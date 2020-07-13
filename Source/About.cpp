@@ -37,7 +37,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Common.h"
 
 
-namespace dbaudio
+namespace SoundscapeApp
 {
 
 
@@ -331,4 +331,4 @@ void CAboutOverlayAU::resized()
 }
 
 
-} // namespace dbaudio
+} // namespace SoundscapeApp

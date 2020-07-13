@@ -40,7 +40,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 
 
-namespace dbaudio
+namespace SoundscapeApp
 {
 
 
@@ -103,4 +103,4 @@ private:
 };
 
 
-} // namespace dbaudio
+} // namespace SoundscapeApp

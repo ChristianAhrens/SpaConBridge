@@ -40,7 +40,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Gui.h"
 
 
-namespace dbaudio
+namespace SoundscapeApp
 {
 
 
@@ -126,7 +126,7 @@ void CSurfaceSlider::mouseDown(const MouseEvent& e)
 	float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / w)));
 	float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / h)));
 
-	CPlugin* plugin = dynamic_cast<CPlugin*>(m_parent);
+	MainProcessor* plugin = dynamic_cast<MainProcessor*>(m_parent);
 	if (plugin)
 	{
 		// Set new X and Y values
@@ -155,7 +155,7 @@ void CSurfaceSlider::mouseDrag(const MouseEvent& e)
 	float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / w)));
 	float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / h)));
 
-	CPlugin* plugin = dynamic_cast<CPlugin*>(m_parent);
+	MainProcessor* plugin = dynamic_cast<MainProcessor*>(m_parent);
 	if (plugin)
 	{
 		// Set new X and Y values
@@ -289,7 +289,7 @@ void CSurfaceMultiSlider::mouseDown(const MouseEvent& e)
 			CController* ctrl = CController::GetInstance();
 			if (ctrl)
 			{
-				CPlugin* plugin = ctrl->GetProcessor(m_selected);
+				MainProcessor* plugin = ctrl->GetProcessor(m_selected);
 				jassert(plugin);
 				if (plugin)
 				{
@@ -319,7 +319,7 @@ void CSurfaceMultiSlider::mouseDrag(const MouseEvent& e)
 		CController* ctrl = CController::GetInstance();
 		if (ctrl)
 		{
-			CPlugin* plugin = ctrl->GetProcessor(m_selected);
+			MainProcessor* plugin = ctrl->GetProcessor(m_selected);
 			if (plugin)
 			{
 				// Get mouse pixel-wise position and scale it between 0 and 1.
@@ -348,7 +348,7 @@ void CSurfaceMultiSlider::mouseUp(const MouseEvent& e)
 		CController* ctrl = CController::GetInstance();
 		if (ctrl)
 		{
-			CPlugin* plugin = ctrl->GetProcessor(m_selected);
+			MainProcessor* plugin = ctrl->GetProcessor(m_selected);
 			if (plugin)
 			{
 				dynamic_cast<CAudioParameterFloat*>(plugin->getParameters()[ParamIdx_X])->EndGuiGesture();
@@ -380,4 +380,4 @@ void CSurfaceMultiSlider::UpdatePositions(PositionCache positions)
 }
 
 
-} // namespace dbaudio
+} // namespace SoundscapeApp

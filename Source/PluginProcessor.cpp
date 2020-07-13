@@ -34,7 +34,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "PluginProcessor.h"
-#include "PluginEditor.h"	//<USE CPluginEditor
+#include "PluginEditor.h"	//<USE MainProcessorEditor
 #include "Controller.h"		//<USE CController
 #include "Overview.h"		//<USE COverviewManager
 #include "Common.h"
@@ -42,7 +42,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Version.h"		//<USE CVersion
 
 
-namespace dbaudio
+namespace SoundscapeApp
 {
 
 
@@ -52,14 +52,14 @@ static constexpr int DEFAULT_COORD_MAPPING = 1;		//< Default coordinate mapping
 
 /*
 ===============================================================================
- Class CPlugin
+ Class MainProcessor
 ===============================================================================
 */
 
 /**
  * Class constructor for the processor.
  */
-CPlugin::CPlugin()
+MainProcessor::MainProcessor()
 {
 	// Automation parameters.
 	m_xPos = new CAudioParameterFloat("x_pos", "x", 0.0f, 1.0f, 0.001f, 0.5f);
@@ -115,7 +115,7 @@ CPlugin::CPlugin()
 /**
  * Class destructor for the processor.
  */
-CPlugin::~CPlugin()
+MainProcessor::~MainProcessor()
 {
 	// Erase this new plugin instance from the singleton CController object's internal list.
 	CController* ctrl = CController::GetInstance();
@@ -130,7 +130,7 @@ CPlugin::~CPlugin()
  * @return	True if any of the given parameters has changed it's value 
  *			since the last time PopParameterChanged() was called.
  */
-bool CPlugin::GetParameterChanged(DataChangeSource changeSource, DataChangeTypes change)
+bool MainProcessor::GetParameterChanged(DataChangeSource changeSource, DataChangeTypes change)
 {
 	return ((m_parametersChanged[changeSource] & change) != 0);
 }
@@ -143,7 +143,7 @@ bool CPlugin::GetParameterChanged(DataChangeSource changeSource, DataChangeTypes
  * @return	True if any of the given parameters has changed it's value 
  *			since the last time PopParameterChanged() was called.
  */
-bool CPlugin::PopParameterChanged(DataChangeSource changeSource, DataChangeTypes change)
+bool MainProcessor::PopParameterChanged(DataChangeSource changeSource, DataChangeTypes change)
 {
 	bool ret((m_parametersChanged[changeSource] & change) != 0);
 	m_parametersChanged[changeSource] &= ~change; // Reset flag.
@@ -155,7 +155,7 @@ bool CPlugin::PopParameterChanged(DataChangeSource changeSource, DataChangeTypes
  * @param changeSource	The application module which is causing the property change.
  * @param changeTypes	Defines which parameter or property has been changed.
  */
-void CPlugin::SetParameterChanged(DataChangeSource changeSource, DataChangeTypes changeTypes)
+void MainProcessor::SetParameterChanged(DataChangeSource changeSource, DataChangeTypes changeTypes)
 {
 	// Set the specified change flag for all DataChangeSources.
 	for (int cs = 0; cs < DCS_Max; cs++)
@@ -174,7 +174,7 @@ void CPlugin::SetParameterChanged(DataChangeSource changeSource, DataChangeTypes
  * @param normalized If true, the returned value will be normalized to a 0.0f to 1.0f range. False per default.
  * @return	The desired parameter value, as float.
  */
-float CPlugin::GetParameterValue(AutomationParameterIndex paramIdx, bool normalized) const
+float MainProcessor::GetParameterValue(AutomationParameterIndex paramIdx, bool normalized) const
 {
 	float ret = 0.0f;
 
@@ -238,7 +238,7 @@ float CPlugin::GetParameterValue(AutomationParameterIndex paramIdx, bool normali
  * @param paramIdx	The index of the desired parameter.
  * @param newValue	The new value as a float.
  */
-void CPlugin::SetParameterValue(DataChangeSource changeSource, AutomationParameterIndex paramIdx, float newValue)
+void MainProcessor::SetParameterValue(DataChangeSource changeSource, AutomationParameterIndex paramIdx, float newValue)
 {
 	// The reimplemented method AudioProcessor::parameterValueChanged() will trigger a SetParameterChanged() call.
 	// We need to ensure that this change is registered to the correct source. 
@@ -280,7 +280,7 @@ void CPlugin::SetParameterValue(DataChangeSource changeSource, AutomationParamet
  * This method should be called once every timer callback tick of the CController. 
  * The signal is passed on to all automation parameters. This is used to trigger gestures for touch automation.
  */
-void CPlugin::Tick()
+void MainProcessor::Tick()
 {
 	// Reset the flags indicating when a parameter's SET command is out on the network. 
 	// These flags are set during CController::timerCallback() and queried in CController::oscMessageReceived()
@@ -319,7 +319,7 @@ void CPlugin::Tick()
  * The given parameter(s) have a SET command message which has just been sent out on the network.
  * @param paramsChanged		Which parameter(s) should be marked as having a SET command in transit.
  */
-void CPlugin::SetParamInTransit(DataChangeTypes paramsChanged)
+void MainProcessor::SetParamInTransit(DataChangeTypes paramsChanged)
 {
 	m_paramSetCommandsInTransit |= paramsChanged;
 }
@@ -328,7 +328,7 @@ void CPlugin::SetParamInTransit(DataChangeTypes paramsChanged)
  * Check if the given parameter(s) have a SET command message which has just been sent out on the network.
  * @return True if the specified paranmeter(s) are marked as having a SET command in transit.
  */
-bool CPlugin::IsParamInTransit(DataChangeTypes paramsChanged) const
+bool MainProcessor::IsParamInTransit(DataChangeTypes paramsChanged) const
 {
 	return ((m_paramSetCommandsInTransit & paramsChanged) != DCT_None);
 }
@@ -336,7 +336,7 @@ bool CPlugin::IsParamInTransit(DataChangeTypes paramsChanged) const
 /**
  * Function called when the "Overview" button on the GUI is clicked.
  */
-void CPlugin::OnOverviewButtonClicked()
+void MainProcessor::OnOverviewButtonClicked()
 {
 	COverviewManager* ovrMgr = COverviewManager::GetInstance();
 	if (ovrMgr)
@@ -354,7 +354,7 @@ void CPlugin::OnOverviewButtonClicked()
  * so that the host can store this and later restore it using setStateInformation().
  * @param destData		Stream where the plugin parameters will be written to.
  */
-void CPlugin::getStateInformation(MemoryBlock& destData)
+void MainProcessor::getStateInformation(MemoryBlock& destData)
 {
 	MemoryOutputStream stream(destData, true);
 
@@ -385,7 +385,7 @@ void CPlugin::getStateInformation(MemoryBlock& destData)
 	stream.writeInt(m_pluginId);
 
 #ifdef JUCE_DEBUG
-	PushDebugMessage("CPlugin::getStateInformation");
+	PushDebugMessage("MainProcessor::getStateInformation");
 #endif
 }
 
@@ -393,14 +393,14 @@ void CPlugin::getStateInformation(MemoryBlock& destData)
  * This method is called when project is loaded, or when a snapshot is recalled.
  * Use this method to restore your parameters from this memory block,
  * whose contents will have been created by the getStateInformation() call.
- * @sa CPlugin::DisablePollingForTicks()
+ * @sa MainProcessor::DisablePollingForTicks()
  * @param data			Stream where the plugin parameters will be read from.
  * @param sizeInBytes	Size of stream buffer.
  */
-void CPlugin::setStateInformation(const void* data, int sizeInBytes)
+void MainProcessor::setStateInformation(const void* data, int sizeInBytes)
 {
 #ifdef JUCE_DEBUG
-	PushDebugMessage("CPlugin::setStateInformation");
+	PushDebugMessage("MainProcessor::setStateInformation");
 #endif
 
 	MemoryInputStream stream(data, static_cast<size_t> (sizeInBytes), false);
@@ -462,7 +462,7 @@ void CPlugin::setStateInformation(const void* data, int sizeInBytes)
  * @param changeSource	The application module which is causing the property change.
  * @param newMode	The new OSC communication mode.
  */
-void CPlugin::SetComsMode(DataChangeSource changeSource, ComsMode newMode)
+void MainProcessor::SetComsMode(DataChangeSource changeSource, ComsMode newMode)
 {
 	if (m_comsMode != newMode)
 	{
@@ -488,7 +488,7 @@ void CPlugin::SetComsMode(DataChangeSource changeSource, ComsMode newMode)
  * Restore the Plugin's OSC Rx/Tx mode to whatever it was before going into Bypass.
  * @param changeSource	The application module which is causing the property change.
  */
-void CPlugin::RestoreComsMode(DataChangeSource changeSource)
+void MainProcessor::RestoreComsMode(DataChangeSource changeSource)
 {
 	if (m_comsModeWhenNotBypassed != CM_Off)
 		SetComsMode(changeSource, m_comsModeWhenNotBypassed);
@@ -498,7 +498,7 @@ void CPlugin::RestoreComsMode(DataChangeSource changeSource)
  * Get the current OSC communication mode (either sending or receiving).
  * @return The current OSC communication mode.
  */
-ComsMode CPlugin::GetComsMode() const
+ComsMode MainProcessor::GetComsMode() const
 {
 	return m_comsMode;
 }
@@ -508,7 +508,7 @@ ComsMode CPlugin::GetComsMode() const
  * @param changeSource	The application module which is causing the property change.
  * @param mappingId		The new coordinate mapping ID
  */
-void CPlugin::SetMappingId(DataChangeSource changeSource, int mappingId)
+void MainProcessor::SetMappingId(DataChangeSource changeSource, int mappingId)
 {
 	if (m_mappingId != mappingId)
 	{
@@ -534,7 +534,7 @@ void CPlugin::SetMappingId(DataChangeSource changeSource, int mappingId)
  * Getter function for the coordinate mapping Id
  * @return	The current coordinate mapping ID
  */
-int CPlugin::GetMappingId() const
+int MainProcessor::GetMappingId() const
 {
 	return m_mappingId;
 }
@@ -544,7 +544,7 @@ int CPlugin::GetMappingId() const
  * @param changeSource	The application module which is causing the property change.
  * @param sourceId	The new ID
  */
-void CPlugin::SetSourceId(DataChangeSource changeSource, SourceId sourceId)
+void MainProcessor::SetSourceId(DataChangeSource changeSource, SourceId sourceId)
 {
 	if (m_sourceId != sourceId)
 	{
@@ -560,7 +560,7 @@ void CPlugin::SetSourceId(DataChangeSource changeSource, SourceId sourceId)
  * Getter function for the source Id
  * @return	The current source ID
  */
-SourceId CPlugin::GetSourceId() const
+SourceId MainProcessor::GetSourceId() const
 {
 	return m_sourceId;
 }
@@ -570,7 +570,7 @@ SourceId CPlugin::GetSourceId() const
  * @param changeSource	The application module which is causing the property change.
  * @param ipAddress	The new IP address as a string
  */
-void CPlugin::SetIpAddress(DataChangeSource changeSource, String ipAddress)
+void MainProcessor::SetIpAddress(DataChangeSource changeSource, String ipAddress)
 {
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
@@ -581,7 +581,7 @@ void CPlugin::SetIpAddress(DataChangeSource changeSource, String ipAddress)
 * Getter function for the IP address
 * @return	The current IP address as a string
 */
-String CPlugin::GetIpAddress() const
+String MainProcessor::GetIpAddress() const
 {
 	String ipAddress;
 	CController* ctrl = CController::GetInstance();
@@ -596,7 +596,7 @@ String CPlugin::GetIpAddress() const
  * @param changeSource	The application module which is causing the property change.
  * @param oscMsgRate	The interval at which OSC messages are sent, in ms.
  */
-void CPlugin::SetMessageRate(DataChangeSource changeSource, int oscMsgRate)
+void MainProcessor::SetMessageRate(DataChangeSource changeSource, int oscMsgRate)
 {
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
@@ -607,7 +607,7 @@ void CPlugin::SetMessageRate(DataChangeSource changeSource, int oscMsgRate)
  * Getter function for the send rate used in the outgoing OSC messages.
  * @return	The interval at which OSC messages are sent, in ms.
  */
-int CPlugin::GetMessageRate() const
+int MainProcessor::GetMessageRate() const
 {
 	int rate = 0;
 	CController* ctrl = CController::GetInstance();
@@ -621,7 +621,7 @@ int CPlugin::GetMessageRate() const
  * Getter function for the last OSCSender connection status.
  * @return	True if the last message attempted by the OSCSender was successful, false if it failed.
  */
-bool CPlugin::GetOnline() const
+bool MainProcessor::GetOnline() const
 {
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
@@ -638,7 +638,7 @@ bool CPlugin::GetOnline() const
  * @param oscMsgRate	New interval for OSC messages, in milliseconds.
  * @param newMode		New OSC communication mode (Rx/Tx).
  */
-void CPlugin::InitializeSettings(int sourceId, int mappingId, String ipAddress, int oscMsgRate, ComsMode newMode)
+void MainProcessor::InitializeSettings(int sourceId, int mappingId, String ipAddress, int oscMsgRate, ComsMode newMode)
 {
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
@@ -661,7 +661,7 @@ void CPlugin::InitializeSettings(int sourceId, int mappingId, String ipAddress, 
  * The default implementation of this callback will do nothing.
  * @param properties	A struct containing information about the DAW track inside which your AudioProcessor is loaded.
  */
-void CPlugin::updateTrackProperties(const TrackProperties& properties)
+void MainProcessor::updateTrackProperties(const TrackProperties& properties)
 {
 	m_pluginDisplayName = properties.name;
 
@@ -673,7 +673,7 @@ void CPlugin::updateTrackProperties(const TrackProperties& properties)
  * Returns the parameter that controls the AudioProcessor's bypass state. 
  * @return	The bypass parameter.
  */
-AudioProcessorParameter* CPlugin::getBypassParameter() const
+AudioProcessorParameter* MainProcessor::getBypassParameter() const
 {
 	return m_bypassParam;
 }
@@ -682,7 +682,7 @@ AudioProcessorParameter* CPlugin::getBypassParameter() const
  * Getter function for the current bypass status of the plugin.
  * @return	True for bypass (no OSC communication), false for normal OSC operation.
  */
-bool CPlugin::GetBypass() const
+bool MainProcessor::GetBypass() const
 {
 	return (m_bypassParam->getIndex() == 1);
 }
@@ -692,7 +692,7 @@ bool CPlugin::GetBypass() const
  * Helper method to append a message onto the debugging buffer. This buffer can then be flushed with FlushDebugMessages().
  * @param message Message to be printed. A timestamp will automatically be prepended.
  */
-void CPlugin::PushDebugMessage(String message)
+void MainProcessor::PushDebugMessage(String message)
 {
 	if (message.isNotEmpty())
 	{
@@ -708,7 +708,7 @@ void CPlugin::PushDebugMessage(String message)
  * Helper method to get the contents of the debug message buffer. This call also clears the buffer.
  * @ret		Messages to be printed, one per line. 
  */
-String CPlugin::FlushDebugMessages()
+String MainProcessor::FlushDebugMessages()
 {
 	String ret(m_debugMessageBuffer);
 	m_debugMessageBuffer.clear();
@@ -721,7 +721,7 @@ String CPlugin::FlushDebugMessages()
  * Check the type of host, which the plugin is currently running on.
  * @return See enum TargetHost.
  */
-CPlugin::TargetHost CPlugin::GetTargetHost() const
+MainProcessor::TargetHost MainProcessor::GetTargetHost() const
 {
 	if (PluginHostType::getPluginLoadedAs() == wrapperType_AAX)
 	{
@@ -739,7 +739,7 @@ CPlugin::TargetHost CPlugin::GetTargetHost() const
  * Check if plugin is currently running on an Avid Console (S6L or similar)
  * @return True if on Avid Console, false for any other host.
  */
-bool CPlugin::IsTargetHostAvidConsole() const
+bool MainProcessor::IsTargetHostAvidConsole() const
 {
 	return (GetTargetHost() == TargetHost_S6L);
 }
@@ -758,7 +758,7 @@ bool CPlugin::IsTargetHostAvidConsole() const
  * @param parameterIndex	Index of the plugin parameter being changed.
  * @param newValue			New parameter value, always between 0.0f and 1.0f.
  */
-void CPlugin::parameterValueChanged(int parameterIndex, float newValue)
+void MainProcessor::parameterValueChanged(int parameterIndex, float newValue)
 {
 	DataChangeTypes changed = DCT_None;
 
@@ -822,7 +822,7 @@ void CPlugin::parameterValueChanged(int parameterIndex, float newValue)
  * @param parameterIndex	Index of the plugin parameter being changed.
  * @param gestureIsStarting	True if starting, false if ending.
  */
-void CPlugin::parameterGestureChanged(int parameterIndex, bool gestureIsStarting)
+void MainProcessor::parameterGestureChanged(int parameterIndex, bool gestureIsStarting)
 {
 	ignoreUnused(parameterIndex);
 	ignoreUnused(gestureIsStarting);
@@ -838,16 +838,16 @@ void CPlugin::parameterGestureChanged(int parameterIndex, bool gestureIsStarting
  * Returns the name of this processor.
  * @return The plugin name.
  */
-const String CPlugin::getName() const
+const String MainProcessor::getName() const
 {
-	return JucePlugin_Name;
+	return JUCEApplication::getInstance()->getApplicationName();
 }
 
 /**
  * Returns true if the processor wants midi messages.
  * @return	True if the processor wants midi messages.
  */
-bool CPlugin::acceptsMidi() const
+bool MainProcessor::acceptsMidi() const
 {
 #if JucePlugin_WantsMidiInput
 	return true;
@@ -860,7 +860,7 @@ bool CPlugin::acceptsMidi() const
  * Returns true if the processor produces midi messages.
  * @return	True if the processor produces midi messages.
  */
-bool CPlugin::producesMidi() const
+bool MainProcessor::producesMidi() const
 {
 #if JucePlugin_ProducesMidiOutput
 	return true;
@@ -874,7 +874,7 @@ bool CPlugin::producesMidi() const
  * @return	Zero, since no audio delay is introduced.
  */
 
-double CPlugin::getTailLengthSeconds() const
+double MainProcessor::getTailLengthSeconds() const
 {
 	return 0.0;
 }
@@ -884,7 +884,7 @@ double CPlugin::getTailLengthSeconds() const
  * The value returned must be valid as soon as this object is created, and must not change over its lifetime.
  * @return Number of preset programs the filter supports. This value shouldn't be less than 1.
  */
-int CPlugin::getNumPrograms()
+int MainProcessor::getNumPrograms()
 {
 	return 1;
 }
@@ -893,7 +893,7 @@ int CPlugin::getNumPrograms()
  * Returns the number of the currently active program.
  * @return Returns the number of the currently active program.
  */
-int CPlugin::getCurrentProgram()
+int MainProcessor::getCurrentProgram()
 {
 	return 0;
 }
@@ -902,7 +902,7 @@ int CPlugin::getCurrentProgram()
  * Called by the host to change the current program.
  * @param index		New program index.
  */
-void CPlugin::setCurrentProgram(int index)
+void MainProcessor::setCurrentProgram(int index)
 {
 	ignoreUnused(index);
 }
@@ -912,7 +912,7 @@ void CPlugin::setCurrentProgram(int index)
  * @param index		Index of the desired program
  * @return			Desired program name.
  */
-const String CPlugin::getProgramName(int index)
+const String MainProcessor::getProgramName(int index)
 {
 	ignoreUnused(index);
 	return m_pluginDisplayName;
@@ -923,7 +923,7 @@ const String CPlugin::getProgramName(int index)
  * @param index		Index of the desired program
  * @param newName	Desired new program name.
  */
-void CPlugin::changeProgramName(int index, const String& newName)
+void MainProcessor::changeProgramName(int index, const String& newName)
 {
 	ignoreUnused(index);
 	m_pluginDisplayName = newName;
@@ -942,7 +942,7 @@ void CPlugin::changeProgramName(int index, const String& newName)
  *							a buggy host exceeds this value. The actual block sizes that the host uses may be different each time
  *							the callback happens: completely variable block sizes can be expected from some hosts.
  */
-void CPlugin::prepareToPlay(double sampleRate, int samplesPerBlock)
+void MainProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
 	ignoreUnused(sampleRate, samplesPerBlock);
 }
@@ -951,7 +951,7 @@ void CPlugin::prepareToPlay(double sampleRate, int samplesPerBlock)
  * Called after playback has stopped, to let the filter free up any resources it no longer needs.
  * When playback stops, you can use this as an opportunity to free up any spare memory, etc.
  */
-void CPlugin::releaseResources()
+void MainProcessor::releaseResources()
 {
 }
 
@@ -963,7 +963,7 @@ void CPlugin::releaseResources()
  * @param layouts	Bus channel layouts to check.
  * @returns			True if a given layout is supported by this plugin.
  */
-bool CPlugin::isBusesLayoutSupported(const BusesLayout& layouts) const
+bool MainProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
 {
 	ignoreUnused(layouts);
 	return true;
@@ -982,7 +982,7 @@ bool CPlugin::isBusesLayoutSupported(const BusesLayout& layouts) const
  *						to be the filter's midi output. This means that your filter should be careful to clear any incoming
  *						messages from the array if it doesn't want them to be passed-on.
  */
-void CPlugin::processBlock(AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
+void MainProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
 	ignoreUnused(buffer, midiMessages);
 }
@@ -991,7 +991,7 @@ void CPlugin::processBlock(AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
  * This function returns true if the plugin can create an editor component.
  * @return True.
  */
-bool CPlugin::hasEditor() const
+bool MainProcessor::hasEditor() const
 {
 	return true;
 }
@@ -1001,9 +1001,9 @@ bool CPlugin::hasEditor() const
  * This can return nullptr if you want a UI-less filter, in which case the host may create a generic UI that lets the user twiddle the parameters directly.
  * @return	A pointer to the newly created editor component.
  */
-AudioProcessorEditor* CPlugin::createEditor()
+AudioProcessorEditor* MainProcessor::createEditor()
 {
-	AudioProcessorEditor* editor = new CPluginEditor(*this);
+	AudioProcessorEditor* editor = new MainProcessorEditor(*this);
 
 	// Initialize GUI with current IP address, etc.
 	SetParameterChanged(DCS_Host, (DCT_PluginInstanceConfig | DCT_OscConfig | DCT_AutomationParameters));
@@ -1012,7 +1012,7 @@ AudioProcessorEditor* CPlugin::createEditor()
 }
 
 
-} // namespace dbaudio
+} // namespace SoundscapeApp
 
 
 /**
@@ -1021,5 +1021,5 @@ AudioProcessorEditor* CPlugin::createEditor()
  */
 AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-	return new dbaudio::CPlugin();
+	return new SoundscapeApp::MainProcessor();
 }

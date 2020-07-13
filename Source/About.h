@@ -39,7 +39,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <utility>	//<USE std::unique_ptr
 
 
-namespace dbaudio
+namespace SoundscapeApp
 {
 
 
@@ -154,4 +154,4 @@ private:
 };
 
 
-} // namespace dbaudio
+} // namespace SoundscapeApp

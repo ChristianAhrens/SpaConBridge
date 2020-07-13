@@ -39,7 +39,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SurfaceSlider.h"
 
 
-namespace dbaudio
+namespace SoundscapeApp
 {
 
 
@@ -773,7 +773,7 @@ void COverviewTableContainer::UpdateGui(bool init)
 			// Iterate through all plugin instances and see if anything changed there.
 			for (int pIdx = 0; pIdx < ctrl->GetProcessorCount(); pIdx++)
 			{
-				CPlugin* plugin = ctrl->GetProcessor(pIdx);
+				MainProcessor* plugin = ctrl->GetProcessor(pIdx);
 				if (plugin && plugin->PopParameterChanged(DCS_Overview, DCT_PluginInstanceConfig))
 				{
 					m_overviewTable->UpdateTable();
@@ -847,7 +847,7 @@ void COverviewMultiSurface::resized()
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
 	{
-		CPlugin* plugin = ctrl->GetProcessor(0);
+		MainProcessor* plugin = ctrl->GetProcessor(0);
 		if (plugin && plugin->IsTargetHostAvidConsole())
 		{
 			// For consoles, keep aspect ratio of slider at 1:1, as plugin window usually cannot be resized.
@@ -897,7 +897,7 @@ void COverviewMultiSurface::UpdateGui(bool init)
 		CSurfaceMultiSlider::PositionCache cachedPositions;
 		for (int pIdx = 0; pIdx < ctrl->GetProcessorCount(); pIdx++)
 		{
-			CPlugin* plugin = ctrl->GetProcessor(pIdx);
+			MainProcessor* plugin = ctrl->GetProcessor(pIdx);
 			if (plugin)
 			{
 				if (plugin->GetMappingId() == selectedMapping)
@@ -1449,7 +1449,7 @@ void CComboBoxContainer::comboBoxChanged(ComboBox *comboBox)
 		for (std::size_t i = 0; i < pluginIds.size(); ++i)
 		{
 			// Set the value of the combobox to the current MappingID of the corresponding plugin.
-			CPlugin* plugin = ctrl->GetProcessor(pluginIds[i]);
+			MainProcessor* plugin = ctrl->GetProcessor(pluginIds[i]);
 			if (plugin)
 				plugin->SetMappingId(DCS_Overview, newMapping);
 		}
@@ -1479,7 +1479,7 @@ void CComboBoxContainer::SetRow(int newRow)
 	if (ctrl)
 	{
 		// Set the value of the combobox to the current MappingID of the corresponding plugin.
-		const CPlugin* plugin = ctrl->GetProcessor(pluginId);
+		const MainProcessor* plugin = ctrl->GetProcessor(pluginId);
 		if (plugin)
 			m_comboBox.setSelectedId(plugin->GetMappingId(), dontSendNotification);
 	}
@@ -1540,7 +1540,7 @@ void CTextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
 		for (std::size_t i = 0; i < pluginIds.size(); ++i)
 		{
 			// Set the value of the combobox to the current MappingID of the corresponding plugin.
-			CPlugin* plugin = ctrl->GetProcessor(pluginIds[i]);
+			MainProcessor* plugin = ctrl->GetProcessor(pluginIds[i]);
 			if (plugin)
 				plugin->SetSourceId(DCS_Overview, newSourceId);
 		}
@@ -1586,7 +1586,7 @@ void CTextEditorContainer::SetRow(int newRow)
 	if (ctrl)
 	{
 		// Set the value of the textEditor to the current SourceID of the corresponding plugin.
-		const CPlugin* plugin = ctrl->GetProcessor(pluginId);
+		const MainProcessor* plugin = ctrl->GetProcessor(pluginId);
 		if (plugin)
 			m_editor.setText(String(plugin->GetSourceId()), false);
 	}
@@ -1652,7 +1652,7 @@ void CRadioButtonContainer::buttonClicked(Button *button)
 
 		for (std::size_t i = 0; i < pluginIds.size(); ++i)
 		{
-			CPlugin* plugin = ctrl->GetProcessor(pluginIds[i]);
+			MainProcessor* plugin = ctrl->GetProcessor(pluginIds[i]);
 			if (plugin)
 			{
 				ComsMode oldMode = plugin->GetComsMode();
@@ -1695,7 +1695,7 @@ void CRadioButtonContainer::SetRow(int newRow)
 	if (ctrl)
 	{
 		// Toggle the correct radio buttons to the current ComsMode of the corresponding plugin.
-		const CPlugin* plugin = ctrl->GetProcessor(pluginId);
+		const MainProcessor* plugin = ctrl->GetProcessor(pluginId);
 		if (plugin)
 		{
 			const Array<AudioProcessorParameter*>& params = plugin->getParameters();
@@ -1783,7 +1783,7 @@ void CEditableLabelContainer::SetRow(int newRow)
 	if (ctrl)
 	{
 		// Set the value of the combobox to the current MappingID of the corresponding plugin.
-		CPlugin* plugin = ctrl->GetProcessor(pluginId);
+		MainProcessor* plugin = ctrl->GetProcessor(pluginId);
 		if (plugin)
 		{
 			displayName = plugin->getProgramName(0);
@@ -1797,4 +1797,4 @@ void CEditableLabelContainer::SetRow(int newRow)
 }
 
 
-} // namespace dbaudio
+} // namespace SoundscapeApp

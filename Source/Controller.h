@@ -39,14 +39,14 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <juce_osc/juce_osc.h>				//<USE OSCSender, OSCReceiver
 
 
-namespace dbaudio
+namespace SoundscapeApp
 {
 
 
 /**
  * Forward declarations.
  */
-class CPlugin;
+class MainProcessor;
 
 
 /**
@@ -67,10 +67,10 @@ public:
 	bool PopParameterChanged(DataChangeSource changeSource, DataChangeTypes change);
 	void SetParameterChanged(DataChangeSource changeSource, DataChangeTypes changeTypes);
 
-	PluginId AddProcessor(CPlugin* p);
-	void RemoveProcessor(CPlugin* p);
+	PluginId AddProcessor(MainProcessor* p);
+	void RemoveProcessor(MainProcessor* p);
 	int GetProcessorCount() const;
-	CPlugin* GetProcessor(PluginId idx) const;
+	MainProcessor* GetProcessor(PluginId idx) const;
 
 	String GetIpAddress() const;
 	static String GetDefaultIpAddress();
@@ -105,7 +105,7 @@ protected:
 	 * When removing Plug-in instances from a project, this list will shrink. When the list becomes empty,
 	 * The CController singleton object is no longer necessary and will destruct itself.
 	 */
-	Array<CPlugin*>			m_processors;
+	Array<MainProcessor*>			m_processors;
 
 	/**
 	 * An OSCSender object can connect to a network port. It then can send OSC
@@ -154,4 +154,4 @@ protected:
 };
 
 
-} // namespace dbaudio
+} // namespace SoundscapeApp

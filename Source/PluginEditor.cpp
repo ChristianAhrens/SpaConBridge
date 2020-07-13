@@ -39,7 +39,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Parameters.h"
 
 
-namespace dbaudio
+namespace SoundscapeApp
 {
 
 
@@ -67,11 +67,11 @@ static constexpr Point<int> GUI_DEFAULT_PLUGIN_WINDOW_SIZE(488, 380);
 /*
  * Initialize user's Plug-In window size with default values.
  */
-Point<int> CPluginEditor::m_pluginWindowSize = GUI_DEFAULT_PLUGIN_WINDOW_SIZE;
+Point<int> MainProcessorEditor::m_pluginWindowSize = GUI_DEFAULT_PLUGIN_WINDOW_SIZE;
 
 /*
 ===============================================================================
- Class CPluginEditor
+ Class MainProcessorEditor
 ===============================================================================
 */
 
@@ -80,7 +80,7 @@ Point<int> CPluginEditor::m_pluginWindowSize = GUI_DEFAULT_PLUGIN_WINDOW_SIZE;
  * This is the base class for the component that acts as the GUI for an AudioProcessor.
  * @param parent	The audio processor object to act as parent.
  */
-CPluginEditor::CPluginEditor(CPlugin& parent)
+MainProcessorEditor::MainProcessorEditor(MainProcessor& parent)
 	: AudioProcessorEditor(&parent)
 {
 	m_surfaceSlider = std::make_unique<CSurfaceSlider>(&parent);
@@ -297,7 +297,7 @@ CPluginEditor::CPluginEditor(CPlugin& parent)
 /**
  * Object destructor.
  */
-CPluginEditor::~CPluginEditor()
+MainProcessorEditor::~MainProcessorEditor()
 {
 	stopTimer();
 }
@@ -307,7 +307,7 @@ CPluginEditor::~CPluginEditor()
  * @param slider	The slider object for which the parameter is desired.
  * @return			The desired plugin parameter.
  */
-CAudioParameterFloat* CPluginEditor::GetParameterForSlider(CSlider* slider)
+CAudioParameterFloat* MainProcessorEditor::GetParameterForSlider(CSlider* slider)
 {
 	const Array<AudioProcessorParameter*>& params = getAudioProcessor()->getParameters();
 	if (slider == m_xSlider.get())
@@ -330,9 +330,9 @@ CAudioParameterFloat* CPluginEditor::GetParameterForSlider(CSlider* slider)
  * You can find out the new value using Slider::getValue().
  * @param slider	Slider object which was dragged by user.
  */
-void CPluginEditor::sliderValueChanged(Slider* slider)
+void MainProcessorEditor::sliderValueChanged(Slider* slider)
 {
-	CPlugin* plugin = dynamic_cast<CPlugin*>(getAudioProcessor());
+	MainProcessor* plugin = dynamic_cast<MainProcessor*>(getAudioProcessor());
 	if (plugin)
 	{
 		AutomationParameterIndex paramIdx = ParamIdx_MaxIndex;
@@ -355,7 +355,7 @@ void CPluginEditor::sliderValueChanged(Slider* slider)
  * and then sliderDragEnded() is called after the user lets go.
  * @param slider	Slider object which was dragged by user.
  */
-void CPluginEditor::sliderDragStarted(Slider* slider)
+void MainProcessorEditor::sliderDragStarted(Slider* slider)
 {
 	if (CAudioParameterFloat* param = GetParameterForSlider(static_cast<CSlider*>(slider)))
 		param->BeginGuiGesture();
@@ -365,7 +365,7 @@ void CPluginEditor::sliderDragStarted(Slider* slider)
  * Called after a drag operation has finished.
  * @param slider	Slider object which was dragged by user.
  */
-void CPluginEditor::sliderDragEnded(Slider* slider)
+void MainProcessorEditor::sliderDragEnded(Slider* slider)
 {
 	if (CAudioParameterFloat* param = GetParameterForSlider(static_cast<CSlider*>(slider)))
 		param->EndGuiGesture();
@@ -375,10 +375,10 @@ void CPluginEditor::sliderDragEnded(Slider* slider)
  * Callback function for changes to our textEditors.
  * @param textEditor	The TextEditor object whose content has just changed.
  */
-void CPluginEditor::textEditorFocusLost(TextEditor& textEditor)
+void MainProcessorEditor::textEditorFocusLost(TextEditor& textEditor)
 {
 	CTextEditor *myEditor = static_cast<CTextEditor*>(&textEditor);
-	CPlugin* pro = dynamic_cast<CPlugin*>(getAudioProcessor());
+	MainProcessor* pro = dynamic_cast<MainProcessor*>(getAudioProcessor());
 	if (pro && myEditor)
 	{
 		// SourceId changed
@@ -411,7 +411,7 @@ void CPluginEditor::textEditorFocusLost(TextEditor& textEditor)
  * Callback function for Enter key presses on textEditors.
  * @param textEditor	The TextEditor object whose where enter key was pressed.
  */
-void CPluginEditor::textEditorReturnKeyPressed(TextEditor& textEditor)
+void MainProcessorEditor::textEditorReturnKeyPressed(TextEditor& textEditor)
 {
 	ignoreUnused(textEditor);
 
@@ -424,9 +424,9 @@ void CPluginEditor::textEditorReturnKeyPressed(TextEditor& textEditor)
  * Called when a ComboBox has its selected item changed. 
  * @param comboBox	The combo box which has changed.
  */
-void CPluginEditor::comboBoxChanged(ComboBox *comboBox)
+void MainProcessorEditor::comboBoxChanged(ComboBox *comboBox)
 {
-	CPlugin* pro = dynamic_cast<CPlugin*>(getAudioProcessor());
+	MainProcessor* pro = dynamic_cast<MainProcessor*>(getAudioProcessor());
 	if (pro)
 	{
 		if (comboBox == m_areaSelector.get())
@@ -445,9 +445,9 @@ void CPluginEditor::comboBoxChanged(ComboBox *comboBox)
  * Called when a button has been clicked.
  * @param button	The button whose status changed.
  */
-void CPluginEditor::buttonClicked(Button *button)
+void MainProcessorEditor::buttonClicked(Button *button)
 {
-	CPlugin* pro = dynamic_cast<CPlugin*>(getAudioProcessor());
+	MainProcessor* pro = dynamic_cast<MainProcessor*>(getAudioProcessor());
 	if (pro)
 	{
 		// Rx / Tx Buttons
@@ -527,7 +527,7 @@ void CPluginEditor::buttonClicked(Button *button)
  * and the corresponding GUI buttons are automatically toggled off.
  * @param type	Desired overlay to turn on or off.
  */
-void CPluginEditor::ToggleOverlay(AOverlay::OverlayType type)
+void MainProcessorEditor::ToggleOverlay(AOverlay::OverlayType type)
 {
 	AOverlay::OverlayType previousType = AOverlay::OT_Unknown;
 
@@ -613,7 +613,7 @@ void CPluginEditor::ToggleOverlay(AOverlay::OverlayType type)
 * screen that means a section of a window needs to be redrawn.
 * @param g		Graphics context that must be used to do the drawing operations.
 */
-void CPluginEditor::paint(Graphics& g)
+void MainProcessorEditor::paint(Graphics& g)
 {
 	int w = getLocalBounds().getWidth();
 	int h = getLocalBounds().getHeight();
@@ -635,7 +635,7 @@ void CPluginEditor::paint(Graphics& g)
 	g.drawImage(m_dbLogo, getLocalBounds().getWidth() - 25, 15, 15, 15, 0, 0, 15, 15);
 
 	// Draw a thin frame around window. Looks naked without.
-	CPlugin* pro = dynamic_cast<CPlugin*>(getAudioProcessor());
+	MainProcessor* pro = dynamic_cast<MainProcessor*>(getAudioProcessor());
 	if (pro && pro->IsTargetHostAvidConsole())
 	{
 		g.setColour(CDbStyle::GetDbColor(CDbStyle::DarkLineColor));
@@ -647,7 +647,7 @@ void CPluginEditor::paint(Graphics& g)
 * Called when this component's size has been changed.
 * This is generally where you'll want to lay out the positions of any subcomponents in your editor.
 */
-void CPluginEditor::resized()
+void MainProcessorEditor::resized()
 {
 	Rectangle<int> bounds = getLocalBounds();
 	int w = bounds.getWidth();
@@ -750,7 +750,7 @@ void CPluginEditor::resized()
  * Timer callback function, which will be called at regular intervals to update the GUI.
  * Reimplemented from base class Timer.
  */
-void CPluginEditor::timerCallback()
+void MainProcessorEditor::timerCallback()
 {
 	// If there is an overlay currenly active, update it.
 	if (m_overlay)
@@ -765,13 +765,13 @@ void CPluginEditor::timerCallback()
  * @param init	True to ignore any changed flags and update parameters
  *				in the GUI anyway. Good for when opening the GUI for the first time.
  */
-void CPluginEditor::UpdateGui(bool init)
+void MainProcessorEditor::UpdateGui(bool init)
 {
 	ignoreUnused(init); // No need to use this here so far.
 
 	bool somethingChanged = false;
 
-	CPlugin* pro = dynamic_cast<CPlugin*>(getAudioProcessor());
+	MainProcessor* pro = dynamic_cast<MainProcessor*>(getAudioProcessor());
 	if (pro)
 	{
 		const Array<AudioProcessorParameter*>& params = pro->getParameters();
@@ -894,7 +894,7 @@ void CPluginEditor::UpdateGui(bool init)
 		if (getTimerInterval() == GUI_UPDATE_RATE_SLOW)
 		{
 			startTimer(GUI_UPDATE_RATE_FAST);
-			DBG("CPluginEditor::timerCallback: Switching to GUI_UPDATE_RATE_FAST");
+			DBG("MainProcessorEditor::timerCallback: Switching to GUI_UPDATE_RATE_FAST");
 		}
 	}
 
@@ -907,11 +907,11 @@ void CPluginEditor::UpdateGui(bool init)
 		// Once counter has reached a certain limit: Switch to lazy GUI refreshing rate
 		else if (getTimerInterval() == GUI_UPDATE_RATE_FAST)
 		{
-			DBG("CPluginEditor::timerCallback(): Switching to GUI_UPDATE_RATE_SLOW");
+			DBG("MainProcessorEditor::timerCallback(): Switching to GUI_UPDATE_RATE_SLOW");
 			startTimer(GUI_UPDATE_RATE_SLOW);
 		}
 	}
 }
 
 
-} // namespace dbaudio
+} // namespace SoundscapeApp

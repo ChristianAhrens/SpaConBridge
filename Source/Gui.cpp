@@ -36,7 +36,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Gui.h"
 
 
-namespace dbaudio
+namespace SoundscapeApp
 {
 
 
@@ -885,4 +885,4 @@ AOverlay::OverlayType AOverlay::GetOverlayType() const
 }
 
 
-} // namespace dbaudio
+} // namespace SoundscapeApp

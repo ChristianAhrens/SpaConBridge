@@ -38,7 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Common.h"
 
 
-namespace dbaudio
+namespace SoundscapeApp
 {
 
 
@@ -50,9 +50,9 @@ class CAudioParameterChoice;
 
 
 /**
- * Class CPlugin, a derived AudioProcessor which can be wrapped as VST, AU, or AAX. 
+ * Class MainProcessor, a derived AudioProcessor which can be wrapped as VST, AU, or AAX. 
  */
-class CPlugin :
+class MainProcessor :
 	public AudioProcessor,
 	public AudioProcessorParameter::Listener
 {
@@ -67,8 +67,8 @@ public:
 		TargetHost_S6L
 	};
 
-	CPlugin();
-	~CPlugin() override;
+	MainProcessor();
+	~MainProcessor() override;
 
 	void InitializeSettings(SourceId sourceId, int mappingId, String ipAddress, int oscMsgRate, ComsMode newMode);
 
@@ -225,7 +225,7 @@ protected:
 
 	/**
 	 * Member used to ensure that property changes are registered to the correct source.
-	 * See CPlugin::SetParameterValue().
+	 * See MainProcessor::SetParameterValue().
 	 */
 	DataChangeSource			m_currentChangeSource = DCS_Host;
 
@@ -236,8 +236,8 @@ protected:
 	String						m_debugMessageBuffer;
 #endif
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CPlugin)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainProcessor)
 };
 
 
-} // namespace dbaudio
+} // namespace SoundscapeApp

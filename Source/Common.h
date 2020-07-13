@@ -38,7 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../JuceLibraryCode/JuceHeader.h"
 
 
-namespace dbaudio
+namespace SoundscapeApp
 {
 
 
@@ -113,4 +113,4 @@ static constexpr ComsMode CM_PollOnce =		0x0004; //< The X/Y coordinates have be
 static constexpr ComsMode CM_Sync =			(CM_Rx | CM_Tx); //< The Plug-in sends SET commands when necessary, else sends requests, and accepts all responses.
 
 
-} // namespace dbaudio
+} // namespace SoundscapeApp

@@ -38,7 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../JuceLibraryCode/JuceHeader.h"
 
 
-namespace dbaudio
+namespace SoundscapeApp
 {
 
 
@@ -146,4 +146,4 @@ protected:
 };
 
 
-} // namespace dbaudio
+} // namespace SoundscapeApp

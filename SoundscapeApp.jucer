@@ -2,16 +2,11 @@
 
 <JUCERPROJECT id="MFvkL5" name="SoundscapeApp" projectType="guiapp" version="0.1.0"
               bundleIdentifier="com.ChristianAhrens.SoundscapeApp" pluginName="d&amp;b Soundscape"
-              pluginDesc="Soundscape Plug-in for d&amp;b DS100 control" pluginManufacturer="d&amp;b audiotechnik GmbH &amp; Co. KG"
-              pluginManufacturerCode="dbAu" pluginCode="sVst" pluginChannelConfigs="{2, 2}, {1, 1}"
-              pluginIsSynth="0" pluginWantsMidiIn="0" pluginProducesMidiOut="0"
-              pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0" pluginAUExportPrefix="SoundscapePlugin"
-              pluginRTASCategory="" aaxIdentifier="com.dbaudio.SoundscapePlugin"
-              pluginAAXCategory="0" jucerVersion="5.4.7" companyName="Christian Ahrens"
-              companyEmail="christianahrens@me.com" displaySplashScreen="0"
-              reportAppUsage="0" companyCopyright="2020" pluginFormats="buildAAX,buildAU,buildVST3"
-              buildVST="0" buildVST3="1" buildAU="1" buildAUv3="0" buildRTAS="0"
-              buildAAX="1" buildStandalone="0" enableIAA="0" pluginVST3Category="Spatial">
+              pluginDesc="Soundscape App for d&amp;b DS100 control" pluginManufacturer="-"
+              companyName="Christian Ahrens" companyEmail="christianahrens@me.com"
+              displaySplashScreen="0" reportAppUsage="0" companyCopyright="2020"
+              buildStandalone="1" enableIAA="0" pluginVST3Category="Spatial"
+              jucerFormatVersion="1" pluginFormats="buildStandalone">
   <MAINGROUP id="cS7SrP" name="SoundscapeApp">
     <GROUP id="{DA3507CD-D9BE-4153-5873-D44DBA9EAF0C}" name="Resources">
       <GROUP id="{5FBD4EDA-A4BE-1C72-49FC-FCB143B5F140}" name="Images">
@@ -32,6 +27,7 @@
       </GROUP>
     </GROUP>
     <GROUP id="{2B9DD386-1093-ADF5-E47F-5954774132B5}" name="Source">
+      <FILE id="g0nbLB" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
       <FILE id="nZnFg0" name="Version.cpp" compile="1" resource="0" file="Source/Version.cpp"/>
       <FILE id="tKd5wL" name="Version.h" compile="0" resource="0" file="Source/Version.h"/>
       <FILE id="mSMMnq" name="Gui.cpp" compile="1" resource="0" file="Source/Gui.cpp"/>

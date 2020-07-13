@@ -35,19 +35,20 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include "PluginProcessor.h"
 #include "Gui.h"
 #include "SurfaceSlider.h"
 #include <utility>	//<USE std::unique_ptr
 
 
-namespace dbaudio
+namespace SoundscapeApp
 {
 
 
 /**
- * Class CPluginEditor, a component that acts as the GUI for the AudioProcessor. 
+ * Class MainProcessorEditor, a component that acts as the GUI for the AudioProcessor. 
  */
-class CPluginEditor :
+class MainProcessorEditor :
 	public AudioProcessorEditor,
 	public TextEditor::Listener,
 	public Slider::Listener,
@@ -56,8 +57,8 @@ class CPluginEditor :
 	private Timer
 {
 public:
-	CPluginEditor(CPlugin&);
-	~CPluginEditor() override;
+	MainProcessorEditor(MainProcessor&);
+	~MainProcessorEditor() override;
 
 	void paint(Graphics&) override;
 	void resized() override;
@@ -245,8 +246,8 @@ private:
 	std::unique_ptr<TextEditor>	m_debugTextEdit;
 #endif
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CPluginEditor)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainProcessorEditor)
 };
 
 
-} // namespace dbaudio
+} // namespace SoundscapeApp

@@ -40,7 +40,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Common.h"
 
 
-namespace dbaudio
+namespace SoundscapeApp
 {
 
 
@@ -552,4 +552,4 @@ private:
 };
 
 
-} // namespace dbaudio
+} // namespace SoundscapeApp

@@ -162,131 +162,14 @@ void AAboutOverlay::resized()
 
 /*
 ===============================================================================
- Class CAboutOverlayVST
+ Class CAboutOverlayGeneric
 ===============================================================================
 */
 
 /**
  * Class constructor.
  */
-CAboutOverlayVST::CAboutOverlayVST()
-{
-	// Indicate whether VST2 or VST3
-	String hostFormatName("VST2");
-	if (PluginHostType::getPluginLoadedAs() == AudioProcessor::wrapperType_VST3)
-		hostFormatName = "VST3";
-
-	// Plugin version label
-	String formatString = hostFormatName + String(" is a trademark of Steinberg Media Technologies GmbH, registered in Europe and other countries.\n") +
-		String(CharPointer_UTF8("\xc2\xa9")) + String(" 2019 Steinberg Media Technologies GmbH, all rights reserved.");
-	m_formatInfoLabel = std::make_unique<CLabel>("FormatInfo", formatString);
-	m_formatInfoLabel->setJustificationType(Justification::topLeft);
-	m_formatInfoLabel->setFont(Font(13.0, Font::plain));
-	addAndMakeVisible(m_formatInfoLabel.get());
-
-}
-
-/**
- * Class destructor.
- */
-CAboutOverlayVST::~CAboutOverlayVST()
-{
-}
-
-/**
- * Reimplemented to paint the overlay's background.
- * @param g		Graphics context that must be used to do the drawing operations.
- */
-void CAboutOverlayVST::paint(Graphics& g)
-{
-	// First paint base class
-	AAboutOverlay::paint(g);
-
-	// VST logo 
-	Image formatLogo = ImageCache::getFromMemory(BinaryData::logo_vst_200x83_png, BinaryData::logo_vst_200x83_pngSize);
-	g.setImageResamplingQuality(Graphics::highResamplingQuality);
-	g.drawImage(formatLogo, 20, 100, 120, 50, 0, 0, 200, 83);
-
-	// Frame around logo
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::DarkLineColor));
-	g.drawRect(Rectangle<int>(20, 100, 120, 50), 1);
-}
-
-/**
- * Reimplemented to resize and re-postion controls & labels.
- */
-void CAboutOverlayVST::resized()
-{
-	// First resize base class components
-	AAboutOverlay::resized();
-
-	m_formatInfoLabel->setBounds(145, 100, getLocalBounds().getWidth() - 155, 80);
-}
-
-
-/*
-===============================================================================
- Class CAboutOverlayAAX
-===============================================================================
-*/
-
-/**
- * Class constructor.
- */
-CAboutOverlayAAX::CAboutOverlayAAX()
-{
-	// Plugin version label
-	String formatString = String("AAX Plug-in format.\nCopyright ") + 
-		String(CharPointer_UTF8("\xc2\xa9")) + String(" 2014-2018 by Avid Technology, Inc.\nAll rights reserved.");
-	m_formatInfoLabel = std::make_unique<CLabel>("FormatInfo", formatString);
-	m_formatInfoLabel->setJustificationType(Justification::topLeft);
-	m_formatInfoLabel->setFont(Font(13.0, Font::plain));
-	addAndMakeVisible(m_formatInfoLabel.get());
-}
-
-/**
- * Class destructor.
- */
-CAboutOverlayAAX::~CAboutOverlayAAX()
-{
-}
-
-/**
- * Reimplemented to paint the overlay's background.
- * @param g		Graphics context that must be used to do the drawing operations.
- */
-void CAboutOverlayAAX::paint(Graphics& g)
-{
-	// First paint base class
-	AAboutOverlay::paint(g);
-
-	// AAX logo
-	std::unique_ptr<Drawable> formatLogo = Drawable::createFromImageData(BinaryData::logo_avid_svg, BinaryData::logo_avid_svgSize);
-	formatLogo->drawWithin(g, Rectangle<float>(20.0f, 100.0f, 140.0f, 46.0f), RectanglePlacement::stretchToFit, 1.0f);
-}
-
-/**
- * Reimplemented to resize and re-postion controls & labels.
- */
-void CAboutOverlayAAX::resized()
-{
-	// First resize base class components
-	AAboutOverlay::resized();
-
-	m_formatInfoLabel->setBounds(172, 101, getLocalBounds().getWidth() - 155, 80);
-}
-
-
-/*
-===============================================================================
- Class CAboutOverlayAU
-===============================================================================
-*/
-
-/**
- * Class constructor.
- */
-CAboutOverlayAU::CAboutOverlayAU()
+CAboutOverlayGeneric::CAboutOverlayGeneric()
 {
 	// Plugin version label
 	String formatString = String("Audio Units (AU) Plug-in format. \nThe Audio Units logo is a trademark of Apple Computer, Inc. \nCopyright ") +
@@ -300,7 +183,7 @@ CAboutOverlayAU::CAboutOverlayAU()
 /**
  * Class destructor.
  */
-CAboutOverlayAU::~CAboutOverlayAU()
+CAboutOverlayGeneric::~CAboutOverlayGeneric()
 {
 }
 
@@ -308,7 +191,7 @@ CAboutOverlayAU::~CAboutOverlayAU()
  * Reimplemented to paint the overlay's background.
  * @param g		Graphics context that must be used to do the drawing operations.
  */
-void CAboutOverlayAU::paint(Graphics& g)
+void CAboutOverlayGeneric::paint(Graphics& g)
 {
 	// First paint base class
 	AAboutOverlay::paint(g);
@@ -322,7 +205,7 @@ void CAboutOverlayAU::paint(Graphics& g)
 /**
  * Reimplemented to resize and re-postion controls & labels.
  */
-void CAboutOverlayAU::resized()
+void CAboutOverlayGeneric::resized()
 {
 	// First resize base class components
 	AAboutOverlay::resized();

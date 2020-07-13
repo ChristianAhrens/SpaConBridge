@@ -108,9 +108,6 @@ public:
 	String FlushDebugMessages();
 #endif
 
-	bool IsTargetHostAvidConsole() const;
-	TargetHost GetTargetHost() const;
-
 	// Overriden functions of class AudioProcessor
 
 	virtual void getStateInformation(MemoryBlock& destData) override;

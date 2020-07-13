@@ -262,23 +262,6 @@ MainProcessorEditor::MainProcessorEditor(MainProcessor& parent)
 	addAndMakeVisible(m_debugTextEdit.get());
 #endif
 
-	if (parent.IsTargetHostAvidConsole())
-	{
-		// Overview Multi-slider button, only needed on consoles where no extra Overview window is used.
-		Path iconPath;
-		CTabbedComponent::GetIconPath(CTabbedComponent::OTI_MultiSlider, Point<float>(14, 10), 2.0f, iconPath);
-		m_overviewMultiSliderButton = std::make_unique<CPathButton>(iconPath);
-		m_overviewMultiSliderButton->setEnabled(true);
-		m_overviewMultiSliderButton->addListener(this);
-		addAndMakeVisible(m_overviewMultiSliderButton.get());
-
-		// Larger GUI for consoles.
-		if (m_pluginWindowSize == GUI_DEFAULT_PLUGIN_WINDOW_SIZE)
-		{
-			m_pluginWindowSize = Point<int>(684, 544);
-		}
-	}
-
 	// Backup user's window size, since setResizeLimits() calls resized(), which overwrites it.
 	Point<int> tmpSize(m_pluginWindowSize);
 	setResizeLimits(488, 380, 1920, 1080);
@@ -467,33 +450,13 @@ void MainProcessorEditor::buttonClicked(Button *button)
 		// Overview button
 		else if (button == m_overviewButton.get())
 		{
-			if (pro->IsTargetHostAvidConsole())
-			{
-				// Show / hide the Overview overlay
-				ToggleOverlay(AOverlay::OT_Overview);
-			}
-			else
-			{
+
 				// Signal goes all the way to the Overview manager -> This will open the overview window.
 				pro->OnOverviewButtonClicked();
 
 				// Un-toggle button.			
 				m_overviewButton->setToggleState(false, NotificationType::dontSendNotification);
-			}
-		}
-
-		else if (button == m_overviewMultiSliderButton.get())
-		{
-			if (pro->IsTargetHostAvidConsole())
-			{
-				// Show / hide the Overview Multi-slider overlay.
-				ToggleOverlay(AOverlay::OT_MultiSlide);
-
-				// Set the selected coordinate mapping on the Overview slider to this Plug-in's setting.
-				COverviewManager* ovrMgr = COverviewManager::GetInstance();
-				if (ovrMgr)
-					ovrMgr->SetSelectedMapping(pro->GetMappingId());
-			}
+			
 		}
 
 		// "About" button
@@ -575,25 +538,9 @@ void MainProcessorEditor::ToggleOverlay(AOverlay::OverlayType type)
 				break;
 
 			case AOverlay::OT_About:
-				// Slightly different About overlay depending on host format. 
-				switch (PluginHostType::getPluginLoadedAs())
-				{
-					case AudioProcessor::wrapperType_AAX:
-						m_overlay = std::make_unique<CAboutOverlayAAX>();
-						break;
-					case AudioProcessor::wrapperType_VST:
-					case AudioProcessor::wrapperType_VST3: 
-						m_overlay = std::make_unique<CAboutOverlayVST>();
-						break;
-					case AudioProcessor::wrapperType_AudioUnit:
-					case AudioProcessor::wrapperType_AudioUnitv3:
-						m_overlay = std::make_unique<CAboutOverlayAU>();
-						break;
-					default:
-						jassertfalse;
-						break;
-				}
+				m_overlay = std::make_unique<CAboutOverlayGeneric>();
 				break;
+
 			default:
 				jassertfalse;
 				break;
@@ -634,13 +581,6 @@ void MainProcessorEditor::paint(Graphics& g)
 	// Add d&b logo 
 	g.drawImage(m_dbLogo, getLocalBounds().getWidth() - 25, 15, 15, 15, 0, 0, 15, 15);
 
-	// Draw a thin frame around window. Looks naked without.
-	MainProcessor* pro = dynamic_cast<MainProcessor*>(getAudioProcessor());
-	if (pro && pro->IsTargetHostAvidConsole())
-	{
-		g.setColour(CDbStyle::GetDbColor(CDbStyle::DarkLineColor));
-		g.drawRect(Rectangle<int>(0, 0, w, h), 1);
-	}
 }
 
 /**

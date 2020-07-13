@@ -86,13 +86,13 @@ private:
 
 
 /**
- * Class CAboutOverlayVST is a GUI overlay which provides copyright and licensing info, specific to VST2 and VST3.
+ * Class CAboutOverlayGeneric is a GUI overlay which provides .
  */
-class CAboutOverlayVST : public AAboutOverlay
+class CAboutOverlayGeneric : public AAboutOverlay
 {
 public:
-	CAboutOverlayVST();
-	~CAboutOverlayVST() override;
+	CAboutOverlayGeneric();
+	~CAboutOverlayGeneric() override;
 
 protected:
 	void paint(Graphics&) override;
@@ -104,53 +104,7 @@ private:
 	 */
 	std::unique_ptr<CLabel>	m_formatInfoLabel;
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CAboutOverlayVST)
-};
-
-
-/**
- * Class CAboutOverlayAAX is a GUI overlay which provides copyright and licensing info, specific to AAX (ProTools and S6L).
- */
-class CAboutOverlayAAX : public AAboutOverlay
-{
-public:
-	CAboutOverlayAAX();
-	~CAboutOverlayAAX() override;
-
-protected:
-	void paint(Graphics&) override;
-	void resized() override;
-
-private:
-	/**
-	 * Host format license into
-	 */
-	std::unique_ptr<CLabel>	m_formatInfoLabel;
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CAboutOverlayAAX)
-};
-
-
-/**
- * Class CAboutOverlayAU is a GUI overlay which provides copyright and licensing info, specific to AAX (ProTools and S6L).
- */
-class CAboutOverlayAU : public AAboutOverlay
-{
-public:
-	CAboutOverlayAU();
-	~CAboutOverlayAU() override;
-
-protected:
-	void paint(Graphics&) override;
-	void resized() override;
-
-private:
-	/**
-	 * Host format license into
-	 */
-	std::unique_ptr<CLabel>	m_formatInfoLabel;
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CAboutOverlayAU)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CAboutOverlayGeneric)
 };
 
 

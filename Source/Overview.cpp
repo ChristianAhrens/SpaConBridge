@@ -847,15 +847,7 @@ void COverviewMultiSurface::resized()
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
 	{
-		MainProcessor* plugin = ctrl->GetProcessor(0);
-		if (plugin && plugin->IsTargetHostAvidConsole())
-		{
-			// For consoles, keep aspect ratio of slider at 1:1, as plugin window usually cannot be resized.
-			int side = jmin<int>((getLocalBounds().getWidth() - 40), (getLocalBounds().getHeight() - 52));
-			m_multiSlider->setBounds((getLocalBounds().getWidth() / 2) - (side / 2), 10, side, side);
-		}
-		else
-			m_multiSlider->setBounds(Rectangle<int>(20, 10, getLocalBounds().getWidth() - 40, getLocalBounds().getHeight() - 52));
+		m_multiSlider->setBounds(Rectangle<int>(20, 10, getLocalBounds().getWidth() - 40, getLocalBounds().getHeight() - 52));
 	}
 
 	// Mapping selector

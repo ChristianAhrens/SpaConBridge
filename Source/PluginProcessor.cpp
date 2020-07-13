@@ -95,10 +95,7 @@ MainProcessor::MainProcessor()
 	m_pluginId = -1;
 
 	// Default OSC communication mode. In the console version, default is "sync" mode.
-	if (IsTargetHostAvidConsole())
-		m_comsMode = CM_Sync;
-	else 
-		m_comsMode = CM_Tx;
+	m_comsMode = CM_Tx;
 	m_comsModeWhenNotBypassed = m_comsMode;
 
 	// Start with all parameter changed flags cleared. Function setStateInformation() 
@@ -446,13 +443,10 @@ void MainProcessor::setStateInformation(const void* data, int sizeInBytes)
 			SetParameterValue(DCS_Host, ParamIdx_SourceSpread, spread);
 			SetParameterValue(DCS_Host, ParamIdx_DelayMode, delaym);
 
-			// Only set overview size if host is not a console, where size is fix.
-			if (!IsTargetHostAvidConsole())
-			{
-				COverviewManager* ovrMgr = COverviewManager::GetInstance();
-				if (ovrMgr)
-					ovrMgr->SaveLastOverviewBounds(overviewBounds);
-			}
+
+			COverviewManager* ovrMgr = COverviewManager::GetInstance();
+			if (ovrMgr)
+				ovrMgr->SaveLastOverviewBounds(overviewBounds);
 		}
 	}
 }
@@ -715,34 +709,6 @@ String MainProcessor::FlushDebugMessages()
 	return ret;
 }
 #endif
-
-
-/**
- * Check the type of host, which the plugin is currently running on.
- * @return See enum TargetHost.
- */
-MainProcessor::TargetHost MainProcessor::GetTargetHost() const
-{
-	if (PluginHostType::getPluginLoadedAs() == wrapperType_AAX)
-	{
-		if (PluginHostType().isProTools())
-			return TargetHost_ProTools;
-
-		// Not ProTools, yet AAX? Assume S6L.
-		return TargetHost_S6L;
-	}
-		
-	return TargetHost_Unknown;
-}
-
-/**
- * Check if plugin is currently running on an Avid Console (S6L or similar)
- * @return True if on Avid Console, false for any other host.
- */
-bool MainProcessor::IsTargetHostAvidConsole() const
-{
-	return (GetTargetHost() == TargetHost_S6L);
-}
 
 
 

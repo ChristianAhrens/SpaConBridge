@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="MFvkL5" name="SoundscapeApp" projectType="guiapp" version="0.1.0"
-              bundleIdentifier="com.ChristianAhrens.SoundscapeApp" pluginName="d&amp;b Soundscape"
-              pluginDesc="Soundscape App for d&amp;b DS100 control" pluginManufacturer="-"
-              companyName="Christian Ahrens" companyEmail="christianahrens@me.com"
-              displaySplashScreen="0" reportAppUsage="0" companyCopyright="2020"
-              buildStandalone="1" enableIAA="0" pluginVST3Category="Spatial"
-              jucerFormatVersion="1" pluginFormats="buildStandalone">
+              bundleIdentifier="com.ChristianAhrens.SoundscapeApp" companyName="Christian Ahrens"
+              companyEmail="christianahrens@me.com" displaySplashScreen="0"
+              reportAppUsage="0" companyCopyright="2020" jucerFormatVersion="1">
   <MAINGROUP id="cS7SrP" name="SoundscapeApp">
     <GROUP id="{DA3507CD-D9BE-4153-5873-D44DBA9EAF0C}" name="Resources">
       <GROUP id="{5FBD4EDA-A4BE-1C72-49FC-FCB143B5F140}" name="Images">
@@ -27,13 +24,13 @@
       </GROUP>
     </GROUP>
     <GROUP id="{2B9DD386-1093-ADF5-E47F-5954774132B5}" name="Source">
+      <FILE id="wvD6A5" name="About.cpp" compile="1" resource="0" file="Source/About.cpp"/>
+      <FILE id="fYpzuk" name="About.h" compile="0" resource="0" file="Source/About.h"/>
       <FILE id="g0nbLB" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
       <FILE id="nZnFg0" name="Version.cpp" compile="1" resource="0" file="Source/Version.cpp"/>
       <FILE id="tKd5wL" name="Version.h" compile="0" resource="0" file="Source/Version.h"/>
       <FILE id="mSMMnq" name="Gui.cpp" compile="1" resource="0" file="Source/Gui.cpp"/>
       <FILE id="awUO6O" name="Gui.h" compile="0" resource="0" file="Source/Gui.h"/>
-      <FILE id="IpMis7" name="About.cpp" compile="1" resource="0" file="Source/About.cpp"/>
-      <FILE id="dMjhZQ" name="About.h" compile="0" resource="0" file="Source/About.h"/>
       <FILE id="SQMIsv" name="Parameters.cpp" compile="1" resource="0" file="Source/Parameters.cpp"/>
       <FILE id="nepks0" name="Parameters.h" compile="0" resource="0" file="Source/Parameters.h"/>
       <FILE id="Kqvnes" name="Controller.cpp" compile="1" resource="0" file="Source/Controller.cpp"/>
@@ -60,17 +57,16 @@
         <CONFIGURATION isDebug="0" name="Release"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_osc" path="../../juce"/>
-        <MODULEPATH id="juce_opengl" path="../../juce"/>
-        <MODULEPATH id="juce_gui_extra" path="../../juce"/>
-        <MODULEPATH id="juce_gui_basics" path="../../juce"/>
-        <MODULEPATH id="juce_graphics" path="../../juce"/>
-        <MODULEPATH id="juce_events" path="../../juce"/>
-        <MODULEPATH id="juce_data_structures" path="../../juce"/>
-        <MODULEPATH id="juce_core" path="../../juce"/>
-        <MODULEPATH id="juce_audio_processors" path="../../juce"/>
-        <MODULEPATH id="juce_audio_plugin_client" path="../../juce"/>
-        <MODULEPATH id="juce_audio_basics" path="../../juce"/>
+        <MODULEPATH id="juce_osc"/>
+        <MODULEPATH id="juce_opengl"/>
+        <MODULEPATH id="juce_gui_extra"/>
+        <MODULEPATH id="juce_gui_basics"/>
+        <MODULEPATH id="juce_graphics"/>
+        <MODULEPATH id="juce_events"/>
+        <MODULEPATH id="juce_data_structures"/>
+        <MODULEPATH id="juce_core"/>
+        <MODULEPATH id="juce_audio_processors"/>
+        <MODULEPATH id="juce_audio_basics"/>
       </MODULEPATHS>
     </VS2019>
     <XCODE_MAC targetFolder="Builds/MacOSX">
@@ -88,7 +84,6 @@
         <MODULEPATH id="juce_data_structures"/>
         <MODULEPATH id="juce_core"/>
         <MODULEPATH id="juce_audio_processors"/>
-        <MODULEPATH id="juce_audio_plugin_client"/>
         <MODULEPATH id="juce_audio_basics"/>
       </MODULEPATHS>
     </XCODE_MAC>
@@ -107,15 +102,12 @@
         <MODULEPATH id="juce_data_structures"/>
         <MODULEPATH id="juce_core"/>
         <MODULEPATH id="juce_audio_processors"/>
-        <MODULEPATH id="juce_audio_plugin_client"/>
         <MODULEPATH id="juce_audio_basics"/>
       </MODULEPATHS>
     </XCODE_IPHONE>
   </EXPORTFORMATS>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
-    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
-            useGlobalPath="1"/>
     <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>

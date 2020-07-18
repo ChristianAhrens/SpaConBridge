@@ -125,6 +125,14 @@ void COverviewManager::OpenOverview()
 	}
 }
 
+COverview* COverviewManager::GetOverview()
+{
+	if (m_overview == nullptr)
+		OpenOverview();
+
+	return m_overview;
+}
+
 /**
  * Function called by COverview's destructor to set the local pointer to zero.
  * @param destroy	True to also destroy the COverviewManager itself.

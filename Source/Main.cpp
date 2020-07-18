@@ -1,7 +1,7 @@
 #include <JuceHeader.h>
 
-#include "PluginEditor.h"
-#include "PluginProcessor.h"
+#include "MainComponent.h"
+
 
 //==============================================================================
 class SoundscapeAppApplication  : public JUCEApplication
@@ -51,11 +51,10 @@ public:
                                                     .findColour (ResizableWindow::backgroundColourId),
                                                     DocumentWindow::allButtons)
         {
-            m_processor = std::make_unique<SoundscapeApp::MainProcessor>();
-            m_processorEditor = std::make_unique<SoundscapeApp::MainProcessorEditor>(*m_processor.get());
+            m_mainComponent = std::make_unique<MainComponent>();
 
             setUsingNativeTitleBar (true);
-            setContentOwned (m_processorEditor.get(), true);
+            setContentOwned (m_mainComponent.get(), true);
 
            #if JUCE_IOS || JUCE_ANDROID
             setFullScreen (true);
@@ -83,8 +82,7 @@ public:
         */
 
     private:
-        std::unique_ptr<SoundscapeApp::MainProcessor>       m_processor;
-        std::unique_ptr<SoundscapeApp::MainProcessorEditor> m_processorEditor;
+        std::unique_ptr<MainComponent>  m_mainComponent;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)
     };

@@ -121,6 +121,14 @@ MainProcessor::~MainProcessor()
 }
 
 /**
+ * Get the id of this plugin instance 
+ */
+int MainProcessor::GetPluginId() const
+{
+	return m_pluginId;
+}
+
+/**
  * Get the state of the desired flag (or flags) for the desired change source.
  * @param changeSource	The application module querying the change flag.
  * @param change	The desired parameter (or parameters).

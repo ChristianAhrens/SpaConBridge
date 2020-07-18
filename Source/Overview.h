@@ -71,6 +71,7 @@ public:
 	static COverviewManager* GetInstance();
 
 	void OpenOverview();
+	COverview* GetOverview();
 	void CloseOverview(bool destroy);
 	void SaveLastOverviewBounds(Rectangle<int> bounds);
 	Rectangle<int> GetOverviewBounds() const;

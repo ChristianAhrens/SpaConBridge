@@ -70,6 +70,8 @@ public:
 	MainProcessor();
 	~MainProcessor() override;
 
+	int GetPluginId() const;
+
 	void InitializeSettings(SourceId sourceId, int mappingId, String ipAddress, int oscMsgRate, ComsMode newMode);
 
 	SourceId GetSourceId() const;

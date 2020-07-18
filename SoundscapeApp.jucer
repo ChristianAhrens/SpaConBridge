@@ -26,6 +26,9 @@
       </GROUP>
     </GROUP>
     <GROUP id="{2B9DD386-1093-ADF5-E47F-5954774132B5}" name="Source">
+      <FILE id="SKhSnW" name="MainComponent.cpp" compile="1" resource="0"
+            file="Source/MainComponent.cpp"/>
+      <FILE id="Z0i2A2" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
       <FILE id="wvD6A5" name="About.cpp" compile="1" resource="0" file="Source/About.cpp"/>
       <FILE id="fYpzuk" name="About.h" compile="0" resource="0" file="Source/About.h"/>
       <FILE id="g0nbLB" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>

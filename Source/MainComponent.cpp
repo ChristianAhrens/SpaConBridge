@@ -36,9 +36,10 @@ MainComponent::~MainComponent()
 {
 }
 
-void MainComponent::paint (juce::Graphics& /*g*/)
+void MainComponent::paint (juce::Graphics& g)
 {
-
+    // (Our component is opaque, so we must completely fill the background with a solid colour)
+    g.fillAll(SoundscapeApp::CDbStyle::GetDbColor(SoundscapeApp::CDbStyle::DarkColor));
 }
 
 void MainComponent::resized()

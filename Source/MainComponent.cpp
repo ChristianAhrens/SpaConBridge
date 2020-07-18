@@ -56,8 +56,8 @@ void MainComponent::resized()
         fb.justifyContent = FlexBox::JustifyContent::center;
 
         fb.items.addArray({
-            FlexItem(*m_processors.begin()->second.second.get()).withFlex(1).withMargin(FlexItem::Margin(10,10,0,10)),
-            FlexItem(*m_overview).withFlex(1).withMargin(FlexItem::Margin(10,10,0,10))
+            FlexItem(*m_overview).withFlex(1),
+            FlexItem(*m_processors.begin()->second.second.get()).withFlex(1)
             });
         fb.performLayout(safeBounds.toFloat());
     }
@@ -68,8 +68,8 @@ void MainComponent::resized()
         fb.justifyContent = FlexBox::JustifyContent::center;
 
         fb.items.addArray({
-            FlexItem(*m_processors.begin()->second.second.get()).withFlex(1).withMargin(FlexItem::Margin(10,0,10,10)),
-            FlexItem(*m_overview).withFlex(1).withMargin(FlexItem::Margin(10,0,10,10))
+            FlexItem(*m_overview).withFlex(1),
+            FlexItem(*m_processors.begin()->second.second.get()).withFlex(1)
             });
         fb.performLayout(safeBounds.toFloat());
     }

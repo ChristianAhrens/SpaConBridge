@@ -71,10 +71,8 @@ public:
 	static COverviewManager* GetInstance();
 
 	void OpenOverview();
-	COverview* GetOverview();
+	COverviewComponent* GetOverview();
 	void CloseOverview(bool destroy);
-	void SaveLastOverviewBounds(Rectangle<int> bounds);
-	Rectangle<int> GetOverviewBounds() const;
 
 	int GetActiveTab() const;
 	void SetActiveTab(int tabIdx);
@@ -91,12 +89,7 @@ protected:
 	/**
 	 * Pointer to the Overview winodw, if any.
 	 */
-	COverview*				m_overview;
-
-	/**
-	 * Default position and size of the overview window.
-	 */
-	Rectangle<int>			m_overviewBounds;
+	COverviewComponent			*m_overview;
 
 	/**
 	 * Remember the last active tab.
@@ -109,28 +102,6 @@ protected:
 	int						m_selectedMapping = 1;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(COverviewManager)
-};
-
-
-/**
- * Class COverview inherits from DocumentWindow to provide a resizeable window with minimize, maximize and close buttons.
- */
-class COverview : public DocumentWindow
-{
-public:
-	COverview();
-	~COverview() override;
-
-private:
-	virtual void closeButtonPressed() override;
-
-	/**
-	 *	Component within the overview window, used as container for all other components.
-	 */
-	std::unique_ptr<COverviewComponent> m_contentComponent;
-
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(COverview)
 };
 
 

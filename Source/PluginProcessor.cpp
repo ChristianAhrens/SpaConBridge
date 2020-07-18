@@ -377,16 +377,6 @@ void MainProcessor::getStateInformation(MemoryBlock& destData)
 	stream.writeFloat(m_reverbSendGain->get());
 	stream.writeFloat(m_sourceSpread->get());
 	stream.writeFloat(static_cast<float>(m_delayMode->getIndex()));
-
-	Rectangle<int> overviewBounds;
-	COverviewManager* ovrMgr = COverviewManager::GetInstance();
-	if (ovrMgr)
-		overviewBounds = ovrMgr->GetOverviewBounds();
-
-	stream.writeInt(overviewBounds.getX());
-	stream.writeInt(overviewBounds.getY());
-	stream.writeInt(overviewBounds.getWidth());
-	stream.writeInt(overviewBounds.getHeight());
 	stream.writeInt(m_pluginId);
 
 #ifdef JUCE_DEBUG
@@ -450,11 +440,6 @@ void MainProcessor::setStateInformation(const void* data, int sizeInBytes)
 			SetParameterValue(DCS_Host, ParamIdx_ReverbSendGain, reverb);
 			SetParameterValue(DCS_Host, ParamIdx_SourceSpread, spread);
 			SetParameterValue(DCS_Host, ParamIdx_DelayMode, delaym);
-
-
-			COverviewManager* ovrMgr = COverviewManager::GetInstance();
-			if (ovrMgr)
-				ovrMgr->SaveLastOverviewBounds(overviewBounds);
 		}
 	}
 }

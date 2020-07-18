@@ -75,7 +75,6 @@ COverviewManager::COverviewManager()
 
 	//Default overview window properties.
 	m_overview = nullptr;
-	m_overviewBounds = Rectangle<int>(50, 50, 500, 500);
 }
 
 /**
@@ -110,12 +109,7 @@ void COverviewManager::OpenOverview()
 	// Overview window is not currently open -> create it.
 	if (m_overview == nullptr)
 	{
-		m_overview = new COverview();
-		m_overview->setBounds(m_overviewBounds);
-		m_overview->setResizeLimits(410, 370, 1920, 1080);
-		m_overview->setResizable(true, false);
-		m_overview->setUsingNativeTitleBar(true);
-		m_overview->setVisible(true);
+		m_overview = new COverviewComponent();
 	}
 
 	// Overview window already exists -> bring it to the front.
@@ -125,7 +119,7 @@ void COverviewManager::OpenOverview()
 	}
 }
 
-COverview* COverviewManager::GetOverview()
+COverviewComponent* COverviewManager::GetOverview()
 {
 	if (m_overview == nullptr)
 		OpenOverview();
@@ -141,8 +135,6 @@ void COverviewManager::CloseOverview(bool destroy)
 {
 	if (m_overview != nullptr)
 	{
-		SaveLastOverviewBounds(GetOverviewBounds());
-
 		// Close the overview window.
 		delete m_overview;
 		m_overview = nullptr;
@@ -151,33 +143,6 @@ void COverviewManager::CloseOverview(bool destroy)
 	// Closed overview, so manager no longer needed.
 	if (destroy)
 		delete this;
-}
-
-/**
- * If the Overview window is currently closed (m_overview points to zero), return it's
- * last known position and size. If Overview is open, get it's current pos and size.
- * @return	A rectangle defining the window's position and size.
- */
-Rectangle<int> COverviewManager::GetOverviewBounds() const
-{
-	if (m_overview)
-	{
-		return Rectangle<int>(	m_overview->getScreenPosition().getX(),
-								m_overview->getScreenPosition().getY(),
-								m_overview->getLocalBounds().getWidth(),
-								m_overview->getLocalBounds().getHeight());
-	}
-	return m_overviewBounds;
-}
-
-/**
- * Save the Overview window's position and size for later use.
- * @param bounds	A rectangle defining the window's position and size.
- */
-void COverviewManager::SaveLastOverviewBounds(Rectangle<int> bounds)
-{
-	if (!bounds.isEmpty())
-		m_overviewBounds = bounds;
 }
 
 /**
@@ -214,61 +179,6 @@ int COverviewManager::GetSelectedMapping() const
 void COverviewManager::SetSelectedMapping(int mapping)
 {
 	m_selectedMapping = mapping;
-}
-
-
-/*
-===============================================================================
- Class COverview
-===============================================================================
-*/
-
-/**
- * Class constructor.
- */
-COverview::COverview() :
-	DocumentWindow("Overview",
-	Colours::black,
-	DocumentWindow::allButtons,
-	true)
-{
-	// Set the proper plugin name on the Overview window's title bar.
-	CController* ctrl = CController::GetInstance();
-	if (ctrl)
-	{
-		String pluginName = ctrl->GetProcessor(0)->getName();
-		setName(pluginName + String(" Overview"));
-	}
-
-	// DocumentWindow can only have one child component set via setContentOwned,
-	// so we use a dummy content component and all all controls to it.
-	m_contentComponent = std::make_unique<COverviewComponent>();
-
-	// Component resizes automatically anyway, but need size > 0 to prevent 
-	// stupid juce assert.
-	m_contentComponent->setBounds(Rectangle<int>(1, 1));
-
-	// The Overview window now takes ownership of the content component and resizes it too.
-	setContentOwned(m_contentComponent.get(), true);
-}
-
-/**
- * Class destructor.
- */
-COverview::~COverview()
-{
-}
-
-/**
- * Reimplemented to simply destroy the overview window when the close button is pressed.
- */
-void COverview::closeButtonPressed()
-{
-	COverviewManager* ovrMgr = COverviewManager::GetInstance();
-	if (ovrMgr)
-	{
-		ovrMgr->CloseOverview(false);
-	}
 }
 
 

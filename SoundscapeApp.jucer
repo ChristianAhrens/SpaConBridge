@@ -5,6 +5,17 @@
               companyEmail="christianahrens@me.com" displaySplashScreen="0"
               reportAppUsage="0" companyCopyright="2020" jucerFormatVersion="1">
   <MAINGROUP id="cS7SrP" name="SoundscapeApp">
+    <GROUP id="{F93FDF74-FF39-A47E-E403-31E5ADA7ADD3}" name="submodules">
+      <GROUP id="{FAEFB6F6-97A8-A4B1-8911-35FBC344E2EF}" name="JUCE-AppBasics">
+        <GROUP id="{AEF488F2-ECE4-B5B0-0BC4-9A3644EF8A18}" name="Source">
+          <FILE id="GDtXdS" name="Image_utils.hpp" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Image_utils.hpp"/>
+          <FILE id="yq1Bqf" name="iOS_utils.hpp" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/iOS_utils.hpp"/>
+        </GROUP>
+        <GROUP id="{A1501CBC-FDBD-6A07-19CE-0B89ABD08D89}" name="Resources">
+          <GROUP id="{49230987-3CBC-5512-5852-2C92F74CB3FC}" name="Images"/>
+        </GROUP>
+      </GROUP>
+    </GROUP>
     <GROUP id="{DA3507CD-D9BE-4153-5873-D44DBA9EAF0C}" name="Resources">
       <GROUP id="{5FBD4EDA-A4BE-1C72-49FC-FCB143B5F140}" name="Images">
         <FILE id="fDAo9Q" name="icon_hamburger_16x16.png" compile="0" resource="1"

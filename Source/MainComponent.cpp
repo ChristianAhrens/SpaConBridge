@@ -11,6 +11,8 @@
 #include <JuceHeader.h>
 #include "MainComponent.h"
 
+#include "../submodules/JUCE-AppBasics/Source/iOS_utils.hpp"
+
 //==============================================================================
 MainComponent::MainComponent()
 {
@@ -34,7 +36,7 @@ MainComponent::~MainComponent()
 {
 }
 
-void MainComponent::paint (juce::Graphics& g)
+void MainComponent::paint (juce::Graphics& /*g*/)
 {
 
 }
@@ -42,12 +44,12 @@ void MainComponent::paint (juce::Graphics& g)
 void MainComponent::resized()
 {
     auto isPortrait = getLocalBounds().getHeight() > getLocalBounds().getWidth();
-    //auto safety = JUCEAppBasics::iOS_utils::getDeviceSafetyMargins();
+    auto safety = JUCEAppBasics::iOS_utils::getDeviceSafetyMargins();
     auto safeBounds = getLocalBounds();
-    //safeBounds.removeFromTop(safety._top);
-    //safeBounds.removeFromBottom(safety._bottom);
-    //safeBounds.removeFromLeft(safety._left);
-    //safeBounds.removeFromRight(safety._right);
+    safeBounds.removeFromTop(safety._top);
+    safeBounds.removeFromBottom(safety._bottom);
+    safeBounds.removeFromLeft(safety._left);
+    safeBounds.removeFromRight(safety._right);
 
     if (isPortrait)
     {

@@ -58,6 +58,7 @@ class CComboBoxContainer;
 class CTextEditorContainer;
 class CRadioButtonContainer;
 class CEditableLabelContainer;
+class MainProcessorEditor;
 
 
 /**
@@ -256,6 +257,8 @@ public:
 	void UpdateGui(bool init) override;
 	void buttonClicked(Button*) override;
 
+	void onCurrentSelectedProcessorChanged(PluginId selectedPluginId);
+
 protected:
 	void paint(Graphics&) override;
 	void resized() override;
@@ -265,6 +268,21 @@ private:
 	 * The actual table model / component inside this component.
 	 */
 	std::unique_ptr<CTableModelComponent> m_overviewTable;
+
+	/**
+	 * The processor editor component corresponding to the selected row
+	 */
+	std::unique_ptr<MainProcessorEditor> m_selectedPluginInstanceEditor;
+
+	/**
+	 * Button to add a processor instance
+	 */
+	std::unique_ptr<CButton> m_addInstance;
+
+	/**
+	 * Button to remove the selected processor instance
+	 */
+	std::unique_ptr<CButton> m_removeInstance;
 
 	/**
 	 * Quick select label
@@ -368,10 +386,14 @@ public:
 	void sortOrderChanged(int newSortColumnId, bool isForwards) override;
 	Component* refreshComponentForCell(int rowNumber, int columnId, bool isRowSelected, Component* existingComponentToUpdate) override;
 	int getColumnAutoSizeWidth(int columnId) override;
+	void selectedRowsChanged(int lastRowSelected) override;
 
 
 	// Overriden methods from Component
 	void resized() override;
+
+	// Callback functions
+	std::function<void(PluginId)>	currentSelectedProcessorChanged;
 
 private:
 	/**

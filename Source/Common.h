@@ -113,4 +113,9 @@ static constexpr ComsMode CM_PollOnce =		0x0004; //< The X/Y coordinates have be
 static constexpr ComsMode CM_Sync =			(CM_Rx | CM_Tx); //< The Plug-in sends SET commands when necessary, else sends requests, and accepts all responses.
 
 
+/**
+ * Invalid PluginId used to signal when selection in CSurfaceMultiSlider is empty etc..
+ */
+static constexpr PluginId INVALID_PLUGIN_ID = 0xFFFFFFFF;
+
 } // namespace SoundscapeApp

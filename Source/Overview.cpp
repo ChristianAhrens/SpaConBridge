@@ -35,6 +35,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Overview.h"
 #include "PluginProcessor.h"
+#include "PluginEditor.h"
 #include "Controller.h"
 #include "SurfaceSlider.h"
 
@@ -596,7 +597,18 @@ COverviewTableContainer::COverviewTableContainer()
 {
 	// Create the table model/component.
 	m_overviewTable = std::make_unique<CTableModelComponent>();
+	m_overviewTable->currentSelectedProcessorChanged = [=](PluginId id) { this->onCurrentSelectedProcessorChanged(id); };
 	addAndMakeVisible(m_overviewTable.get());
+
+	// Add/Remove Buttons
+	m_addInstance = std::make_unique<CButton>("Add");
+	m_addInstance->setClickingTogglesState(false);
+	m_addInstance->addListener(this);
+	addAndMakeVisible(m_addInstance.get());
+	m_removeInstance = std::make_unique<CButton>("Remove");
+	m_removeInstance->setClickingTogglesState(false);
+	m_removeInstance->addListener(this);
+	addAndMakeVisible(m_removeInstance.get());
 
 	// Create quick selection buttons
 	m_selectLabel = std::make_unique<CLabel>("Select:", "Select:");
@@ -643,15 +655,66 @@ void COverviewTableContainer::paint(Graphics& g)
  */
 void COverviewTableContainer::resized()
 {
-	int w = getLocalBounds().getWidth();
+	// flexbox for table and editor as column or row layout depending on aspect ratio
+	FlexBox tableAndEditorFlex;
+	FlexItem::Margin tableMargin{ 8 };
+	FlexItem::Margin editorMargin{ 8 };
+	auto isPortrait = getLocalBounds().getHeight() > getLocalBounds().getWidth();
+	if (isPortrait)
+	{
+		tableAndEditorFlex.flexDirection = FlexBox::Direction::column;
+		if (m_selectedPluginInstanceEditor)
+		{
+			tableMargin = FlexItem::Margin(8, 8, 4, 8);
+			editorMargin = FlexItem::Margin(4, 8, 0, 8);
+		}
+		else
+			tableMargin = FlexItem::Margin(8, 8, 0, 8);
+	}
+	else
+	{
+		tableAndEditorFlex.flexDirection = FlexBox::Direction::row;
+		if (m_selectedPluginInstanceEditor)
+		{
+			tableMargin = FlexItem::Margin(8, 4, 0, 8);
+			editorMargin = FlexItem::Margin(8, 8, 0, 4);
+		}
+		else
+			tableMargin = FlexItem::Margin(8, 8, 0, 8);
+	}
 
-	// Resize overview table.
-	m_overviewTable->setBounds(Rectangle<int>(0, 0, w, getLocalBounds().getHeight() - 32));
+	tableAndEditorFlex.justifyContent = FlexBox::JustifyContent::center;
 
-	// Resize quick selection buttons
-	m_selectLabel->setBounds(Rectangle<int>(w - 170, getLocalBounds().getHeight() - 40, 80, 30));
-	m_selectAll->setBounds(Rectangle<int>(w - 106, getLocalBounds().getHeight() - 38, 40, 26));
-	m_selectNone->setBounds(Rectangle<int>(w - 65, getLocalBounds().getHeight() - 38, 46, 26));
+	if (m_selectedPluginInstanceEditor)
+	{
+		tableAndEditorFlex.items.add(FlexItem(*m_overviewTable).withFlex(1).withMargin(tableMargin));
+		tableAndEditorFlex.items.add(FlexItem(*m_selectedPluginInstanceEditor.get()).withFlex(1).withMargin(editorMargin));
+	}
+	else
+		tableAndEditorFlex.items.add(FlexItem(*m_overviewTable).withFlex(1).withMargin(tableMargin));
+	
+	// flexbox for bottom buttons
+	FlexBox bottomBarFlex;
+	bottomBarFlex.flexDirection = FlexBox::Direction::row;
+	bottomBarFlex.justifyContent = FlexBox::JustifyContent::center;
+	bottomBarFlex.alignContent = FlexBox::AlignContent::center;
+	bottomBarFlex.items.addArray({
+		FlexItem(*m_addInstance.get()).withFlex(1).withMaxWidth(40).withMargin(FlexItem::Margin(2)),
+		FlexItem(*m_removeInstance.get()).withFlex(1).withMaxWidth(60).withMargin(FlexItem::Margin(2)),
+		FlexItem().withFlex(2).withHeight(30),
+		FlexItem(*m_selectLabel.get()).withFlex(1).withMaxWidth(80),
+		FlexItem(*m_selectAll.get()).withFlex(1).withMaxWidth(40).withMargin(FlexItem::Margin(2)),
+		FlexItem(*m_selectNone.get()).withFlex(1).withMaxWidth(46).withMargin(FlexItem::Margin(2)),
+		});
+
+	FlexBox mainFB;
+	mainFB.flexDirection = FlexBox::Direction::column;
+	mainFB.justifyContent = FlexBox::JustifyContent::center;
+	mainFB.items.addArray({
+		FlexItem(tableAndEditorFlex).withFlex(4),
+		FlexItem(bottomBarFlex).withFlex(1).withMaxHeight(32).withMargin(FlexItem::Margin(0, 8, 8, 8))
+		});
+	mainFB.performLayout(getLocalBounds().toFloat());
 }
 
 /**
@@ -667,6 +730,56 @@ void COverviewTableContainer::buttonClicked(Button *button)
 
 		// Un-toggle button.			
 		button->setToggleState(false, NotificationType::dontSendNotification);
+	}
+	else if ((button == m_addInstance.get()) || (button == m_removeInstance.get()))
+	{
+		auto addInstance = (button == m_addInstance.get());
+
+		CController* ctrl = CController::GetInstance();
+		if (ctrl)
+		{
+			if (addInstance)
+			{
+				auto processor = std::make_unique<SoundscapeApp::MainProcessor>();
+				processor.release();
+			}
+			else
+			{
+				auto processorIds = m_overviewTable->GetSelectedRows();
+				for (auto processorId : processorIds)
+				{
+					if (ctrl->GetProcessorCount() > 1)
+						auto processor = std::unique_ptr<MainProcessor>(ctrl->GetProcessor(processorId));
+				}
+			}
+		}
+	}
+}
+
+/**
+ * Function to be called from model when the current selection has changed
+ */
+void COverviewTableContainer::onCurrentSelectedProcessorChanged(PluginId selectedPluginId)
+{
+	if (selectedPluginId == INVALID_PLUGIN_ID)
+	{
+		if (m_selectedPluginInstanceEditor)
+		{
+			removeChildComponent(m_selectedPluginInstanceEditor.get());
+			m_selectedPluginInstanceEditor.release();
+			resized();
+		}
+	}
+	else
+	{
+		CController* ctrl = CController::GetInstance();
+		if (ctrl)
+		{
+			auto processor = ctrl->GetProcessor(selectedPluginId);
+			m_selectedPluginInstanceEditor = std::make_unique<MainProcessorEditor>(*processor);
+			addAndMakeVisible(m_selectedPluginInstanceEditor.get());
+			resized();
+		}
 	}
 }
 
@@ -1287,12 +1400,30 @@ int CTableModelComponent::getColumnAutoSizeWidth(int columnId)
 }
 
 /**
+ * This is overloaded from TableListBoxModel, and tells us that the row selection has changed.
+ * @param lastRowSelected	The last of the now selected rows.
+ */
+void CTableModelComponent::selectedRowsChanged(int lastRowSelected)
+{
+	if (currentSelectedProcessorChanged)
+	{
+		if (m_table.getSelectedRows().isEmpty())
+		{
+			currentSelectedProcessorChanged(SoundscapeApp::INVALID_PLUGIN_ID);
+		}
+		else
+		{
+			currentSelectedProcessorChanged(GetPluginIdForRow(lastRowSelected));
+		}
+	}
+}
+
+/**
  *  This is overloaded from Component, and will reposition the TableListBox inside it. 
  */
 void CTableModelComponent::resized()
 {
-	// position our table with a gap around its edge
-	m_table.setBoundsInset(BorderSize<int>(8));
+	m_table.setBounds(getLocalBounds());
 }
 
 

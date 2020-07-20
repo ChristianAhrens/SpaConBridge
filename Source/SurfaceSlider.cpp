@@ -44,11 +44,6 @@ namespace SoundscapeApp
 {
 
 
-/**
- * Invalid PluginId used to signal when selection in CSurfaceMultiSlider is empty.
- */
-static constexpr PluginId INVALID_PLUGIN_ID = 0xFFFFFFFF;
-
 
 /*
 ===============================================================================

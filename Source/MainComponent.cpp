@@ -16,12 +16,6 @@
 //==============================================================================
 MainComponent::MainComponent()
 {
-    auto processor = std::make_unique<SoundscapeApp::MainProcessor>();
-    auto processorEditor = std::make_unique<SoundscapeApp::MainProcessorEditor>(*processor.get());
-    addAndMakeVisible(processorEditor.get());
-
-    m_processors.insert(std::make_pair(processor->GetPluginId(), std::make_pair(std::move(processor), std::move(processorEditor))));
-
     SoundscapeApp::COverviewManager* ovrMgr = SoundscapeApp::COverviewManager::GetInstance();
     if (ovrMgr)
     {
@@ -44,7 +38,6 @@ void MainComponent::paint (juce::Graphics& g)
 
 void MainComponent::resized()
 {
-    auto isPortrait = getLocalBounds().getHeight() > getLocalBounds().getWidth();
     auto safety = JUCEAppBasics::iOS_utils::getDeviceSafetyMargins();
     auto safeBounds = getLocalBounds();
     safeBounds.removeFromTop(safety._top);
@@ -52,28 +45,5 @@ void MainComponent::resized()
     safeBounds.removeFromLeft(safety._left);
     safeBounds.removeFromRight(safety._right);
 
-    if (isPortrait)
-    {
-        FlexBox fb;
-        fb.flexDirection = FlexBox::Direction::column;
-        fb.justifyContent = FlexBox::JustifyContent::center;
-
-        fb.items.addArray({
-            FlexItem(*m_overview).withFlex(1),
-            FlexItem(*m_processors.begin()->second.second.get()).withFlex(1)
-            });
-        fb.performLayout(safeBounds.toFloat());
-    }
-    else
-    {
-        FlexBox fb;
-        fb.flexDirection = FlexBox::Direction::row;
-        fb.justifyContent = FlexBox::JustifyContent::center;
-
-        fb.items.addArray({
-            FlexItem(*m_overview).withFlex(1),
-            FlexItem(*m_processors.begin()->second.second.get()).withFlex(1)
-            });
-        fb.performLayout(safeBounds.toFloat());
-    }
+    m_overview->setBounds(safeBounds);
 }

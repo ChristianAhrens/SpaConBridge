@@ -120,6 +120,12 @@ void COverviewManager::OpenOverview()
 	}
 }
 
+/**
+ * Getter for the overview component.
+ * This is required to be able to embed the overview in a main component,
+ * were the original d&b Soundscape Plugin displayed the overview as a window of its own.
+ * @return The overview component.
+ */
 COverviewComponent* COverviewManager::GetOverview()
 {
 	if (m_overview == nullptr)
@@ -282,11 +288,11 @@ void COverviewComponent::paint(Graphics& g)
 
 	// Little lines between version and logo
 	g.setColour(CDbStyle::GetDbColor(CDbStyle::ButtonColor));
-	g.fillRect(Rectangle<int>(w - 35, 6, 1, 30));
-	g.fillRect(Rectangle<int>(w - 102, 6, 1, 30));
+	g.fillRect(Rectangle<int>(w - 39, 6, 1, 30));
+	g.fillRect(Rectangle<int>(w - 106, 6, 1, 30));
 
-	// Add d&b logo 
-	g.drawImage(m_appLogo, getLocalBounds().getWidth() - 31, 9, 26, 26, 0, 0, 1024, 1024);
+	// Add app logo 
+	g.drawImage(m_appLogo, getLocalBounds().getWidth() - 35, 6, 30, 30, 0, 0, 1024, 1024);
 
 	// Draw little line below "Overview" to match with the line which is automatically drawn 
 	// by the CTabbedComponent's CTabBarButton.
@@ -314,8 +320,8 @@ void COverviewComponent::resized()
 	m_onlineLed->setBounds(Rectangle<int>(w - 40, vStartPos2, 24, 24));
 
 	// Name and Version label
-	m_nameLabel->setBounds(w - 105, 3, 75, 25);
-	m_versionLabel->setBounds(w - 103, 21, 42, 15);
+	m_nameLabel->setBounds(w - 109, 3, 75, 25);
+	m_versionLabel->setBounds(w - 107, 21, 42, 15);
 
 	// Title label
 	m_titleLabel->setBounds(Rectangle<int>(5, 10, 80, 25));
@@ -607,6 +613,7 @@ COverviewTableContainer::COverviewTableContainer()
 	addAndMakeVisible(m_addInstance.get());
 	m_removeInstance = std::make_unique<CButton>("Remove");
 	m_removeInstance->setClickingTogglesState(false);
+	m_removeInstance->setEnabled(false);
 	m_removeInstance->addListener(this);
 	addAndMakeVisible(m_removeInstance.get());
 
@@ -741,15 +748,25 @@ void COverviewTableContainer::buttonClicked(Button *button)
 			if (addInstance)
 			{
 				auto processor = std::make_unique<SoundscapeApp::MainProcessor>();
-				processor.release();
+				processor.release(); // let go of the instance here, we do not want to destroy it, since it lives as member of CCOntroller when constructed
 			}
 			else
 			{
-				auto processorIds = m_overviewTable->GetSelectedRows();
+				auto const& processorIds = m_overviewTable->GetSelectedRows();
+
+				if (ctrl->GetProcessorCount() <= processorIds.size())
+					onCurrentSelectedProcessorChanged(INVALID_PLUGIN_ID);
+				else
+				{
+					PluginId nextStillExistingId = (ctrl->GetProcessorCount() - processorIds.size());
+					m_overviewTable->selectedRowsChanged(nextStillExistingId);
+					//onCurrentSelectedProcessorChanged(nextStillExistingId);
+				}
+
 				for (auto processorId : processorIds)
 				{
 					if (ctrl->GetProcessorCount() > 1)
-						auto processor = std::unique_ptr<MainProcessor>(ctrl->GetProcessor(processorId));
+						auto processor = std::unique_ptr<MainProcessor>(ctrl->GetProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
 				}
 			}
 		}
@@ -769,6 +786,8 @@ void COverviewTableContainer::onCurrentSelectedProcessorChanged(PluginId selecte
 			m_selectedPluginInstanceEditor.release();
 			resized();
 		}
+
+		m_removeInstance->setEnabled(false);
 	}
 	else
 	{
@@ -778,8 +797,11 @@ void COverviewTableContainer::onCurrentSelectedProcessorChanged(PluginId selecte
 			auto processor = ctrl->GetProcessor(selectedPluginId);
 			m_selectedPluginInstanceEditor = std::make_unique<MainProcessorEditor>(*processor);
 			addAndMakeVisible(m_selectedPluginInstanceEditor.get());
+			m_selectedPluginInstanceEditor->UpdateGui(true);
 			resized();
 		}
+
+		m_removeInstance->setEnabled(true);
 	}
 }
 
@@ -1151,7 +1173,12 @@ void CTableModelComponent::RecreateTableRowIds()
 	}
 
 	// Clear row selection, since rows may have changed.
-	m_table.deselectAllRows();
+	auto currentSelectedRows = m_table.getSelectedRows();
+	if (!currentSelectedRows.isEmpty())
+	{
+		m_table.deselectAllRows();
+		m_table.selectRow(currentSelectedRows[currentSelectedRows.size() - 1]);
+	}
 }
 
 /**
@@ -1407,7 +1434,7 @@ void CTableModelComponent::selectedRowsChanged(int lastRowSelected)
 {
 	if (currentSelectedProcessorChanged)
 	{
-		if (m_table.getSelectedRows().isEmpty())
+		if (m_table.getSelectedRows().isEmpty() || m_table.getSelectedRows().size() > 1)
 		{
 			currentSelectedProcessorChanged(SoundscapeApp::INVALID_PLUGIN_ID);
 		}

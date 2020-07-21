@@ -136,10 +136,6 @@ void AAboutOverlay::paint(Graphics& g)
 	g.setColour(CDbStyle::GetDbColor(CDbStyle::DarkColor));
 	g.fillRect(Rectangle<int>(8, 8, w - 16, h - 16));
 
-	// d&b logo 
-	std::unique_ptr<Drawable> dbLogo = Drawable::createFromImageData(BinaryData::logo_dbaudio_text_svg, BinaryData::logo_dbaudio_text_svgSize);
-	dbLogo->drawWithin(g, Rectangle<float>(20.0f, 20.0f, 30.0f, 30.0f), RectanglePlacement::stretchToFit, 1.0f);
-
 	// JUCE logo
 	std::unique_ptr<Drawable> formatLogo = Drawable::createFromImageData(BinaryData::logo_juce_svg, BinaryData::logo_juce_svgSize);
 	formatLogo->drawWithin(g, Rectangle<float>(w - 120.0f, 10.0f, 100.0f, 35.0f), RectanglePlacement::stretchToFit, 1.0f);
@@ -196,10 +192,6 @@ void CAboutOverlayGeneric::paint(Graphics& g)
 	// First paint base class
 	AAboutOverlay::paint(g);
 
-	// AU logo 
-	Image formatLogo = ImageCache::getFromMemory(BinaryData::logo_au_100x100_png, BinaryData::logo_au_100x100_pngSize);
-	g.setImageResamplingQuality(Graphics::highResamplingQuality);
-	g.drawImage(formatLogo, 20, 93, 66, 66, 0, 0, 101, 101);
 }
 
 /**

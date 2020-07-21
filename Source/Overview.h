@@ -146,7 +146,7 @@ private:
 	/*
 	 * Logo image.
 	 */
-	Image					m_dbLogo;
+	Image					m_appLogo;
 
 	/**
 	 * DS100 IP Address label

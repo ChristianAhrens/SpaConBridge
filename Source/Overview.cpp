@@ -216,7 +216,7 @@ COverviewComponent::COverviewComponent()
 	addAndMakeVisible(m_rateLabel.get());
 
 	// d&b logo and Plugin version label
-	m_dbLogo = ImageCache::getFromMemory(BinaryData::logo_dbaudio_15x15_png, BinaryData::logo_dbaudio_15x15_pngSize);
+	m_appLogo = ImageCache::getFromMemory(BinaryData::SoundscapeApp_png, BinaryData::SoundscapeApp_pngSize);
 	m_versionLabel = std::make_unique<CLabel>("PluginVersion", String(JUCE_STRINGIFY(JUCE_APP_VERSION)));
 	m_versionLabel->setFont(Font(11));
 	addAndMakeVisible(m_versionLabel.get());
@@ -286,7 +286,7 @@ void COverviewComponent::paint(Graphics& g)
 	g.fillRect(Rectangle<int>(w - 102, 6, 1, 30));
 
 	// Add d&b logo 
-	g.drawImage(m_dbLogo, getLocalBounds().getWidth() - 25, 15, 15, 15, 0, 0, 15, 15);
+	g.drawImage(m_appLogo, getLocalBounds().getWidth() - 31, 9, 26, 26, 0, 0, 1024, 1024);
 
 	// Draw little line below "Overview" to match with the line which is automatically drawn 
 	// by the CTabbedComponent's CTabBarButton.

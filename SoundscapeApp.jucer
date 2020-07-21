@@ -18,20 +18,7 @@
     </GROUP>
     <GROUP id="{DA3507CD-D9BE-4153-5873-D44DBA9EAF0C}" name="Resources">
       <GROUP id="{5FBD4EDA-A4BE-1C72-49FC-FCB143B5F140}" name="Images">
-        <FILE id="fDAo9Q" name="icon_hamburger_16x16.png" compile="0" resource="1"
-              file="Resources/Images/icon_hamburger_16x16.png"/>
-        <FILE id="ypW0tG" name="icon_help_16x16.png" compile="0" resource="1"
-              file="Resources/Images/icon_help_16x16.png"/>
-        <FILE id="QMVb5i" name="logo_au_100x100.png" compile="0" resource="1"
-              file="Resources/Images/logo_au_100x100.png"/>
-        <FILE id="Dsb2UD" name="logo_avid.svg" compile="0" resource="1" file="Resources/Images/logo_avid.svg"/>
-        <FILE id="Ix0T7k" name="logo_dbaudio_15x15.png" compile="0" resource="1"
-              file="Resources/Images/logo_dbaudio_15x15.png"/>
-        <FILE id="WHryKT" name="logo_dbaudio_text.svg" compile="0" resource="1"
-              file="Resources/Images/logo_dbaudio_text.svg"/>
         <FILE id="bSDxmA" name="logo_juce.svg" compile="0" resource="1" file="Resources/Images/logo_juce.svg"/>
-        <FILE id="YsPJq2" name="logo_vst_200x83.png" compile="0" resource="1"
-              file="Resources/Images/logo_vst_200x83.png"/>
         <FILE id="ZgXgfh" name="SoundscapeApp.png" compile="0" resource="1"
               file="Resources/Images/SoundscapeApp.png"/>
       </GROUP>

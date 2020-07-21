@@ -53,7 +53,6 @@ class MainProcessorEditor :
 	public TextEditor::Listener,
 	public Slider::Listener,
 	public ComboBox::Listener,
-	public Button::Listener,
 	private Timer
 {
 public:
@@ -62,7 +61,6 @@ public:
 
 	void paint(Graphics&) override;
 	void resized() override;
-	void ToggleOverlay(AOverlay::OverlayType type);
 	void UpdateGui(bool init);
 
 private:
@@ -70,11 +68,10 @@ private:
 	void sliderValueChanged(Slider *slider) override;
 	void sliderDragStarted(Slider* slider) override;
 	void sliderDragEnded(Slider* slider) override;
-	void textEditorFocusLost(TextEditor &) override;
 	void textEditorReturnKeyPressed(TextEditor &) override;
 	void comboBoxChanged(ComboBox *comboBox) override;
-	void buttonClicked(Button*) override;
 	void timerCallback() override;
+	bool getResizePaintAreaSplit(Rectangle<int>& twoDSurfaceArea, Rectangle<int>& parameterEditArea);
 
 	/**
 	 * Horizontal slider for X axis.
@@ -127,94 +124,9 @@ private:
 	std::unique_ptr<CLabel>	m_delayModeLabel;
 
 	/*
-	 * App version label
-	 */
-	std::unique_ptr<CLabel>	m_versionLabel;
-
-	/*
-	 * App name
-	 */
-	std::unique_ptr<CLabel>	m_nameLabel;
-
-	/*
-	 * Positioning Area label
-	 */
-	std::unique_ptr<CLabel>	m_posAreaLabel;
-
-	/*
-	 * Source ID label
-	 */
-	std::unique_ptr<CLabel>	m_sourceIdLabel;
-
-	/*
-	 * DS100 IP Address label
-	 */
-	std::unique_ptr<CLabel>	m_ipAddressLabel;
-
-	/*
-	 * Send/receive rate label
-	 */
-	std::unique_ptr<CLabel>	m_rateLabel;
-
-	/*
-	 * ComboBox selector for the positioning area
-	 */
-	std::unique_ptr<ComboBox>	m_areaSelector;
-
-	/*
-	 * Text editor for the source ID (matrix input)
-	 */
-	std::unique_ptr<CDigital>	m_sourceIdDigital;
-
-	/*
-	 * Text editor for the DS100 IP Address
-	 */
-	std::unique_ptr<CTextEditor>	m_ipAddressTextEdit;
-
-	/*
-	 * Text editor for the OSC send/receive rate in ms.
-	 */
-	std::unique_ptr<CTextEditor>	m_rateTextEdit;
-
-	/*
-	 * Button used as Online indicator LED.
-	 */
-	std::unique_ptr<CButton> m_onlineLed;
-
-	/*
-	 * Button for OSC Send mode (part of a radio button pair)
-	 */
-	std::unique_ptr<CButton> m_oscModeSend;
-	/*
-	 * Button for OSC Receive mode (part of a radio button pair)
-	 */
-	std::unique_ptr<CButton> m_oscModeReceive;
-
-	/*
 	 * 2D Slider component.
 	 */
 	std::unique_ptr<CSurfaceSlider> m_surfaceSlider;
-
-	/*
-	 * Logo image.
-	 */
-	Image m_dbLogo;
-
-	/**
-	 * Button to open the overview window.
-	 */
-	std::unique_ptr<CImageButton> m_overviewButton;
-
-	/**
-	 * Button to open the overview multi-slider overlay (Console-only).
-	 */
-	std::unique_ptr<CPathButton> m_overviewMultiSliderButton;
-
-	/**
-	 * Pointer to the GUI overlay. 
-	 * This can be an overview table, or an "about" overlay.
-	 */
-	std::unique_ptr<AOverlay> m_overlay;
 
 	/**
 	 * Plug-in display name label. On the hosts which support updateTrackProperties or changeProgramName, 
@@ -223,21 +135,11 @@ private:
 	std::unique_ptr<CLabel>	m_displayNameLabel;
 
 	/**
-	 * Button to open the "About" overlay.
-	 */
-	std::unique_ptr<CDiscreteButton> m_aboutButton;
-
-	/**
 	 * Used to allow some tolerance when switching between fast and slow refresh rates for the GUI. 
 	 * Once this counter reaches GUI_UPDATE_DELAY_TICKS, and no parameters have changed, the GUI will
 	 * switch to GUI_UPDATE_RATE_SLOW. Switches to GUI_UPDATE_RATE_FAST happen immediately after any change.
 	 */
 	int m_ticksSinceLastChange = 0;
-
-	/**
-	 * Keep track of the user's preferred Plug-In window size, and use it when opening a fresh window.
-	 */
-	static Point<int> m_pluginWindowSize;
 
 #ifdef JUCE_DEBUG
 	/**

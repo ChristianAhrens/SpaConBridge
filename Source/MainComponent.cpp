@@ -23,7 +23,7 @@ MainComponent::MainComponent()
         addAndMakeVisible(m_overview);
     }
 
-    setSize(976, 380);
+    setSize(896, 414);
 }
 
 MainComponent::~MainComponent()

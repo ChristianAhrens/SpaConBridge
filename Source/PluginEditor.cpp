@@ -346,20 +346,25 @@ void MainProcessorEditor::resized()
 	auto isPortrait = getResizePaintAreaSplit(twoDSurfaceArea, parameterEditArea);
 
 	//==============================================================================
-	auto xSliderStripWidth = 80;
-	auto ySliderStripWidth = 100;
+	bool surfaceSliderLabelVisible = true;
+	if (twoDSurfaceArea.getWidth() < 250 || twoDSurfaceArea.getHeight() < 250)
+		surfaceSliderLabelVisible = false;
+	auto xSliderStripWidth = surfaceSliderLabelVisible ? 80 : 30;
+	auto ySliderStripWidth = surfaceSliderLabelVisible ? 100 : 30;
 	twoDSurfaceArea.reduce(5, 5);
-	twoDSurfaceArea.removeFromTop(30);
-	twoDSurfaceArea.removeFromRight(30);
+	twoDSurfaceArea.removeFromTop(surfaceSliderLabelVisible ? 30 : 10);
+	twoDSurfaceArea.removeFromRight(surfaceSliderLabelVisible ? 30 : 10);
 
 	// Y Slider
 	auto ySliderBounds = twoDSurfaceArea;
 	ySliderBounds.removeFromRight(twoDSurfaceArea.getWidth() - ySliderStripWidth);
 	ySliderBounds.removeFromBottom(xSliderStripWidth);
 	m_ySlider->setBounds(ySliderBounds);
+	m_ySlider->setTextBoxStyle(surfaceSliderLabelVisible ? Slider::TextBoxLeft : Slider::NoTextBox, false, 80, 20);
 	ySliderBounds.removeFromTop(50);
 	ySliderBounds.removeFromRight(30);
 	m_yAxisLabel->setBounds(ySliderBounds);
+	m_yAxisLabel->setVisible(surfaceSliderLabelVisible);
 
 	// 2D Surface
 	auto surfaceSliderBounds = twoDSurfaceArea;
@@ -375,12 +380,17 @@ void MainProcessorEditor::resized()
 	xSliderBounds.removeFromTop(twoDSurfaceArea.getHeight() - xSliderStripWidth);
 	xSliderBounds.removeFromLeft(ySliderStripWidth);
 	m_xSlider->setBounds(xSliderBounds.removeFromTop(50));
+	m_xSlider->setTextBoxStyle(surfaceSliderLabelVisible ? Slider::TextBoxBelow : Slider::NoTextBox, false, 80, 20);
 	m_xAxisLabel->setBounds(xSliderBounds);
+	m_xAxisLabel->setVisible(surfaceSliderLabelVisible);
 
 
 	//==============================================================================
+	bool paramSliderLabelVisible = true;
+	if (parameterEditArea.getHeight() < 250)
+		paramSliderLabelVisible = false;
 	auto labelHeight = 25;
-	auto sliderHeight = 75;
+	auto sliderHeight = paramSliderLabelVisible ? 75 : 55;
 	auto labelSliderWidth = 72;
 
 	if (isPortrait)
@@ -406,7 +416,7 @@ void MainProcessorEditor::resized()
 	}
 	else
 	{
-		auto parameterEditsHeight = 250;
+		auto parameterEditsHeight = paramSliderLabelVisible ? 250 : 190;
 		auto hPos = getLocalBounds().getWidth() - 80;
 		auto vPos = 0.5f *(getLocalBounds().getHeight() - parameterEditsHeight);
 	
@@ -414,13 +424,15 @@ void MainProcessorEditor::resized()
 		m_reverbSendGainLabel->setBounds(Rectangle<int>(hPos, vPos, labelSliderWidth, labelHeight));
 		vPos += 18;
 		m_reverbSendGainSlider->setBounds(Rectangle<int>(hPos, vPos, labelSliderWidth, sliderHeight));
-		vPos += 86;
+		m_reverbSendGainSlider->setTextBoxStyle(paramSliderLabelVisible ? Slider::TextBoxBelow : Slider::NoTextBox, false, 80, 20);
+		vPos += paramSliderLabelVisible ? 86 : 56;
 	
 		// SourceSpread Slider
 		m_sourceSpreadLabel->setBounds(Rectangle<int>(hPos, vPos, labelSliderWidth, labelHeight));
 		vPos += 18;
 		m_sourceSpreadSlider->setBounds(Rectangle<int>(hPos, vPos, labelSliderWidth, sliderHeight));
-		vPos += 86;
+		m_sourceSpreadSlider->setTextBoxStyle(paramSliderLabelVisible ? Slider::TextBoxBelow : Slider::NoTextBox, false, 80, 20);
+		vPos += paramSliderLabelVisible ? 86 : 56;
 	
 		// DelayMode ComboBox
 		m_delayModeLabel->setBounds(Rectangle<int>(hPos, vPos, labelSliderWidth, labelHeight));

@@ -769,7 +769,7 @@ void COverviewTableContainer::buttonClicked(Button *button)
 
 				for (auto processorId : processorIds)
 				{
-					if (ctrl->GetProcessorCount() > 1)
+					if (ctrl->GetProcessorCount() >= 1)
 						auto processor = std::unique_ptr<MainProcessor>(ctrl->GetProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
 				}
 			}

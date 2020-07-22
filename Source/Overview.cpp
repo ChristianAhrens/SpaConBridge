@@ -226,12 +226,12 @@ COverviewComponent::COverviewComponent()
 	m_versionLabel = std::make_unique<CLabel>("PluginVersion", String(JUCE_STRINGIFY(JUCE_APP_VERSION)));
 	m_versionLabel->setFont(Font(11));
 	addAndMakeVisible(m_versionLabel.get());
-	m_nameLabel = std::make_unique<CLabel>("PluginName", "Soundscape");
+	m_nameLabel = std::make_unique<CLabel>("PluginName", "Version");
 	m_nameLabel->setFont(Font(11));
 	m_nameLabel->setColour(Label::textColourId, CDbStyle::GetDbColor(CDbStyle::DarkTextColor));
 	addAndMakeVisible(m_nameLabel.get());
 
-	m_titleLabel = std::make_unique<CLabel>("Title", "Overview");
+	m_titleLabel = std::make_unique<CLabel>("Title", "");
 	addAndMakeVisible(m_titleLabel.get());
 
 	// Create the table container.
@@ -289,15 +289,16 @@ void COverviewComponent::paint(Graphics& g)
 	// Little lines between version and logo
 	g.setColour(CDbStyle::GetDbColor(CDbStyle::ButtonColor));
 	g.fillRect(Rectangle<int>(w - 39, 6, 1, 30));
-	g.fillRect(Rectangle<int>(w - 106, 6, 1, 30));
+	g.fillRect(Rectangle<int>(w - 86, 6, 1, 30));
 
 	// Add app logo 
 	g.drawImage(m_appLogo, getLocalBounds().getWidth() - 35, 6, 30, 30, 0, 0, 1024, 1024);
 
-	// Draw little line below "Overview" to match with the line which is automatically drawn 
+	// Draw little line below right and left overlap of tabbedcomponent buttonbar to match with the line which is automatically drawn 
 	// by the CTabbedComponent's CTabBarButton.
 	g.setColour(Colour(108, 113, 115));
-	g.drawRect(Rectangle<int>(0, 43, 100, 1), 1);
+	g.drawRect(Rectangle<int>(0, 43, 40, 1), 1);
+	g.drawRect(Rectangle<int>(w - 86, 43, 86, 1), 1);
 }
 
 /**
@@ -308,23 +309,26 @@ void COverviewComponent::resized()
 	int w = getLocalBounds().getWidth();
 	int vStartPos2 = getLocalBounds().getHeight() - 35;
 
-	// Ip Address
-	m_ipAddressLabel->setBounds(Rectangle<int>(5, vStartPos2, 75, 25));
-	m_ipAddressTextEdit->setBounds(Rectangle<int>(80, vStartPos2, 140, 25));
-
-	// Rate
-	m_rateLabel->setBounds(Rectangle<int>(233, vStartPos2, 65, 25));
-	m_rateTextEdit->setBounds(Rectangle<int>(296, vStartPos2, 50, 25));
-
-	// Online
-	m_onlineLed->setBounds(Rectangle<int>(w - 40, vStartPos2, 24, 24));
+	FlexBox bottomBarFB;
+	bottomBarFB.flexDirection = FlexBox::Direction::row;
+	bottomBarFB.justifyContent = FlexBox::JustifyContent::center;
+	bottomBarFB.alignContent = FlexBox::AlignContent::center;
+	bottomBarFB.items.addArray({
+		// Ip Address
+		FlexItem(*m_ipAddressLabel.get()).withWidth(74).withHeight(25).withMargin(FlexItem::Margin(5, 0, 5, 10)),
+		FlexItem(*m_ipAddressTextEdit.get()).withHeight(25).withFlex(1).withMargin(FlexItem::Margin(5, 0, 5, 0)),
+		// Rate
+		FlexItem(*m_rateLabel.get()).withWidth(65).withHeight(25).withMargin(FlexItem::Margin(5, 0, 5, 0)),
+		FlexItem(*m_rateTextEdit.get()).withHeight(25).withFlex(1).withMargin(FlexItem::Margin(5, 0, 5, 0)),
+		FlexItem().withFlex(1),
+		// Online
+		FlexItem(*m_onlineLed.get()).withWidth(24).withHeight(24).withMargin(FlexItem::Margin(5, 10, 5, 0)),
+		});
+	bottomBarFB.performLayout(getLocalBounds().removeFromBottom(45));
 
 	// Name and Version label
-	m_nameLabel->setBounds(w - 109, 3, 75, 25);
-	m_versionLabel->setBounds(w - 107, 21, 42, 15);
-
-	// Title label
-	m_titleLabel->setBounds(Rectangle<int>(5, 10, 80, 25));
+	m_nameLabel->setBounds(w - 89, 3, 55, 25);
+	m_versionLabel->setBounds(w - 87, 21, 42, 15);
 
 	// Tab container takes up the entire window minus the bottom bar (with the IP etc).
 	// See CTabbedComponent::resized().
@@ -491,7 +495,7 @@ void CTabbedComponent::currentTabChanged(int newCurrentTabIndex, const String &n
 void CTabbedComponent::resized()
 {
 	int w = getLocalBounds().getWidth();
-	getTabbedButtonBar().setBounds(Rectangle<int>(90, 0, w - 90, 44));
+	getTabbedButtonBar().setBounds(Rectangle<int>(40, 0, w - (40 + 86), 44));
 }
 
 /**

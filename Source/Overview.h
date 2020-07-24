@@ -53,6 +53,7 @@ class CTabBarButton;
 class COverviewComponent;
 class COverviewTableContainer;
 class COverviewMultiSurface;
+class CSettingsContainer;
 class CTableModelComponent;
 class CComboBoxContainer;
 class CTextEditorContainer;
@@ -187,6 +188,11 @@ private:
 	 * Container for multi-slider.
 	 */
 	std::unique_ptr<COverviewMultiSurface> m_multiSliderContainer;
+
+	/**
+	 * Container for settings component.
+	 */
+	std::unique_ptr<CSettingsContainer> m_settingsContainer;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(COverviewComponent)
 };
@@ -343,6 +349,20 @@ private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(COverviewMultiSurface)
 };
 
+class CSettingsContainer : public AOverlay
+{
+public:
+	CSettingsContainer();
+	~CSettingsContainer() override;
+
+	void UpdateGui(bool init) override;
+
+protected:
+	void paint(Graphics&) override;
+	void resized() override;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CSettingsContainer)
+};
 
 /**
  * Class CTableModelComponent acts as a table model and a component at the same time.

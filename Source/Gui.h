@@ -290,6 +290,7 @@ public:
 		OT_Unknown = 0,
 		OT_Overview,
 		OT_MultiSlide,
+		OT_Settings,
 		OT_About
 	};
 

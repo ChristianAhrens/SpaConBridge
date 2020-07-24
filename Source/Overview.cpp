@@ -250,6 +250,7 @@ COverviewComponent::COverviewComponent()
 	// Add the overview tabs.
 	m_tabbedComponent->addTab("Table", CDbStyle::GetDbColor(CDbStyle::DarkColor), m_tableContainer.get(), false);
 	m_tabbedComponent->addTab("Slider", CDbStyle::GetDbColor(CDbStyle::DarkColor), m_multiSliderContainer.get(), false);
+	m_tabbedComponent->addTab("Settings", CDbStyle::GetDbColor(CDbStyle::DarkColor), m_settingsContainer.get(), false);
 
 	// Remember which tab was active before the last time the overview was closed.
 	COverviewManager* ovrMgr = COverviewManager::GetInstance();
@@ -309,7 +310,6 @@ void COverviewComponent::paint(Graphics& g)
 void COverviewComponent::resized()
 {
 	int w = getLocalBounds().getWidth();
-	int vStartPos2 = getLocalBounds().getHeight() - 35;
 
 	FlexBox bottomBarFB;
 	bottomBarFB.flexDirection = FlexBox::Direction::row;
@@ -591,8 +591,8 @@ void CTabBarButton::resized()
 {
 	auto iconBounds = Rectangle<int>(0, 0, 25, 25);
 	auto activeArea = getActiveArea(); 
-	float xOffset = (activeArea.getWidth() / 2) - (iconBounds.getWidth() / 2);
-	float yOffset = (activeArea.getHeight() / 2) - (iconBounds.getHeight() / 2);
+	auto xOffset = (activeArea.getWidth() / 2) - (iconBounds.getWidth() / 2);
+	auto yOffset = (activeArea.getHeight() / 2) - (iconBounds.getHeight() / 2);
 	iconBounds.setPosition(xOffset, yOffset);
 	
 	m_normalImage->setBounds(iconBounds);
@@ -798,7 +798,7 @@ void COverviewTableContainer::buttonClicked(Button *button)
 					onCurrentSelectedProcessorChanged(INVALID_PLUGIN_ID);
 				else
 				{
-					PluginId nextStillExistingId = (ctrl->GetProcessorCount() - processorIds.size());
+					PluginId nextStillExistingId = static_cast<PluginId>(ctrl->GetProcessorCount() - processorIds.size());
 					m_overviewTable->selectedRowsChanged(nextStillExistingId);
 					//onCurrentSelectedProcessorChanged(nextStillExistingId);
 				}
@@ -1025,6 +1025,137 @@ void COverviewMultiSurface::comboBoxChanged(ComboBox *comboBox)
 			UpdateGui(true);
 		}
 	}
+}
+
+
+/*
+===============================================================================
+ Class CSettingsContainer
+===============================================================================
+*/
+
+/**
+ * Class constructor.
+ */
+CSettingsContainer::CSettingsContainer()
+	: AOverlay(OT_Settings)
+{
+	//// Add multi-slider
+	//m_multiSlider = std::make_unique<CSurfaceMultiSlider>();
+	//addAndMakeVisible(m_multiSlider.get());
+	//
+	//// Add mapping label
+	//m_posAreaLabel = std::make_unique<CLabel>("Coordinate mapping label", "View mapping:");
+	//addAndMakeVisible(m_posAreaLabel.get());
+	//
+	//// Add mapping selector
+	//m_areaSelector = std::make_unique<ComboBox>("Coordinate mapping");
+	//m_areaSelector->setEditableText(false);
+	//m_areaSelector->addItem("1", 1);
+	//m_areaSelector->addItem("2", 2);
+	//m_areaSelector->addItem("3", 3);
+	//m_areaSelector->addItem("4", 4);
+	//m_areaSelector->addListener(this);
+	//m_areaSelector->setColour(ComboBox::backgroundColourId, CDbStyle::GetDbColor(CDbStyle::DarkColor));
+	//m_areaSelector->setColour(ComboBox::textColourId, CDbStyle::GetDbColor(CDbStyle::TextColor));
+	//m_areaSelector->setColour(ComboBox::outlineColourId, CDbStyle::GetDbColor(CDbStyle::WindowColor));
+	//m_areaSelector->setColour(ComboBox::buttonColourId, CDbStyle::GetDbColor(CDbStyle::MidColor));
+	//m_areaSelector->setColour(ComboBox::arrowColourId, CDbStyle::GetDbColor(CDbStyle::TextColor));
+	//addAndMakeVisible(m_areaSelector.get());
+}
+
+/**
+ * Class destructor.
+ */
+CSettingsContainer::~CSettingsContainer()
+{
+}
+
+/**
+ * Reimplemented to paint background.
+ * @param g		Graphics context that must be used to do the drawing operations.
+ */
+void CSettingsContainer::paint(Graphics& g)
+{
+	// Paint background to cover the controls behind this overlay.
+	g.setColour(CDbStyle::GetDbColor(CDbStyle::DarkColor));
+	g.fillRect(Rectangle<int>(0, 0, getLocalBounds().getWidth(), getLocalBounds().getHeight()));
+}
+
+/**
+ * Reimplemented to resize and re-postion controls on the overview window.
+ */
+void CSettingsContainer::resized()
+{
+	//// Resize multi-slider.
+	//CController* ctrl = CController::GetInstance();
+	//if (ctrl)
+	//{
+	//	m_multiSlider->setBounds(Rectangle<int>(20, 10, getLocalBounds().getWidth() - 40, getLocalBounds().getHeight() - 52));
+	//}
+	//
+	//// Mapping selector
+	//m_posAreaLabel->setBounds(Rectangle<int>(70, getLocalBounds().getHeight() - 32, 100, 25));
+	//m_areaSelector->setBounds(Rectangle<int>(170, getLocalBounds().getHeight() - 32, 50, 25));
+}
+
+/**
+ * If any relevant parameters have been marked as changed, update the table contents.
+ * @param init	True to ignore any changed flags and update the plugin parameters
+ *				in the GUI anyway. Good for when opening the Overview for the first time.
+ */
+void CSettingsContainer::UpdateGui(bool init)
+{
+	//// Will be set to true if any changes relevant to the multi-slider are found.
+	//bool update = init;
+	//
+	//// Update the selected mapping area.
+	//int selectedMapping = 0;
+	//COverviewManager* ovrMgr = COverviewManager::GetInstance();
+	//if (ovrMgr)
+	//{
+	//	selectedMapping = ovrMgr->GetSelectedMapping();
+	//	if (selectedMapping != m_areaSelector->getSelectedId())
+	//	{
+	//		m_areaSelector->setSelectedId(selectedMapping, dontSendNotification);
+	//		update = true;
+	//	}
+	//}
+	//
+	//CController* ctrl = CController::GetInstance();
+	//if (ctrl && m_multiSlider)
+	//{
+	//	if (ctrl->PopParameterChanged(DCS_Overview, DCT_NumPlugins))
+	//		update = true;
+	//
+	//	// Iterate through all plugin instances and see if anything changed there.
+	//	// At the same time collect all sources positions for updating.
+	//	CSurfaceMultiSlider::PositionCache cachedPositions;
+	//	for (int pIdx = 0; pIdx < ctrl->GetProcessorCount(); pIdx++)
+	//	{
+	//		MainProcessor* plugin = ctrl->GetProcessor(pIdx);
+	//		if (plugin)
+	//		{
+	//			if (plugin->GetMappingId() == selectedMapping)
+	//			{
+	//				// NOTE: only sources are included, which match the selected viewing mapping.
+	//				Point<float> p(plugin->GetParameterValue(ParamIdx_X), plugin->GetParameterValue(ParamIdx_Y));
+	//				cachedPositions.insert(std::make_pair(pIdx, std::make_pair(plugin->GetSourceId(), p)));
+	//			}
+	//
+	//			if (plugin->PopParameterChanged(DCS_Overview, (DCT_PluginInstanceConfig | DCT_SourcePosition)))
+	//				update = true;
+	//		}
+	//	}
+	//
+	//	CSurfaceMultiSlider* multiSlider = dynamic_cast<CSurfaceMultiSlider*>(m_multiSlider.get());
+	//	if (update && multiSlider)
+	//	{
+	//		// Update all nipple positions on the 2D-Slider.
+	//		multiSlider->UpdatePositions(cachedPositions);
+	//		multiSlider->repaint();
+	//	}
+	//}
 }
 
 

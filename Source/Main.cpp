@@ -1,6 +1,6 @@
 #include <JuceHeader.h>
 
-#include "MainComponent.h"
+#include "MainSoundscapeAppComponent.h"
 
 
 //==============================================================================
@@ -51,7 +51,7 @@ public:
                                                     .findColour (ResizableWindow::backgroundColourId),
                                                     DocumentWindow::allButtons)
         {
-            m_mainComponent = std::make_unique<MainComponent>();
+            m_mainComponent = std::make_unique<MainSoundscapeAppComponent>();
 
             setUsingNativeTitleBar (true);
             setContentOwned (m_mainComponent.get(), true);
@@ -82,7 +82,7 @@ public:
         */
 
     private:
-        std::unique_ptr<MainComponent>  m_mainComponent;
+        std::unique_ptr<MainSoundscapeAppComponent>  m_mainComponent;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)
     };

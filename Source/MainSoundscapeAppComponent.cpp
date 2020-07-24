@@ -9,12 +9,12 @@
 */
 
 #include <JuceHeader.h>
-#include "MainComponent.h"
+#include "MainSoundscapeAppComponent.h"
 
 #include "../submodules/JUCE-AppBasics/Source/iOS_utils.hpp"
 
 //==============================================================================
-MainComponent::MainComponent()
+MainSoundscapeAppComponent::MainSoundscapeAppComponent()
 {
     SoundscapeApp::COverviewManager* ovrMgr = SoundscapeApp::COverviewManager::GetInstance();
     if (ovrMgr)
@@ -26,17 +26,17 @@ MainComponent::MainComponent()
     setSize(896, 414);
 }
 
-MainComponent::~MainComponent()
+MainSoundscapeAppComponent::~MainSoundscapeAppComponent()
 {
 }
 
-void MainComponent::paint (juce::Graphics& g)
+void MainSoundscapeAppComponent::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll(SoundscapeApp::CDbStyle::GetDbColor(SoundscapeApp::CDbStyle::DarkColor));
 }
 
-void MainComponent::resized()
+void MainSoundscapeAppComponent::resized()
 {
     auto safety = JUCEAppBasics::iOS_utils::getDeviceSafetyMargins();
     auto safeBounds = getLocalBounds();

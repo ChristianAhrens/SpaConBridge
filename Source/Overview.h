@@ -206,13 +206,12 @@ public:
 	enum OverviewTabIndex
 	{
 		OTI_Table = 0,
-		OTI_MultiSlider
+		OTI_MultiSlider,
+		OTI_Settings,
 	};
 
 	CTabbedComponent();
 	~CTabbedComponent() override;
-
-	static void GetIconPath(int tabIdx, Point<float> iconSize, float strokeThickness, Path& p);
 
 protected:
 	TabBarButton* createTabButton(const String& tabName, int tabIndex) override;
@@ -235,9 +234,13 @@ public:
 
 protected:
 	void paintButton(Graphics&, bool, bool) override;
+	void resized() override;
 
 private:
+	bool setVisibleDrawable(Drawable* visibleDrawable);
+
 	int m_tabIndex;
+	std::unique_ptr<juce::Drawable> m_normalImage, m_overImage, m_downImage, m_disabledImage, m_normalOnImage, m_overOnImage, m_downOnImage, m_disabledOnImage;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CTabBarButton)
 };

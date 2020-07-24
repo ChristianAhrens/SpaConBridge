@@ -39,6 +39,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Controller.h"
 #include "SurfaceSlider.h"
 
+#include "../submodules/JUCE-AppBasics/Source/Image_utils.hpp"
+
 
 namespace SoundscapeApp
 {
@@ -498,37 +500,6 @@ void CTabbedComponent::resized()
 	getTabbedButtonBar().setBounds(Rectangle<int>(40, 0, w - (40 + 86), 44));
 }
 
-/**
- * Static method to provide a path, which can then be used to draw the corresponding icon on top of a button or tab.
- * @param tabIdx	Entry in enum OverviewTabIndex which determines which icon path is returned. 
- * @param iconSize	Absolute width and height which the icon should be bound to.
- * @param strokeThickness	For nicer icons, this should be the same thickness later used in Graphics::strokePath(..).
- * @param path		The resulting path.
- * OverviewTabIndex
- */
-void CTabbedComponent::GetIconPath(int tabIdx, Point<float> iconSize, float strokeThickness, Path& path)
-{
-	switch (tabIdx)
-	{
-	case CTabbedComponent::OTI_Table: // Overview table COverviewTableContainer
-		path.addRectangle(0, 0, iconSize.x, iconSize.y);
-		path.addRectangle(0, strokeThickness, iconSize.x, strokeThickness);
-		break;
-
-	case CTabbedComponent::OTI_MultiSlider: // Multi-slider COverviewMultiSurface
-		path.addEllipse(0, 0, strokeThickness, strokeThickness);
-		path.addEllipse(iconSize.x - strokeThickness, 0, strokeThickness, strokeThickness);
-		path.addEllipse(0, iconSize.y - strokeThickness, strokeThickness, strokeThickness);
-		path.addEllipse(iconSize.x - strokeThickness, iconSize.y - strokeThickness, strokeThickness, strokeThickness);
-		path.addEllipse((iconSize.x - strokeThickness) / 2, (iconSize.y - strokeThickness) / 2, strokeThickness, strokeThickness);
-		break;
-
-	default:
-		jassertfalse; // missing implementation!
-		break;
-	}
-}
-
 
 /*
 ===============================================================================
@@ -545,7 +516,32 @@ CTabBarButton::CTabBarButton(int tabIdx, TabbedButtonBar& ownerBar)
 	: TabBarButton(String(), ownerBar),
 	m_tabIndex(tabIdx)
 {
+	String imageName;
+	switch (m_tabIndex)
+	{
+	case CTabbedComponent::OTI_Table:
+		imageName = BinaryData::vertical_split24px_svg;
+		break;
+	case CTabbedComponent::OTI_MultiSlider:
+		imageName = BinaryData::grain24px_svg;
+		break;
+	case CTabbedComponent::OTI_Settings:
+		imageName = BinaryData::settings24px_svg;
+		break;
+	default:
+		break;
+	}
 
+	JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, m_normalImage, m_overImage, m_downImage, m_disabledImage, m_normalOnImage, m_overOnImage, m_downOnImage, m_disabledOnImage);
+
+	addChildComponent(m_normalImage.get());
+	addChildComponent(m_overImage.get());
+	addChildComponent(m_downImage.get());
+	addChildComponent(m_disabledImage.get()); 
+	addChildComponent(m_normalOnImage.get()); 
+	addChildComponent(m_overOnImage.get());
+	addChildComponent(m_downOnImage.get());
+	addChildComponent(m_disabledOnImage.get());
 }
 
 /**
@@ -577,19 +573,59 @@ void CTabBarButton::paintButton(Graphics& g, bool isMouseOverButton, bool isButt
 	g.setColour(buttonBackground);
 	g.fillRect(getActiveArea());
 
-	// Get the icon path for this tab.
-	Path iconPath;
-	float thickness = 2.0f;
-	CTabbedComponent::GetIconPath(m_tabIndex, Point<float>(22.0f, 16.0f), thickness, iconPath);
+	// make the drawable visible that corresponds to the given bool flag values
+	Drawable* visibleDrawable{ m_normalImage.get() };
+	if (isButtonDown)
+		visibleDrawable = m_downImage.get();
+	else if (isMouseOverButton)
+		visibleDrawable = m_overImage.get();
 
-	// Move path so that is centered within the button's activeArea.
-	float xOffset = (activeArea.getWidth() / 2) - (iconPath.getBounds().getWidth() / 2);
-	float yOffset = (activeArea.getHeight() / 2) - (iconPath.getBounds().getHeight() / 2);
-	iconPath.applyTransform(AffineTransform::translation(xOffset, yOffset));
+	if (setVisibleDrawable(visibleDrawable))
+		resized();
+}
 
-	// Draw icon path.
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::LightColor));
-	g.strokePath(iconPath, PathStrokeType(thickness, PathStrokeType::curved, PathStrokeType::rounded));
+/**
+ * Reimplemented to resize and re-postion controls on the tabbarbutton.
+ */
+void CTabBarButton::resized()
+{
+	auto iconBounds = Rectangle<int>(0, 0, 25, 25);
+	auto activeArea = getActiveArea(); 
+	float xOffset = (activeArea.getWidth() / 2) - (iconBounds.getWidth() / 2);
+	float yOffset = (activeArea.getHeight() / 2) - (iconBounds.getHeight() / 2);
+	iconBounds.setPosition(xOffset, yOffset);
+	
+	m_normalImage->setBounds(iconBounds);
+	m_overImage->setBounds(iconBounds);
+	m_downImage->setBounds(iconBounds);
+	m_disabledImage->setBounds(iconBounds);
+	m_normalOnImage->setBounds(iconBounds);
+	m_overOnImage->setBounds(iconBounds);
+	m_downOnImage->setBounds(iconBounds);
+	m_disabledOnImage->setBounds(iconBounds);
+}
+
+/**
+ * Helper method to set one of the drawables visible
+ * @param visibleDrawable The drawable to become visible
+ * @return True if the drawable was made visible, false if it already was visible or the given pointer is invalid
+ */
+bool CTabBarButton::setVisibleDrawable(Drawable* visibleDrawable)
+{
+	// if the drawable is already visible -> return false to indicate that nothing was changed
+	if (!visibleDrawable || visibleDrawable->isVisible())
+		return false;
+
+	m_normalImage->setVisible(m_normalImage.get() == visibleDrawable);
+	m_overImage->setVisible(m_overImage.get() == visibleDrawable);
+	m_downImage->setVisible(m_downImage.get() == visibleDrawable);
+	m_disabledImage->setVisible(m_disabledImage.get() == visibleDrawable);
+	m_normalOnImage->setVisible(m_normalOnImage.get() == visibleDrawable);
+	m_overOnImage->setVisible(m_overOnImage.get() == visibleDrawable);
+	m_downOnImage->setVisible(m_downOnImage.get() == visibleDrawable);
+	m_disabledOnImage->setVisible(m_disabledOnImage.get() == visibleDrawable);
+
+	return true;
 }
 
 

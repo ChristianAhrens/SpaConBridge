@@ -37,7 +37,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "About.h"
 #include "Gui.h"
-#include "Common.h"
+#include "SoundscapeBridgeAppCommon.h"
 
 
 namespace SoundscapeApp

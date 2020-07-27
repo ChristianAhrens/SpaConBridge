@@ -37,7 +37,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PluginEditor.h"	//<USE MainProcessorEditor
 #include "Controller.h"		//<USE CController
 #include "Overview.h"		//<USE COverviewManager
-#include "Common.h"
+#include "SoundscapeBridgeAppCommon.h"
 #include "Parameters.h"
 #include "Version.h"		//<USE CVersion
 
@@ -168,7 +168,7 @@ void MainProcessor::SetParameterChanged(DataChangeSource changeSource, DataChang
 		// If the change came from OSC (received message with new param value), 
 		// do not set the specified change flag for OSC. This would trigger an 
 		// OSC Set command to go out for every received message.
-		if ((changeSource != DCS_Osc) || (cs != DCS_Osc))
+		if ((changeSource != DCS_Protocol) || (cs != DCS_Protocol))
 			m_parametersChanged[cs] |= changeTypes;
 	}
 }

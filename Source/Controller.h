@@ -35,8 +35,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "Common.h"
-#include <juce_osc/juce_osc.h>				//<USE OSCSender, OSCReceiver
+#include "SoundscapeBridgeAppCommon.h"
+#include "../submodules/RemoteProtocolBridge/Source/ProcessingEngineNode.h"
 
 
 namespace SoundscapeApp
@@ -55,7 +55,7 @@ class MainProcessor;
  * NOTE: This is a singleton class, i.e. there is only one instance.
  */
 class CController :
-	public OSCReceiver::Listener<OSCReceiver::MessageLoopCallback>,
+	public ProcessingEngineNode::NodeListener,
 	private Timer
 {
 public:
@@ -82,12 +82,13 @@ public:
 
 	void InitGlobalSettings(DataChangeSource changeSource, String ipAddress, int rate);
 
-	void DisconnectOsc();
-	void ReconnectOsc();
+	void Disconnect();
+	void Reconnect();
 	bool GetOnline() const;
 
-	void oscMessageReceived(const OSCMessage &message) override;
-	bool SendOSCMessage(OSCMessage message);
+	void CreateNodeConfiguration();
+	void HandleNodeData(NodeId nodeId, ProtocolId senderProtocolId, ProtocolType senderProtocolType, RemoteObjectIdentifier objectId, RemoteObjectMessageData& msgData) override;
+	bool SendMessage(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData);
 
 private:
 	void timerCallback() override;
@@ -105,19 +106,15 @@ protected:
 	 * When removing Plug-in instances from a project, this list will shrink. When the list becomes empty,
 	 * The CController singleton object is no longer necessary and will destruct itself.
 	 */
-	Array<MainProcessor*>			m_processors;
+	Array<MainProcessor*>	m_processors;
 
 	/**
-	 * An OSCSender object can connect to a network port. It then can send OSC
-	 * messages and bundles to a specified host over an UDP socket.
+	 * A processing engine node can send data to and receive data from multiple protocols that is encapsulates.
+	 * Depending on the node configuration, there can exist two groups of protocols, A and B, that are handled 
+	 * in a specific way to pass incoming and outgoing data to each other and this parent controller instance.
 	 */
-	OSCSender				m_oscSender;
-
-	/**
-	 * An OSCReceiver object can connect to a network port, receive incoming OSC packets from the network
-	 * via UDP, parse them, and forward the included OSCMessage and OSCBundle objects to its listeners.
-	 */
-	OSCReceiver				m_oscReceiver;
+	ProcessingEngineNode	m_processingNode;	/**< The node that encapsulates the protocols that are used to send, receive and bridge data. */
+	ProcessingEngineConfig	m_processingConfig;	/**< The configuration of the processing node. */
 
 	/**
 	 * IP Address where OSC messages will be sent to / received from.

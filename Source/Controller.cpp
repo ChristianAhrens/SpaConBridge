@@ -42,11 +42,11 @@ namespace SoundscapeApp
 {
 
 
-static constexpr int OSC_INTERVAL_MIN = 20;		//< Minimum supported OSC messaging rate in milliseconds
-static constexpr int OSC_INTERVAL_MAX = 5000;	//< Maximum supported OSC messaging rate in milliseconds
-static constexpr int OSC_INTERVAL_DEF = 50;		//< Default OSC messaging rate in milliseconds
+static constexpr int PROTOCOL_INTERVAL_MIN = 20;		//< Minimum supported OSC messaging rate in milliseconds
+static constexpr int PROTOCOL_INTERVAL_MAX = 5000;	//< Maximum supported OSC messaging rate in milliseconds
+static constexpr int PROTOCOL_INTERVAL_DEF = 50;		//< Default OSC messaging rate in milliseconds
 
-static const String OSC_DEFAULT_IP("127.0.0.1");	//< Default IP Address
+static const String PROTOCOL_DEFAULT_IP("127.0.0.1");	//< Default IP Address
 
 static constexpr int RX_PORT_DS100 = 50010;		//< UDP port which the DS100 is listening to for OSC
 static constexpr int RX_PORT_HOST = 50011;		//< UDP port to which the DS100 will send OSC replies
@@ -71,6 +71,12 @@ static const String kOscResponseString_reverbsendgain("/dbaudio1/matrixinput/rev
 static const String kOscResponseString_source_spread("/dbaudio1/positioning/source_spread");
 static const String kOscResponseString_source_delaymode("/dbaudio1/positioning/source_delaymode");
 
+/**
+ * Pre-define processing bridge config values
+ */
+static constexpr int DEFAULT_PROCNODE_ID = 1;
+static constexpr int DEFAULT_PROCPROT_A_ID = 2;
+static constexpr int DEFAULT_PROCPROT_B_ID = 2;
 
 
 
@@ -95,20 +101,19 @@ CController::CController()
 	jassert(!m_singleton);	// only one instnce allowed!!
 	m_singleton = this;
 
-	m_ipAddress = String("");
-	m_oscMsgRate = 0;
-
 	// Clear all changed flags initially
 	for (int cs = 0; cs < DCS_Max; cs++)
 		m_parametersChanged[cs] = DCT_None;
 
-	// CController derives from OSCReceiver::Listener
-	m_oscReceiver.addListener(this); 
+	// CController derives from ProcessingEngineNode::Listener
+	m_processingNode.AddListener(this);
+
+	CreateNodeConfiguration();
 
 	// Default OSC server settings. These might become overwritten 
 	// by setStateInformation()
-	SetRate(DCS_Osc, OSC_INTERVAL_DEF);
-	SetIpAddress(DCS_Osc, OSC_DEFAULT_IP);
+	SetRate(DCS_Protocol, PROTOCOL_INTERVAL_DEF);
+	SetIpAddress(DCS_Protocol, PROTOCOL_DEFAULT_IP);
 }
 
 /**
@@ -117,7 +122,7 @@ CController::CController()
 CController::~CController()
 {
 	stopTimer();
-	DisconnectOsc();
+	Disconnect();
 
 	// Destroy overView window and overView Manager
 	COverviewManager* ovrMgr = COverviewManager::GetInstance();
@@ -213,10 +218,10 @@ PluginId CController::AddProcessor(MainProcessor* p)
 	}
 
 	m_processors.add(p);
-	SetParameterChanged(DCS_Osc, DCT_NumPlugins);
+	SetParameterChanged(DCS_Protocol, DCT_NumPlugins);
 
 	// Set the new Plugin's InputID to the next in sequence.
-	p->SetSourceId(DCS_Osc, currentMaxSourceId + 1);
+	p->SetSourceId(DCS_Protocol, currentMaxSourceId + 1);
 
 	PluginId newPluginId = static_cast<PluginId>(m_processors.size() - 1);
 #ifdef JUCE_DEBUG
@@ -241,7 +246,7 @@ void CController::RemoveProcessor(MainProcessor* p)
 			const ScopedLock lock(m_mutex);
 			m_processors.remove(idx);
 
-			SetParameterChanged(DCS_Osc, DCT_NumPlugins);
+			SetParameterChanged(DCS_Protocol, DCT_NumPlugins);
 		}
 	}
 
@@ -297,7 +302,7 @@ String CController::GetIpAddress() const
  */
 String CController::GetDefaultIpAddress()
 {
-	return OSC_DEFAULT_IP;
+	return PROTOCOL_DEFAULT_IP;
 }
 
 /**
@@ -314,6 +319,12 @@ void CController::SetIpAddress(DataChangeSource changeSource, String ipAddress)
 
 		m_ipAddress = ipAddress;
 
+		m_processingConfig.GetProtocolAIds(DEFAULT_PROCNODE_ID).getFirst();
+		auto protocolData = m_processingConfig.GetProtocolData(DEFAULT_PROCNODE_ID, m_processingConfig.GetProtocolAIds(DEFAULT_PROCNODE_ID).getFirst());
+		protocolData.IpAddress = ipAddress;
+		m_processingConfig.SetProtocolData(DEFAULT_PROCNODE_ID, m_processingConfig.GetProtocolAIds(DEFAULT_PROCNODE_ID).getFirst(), protocolData);
+		m_processingNode.SetNodeConfiguration(m_processingConfig, DEFAULT_PROCNODE_ID);
+
 		// Start "offline" after changing IP address
 		m_heartBeatsRx = MAX_HEARTBEAT_COUNT;
 		m_heartBeatsTx = 0;
@@ -321,7 +332,7 @@ void CController::SetIpAddress(DataChangeSource changeSource, String ipAddress)
 		// Signal the change to all plugins. 
 		SetParameterChanged(changeSource, (DCT_IPAddress | DCT_Online));
 
-		ReconnectOsc();
+		Reconnect();
 	}
 }
 
@@ -356,9 +367,16 @@ void CController::SetRate(DataChangeSource changeSource, int rate)
 		const ScopedLock lock(m_mutex);
 
 		// Clip rate to the allowed range.
-		rate = jmin(OSC_INTERVAL_MAX, jmax(OSC_INTERVAL_MIN, rate));
+		rate = jmin(PROTOCOL_INTERVAL_MAX, jmax(PROTOCOL_INTERVAL_MIN, rate));
 
 		m_oscMsgRate = rate;
+
+		for (auto protocolAId : m_processingConfig.GetProtocolAIds(DEFAULT_PROCNODE_ID))
+			m_processingConfig.SetPollingInterval(DEFAULT_PROCNODE_ID, protocolAId, rate);
+		for (auto protocolBId : m_processingConfig.GetProtocolBIds(DEFAULT_PROCNODE_ID))
+			m_processingConfig.SetPollingInterval(DEFAULT_PROCNODE_ID, protocolBId, rate);
+
+		m_processingNode.SetNodeConfiguration(m_processingConfig, DEFAULT_PROCNODE_ID);
 
 		// Signal the change to all plugins.
 		SetParameterChanged(changeSource, DCT_MessageRate);
@@ -369,13 +387,13 @@ void CController::SetRate(DataChangeSource changeSource, int rate)
 }
 
 /**
- * Static methiod which returns the allowed minimum and maximum OSC message rates.
+ * Static methiod which returns the allowed minimum and maximum PROTOCOL message rates.
  * @return	Returns a std::pair<int, int> where the first number is the minimum supported rate, 
  *			and the second number is the maximum.
  */
 std::pair<int, int> CController::GetSupportedRateRange()
 {
-	return std::pair<int, int>(OSC_INTERVAL_MIN, OSC_INTERVAL_MAX);
+	return std::pair<int, int>(PROTOCOL_INTERVAL_MIN, PROTOCOL_INTERVAL_MAX);
 }
 
 /**
@@ -391,12 +409,54 @@ void CController::InitGlobalSettings(DataChangeSource changeSource, String ipAdd
 }
 
 /**
+ * Method to create a basic configuration to use to setup the single supported
+ * bridging node.
+ */
+void CController::CreateNodeConfiguration()
+{
+	ProcessingEngineConfig::ProtocolData newProtocol;
+	newProtocol.Id = DEFAULT_PROCPROT_A_ID;
+	newProtocol.IpAddress = PROTOCOL_DEFAULT_IP;
+	newProtocol.ClientPort = RX_PORT_DS100;
+	newProtocol.HostPort = RX_PORT_HOST;
+	newProtocol.UsesActiveRemoteObjects = true;
+	newProtocol.Type = ProtocolType::PT_OSCProtocol;
+
+	ProcessingEngineConfig::ObjectHandlingData newObjectHandling;
+	newObjectHandling.Mode = ObjectHandlingMode::OHM_Bypass;
+	newObjectHandling.ACnt = 1;
+	newObjectHandling.BCnt = 0;
+	newObjectHandling.Prec = 1.0f;
+
+	ProcessingEngineConfig::NodeData newNode;
+	newNode.Id = DEFAULT_PROCNODE_ID;
+	newNode.ObjectHandling = newObjectHandling;
+	newNode.RoleAProtocols.add(newProtocol.Id);
+
+	m_processingConfig.SetNode(newNode.Id, newNode);
+	m_processingConfig.SetProtocolData(newNode.Id, newProtocol.Id, newProtocol);
+}
+
+/**
  * Called when the OSCReceiver receives a new OSC message, since CController inherits from OSCReceiver::Listener.
  * It forwards the message to all registered plugin objects.
- * @param message	The received OSC message.
+ * @param nodeId	The bridging node that the message data was received on (only a single default id node supported currently).
+ * @param senderProtocolId	The protocol that the message data was received on and was sent to controller from.
+ * @param objectId	The remote object id of the object that was received
+ * @param msgData	The actual message data that was received
  */
-void CController::oscMessageReceived(const OSCMessage &message)
+void CController::HandleNodeData(NodeId nodeId, ProtocolId senderProtocolId, ProtocolType senderProtocolType, RemoteObjectIdentifier objectId, RemoteObjectMessageData& msgData)
 {
+	jassert(nodeId == DEFAULT_PROCNODE_ID);
+	if (nodeId != DEFAULT_PROCNODE_ID)
+		return;
+
+	jassert(senderProtocolId == DEFAULT_PROCPROT_A_ID);
+	if (senderProtocolId != DEFAULT_PROCPROT_A_ID)
+		return;
+
+	ignoreUnused(senderProtocolType);
+
 	const ScopedLock lock(m_mutex);
 	jassert(m_processors.size() > 0);
 
@@ -406,15 +466,14 @@ void CController::oscMessageReceived(const OSCMessage &message)
 		bool resetHeartbeat = false;
 
 		// Check if the incoming message is a response to a sent "ping".
-		String addressString = message.getAddressPattern().toString();
-		if (addressString.startsWith(kOscResponseString_pong))
+		if (objectId == RemoteObjectIdentifier::ROI_HeartbeatPong)
 			resetHeartbeat = true;
 
 		// Check if the incoming message contains parameters.
-		else if (message.size() > 0)
+		else
 		{
 			// Parse the Source ID
-			SourceId sourceId = (addressString.fromLastOccurrenceOf(kOscDelimiterString, false, true)).getIntValue();
+			SourceId sourceId = msgData.addrVal.first;
 			jassert(sourceId > 0);
 			if (sourceId > 0)
 			{
@@ -423,27 +482,26 @@ void CController::oscMessageReceived(const OSCMessage &message)
 				int mappingId = 0;
 
 				// Determine which parameter was changed depending on the incoming message's address pattern.
-				if (addressString.startsWith(kOscResponseString_source_position_xy))
+				if (objectId == RemoteObjectIdentifier::ROI_SoundObject_Position_XY)
 				{
-					// Parse the Mapping ID
-					addressString = addressString.upToLastOccurrenceOf(kOscDelimiterString, false, true);
-					mappingId = (addressString.fromLastOccurrenceOf(kOscDelimiterString, false, true)).getIntValue();
+					// The Mapping ID
+					mappingId = msgData.addrVal.second;
 					jassert(mappingId > 0);
 
 					pIdx = ParamIdx_X;
 					change = DCT_SourcePosition;
 				}
-				else if (addressString.startsWith(kOscResponseString_reverbsendgain))
+				else if (objectId == RemoteObjectIdentifier::ROI_ReverbSendGain)
 				{
 					pIdx = ParamIdx_ReverbSendGain;
 					change = DCT_ReverbSendGain;
 				}
-				else if (addressString.startsWith(kOscResponseString_source_spread))
+				else if (objectId == RemoteObjectIdentifier::ROI_SoundObject_Spread)
 				{
 					pIdx = ParamIdx_SourceSpread;
 					change = DCT_SourceSpread;
 				}
-				else if (addressString.startsWith(kOscResponseString_source_delaymode))
+				else if (objectId == RemoteObjectIdentifier::ROI_SoundObject_DelayMode)
 				{
 					pIdx = ParamIdx_DelayMode;
 					change = DCT_DelayMode;
@@ -466,38 +524,50 @@ void CController::oscMessageReceived(const OSCMessage &message)
 
 							// Only pass on new positions to plugins that are in RX mode.
 							// Also, ignore all incoming messages for properties which this plugin wants to send a set command.
-							if (!ignoreResponse && ((mode & (CM_Rx | CM_PollOnce)) != 0) && (plugin->GetParameterChanged(DCS_Osc, change) == false))
+							if (!ignoreResponse && ((mode & (CM_Rx | CM_PollOnce)) != 0) && (plugin->GetParameterChanged(DCS_Protocol, change) == false))
 							{
 								// Special handling for X/Y position, since message contains two parameters and MappingID needs to match too.
 								if (pIdx == ParamIdx_X)
 								{
 									if (mappingId == plugin->GetMappingId())
 									{
+										jassert(msgData.valCount == 2 && msgData.valType == RemoteObjectValueType::ROVT_FLOAT);
 										// Set the plugin's new position.
-										plugin->SetParameterValue(DCS_Osc, ParamIdx_X, message[0].getFloat32());
-										plugin->SetParameterValue(DCS_Osc, ParamIdx_Y, message[1].getFloat32());
+										plugin->SetParameterValue(DCS_Protocol, ParamIdx_X, static_cast<float*>(msgData.payload)[0]);
+										plugin->SetParameterValue(DCS_Protocol, ParamIdx_Y, static_cast<float*>(msgData.payload)[1]);
 
 										// A request was sent to the DS100 by the CController because this plugin was in CM_PollOnce mode.
 										// Since the response was now processed, set the plugin back into it's original mode.
 										if ((mode & CM_PollOnce) == CM_PollOnce)
 										{
 											mode &= ~CM_PollOnce;
-											plugin->SetComsMode(DCS_Osc, mode);
+											plugin->SetComsMode(DCS_Protocol, mode);
 										}
 									}
 								}
 
 								// All other automation parameters.
-								else 
+								else
 								{
-									// DelayMode is an integer.
 									float newValue;
-									if ((pIdx == ParamIdx_DelayMode) && message[0].isInt32())
-										newValue = static_cast<float>(message[0].getInt32());
-									else
-										newValue = message[0].getFloat32();
+									switch (msgData.valType)
+									{
+									case RemoteObjectValueType::ROVT_INT:
+										newValue = static_cast<float>(static_cast<int*>(msgData.payload)[0]);
+										break;
+									case RemoteObjectValueType::ROVT_FLOAT:
+										newValue = static_cast<float*>(msgData.payload)[0];
+										break;
+									case RemoteObjectValueType::ROVT_STRING:
+										newValue = std::stof(std::string(static_cast<char*>(msgData.payload)));
+										break;
+									case RemoteObjectValueType::ROVT_NONE:
+									default:
+										newValue = 0.0f;
+										break;
+									}
 
-									plugin->SetParameterValue(DCS_Osc, pIdx, newValue);
+									plugin->SetParameterValue(DCS_Protocol, pIdx, newValue);
 								}
 							}
 						}
@@ -521,46 +591,48 @@ void CController::oscMessageReceived(const OSCMessage &message)
 			// update their GUI, since we are now Online.
 			if (!wasOnline)
 			{
-				SetParameterChanged(DCS_Osc, DCT_Online);
+				SetParameterChanged(DCS_Protocol, DCT_Online);
 			}
 		}
 	}
 }
 
 /**
- * Send a OSCMessage out to the connected ip address.
- * @param message	The OSC message to be sent.
+ * Send a Message out via the active bridging node.
+ * @param Id	The id of the remote object to be sent.
+ * @param msgData	The message data to be sent.
+ * @return True on success, false on failure
  */
-bool CController::SendOSCMessage(OSCMessage message)
+bool CController::SendMessage(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData)
 {
-	bool ret = (m_oscSender.send(message));
-	if (ret)
-		m_heartBeatsTx = 0;
-	return ret;
+	auto sendSuccess{ true };
+
+	auto activeBridgeNodeData = m_processingConfig.GetNodeData(m_processingConfig.GetNodeIds().getFirst());
+	for (auto protocolA : activeBridgeNodeData.RoleAProtocols)
+		sendSuccess &= m_processingNode.SendMessageTo(protocolA, Id, msgData);
+	for (auto protocolB : activeBridgeNodeData.RoleAProtocols)
+		sendSuccess &= m_processingNode.SendMessageTo(protocolB, Id, msgData);
+
+	return sendSuccess;
 }
 
 /**
- * Disconnect the OSCSender from it's host.
+ * Disconnect the active bridging nodes' protocols.
  */
-void CController::DisconnectOsc()
+void CController::Disconnect()
 {
-	m_oscSender.disconnect();
-	m_oscReceiver.disconnect();
+	m_processingNode.Stop();
 }
 
 /**
  * Disconnect and re-connect the OSCSender to a host specified by the current ip settings.
  */
-void CController::ReconnectOsc()
+void CController::Reconnect()
 {
-	DisconnectOsc();
+	Disconnect();
 
-	// Connect both sender and receiver  
-	bool ok = m_oscSender.connect(m_ipAddress, RX_PORT_DS100);
-	jassert(ok);
-
-	ok = m_oscReceiver.connect(RX_PORT_HOST);
-	jassert(ok);
+	m_processingNode.SetNodeConfiguration(m_processingConfig, m_processingConfig.GetNodeIds().getFirst());
+	m_processingNode.Start();
 }
 
 /**
@@ -580,7 +652,7 @@ void CController::timerCallback()
 		int i;
 		MainProcessor* pro = nullptr;
 		ComsMode mode;
-		String messageString;
+		RemoteObjectMessageData newMsgData;
 
 		for (i = 0; i < m_processors.size(); ++i)
 		{
@@ -589,16 +661,16 @@ void CController::timerCallback()
 			// If the OscBypass parameter has changed since the last interval, 
 			// update the OSC Rx/Tx mode of each Plugin accordingly.
 			bool oscBypassed = pro->GetBypass();
-			if (pro->PopParameterChanged(DCS_Osc, DCT_Bypass))
+			if (pro->PopParameterChanged(DCS_Protocol, DCT_Bypass))
 			{
 				if (oscBypassed)
-					pro->SetComsMode(DCS_Osc, CM_Off);
+					pro->SetComsMode(DCS_Protocol, CM_Off);
 				else
-					pro->RestoreComsMode(DCS_Osc);
+					pro->RestoreComsMode(DCS_Protocol);
 
 				// Changing ComsMode also sets the changed flag for Bypass. 
 				// Clear it so we don't come in here again unnecessarily.
-				pro->PopParameterChanged(DCS_Osc, DCT_Bypass);
+				pro->PopParameterChanged(DCS_Protocol, DCT_Bypass);
 			}
 			mode = pro->GetComsMode();
 
@@ -606,141 +678,132 @@ void CController::timerCallback()
 			// This is used to trigger gestures for touch automation.
 			pro->Tick();
 
-			// If plugin is in Bypass, we can skip all of the stuff below.
-			if (!oscBypassed)
+			bool msgSent;
+			DataChangeTypes paramSetsInTransit = DCT_None;
+
+			newMsgData.addrVal.first = static_cast<juce::uint16>(pro->GetSourceId());
+			newMsgData.addrVal.second = static_cast<juce::uint16>(pro->GetMappingId());
+
+			// Iterate through all automation parameters.
+			for (int pIdx = ParamIdx_X; pIdx < ParamIdx_MaxIndex; ++pIdx)
 			{
-				bool msgSent;
-				DataChangeTypes paramSetsInTransit = DCT_None;
+				msgSent = false;
 
-				// Iterate through all automation parameters.
-				for (int pIdx = ParamIdx_X; pIdx < ParamIdx_MaxIndex; ++pIdx)
+				switch (pIdx)
 				{
-					msgSent = false;
-
-					switch (pIdx)
+					case ParamIdx_X:
 					{
-						case ParamIdx_X:
+						float newDualFloatValue[2];
+
+						newDualFloatValue[0] = pro->GetParameterValue(ParamIdx_X);
+						newDualFloatValue[1] = pro->GetParameterValue(ParamIdx_Y);
+
+						newMsgData.valCount = 2;
+						newMsgData.payload = &newDualFloatValue;
+						newMsgData.payloadSize = 2 * sizeof(float);
+
+						// SET command is only sent out while in CM_Tx mode, provided that
+						// this parameter has been changed since the last timer tick.
+						if (((mode & CM_Tx) == CM_Tx) && pro->GetParameterChanged(DCS_Protocol, DCT_SourcePosition))
 						{
-							// SET command is only sent out while in CM_Tx mode, provided that
-							// this parameter has been changed since the last timer tick.
-							if (((mode & CM_Tx) == CM_Tx) && pro->GetParameterChanged(DCS_Osc, DCT_SourcePosition))
-							{
-								messageString = String::formatted(kOscCommandString_source_position_xy, pro->GetMappingId(), pro->GetSourceId());
-								msgSent = SendOSCMessage(OSCMessage(messageString, pro->GetParameterValue(ParamIdx_X), pro->GetParameterValue(ParamIdx_Y)));
-								paramSetsInTransit |= DCT_SourcePosition;
-							}
-
-							// GET command for x/y coordinates is only sent out while in CM_Rx or CM_PollOnce mode,
-							// provided that we didn't already send a SET command. Get command is just the OSC address pattern without parameters.
-							if ((!msgSent) && ((mode & (CM_Rx | CM_PollOnce)) != 0))
-							{
-								messageString = String::formatted(kOscCommandString_source_position_xy, pro->GetMappingId(), pro->GetSourceId());
-								msgSent = SendOSCMessage(OSCMessage(messageString));
-							}
+							msgSent = SendMessage(ROI_SoundObject_Position_XY, newMsgData);
+							paramSetsInTransit |= DCT_SourcePosition;
 						}
-						break;
-
-						case ParamIdx_Y:
-							// Changes to ParamIdx_Y are handled together with ParamIdx_X, so skip it.
-							continue;
-							break;
-
-						case ParamIdx_ReverbSendGain:
-						{
-							// SET command is only sent out while in CM_Tx mode, provided that
-							// this parameter has been changed since the last timer tick.
-							if (((mode & CM_Tx) == CM_Tx) && pro->GetParameterChanged(DCS_Osc, DCT_ReverbSendGain))
-							{
-								messageString = String::formatted(kOscCommandString_reverbsendgain, pro->GetSourceId());
-								msgSent = SendOSCMessage(OSCMessage(messageString, pro->GetParameterValue(ParamIdx_ReverbSendGain)));
-								paramSetsInTransit |= DCT_ReverbSendGain;
-							}
-
-							// GET command is only sent out while in CM_Rx mode, provided that we 
-							// didn't already send a SET command. Get command is just the OSC address pattern without parameters.
-							if ((!msgSent) && ((mode & CM_Rx) == CM_Rx))
-							{
-								messageString = String::formatted(kOscCommandString_reverbsendgain, pro->GetSourceId());
-								msgSent = SendOSCMessage(OSCMessage(messageString));
-							}
-						}
-						break;
-
-						case ParamIdx_SourceSpread:
-						{
-							// SET command is only sent out while in CM_Tx mode, provided that
-							// this parameter has been changed since the last timer tick.
-							if (((mode & CM_Tx) == CM_Tx) && pro->GetParameterChanged(DCS_Osc, DCT_SourceSpread))
-							{
-								messageString = String::formatted(kOscCommandString_source_spread, pro->GetSourceId());
-								msgSent = SendOSCMessage(OSCMessage(messageString, pro->GetParameterValue(ParamIdx_SourceSpread)));
-								paramSetsInTransit |= DCT_SourceSpread;
-							}
-
-							// GET command is only sent out while in CM_Rx mode, provided that we 
-							// didn't already send a SET command. Get command is just the OSC address pattern without parameters.
-							if ((!msgSent) && ((mode & CM_Rx) == CM_Rx))
-							{
-								messageString = String::formatted(kOscCommandString_source_spread, pro->GetSourceId());
-								msgSent = SendOSCMessage(OSCMessage(messageString));
-							}
-						}
-						break;
-
-						case ParamIdx_DelayMode:
-						{
-							// SET command is only sent out while in CM_Tx mode, provided that
-							// this parameter has been changed since the last timer tick.
-							if (((mode & CM_Tx) == CM_Tx) && pro->GetParameterChanged(DCS_Osc, DCT_DelayMode))
-							{
-								messageString = String::formatted(kOscCommandString_source_delaymode, pro->GetSourceId());
-								msgSent = SendOSCMessage(OSCMessage(messageString, static_cast<int>(pro->GetParameterValue(ParamIdx_DelayMode))));
-								paramSetsInTransit |= DCT_DelayMode;
-							}
-
-							// GET command is only sent out while in CM_Rx mode, provided that we 
-							// didn't already send a SET command. Get command is just the OSC address pattern without parameters.
-							if ((!msgSent) && ((mode & CM_Rx) == CM_Rx))
-							{
-								messageString = String::formatted(kOscCommandString_source_delaymode, pro->GetSourceId());
-								msgSent = SendOSCMessage(OSCMessage(messageString));
-							}
-						}
-						break;
-
-						case ParamIdx_Bypass:
-							// Nothing to do, this is not a parameter which will arrive per OSC.
-							continue;
-							break;
-
-						default:
-							jassertfalse;
-							break;
 					}
+					break;
 
-					if (msgSent)
+					case ParamIdx_Y:
+						// Changes to ParamIdx_Y are handled together with ParamIdx_X, so skip it.
+						continue;
+						break;
+
+					case ParamIdx_ReverbSendGain:
 					{
-						// Since we are expecting at least one response from the DS100, 
-						// we can use that as heartbeat, no need to send an extra ping.
-						sendKeepAlive = false;
+						float newFloatValue = pro->GetParameterValue(ParamIdx_ReverbSendGain);
+
+						newMsgData.valCount = 1;
+						newMsgData.payload = &newFloatValue;
+						newMsgData.payloadSize = sizeof(float);
+
+						// SET command is only sent out while in CM_Tx mode, provided that
+						// this parameter has been changed since the last timer tick.
+						if (((mode & CM_Tx) == CM_Tx) && pro->GetParameterChanged(DCS_Protocol, DCT_ReverbSendGain))
+						{
+							msgSent = SendMessage(ROI_ReverbSendGain, newMsgData);
+							paramSetsInTransit |= DCT_ReverbSendGain;
+						}
 					}
+					break;
+
+					case ParamIdx_SourceSpread:
+					{
+						float newFloatValue = pro->GetParameterValue(ParamIdx_SourceSpread);
+
+						newMsgData.valCount = 1;
+						newMsgData.payload = &newFloatValue;
+						newMsgData.payloadSize = sizeof(float);
+
+						// SET command is only sent out while in CM_Tx mode, provided that
+						// this parameter has been changed since the last timer tick.
+						if (((mode & CM_Tx) == CM_Tx) && pro->GetParameterChanged(DCS_Protocol, DCT_SourceSpread))
+						{
+							msgSent = SendMessage(ROI_SoundObject_Spread, newMsgData);
+							paramSetsInTransit |= DCT_SourceSpread;
+						}
+					}
+					break;
+
+					case ParamIdx_DelayMode:
+					{
+						float newFloatValue = pro->GetParameterValue(ParamIdx_DelayMode);
+
+						newMsgData.valCount = 1;
+						newMsgData.payload = &newFloatValue;
+						newMsgData.payloadSize = sizeof(float);
+
+						// SET command is only sent out while in CM_Tx mode, provided that
+						// this parameter has been changed since the last timer tick.
+						if (((mode & CM_Tx) == CM_Tx) && pro->GetParameterChanged(DCS_Protocol, DCT_DelayMode))
+						{
+							msgSent = SendMessage(ROI_SoundObject_DelayMode, newMsgData);
+							paramSetsInTransit |= DCT_DelayMode;
+						}
+					}
+					break;
+
+					case ParamIdx_Bypass:
+						// Nothing to do, this is not a parameter which will arrive per remote protocol.
+						continue;
+						break;
+
+					default:
+						jassertfalse;
+						break;
 				}
 
-				// Flag the parameters for which we just sent a SET command out.
-				pro->SetParamInTransit(paramSetsInTransit);
+				if (msgSent)
+				{
+					// Since we are expecting at least one response from the DS100, 
+					// we can use that as heartbeat, no need to send an extra ping.
+					sendKeepAlive = false;
+				}
 			}
 
+			// Flag the parameters for which we just sent a SET command out.
+			pro->SetParamInTransit(paramSetsInTransit);
+
 			// All changed parameters were sent out, so we can reset their flags now.
-			pro->PopParameterChanged(DCS_Osc, DCT_AutomationParameters);
+			pro->PopParameterChanged(DCS_Protocol, DCT_AutomationParameters);
 		}
 		
 		if (sendKeepAlive)
 		{
 			// If we aren't expecting any responses from the DS100, we need to at least send a "ping"
-			// so that we can use the "pong" to check our connection status. 
-			// See handling of "pong" in oscMessageReceived()
-			OSCMessage oscMessage(kOscCommandString_ping);
-			SendOSCMessage(oscMessage);
+			// so that we can use the "pong" to check our connection status.
+			newMsgData.valCount = 0;
+			newMsgData.payload = 0;
+			newMsgData.payloadSize = 0;
+			SendMessage(ROI_HeartbeatPing, newMsgData);
 		}
 
 		bool wasOnline = GetOnline();
@@ -752,7 +815,7 @@ void CController::timerCallback()
 		// If we have just crossed the treshold, force all plugins to update their
 		// GUI, since we are now Offline.
 		if (wasOnline && (GetOnline() == false))
-			SetParameterChanged(DCS_Osc, DCT_Online);
+			SetParameterChanged(DCS_Protocol, DCT_Online);
 	}
 }
 

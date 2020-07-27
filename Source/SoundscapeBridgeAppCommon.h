@@ -35,7 +35,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 
 
 namespace SoundscapeApp
@@ -59,7 +59,7 @@ enum DataChangeSource
 {
 	DCS_Gui = 0,		//< Change was caused by the GUI, i.e. the user turning a knob to change a value.
 	DCS_Host,			//< Change was caused by the VST/AU/AAX host, i.e. a project was loaded or a DAW preset was recalled.
-	DCS_Osc,			//< Change was caused by an incoming OSC message, or caused by internal operations by the Controller.
+	DCS_Protocol,		//< Change was caused by an incoming protocol message, or caused by internal operations by the Controller.
 	DCS_Overview,		//< Change was caused by the Overview. Similar to DCS_Gui, but specific to the Overview window's GUI.
 	DCS_Max				//< Number of change cources.
 };

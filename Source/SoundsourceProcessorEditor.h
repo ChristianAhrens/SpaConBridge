@@ -35,7 +35,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "PluginProcessor.h"
+#include "SoundsourceProcessor.h"
 #include "Gui.h"
 #include "SurfaceSlider.h"
 #include <utility>	//<USE std::unique_ptr
@@ -48,7 +48,7 @@ namespace SoundscapeApp
 /**
  * Class MainProcessorEditor, a component that acts as the GUI for the AudioProcessor. 
  */
-class MainProcessorEditor :
+class SoundsourceProcessorEditor :
 	public AudioProcessorEditor,
 	public TextEditor::Listener,
 	public Slider::Listener,
@@ -56,8 +56,8 @@ class MainProcessorEditor :
 	private Timer
 {
 public:
-	MainProcessorEditor(MainProcessor&);
-	~MainProcessorEditor() override;
+	SoundsourceProcessorEditor(SoundsourceProcessor&);
+	~SoundsourceProcessorEditor() override;
 
 	void paint(Graphics&) override;
 	void resized() override;
@@ -148,7 +148,7 @@ private:
 	std::unique_ptr<TextEditor>	m_debugTextEdit;
 #endif
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainProcessorEditor)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SoundsourceProcessorEditor)
 };
 
 

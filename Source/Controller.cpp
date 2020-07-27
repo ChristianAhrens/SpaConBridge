@@ -35,7 +35,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Controller.h"
 #include "Overview.h"
-#include "PluginProcessor.h"
+#include "SoundsourceProcessor.h"
 
 
 namespace SoundscapeApp
@@ -205,7 +205,7 @@ bool CController::PopParameterChanged(DataChangeSource changeSource, DataChangeT
  * @param p		Pointer to newly crated plugin processor object.
  * @return		The PluginId of the newly added Plug-in.
  */
-PluginId CController::AddProcessor(MainProcessor* p)
+PluginId CController::AddProcessor(SoundsourceProcessor* p)
 {
 	const ScopedLock lock(m_mutex);
 
@@ -235,7 +235,7 @@ PluginId CController::AddProcessor(MainProcessor* p)
  * Remove a plugin instance from the local list of processors.
  * @param p		Pointer to plugin processor object which should be removed.
  */
-void CController::RemoveProcessor(MainProcessor* p)
+void CController::RemoveProcessor(SoundsourceProcessor* p)
 {
 	if (m_processors.size() > 1)
 	{
@@ -277,7 +277,7 @@ int CController::GetProcessorCount() const
  * @param idx	The index of the desired processor.
  * @return	The pointer to the desired processor.
  */
-MainProcessor* CController::GetProcessor(PluginId idx) const
+SoundsourceProcessor* CController::GetProcessor(PluginId idx) const
 {
 	const ScopedLock lock(m_mutex);
 	if ((idx >= 0) && (idx < m_processors.size()))
@@ -514,7 +514,7 @@ void CController::HandleNodeData(NodeId nodeId, ProtocolId senderProtocolId, Pro
 					for (i = 0; i < m_processors.size(); ++i)
 					{
 						// Check for matching Input number.
-						MainProcessor* plugin = m_processors[i];
+						SoundsourceProcessor* plugin = m_processors[i];
 						if (sourceId == plugin->GetSourceId())
 						{
 							// Check if a SET command was recently sent out and might currently be on transit to the device.
@@ -650,7 +650,7 @@ void CController::timerCallback()
 								((m_heartBeatsTx * m_oscMsgRate) > KEEPALIVE_INTERVAL));
 
 		int i;
-		MainProcessor* pro = nullptr;
+		SoundsourceProcessor* pro = nullptr;
 		ComsMode mode;
 		RemoteObjectMessageData newMsgData;
 

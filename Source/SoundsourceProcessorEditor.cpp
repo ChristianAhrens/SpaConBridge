@@ -33,8 +33,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#include "PluginProcessor.h"
-#include "PluginEditor.h"
+#include "SoundsourceProcessor.h"
+#include "SoundsourceProcessorEditor.h"
 #include "Overview.h"
 #include "Parameters.h"
 
@@ -62,7 +62,7 @@ static constexpr int GUI_UPDATE_DELAY_TICKS = 15;
 
 /*
 ===============================================================================
- Class MainProcessorEditor
+ Class SoundsourceProcessorEditor
 ===============================================================================
 */
 
@@ -71,7 +71,7 @@ static constexpr int GUI_UPDATE_DELAY_TICKS = 15;
  * This is the base class for the component that acts as the GUI for an AudioProcessor.
  * @param parent	The audio processor object to act as parent.
  */
-MainProcessorEditor::MainProcessorEditor(MainProcessor& parent)
+SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& parent)
 	: AudioProcessorEditor(&parent)
 {
 	m_surfaceSlider = std::make_unique<CSurfaceSlider>(&parent);
@@ -178,7 +178,7 @@ MainProcessorEditor::MainProcessorEditor(MainProcessor& parent)
 /**
  * Object destructor.
  */
-MainProcessorEditor::~MainProcessorEditor()
+SoundsourceProcessorEditor::~SoundsourceProcessorEditor()
 {
 	stopTimer();
 }
@@ -188,7 +188,7 @@ MainProcessorEditor::~MainProcessorEditor()
  * @param slider	The slider object for which the parameter is desired.
  * @return			The desired plugin parameter.
  */
-CAudioParameterFloat* MainProcessorEditor::GetParameterForSlider(CSlider* slider)
+CAudioParameterFloat* SoundsourceProcessorEditor::GetParameterForSlider(CSlider* slider)
 {
 	const Array<AudioProcessorParameter*>& params = getAudioProcessor()->getParameters();
 	if (slider == m_xSlider.get())
@@ -211,9 +211,9 @@ CAudioParameterFloat* MainProcessorEditor::GetParameterForSlider(CSlider* slider
  * You can find out the new value using Slider::getValue().
  * @param slider	Slider object which was dragged by user.
  */
-void MainProcessorEditor::sliderValueChanged(Slider* slider)
+void SoundsourceProcessorEditor::sliderValueChanged(Slider* slider)
 {
-	MainProcessor* plugin = dynamic_cast<MainProcessor*>(getAudioProcessor());
+	SoundsourceProcessor* plugin = dynamic_cast<SoundsourceProcessor*>(getAudioProcessor());
 	if (plugin)
 	{
 		AutomationParameterIndex paramIdx = ParamIdx_MaxIndex;
@@ -236,7 +236,7 @@ void MainProcessorEditor::sliderValueChanged(Slider* slider)
  * and then sliderDragEnded() is called after the user lets go.
  * @param slider	Slider object which was dragged by user.
  */
-void MainProcessorEditor::sliderDragStarted(Slider* slider)
+void SoundsourceProcessorEditor::sliderDragStarted(Slider* slider)
 {
 	if (CAudioParameterFloat* param = GetParameterForSlider(static_cast<CSlider*>(slider)))
 		param->BeginGuiGesture();
@@ -246,7 +246,7 @@ void MainProcessorEditor::sliderDragStarted(Slider* slider)
  * Called after a drag operation has finished.
  * @param slider	Slider object which was dragged by user.
  */
-void MainProcessorEditor::sliderDragEnded(Slider* slider)
+void SoundsourceProcessorEditor::sliderDragEnded(Slider* slider)
 {
 	if (CAudioParameterFloat* param = GetParameterForSlider(static_cast<CSlider*>(slider)))
 		param->EndGuiGesture();
@@ -256,7 +256,7 @@ void MainProcessorEditor::sliderDragEnded(Slider* slider)
  * Callback function for Enter key presses on textEditors.
  * @param textEditor	The TextEditor object whose where enter key was pressed.
  */
-void MainProcessorEditor::textEditorReturnKeyPressed(TextEditor& textEditor)
+void SoundsourceProcessorEditor::textEditorReturnKeyPressed(TextEditor& textEditor)
 {
 	ignoreUnused(textEditor);
 
@@ -269,9 +269,9 @@ void MainProcessorEditor::textEditorReturnKeyPressed(TextEditor& textEditor)
  * Called when a ComboBox has its selected item changed. 
  * @param comboBox	The combo box which has changed.
  */
-void MainProcessorEditor::comboBoxChanged(ComboBox *comboBox)
+void SoundsourceProcessorEditor::comboBoxChanged(ComboBox *comboBox)
 {
-	MainProcessor* pro = dynamic_cast<MainProcessor*>(getAudioProcessor());
+	SoundsourceProcessor* pro = dynamic_cast<SoundsourceProcessor*>(getAudioProcessor());
 	if (pro)
 	{
 		if (comboBox == m_delayModeComboBox.get())
@@ -287,7 +287,7 @@ void MainProcessorEditor::comboBoxChanged(ComboBox *comboBox)
 * screen that means a section of a window needs to be redrawn.
 * @param g		Graphics context that must be used to do the drawing operations.
 */
-void MainProcessorEditor::paint(Graphics& g)
+void SoundsourceProcessorEditor::paint(Graphics& g)
 {
 	Rectangle<int> twoDSurfaceArea = getLocalBounds();
 	Rectangle<int> parameterEditArea = getLocalBounds();
@@ -314,7 +314,7 @@ void MainProcessorEditor::paint(Graphics& g)
  * @param parameterEditArea	The area to be used for parameter controls
  * @return	True if the layout is to be done in portrait, false if in landscape orientation
  */
-bool MainProcessorEditor::getResizePaintAreaSplit(Rectangle<int>& twoDSurfaceArea, Rectangle<int>& parameterEditArea)
+bool SoundsourceProcessorEditor::getResizePaintAreaSplit(Rectangle<int>& twoDSurfaceArea, Rectangle<int>& parameterEditArea)
 {
 	auto paramEditStripWidth = 90;
 	auto paramEditStripHeight = 105;
@@ -338,7 +338,7 @@ bool MainProcessorEditor::getResizePaintAreaSplit(Rectangle<int>& twoDSurfaceAre
 * Called when this component's size has been changed.
 * This is generally where you'll want to lay out the positions of any subcomponents in your editor.
 */
-void MainProcessorEditor::resized()
+void SoundsourceProcessorEditor::resized()
 {
 	//==============================================================================
 	Rectangle<int> twoDSurfaceArea = getLocalBounds();
@@ -446,7 +446,7 @@ void MainProcessorEditor::resized()
  * Timer callback function, which will be called at regular intervals to update the GUI.
  * Reimplemented from base class Timer.
  */
-void MainProcessorEditor::timerCallback()
+void SoundsourceProcessorEditor::timerCallback()
 {
 	// Also update the regular GUI.
 	UpdateGui(false);
@@ -457,13 +457,13 @@ void MainProcessorEditor::timerCallback()
  * @param init	True to ignore any changed flags and update parameters
  *				in the GUI anyway. Good for when opening the GUI for the first time.
  */
-void MainProcessorEditor::UpdateGui(bool init)
+void SoundsourceProcessorEditor::UpdateGui(bool init)
 {
 	ignoreUnused(init); // No need to use this here so far.
 
 	bool somethingChanged = false;
 
-	MainProcessor* pro = dynamic_cast<MainProcessor*>(getAudioProcessor());
+	SoundsourceProcessor* pro = dynamic_cast<SoundsourceProcessor*>(getAudioProcessor());
 	if (pro)
 	{
 		const Array<AudioProcessorParameter*>& params = pro->getParameters();
@@ -542,7 +542,7 @@ void MainProcessorEditor::UpdateGui(bool init)
 		if (getTimerInterval() == GUI_UPDATE_RATE_SLOW)
 		{
 			startTimer(GUI_UPDATE_RATE_FAST);
-			DBG("MainProcessorEditor::timerCallback: Switching to GUI_UPDATE_RATE_FAST");
+			DBG("SoundsourceProcessorEditor::timerCallback: Switching to GUI_UPDATE_RATE_FAST");
 		}
 	}
 
@@ -555,7 +555,7 @@ void MainProcessorEditor::UpdateGui(bool init)
 		// Once counter has reached a certain limit: Switch to lazy GUI refreshing rate
 		else if (getTimerInterval() == GUI_UPDATE_RATE_FAST)
 		{
-			DBG("MainProcessorEditor::timerCallback(): Switching to GUI_UPDATE_RATE_SLOW");
+			DBG("SoundsourceProcessorEditor::timerCallback(): Switching to GUI_UPDATE_RATE_SLOW");
 			startTimer(GUI_UPDATE_RATE_SLOW);
 		}
 	}

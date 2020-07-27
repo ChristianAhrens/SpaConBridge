@@ -46,7 +46,7 @@ namespace SoundscapeApp
 /**
  * Forward declarations.
  */
-class MainProcessor;
+class SoundsourceProcessor;
 
 
 /**
@@ -67,10 +67,10 @@ public:
 	bool PopParameterChanged(DataChangeSource changeSource, DataChangeTypes change);
 	void SetParameterChanged(DataChangeSource changeSource, DataChangeTypes changeTypes);
 
-	PluginId AddProcessor(MainProcessor* p);
-	void RemoveProcessor(MainProcessor* p);
+	PluginId AddProcessor(SoundsourceProcessor* p);
+	void RemoveProcessor(SoundsourceProcessor* p);
 	int GetProcessorCount() const;
-	MainProcessor* GetProcessor(PluginId idx) const;
+	SoundsourceProcessor* GetProcessor(PluginId idx) const;
 
 	String GetIpAddress() const;
 	static String GetDefaultIpAddress();
@@ -106,7 +106,7 @@ protected:
 	 * When removing Plug-in instances from a project, this list will shrink. When the list becomes empty,
 	 * The CController singleton object is no longer necessary and will destruct itself.
 	 */
-	Array<MainProcessor*>	m_processors;
+	Array<SoundsourceProcessor*>	m_processors;
 
 	/**
 	 * A processing engine node can send data to and receive data from multiple protocols that is encapsulates.

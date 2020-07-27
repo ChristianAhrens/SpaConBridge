@@ -98,13 +98,14 @@
       <FILE id="FN3fsG" name="SurfaceSlider.cpp" compile="1" resource="0"
             file="Source/SurfaceSlider.cpp"/>
       <FILE id="HtcGNB" name="SurfaceSlider.h" compile="0" resource="0" file="Source/SurfaceSlider.h"/>
-      <FILE id="KAmwPc" name="PluginProcessor.cpp" compile="1" resource="0"
-            file="Source/PluginProcessor.cpp"/>
-      <FILE id="do2yHv" name="PluginProcessor.h" compile="0" resource="0"
-            file="Source/PluginProcessor.h"/>
-      <FILE id="wFy796" name="PluginEditor.cpp" compile="1" resource="0"
-            file="Source/PluginEditor.cpp"/>
-      <FILE id="k825w0" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+      <FILE id="KAmwPc" name="SoundsourceProcessor.cpp" compile="1" resource="0"
+            file="Source/SoundsourceProcessor.cpp"/>
+      <FILE id="do2yHv" name="SoundsourceProcessor.h" compile="0" resource="0"
+            file="Source/SoundsourceProcessor.h"/>
+      <FILE id="wFy796" name="SoundsourceProcessorEditor.cpp" compile="1"
+            resource="0" file="Source/SoundsourceProcessorEditor.cpp"/>
+      <FILE id="k825w0" name="SoundsourceProcessorEditor.h" compile="0" resource="0"
+            file="Source/SoundsourceProcessorEditor.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>

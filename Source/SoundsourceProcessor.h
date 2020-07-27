@@ -52,7 +52,7 @@ class CAudioParameterChoice;
 /**
  * Class MainProcessor, a derived AudioProcessor which can be wrapped as VST, AU, or AAX. 
  */
-class MainProcessor :
+class SoundsourceProcessor :
 	public AudioProcessor,
 	public AudioProcessorParameter::Listener
 {
@@ -67,8 +67,8 @@ public:
 		TargetHost_S6L
 	};
 
-	MainProcessor();
-	~MainProcessor() override;
+	SoundsourceProcessor();
+	~SoundsourceProcessor() override;
 
 	int GetPluginId() const;
 
@@ -235,7 +235,7 @@ protected:
 	String						m_debugMessageBuffer;
 #endif
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainProcessor)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SoundsourceProcessor)
 };
 
 

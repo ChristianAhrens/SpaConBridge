@@ -35,7 +35,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "SurfaceSlider.h"
 #include "Parameters.h"
-#include "PluginProcessor.h"
+#include "SoundsourceProcessor.h"
 #include "Controller.h"
 #include "Gui.h"
 
@@ -121,7 +121,7 @@ void CSurfaceSlider::mouseDown(const MouseEvent& e)
 	float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / w)));
 	float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / h)));
 
-	MainProcessor* plugin = dynamic_cast<MainProcessor*>(m_parent);
+	SoundsourceProcessor* plugin = dynamic_cast<SoundsourceProcessor*>(m_parent);
 	if (plugin)
 	{
 		// Set new X and Y values
@@ -150,7 +150,7 @@ void CSurfaceSlider::mouseDrag(const MouseEvent& e)
 	float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / w)));
 	float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / h)));
 
-	MainProcessor* plugin = dynamic_cast<MainProcessor*>(m_parent);
+	SoundsourceProcessor* plugin = dynamic_cast<SoundsourceProcessor*>(m_parent);
 	if (plugin)
 	{
 		// Set new X and Y values
@@ -284,7 +284,7 @@ void CSurfaceMultiSlider::mouseDown(const MouseEvent& e)
 			CController* ctrl = CController::GetInstance();
 			if (ctrl)
 			{
-				MainProcessor* plugin = ctrl->GetProcessor(m_selected);
+				SoundsourceProcessor* plugin = ctrl->GetProcessor(m_selected);
 				jassert(plugin);
 				if (plugin)
 				{
@@ -314,7 +314,7 @@ void CSurfaceMultiSlider::mouseDrag(const MouseEvent& e)
 		CController* ctrl = CController::GetInstance();
 		if (ctrl)
 		{
-			MainProcessor* plugin = ctrl->GetProcessor(m_selected);
+			SoundsourceProcessor* plugin = ctrl->GetProcessor(m_selected);
 			if (plugin)
 			{
 				// Get mouse pixel-wise position and scale it between 0 and 1.
@@ -343,7 +343,7 @@ void CSurfaceMultiSlider::mouseUp(const MouseEvent& e)
 		CController* ctrl = CController::GetInstance();
 		if (ctrl)
 		{
-			MainProcessor* plugin = ctrl->GetProcessor(m_selected);
+			SoundsourceProcessor* plugin = ctrl->GetProcessor(m_selected);
 			if (plugin)
 			{
 				dynamic_cast<CAudioParameterFloat*>(plugin->getParameters()[ParamIdx_X])->EndGuiGesture();

@@ -34,8 +34,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "Overview.h"
-#include "PluginProcessor.h"
-#include "PluginEditor.h"
+#include "SoundsourceProcessor.h"
+#include "SoundsourceProcessorEditor.h"
 #include "Controller.h"
 #include "SurfaceSlider.h"
 
@@ -787,7 +787,7 @@ void COverviewTableContainer::buttonClicked(Button *button)
 		{
 			if (addInstance)
 			{
-				auto processor = std::make_unique<SoundscapeApp::MainProcessor>();
+				auto processor = std::make_unique<SoundscapeApp::SoundsourceProcessor>();
 				processor.release(); // let go of the instance here, we do not want to destroy it, since it lives as member of CCOntroller when constructed
 			}
 			else
@@ -806,7 +806,7 @@ void COverviewTableContainer::buttonClicked(Button *button)
 				for (auto processorId : processorIds)
 				{
 					if (ctrl->GetProcessorCount() >= 1)
-						auto processor = std::unique_ptr<MainProcessor>(ctrl->GetProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
+						auto processor = std::unique_ptr<SoundsourceProcessor>(ctrl->GetProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
 				}
 			}
 		}
@@ -835,7 +835,7 @@ void COverviewTableContainer::onCurrentSelectedProcessorChanged(PluginId selecte
 		if (ctrl)
 		{
 			auto processor = ctrl->GetProcessor(selectedPluginId);
-			m_selectedPluginInstanceEditor = std::make_unique<MainProcessorEditor>(*processor);
+			m_selectedPluginInstanceEditor = std::make_unique<SoundsourceProcessorEditor>(*processor);
 			addAndMakeVisible(m_selectedPluginInstanceEditor.get());
 			m_selectedPluginInstanceEditor->UpdateGui(true);
 			resized();
@@ -866,7 +866,7 @@ void COverviewTableContainer::UpdateGui(bool init)
 			// Iterate through all plugin instances and see if anything changed there.
 			for (int pIdx = 0; pIdx < ctrl->GetProcessorCount(); pIdx++)
 			{
-				MainProcessor* plugin = ctrl->GetProcessor(pIdx);
+				SoundsourceProcessor* plugin = ctrl->GetProcessor(pIdx);
 				if (plugin && plugin->PopParameterChanged(DCS_Overview, DCT_PluginInstanceConfig))
 				{
 					m_overviewTable->UpdateTable();
@@ -982,7 +982,7 @@ void COverviewMultiSurface::UpdateGui(bool init)
 		CSurfaceMultiSlider::PositionCache cachedPositions;
 		for (int pIdx = 0; pIdx < ctrl->GetProcessorCount(); pIdx++)
 		{
-			MainProcessor* plugin = ctrl->GetProcessor(pIdx);
+			SoundsourceProcessor* plugin = ctrl->GetProcessor(pIdx);
 			if (plugin)
 			{
 				if (plugin->GetMappingId() == selectedMapping)
@@ -1688,7 +1688,7 @@ void CComboBoxContainer::comboBoxChanged(ComboBox *comboBox)
 		for (std::size_t i = 0; i < pluginIds.size(); ++i)
 		{
 			// Set the value of the combobox to the current MappingID of the corresponding plugin.
-			MainProcessor* plugin = ctrl->GetProcessor(pluginIds[i]);
+			SoundsourceProcessor* plugin = ctrl->GetProcessor(pluginIds[i]);
 			if (plugin)
 				plugin->SetMappingId(DCS_Overview, newMapping);
 		}
@@ -1718,7 +1718,7 @@ void CComboBoxContainer::SetRow(int newRow)
 	if (ctrl)
 	{
 		// Set the value of the combobox to the current MappingID of the corresponding plugin.
-		const MainProcessor* plugin = ctrl->GetProcessor(pluginId);
+		const SoundsourceProcessor* plugin = ctrl->GetProcessor(pluginId);
 		if (plugin)
 			m_comboBox.setSelectedId(plugin->GetMappingId(), dontSendNotification);
 	}
@@ -1779,7 +1779,7 @@ void CTextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
 		for (std::size_t i = 0; i < pluginIds.size(); ++i)
 		{
 			// Set the value of the combobox to the current MappingID of the corresponding plugin.
-			MainProcessor* plugin = ctrl->GetProcessor(pluginIds[i]);
+			SoundsourceProcessor* plugin = ctrl->GetProcessor(pluginIds[i]);
 			if (plugin)
 				plugin->SetSourceId(DCS_Overview, newSourceId);
 		}
@@ -1825,7 +1825,7 @@ void CTextEditorContainer::SetRow(int newRow)
 	if (ctrl)
 	{
 		// Set the value of the textEditor to the current SourceID of the corresponding plugin.
-		const MainProcessor* plugin = ctrl->GetProcessor(pluginId);
+		const SoundsourceProcessor* plugin = ctrl->GetProcessor(pluginId);
 		if (plugin)
 			m_editor.setText(String(plugin->GetSourceId()), false);
 	}
@@ -1891,7 +1891,7 @@ void CRadioButtonContainer::buttonClicked(Button *button)
 
 		for (std::size_t i = 0; i < pluginIds.size(); ++i)
 		{
-			MainProcessor* plugin = ctrl->GetProcessor(pluginIds[i]);
+			SoundsourceProcessor* plugin = ctrl->GetProcessor(pluginIds[i]);
 			if (plugin)
 			{
 				ComsMode oldMode = plugin->GetComsMode();
@@ -1934,7 +1934,7 @@ void CRadioButtonContainer::SetRow(int newRow)
 	if (ctrl)
 	{
 		// Toggle the correct radio buttons to the current ComsMode of the corresponding plugin.
-		const MainProcessor* plugin = ctrl->GetProcessor(pluginId);
+		const SoundsourceProcessor* plugin = ctrl->GetProcessor(pluginId);
 		if (plugin)
 		{
 			const Array<AudioProcessorParameter*>& params = plugin->getParameters();
@@ -2022,7 +2022,7 @@ void CEditableLabelContainer::SetRow(int newRow)
 	if (ctrl)
 	{
 		// Set the value of the combobox to the current MappingID of the corresponding plugin.
-		MainProcessor* plugin = ctrl->GetProcessor(pluginId);
+		SoundsourceProcessor* plugin = ctrl->GetProcessor(pluginId);
 		if (plugin)
 		{
 			displayName = plugin->getProgramName(0);

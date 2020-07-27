@@ -59,7 +59,7 @@ class CComboBoxContainer;
 class CTextEditorContainer;
 class CRadioButtonContainer;
 class CEditableLabelContainer;
-class MainProcessorEditor;
+class SoundsourceProcessorEditor;
 
 
 /**
@@ -281,7 +281,7 @@ private:
 	/**
 	 * The processor editor component corresponding to the selected row
 	 */
-	std::unique_ptr<MainProcessorEditor> m_selectedPluginInstanceEditor;
+	std::unique_ptr<SoundsourceProcessorEditor> m_selectedPluginInstanceEditor;
 
 	/**
 	 * Button to add a processor instance

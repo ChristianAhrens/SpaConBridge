@@ -33,8 +33,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#include "PluginProcessor.h"
-#include "PluginEditor.h"	//<USE MainProcessorEditor
+#include "SoundsourceProcessor.h"
+#include "SoundsourceProcessorEditor.h"	//<USE SoundsourceProcessorEditor
 #include "Controller.h"		//<USE CController
 #include "Overview.h"		//<USE COverviewManager
 #include "SoundscapeBridgeAppCommon.h"
@@ -52,14 +52,14 @@ static constexpr int DEFAULT_COORD_MAPPING = 1;		//< Default coordinate mapping
 
 /*
 ===============================================================================
- Class MainProcessor
+ Class SoundsourceProcessor
 ===============================================================================
 */
 
 /**
  * Class constructor for the processor.
  */
-MainProcessor::MainProcessor()
+SoundsourceProcessor::SoundsourceProcessor()
 {
 	// Automation parameters.
 	m_xPos = new CAudioParameterFloat("x_pos", "x", 0.0f, 1.0f, 0.001f, 0.5f);
@@ -112,7 +112,7 @@ MainProcessor::MainProcessor()
 /**
  * Class destructor for the processor.
  */
-MainProcessor::~MainProcessor()
+SoundsourceProcessor::~SoundsourceProcessor()
 {
 	// Erase this new plugin instance from the singleton CController object's internal list.
 	CController* ctrl = CController::GetInstance();
@@ -123,7 +123,7 @@ MainProcessor::~MainProcessor()
 /**
  * Get the id of this plugin instance 
  */
-int MainProcessor::GetPluginId() const
+int SoundsourceProcessor::GetPluginId() const
 {
 	return m_pluginId;
 }
@@ -135,7 +135,7 @@ int MainProcessor::GetPluginId() const
  * @return	True if any of the given parameters has changed it's value 
  *			since the last time PopParameterChanged() was called.
  */
-bool MainProcessor::GetParameterChanged(DataChangeSource changeSource, DataChangeTypes change)
+bool SoundsourceProcessor::GetParameterChanged(DataChangeSource changeSource, DataChangeTypes change)
 {
 	return ((m_parametersChanged[changeSource] & change) != 0);
 }
@@ -148,7 +148,7 @@ bool MainProcessor::GetParameterChanged(DataChangeSource changeSource, DataChang
  * @return	True if any of the given parameters has changed it's value 
  *			since the last time PopParameterChanged() was called.
  */
-bool MainProcessor::PopParameterChanged(DataChangeSource changeSource, DataChangeTypes change)
+bool SoundsourceProcessor::PopParameterChanged(DataChangeSource changeSource, DataChangeTypes change)
 {
 	bool ret((m_parametersChanged[changeSource] & change) != 0);
 	m_parametersChanged[changeSource] &= ~change; // Reset flag.
@@ -160,7 +160,7 @@ bool MainProcessor::PopParameterChanged(DataChangeSource changeSource, DataChang
  * @param changeSource	The application module which is causing the property change.
  * @param changeTypes	Defines which parameter or property has been changed.
  */
-void MainProcessor::SetParameterChanged(DataChangeSource changeSource, DataChangeTypes changeTypes)
+void SoundsourceProcessor::SetParameterChanged(DataChangeSource changeSource, DataChangeTypes changeTypes)
 {
 	// Set the specified change flag for all DataChangeSources.
 	for (int cs = 0; cs < DCS_Max; cs++)
@@ -179,7 +179,7 @@ void MainProcessor::SetParameterChanged(DataChangeSource changeSource, DataChang
  * @param normalized If true, the returned value will be normalized to a 0.0f to 1.0f range. False per default.
  * @return	The desired parameter value, as float.
  */
-float MainProcessor::GetParameterValue(AutomationParameterIndex paramIdx, bool normalized) const
+float SoundsourceProcessor::GetParameterValue(AutomationParameterIndex paramIdx, bool normalized) const
 {
 	float ret = 0.0f;
 
@@ -243,7 +243,7 @@ float MainProcessor::GetParameterValue(AutomationParameterIndex paramIdx, bool n
  * @param paramIdx	The index of the desired parameter.
  * @param newValue	The new value as a float.
  */
-void MainProcessor::SetParameterValue(DataChangeSource changeSource, AutomationParameterIndex paramIdx, float newValue)
+void SoundsourceProcessor::SetParameterValue(DataChangeSource changeSource, AutomationParameterIndex paramIdx, float newValue)
 {
 	// The reimplemented method AudioProcessor::parameterValueChanged() will trigger a SetParameterChanged() call.
 	// We need to ensure that this change is registered to the correct source. 
@@ -285,7 +285,7 @@ void MainProcessor::SetParameterValue(DataChangeSource changeSource, AutomationP
  * This method should be called once every timer callback tick of the CController. 
  * The signal is passed on to all automation parameters. This is used to trigger gestures for touch automation.
  */
-void MainProcessor::Tick()
+void SoundsourceProcessor::Tick()
 {
 	// Reset the flags indicating when a parameter's SET command is out on the network. 
 	// These flags are set during CController::timerCallback() and queried in CController::oscMessageReceived()
@@ -324,7 +324,7 @@ void MainProcessor::Tick()
  * The given parameter(s) have a SET command message which has just been sent out on the network.
  * @param paramsChanged		Which parameter(s) should be marked as having a SET command in transit.
  */
-void MainProcessor::SetParamInTransit(DataChangeTypes paramsChanged)
+void SoundsourceProcessor::SetParamInTransit(DataChangeTypes paramsChanged)
 {
 	m_paramSetCommandsInTransit |= paramsChanged;
 }
@@ -333,7 +333,7 @@ void MainProcessor::SetParamInTransit(DataChangeTypes paramsChanged)
  * Check if the given parameter(s) have a SET command message which has just been sent out on the network.
  * @return True if the specified paranmeter(s) are marked as having a SET command in transit.
  */
-bool MainProcessor::IsParamInTransit(DataChangeTypes paramsChanged) const
+bool SoundsourceProcessor::IsParamInTransit(DataChangeTypes paramsChanged) const
 {
 	return ((m_paramSetCommandsInTransit & paramsChanged) != DCT_None);
 }
@@ -341,7 +341,7 @@ bool MainProcessor::IsParamInTransit(DataChangeTypes paramsChanged) const
 /**
  * Function called when the "Overview" button on the GUI is clicked.
  */
-void MainProcessor::OnOverviewButtonClicked()
+void SoundsourceProcessor::OnOverviewButtonClicked()
 {
 	COverviewManager* ovrMgr = COverviewManager::GetInstance();
 	if (ovrMgr)
@@ -359,7 +359,7 @@ void MainProcessor::OnOverviewButtonClicked()
  * so that the host can store this and later restore it using setStateInformation().
  * @param destData		Stream where the plugin parameters will be written to.
  */
-void MainProcessor::getStateInformation(MemoryBlock& destData)
+void SoundsourceProcessor::getStateInformation(MemoryBlock& destData)
 {
 	MemoryOutputStream stream(destData, true);
 
@@ -380,7 +380,7 @@ void MainProcessor::getStateInformation(MemoryBlock& destData)
 	stream.writeInt(m_pluginId);
 
 #ifdef JUCE_DEBUG
-	PushDebugMessage("MainProcessor::getStateInformation");
+	PushDebugMessage("SoundsourceProcessor::getStateInformation");
 #endif
 }
 
@@ -388,14 +388,14 @@ void MainProcessor::getStateInformation(MemoryBlock& destData)
  * This method is called when project is loaded, or when a snapshot is recalled.
  * Use this method to restore your parameters from this memory block,
  * whose contents will have been created by the getStateInformation() call.
- * @sa MainProcessor::DisablePollingForTicks()
+ * @sa SoundsourceProcessor::DisablePollingForTicks()
  * @param data			Stream where the plugin parameters will be read from.
  * @param sizeInBytes	Size of stream buffer.
  */
-void MainProcessor::setStateInformation(const void* data, int sizeInBytes)
+void SoundsourceProcessor::setStateInformation(const void* data, int sizeInBytes)
 {
 #ifdef JUCE_DEBUG
-	PushDebugMessage("MainProcessor::setStateInformation");
+	PushDebugMessage("SoundsourceProcessor::setStateInformation");
 #endif
 
 	MemoryInputStream stream(data, static_cast<size_t> (sizeInBytes), false);
@@ -449,7 +449,7 @@ void MainProcessor::setStateInformation(const void* data, int sizeInBytes)
  * @param changeSource	The application module which is causing the property change.
  * @param newMode	The new OSC communication mode.
  */
-void MainProcessor::SetComsMode(DataChangeSource changeSource, ComsMode newMode)
+void SoundsourceProcessor::SetComsMode(DataChangeSource changeSource, ComsMode newMode)
 {
 	if (m_comsMode != newMode)
 	{
@@ -475,7 +475,7 @@ void MainProcessor::SetComsMode(DataChangeSource changeSource, ComsMode newMode)
  * Restore the Plugin's OSC Rx/Tx mode to whatever it was before going into Bypass.
  * @param changeSource	The application module which is causing the property change.
  */
-void MainProcessor::RestoreComsMode(DataChangeSource changeSource)
+void SoundsourceProcessor::RestoreComsMode(DataChangeSource changeSource)
 {
 	if (m_comsModeWhenNotBypassed != CM_Off)
 		SetComsMode(changeSource, m_comsModeWhenNotBypassed);
@@ -485,7 +485,7 @@ void MainProcessor::RestoreComsMode(DataChangeSource changeSource)
  * Get the current OSC communication mode (either sending or receiving).
  * @return The current OSC communication mode.
  */
-ComsMode MainProcessor::GetComsMode() const
+ComsMode SoundsourceProcessor::GetComsMode() const
 {
 	return m_comsMode;
 }
@@ -495,7 +495,7 @@ ComsMode MainProcessor::GetComsMode() const
  * @param changeSource	The application module which is causing the property change.
  * @param mappingId		The new coordinate mapping ID
  */
-void MainProcessor::SetMappingId(DataChangeSource changeSource, int mappingId)
+void SoundsourceProcessor::SetMappingId(DataChangeSource changeSource, int mappingId)
 {
 	if (m_mappingId != mappingId)
 	{
@@ -521,7 +521,7 @@ void MainProcessor::SetMappingId(DataChangeSource changeSource, int mappingId)
  * Getter function for the coordinate mapping Id
  * @return	The current coordinate mapping ID
  */
-int MainProcessor::GetMappingId() const
+int SoundsourceProcessor::GetMappingId() const
 {
 	return m_mappingId;
 }
@@ -531,7 +531,7 @@ int MainProcessor::GetMappingId() const
  * @param changeSource	The application module which is causing the property change.
  * @param sourceId	The new ID
  */
-void MainProcessor::SetSourceId(DataChangeSource changeSource, SourceId sourceId)
+void SoundsourceProcessor::SetSourceId(DataChangeSource changeSource, SourceId sourceId)
 {
 	if (m_sourceId != sourceId)
 	{
@@ -547,7 +547,7 @@ void MainProcessor::SetSourceId(DataChangeSource changeSource, SourceId sourceId
  * Getter function for the source Id
  * @return	The current source ID
  */
-SourceId MainProcessor::GetSourceId() const
+SourceId SoundsourceProcessor::GetSourceId() const
 {
 	return m_sourceId;
 }
@@ -557,7 +557,7 @@ SourceId MainProcessor::GetSourceId() const
  * @param changeSource	The application module which is causing the property change.
  * @param ipAddress	The new IP address as a string
  */
-void MainProcessor::SetIpAddress(DataChangeSource changeSource, String ipAddress)
+void SoundsourceProcessor::SetIpAddress(DataChangeSource changeSource, String ipAddress)
 {
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
@@ -568,7 +568,7 @@ void MainProcessor::SetIpAddress(DataChangeSource changeSource, String ipAddress
 * Getter function for the IP address
 * @return	The current IP address as a string
 */
-String MainProcessor::GetIpAddress() const
+String SoundsourceProcessor::GetIpAddress() const
 {
 	String ipAddress;
 	CController* ctrl = CController::GetInstance();
@@ -583,7 +583,7 @@ String MainProcessor::GetIpAddress() const
  * @param changeSource	The application module which is causing the property change.
  * @param oscMsgRate	The interval at which OSC messages are sent, in ms.
  */
-void MainProcessor::SetMessageRate(DataChangeSource changeSource, int oscMsgRate)
+void SoundsourceProcessor::SetMessageRate(DataChangeSource changeSource, int oscMsgRate)
 {
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
@@ -594,7 +594,7 @@ void MainProcessor::SetMessageRate(DataChangeSource changeSource, int oscMsgRate
  * Getter function for the send rate used in the outgoing OSC messages.
  * @return	The interval at which OSC messages are sent, in ms.
  */
-int MainProcessor::GetMessageRate() const
+int SoundsourceProcessor::GetMessageRate() const
 {
 	int rate = 0;
 	CController* ctrl = CController::GetInstance();
@@ -608,7 +608,7 @@ int MainProcessor::GetMessageRate() const
  * Getter function for the last OSCSender connection status.
  * @return	True if the last message attempted by the OSCSender was successful, false if it failed.
  */
-bool MainProcessor::GetOnline() const
+bool SoundsourceProcessor::GetOnline() const
 {
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
@@ -625,7 +625,7 @@ bool MainProcessor::GetOnline() const
  * @param oscMsgRate	New interval for OSC messages, in milliseconds.
  * @param newMode		New OSC communication mode (Rx/Tx).
  */
-void MainProcessor::InitializeSettings(int sourceId, int mappingId, String ipAddress, int oscMsgRate, ComsMode newMode)
+void SoundsourceProcessor::InitializeSettings(int sourceId, int mappingId, String ipAddress, int oscMsgRate, ComsMode newMode)
 {
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
@@ -648,7 +648,7 @@ void MainProcessor::InitializeSettings(int sourceId, int mappingId, String ipAdd
  * The default implementation of this callback will do nothing.
  * @param properties	A struct containing information about the DAW track inside which your AudioProcessor is loaded.
  */
-void MainProcessor::updateTrackProperties(const TrackProperties& properties)
+void SoundsourceProcessor::updateTrackProperties(const TrackProperties& properties)
 {
 	m_pluginDisplayName = properties.name;
 
@@ -660,7 +660,7 @@ void MainProcessor::updateTrackProperties(const TrackProperties& properties)
  * Returns the parameter that controls the AudioProcessor's bypass state. 
  * @return	The bypass parameter.
  */
-AudioProcessorParameter* MainProcessor::getBypassParameter() const
+AudioProcessorParameter* SoundsourceProcessor::getBypassParameter() const
 {
 	return m_bypassParam;
 }
@@ -669,7 +669,7 @@ AudioProcessorParameter* MainProcessor::getBypassParameter() const
  * Getter function for the current bypass status of the plugin.
  * @return	True for bypass (no OSC communication), false for normal OSC operation.
  */
-bool MainProcessor::GetBypass() const
+bool SoundsourceProcessor::GetBypass() const
 {
 	return (m_bypassParam->getIndex() == 1);
 }
@@ -679,7 +679,7 @@ bool MainProcessor::GetBypass() const
  * Helper method to append a message onto the debugging buffer. This buffer can then be flushed with FlushDebugMessages().
  * @param message Message to be printed. A timestamp will automatically be prepended.
  */
-void MainProcessor::PushDebugMessage(String message)
+void SoundsourceProcessor::PushDebugMessage(String message)
 {
 	if (message.isNotEmpty())
 	{
@@ -695,7 +695,7 @@ void MainProcessor::PushDebugMessage(String message)
  * Helper method to get the contents of the debug message buffer. This call also clears the buffer.
  * @ret		Messages to be printed, one per line. 
  */
-String MainProcessor::FlushDebugMessages()
+String SoundsourceProcessor::FlushDebugMessages()
 {
 	String ret(m_debugMessageBuffer);
 	m_debugMessageBuffer.clear();
@@ -717,7 +717,7 @@ String MainProcessor::FlushDebugMessages()
  * @param parameterIndex	Index of the plugin parameter being changed.
  * @param newValue			New parameter value, always between 0.0f and 1.0f.
  */
-void MainProcessor::parameterValueChanged(int parameterIndex, float newValue)
+void SoundsourceProcessor::parameterValueChanged(int parameterIndex, float newValue)
 {
 	DataChangeTypes changed = DCT_None;
 
@@ -781,7 +781,7 @@ void MainProcessor::parameterValueChanged(int parameterIndex, float newValue)
  * @param parameterIndex	Index of the plugin parameter being changed.
  * @param gestureIsStarting	True if starting, false if ending.
  */
-void MainProcessor::parameterGestureChanged(int parameterIndex, bool gestureIsStarting)
+void SoundsourceProcessor::parameterGestureChanged(int parameterIndex, bool gestureIsStarting)
 {
 	ignoreUnused(parameterIndex);
 	ignoreUnused(gestureIsStarting);
@@ -797,7 +797,7 @@ void MainProcessor::parameterGestureChanged(int parameterIndex, bool gestureIsSt
  * Returns the name of this processor.
  * @return The plugin name.
  */
-const String MainProcessor::getName() const
+const String SoundsourceProcessor::getName() const
 {
 	return JUCEApplication::getInstance()->getApplicationName();
 }
@@ -806,7 +806,7 @@ const String MainProcessor::getName() const
  * Returns true if the processor wants midi messages.
  * @return	True if the processor wants midi messages.
  */
-bool MainProcessor::acceptsMidi() const
+bool SoundsourceProcessor::acceptsMidi() const
 {
 #if JucePlugin_WantsMidiInput
 	return true;
@@ -819,7 +819,7 @@ bool MainProcessor::acceptsMidi() const
  * Returns true if the processor produces midi messages.
  * @return	True if the processor produces midi messages.
  */
-bool MainProcessor::producesMidi() const
+bool SoundsourceProcessor::producesMidi() const
 {
 #if JucePlugin_ProducesMidiOutput
 	return true;
@@ -833,7 +833,7 @@ bool MainProcessor::producesMidi() const
  * @return	Zero, since no audio delay is introduced.
  */
 
-double MainProcessor::getTailLengthSeconds() const
+double SoundsourceProcessor::getTailLengthSeconds() const
 {
 	return 0.0;
 }
@@ -843,7 +843,7 @@ double MainProcessor::getTailLengthSeconds() const
  * The value returned must be valid as soon as this object is created, and must not change over its lifetime.
  * @return Number of preset programs the filter supports. This value shouldn't be less than 1.
  */
-int MainProcessor::getNumPrograms()
+int SoundsourceProcessor::getNumPrograms()
 {
 	return 1;
 }
@@ -852,7 +852,7 @@ int MainProcessor::getNumPrograms()
  * Returns the number of the currently active program.
  * @return Returns the number of the currently active program.
  */
-int MainProcessor::getCurrentProgram()
+int SoundsourceProcessor::getCurrentProgram()
 {
 	return 0;
 }
@@ -861,7 +861,7 @@ int MainProcessor::getCurrentProgram()
  * Called by the host to change the current program.
  * @param index		New program index.
  */
-void MainProcessor::setCurrentProgram(int index)
+void SoundsourceProcessor::setCurrentProgram(int index)
 {
 	ignoreUnused(index);
 }
@@ -871,7 +871,7 @@ void MainProcessor::setCurrentProgram(int index)
  * @param index		Index of the desired program
  * @return			Desired program name.
  */
-const String MainProcessor::getProgramName(int index)
+const String SoundsourceProcessor::getProgramName(int index)
 {
 	ignoreUnused(index);
 	return m_pluginDisplayName;
@@ -882,7 +882,7 @@ const String MainProcessor::getProgramName(int index)
  * @param index		Index of the desired program
  * @param newName	Desired new program name.
  */
-void MainProcessor::changeProgramName(int index, const String& newName)
+void SoundsourceProcessor::changeProgramName(int index, const String& newName)
 {
 	ignoreUnused(index);
 	m_pluginDisplayName = newName;
@@ -901,7 +901,7 @@ void MainProcessor::changeProgramName(int index, const String& newName)
  *							a buggy host exceeds this value. The actual block sizes that the host uses may be different each time
  *							the callback happens: completely variable block sizes can be expected from some hosts.
  */
-void MainProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
+void SoundsourceProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
 	ignoreUnused(sampleRate, samplesPerBlock);
 }
@@ -910,7 +910,7 @@ void MainProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
  * Called after playback has stopped, to let the filter free up any resources it no longer needs.
  * When playback stops, you can use this as an opportunity to free up any spare memory, etc.
  */
-void MainProcessor::releaseResources()
+void SoundsourceProcessor::releaseResources()
 {
 }
 
@@ -922,7 +922,7 @@ void MainProcessor::releaseResources()
  * @param layouts	Bus channel layouts to check.
  * @returns			True if a given layout is supported by this plugin.
  */
-bool MainProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
+bool SoundsourceProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
 {
 	ignoreUnused(layouts);
 	return true;
@@ -941,7 +941,7 @@ bool MainProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
  *						to be the filter's midi output. This means that your filter should be careful to clear any incoming
  *						messages from the array if it doesn't want them to be passed-on.
  */
-void MainProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
+void SoundsourceProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
 	ignoreUnused(buffer, midiMessages);
 }
@@ -950,7 +950,7 @@ void MainProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffer& midiMess
  * This function returns true if the plugin can create an editor component.
  * @return True.
  */
-bool MainProcessor::hasEditor() const
+bool SoundsourceProcessor::hasEditor() const
 {
 	return true;
 }
@@ -960,9 +960,9 @@ bool MainProcessor::hasEditor() const
  * This can return nullptr if you want a UI-less filter, in which case the host may create a generic UI that lets the user twiddle the parameters directly.
  * @return	A pointer to the newly created editor component.
  */
-AudioProcessorEditor* MainProcessor::createEditor()
+AudioProcessorEditor* SoundsourceProcessor::createEditor()
 {
-	AudioProcessorEditor* editor = new MainProcessorEditor(*this);
+	AudioProcessorEditor* editor = new SoundsourceProcessorEditor(*this);
 
 	// Initialize GUI with current IP address, etc.
 	SetParameterChanged(DCS_Host, (DCT_PluginInstanceConfig | DCT_OscConfig | DCT_AutomationParameters));
@@ -980,5 +980,5 @@ AudioProcessorEditor* MainProcessor::createEditor()
  */
 AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-	return new SoundscapeApp::MainProcessor();
+	return new SoundscapeApp::SoundsourceProcessor();
 }

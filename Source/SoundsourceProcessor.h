@@ -38,7 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SoundscapeBridgeAppCommon.h"
 
 
-namespace SoundscapeApp
+namespace SoundscapeBridgeApp
 {
 
 
@@ -239,4 +239,4 @@ protected:
 };
 
 
-} // namespace SoundscapeApp
+} // namespace SoundscapeBridgeApp

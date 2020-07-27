@@ -36,7 +36,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Version.h"
 
 
-namespace SoundscapeApp
+namespace SoundscapeBridgeApp
 {
 
 
@@ -212,4 +212,4 @@ juce::uint32 CVersion::ToInt() const
 }
 
 
-} // namespace SoundscapeApp
+} // namespace SoundscapeBridgeApp

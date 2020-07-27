@@ -38,7 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <JuceHeader.h>
 
 
-namespace SoundscapeApp
+namespace SoundscapeBridgeApp
 {
 
 
@@ -118,4 +118,4 @@ static constexpr ComsMode CM_Sync =			(CM_Rx | CM_Tx); //< The Plug-in sends SET
  */
 static constexpr PluginId INVALID_PLUGIN_ID = 0xFFFFFFFF;
 
-} // namespace SoundscapeApp
+} // namespace SoundscapeBridgeApp

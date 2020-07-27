@@ -40,7 +40,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Gui.h"
 
 
-namespace SoundscapeApp
+namespace SoundscapeBridgeApp
 {
 
 
@@ -375,4 +375,4 @@ void CSurfaceMultiSlider::UpdatePositions(PositionCache positions)
 }
 
 
-} // namespace SoundscapeApp
+} // namespace SoundscapeBridgeApp

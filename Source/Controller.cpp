@@ -38,7 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SoundsourceProcessor.h"
 
 
-namespace SoundscapeApp
+namespace SoundscapeBridgeApp
 {
 
 
@@ -820,4 +820,4 @@ void CController::timerCallback()
 }
 
 
-} // namespace SoundscapeApp
+} // namespace SoundscapeBridgeApp

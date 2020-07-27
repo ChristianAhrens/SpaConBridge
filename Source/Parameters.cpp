@@ -36,7 +36,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Parameters.h"
 
 
-namespace SoundscapeApp
+namespace SoundscapeBridgeApp
 {
 
 
@@ -307,4 +307,4 @@ void CAudioParameterChoice::SetParameterValue(float newValue)
 }
 
 
-} // namespace SoundscapeApp
+} // namespace SoundscapeBridgeApp

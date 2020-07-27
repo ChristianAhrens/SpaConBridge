@@ -38,7 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <JuceHeader.h>
 
 
-namespace SoundscapeApp
+namespace SoundscapeBridgeApp
 {
 
 
@@ -146,4 +146,4 @@ protected:
 };
 
 
-} // namespace SoundscapeApp
+} // namespace SoundscapeBridgeApp

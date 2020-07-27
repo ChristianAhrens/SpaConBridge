@@ -40,7 +40,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <map>
 
 
-namespace SoundscapeApp
+namespace SoundscapeBridgeApp
 {
 
 
@@ -103,4 +103,4 @@ private:
 };
 
 
-} // namespace SoundscapeApp
+} // namespace SoundscapeBridgeApp

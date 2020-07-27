@@ -39,7 +39,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Parameters.h"
 
 
-namespace SoundscapeApp
+namespace SoundscapeBridgeApp
 {
 
 
@@ -562,4 +562,4 @@ void SoundsourceProcessorEditor::UpdateGui(bool init)
 }
 
 
-} // namespace SoundscapeApp
+} // namespace SoundscapeBridgeApp

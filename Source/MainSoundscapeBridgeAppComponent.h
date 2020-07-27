@@ -19,17 +19,17 @@
 //==============================================================================
 /*
 */
-class MainSoundscapeAppComponent  : public juce::Component
+class MainSoundscapeBridgeAppComponent  : public juce::Component
 {
 public:
-    MainSoundscapeAppComponent();
-    ~MainSoundscapeAppComponent() override;
+    MainSoundscapeBridgeAppComponent();
+    ~MainSoundscapeBridgeAppComponent() override;
 
     void paint (juce::Graphics&) override;
     void resized() override;
 
 private:
-    SoundscapeApp::COverviewComponent *m_overview{ nullptr };
+    SoundscapeBridgeApp::COverviewComponent *m_overview{ nullptr };
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainSoundscapeAppComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainSoundscapeBridgeAppComponent)
 };

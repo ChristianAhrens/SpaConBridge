@@ -37,7 +37,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SoundscapeBridgeAppCommon.h"
 
 
-namespace SoundscapeApp
+namespace SoundscapeBridgeApp
 {
 
 
@@ -206,4 +206,4 @@ void CAboutOverlayGeneric::resized()
 }
 
 
-} // namespace SoundscapeApp
+} // namespace SoundscapeBridgeApp

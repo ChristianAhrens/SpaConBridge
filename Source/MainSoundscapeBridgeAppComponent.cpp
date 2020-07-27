@@ -9,14 +9,14 @@
 */
 
 #include <JuceHeader.h>
-#include "MainSoundscapeAppComponent.h"
+#include "MainSoundscapeBridgeAppComponent.h"
 
 #include "../submodules/JUCE-AppBasics/Source/iOS_utils.hpp"
 
 //==============================================================================
-MainSoundscapeAppComponent::MainSoundscapeAppComponent()
+MainSoundscapeBridgeAppComponent::MainSoundscapeBridgeAppComponent()
 {
-    SoundscapeApp::COverviewManager* ovrMgr = SoundscapeApp::COverviewManager::GetInstance();
+    SoundscapeBridgeApp::COverviewManager* ovrMgr = SoundscapeBridgeApp::COverviewManager::GetInstance();
     if (ovrMgr)
     {
         m_overview = ovrMgr->GetOverview();
@@ -26,17 +26,17 @@ MainSoundscapeAppComponent::MainSoundscapeAppComponent()
     setSize(896, 414);
 }
 
-MainSoundscapeAppComponent::~MainSoundscapeAppComponent()
+MainSoundscapeBridgeAppComponent::~MainSoundscapeBridgeAppComponent()
 {
 }
 
-void MainSoundscapeAppComponent::paint (juce::Graphics& g)
+void MainSoundscapeBridgeAppComponent::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll(SoundscapeApp::CDbStyle::GetDbColor(SoundscapeApp::CDbStyle::DarkColor));
+    g.fillAll(SoundscapeBridgeApp::CDbStyle::GetDbColor(SoundscapeBridgeApp::CDbStyle::DarkColor));
 }
 
-void MainSoundscapeAppComponent::resized()
+void MainSoundscapeBridgeAppComponent::resized()
 {
     auto safety = JUCEAppBasics::iOS_utils::getDeviceSafetyMargins();
     auto safeBounds = getLocalBounds();

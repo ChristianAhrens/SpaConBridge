@@ -1,14 +1,14 @@
 #include <JuceHeader.h>
 
-#include "MainSoundscapeAppComponent.h"
+#include "MainSoundscapeBridgeAppComponent.h"
 
 
 //==============================================================================
-class SoundscapeAppApplication  : public JUCEApplication
+class SoundscapeBridgeAppApplication  : public JUCEApplication
 {
 public:
     //==============================================================================
-    SoundscapeAppApplication() {}
+    SoundscapeBridgeAppApplication() {}
 
     const String getApplicationName() override       { return ProjectInfo::projectName; }
     const String getApplicationVersion() override    { return ProjectInfo::versionString; }
@@ -51,7 +51,7 @@ public:
                                                     .findColour (ResizableWindow::backgroundColourId),
                                                     DocumentWindow::allButtons)
         {
-            m_mainComponent = std::make_unique<MainSoundscapeAppComponent>();
+            m_mainComponent = std::make_unique<MainSoundscapeBridgeAppComponent>();
 
             setUsingNativeTitleBar (true);
             setContentOwned (m_mainComponent.get(), true);
@@ -82,7 +82,7 @@ public:
         */
 
     private:
-        std::unique_ptr<MainSoundscapeAppComponent>  m_mainComponent;
+        std::unique_ptr<MainSoundscapeBridgeAppComponent>  m_mainComponent;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)
     };
@@ -93,4 +93,4 @@ private:
 
 //==============================================================================
 // This macro generates the main() routine that launches the app.
-START_JUCE_APPLICATION (SoundscapeAppApplication)
+START_JUCE_APPLICATION (SoundscapeBridgeAppApplication)

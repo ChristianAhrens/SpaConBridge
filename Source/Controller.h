@@ -39,7 +39,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../submodules/RemoteProtocolBridge/Source/ProcessingEngineNode.h"
 
 
-namespace SoundscapeApp
+namespace SoundscapeBridgeApp
 {
 
 
@@ -151,4 +151,4 @@ protected:
 };
 
 
-} // namespace SoundscapeApp
+} // namespace SoundscapeBridgeApp

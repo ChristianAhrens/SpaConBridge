@@ -42,7 +42,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Version.h"		//<USE CVersion
 
 
-namespace SoundscapeApp
+namespace SoundscapeBridgeApp
 {
 
 
@@ -971,7 +971,7 @@ AudioProcessorEditor* SoundsourceProcessor::createEditor()
 }
 
 
-} // namespace SoundscapeApp
+} // namespace SoundscapeBridgeApp
 
 
 /**
@@ -980,5 +980,5 @@ AudioProcessorEditor* SoundsourceProcessor::createEditor()
  */
 AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-	return new SoundscapeApp::SoundsourceProcessor();
+	return new SoundscapeBridgeApp::SoundsourceProcessor();
 }

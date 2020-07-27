@@ -41,7 +41,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <utility>	//<USE std::unique_ptr
 
 
-namespace SoundscapeApp
+namespace SoundscapeBridgeApp
 {
 
 
@@ -152,4 +152,4 @@ private:
 };
 
 
-} // namespace SoundscapeApp
+} // namespace SoundscapeBridgeApp

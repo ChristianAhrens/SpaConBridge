@@ -40,7 +40,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SoundscapeBridgeAppCommon.h"
 
 
-namespace SoundscapeApp
+namespace SoundscapeBridgeApp
 {
 
 
@@ -569,4 +569,4 @@ private:
 };
 
 
-} // namespace SoundscapeApp
+} // namespace SoundscapeBridgeApp

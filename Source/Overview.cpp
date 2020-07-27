@@ -42,7 +42,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../submodules/JUCE-AppBasics/Source/Image_utils.hpp"
 
 
-namespace SoundscapeApp
+namespace SoundscapeBridgeApp
 {
 
 
@@ -224,7 +224,7 @@ COverviewComponent::COverviewComponent()
 	addAndMakeVisible(m_rateLabel.get());
 
 	// d&b logo and Plugin version label
-	m_appLogo = ImageCache::getFromMemory(BinaryData::SoundscapeApp_png, BinaryData::SoundscapeApp_pngSize);
+	m_appLogo = ImageCache::getFromMemory(BinaryData::SoundscapeBridgeApp_png, BinaryData::SoundscapeBridgeApp_pngSize);
 	m_versionLabel = std::make_unique<CLabel>("PluginVersion", String(JUCE_STRINGIFY(JUCE_APP_VERSION)));
 	m_versionLabel->setFont(Font(11));
 	addAndMakeVisible(m_versionLabel.get());
@@ -787,7 +787,7 @@ void COverviewTableContainer::buttonClicked(Button *button)
 		{
 			if (addInstance)
 			{
-				auto processor = std::make_unique<SoundscapeApp::SoundsourceProcessor>();
+				auto processor = std::make_unique<SoundscapeBridgeApp::SoundsourceProcessor>();
 				processor.release(); // let go of the instance here, we do not want to destroy it, since it lives as member of CCOntroller when constructed
 			}
 			else
@@ -1607,7 +1607,7 @@ void CTableModelComponent::selectedRowsChanged(int lastRowSelected)
 	{
 		if (m_table.getSelectedRows().isEmpty() || m_table.getSelectedRows().size() > 1)
 		{
-			currentSelectedProcessorChanged(SoundscapeApp::INVALID_PLUGIN_ID);
+			currentSelectedProcessorChanged(SoundscapeBridgeApp::INVALID_PLUGIN_ID);
 		}
 		else
 		{
@@ -2036,4 +2036,4 @@ void CEditableLabelContainer::SetRow(int newRow)
 }
 
 
-} // namespace SoundscapeApp
+} // namespace SoundscapeBridgeApp

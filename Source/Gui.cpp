@@ -36,7 +36,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Gui.h"
 
 
-namespace SoundscapeApp
+namespace SoundscapeBridgeApp
 {
 
 
@@ -885,4 +885,4 @@ AOverlay::OverlayType AOverlay::GetOverlayType() const
 }
 
 
-} // namespace SoundscapeApp
+} // namespace SoundscapeBridgeApp

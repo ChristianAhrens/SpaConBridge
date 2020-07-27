@@ -228,6 +228,20 @@ ProcessorId CController::AddProcessor(SoundsourceProcessor* p)
 	p->PushDebugMessage("CController::AddProcessor: #" + String(newProcessorId));
 #endif
 
+	auto protocolData = m_processingConfig.GetProtocolData(DEFAULT_PROCNODE_ID, DEFAULT_PROCPROT_A_ID);
+	for (int roi = ROI_SoundObject_Position_XY; roi < ROI_UserMAX; roi++)
+	{
+		RemoteObject newSourceObject;
+		newSourceObject.Id = static_cast<RemoteObjectIdentifier>(roi);
+		newSourceObject.Addr.first = static_cast<juce::int16>(p->GetSourceId());
+		newSourceObject.Addr.second = static_cast<juce::int16>(p->GetMappingId());
+
+		if (!protocolData.RemoteObjects.contains(newSourceObject))
+			protocolData.RemoteObjects.add(newSourceObject);
+	}
+	m_processingConfig.SetProtocolData(DEFAULT_PROCNODE_ID, DEFAULT_PROCPROT_A_ID, protocolData);
+	m_processingNode.SetNodeConfiguration(m_processingConfig, DEFAULT_PROCNODE_ID);
+
 	return newProcessorId;
 }
 
@@ -237,6 +251,20 @@ ProcessorId CController::AddProcessor(SoundsourceProcessor* p)
  */
 void CController::RemoveProcessor(SoundsourceProcessor* p)
 {
+	auto protocolData = m_processingConfig.GetProtocolData(DEFAULT_PROCNODE_ID, DEFAULT_PROCPROT_A_ID);
+	for (int roi = ROI_SoundObject_Position_XY; roi < ROI_UserMAX; roi++)
+	{
+		RemoteObject newSourceObject;
+		newSourceObject.Id = static_cast<RemoteObjectIdentifier>(roi);
+		newSourceObject.Addr.first = static_cast<juce::int16>(p->GetSourceId());
+		newSourceObject.Addr.second = static_cast<juce::int16>(p->GetMappingId());
+
+		if (protocolData.RemoteObjects.contains(newSourceObject))
+			protocolData.RemoteObjects.remove(protocolData.RemoteObjects.removeAllInstancesOf(newSourceObject));
+	}
+	m_processingConfig.SetProtocolData(DEFAULT_PROCNODE_ID, DEFAULT_PROCPROT_A_ID, protocolData);
+	m_processingNode.SetNodeConfiguration(m_processingConfig, DEFAULT_PROCNODE_ID);
+
 	if (m_processors.size() > 1)
 	{
 		int idx = m_processors.indexOf(p);
@@ -414,27 +442,24 @@ void CController::InitGlobalSettings(DataChangeSource changeSource, String ipAdd
  */
 void CController::CreateNodeConfiguration()
 {
-	ProcessingEngineConfig::ProtocolData newProtocol;
-	newProtocol.Id = DEFAULT_PROCPROT_A_ID;
-	newProtocol.IpAddress = PROTOCOL_DEFAULT_IP;
-	newProtocol.ClientPort = RX_PORT_DS100;
-	newProtocol.HostPort = RX_PORT_HOST;
-	newProtocol.UsesActiveRemoteObjects = true;
-	newProtocol.Type = ProtocolType::PT_OSCProtocol;
-
 	ProcessingEngineConfig::ObjectHandlingData newObjectHandling;
 	newObjectHandling.Mode = ObjectHandlingMode::OHM_Bypass;
 	newObjectHandling.ACnt = 1;
 	newObjectHandling.BCnt = 0;
 	newObjectHandling.Prec = 1.0f;
-
 	ProcessingEngineConfig::NodeData newNode;
 	newNode.Id = DEFAULT_PROCNODE_ID;
 	newNode.ObjectHandling = newObjectHandling;
-	newNode.RoleAProtocols.add(newProtocol.Id);
-
+	newNode.RoleAProtocols.add(DEFAULT_PROCPROT_A_ID);
 	m_processingConfig.SetNode(newNode.Id, newNode);
-	m_processingConfig.SetProtocolData(newNode.Id, newProtocol.Id, newProtocol);
+
+	auto protocolData = m_processingConfig.GetProtocolData(DEFAULT_PROCNODE_ID, DEFAULT_PROCPROT_A_ID);
+	protocolData.IpAddress = PROTOCOL_DEFAULT_IP;
+	protocolData.ClientPort = RX_PORT_DS100;
+	protocolData.HostPort = RX_PORT_HOST;
+	protocolData.UsesActiveRemoteObjects = true;
+	protocolData.Type = ProtocolType::PT_OSCProtocol;
+	m_processingConfig.SetProtocolData(DEFAULT_PROCNODE_ID, DEFAULT_PROCPROT_A_ID, protocolData);
 }
 
 /**

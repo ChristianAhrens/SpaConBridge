@@ -74,7 +74,7 @@ private:
 class CSurfaceMultiSlider  : public Component
 {
 public:
-	typedef std::map<PluginId, std::pair<int, Point<float>>> PositionCache;
+	typedef std::map<ProcessorId, std::pair<int, Point<float>>> PositionCache;
 
 	CSurfaceMultiSlider();
 	~CSurfaceMultiSlider() override;
@@ -88,9 +88,9 @@ public:
 
 private:
 	/**
-	 * PluginId of the currently selected knob, if any.
+	 * ProcessorId of the currently selected knob, if any.
 	 */
-	PluginId m_selected;
+	ProcessorId m_selected;
 
 	/**
 	 * To save us from iterating over all Plug-ins at every click, cache the source positions.

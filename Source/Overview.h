@@ -266,7 +266,7 @@ public:
 	void UpdateGui(bool init) override;
 	void buttonClicked(Button*) override;
 
-	void onCurrentSelectedProcessorChanged(PluginId selectedPluginId);
+	void onCurrentSelectedProcessorChanged(ProcessorId selectedProcessorId);
 
 protected:
 	void paint(Graphics&) override;
@@ -281,7 +281,7 @@ private:
 	/**
 	 * The processor editor component corresponding to the selected row
 	 */
-	std::unique_ptr<SoundsourceProcessorEditor> m_selectedPluginInstanceEditor;
+	std::unique_ptr<SoundsourceProcessorEditor> m_selectedProcessorInstanceEditor;
 
 	/**
 	 * Button to add a processor instance
@@ -388,12 +388,12 @@ public:
 	CTableModelComponent();
 	~CTableModelComponent() override;
 
-	static bool LessThanSourceId(PluginId pId1, PluginId pId2);
-	static bool LessThanMapping(PluginId pId1, PluginId pId2);
-	static bool LessThanComsMode(PluginId pId1, PluginId pId2);
+	static bool LessThanSourceId(ProcessorId pId1, ProcessorId pId2);
+	static bool LessThanMapping(ProcessorId pId1, ProcessorId pId2);
+	static bool LessThanComsMode(ProcessorId pId1, ProcessorId pId2);
 
-	PluginId GetPluginIdForRow(int rowNumber);
-	std::vector<PluginId> GetPluginIdsForRows(std::vector<int> rowNumbers);
+	ProcessorId GetProcessorIdForRow(int rowNumber);
+	std::vector<ProcessorId> GetProcessorIdsForRows(std::vector<int> rowNumbers);
 	std::vector<int> GetSelectedRows() const;
 	void SelectAllRows(bool all);
 	void RecreateTableRowIds();
@@ -416,7 +416,7 @@ public:
 	void resized() override;
 
 	// Callback functions
-	std::function<void(PluginId)>	currentSelectedProcessorChanged;
+	std::function<void(ProcessorId)>	currentSelectedProcessorChanged;
 
 private:
 	/**
@@ -427,7 +427,7 @@ private:
 	/**
 	 * Local list of Plug-in instance IDs, one for each row in the table.
 	 */
-	std::vector<PluginId> m_ids;
+	std::vector<ProcessorId> m_ids;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CTableModelComponent)
 };

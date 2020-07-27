@@ -70,7 +70,7 @@ public:
 	SoundsourceProcessor();
 	~SoundsourceProcessor() override;
 
-	int GetPluginId() const;
+	int GetProcessorId() const;
 
 	void InitializeSettings(SourceId sourceId, int mappingId, String ipAddress, int oscMsgRate, ComsMode newMode);
 
@@ -196,10 +196,10 @@ protected:
 	SourceId					m_sourceId;
 
 	/**
-	 * Unique ID of this Plug-in instance. 
-	 * This is also this Plug-in's index within the CController::m_processors array.
+	 * Unique ID of this Processor instance. 
+	 * This is also this Processor's index within the CController::m_processors array.
 	 */
-	PluginId					m_pluginId;
+	ProcessorId					m_processorId;
 
 	/**
 	 * Keep track of which automation parameters have changed recently. 

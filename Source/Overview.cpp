@@ -643,7 +643,7 @@ COverviewTableContainer::COverviewTableContainer()
 {
 	// Create the table model/component.
 	m_overviewTable = std::make_unique<CTableModelComponent>();
-	m_overviewTable->currentSelectedProcessorChanged = [=](PluginId id) { this->onCurrentSelectedProcessorChanged(id); };
+	m_overviewTable->currentSelectedProcessorChanged = [=](ProcessorId id) { this->onCurrentSelectedProcessorChanged(id); };
 	addAndMakeVisible(m_overviewTable.get());
 
 	// Add/Remove Buttons
@@ -710,7 +710,7 @@ void COverviewTableContainer::resized()
 	if (isPortrait)
 	{
 		tableAndEditorFlex.flexDirection = FlexBox::Direction::column;
-		if (m_selectedPluginInstanceEditor)
+		if (m_selectedProcessorInstanceEditor)
 		{
 			tableMargin = FlexItem::Margin(8, 8, 4, 8);
 			editorMargin = FlexItem::Margin(4, 8, 0, 8);
@@ -721,7 +721,7 @@ void COverviewTableContainer::resized()
 	else
 	{
 		tableAndEditorFlex.flexDirection = FlexBox::Direction::row;
-		if (m_selectedPluginInstanceEditor)
+		if (m_selectedProcessorInstanceEditor)
 		{
 			tableMargin = FlexItem::Margin(8, 4, 0, 8);
 			editorMargin = FlexItem::Margin(8, 8, 0, 4);
@@ -732,10 +732,10 @@ void COverviewTableContainer::resized()
 
 	tableAndEditorFlex.justifyContent = FlexBox::JustifyContent::center;
 
-	if (m_selectedPluginInstanceEditor)
+	if (m_selectedProcessorInstanceEditor)
 	{
 		tableAndEditorFlex.items.add(FlexItem(*m_overviewTable).withFlex(1).withMargin(tableMargin));
-		tableAndEditorFlex.items.add(FlexItem(*m_selectedPluginInstanceEditor.get()).withFlex(1).withMargin(editorMargin));
+		tableAndEditorFlex.items.add(FlexItem(*m_selectedProcessorInstanceEditor.get()).withFlex(1).withMargin(editorMargin));
 	}
 	else
 		tableAndEditorFlex.items.add(FlexItem(*m_overviewTable).withFlex(1).withMargin(tableMargin));
@@ -795,10 +795,10 @@ void COverviewTableContainer::buttonClicked(Button *button)
 				auto const& processorIds = m_overviewTable->GetSelectedRows();
 
 				if (ctrl->GetProcessorCount() <= processorIds.size())
-					onCurrentSelectedProcessorChanged(INVALID_PLUGIN_ID);
+					onCurrentSelectedProcessorChanged(INVALID_PROCESSOR_ID);
 				else
 				{
-					PluginId nextStillExistingId = static_cast<PluginId>(ctrl->GetProcessorCount() - processorIds.size());
+					ProcessorId nextStillExistingId = static_cast<ProcessorId>(ctrl->GetProcessorCount() - processorIds.size());
 					m_overviewTable->selectedRowsChanged(nextStillExistingId);
 					//onCurrentSelectedProcessorChanged(nextStillExistingId);
 				}
@@ -816,14 +816,14 @@ void COverviewTableContainer::buttonClicked(Button *button)
 /**
  * Function to be called from model when the current selection has changed
  */
-void COverviewTableContainer::onCurrentSelectedProcessorChanged(PluginId selectedPluginId)
+void COverviewTableContainer::onCurrentSelectedProcessorChanged(ProcessorId selectedProcessorId)
 {
-	if (selectedPluginId == INVALID_PLUGIN_ID)
+	if (selectedProcessorId == INVALID_PROCESSOR_ID)
 	{
-		if (m_selectedPluginInstanceEditor)
+		if (m_selectedProcessorInstanceEditor)
 		{
-			removeChildComponent(m_selectedPluginInstanceEditor.get());
-			m_selectedPluginInstanceEditor.release();
+			removeChildComponent(m_selectedProcessorInstanceEditor.get());
+			m_selectedProcessorInstanceEditor.release();
 			resized();
 		}
 
@@ -834,10 +834,10 @@ void COverviewTableContainer::onCurrentSelectedProcessorChanged(PluginId selecte
 		CController* ctrl = CController::GetInstance();
 		if (ctrl)
 		{
-			auto processor = ctrl->GetProcessor(selectedPluginId);
-			m_selectedPluginInstanceEditor = std::make_unique<SoundsourceProcessorEditor>(*processor);
-			addAndMakeVisible(m_selectedPluginInstanceEditor.get());
-			m_selectedPluginInstanceEditor->UpdateGui(true);
+			auto processor = ctrl->GetProcessor(selectedProcessorId);
+			m_selectedProcessorInstanceEditor = std::make_unique<SoundsourceProcessorEditor>(*processor);
+			addAndMakeVisible(m_selectedProcessorInstanceEditor.get());
+			m_selectedProcessorInstanceEditor->UpdateGui(true);
 			resized();
 		}
 
@@ -1220,7 +1220,7 @@ CTableModelComponent::~CTableModelComponent()
  * @param rowNumber	The desired row number (starts at 0).
  * @return	The ID of the plugin instance at that row number, if any.
  */
-PluginId CTableModelComponent::GetPluginIdForRow(int rowNumber)
+ProcessorId CTableModelComponent::GetProcessorIdForRow(int rowNumber)
 {
 	if ((unsigned int)rowNumber > (m_ids.size() - 1))
 	{
@@ -1236,12 +1236,12 @@ PluginId CTableModelComponent::GetPluginIdForRow(int rowNumber)
  * @param rowNumbers	A list of desired row numbers.
  * @return	A list of IDs of the plugin instances at those rows.
  */
-std::vector<PluginId> CTableModelComponent::GetPluginIdsForRows(std::vector<int> rowNumbers)
+std::vector<ProcessorId> CTableModelComponent::GetProcessorIdsForRows(std::vector<int> rowNumbers)
 {
-	std::vector<PluginId> ids;
+	std::vector<ProcessorId> ids;
 	ids.reserve(rowNumbers.size());
 	for (std::size_t i = 0; i < rowNumbers.size(); ++i)
-		ids.push_back(GetPluginIdForRow(rowNumbers[i]));
+		ids.push_back(GetProcessorIdForRow(rowNumbers[i]));
 
 	return ids;
 }
@@ -1278,12 +1278,12 @@ void CTableModelComponent::SelectAllRows(bool all)
  * @param pId2	Id of the second plugin processor.
  * @return	True if the first plugin's SourceId is less than the second's.
  */
-bool CTableModelComponent::LessThanSourceId(PluginId pId1, PluginId pId2)
+bool CTableModelComponent::LessThanSourceId(ProcessorId pId1, ProcessorId pId2)
 {
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
 	{
-		if ((pId1 < (PluginId)ctrl->GetProcessorCount()) && (pId2 < (PluginId)ctrl->GetProcessorCount()))
+		if ((pId1 < (ProcessorId)ctrl->GetProcessorCount()) && (pId2 < (ProcessorId)ctrl->GetProcessorCount()))
 			return (ctrl->GetProcessor(pId1)->GetSourceId() < ctrl->GetProcessor(pId2)->GetSourceId());
 	}
 
@@ -1297,12 +1297,12 @@ bool CTableModelComponent::LessThanSourceId(PluginId pId1, PluginId pId2)
  * @param pId2	Id of the second plugin processor.
  * @return	True if the first plugin's MappingId is less than the second's.
  */
-bool CTableModelComponent::LessThanMapping(PluginId pId1, PluginId pId2)
+bool CTableModelComponent::LessThanMapping(ProcessorId pId1, ProcessorId pId2)
 {
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
 	{
-		if ((pId1 < (PluginId)ctrl->GetProcessorCount()) && (pId2 < (PluginId)ctrl->GetProcessorCount()))
+		if ((pId1 < (ProcessorId)ctrl->GetProcessorCount()) && (pId2 < (ProcessorId)ctrl->GetProcessorCount()))
 			return (ctrl->GetProcessor(pId1)->GetMappingId() < ctrl->GetProcessor(pId2)->GetMappingId());
 	}
 
@@ -1316,12 +1316,12 @@ bool CTableModelComponent::LessThanMapping(PluginId pId1, PluginId pId2)
  * @param pId2	Id of the second plugin processor.
  * @return	True if the first plugin's ComsMode is less than the second's.
  */
-bool CTableModelComponent::LessThanComsMode(PluginId pId1, PluginId pId2)
+bool CTableModelComponent::LessThanComsMode(ProcessorId pId1, ProcessorId pId2)
 {
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
 	{
-		if ((pId1 < (PluginId)ctrl->GetProcessorCount()) && (pId2 < (PluginId)ctrl->GetProcessorCount()))
+		if ((pId1 < (ProcessorId)ctrl->GetProcessorCount()) && (pId2 < (ProcessorId)ctrl->GetProcessorCount()))
 			return (ctrl->GetProcessor(pId1)->GetComsMode() < ctrl->GetProcessor(pId2)->GetComsMode());
 	}
 
@@ -1445,7 +1445,7 @@ void CTableModelComponent::paintCell(Graphics& g, int rowNumber, int columnId, i
 void CTableModelComponent::sortOrderChanged(int newSortColumnId, bool isForwards)
 {
 	// Remember row selection so it can be restored after sorting.
-	std::vector<PluginId> selectedPlugins = GetPluginIdsForRows(GetSelectedRows());
+	std::vector<ProcessorId> selectedPlugins = GetProcessorIdsForRows(GetSelectedRows());
 	m_table.deselectAllRows();
 
 	// Use a different helper sorting function depending on which column is selected for sorting.
@@ -1475,7 +1475,7 @@ void CTableModelComponent::sortOrderChanged(int newSortColumnId, bool isForwards
 
 	// Restore row selection after sorting order has been changed, BUT make sure that
 	// it is the same Plugins which are selected after the sorting, NOT the same rows.
-	for (PluginId pId : selectedPlugins)
+	for (ProcessorId pId : selectedPlugins)
 	{
 		int rowNo = static_cast<int>(std::find(m_ids.begin(), m_ids.end(), pId) - m_ids.begin());
 		m_table.selectRow(rowNo, true /* don't scroll */, false /* do not deselect other rows*/);
@@ -1607,11 +1607,11 @@ void CTableModelComponent::selectedRowsChanged(int lastRowSelected)
 	{
 		if (m_table.getSelectedRows().isEmpty() || m_table.getSelectedRows().size() > 1)
 		{
-			currentSelectedProcessorChanged(SoundscapeBridgeApp::INVALID_PLUGIN_ID);
+			currentSelectedProcessorChanged(SoundscapeBridgeApp::INVALID_PROCESSOR_ID);
 		}
 		else
 		{
-			currentSelectedProcessorChanged(GetPluginIdForRow(lastRowSelected));
+			currentSelectedProcessorChanged(GetProcessorIdForRow(lastRowSelected));
 		}
 	}
 }
@@ -1678,17 +1678,17 @@ void CComboBoxContainer::comboBoxChanged(ComboBox *comboBox)
 	}
 
 	// Get the IDs of the plugins on the selected rows.
-	std::vector<PluginId> pluginIds = m_owner.GetPluginIdsForRows(selectedRows);
+	std::vector<ProcessorId> ProcessorIds = m_owner.GetProcessorIdsForRows(selectedRows);
 
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
 	{
 		// New MappingID which should be applied to all plugins in the selected rows.
 		int newMapping = comboBox->getSelectedId();
-		for (std::size_t i = 0; i < pluginIds.size(); ++i)
+		for (std::size_t i = 0; i < ProcessorIds.size(); ++i)
 		{
 			// Set the value of the combobox to the current MappingID of the corresponding plugin.
-			SoundsourceProcessor* plugin = ctrl->GetProcessor(pluginIds[i]);
+			SoundsourceProcessor* plugin = ctrl->GetProcessor(ProcessorIds[i]);
 			if (plugin)
 				plugin->SetMappingId(DCS_Overview, newMapping);
 		}
@@ -1713,12 +1713,12 @@ void CComboBoxContainer::SetRow(int newRow)
 	m_row = newRow;
 
 	// Find the plugin instance corresponding to the given row number.
-	PluginId pluginId = m_owner.GetPluginIdForRow(newRow);
+	ProcessorId ProcessorId = m_owner.GetProcessorIdForRow(newRow);
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
 	{
 		// Set the value of the combobox to the current MappingID of the corresponding plugin.
-		const SoundsourceProcessor* plugin = ctrl->GetProcessor(pluginId);
+		const SoundsourceProcessor* plugin = ctrl->GetProcessor(ProcessorId);
 		if (plugin)
 			m_comboBox.setSelectedId(plugin->GetMappingId(), dontSendNotification);
 	}
@@ -1767,7 +1767,7 @@ void CTextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
 	}
 
 	// Get the IDs of the plugins on the selected rows.
-	std::vector<PluginId> pluginIds = m_owner.GetPluginIdsForRows(selectedRows);
+	std::vector<ProcessorId> ProcessorIds = m_owner.GetProcessorIdsForRows(selectedRows);
 
 	CController* ctrl = CController::GetInstance();
 	CTextEditor *myEditor = static_cast<CTextEditor*>(&textEditor);
@@ -1776,10 +1776,10 @@ void CTextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
 		// New SourceID which should be applied to all plugins in the selected rows.
 		int newSourceId;
 		newSourceId = myEditor->getText().getIntValue();
-		for (std::size_t i = 0; i < pluginIds.size(); ++i)
+		for (std::size_t i = 0; i < ProcessorIds.size(); ++i)
 		{
 			// Set the value of the combobox to the current MappingID of the corresponding plugin.
-			SoundsourceProcessor* plugin = ctrl->GetProcessor(pluginIds[i]);
+			SoundsourceProcessor* plugin = ctrl->GetProcessor(ProcessorIds[i]);
 			if (plugin)
 				plugin->SetSourceId(DCS_Overview, newSourceId);
 		}
@@ -1820,12 +1820,12 @@ void CTextEditorContainer::SetRow(int newRow)
 	m_row = newRow;
 
 	// Find the plugin instance corresponding to the given row number.
-	PluginId pluginId = m_owner.GetPluginIdForRow(newRow);
+	ProcessorId ProcessorId = m_owner.GetProcessorIdForRow(newRow);
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
 	{
 		// Set the value of the textEditor to the current SourceID of the corresponding plugin.
-		const SoundsourceProcessor* plugin = ctrl->GetProcessor(pluginId);
+		const SoundsourceProcessor* plugin = ctrl->GetProcessor(ProcessorId);
 		if (plugin)
 			m_editor.setText(String(plugin->GetSourceId()), false);
 	}
@@ -1887,11 +1887,11 @@ void CRadioButtonContainer::buttonClicked(Button *button)
 		}
 
 		// Get the IDs of the plugins on the selected rows.
-		std::vector<PluginId> pluginIds = m_owner.GetPluginIdsForRows(selectedRows);
+		std::vector<ProcessorId> ProcessorIds = m_owner.GetProcessorIdsForRows(selectedRows);
 
-		for (std::size_t i = 0; i < pluginIds.size(); ++i)
+		for (std::size_t i = 0; i < ProcessorIds.size(); ++i)
 		{
-			SoundsourceProcessor* plugin = ctrl->GetProcessor(pluginIds[i]);
+			SoundsourceProcessor* plugin = ctrl->GetProcessor(ProcessorIds[i]);
 			if (plugin)
 			{
 				ComsMode oldMode = plugin->GetComsMode();
@@ -1929,12 +1929,12 @@ void CRadioButtonContainer::SetRow(int newRow)
 	m_row = newRow;
 
 	// Find the plugin instance corresponding to the given row number.
-	PluginId pluginId = m_owner.GetPluginIdForRow(newRow);
+	ProcessorId ProcessorId = m_owner.GetProcessorIdForRow(newRow);
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
 	{
 		// Toggle the correct radio buttons to the current ComsMode of the corresponding plugin.
-		const SoundsourceProcessor* plugin = ctrl->GetProcessor(pluginId);
+		const SoundsourceProcessor* plugin = ctrl->GetProcessor(ProcessorId);
 		if (plugin)
 		{
 			const Array<AudioProcessorParameter*>& params = plugin->getParameters();
@@ -2017,12 +2017,12 @@ void CEditableLabelContainer::SetRow(int newRow)
 	String displayName;
 
 	// Find the plugin instance corresponding to the given row number.
-	PluginId pluginId = m_owner.GetPluginIdForRow(newRow);
+	ProcessorId ProcessorId = m_owner.GetProcessorIdForRow(newRow);
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
 	{
 		// Set the value of the combobox to the current MappingID of the corresponding plugin.
-		SoundsourceProcessor* plugin = ctrl->GetProcessor(pluginId);
+		SoundsourceProcessor* plugin = ctrl->GetProcessor(ProcessorId);
 		if (plugin)
 		{
 			displayName = plugin->getProgramName(0);

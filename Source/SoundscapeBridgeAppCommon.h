@@ -46,7 +46,7 @@ namespace SoundscapeBridgeApp
  * Type definitions.
  */
 typedef juce::int32 SourceId;
-typedef juce::int32 PluginId;
+typedef juce::int32 ProcessorId;
 typedef juce::uint64 DataChangeTypes;
 typedef juce::uint8 ComsMode;
 
@@ -114,8 +114,8 @@ static constexpr ComsMode CM_Sync =			(CM_Rx | CM_Tx); //< The Plug-in sends SET
 
 
 /**
- * Invalid PluginId used to signal when selection in CSurfaceMultiSlider is empty etc..
+ * Invalid ProcessorId used to signal when selection in CSurfaceMultiSlider is empty etc..
  */
-static constexpr PluginId INVALID_PLUGIN_ID = 0xFFFFFFFF;
+static constexpr ProcessorId INVALID_PROCESSOR_ID = 0xFFFFFFFF;
 
 } // namespace SoundscapeBridgeApp

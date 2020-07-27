@@ -92,7 +92,7 @@ SoundsourceProcessor::SoundsourceProcessor()
 
 	m_sourceId = SOURCE_ID_MIN; // This default sourceId will be overwritten by ctrl->AddProcessor() below.
 	m_mappingId = DEFAULT_COORD_MAPPING; // Default: coordinate mapping 1.
-	m_pluginId = -1;
+	m_processorId = -1;
 
 	// Default OSC communication mode. In the console version, default is "sync" mode.
 	m_comsMode = CM_Tx;
@@ -106,7 +106,7 @@ SoundsourceProcessor::SoundsourceProcessor()
 	// Register this new plugin instance to the singleton CController object's internal list.
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
-		m_pluginId = ctrl->AddProcessor(this);
+		m_processorId = ctrl->AddProcessor(this);
 }
 
 /**
@@ -121,11 +121,11 @@ SoundsourceProcessor::~SoundsourceProcessor()
 }
 
 /**
- * Get the id of this plugin instance 
+ * Get the id of this processor instance 
  */
-int SoundsourceProcessor::GetPluginId() const
+int SoundsourceProcessor::GetProcessorId() const
 {
-	return m_pluginId;
+	return m_processorId;
 }
 
 /**
@@ -377,7 +377,7 @@ void SoundsourceProcessor::getStateInformation(MemoryBlock& destData)
 	stream.writeFloat(m_reverbSendGain->get());
 	stream.writeFloat(m_sourceSpread->get());
 	stream.writeFloat(static_cast<float>(m_delayMode->getIndex()));
-	stream.writeInt(m_pluginId);
+	stream.writeInt(m_processorId);
 
 #ifdef JUCE_DEBUG
 	PushDebugMessage("SoundsourceProcessor::getStateInformation");
@@ -422,16 +422,16 @@ void SoundsourceProcessor::setStateInformation(const void* data, int sizeInBytes
 		overviewBounds.setHeight(stream.readInt());
 
 		// PluginId was added in V2.8.0
-		PluginId pluginId = -1;
+		ProcessorId processorId = INVALID_PROCESSOR_ID;
 		if (version >= CVersion(2, 8))
 		{
-			pluginId = stream.readInt();
+			processorId = stream.readInt();
 		}
 
 		// Only apply the de-serialized data if the stored PluginID matches our own.
 		// When loading projects and when adding new plugin instances, Pro Tools likes to call setStateInformation 
 		// with data which does not necessarily belong to the correct instance, and which will overwrite the correct settings.
-		if ((pluginId == m_pluginId) || (pluginId == -1))
+		if ((processorId == m_processorId) || (processorId == INVALID_PROCESSOR_ID))
 		{
 			InitializeSettings(sourceId, mapId, ipAddress, msgRate, newComMode);
 

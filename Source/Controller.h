@@ -67,10 +67,10 @@ public:
 	bool PopParameterChanged(DataChangeSource changeSource, DataChangeTypes change);
 	void SetParameterChanged(DataChangeSource changeSource, DataChangeTypes changeTypes);
 
-	PluginId AddProcessor(SoundsourceProcessor* p);
+	ProcessorId AddProcessor(SoundsourceProcessor* p);
 	void RemoveProcessor(SoundsourceProcessor* p);
 	int GetProcessorCount() const;
-	SoundsourceProcessor* GetProcessor(PluginId idx) const;
+	SoundsourceProcessor* GetProcessor(ProcessorId idx) const;
 
 	String GetIpAddress() const;
 	static String GetDefaultIpAddress();

@@ -188,7 +188,7 @@ void CSurfaceSlider::mouseUp(const MouseEvent& e)
  */
 CSurfaceMultiSlider::CSurfaceMultiSlider()
 {
-	m_selected = INVALID_PLUGIN_ID;
+	m_selected = INVALID_PROCESSOR_ID;
 }
 
 /**
@@ -309,7 +309,7 @@ void CSurfaceMultiSlider::mouseDown(const MouseEvent& e)
  */
 void CSurfaceMultiSlider::mouseDrag(const MouseEvent& e)
 {
-	if (m_selected != INVALID_PLUGIN_ID)
+	if (m_selected != INVALID_PROCESSOR_ID)
 	{
 		CController* ctrl = CController::GetInstance();
 		if (ctrl)
@@ -338,7 +338,7 @@ void CSurfaceMultiSlider::mouseUp(const MouseEvent& e)
 {
 	ignoreUnused(e);
 
-	if (m_selected != INVALID_PLUGIN_ID)
+	if (m_selected != INVALID_PROCESSOR_ID)
 	{
 		CController* ctrl = CController::GetInstance();
 		if (ctrl)
@@ -360,7 +360,7 @@ void CSurfaceMultiSlider::mouseUp(const MouseEvent& e)
 		}
 
 		// De-select knob.
-		m_selected = INVALID_PLUGIN_ID;
+		m_selected = INVALID_PROCESSOR_ID;
 	}
 }
 

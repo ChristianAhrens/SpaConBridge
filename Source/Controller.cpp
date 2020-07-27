@@ -205,7 +205,7 @@ bool CController::PopParameterChanged(DataChangeSource changeSource, DataChangeT
  * @param p		Pointer to newly crated plugin processor object.
  * @return		The PluginId of the newly added Plug-in.
  */
-PluginId CController::AddProcessor(SoundsourceProcessor* p)
+ProcessorId CController::AddProcessor(SoundsourceProcessor* p)
 {
 	const ScopedLock lock(m_mutex);
 
@@ -223,12 +223,12 @@ PluginId CController::AddProcessor(SoundsourceProcessor* p)
 	// Set the new Plugin's InputID to the next in sequence.
 	p->SetSourceId(DCS_Protocol, currentMaxSourceId + 1);
 
-	PluginId newPluginId = static_cast<PluginId>(m_processors.size() - 1);
+	ProcessorId newProcessorId = static_cast<ProcessorId>(m_processors.size() - 1);
 #ifdef JUCE_DEBUG
-	p->PushDebugMessage("CController::AddProcessor: #" + String(newPluginId));
+	p->PushDebugMessage("CController::AddProcessor: #" + String(newProcessorId));
 #endif
 
-	return newPluginId;
+	return newProcessorId;
 }
 
 /**
@@ -277,7 +277,7 @@ int CController::GetProcessorCount() const
  * @param idx	The index of the desired processor.
  * @return	The pointer to the desired processor.
  */
-SoundsourceProcessor* CController::GetProcessor(PluginId idx) const
+SoundsourceProcessor* CController::GetProcessor(ProcessorId idx) const
 {
 	const ScopedLock lock(m_mutex);
 	if ((idx >= 0) && (idx < m_processors.size()))

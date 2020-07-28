@@ -62,6 +62,7 @@ public:
 	CController();
 	~CController() override;
 	static CController* GetInstance();
+	void DestroyInstance();
 
 	bool GetParameterChanged(DataChangeSource changeSource, DataChangeTypes change);
 	bool PopParameterChanged(DataChangeSource changeSource, DataChangeTypes change);

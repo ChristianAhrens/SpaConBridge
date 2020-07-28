@@ -10,6 +10,8 @@
 
 #include "MainSoundscapeBridgeAppComponent.h"
 
+#include "Controller.h"
+
 #include "Overview/OverviewManager.h"
 
 #include "../submodules/JUCE-AppBasics/Source/iOS_utils.hpp"
@@ -19,7 +21,9 @@
 //==============================================================================
 MainSoundscapeBridgeAppComponent::MainSoundscapeBridgeAppComponent()
 {
-    SoundscapeBridgeApp::COverviewManager* ovrMgr = SoundscapeBridgeApp::COverviewManager::GetInstance();
+    auto ctrl = SoundscapeBridgeApp::CController::GetInstance();
+    ignoreUnused(ctrl);
+    auto ovrMgr = SoundscapeBridgeApp::COverviewManager::GetInstance();
     if (ovrMgr)
     {
         m_overview = ovrMgr->GetOverview();
@@ -31,6 +35,12 @@ MainSoundscapeBridgeAppComponent::MainSoundscapeBridgeAppComponent()
 
 MainSoundscapeBridgeAppComponent::~MainSoundscapeBridgeAppComponent()
 {
+    removeChildComponent(m_overview);
+    m_overview = nullptr;
+
+    auto ctrl = SoundscapeBridgeApp::CController::GetInstance();
+    if (ctrl)
+        ctrl->DestroyInstance();
 }
 
 void MainSoundscapeBridgeAppComponent::paint (juce::Graphics& g)

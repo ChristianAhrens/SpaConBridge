@@ -151,6 +151,14 @@ CController* CController::GetInstance()
 }
 
 /**
+ * Triggers destruction of CController singleton object
+ */
+void CController::DestroyInstance()
+{
+	delete m_singleton;
+}
+
+/**
  * Method which will be called every time a parameter or property has been changed.
  * @param changeSource	The application module which is causing the property change.
  * @param changeTypes	Defines which parameter or property has been changed.
@@ -266,28 +274,14 @@ void CController::RemoveProcessor(SoundsourceProcessor* p)
 	m_processingConfig.SetProtocolData(DEFAULT_PROCNODE_ID, DEFAULT_PROCPROT_A_ID, protocolData);
 	m_processingNode.SetNodeConfiguration(m_processingConfig, DEFAULT_PROCNODE_ID);
 
-	if (m_processors.size() > 1)
+	int idx = m_processors.indexOf(p);
+	jassert(idx >= 0); // Tried to remove inexistent plugin object.
+	if (idx >= 0)
 	{
-		int idx = m_processors.indexOf(p);
-		jassert(idx >= 0); // Tried to remove inexistent plugin object.
-		if (idx >= 0)
-		{
-			const ScopedLock lock(m_mutex);
-			m_processors.remove(idx);
+		const ScopedLock lock(m_mutex);
+		m_processors.remove(idx);
 
-			SetParameterChanged(DCS_Protocol, DCT_NumPlugins);
-		}
-	}
-
-	// If last plugin instance is being removed, delete CController singleton.
-	else if (m_processors.size() == 1)
-	{
-		{ // Scope for lock.
-			const ScopedLock lock(m_mutex);
-			m_processors.clearQuick();
-		}
-	
-		delete this;
+		SetParameterChanged(DCS_Protocol, DCT_NumPlugins);
 	}
 }
 

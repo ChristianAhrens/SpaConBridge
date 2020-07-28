@@ -36,9 +36,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include "SoundsourceProcessor.h"
-#include "Gui.h"
+
+#include "../Gui.h"
 #include "SurfaceSlider.h"
-#include <utility>	//<USE std::unique_ptr
 
 
 namespace SoundscapeBridgeApp

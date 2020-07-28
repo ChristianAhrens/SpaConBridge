@@ -54,6 +54,10 @@
       </GROUP>
       <GROUP id="{FAEFB6F6-97A8-A4B1-8911-35FBC344E2EF}" name="JUCE-AppBasics">
         <GROUP id="{AEF488F2-ECE4-B5B0-0BC4-9A3644EF8A18}" name="Source">
+          <FILE id="vbXiyi" name="AppConfigurationBase.cpp" compile="1" resource="0"
+                file="submodules/JUCE-AppBasics/Source/AppConfigurationBase.cpp"/>
+          <FILE id="YDW7K8" name="AppConfigurationBase.h" compile="0" resource="0"
+                file="submodules/JUCE-AppBasics/Source/AppConfigurationBase.h"/>
           <FILE id="GDtXdS" name="Image_utils.hpp" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Image_utils.hpp"/>
           <FILE id="yq1Bqf" name="iOS_utils.hpp" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/iOS_utils.hpp"/>
         </GROUP>
@@ -76,6 +80,40 @@
       </GROUP>
     </GROUP>
     <GROUP id="{2B9DD386-1093-ADF5-E47F-5954774132B5}" name="Source">
+      <GROUP id="{E52BF071-97A9-96F9-9009-172CD007BA20}" name="SoundsourceProcessor">
+        <FILE id="awtecl" name="Parameters.cpp" compile="1" resource="0" file="Source/SoundsourceProcessor/Parameters.cpp"/>
+        <FILE id="YLVW46" name="Parameters.h" compile="0" resource="0" file="Source/SoundsourceProcessor/Parameters.h"/>
+        <FILE id="HvUfDT" name="SoundsourceProcessor.cpp" compile="1" resource="0"
+              file="Source/SoundsourceProcessor/SoundsourceProcessor.cpp"/>
+        <FILE id="ZprKu0" name="SoundsourceProcessor.h" compile="0" resource="0"
+              file="Source/SoundsourceProcessor/SoundsourceProcessor.h"/>
+        <FILE id="WPv7hF" name="SoundsourceProcessorEditor.cpp" compile="1"
+              resource="0" file="Source/SoundsourceProcessor/SoundsourceProcessorEditor.cpp"/>
+        <FILE id="dDbadl" name="SoundsourceProcessorEditor.h" compile="0" resource="0"
+              file="Source/SoundsourceProcessor/SoundsourceProcessorEditor.h"/>
+        <FILE id="od9Z4l" name="SurfaceSlider.cpp" compile="1" resource="0"
+              file="Source/SoundsourceProcessor/SurfaceSlider.cpp"/>
+        <FILE id="iNu0u2" name="SurfaceSlider.h" compile="0" resource="0" file="Source/SoundsourceProcessor/SurfaceSlider.h"/>
+      </GROUP>
+      <GROUP id="{ABC3680A-0C49-EE16-E766-E6ED89078A7C}" name="Overview">
+        <FILE id="p3mOuB" name="Overview.cpp" compile="1" resource="0" file="Source/Overview/Overview.cpp"/>
+        <FILE id="u3W6Eh" name="Overview.h" compile="0" resource="0" file="Source/Overview/Overview.h"/>
+        <FILE id="zhFbhV" name="OverviewManager.cpp" compile="1" resource="0"
+              file="Source/Overview/OverviewManager.cpp"/>
+        <FILE id="XfbgRx" name="OverviewManager.h" compile="0" resource="0"
+              file="Source/Overview/OverviewManager.h"/>
+        <FILE id="I9Fdgh" name="OverviewMultisurface.cpp" compile="1" resource="0"
+              file="Source/Overview/OverviewMultisurface.cpp"/>
+        <FILE id="tMcT6V" name="OverviewMultisurface.h" compile="0" resource="0"
+              file="Source/Overview/OverviewMultisurface.h"/>
+        <FILE id="O1chzp" name="OverviewSettings.cpp" compile="1" resource="0"
+              file="Source/Overview/OverviewSettings.cpp"/>
+        <FILE id="H6YJnD" name="OverviewSettings.h" compile="0" resource="0"
+              file="Source/Overview/OverviewSettings.h"/>
+        <FILE id="hrDqFs" name="OverviewTable.cpp" compile="1" resource="0"
+              file="Source/Overview/OverviewTable.cpp"/>
+        <FILE id="aZ8lrk" name="OverviewTable.h" compile="0" resource="0" file="Source/Overview/OverviewTable.h"/>
+      </GROUP>
       <FILE id="SKhSnW" name="MainSoundscapeBridgeAppComponent.cpp" compile="1"
             resource="0" file="Source/MainSoundscapeBridgeAppComponent.cpp"/>
       <FILE id="Z0i2A2" name="MainSoundscapeBridgeAppComponent.h" compile="0"
@@ -87,25 +125,10 @@
       <FILE id="tKd5wL" name="Version.h" compile="0" resource="0" file="Source/Version.h"/>
       <FILE id="mSMMnq" name="Gui.cpp" compile="1" resource="0" file="Source/Gui.cpp"/>
       <FILE id="awUO6O" name="Gui.h" compile="0" resource="0" file="Source/Gui.h"/>
-      <FILE id="SQMIsv" name="Parameters.cpp" compile="1" resource="0" file="Source/Parameters.cpp"/>
-      <FILE id="nepks0" name="Parameters.h" compile="0" resource="0" file="Source/Parameters.h"/>
       <FILE id="Kqvnes" name="Controller.cpp" compile="1" resource="0" file="Source/Controller.cpp"/>
       <FILE id="dObTPr" name="Controller.h" compile="0" resource="0" file="Source/Controller.h"/>
-      <FILE id="QagIcD" name="Overview.cpp" compile="1" resource="0" file="Source/Overview.cpp"/>
-      <FILE id="SMkAdd" name="Overview.h" compile="0" resource="0" file="Source/Overview.h"/>
       <FILE id="c3j7aS" name="SoundscapeBridgeAppCommon.h" compile="0" resource="0"
             file="Source/SoundscapeBridgeAppCommon.h"/>
-      <FILE id="FN3fsG" name="SurfaceSlider.cpp" compile="1" resource="0"
-            file="Source/SurfaceSlider.cpp"/>
-      <FILE id="HtcGNB" name="SurfaceSlider.h" compile="0" resource="0" file="Source/SurfaceSlider.h"/>
-      <FILE id="KAmwPc" name="SoundsourceProcessor.cpp" compile="1" resource="0"
-            file="Source/SoundsourceProcessor.cpp"/>
-      <FILE id="do2yHv" name="SoundsourceProcessor.h" compile="0" resource="0"
-            file="Source/SoundsourceProcessor.h"/>
-      <FILE id="wFy796" name="SoundsourceProcessorEditor.cpp" compile="1"
-            resource="0" file="Source/SoundsourceProcessorEditor.cpp"/>
-      <FILE id="k825w0" name="SoundsourceProcessorEditor.h" compile="0" resource="0"
-            file="Source/SoundsourceProcessorEditor.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>

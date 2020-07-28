@@ -34,12 +34,14 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "SoundsourceProcessor.h"
+
 #include "SoundsourceProcessorEditor.h"	//<USE SoundsourceProcessorEditor
-#include "Controller.h"		//<USE CController
-#include "Overview.h"		//<USE COverviewManager
-#include "SoundscapeBridgeAppCommon.h"
 #include "Parameters.h"
-#include "Version.h"		//<USE CVersion
+
+#include "../Controller.h"		//<USE CController
+#include "../Overview/OverviewManager.h"		//<USE COverviewManager
+#include "../SoundscapeBridgeAppCommon.h"
+#include "../Version.h"		//<USE CVersion
 
 
 namespace SoundscapeBridgeApp

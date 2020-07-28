@@ -35,9 +35,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "About.h"
-#include "Gui.h"
-#include "SoundscapeBridgeAppCommon.h"
+#include "../About.h"
+#include "../Gui.h"
+#include "../SoundscapeBridgeAppCommon.h"
 
 
 namespace SoundscapeBridgeApp
@@ -47,209 +47,13 @@ namespace SoundscapeBridgeApp
 /**
  * Forward declarations
  */
-class COverview;
-class CTabbedComponent;
-class CTabBarButton;
-class COverviewComponent;
 class COverviewTableContainer;
-class COverviewMultiSurface;
-class CSettingsContainer;
 class CTableModelComponent;
 class CComboBoxContainer;
 class CTextEditorContainer;
 class CRadioButtonContainer;
 class CEditableLabelContainer;
 class SoundsourceProcessorEditor;
-
-
-/**
- * Class COverviewManager which takes care of opening and closing the overview window.
- */
-class COverviewManager
-{
-public:
-	COverviewManager();
-	virtual ~COverviewManager();
-	static COverviewManager* GetInstance();
-
-	void OpenOverview();
-	COverviewComponent* GetOverview();
-	void CloseOverview(bool destroy);
-
-	int GetActiveTab() const;
-	void SetActiveTab(int tabIdx);
-
-	int GetSelectedMapping() const;
-	void SetSelectedMapping(int mapping);
-
-protected:
-	/**
-	 * The one and only instance of COverviewManager.
-	 */
-	static COverviewManager		*m_singleton;
-
-	/**
-	 * Pointer to the Overview winodw, if any.
-	 */
-	COverviewComponent			*m_overview;
-
-	/**
-	 * Remember the last active tab.
-	 */
-	int						m_selectedTab = 0;
-
-	/**
-	 * Remember the last selected coordinate mapping for the multi-slider
-	 */
-	int						m_selectedMapping = 1;
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(COverviewManager)
-};
-
-
-/**
- * Class COverviewComponent is a simple container used to hold the GUI controls.
- */
-class COverviewComponent : public Component,
-	public TextEditor::Listener,
-	private Timer
-{
-public:
-	COverviewComponent();
-	~COverviewComponent() override;
-	void UpdateGui(bool init);
-
-private:
-	void paint(Graphics&) override;
-	void resized() override;
-
-	void textEditorFocusLost(TextEditor &) override;
-	void textEditorReturnKeyPressed(TextEditor &) override;
-
-	void timerCallback() override;
-
-private:
-	/**
-	 * App version label
-	 */
-	std::unique_ptr<CLabel>	m_versionLabel;
-
-	/**
-	 * App name
-	 */
-	std::unique_ptr<CLabel>	m_nameLabel;
-
-	/**
-	 * Overview title label
-	 */
-	std::unique_ptr<CLabel>	m_titleLabel;
-
-	/*
-	 * Logo image.
-	 */
-	Image					m_appLogo;
-
-	/**
-	 * DS100 IP Address label
-	 */
-	std::unique_ptr<CLabel>	m_ipAddressLabel;
-
-	/**
-	 * Text editor for the DS100 IP Address
-	 */
-	std::unique_ptr<CTextEditor>	m_ipAddressTextEdit;
-
-	/**
-	 * Send/receive rate label
-	 */
-	std::unique_ptr<CLabel>	m_rateLabel;
-
-	/**
-	 * Text editor for the OSC send/receive rate in ms.
-	 */
-	std::unique_ptr<CTextEditor>	m_rateTextEdit;
-
-	/**
-	 * Button used as Online indicator LED.
-	 */
-	std::unique_ptr<CButton> m_onlineLed;
-
-	/**
-	 * A container for tabs.
-	 */
-	std::unique_ptr<CTabbedComponent> m_tabbedComponent;
-
-	/**
-	 * The actual table container inside this component.
-	 */
-	std::unique_ptr<COverviewTableContainer> m_tableContainer;
-
-	/**
-	 * Container for multi-slider.
-	 */
-	std::unique_ptr<COverviewMultiSurface> m_multiSliderContainer;
-
-	/**
-	 * Container for settings component.
-	 */
-	std::unique_ptr<CSettingsContainer> m_settingsContainer;
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(COverviewComponent)
-};
-
-
-/** 
- * Reimplemented TabbedComponent which overrides the createTabButton method in order
- * to provide custom tabBar buttons (See CTabBarButton).
- */
-class CTabbedComponent : public TabbedComponent
-{
-public:
-
-	/**
-	 * Overview tab indeces
-	 */
-	enum OverviewTabIndex
-	{
-		OTI_Table = 0,
-		OTI_MultiSlider,
-		OTI_Settings,
-	};
-
-	CTabbedComponent();
-	~CTabbedComponent() override;
-
-protected:
-	TabBarButton* createTabButton(const String& tabName, int tabIndex) override;
-	void currentTabChanged(int newCurrentTabIndex, const String &newCurrentTabName) override;
-	void resized() override;
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CTabbedComponent)
-};
-
-
-/** 
- * Reimplemented TabBarButton which overrides the paintButton method 
- * to show an icon instead of the standard tab name text.
- */
-class CTabBarButton : public TabBarButton
-{
-public:
-	CTabBarButton(int tabIdx, TabbedButtonBar& ownerBar);
-	~CTabBarButton() override;
-
-protected:
-	void paintButton(Graphics&, bool, bool) override;
-	void resized() override;
-
-private:
-	bool setVisibleDrawable(Drawable* visibleDrawable);
-
-	int m_tabIndex;
-	std::unique_ptr<juce::Drawable> m_normalImage, m_overImage, m_downImage, m_disabledImage, m_normalOnImage, m_overOnImage, m_downOnImage, m_disabledOnImage;
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CTabBarButton)
-};
 
 
 /**
@@ -311,58 +115,6 @@ private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(COverviewTableContainer)
 };
 
-
-/**
- * Class COverviewMultiSurface is just a component which contains the multi-source slider
- * and the mapping selection control.
- */
-class COverviewMultiSurface : public AOverlay,
-	public ComboBox::Listener
-{
-public:
-	COverviewMultiSurface();
-	~COverviewMultiSurface() override;
-
-	void UpdateGui(bool init) override;
-
-protected:
-	void paint(Graphics&) override;
-	void resized() override;
-	void comboBoxChanged(ComboBox *comboBox) override;
-
-private:
-	/**
-	 * Multi-source 2D-Slider.
-	 */
-	std::unique_ptr<Component> m_multiSlider;
-
-	/*
-	 * Mapping selector label
-	 */
-	std::unique_ptr<CLabel>	m_posAreaLabel;
-
-	/**
-	 * ComboBox selector for the coordinate mapping area
-	 */
-	std::unique_ptr<ComboBox>	m_areaSelector;
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(COverviewMultiSurface)
-};
-
-class CSettingsContainer : public AOverlay
-{
-public:
-	CSettingsContainer();
-	~CSettingsContainer() override;
-
-	void UpdateGui(bool init) override;
-
-protected:
-	void paint(Graphics&) override;
-	void resized() override;
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CSettingsContainer)
-};
 
 /**
  * Class CTableModelComponent acts as a table model and a component at the same time.

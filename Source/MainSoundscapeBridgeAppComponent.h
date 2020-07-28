@@ -12,9 +12,9 @@
 
 #include <JuceHeader.h>
 
-#include "SoundsourceProcessorEditor.h"
-#include "SoundsourceProcessor.h"
-#include "Overview.h"
+#include "SoundsourceProcessor/SoundsourceProcessorEditor.h"
+#include "SoundsourceProcessor/SoundsourceProcessor.h"
+#include "Overview/Overview.h"
 
 //==============================================================================
 /*

@@ -34,8 +34,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "Controller.h"
-#include "Overview.h"
-#include "SoundsourceProcessor.h"
+
+#include "Overview/OverviewManager.h"
+#include "SoundsourceProcessor/SoundsourceProcessor.h"
 
 
 namespace SoundscapeBridgeApp

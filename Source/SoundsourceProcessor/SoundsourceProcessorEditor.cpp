@@ -33,10 +33,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#include "SoundsourceProcessor.h"
 #include "SoundsourceProcessorEditor.h"
-#include "Overview.h"
+
+#include "SoundsourceProcessor.h"
 #include "Parameters.h"
+
+#include "../Overview/Overview.h"
 
 
 namespace SoundscapeBridgeApp

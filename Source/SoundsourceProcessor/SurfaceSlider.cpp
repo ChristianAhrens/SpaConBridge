@@ -36,8 +36,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SurfaceSlider.h"
 #include "Parameters.h"
 #include "SoundsourceProcessor.h"
-#include "Controller.h"
-#include "Gui.h"
+#include "../Controller.h"
+#include "../Gui.h"
 
 
 namespace SoundscapeBridgeApp

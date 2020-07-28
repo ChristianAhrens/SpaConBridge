@@ -35,7 +35,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "SoundscapeBridgeAppCommon.h"
+#include "../SoundscapeBridgeAppCommon.h"
 
 
 namespace SoundscapeBridgeApp

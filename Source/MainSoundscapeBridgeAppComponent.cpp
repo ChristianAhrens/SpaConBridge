@@ -8,10 +8,13 @@
   ==============================================================================
 */
 
-#include <JuceHeader.h>
 #include "MainSoundscapeBridgeAppComponent.h"
 
+#include "Overview/OverviewManager.h"
+
 #include "../submodules/JUCE-AppBasics/Source/iOS_utils.hpp"
+
+#include <JuceHeader.h>
 
 //==============================================================================
 MainSoundscapeBridgeAppComponent::MainSoundscapeBridgeAppComponent()

@@ -36,8 +36,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include <JuceHeader.h>
-#include "SoundscapeBridgeAppCommon.h"
-#include <map>
+#include "../SoundscapeBridgeAppCommon.h"
 
 
 namespace SoundscapeBridgeApp

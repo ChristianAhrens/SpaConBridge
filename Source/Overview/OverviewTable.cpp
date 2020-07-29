@@ -273,7 +273,7 @@ void COverviewTableContainer::UpdateGui(bool init)
 	CController* ctrl = CController::GetInstance();
 	if (ctrl && m_overviewTable)
 	{
-		if (ctrl->PopParameterChanged(DCS_Overview, DCT_NumPlugins) || init)
+		if (ctrl->PopParameterChanged(DCS_Overview, DCT_NumProcessors) || init)
 		{
 			m_overviewTable->RecreateTableRowIds();
 			m_overviewTable->UpdateTable();

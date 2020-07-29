@@ -53,7 +53,7 @@ static const String PROTOCOL_DEFAULT_IP("127.0.0.1");	//< Default IP Address
 static constexpr int RX_PORT_DS100 = 50010;		//< UDP port which the DS100 is listening to for OSC
 static constexpr int RX_PORT_HOST = 50011;		//< UDP port to which the DS100 will send OSC replies
 
-static constexpr int KEEPALIVE_TIMEOUT = 5000;	//< Milliseconds without response after which we consider plugin "Offline"
+static constexpr int KEEPALIVE_TIMEOUT = 5000;	//< Milliseconds without response after which we consider processor "Offline"
 static constexpr int KEEPALIVE_INTERVAL = 1500;	//< Interval at which keepalive (ping) messages are sent, in milliseconds
 static constexpr int MAX_HEARTBEAT_COUNT = 0xFFFF;	//< No point counting beyond this number.
 
@@ -174,7 +174,7 @@ void CController::SetParameterChanged(DataChangeSource changeSource, DataChangeT
 		m_parametersChanged[cs] |= changeTypes;
 	}
 
-	// Forward the change to all plugin instances. This is needed, for example, so that all plugin's
+	// Forward the change to all processor instances. This is needed, for example, so that all processor's
 	// GUIs update an IP address change.
 	for (int i = 0; i < m_processors.size(); ++i)
 	{
@@ -211,15 +211,15 @@ bool CController::PopParameterChanged(DataChangeSource changeSource, DataChangeT
 }
 
 /**
- * Register a plugin instance to the local list of processors. 
- * @param p		Pointer to newly crated plugin processor object.
- * @return		The PluginId of the newly added Plug-in.
+ * Register a processor instance to the local list of processors. 
+ * @param p		Pointer to newly crated processor processor object.
+ * @return		The ProcessorId of the newly added processor.
  */
 ProcessorId CController::AddProcessor(SoundsourceProcessor* p)
 {
 	const ScopedLock lock(m_mutex);
 
-	// Get the highest Input number of all current Plugins.
+	// Get the highest Input number of all current processors.
 	SourceId currentMaxSourceId = 0;
 	for (int i = 0; i < m_processors.size(); ++i)
 	{
@@ -228,9 +228,9 @@ ProcessorId CController::AddProcessor(SoundsourceProcessor* p)
 	}
 
 	m_processors.add(p);
-	SetParameterChanged(DCS_Protocol, DCT_NumPlugins);
+	SetParameterChanged(DCS_Protocol, DCT_NumProcessors);
 
-	// Set the new Plugin's InputID to the next in sequence.
+	// Set the new Processor's InputID to the next in sequence.
 	p->SetSourceId(DCS_Protocol, currentMaxSourceId + 1);
 
 	ProcessorId newProcessorId = static_cast<ProcessorId>(m_processors.size() - 1);
@@ -256,8 +256,8 @@ ProcessorId CController::AddProcessor(SoundsourceProcessor* p)
 }
 
 /**
- * Remove a plugin instance from the local list of processors.
- * @param p		Pointer to plugin processor object which should be removed.
+ * Remove a Processor instance from the local list of processors.
+ * @param p		Pointer to Processor object which should be removed.
  */
 void CController::RemoveProcessor(SoundsourceProcessor* p)
 {
@@ -276,19 +276,19 @@ void CController::RemoveProcessor(SoundsourceProcessor* p)
 	m_processingNode.SetNodeConfiguration(m_processingConfig, DEFAULT_PROCNODE_ID);
 
 	int idx = m_processors.indexOf(p);
-	jassert(idx >= 0); // Tried to remove inexistent plugin object.
+	jassert(idx >= 0); // Tried to remove inexistent Processor object.
 	if (idx >= 0)
 	{
 		const ScopedLock lock(m_mutex);
 		m_processors.remove(idx);
 
-		SetParameterChanged(DCS_Protocol, DCT_NumPlugins);
+		SetParameterChanged(DCS_Protocol, DCT_NumProcessors);
 	}
 }
 
 /**
- * Number of registered plugin instances.
- * @return	Number of registered plugin instances.
+ * Number of registered Processor instances.
+ * @return	Number of registered Processor instances.
  */
 int CController::GetProcessorCount() const
 {
@@ -353,7 +353,7 @@ void CController::SetIpAddress(DataChangeSource changeSource, String ipAddress)
 		m_heartBeatsRx = MAX_HEARTBEAT_COUNT;
 		m_heartBeatsTx = 0;
 
-		// Signal the change to all plugins. 
+		// Signal the change to all Processors. 
 		SetParameterChanged(changeSource, (DCT_IPAddress | DCT_Online));
 
 		Reconnect();
@@ -402,7 +402,7 @@ void CController::SetRate(DataChangeSource changeSource, int rate)
 
 		m_processingNode.SetNodeConfiguration(m_processingConfig, DEFAULT_PROCNODE_ID);
 
-		// Signal the change to all plugins.
+		// Signal the change to all Processors.
 		SetParameterChanged(changeSource, DCT_MessageRate);
 
 		// Reset timer to the new interval.
@@ -460,7 +460,7 @@ void CController::CreateNodeConfiguration()
 
 /**
  * Called when the OSCReceiver receives a new OSC message, since CController inherits from OSCReceiver::Listener.
- * It forwards the message to all registered plugin objects.
+ * It forwards the message to all registered Processor objects.
  * @param nodeId	The bridging node that the message data was received on (only a single default id node supported currently).
  * @param senderProtocolId	The protocol that the message data was received on and was sent to controller from.
  * @param objectId	The remote object id of the object that was received
@@ -531,38 +531,38 @@ void CController::HandleNodeData(NodeId nodeId, ProtocolId senderProtocolId, Pro
 				// Continue if the message's address pattern was recognized 
 				if (change != DCT_None)
 				{
-					// Check all plugin instances to see if any of them want the new coordinates.
+					// Check all Processor instances to see if any of them want the new coordinates.
 					for (i = 0; i < m_processors.size(); ++i)
 					{
 						// Check for matching Input number.
-						SoundsourceProcessor* plugin = m_processors[i];
-						if (sourceId == plugin->GetSourceId())
+						SoundsourceProcessor* processor = m_processors[i];
+						if (sourceId == processor->GetSourceId())
 						{
 							// Check if a SET command was recently sent out and might currently be on transit to the device.
 							// If so, ignore the incoming message so that our local data does not jump back to a now outdated value.
-							bool ignoreResponse = plugin->IsParamInTransit(change);
-							ComsMode mode = plugin->GetComsMode();
+							bool ignoreResponse = processor->IsParamInTransit(change);
+							ComsMode mode = processor->GetComsMode();
 
-							// Only pass on new positions to plugins that are in RX mode.
-							// Also, ignore all incoming messages for properties which this plugin wants to send a set command.
-							if (!ignoreResponse && ((mode & (CM_Rx | CM_PollOnce)) != 0) && (plugin->GetParameterChanged(DCS_Protocol, change) == false))
+							// Only pass on new positions to processors that are in RX mode.
+							// Also, ignore all incoming messages for properties which this processor wants to send a set command.
+							if (!ignoreResponse && ((mode & (CM_Rx | CM_PollOnce)) != 0) && (processor->GetParameterChanged(DCS_Protocol, change) == false))
 							{
 								// Special handling for X/Y position, since message contains two parameters and MappingID needs to match too.
 								if (pIdx == ParamIdx_X)
 								{
-									if (mappingId == plugin->GetMappingId())
+									if (mappingId == processor->GetMappingId())
 									{
 										jassert(msgData.valCount == 2 && msgData.valType == RemoteObjectValueType::ROVT_FLOAT);
-										// Set the plugin's new position.
-										plugin->SetParameterValue(DCS_Protocol, ParamIdx_X, static_cast<float*>(msgData.payload)[0]);
-										plugin->SetParameterValue(DCS_Protocol, ParamIdx_Y, static_cast<float*>(msgData.payload)[1]);
+										// Set the processor's new position.
+										processor->SetParameterValue(DCS_Protocol, ParamIdx_X, static_cast<float*>(msgData.payload)[0]);
+										processor->SetParameterValue(DCS_Protocol, ParamIdx_Y, static_cast<float*>(msgData.payload)[1]);
 
-										// A request was sent to the DS100 by the CController because this plugin was in CM_PollOnce mode.
-										// Since the response was now processed, set the plugin back into it's original mode.
+										// A request was sent to the DS100 by the CController because this processor was in CM_PollOnce mode.
+										// Since the response was now processed, set the processor back into it's original mode.
 										if ((mode & CM_PollOnce) == CM_PollOnce)
 										{
 											mode &= ~CM_PollOnce;
-											plugin->SetComsMode(DCS_Protocol, mode);
+											processor->SetComsMode(DCS_Protocol, mode);
 										}
 									}
 								}
@@ -588,7 +588,7 @@ void CController::HandleNodeData(NodeId nodeId, ProtocolId senderProtocolId, Pro
 										break;
 									}
 
-									plugin->SetParameterValue(DCS_Protocol, pIdx, newValue);
+									processor->SetParameterValue(DCS_Protocol, pIdx, newValue);
 								}
 							}
 						}
@@ -608,7 +608,7 @@ void CController::HandleNodeData(NodeId nodeId, ProtocolId senderProtocolId, Pro
 			bool wasOnline = GetOnline();
 			m_heartBeatsRx = 0;
 
-			// If previous state was "Offline", force all plugins to
+			// If previous state was "Offline", force all processors to
 			// update their GUI, since we are now Online.
 			if (!wasOnline)
 			{
@@ -680,7 +680,7 @@ void CController::timerCallback()
 			pro = m_processors[i];
 
 			// If the OscBypass parameter has changed since the last interval, 
-			// update the OSC Rx/Tx mode of each Plugin accordingly.
+			// update the OSC Rx/Tx mode of each processor accordingly.
 			bool oscBypassed = pro->GetBypass();
 			if (pro->PopParameterChanged(DCS_Protocol, DCT_Bypass))
 			{
@@ -695,7 +695,7 @@ void CController::timerCallback()
 			}
 			mode = pro->GetComsMode();
 
-			// Signal every timer tick to each plugin instance. 
+			// Signal every timer tick to each processor instance. 
 			// This is used to trigger gestures for touch automation.
 			pro->Tick();
 
@@ -833,7 +833,7 @@ void CController::timerCallback()
 		if (m_heartBeatsTx < MAX_HEARTBEAT_COUNT)
 			m_heartBeatsTx++;
 
-		// If we have just crossed the treshold, force all plugins to update their
+		// If we have just crossed the treshold, force all processors to update their
 		// GUI, since we are now Offline.
 		if (wasOnline && (GetOnline() == false))
 			SetParameterChanged(DCS_Protocol, DCT_Online);

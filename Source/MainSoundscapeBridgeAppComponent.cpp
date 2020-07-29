@@ -71,7 +71,15 @@ MainSoundscapeBridgeAppComponent::~MainSoundscapeBridgeAppComponent()
 
     auto ctrl = SoundscapeBridgeApp::CController::GetInstance();
     if (ctrl)
+    {
+        // Delete the processor instances held in controller externally,
+        // since we otherwise would run into a loop ~CController -> CController::RemoveProcessor -> 
+        // ~SoundsourceProcessor -> CController::RemoveProcessor
+        while(ctrl->GetProcessorCount() > 0)
+            delete ctrl->GetProcessor(0);
+
         ctrl->DestroyInstance();
+    }
 }
 
 void MainSoundscapeBridgeAppComponent::paint(juce::Graphics& g)

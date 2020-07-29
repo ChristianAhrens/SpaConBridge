@@ -145,7 +145,7 @@ void COverviewMultiSurface::UpdateGui(bool init)
 	CController* ctrl = CController::GetInstance();
 	if (ctrl && m_multiSlider)
 	{
-		if (ctrl->PopParameterChanged(DCS_Overview, DCT_NumPlugins))
+		if (ctrl->PopParameterChanged(DCS_Overview, DCT_NumProcessors))
 			update = true;
 		
 		// Iterate through all plugin instances and see if anything changed there.

@@ -85,7 +85,7 @@ enum AutomationParameterIndex
  * Bitfields used to flag parameter changes.
  */
 static constexpr DataChangeTypes DCT_None					= 0x00000000; //< Nothing has changed.
-static constexpr DataChangeTypes DCT_NumPlugins				= 0x00000001; //< The number of CPlugin instances in the project has changed.
+static constexpr DataChangeTypes DCT_NumProcessors			= 0x00000001; //< The number of SoundsourceProcessor instances in the project has changed.
 static constexpr DataChangeTypes DCT_IPAddress				= 0x00000002; //< The user has entered a new IP address for the DS100.
 static constexpr DataChangeTypes DCT_MessageRate			= 0x00000004; //< The user has entered a new interval for OSC messages.
 static constexpr DataChangeTypes DCT_Online					= 0x00000008; //< The Plug-in's Online status has changed, based on the time since last response.

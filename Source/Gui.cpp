@@ -76,6 +76,8 @@ Colour CDbStyle::GetDbColor(DbColor color)
 		return Colour(140, 180, 90);
 	case ButtonBlueColor:
 		return Colour(27, 120, 163);
+	case ButtonRedColor:
+		return Colour(226, 41, 41);
 	default:
 		break;
 	}
@@ -549,6 +551,56 @@ void CButton::paintButton(Graphics &g, bool isMouseOverButton, bool isButtonDown
 			col = col.darker(0.5f);
 		else if (isButtonDown)
 			col = CDbStyle::GetDbColor(CDbStyle::ButtonBlueColor).brighter(0.05f);
+		else if (isMouseOverButton)
+			col = col.brighter(0.05f);
+		g.setColour(col);
+	}
+
+	g.fillRoundedRectangle(buttonRectF, m_cornerRadius);
+	g.setColour(CDbStyle::GetDbColor(CDbStyle::WindowColor));
+	g.drawRoundedRectangle(buttonRectF, m_cornerRadius, 1);
+	g.setColour(CDbStyle::GetDbColor(CDbStyle::TextColor));
+	g.drawText(getName(), bounds, Justification::centred, false);
+}
+
+
+
+/*
+===============================================================================
+ Class CMuteButton
+===============================================================================
+*/
+
+/**
+ * Reimplemented paint function.
+ * @param g					A graphics context, used for drawing a component or image.
+ * @param isMouseOverButton	True if the mouse is over the button.
+ * @param isButtonDown		True if the button is being pressed.
+ */
+void CMuteButton::paintButton(Graphics& g, bool isMouseOverButton, bool isButtonDown)
+{
+	Rectangle<int> bounds = getLocalBounds();
+	Rectangle<float> buttonRectF = Rectangle<float>(2.5f, 2.5f, bounds.getWidth() - 4.0f, bounds.getHeight() - 4.0f);
+	bool on = getToggleState();
+	bool enabled = isEnabled();
+
+	// Button's main colour
+	if (on)
+	{
+		Colour col = CDbStyle::GetDbColor(CDbStyle::ButtonRedColor);
+		if (isButtonDown)
+			col = col.brighter(0.1f);
+		else if (isMouseOverButton)
+			col = col.brighter(0.05f);
+		g.setColour(col);
+	}
+	else
+	{
+		Colour col = CDbStyle::GetDbColor(CDbStyle::ButtonColor);
+		if (!enabled)
+			col = col.darker(0.5f);
+		else if (isButtonDown)
+			col = CDbStyle::GetDbColor(CDbStyle::ButtonRedColor).brighter(0.05f);
 		else if (isMouseOverButton)
 			col = col.brighter(0.05f);
 		g.setColour(col);

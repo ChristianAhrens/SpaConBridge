@@ -134,6 +134,7 @@ public:
 		OC_SourceID,
 		OC_Mapping,
 		OC_ComsMode,
+		OC_BridgingMute,
 		OC_MAX_COLUMNS
 	};
 
@@ -143,6 +144,7 @@ public:
 	static bool LessThanSourceId(ProcessorId pId1, ProcessorId pId2);
 	static bool LessThanMapping(ProcessorId pId1, ProcessorId pId2);
 	static bool LessThanComsMode(ProcessorId pId1, ProcessorId pId2);
+	static bool LessThanBridgingMute(ProcessorId pId1, ProcessorId pId2);
 
 	ProcessorId GetProcessorIdForRow(int rowNumber);
 	std::vector<ProcessorId> GetProcessorIdsForRows(std::vector<int> rowNumbers);
@@ -290,6 +292,40 @@ private:
 	int						m_row;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CRadioButtonContainer)
+};
+
+
+/**
+ * Class CMuteButtonContainer is a container for the Bridging Mute buttons used in the Overview table.
+ */
+class CMuteButtonContainer : public Component,
+	public Button::Listener
+{
+public:
+	explicit CMuteButtonContainer(CTableModelComponent& td);
+	~CMuteButtonContainer() override;
+
+	void buttonClicked(Button*) override;
+	void resized() override;
+	void SetRow(int newRow);
+
+private:
+	/**
+	 * Table where this component is contained.
+	 */
+	CTableModelComponent& m_owner;
+
+	/**
+	 * Actual Mute button.
+	 */
+	CMuteButton				m_muteButton;
+
+	/**
+	 * Row number where this component is located inside the table.
+	 */
+	int						m_row;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CMuteButtonContainer)
 };
 
 

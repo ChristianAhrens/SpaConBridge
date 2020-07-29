@@ -64,6 +64,7 @@ public:
 		HighlightColor,		// 115 140 155 - Highlighted text
 		FaderGreenColor,	// 140 180 90 - Green sliders
 		ButtonBlueColor,	// 28 122 166 - Button Blue
+		ButtonRedColor,		// 226 41 41 - Button Red
 	};
 
 	CDbStyle() {};
@@ -158,6 +159,14 @@ protected:
 	float m_cornerRadius;		/**< Determines the corner radius of the button. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CButton)
+};
+
+/**
+ * class CMuteButton, a CButton with red ON background
+ */
+class CMuteButton : public CButton
+{
+	void paintButton(Graphics&, bool isMouseOverButton, bool isButtonDown) override;
 };
 
 

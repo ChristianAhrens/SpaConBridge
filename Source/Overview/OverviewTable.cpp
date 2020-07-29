@@ -318,7 +318,8 @@ CTableModelComponent::CTableModelComponent()
 	m_table.getHeader().addColumn("Track", OC_TrackID, 50, 30, -1, tableHeaderFlags);
 	m_table.getHeader().addColumn("Input", OC_SourceID, 50, 30, -1, tableHeaderFlags);
 	m_table.getHeader().addColumn("Mapping", OC_Mapping, 50, 30, -1, tableHeaderFlags);
-	m_table.getHeader().addColumn("Mode", OC_ComsMode, 50, 30, -1, tableHeaderFlags);
+	m_table.getHeader().addColumn("Mode", OC_ComsMode, 40, 30, -1, tableHeaderFlags);
+	m_table.getHeader().addColumn("Bridge", OC_BridgingMute, 20, 20, -1, tableHeaderFlags);
 	m_table.getHeader().setSortColumnId(OC_SourceID, true); // sort forwards by the Input number column
 	m_table.getHeader().setStretchToFitActive(true);
 
@@ -466,6 +467,26 @@ bool CTableModelComponent::LessThanComsMode(ProcessorId pId1, ProcessorId pId2)
 }
 
 /**
+ * Helper sorting function used by std::sort(). This version is used to sort by plugin's ComsMode.
+ * @param pId1	Id of the first plugin processor.
+ * @param pId2	Id of the second plugin processor.
+ * @return	True if the first plugin's ComsMode is less than the second's.
+ */
+bool CTableModelComponent::LessThanBridgingMute(ProcessorId pId1, ProcessorId pId2)
+{
+	CController* ctrl = CController::GetInstance();
+	if (ctrl)
+	{
+		//if ((pId1 < (ProcessorId)ctrl->GetProcessorCount()) && (pId2 < (ProcessorId)ctrl->GetProcessorCount()))
+		//	return (ctrl->GetProcessor(pId1)->GetComsMode() < ctrl->GetProcessor(pId2)->GetComsMode());
+		return true;
+	}
+
+	jassertfalse; // Index out of range!
+	return false;
+}
+
+/**
  * This clears and re-fills m_ids.
  */
 void CTableModelComponent::RecreateTableRowIds()
@@ -599,6 +620,9 @@ void CTableModelComponent::sortOrderChanged(int newSortColumnId, bool isForwards
 	case OC_ComsMode:
 		std::sort(m_ids.begin(), m_ids.end(), CTableModelComponent::LessThanComsMode);
 		break;
+	case OC_BridgingMute:
+		std::sort(m_ids.begin(), m_ids.end(), CTableModelComponent::LessThanBridgingMute);
+		break;
 	default:
 		break;
 	}
@@ -701,6 +725,23 @@ Component* CTableModelComponent::refreshComponentForCell(int rowNumber, int colu
 		}
 		break;
 
+	case OC_BridgingMute:
+		{
+			CMuteButtonContainer* muteButton = static_cast<CMuteButtonContainer*> (existingComponentToUpdate);
+
+			// If an existing component is being passed-in for updating, we'll re-use it, but
+			// if not, we'll have to create one.
+			if (muteButton == nullptr)
+				muteButton = new CMuteButtonContainer(*this);
+
+			// Ensure that the component knows which row number it is located at.
+			muteButton->SetRow(rowNumber);
+
+			// Return a pointer to the component.
+			ret = muteButton;
+		}
+		break;
+
 	default:
 		jassert(existingComponentToUpdate == nullptr);
 		break;
@@ -726,6 +767,8 @@ int CTableModelComponent::getColumnAutoSizeWidth(int columnId)
 		return 100;
 	case OC_ComsMode:
 		return 100;
+	case OC_BridgingMute:
+		return 60;
 	default:
 		break;
 	}
@@ -1080,6 +1123,118 @@ void CRadioButtonContainer::SetRow(int newRow)
 				ComsMode newMode = plugin->GetComsMode();
 				m_txButton.setToggleState(((newMode & CM_Tx) == CM_Tx), dontSendNotification);
 				m_rxButton.setToggleState(((newMode & CM_Rx) == CM_Rx), dontSendNotification);
+			}
+		}
+	}
+}
+
+
+
+/*
+===============================================================================
+ Class CMuteButtonContainer
+===============================================================================
+*/
+
+/**
+ * Class constructor.
+ */
+CMuteButtonContainer::CMuteButtonContainer(CTableModelComponent& td)
+	: m_owner(td)
+{
+	// Create and configure button components inside this container.
+	m_muteButton.setName("Mute");
+	m_muteButton.setEnabled(true);
+	m_muteButton.addListener(this);
+	addAndMakeVisible(m_muteButton);
+}
+
+/**
+ * Class destructor.
+ */
+CMuteButtonContainer::~CMuteButtonContainer()
+{
+}
+
+/**
+ * Reimplemented from Button::Listener, gets called whenever the buttons are clicked.
+ * @param button	The button which has been clicked.
+ */
+void CMuteButtonContainer::buttonClicked(Button* button)
+{
+	CController* ctrl = CController::GetInstance();
+	if (ctrl &&
+		((button == &m_muteButton)))
+	{
+		bool newToggleState = button->getToggleState();
+
+		// Get the list of rows which are currently selected on the table.
+		std::vector<int> selectedRows = m_owner.GetSelectedRows();
+		if ((selectedRows.size() < 2) ||
+			(std::find(selectedRows.begin(), selectedRows.end(), m_row) == selectedRows.end()))
+		{
+			// If this button's row (m_row) is NOT selected, or if no multi-selection was made 
+			// then modify the selectedRows list so that it only contains m_row.
+			selectedRows.clear();
+			selectedRows.push_back(m_row);
+		}
+
+		// Get the IDs of the plugins on the selected rows.
+		std::vector<ProcessorId> ProcessorIds = m_owner.GetProcessorIdsForRows(selectedRows);
+
+		for (std::size_t i = 0; i < ProcessorIds.size(); ++i)
+		{
+			//SoundsourceProcessor* plugin = ctrl->GetProcessor(ProcessorIds[i]);
+			//if (plugin)
+			//{
+			//	ComsMode oldMode = plugin->GetComsMode();
+			//	ComsMode newFlag = (button == &m_txButton) ? CM_Tx : CM_Rx;
+			//
+			//	if (newToggleState == true)
+			//		oldMode |= newFlag;
+			//	else
+			//		oldMode &= ~newFlag;
+			//
+			//	plugin->SetComsMode(DCS_Overview, oldMode);
+			//}
+		}
+	}
+}
+
+/**
+ * Reimplemented from Component, used to resize the actual component inside.
+ */
+void CMuteButtonContainer::resized()
+{
+	int w = getLocalBounds().getWidth();
+	int h = getLocalBounds().getHeight();
+	m_muteButton.setBounds(2, 2, w - 3, h - 5);
+}
+
+/**
+ * Saves the row number where this component is located inside the overview table.
+ * It also updates the radio buttons with the current ComsMode.
+ * @param newRow	The new row number.
+ */
+void CMuteButtonContainer::SetRow(int newRow)
+{
+	m_row = newRow;
+
+	// Find the plugin instance corresponding to the given row number.
+	ProcessorId ProcessorId = m_owner.GetProcessorIdForRow(newRow);
+	CController* ctrl = CController::GetInstance();
+	if (ctrl)
+	{
+		// Toggle the correct radio buttons to the current ComsMode of the corresponding plugin.
+		const SoundsourceProcessor* processor = ctrl->GetProcessor(ProcessorId);
+		if (processor)
+		{
+			const Array<AudioProcessorParameter*>& params = processor->getParameters();
+			AudioParameterChoice* param = dynamic_cast<AudioParameterChoice*>(params[ParamIdx_DelayMode]);
+			if (param)
+			{
+				//ComsMode newMode = plugin->GetComsMode();
+				//m_muteButton.setToggleState(((newMode & CM_Tx) == CM_Tx), dontSendNotification);
 			}
 		}
 	}

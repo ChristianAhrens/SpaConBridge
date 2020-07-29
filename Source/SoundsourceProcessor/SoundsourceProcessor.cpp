@@ -355,8 +355,12 @@ void SoundsourceProcessor::OnOverviewButtonClicked()
 	}
 }
 
+
 /**
- *
+ * Overriden from AppConfiguration::XmlConfigurableElement to dump this objects' settings
+ * to a XML element structure that is returned and written to config file by the
+ * singleton AppConfiguration class implementation.
+ * @return	The XML element data that was created.
  */
 std::unique_ptr<XmlElement> SoundsourceProcessor::createStateXml()
 {
@@ -364,7 +368,10 @@ std::unique_ptr<XmlElement> SoundsourceProcessor::createStateXml()
 }
 
 /**
- *
+ * Overriden from AppConfiguration::XmlConfigurableElement to set this objects' settings
+ * from a XML element structure that passed as argument.
+ * @param stateXml	The XML element containing this objects' configuration data
+ * @return	True if the data was read and handled successfuly, false if not.
  */
 bool SoundsourceProcessor::setStateXml(XmlElement* stateXml)
 {

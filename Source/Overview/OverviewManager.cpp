@@ -187,6 +187,12 @@ void COverviewManager::SetSelectedMapping(int mapping)
 	m_selectedMapping = mapping;
 }
 
+/**
+ * Overriden from AppConfiguration::XmlConfigurableElement to set this objects' settings
+ * from a XML element structure that passed as argument.
+ * @param stateXml	The XML element containing this objects' configuration data
+ * @return	True if the data was read and handled successfuly, false if not.
+ */
 bool COverviewManager::setStateXml(XmlElement* stateXml)
 {
 	if (!stateXml || (stateXml->getTagName() != AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW)))
@@ -202,6 +208,12 @@ bool COverviewManager::setStateXml(XmlElement* stateXml)
 		return false;
 }
 
+/**
+ * Overriden from AppConfiguration::XmlConfigurableElement to dump this objects' settings
+ * to a XML element structure that is returned and written to config file by the
+ * singleton AppConfiguration class implementation.
+ * @return	The XML element data that was created.
+ */
 std::unique_ptr<XmlElement> COverviewManager::createStateXml()
 {
 	auto overviewXmlElement = std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW));

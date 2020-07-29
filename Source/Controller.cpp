@@ -36,6 +36,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Controller.h"
 
 #include "Overview/OverviewManager.h"
+#include "Overview/Overview.h"
 #include "SoundsourceProcessor/SoundsourceProcessor.h"
 
 
@@ -837,6 +838,75 @@ void CController::timerCallback()
 		if (wasOnline && (GetOnline() == false))
 			SetParameterChanged(DCS_Protocol, DCT_Online);
 	}
+}
+
+bool CController::setStateXml(XmlElement* stateXml)
+{
+	if (!stateXml || (stateXml->getTagName() != AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER)))
+		return false;
+
+	bool retVal = true;
+
+	auto processorsXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDSOURCEPROCESSORS));
+	if (processorsXmlElement)
+	{
+		forEachXmlChildElement(*processorsXmlElement, processorXmlElement)
+		{
+			jassert(processorXmlElement->getTagName().contains(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE)));
+			int elementProcessorId = processorXmlElement->getTagName().getTrailingIntValue();
+			bool alreadyExists = false;
+			for (auto processor : m_processors)
+				if (processor->GetProcessorId() == elementProcessorId)
+					alreadyExists = true;
+
+			if (!alreadyExists)
+			{
+				auto newProcessor =	std::make_unique<SoundsourceProcessor>();
+				jassert(newProcessor->GetProcessorId() == elementProcessorId);
+				auto p = newProcessor.release();
+				jassert(m_processors.contains(p));
+			}
+		}
+
+		auto ovrMgr = COverviewManager::GetInstance();
+		if (ovrMgr)
+		{
+			auto overview = ovrMgr->GetOverview();
+			if (overview)
+				overview->UpdateGui(false);
+		}
+	}
+	else
+		retVal = false;
+
+	auto bridgingXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::BRIDGING));
+	if (bridgingXmlElement)
+	{
+	}
+	else
+		retVal = false;
+
+	return retVal;
+}
+
+std::unique_ptr<XmlElement> CController::createStateXml()
+{
+	auto controllerXmlElement = std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER));
+
+	auto processorsXmlElement = controllerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDSOURCEPROCESSORS));
+	{
+		for (auto processor : m_processors)
+		{
+			auto processorInstanceXmlElement = processorsXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE) + String(processor->GetProcessorId()));
+			processorsXmlElement->addChildElement(processor->createStateXml().release());
+		}
+	}
+	auto bridgingXmlElement = controllerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::BRIDGING));
+	{
+		//bridgingXmlElement->addChildElement(m_processingNode->createStateXml().release());
+	}
+
+	return std::move(controllerXmlElement);
 }
 
 

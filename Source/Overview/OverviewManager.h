@@ -38,6 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../About.h"
 #include "../Gui.h"
 #include "../SoundscapeBridgeAppCommon.h"
+#include "../AppConfiguration.h"
 
 
 namespace SoundscapeBridgeApp
@@ -54,7 +55,7 @@ class COverviewComponent;
 /**
  * Class COverviewManager which takes care of opening and closing the overview window.
  */
-class COverviewManager
+class COverviewManager : public AppConfiguration::XmlConfigurableElement
 {
 public:
 	COverviewManager();
@@ -66,10 +67,13 @@ public:
 	void CloseOverview(bool destroy);
 
 	int GetActiveTab() const;
-	void SetActiveTab(int tabIdx);
+	void SetActiveTab(int tabIdx, bool dontSendNotification);
 
 	int GetSelectedMapping() const;
 	void SetSelectedMapping(int mapping);
+
+	std::unique_ptr<XmlElement> createStateXml() override;
+	bool setStateXml(XmlElement* stateXml) override;
 
 protected:
 	/**

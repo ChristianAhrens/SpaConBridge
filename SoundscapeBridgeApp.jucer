@@ -80,6 +80,10 @@
       </GROUP>
     </GROUP>
     <GROUP id="{2B9DD386-1093-ADF5-E47F-5954774132B5}" name="Source">
+      <FILE id="iiE5C7" name="AppConfiguration.cpp" compile="1" resource="0"
+            file="Source/AppConfiguration.cpp"/>
+      <FILE id="wLkJi4" name="AppConfiguration.h" compile="0" resource="0"
+            file="Source/AppConfiguration.h"/>
       <GROUP id="{E52BF071-97A9-96F9-9009-172CD007BA20}" name="SoundsourceProcessor">
         <FILE id="awtecl" name="Parameters.cpp" compile="1" resource="0" file="Source/SoundsourceProcessor/Parameters.cpp"/>
         <FILE id="YLVW46" name="Parameters.h" compile="0" resource="0" file="Source/SoundsourceProcessor/Parameters.h"/>

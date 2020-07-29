@@ -159,9 +159,14 @@ int COverviewManager::GetActiveTab() const
  * Set the currently active tab within the overview window.
  * @param tabIdx	The currently active tab index.
  */
-void COverviewManager::SetActiveTab(int tabIdx)
+void COverviewManager::SetActiveTab(int tabIdx, bool dontSendNotification)
 {
 	m_selectedTab = tabIdx;
+
+	if (!dontSendNotification && m_overview != nullptr)
+	{
+		m_overview->SetActiveTab(tabIdx);
+	}
 }
 
 /**
@@ -180,6 +185,29 @@ int COverviewManager::GetSelectedMapping() const
 void COverviewManager::SetSelectedMapping(int mapping)
 {
 	m_selectedMapping = mapping;
+}
+
+bool COverviewManager::setStateXml(XmlElement* stateXml)
+{
+	if (!stateXml || (stateXml->getTagName() != AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW)))
+		return false;
+
+	auto tabIdx = stateXml->getIntAttribute(AppConfiguration::getTagName(AppConfiguration::TagID::ACTIVEOVRTAB), -1);
+	if (tabIdx != -1)
+	{
+		SetActiveTab(tabIdx, false);
+		return true;
+	}
+	else
+		return false;
+}
+
+std::unique_ptr<XmlElement> COverviewManager::createStateXml()
+{
+	auto overviewXmlElement = std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW));
+	overviewXmlElement->setAttribute(AppConfiguration::getTagName(AppConfiguration::TagID::ACTIVEOVRTAB), GetActiveTab());
+
+	return std::move(overviewXmlElement);
 }
 
 

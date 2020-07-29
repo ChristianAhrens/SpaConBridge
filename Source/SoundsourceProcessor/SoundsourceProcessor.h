@@ -36,6 +36,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include "../SoundscapeBridgeAppCommon.h"
+#include "../AppConfiguration.h"
 
 
 namespace SoundscapeBridgeApp
@@ -54,7 +55,8 @@ class CAudioParameterChoice;
  */
 class SoundsourceProcessor :
 	public AudioProcessor,
-	public AudioProcessorParameter::Listener
+	public AudioProcessorParameter::Listener,
+	public AppConfiguration::XmlConfigurableElement
 {
 public:
 	/**
@@ -109,6 +111,11 @@ public:
 	void PushDebugMessage(String message);
 	String FlushDebugMessages();
 #endif
+
+	// Overriden functions of class AppConfiguration::XmlConfigurableElement
+
+	std::unique_ptr<XmlElement> createStateXml() override;
+	bool setStateXml(XmlElement* stateXml) override;
 
 	// Overriden functions of class AudioProcessor
 

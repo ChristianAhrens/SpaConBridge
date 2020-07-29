@@ -65,6 +65,8 @@ public:
 	~COverviewComponent() override;
 	void UpdateGui(bool init);
 
+	void SetActiveTab(int tabIdx);
+
 private:
 	void paint(Graphics&) override;
 	void resized() override;

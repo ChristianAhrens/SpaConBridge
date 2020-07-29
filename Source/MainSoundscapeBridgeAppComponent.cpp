@@ -3,7 +3,7 @@
 
     MainComponent.cpp
     Created: 18 Jul 2020 6:33:56pm
-    Author:  musah
+    Author:  Christian Ahrens
 
   ==============================================================================
 */
@@ -12,11 +12,18 @@
 
 #include "Controller.h"
 
+#include "Overview/Overview.h"
 #include "Overview/OverviewManager.h"
+
+#include "SoundsourceProcessor/SoundsourceProcessorEditor.h"
+#include "SoundsourceProcessor/SoundsourceProcessor.h"
 
 #include "../submodules/JUCE-AppBasics/Source/iOS_utils.hpp"
 
 #include <JuceHeader.h>
+
+namespace SoundscapeBridgeApp
+{
 
 //==============================================================================
 MainSoundscapeBridgeAppComponent::MainSoundscapeBridgeAppComponent()
@@ -26,8 +33,25 @@ MainSoundscapeBridgeAppComponent::MainSoundscapeBridgeAppComponent()
     auto ovrMgr = SoundscapeBridgeApp::COverviewManager::GetInstance();
     if (ovrMgr)
     {
-        m_overview = ovrMgr->GetOverview();
-        addAndMakeVisible(m_overview);
+        auto overview = ovrMgr->GetOverview();
+        addAndMakeVisible(overview);
+    }
+
+    m_config = std::make_unique<AppConfiguration>(JUCEAppBasics::AppConfigurationBase::getDefaultConfigFilePath());
+    m_config->addListener(this);
+    if (!m_config->isValid())
+    {
+        m_config->triggerListenersUpdate();
+    }
+    else
+    {
+        auto ctrlConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER));
+        if (ctrl)
+            ctrl->setStateXml(ctrlConfigState.get());
+
+        auto ovrConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW));
+        if (ovrMgr)
+            ovrMgr->setStateXml(ovrConfigState.get());
     }
 
     setSize(896, 414);
@@ -35,15 +59,22 @@ MainSoundscapeBridgeAppComponent::MainSoundscapeBridgeAppComponent()
 
 MainSoundscapeBridgeAppComponent::~MainSoundscapeBridgeAppComponent()
 {
-    removeChildComponent(m_overview);
-    m_overview = nullptr;
+    if (m_config)
+        m_config->triggerListenersUpdate();
+
+    auto ovrMgr = SoundscapeBridgeApp::COverviewManager::GetInstance();
+    if (ovrMgr)
+    {
+        auto overview = ovrMgr->GetOverview();
+        removeChildComponent(overview);
+    }
 
     auto ctrl = SoundscapeBridgeApp::CController::GetInstance();
     if (ctrl)
         ctrl->DestroyInstance();
 }
 
-void MainSoundscapeBridgeAppComponent::paint (juce::Graphics& g)
+void MainSoundscapeBridgeAppComponent::paint(juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll(SoundscapeBridgeApp::CDbStyle::GetDbColor(SoundscapeBridgeApp::CDbStyle::DarkColor));
@@ -58,5 +89,24 @@ void MainSoundscapeBridgeAppComponent::resized()
     safeBounds.removeFromLeft(safety._left);
     safeBounds.removeFromRight(safety._right);
 
-    m_overview->setBounds(safeBounds);
+    auto ovrMgr = SoundscapeBridgeApp::COverviewManager::GetInstance();
+    if (ovrMgr)
+    {
+        auto overview = ovrMgr->GetOverview();
+        if (overview)
+            overview->setBounds(safeBounds);
+    }
+}
+
+void MainSoundscapeBridgeAppComponent::performConfigurationDump()
+{
+    auto ctrl = SoundscapeBridgeApp::CController::GetInstance();
+    if (ctrl)
+        m_config->setConfigState(ctrl->createStateXml());
+
+    auto ovrMgr = SoundscapeBridgeApp::COverviewManager::GetInstance();
+    if (ovrMgr)
+        m_config->setConfigState(ovrMgr->createStateXml());
+}
+
 }

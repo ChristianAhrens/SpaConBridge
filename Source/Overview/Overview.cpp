@@ -122,11 +122,6 @@ COverviewComponent::COverviewComponent()
 	m_tabbedComponent->addTab("Slider", CDbStyle::GetDbColor(CDbStyle::DarkColor), m_multiSliderContainer.get(), false);
 	m_tabbedComponent->addTab("Settings", CDbStyle::GetDbColor(CDbStyle::DarkColor), m_settingsContainer.get(), false);
 
-	// Remember which tab was active before the last time the overview was closed.
-	COverviewManager* ovrMgr = COverviewManager::GetInstance();
-	if (ovrMgr)
-		m_tabbedComponent->setCurrentTabIndex(ovrMgr->GetActiveTab());
-
 	// Start GUI-refreshing timer.
 	startTimer(GUI_UPDATE_RATE_SLOW);
 }
@@ -139,7 +134,7 @@ COverviewComponent::~COverviewComponent()
 	// Remember which tab was active before the last time the overview was closed.
 	COverviewManager* ovrMgr = COverviewManager::GetInstance();
 	if (ovrMgr && m_tabbedComponent)
-		ovrMgr->SetActiveTab(m_tabbedComponent->getCurrentTabIndex());
+		ovrMgr->SetActiveTab(m_tabbedComponent->getCurrentTabIndex(), true);
 }
 
 /**
@@ -310,6 +305,11 @@ void COverviewComponent::UpdateGui(bool init)
 	}
 }
 
+void COverviewComponent::SetActiveTab(int tabIdx)
+{
+	m_tabbedComponent->setCurrentTabIndex(tabIdx, false);
+}
+
 
 /*
 ===============================================================================
@@ -353,8 +353,11 @@ TabBarButton* CTabbedComponent::createTabButton(const String& tabName, int tabIn
  */
 void CTabbedComponent::currentTabChanged(int newCurrentTabIndex, const String& newCurrentTabName)
 {
-	ignoreUnused(newCurrentTabIndex);
 	ignoreUnused(newCurrentTabName);
+
+	COverviewManager* ovrMgr = COverviewManager::GetInstance();
+	if (ovrMgr)
+		ovrMgr->SetActiveTab(newCurrentTabIndex, false);
 
 	COverviewComponent* parent = dynamic_cast<COverviewComponent*>(getParentComponent());
 	if (parent)

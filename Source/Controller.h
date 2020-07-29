@@ -36,6 +36,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include "SoundscapeBridgeAppCommon.h"
+#include "AppConfiguration.h"
 #include "../submodules/RemoteProtocolBridge/Source/ProcessingEngineNode.h"
 
 
@@ -56,7 +57,8 @@ class SoundsourceProcessor;
  */
 class CController :
 	public ProcessingEngineNode::NodeListener,
-	private Timer
+	private Timer,
+	public AppConfiguration::XmlConfigurableElement
 {
 public:
 	CController();
@@ -90,6 +92,9 @@ public:
 	void CreateNodeConfiguration();
 	void HandleNodeData(NodeId nodeId, ProtocolId senderProtocolId, ProtocolType senderProtocolType, RemoteObjectIdentifier objectId, RemoteObjectMessageData& msgData) override;
 	bool SendMessage(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData);
+
+	std::unique_ptr<XmlElement> createStateXml() override;
+	bool setStateXml(XmlElement* stateXml) override;
 
 private:
 	void timerCallback() override;

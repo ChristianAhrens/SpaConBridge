@@ -3,33 +3,41 @@
 
     MainComponent.h
     Created: 18 Jul 2020 6:33:56pm
-    Author:  musah
+    Author:  Christian Ahrens
 
   ==============================================================================
 */
 
 #pragma once
 
+#include "AppConfiguration.h"
+
 #include <JuceHeader.h>
 
-#include "SoundsourceProcessor/SoundsourceProcessorEditor.h"
-#include "SoundsourceProcessor/SoundsourceProcessor.h"
-#include "Overview/Overview.h"
+
+namespace SoundscapeBridgeApp
+{
+
 
 //==============================================================================
 /*
-*/
-class MainSoundscapeBridgeAppComponent  : public juce::Component
+ */
+class MainSoundscapeBridgeAppComponent :    public juce::Component,
+                                            public AppConfiguration::Listener
 {
 public:
     MainSoundscapeBridgeAppComponent();
     ~MainSoundscapeBridgeAppComponent() override;
 
-    void paint (juce::Graphics&) override;
+    void paint(juce::Graphics&) override;
     void resized() override;
 
-private:
-    SoundscapeBridgeApp::COverviewComponent *m_overview{ nullptr };
+    void performConfigurationDump() override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainSoundscapeBridgeAppComponent)
+private:
+    std::unique_ptr<AppConfiguration>           m_config;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainSoundscapeBridgeAppComponent)
+};
+
 };

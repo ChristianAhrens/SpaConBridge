@@ -356,6 +356,22 @@ void SoundsourceProcessor::OnOverviewButtonClicked()
 }
 
 /**
+ *
+ */
+std::unique_ptr<XmlElement> SoundsourceProcessor::createStateXml()
+{
+	return nullptr;
+}
+
+/**
+ *
+ */
+bool SoundsourceProcessor::setStateXml(XmlElement* stateXml)
+{
+	return false;
+}
+
+/**
  * The host will call this method when it wants to save the processor's internal state.
  * This must copy any info about the processor's state into the block of memory provided, 
  * so that the host can store this and later restore it using setStateInformation().

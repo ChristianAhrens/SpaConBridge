@@ -2,24 +2,26 @@
 
 #include "MainSoundscapeBridgeAppComponent.h"
 
+namespace SoundscapeBridgeApp
+{
 
 //==============================================================================
-class SoundscapeBridgeAppApplication  : public JUCEApplication
+class SoundscapeBridgeAppApplication : public JUCEApplication
 {
 public:
     //==============================================================================
     SoundscapeBridgeAppApplication() {}
 
-    const String getApplicationName() override       { return ProjectInfo::projectName; }
-    const String getApplicationVersion() override    { return ProjectInfo::versionString; }
-    bool moreThanOneInstanceAllowed() override       { return true; }
+    const String getApplicationName() override { return ProjectInfo::projectName; }
+    const String getApplicationVersion() override { return ProjectInfo::versionString; }
+    bool moreThanOneInstanceAllowed() override { return true; }
 
     //==============================================================================
-    void initialise (const String& commandLine) override
+    void initialise(const String& commandLine) override
     {
         ignoreUnused(commandLine);
 
-        m_mainWindow.reset (new MainWindow (getApplicationName()));
+        m_mainWindow.reset(new MainWindow(getApplicationName()));
     }
 
     void shutdown() override
@@ -33,7 +35,7 @@ public:
         quit();
     }
 
-    void anotherInstanceStarted (const String& commandLine) override
+    void anotherInstanceStarted(const String& commandLine) override
     {
         ignoreUnused(commandLine);
     }
@@ -43,27 +45,27 @@ public:
         This class implements the desktop window that contains an instance of
         our MainComponent class.
     */
-    class MainWindow    : public DocumentWindow
+    class MainWindow : public DocumentWindow
     {
     public:
-        MainWindow (String name)  : DocumentWindow (name,
-                                                    Desktop::getInstance().getDefaultLookAndFeel()
-                                                    .findColour (ResizableWindow::backgroundColourId),
-                                                    DocumentWindow::allButtons)
+        MainWindow(String name) : DocumentWindow(name,
+            Desktop::getInstance().getDefaultLookAndFeel()
+            .findColour(ResizableWindow::backgroundColourId),
+            DocumentWindow::allButtons)
         {
             m_mainComponent = std::make_unique<MainSoundscapeBridgeAppComponent>();
 
-            setUsingNativeTitleBar (true);
-            setContentOwned (m_mainComponent.get(), true);
+            setUsingNativeTitleBar(true);
+            setContentOwned(m_mainComponent.get(), true);
 
-           #if JUCE_IOS || JUCE_ANDROID
-            setFullScreen (true);
-           #else
-            setResizable (true, true);
-            centreWithSize (getWidth(), getHeight());
-           #endif
+#if JUCE_IOS || JUCE_ANDROID
+            setFullScreen(true);
+#else
+            setResizable(true, true);
+            centreWithSize(getWidth(), getHeight());
+#endif
 
-            setVisible (true);
+            setVisible(true);
         }
 
         void closeButtonPressed() override
@@ -75,22 +77,24 @@ public:
         }
 
         /* Note: Be careful if you override any DocumentWindow methods - the base
-           class uses a lot of them, so by overriding you might break its functionality.
-           It's best to do all your work in your content component instead, but if
-           you really have to override any DocumentWindow methods, make sure your
-           subclass also calls the superclass's method.
+            class uses a lot of them, so by overriding you might break its functionality.
+            It's best to do all your work in your content component instead, but if
+            you really have to override any DocumentWindow methods, make sure your
+            subclass also calls the superclass's method.
         */
 
     private:
         std::unique_ptr<MainSoundscapeBridgeAppComponent>  m_mainComponent;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainWindow)
     };
 
 private:
     std::unique_ptr<MainWindow> m_mainWindow;
 };
 
+}
+
 //==============================================================================
 // This macro generates the main() routine that launches the app.
-START_JUCE_APPLICATION (SoundscapeBridgeAppApplication)
+START_JUCE_APPLICATION (SoundscapeBridgeApp::SoundscapeBridgeAppApplication)

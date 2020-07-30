@@ -94,7 +94,7 @@ SoundsourceProcessor::SoundsourceProcessor()
 
 	m_sourceId = SOURCE_ID_MIN; // This default sourceId will be overwritten by ctrl->AddProcessor() below.
 	m_mappingId = DEFAULT_COORD_MAPPING; // Default: coordinate mapping 1.
-	m_processorId = -1;
+	m_processorId = INVALID_PROCESSOR_ID;
 
 	// Default OSC communication mode. In the console version, default is "sync" mode.
 	m_comsMode = CM_Tx;
@@ -128,6 +128,20 @@ SoundsourceProcessor::~SoundsourceProcessor()
 int SoundsourceProcessor::GetProcessorId() const
 {
 	return m_processorId;
+}
+
+/**
+ * Setter function for the processors' Id
+ * @param changeSource	The application module which is causing the property change.
+ * @param processorId	The new ID
+ */
+void SoundsourceProcessor::SetProcessorId(DataChangeSource changeSource, ProcessorId processorId)
+{
+	ignoreUnused(changeSource);
+	if (m_processorId != processorId && processorId != INVALID_PROCESSOR_ID)
+	{
+		m_processorId = processorId;
+	}
 }
 
 /**
@@ -354,7 +368,6 @@ void SoundsourceProcessor::OnOverviewButtonClicked()
 		ovrMgr->SetSelectedMapping(GetMappingId());
 	}
 }
-
 
 /**
  * Overriden from AppConfiguration::XmlConfigurableElement to dump this objects' settings

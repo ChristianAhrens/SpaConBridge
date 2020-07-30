@@ -109,6 +109,7 @@ COverviewComponent::COverviewComponent()
 	// Create the table container.
 	m_tableContainer = std::make_unique<COverviewTableContainer>();
 	m_multiSliderContainer = std::make_unique<COverviewMultiSurface>();
+	m_settingsContainer = std::make_unique<CSettingsContainer>();
 
 	// Create a tab container, where the COverviewTableContainer will be one of the tabs.
 	m_tabbedComponent = std::make_unique<CTabbedComponent>();
@@ -118,9 +119,11 @@ COverviewComponent::COverviewComponent()
 	addAndMakeVisible(m_tabbedComponent.get());
 
 	// Add the overview tabs.
+	m_tabbedComponent->SetIsHandlingChanges(false);
 	m_tabbedComponent->addTab("Table", CDbStyle::GetDbColor(CDbStyle::DarkColor), m_tableContainer.get(), false);
 	m_tabbedComponent->addTab("Slider", CDbStyle::GetDbColor(CDbStyle::DarkColor), m_multiSliderContainer.get(), false);
 	m_tabbedComponent->addTab("Settings", CDbStyle::GetDbColor(CDbStyle::DarkColor), m_settingsContainer.get(), false);
+	m_tabbedComponent->SetIsHandlingChanges(true);
 
 	// Start GUI-refreshing timer.
 	startTimer(GUI_UPDATE_RATE_SLOW);
@@ -131,10 +134,6 @@ COverviewComponent::COverviewComponent()
  */
 COverviewComponent::~COverviewComponent()
 {
-	// Remember which tab was active before the last time the overview was closed.
-	COverviewManager* ovrMgr = COverviewManager::GetInstance();
-	if (ovrMgr && m_tabbedComponent)
-		ovrMgr->SetActiveTab(m_tabbedComponent->getCurrentTabIndex(), true);
 }
 
 /**
@@ -202,8 +201,10 @@ void COverviewComponent::resized()
 	m_tabbedComponent->setBounds(Rectangle<int>(0, 0, w, getLocalBounds().getHeight() - 45));
 
 	// Resize overview table container.
-	m_tableContainer->setBounds(Rectangle<int>(0, 44, w, getLocalBounds().getHeight() - 89));
-	m_multiSliderContainer->setBounds(Rectangle<int>(0, 44, w, getLocalBounds().getHeight() - 89));
+	auto rect = Rectangle<int>(0, 44, w, getLocalBounds().getHeight() - 89);
+	m_tableContainer->setBounds(rect);
+	m_multiSliderContainer->setBounds(rect);
+	m_settingsContainer->setBounds(rect);
 }
 
 /**
@@ -305,6 +306,11 @@ void COverviewComponent::UpdateGui(bool init)
 	}
 }
 
+/**
+ * Method to externally set the currently active tab.
+ * This is used to restore the current active tab from config file on app start.
+ * @param tabIdx	The tab index to set active
+ */
 void COverviewComponent::SetActiveTab(int tabIdx)
 {
 	m_tabbedComponent->setCurrentTabIndex(tabIdx, false);
@@ -355,6 +361,9 @@ void CTabbedComponent::currentTabChanged(int newCurrentTabIndex, const String& n
 {
 	ignoreUnused(newCurrentTabName);
 
+	if (!GetIsHandlingChanges())
+		return;
+
 	COverviewManager* ovrMgr = COverviewManager::GetInstance();
 	if (ovrMgr)
 		ovrMgr->SetActiveTab(newCurrentTabIndex, false);
@@ -371,6 +380,24 @@ void CTabbedComponent::resized()
 {
 	int w = getLocalBounds().getWidth();
 	getTabbedButtonBar().setBounds(Rectangle<int>(40, 0, w - (40 + 86), 44));
+}
+
+/**
+ * Getter for the bool flag that indicates if tab changes should be broadcasted
+ * @return True if changes are currently handled (broadcasted), false if not
+ */
+bool CTabbedComponent::GetIsHandlingChanges()
+{
+	return m_isHandlingChanges;
+}
+
+/**
+ * Setter for the bool flag that indicates if tab changes should be broadcasted
+ * @param isHandlingChanges		The new value to be set as the new internal bool flag state
+ */
+void CTabbedComponent::SetIsHandlingChanges(bool isHandlingChanges)
+{
+	m_isHandlingChanges = isHandlingChanges;
 }
 
 

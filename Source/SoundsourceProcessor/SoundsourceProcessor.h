@@ -73,6 +73,7 @@ public:
 	~SoundsourceProcessor() override;
 
 	int GetProcessorId() const;
+	void SetProcessorId(DataChangeSource changeSource, int processorId);
 
 	void InitializeSettings(SourceId sourceId, int mappingId, String ipAddress, int oscMsgRate, ComsMode newMode);
 

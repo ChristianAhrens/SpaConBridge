@@ -28,6 +28,9 @@ namespace SoundscapeBridgeApp
 //==============================================================================
 MainSoundscapeBridgeAppComponent::MainSoundscapeBridgeAppComponent()
 {
+    m_config = std::make_unique<AppConfiguration>(JUCEAppBasics::AppConfigurationBase::getDefaultConfigFilePath());
+    m_config->addDumper(this);
+
     auto ctrl = SoundscapeBridgeApp::CController::GetInstance();
     ignoreUnused(ctrl);
     auto ovrMgr = SoundscapeBridgeApp::COverviewManager::GetInstance();
@@ -37,30 +40,37 @@ MainSoundscapeBridgeAppComponent::MainSoundscapeBridgeAppComponent()
         addAndMakeVisible(overview);
     }
 
-    m_config = std::make_unique<AppConfiguration>(JUCEAppBasics::AppConfigurationBase::getDefaultConfigFilePath());
-    m_config->addListener(this);
     if (!m_config->isValid())
     {
-        m_config->triggerListenersUpdate();
+        m_config->triggerConfigurationDump();
     }
     else
     {
+        // get all the modules' configs first, because the initialization process might already trigger dumping, that would override data
         auto ctrlConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER));
+        auto ovrConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW));
+
+        // set the controller modules' config
         if (ctrl)
             ctrl->setStateXml(ctrlConfigState.get());
 
-        auto ovrConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW));
+        // set the overview manager modules' config
         if (ovrMgr)
             ovrMgr->setStateXml(ovrConfigState.get());
     }
 
     setSize(896, 414);
+
+    m_config->triggerWatcherUpdate();
 }
 
 MainSoundscapeBridgeAppComponent::~MainSoundscapeBridgeAppComponent()
 {
     if (m_config)
-        m_config->triggerListenersUpdate();
+    {
+        m_config->clearDumpers();
+        m_config->clearWatchers();
+    }
 
     auto ovrMgr = SoundscapeBridgeApp::COverviewManager::GetInstance();
     if (ovrMgr)

@@ -167,6 +167,8 @@ void COverviewManager::SetActiveTab(int tabIdx, bool dontSendNotification)
 	{
 		m_overview->SetActiveTab(tabIdx);
 	}
+
+	triggerConfigurationUpdate();
 }
 
 /**

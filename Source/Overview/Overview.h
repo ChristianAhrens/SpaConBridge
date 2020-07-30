@@ -167,10 +167,15 @@ public:
 	CTabbedComponent();
 	~CTabbedComponent() override;
 
+	bool GetIsHandlingChanges();
+	void SetIsHandlingChanges(bool isHandlingChanges);
+
 protected:
 	TabBarButton* createTabButton(const String& tabName, int tabIndex) override;
 	void currentTabChanged(int newCurrentTabIndex, const String& newCurrentTabName) override;
 	void resized() override;
+
+	bool m_isHandlingChanges{ true };
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CTabbedComponent)
 };

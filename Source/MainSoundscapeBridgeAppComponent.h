@@ -23,7 +23,7 @@ namespace SoundscapeBridgeApp
 /*
  */
 class MainSoundscapeBridgeAppComponent :    public juce::Component,
-                                            public AppConfiguration::Listener
+                                            public AppConfiguration::Dumper
 {
 public:
     MainSoundscapeBridgeAppComponent();

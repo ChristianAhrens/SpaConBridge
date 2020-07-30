@@ -38,6 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../About.h"
 #include "../Gui.h"
 #include "../SoundscapeBridgeAppCommon.h"
+#include "../AppConfiguration.h"
 
 
 namespace SoundscapeBridgeApp
@@ -47,7 +48,7 @@ namespace SoundscapeBridgeApp
 /**
  * CSettingsContainer is a component to hold multiple components that are dedicated to app configuration.
  */
-class CSettingsContainer : public AOverlay
+class CSettingsContainer : public AOverlay, public AppConfiguration::Watcher
 {
 public:
 	CSettingsContainer();
@@ -55,9 +56,14 @@ public:
 
 	void UpdateGui(bool init) override;
 
+	void onConfigUpdated() override;
+
 protected:
 	void paint(Graphics&) override;
 	void resized() override;
+
+private:
+	std::unique_ptr<TextEditor>	m_settingsRawEditor;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CSettingsContainer)
 };

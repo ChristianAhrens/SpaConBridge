@@ -114,8 +114,8 @@ CController::CController()
 
 	// Default OSC server settings. These might become overwritten 
 	// by setStateInformation()
-	SetRate(DCS_Protocol, PROTOCOL_INTERVAL_DEF);
-	SetIpAddress(DCS_Protocol, PROTOCOL_DEFAULT_IP);
+	SetRate(DCS_Init, PROTOCOL_INTERVAL_DEF);
+	SetIpAddress(DCS_Init, PROTOCOL_DEFAULT_IP);
 }
 
 /**
@@ -180,6 +180,31 @@ void CController::SetParameterChanged(DataChangeSource changeSource, DataChangeT
 	{
 		m_processors[i]->SetParameterChanged(changeSource, changeTypes);
 	}
+
+	switch (changeTypes)
+	{
+	case DCT_NumProcessors:
+	case DCT_None:
+	case DCT_IPAddress:
+	case DCT_MessageRate:
+	case DCT_Online:
+	case DCT_OscConfig:
+	case DCT_SourceID:
+	case DCT_MappingID:
+	case DCT_ComsMode:
+	case DCT_PluginInstanceConfig:
+	case DCT_SourcePosition:
+	case DCT_ReverbSendGain:
+	case DCT_SourceSpread:
+	case DCT_DelayMode:
+	case DCT_Bypass:
+	case DCT_AutomationParameters:
+	case DCT_DebugMessage:
+	default:
+		if(changeSource != DCS_Init)
+			triggerConfigurationUpdate();
+		break;
+	}
 }
 
 /**
@@ -228,15 +253,18 @@ ProcessorId CController::AddProcessor(SoundsourceProcessor* p)
 	}
 
 	m_processors.add(p);
+	ProcessorId newProcessorId = static_cast<ProcessorId>(m_processors.size() - 1);
+
+	// Set the new Processor's id
+	p->SetProcessorId(DCS_Init, newProcessorId);
+	
+#ifdef JUCE_DEBUG
+	p->PushDebugMessage("CController::AddProcessor: #" + String(newProcessorId));
+#endif
 	SetParameterChanged(DCS_Protocol, DCT_NumProcessors);
 
 	// Set the new Processor's InputID to the next in sequence.
 	p->SetSourceId(DCS_Protocol, currentMaxSourceId + 1);
-
-	ProcessorId newProcessorId = static_cast<ProcessorId>(m_processors.size() - 1);
-#ifdef JUCE_DEBUG
-	p->PushDebugMessage("CController::AddProcessor: #" + String(newProcessorId));
-#endif
 
 	auto protocolData = m_processingConfig.GetProtocolData(DEFAULT_PROCNODE_ID, DEFAULT_PROCPROT_A_ID);
 	for (int roi = ROI_SoundObject_Position_XY; roi < ROI_UserMAX; roi++)
@@ -914,6 +942,7 @@ std::unique_ptr<XmlElement> CController::createStateXml()
 	{
 		for (auto processor : m_processors)
 		{
+			jassert(processor->GetProcessorId() != -1);
 			auto processorInstanceXmlElement = processorsXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE) + String(processor->GetProcessorId()));
 			processorsXmlElement->addChildElement(processor->createStateXml().release());
 		}

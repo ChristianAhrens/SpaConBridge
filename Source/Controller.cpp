@@ -720,6 +720,7 @@ void CController::timerCallback()
 						newDualFloatValue[1] = pro->GetParameterValue(ParamIdx_Y);
 
 						newMsgData.valCount = 2;
+						newMsgData.valType = ROVT_FLOAT;
 						newMsgData.payload = &newDualFloatValue;
 						newMsgData.payloadSize = 2 * sizeof(float);
 
@@ -743,6 +744,7 @@ void CController::timerCallback()
 						float newFloatValue = pro->GetParameterValue(ParamIdx_ReverbSendGain);
 
 						newMsgData.valCount = 1;
+						newMsgData.valType = ROVT_FLOAT;
 						newMsgData.payload = &newFloatValue;
 						newMsgData.payloadSize = sizeof(float);
 
@@ -761,6 +763,7 @@ void CController::timerCallback()
 						float newFloatValue = pro->GetParameterValue(ParamIdx_SourceSpread);
 
 						newMsgData.valCount = 1;
+						newMsgData.valType = ROVT_FLOAT;
 						newMsgData.payload = &newFloatValue;
 						newMsgData.payloadSize = sizeof(float);
 
@@ -779,6 +782,7 @@ void CController::timerCallback()
 						float newFloatValue = pro->GetParameterValue(ParamIdx_DelayMode);
 
 						newMsgData.valCount = 1;
+						newMsgData.valType = ROVT_FLOAT;
 						newMsgData.payload = &newFloatValue;
 						newMsgData.payloadSize = sizeof(float);
 
@@ -822,6 +826,7 @@ void CController::timerCallback()
 			// If we aren't expecting any responses from the DS100, we need to at least send a "ping"
 			// so that we can use the "pong" to check our connection status.
 			newMsgData.valCount = 0;
+			newMsgData.valType = ROVT_NONE;
 			newMsgData.payload = 0;
 			newMsgData.payloadSize = 0;
 			SendMessage(ROI_HeartbeatPing, newMsgData);

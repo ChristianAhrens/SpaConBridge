@@ -875,7 +875,9 @@ bool CController::setStateXml(XmlElement* stateXml)
 			m_processingNode.setStateXml(nodeXmlElement);
 	}
 	else
-		retVal = false;
+	{
+		SetupBridgingNode();
+	}
 
 	return retVal;
 }
@@ -891,6 +893,7 @@ std::unique_ptr<XmlElement> CController::createStateXml()
 	auto controllerXmlElement = std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER));
 
 	auto processorsXmlElement = controllerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDSOURCEPROCESSORS));
+	if (processorsXmlElement)
 	{
 		for (auto processor : m_processors)
 		{
@@ -898,11 +901,21 @@ std::unique_ptr<XmlElement> CController::createStateXml()
 			processorsXmlElement->addChildElement(processor->createStateXml().release());
 		}
 	}
-	auto bridgingXmlElement = controllerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::BRIDGING));
-	{
-		bridgingXmlElement->addChildElement(m_processingNode.createStateXml().release());
-		m_bridgingXml = *bridgingXmlElement;
-	}
+	controllerXmlElement->addChildElement(std::make_unique<XmlElement>(m_bridgingXml).release());
+	//auto bridgingXmlElement = controllerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::BRIDGING));
+	//if (bridgingXmlElement)
+	//{
+	//	auto nodeXmlElement = m_processingNode.createStateXml();
+	//	if (nodeXmlElement)
+	//	{
+	//		bridgingXmlElement->addChildElement(nodeXmlElement.release());
+	//		m_bridgingXml = *bridgingXmlElement;
+	//	}
+	//	else
+	//	{
+	//		controllerXmlElement->replaceChildElement(bridgingXmlElement, std::make_unique<XmlElement>(m_bridgingXml).release());
+	//	}
+	//}
 
 	return std::move(controllerXmlElement);
 }
@@ -913,29 +926,66 @@ std::unique_ptr<XmlElement> CController::createStateXml()
  */
 void CController::SetupBridgingNode()
 {
-	auto defaultNode = ProcessingEngineConfig::GetDefaultNode();
+	auto nodeXmlElement = std::make_unique<XmlElement>(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::NODE));
 
-	jassertfalse;
-	//ProcessingEngineConfig::ObjectHandlingData newObjectHandling;
-	//newObjectHandling.Mode = ObjectHandlingMode::OHM_Bypass;
-	//newObjectHandling.ACnt = 1;
-	//newObjectHandling.BCnt = 0;
-	//newObjectHandling.Prec = 1.0f;
-	//ProcessingEngineConfig::NodeData newNode;
-	//newNode.Id = DEFAULT_PROCNODE_ID;
-	//newNode.ObjectHandling = newObjectHandling;
-	//newNode.RoleAProtocols.add(DEFAULT_PROCPROT_A_ID);
-	//m_processingConfig.SetNode(newNode.Id, newNode);
-	//
-	//auto protocolData = m_processingConfig.GetProtocolData(DEFAULT_PROCNODE_ID, DEFAULT_PROCPROT_A_ID);
-	//protocolData.IpAddress = PROTOCOL_DEFAULT_IP;
-	//protocolData.ClientPort = RX_PORT_DS100;
-	//protocolData.HostPort = RX_PORT_HOST;
-	//protocolData.UsesActiveRemoteObjects = true;
-	//protocolData.Type = ProtocolType::PT_OSCProtocol;
-	//m_processingConfig.SetProtocolData(DEFAULT_PROCNODE_ID, DEFAULT_PROCPROT_A_ID, protocolData);
+	nodeXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), DEFAULT_PROCNODE_ID);
 
-	m_processingNode.setStateXml(defaultNode.get());
+	auto objectHandlingXmlElement = nodeXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OBJECTHANDLING));
+	if (objectHandlingXmlElement)
+	{
+		objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Bypass));
+	}
+
+	auto protocolAXmlElement = nodeXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLA));
+	if (protocolAXmlElement)
+	{
+		protocolAXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), DS100_PROCESSINGPROTOCOL_ID);
+
+		protocolAXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), ProcessingEngineConfig::ProtocolTypeToString(PT_OSCProtocol));
+		protocolAXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::USESACTIVEOBJ), 1);
+
+		auto clientPortXmlElement = protocolAXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+		if (clientPortXmlElement)
+			clientPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_DS100);
+
+		auto hostPortXmlElement = protocolAXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
+		if (hostPortXmlElement)
+			hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_HOST);
+
+		// Active objects preparation
+		Array<RemoteObject> activeObjects;
+		RemoteObject objectX, objectY;
+		//
+		//objectX.Id = ROI_SoundObject_Position_X;
+		//objectY.Id = ROI_SoundObject_Position_Y;
+		//for (int16 i = 1; i <= 16; ++i)
+		//{
+		//	RemoteObjectAddressing addr;
+		//	addr.first = i; //channel = source
+		//	addr.second = 1; //record = mapping
+		//
+		//	objectX.Addr = addr;
+		//	objectY.Addr = addr;
+		//
+		//	activeObjects.add(objectX);
+		//	activeObjects.add(objectY);
+		//}
+		auto activeObjsXmlElement = protocolAXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ACTIVEOBJECTS));
+		if (activeObjsXmlElement)
+			ProcessingEngineConfig::WriteActiveObjects(activeObjsXmlElement, activeObjects);
+
+		auto ipAdressXmlElement = protocolAXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
+		if (ipAdressXmlElement)
+			ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
+
+		auto pollIntervalXmlElement = protocolAXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
+		if (pollIntervalXmlElement)
+			pollIntervalXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::INTERVAL), ET_DefaultPollingRate);
+	}
+
+	m_processingNode.setStateXml(nodeXmlElement.get());
+
+	m_bridgingXml.addChildElement(nodeXmlElement.release());
 }
 
 /**

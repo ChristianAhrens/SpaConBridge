@@ -42,7 +42,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../Controller.h"
 #include "../SoundsourceProcessor/SurfaceSlider.h"
 
-#include "../submodules/JUCE-AppBasics/Source/Image_utils.hpp"
+#include <Image_utils.hpp>
 
 
 namespace SoundscapeBridgeApp

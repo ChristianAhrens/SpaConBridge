@@ -377,7 +377,9 @@ void SoundsourceProcessor::OnOverviewButtonClicked()
  */
 std::unique_ptr<XmlElement> SoundsourceProcessor::createStateXml()
 {
-	return nullptr;
+	auto processorInstanceXmlElement = std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE) + String(GetProcessorId()));
+
+	return std::move(processorInstanceXmlElement);
 }
 
 /**

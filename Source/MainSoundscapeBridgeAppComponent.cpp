@@ -18,7 +18,7 @@
 #include "SoundsourceProcessor/SoundsourceProcessorEditor.h"
 #include "SoundsourceProcessor/SoundsourceProcessor.h"
 
-#include "../submodules/JUCE-AppBasics/Source/iOS_utils.hpp"
+#include <iOS_utils.hpp>
 
 #include <JuceHeader.h>
 

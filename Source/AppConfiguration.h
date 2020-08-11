@@ -2,7 +2,7 @@
 
 #include <JuceHeader.h>
 
-#include "../submodules/JUCE-AppBasics/Source/AppConfigurationBase.h"
+#include <AppConfigurationBase.h>
 
 namespace SoundscapeBridgeApp
 {

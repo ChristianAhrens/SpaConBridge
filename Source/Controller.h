@@ -37,7 +37,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "SoundscapeBridgeAppCommon.h"
 #include "AppConfiguration.h"
-#include "../submodules/RemoteProtocolBridge/Source/ProcessingEngineNode.h"
+
+#include <ProcessingEngine/ProcessingEngineNode.h>
 
 
 namespace SoundscapeBridgeApp
@@ -89,12 +90,17 @@ public:
 	void Reconnect();
 	bool GetOnline() const;
 
-	void CreateNodeConfiguration();
+	void SetupBridgingNode();
 	void HandleNodeData(NodeId nodeId, ProtocolId senderProtocolId, ProtocolType senderProtocolType, RemoteObjectIdentifier objectId, RemoteObjectMessageData& msgData) override;
 	bool SendMessage(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData);
 
 	std::unique_ptr<XmlElement> createStateXml() override;
 	bool setStateXml(XmlElement* stateXml) override;
+
+	bool ActivateDS100SourceId(int sourceId, int mappingId);
+	bool DeactivateDS100SourceId(int sourceId, int mappingId);
+	bool SetDS100IpAddress(String ipAddress);
+	bool SetDS100MsgRate(int msgRate);
 
 private:
 	void timerCallback() override;
@@ -120,7 +126,7 @@ protected:
 	 * in a specific way to pass incoming and outgoing data to each other and this parent controller instance.
 	 */
 	ProcessingEngineNode	m_processingNode;	/**< The node that encapsulates the protocols that are used to send, receive and bridge data. */
-	ProcessingEngineConfig	m_processingConfig;	/**< The configuration of the processing node. */
+	XmlElement				m_bridgingXml;	/**< The current xml config for bridging (contains node xml). */
 
 	/**
 	 * IP Address where OSC messages will be sent to / received from.

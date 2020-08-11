@@ -77,8 +77,7 @@ static const String kOscResponseString_source_delaymode("/dbaudio1/positioning/s
  * Pre-define processing bridge config values
  */
 static constexpr int DEFAULT_PROCNODE_ID = 1;
-static constexpr int DEFAULT_PROCPROT_A_ID = 2;
-static constexpr int DEFAULT_PROCPROT_B_ID = 2;
+static constexpr int DS100_PROCESSINGPROTOCOL_ID = 2;
 
 
 
@@ -99,6 +98,7 @@ CController* CController::m_singleton = nullptr;
  * is managed from a central point and only one UDP port is opened for all OSC communication.
  */
 CController::CController()
+	: m_bridgingXml(AppConfiguration::getTagName(AppConfiguration::TagID::BRIDGING))
 {
 	jassert(!m_singleton);	// only one instnce allowed!!
 	m_singleton = this;
@@ -110,7 +110,7 @@ CController::CController()
 	// CController derives from ProcessingEngineNode::Listener
 	m_processingNode.AddListener(this);
 
-	CreateNodeConfiguration();
+	SetupBridgingNode();
 
 	// Default OSC server settings. These might become overwritten 
 	// by setStateInformation()
@@ -266,19 +266,7 @@ ProcessorId CController::AddProcessor(SoundsourceProcessor* p)
 	// Set the new Processor's InputID to the next in sequence.
 	p->SetSourceId(DCS_Protocol, currentMaxSourceId + 1);
 
-	auto protocolData = m_processingConfig.GetProtocolData(DEFAULT_PROCNODE_ID, DEFAULT_PROCPROT_A_ID);
-	for (int roi = ROI_SoundObject_Position_XY; roi < ROI_UserMAX; roi++)
-	{
-		RemoteObject newSourceObject;
-		newSourceObject.Id = static_cast<RemoteObjectIdentifier>(roi);
-		newSourceObject.Addr.first = static_cast<juce::int16>(p->GetSourceId());
-		newSourceObject.Addr.second = static_cast<juce::int16>(p->GetMappingId());
-
-		if (!protocolData.RemoteObjects.contains(newSourceObject))
-			protocolData.RemoteObjects.add(newSourceObject);
-	}
-	m_processingConfig.SetProtocolData(DEFAULT_PROCNODE_ID, DEFAULT_PROCPROT_A_ID, protocolData);
-	m_processingNode.SetNodeConfiguration(m_processingConfig, DEFAULT_PROCNODE_ID);
+	ActivateDS100SourceId(p->GetSourceId(), p->GetMappingId());
 
 	return newProcessorId;
 }
@@ -289,19 +277,7 @@ ProcessorId CController::AddProcessor(SoundsourceProcessor* p)
  */
 void CController::RemoveProcessor(SoundsourceProcessor* p)
 {
-	auto protocolData = m_processingConfig.GetProtocolData(DEFAULT_PROCNODE_ID, DEFAULT_PROCPROT_A_ID);
-	for (int roi = ROI_SoundObject_Position_XY; roi < ROI_UserMAX; roi++)
-	{
-		RemoteObject newSourceObject;
-		newSourceObject.Id = static_cast<RemoteObjectIdentifier>(roi);
-		newSourceObject.Addr.first = static_cast<juce::int16>(p->GetSourceId());
-		newSourceObject.Addr.second = static_cast<juce::int16>(p->GetMappingId());
-
-		if (protocolData.RemoteObjects.contains(newSourceObject))
-			protocolData.RemoteObjects.remove(protocolData.RemoteObjects.removeAllInstancesOf(newSourceObject));
-	}
-	m_processingConfig.SetProtocolData(DEFAULT_PROCNODE_ID, DEFAULT_PROCPROT_A_ID, protocolData);
-	m_processingNode.SetNodeConfiguration(m_processingConfig, DEFAULT_PROCNODE_ID);
+	DeactivateDS100SourceId(p->GetSourceId(), p->GetMappingId());
 
 	int idx = m_processors.indexOf(p);
 	jassert(idx >= 0); // Tried to remove inexistent Processor object.
@@ -371,11 +347,7 @@ void CController::SetIpAddress(DataChangeSource changeSource, String ipAddress)
 
 		m_ipAddress = ipAddress;
 
-		m_processingConfig.GetProtocolAIds(DEFAULT_PROCNODE_ID).getFirst();
-		auto protocolData = m_processingConfig.GetProtocolData(DEFAULT_PROCNODE_ID, m_processingConfig.GetProtocolAIds(DEFAULT_PROCNODE_ID).getFirst());
-		protocolData.IpAddress = ipAddress;
-		m_processingConfig.SetProtocolData(DEFAULT_PROCNODE_ID, m_processingConfig.GetProtocolAIds(DEFAULT_PROCNODE_ID).getFirst(), protocolData);
-		m_processingNode.SetNodeConfiguration(m_processingConfig, DEFAULT_PROCNODE_ID);
+		SetDS100IpAddress(ipAddress);
 
 		// Start "offline" after changing IP address
 		m_heartBeatsRx = MAX_HEARTBEAT_COUNT;
@@ -423,12 +395,7 @@ void CController::SetRate(DataChangeSource changeSource, int rate)
 
 		m_oscMsgRate = rate;
 
-		for (auto protocolAId : m_processingConfig.GetProtocolAIds(DEFAULT_PROCNODE_ID))
-			m_processingConfig.SetPollingInterval(DEFAULT_PROCNODE_ID, protocolAId, rate);
-		for (auto protocolBId : m_processingConfig.GetProtocolBIds(DEFAULT_PROCNODE_ID))
-			m_processingConfig.SetPollingInterval(DEFAULT_PROCNODE_ID, protocolBId, rate);
-
-		m_processingNode.SetNodeConfiguration(m_processingConfig, DEFAULT_PROCNODE_ID);
+		SetDS100MsgRate(rate);
 
 		// Signal the change to all Processors.
 		SetParameterChanged(changeSource, DCT_MessageRate);
@@ -461,32 +428,6 @@ void CController::InitGlobalSettings(DataChangeSource changeSource, String ipAdd
 }
 
 /**
- * Method to create a basic configuration to use to setup the single supported
- * bridging node.
- */
-void CController::CreateNodeConfiguration()
-{
-	ProcessingEngineConfig::ObjectHandlingData newObjectHandling;
-	newObjectHandling.Mode = ObjectHandlingMode::OHM_Bypass;
-	newObjectHandling.ACnt = 1;
-	newObjectHandling.BCnt = 0;
-	newObjectHandling.Prec = 1.0f;
-	ProcessingEngineConfig::NodeData newNode;
-	newNode.Id = DEFAULT_PROCNODE_ID;
-	newNode.ObjectHandling = newObjectHandling;
-	newNode.RoleAProtocols.add(DEFAULT_PROCPROT_A_ID);
-	m_processingConfig.SetNode(newNode.Id, newNode);
-
-	auto protocolData = m_processingConfig.GetProtocolData(DEFAULT_PROCNODE_ID, DEFAULT_PROCPROT_A_ID);
-	protocolData.IpAddress = PROTOCOL_DEFAULT_IP;
-	protocolData.ClientPort = RX_PORT_DS100;
-	protocolData.HostPort = RX_PORT_HOST;
-	protocolData.UsesActiveRemoteObjects = true;
-	protocolData.Type = ProtocolType::PT_OSCProtocol;
-	m_processingConfig.SetProtocolData(DEFAULT_PROCNODE_ID, DEFAULT_PROCPROT_A_ID, protocolData);
-}
-
-/**
  * Called when the OSCReceiver receives a new OSC message, since CController inherits from OSCReceiver::Listener.
  * It forwards the message to all registered Processor objects.
  * @param nodeId	The bridging node that the message data was received on (only a single default id node supported currently).
@@ -500,8 +441,11 @@ void CController::HandleNodeData(NodeId nodeId, ProtocolId senderProtocolId, Pro
 	if (nodeId != DEFAULT_PROCNODE_ID)
 		return;
 
-	jassert(senderProtocolId == DEFAULT_PROCPROT_A_ID);
-	if (senderProtocolId != DEFAULT_PROCPROT_A_ID)
+	// Do not handle any protocol data except what is received
+	// from DS100 - any data that was sent by 3rd party devices 
+	// is bridged to DS100 and returned by it 
+	// so we can handle the data in the end as well
+	if (senderProtocolId != DS100_PROCESSINGPROTOCOL_ID)
 		return;
 
 	ignoreUnused(senderProtocolType);
@@ -656,11 +600,13 @@ bool CController::SendMessage(RemoteObjectIdentifier Id, RemoteObjectMessageData
 {
 	auto sendSuccess{ true };
 
-	auto activeBridgeNodeData = m_processingConfig.GetNodeData(m_processingConfig.GetNodeIds().getFirst());
-	for (auto protocolA : activeBridgeNodeData.RoleAProtocols)
-		sendSuccess &= m_processingNode.SendMessageTo(protocolA, Id, msgData);
-	for (auto protocolB : activeBridgeNodeData.RoleAProtocols)
-		sendSuccess &= m_processingNode.SendMessageTo(protocolB, Id, msgData);
+	//auto activeBridgeNodeData = m_processingConfig.GetNodeData(m_processingConfig.GetNodeIds().getFirst());
+	//for (auto protocolA : activeBridgeNodeData.RoleAProtocols)
+	//	sendSuccess &= m_processingNode.SendMessageTo(protocolA, Id, msgData);
+	//for (auto protocolB : activeBridgeNodeData.RoleAProtocols)
+	//	sendSuccess &= m_processingNode.SendMessageTo(protocolB, Id, msgData);
+
+	m_processingNode.SendMessageTo(DS100_PROCESSINGPROTOCOL_ID, Id, msgData);
 
 	return sendSuccess;
 }
@@ -680,7 +626,9 @@ void CController::Reconnect()
 {
 	Disconnect();
 
-	m_processingNode.SetNodeConfiguration(m_processingConfig, m_processingConfig.GetNodeIds().getFirst());
+	auto nodeXmlElement = m_bridgingXml.getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::NODE));
+	if (nodeXmlElement)
+		m_processingNode.setStateXml(nodeXmlElement);
 	m_processingNode.Start();
 }
 
@@ -921,6 +869,10 @@ bool CController::setStateXml(XmlElement* stateXml)
 	auto bridgingXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::BRIDGING));
 	if (bridgingXmlElement)
 	{
+		m_bridgingXml = *bridgingXmlElement;
+		auto nodeXmlElement = bridgingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::NODE));
+		if (nodeXmlElement)
+			m_processingNode.setStateXml(nodeXmlElement);
 	}
 	else
 		retVal = false;
@@ -943,16 +895,130 @@ std::unique_ptr<XmlElement> CController::createStateXml()
 		for (auto processor : m_processors)
 		{
 			jassert(processor->GetProcessorId() != -1);
-			auto processorInstanceXmlElement = processorsXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE) + String(processor->GetProcessorId()));
 			processorsXmlElement->addChildElement(processor->createStateXml().release());
 		}
 	}
 	auto bridgingXmlElement = controllerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::BRIDGING));
 	{
-		//bridgingXmlElement->addChildElement(m_processingNode->createStateXml().release());
+		bridgingXmlElement->addChildElement(m_processingNode.createStateXml().release());
+		m_bridgingXml = *bridgingXmlElement;
 	}
 
 	return std::move(controllerXmlElement);
+}
+
+/**
+ * Method to create a basic configuration to use to setup the single supported
+ * bridging node.
+ */
+void CController::SetupBridgingNode()
+{
+	auto defaultNode = ProcessingEngineConfig::GetDefaultNode();
+
+	jassertfalse;
+	//ProcessingEngineConfig::ObjectHandlingData newObjectHandling;
+	//newObjectHandling.Mode = ObjectHandlingMode::OHM_Bypass;
+	//newObjectHandling.ACnt = 1;
+	//newObjectHandling.BCnt = 0;
+	//newObjectHandling.Prec = 1.0f;
+	//ProcessingEngineConfig::NodeData newNode;
+	//newNode.Id = DEFAULT_PROCNODE_ID;
+	//newNode.ObjectHandling = newObjectHandling;
+	//newNode.RoleAProtocols.add(DEFAULT_PROCPROT_A_ID);
+	//m_processingConfig.SetNode(newNode.Id, newNode);
+	//
+	//auto protocolData = m_processingConfig.GetProtocolData(DEFAULT_PROCNODE_ID, DEFAULT_PROCPROT_A_ID);
+	//protocolData.IpAddress = PROTOCOL_DEFAULT_IP;
+	//protocolData.ClientPort = RX_PORT_DS100;
+	//protocolData.HostPort = RX_PORT_HOST;
+	//protocolData.UsesActiveRemoteObjects = true;
+	//protocolData.Type = ProtocolType::PT_OSCProtocol;
+	//m_processingConfig.SetProtocolData(DEFAULT_PROCNODE_ID, DEFAULT_PROCPROT_A_ID, protocolData);
+
+	m_processingNode.setStateXml(defaultNode.get());
+}
+
+/**
+ *
+ * @param sourceId
+ * @param mappingId
+ * @return 
+ */
+bool CController::ActivateDS100SourceId(int sourceId, int mappingId)
+{
+	jassertfalse;
+	return false;
+	//auto protocolData = m_processingConfig.GetProtocolData(DEFAULT_PROCNODE_ID, DEFAULT_PROCPROT_A_ID);
+	//for (int roi = ROI_SoundObject_Position_XY; roi < ROI_UserMAX; roi++)
+	//{
+	//	RemoteObject newSourceObject;
+	//	newSourceObject.Id = static_cast<RemoteObjectIdentifier>(roi);
+	//	newSourceObject.Addr.first = static_cast<juce::int16>(p->GetSourceId());
+	//	newSourceObject.Addr.second = static_cast<juce::int16>(p->GetMappingId());
+	//
+	//	if (!protocolData.RemoteObjects.contains(newSourceObject))
+	//		protocolData.RemoteObjects.add(newSourceObject);
+	//}
+	//m_processingConfig.SetProtocolData(DEFAULT_PROCNODE_ID, DEFAULT_PROCPROT_A_ID, protocolData);
+	//m_processingNode.SetNodeConfiguration(m_processingConfig, DEFAULT_PROCNODE_ID);
+}
+
+/**
+ *
+ * @param sourceId
+ * @param mappingId
+ * @return
+ */
+bool CController::DeactivateDS100SourceId(int sourceId, int mappingId)
+{
+	jassertfalse;
+	return false;
+	//auto protocolData = m_processingConfig.GetProtocolData(DEFAULT_PROCNODE_ID, DEFAULT_PROCPROT_A_ID);
+	//for (int roi = ROI_SoundObject_Position_XY; roi < ROI_UserMAX; roi++)
+	//{
+	//	RemoteObject newSourceObject;
+	//	newSourceObject.Id = static_cast<RemoteObjectIdentifier>(roi);
+	//	newSourceObject.Addr.first = static_cast<juce::int16>(p->GetSourceId());
+	//	newSourceObject.Addr.second = static_cast<juce::int16>(p->GetMappingId());
+	//
+	//	if (protocolData.RemoteObjects.contains(newSourceObject))
+	//		protocolData.RemoteObjects.remove(protocolData.RemoteObjects.removeAllInstancesOf(newSourceObject));
+	//}
+	//m_processingConfig.SetProtocolData(DEFAULT_PROCNODE_ID, DEFAULT_PROCPROT_A_ID, protocolData);
+	//m_processingNode.SetNodeConfiguration(m_processingConfig, DEFAULT_PROCNODE_ID);
+}
+
+/**
+ *
+ * @param ipAddress
+ * @return 
+ */
+bool CController::SetDS100IpAddress(String ipAddress)
+{
+	jassertfalse;
+	return false;
+	//m_processingConfig.GetProtocolAIds(DEFAULT_PROCNODE_ID).getFirst();
+	//auto protocolData = m_processingConfig.GetProtocolData(DEFAULT_PROCNODE_ID, m_processingConfig.GetProtocolAIds(DEFAULT_PROCNODE_ID).getFirst());
+	//protocolData.IpAddress = ipAddress;
+	//m_processingConfig.SetProtocolData(DEFAULT_PROCNODE_ID, m_processingConfig.GetProtocolAIds(DEFAULT_PROCNODE_ID).getFirst(), protocolData);
+	//m_processingNode.SetNodeConfiguration(m_processingConfig, DEFAULT_PROCNODE_ID);
+}
+
+/**
+ *
+ * @param msgRate
+ * @return
+ */
+bool CController::SetDS100MsgRate(int msgRate)
+{
+	jassertfalse;
+	return false;
+	//for (auto protocolAId : m_processingConfig.GetProtocolAIds(DEFAULT_PROCNODE_ID))
+	//	m_processingConfig.SetPollingInterval(DEFAULT_PROCNODE_ID, protocolAId, rate);
+	//for (auto protocolBId : m_processingConfig.GetProtocolBIds(DEFAULT_PROCNODE_ID))
+	//	m_processingConfig.SetPollingInterval(DEFAULT_PROCNODE_ID, protocolBId, rate);
+	//
+	//m_processingNode.SetNodeConfiguration(m_processingConfig, DEFAULT_PROCNODE_ID);
 }
 
 

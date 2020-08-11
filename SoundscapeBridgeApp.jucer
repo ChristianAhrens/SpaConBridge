@@ -3,51 +3,85 @@
 <JUCERPROJECT id="MFvkL5" name="SoundscapeBridgeApp" projectType="guiapp" version="0.1.4"
               bundleIdentifier="com.ChristianAhrens.SoundscapeBridgeApp" companyName="Christian Ahrens"
               companyEmail="christianahrens@me.com" displaySplashScreen="0"
-              reportAppUsage="0" companyCopyright="2020" jucerFormatVersion="1">
+              reportAppUsage="0" companyCopyright="2020" jucerFormatVersion="1"
+              headerPath="../../submodules/RemoteProtocolBridge/Source;&#10;../../submodules/JUCE-AppBasics/Source;">
   <MAINGROUP id="cS7SrP" name="SoundscapeBridgeApp">
     <GROUP id="{F93FDF74-FF39-A47E-E403-31E5ADA7ADD3}" name="submodules">
       <GROUP id="{5D1CEB5A-DB08-BAC9-EF17-843234394AA4}" name="RemoteProtocolBridge">
         <GROUP id="{101B7526-C17E-A526-9CCF-9B16385E1D4F}" name="Source">
-          <GROUP id="{E292F700-4771-1C08-BDE9-01EF568EF5F4}" name="ProtocolProcessor">
-            <GROUP id="{4AB99127-F110-E19D-E6B6-E3F0429FB0C0}" name="MIDIProtocolProcessor">
-              <FILE id="Q9iBC0" name="MIDIProtocolProcessor.cpp" compile="1" resource="0"
-                    file="submodules/RemoteProtocolBridge/Source/ProtocolProcessor/MIDIProtocolProcessor/MIDIProtocolProcessor.cpp"/>
-              <FILE id="mX4170" name="MIDIProtocolProcessor.h" compile="0" resource="0"
-                    file="submodules/RemoteProtocolBridge/Source/ProtocolProcessor/MIDIProtocolProcessor/MIDIProtocolProcessor.h"/>
+          <GROUP id="{7BEDE2E7-D445-0646-3278-7EE2B5985D06}" name="ProcessingEngine">
+            <GROUP id="{E942E9CB-791F-AAD7-FE92-FD5DE9A476C6}" name="ObjectDataHandling">
+              <GROUP id="{46902F9A-189C-CE71-4F7B-DD512B71B27B}" name="Remap_A_X_Y_to_B_XY_Handling">
+                <FILE id="xGykBk" name="Remap_A_X_Y_to_B_XY_Handling.cpp" compile="1"
+                      resource="0" file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ObjectDataHandling/Remap_A_X_Y_to_B_XY_Handling/Remap_A_X_Y_to_B_XY_Handling.cpp"/>
+                <FILE id="eigg0I" name="Remap_A_X_Y_to_B_XY_Handling.h" compile="0"
+                      resource="0" file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ObjectDataHandling/Remap_A_X_Y_to_B_XY_Handling/Remap_A_X_Y_to_B_XY_Handling.h"/>
+              </GROUP>
+              <GROUP id="{FE754F06-DEC9-776C-0BAE-58142057BE35}" name="Mux_nA_to_mB">
+                <FILE id="U9aPUU" name="Mux_nA_to_mB.cpp" compile="1" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ObjectDataHandling/Mux_nA_to_mB/Mux_nA_to_mB.cpp"/>
+                <FILE id="r8JJzS" name="Mux_nA_to_mB.h" compile="0" resource="0" file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ObjectDataHandling/Mux_nA_to_mB/Mux_nA_to_mB.h"/>
+              </GROUP>
+              <GROUP id="{53A2C77E-CAB2-A1FD-7CB0-36F77F7F645C}" name="Forward_only_valueChanges">
+                <FILE id="mInBgP" name="Forward_only_valueChanges.cpp" compile="1"
+                      resource="0" file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ObjectDataHandling/Forward_only_valueChanges/Forward_only_valueChanges.cpp"/>
+                <FILE id="U24Ii2" name="Forward_only_valueChanges.h" compile="0" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ObjectDataHandling/Forward_only_valueChanges/Forward_only_valueChanges.h"/>
+              </GROUP>
+              <GROUP id="{6BAD5C54-D33E-31CF-9892-F0E9A116C1D1}" name="DS100_DeviceSimulation">
+                <FILE id="PrHWGy" name="DS100_DeviceSimulation.cpp" compile="1" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ObjectDataHandling/DS100_DeviceSimulation/DS100_DeviceSimulation.cpp"/>
+                <FILE id="ULAeYh" name="DS100_DeviceSimulation.h" compile="0" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ObjectDataHandling/DS100_DeviceSimulation/DS100_DeviceSimulation.h"/>
+              </GROUP>
+              <GROUP id="{91B48B4B-8F55-CCA0-44CD-A12DB8D44B09}" name="BypassHandling">
+                <FILE id="xpG69T" name="BypassHandling.cpp" compile="1" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ObjectDataHandling/BypassHandling/BypassHandling.cpp"/>
+                <FILE id="bC8pnc" name="BypassHandling.h" compile="0" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ObjectDataHandling/BypassHandling/BypassHandling.h"/>
+              </GROUP>
+              <FILE id="Ej0n3G" name="ObjectDataHandling_Abstract.cpp" compile="1"
+                    resource="0" file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ObjectDataHandling/ObjectDataHandling_Abstract.cpp"/>
+              <FILE id="lm37CX" name="ObjectDataHandling_Abstract.h" compile="0"
+                    resource="0" file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ObjectDataHandling/ObjectDataHandling_Abstract.h"/>
             </GROUP>
-            <GROUP id="{866DA4BC-F30B-2467-9E56-759457302D23}" name="OCAProtocolProcessor">
-              <FILE id="hoiT5w" name="OCAProtocolProcessor.cpp" compile="1" resource="0"
-                    file="submodules/RemoteProtocolBridge/Source/ProtocolProcessor/OCAProtocolProcessor/OCAProtocolProcessor.cpp"/>
-              <FILE id="peJcTp" name="OCAProtocolProcessor.h" compile="0" resource="0"
-                    file="submodules/RemoteProtocolBridge/Source/ProtocolProcessor/OCAProtocolProcessor/OCAProtocolProcessor.h"/>
+            <GROUP id="{E292F700-4771-1C08-BDE9-01EF568EF5F4}" name="ProtocolProcessor">
+              <GROUP id="{4AB99127-F110-E19D-E6B6-E3F0429FB0C0}" name="MIDIProtocolProcessor">
+                <FILE id="FRifrg" name="MIDIProtocolProcessor.cpp" compile="1" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/MIDIProtocolProcessor/MIDIProtocolProcessor.cpp"/>
+                <FILE id="Gr8hMm" name="MIDIProtocolProcessor.h" compile="0" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/MIDIProtocolProcessor/MIDIProtocolProcessor.h"/>
+              </GROUP>
+              <GROUP id="{866DA4BC-F30B-2467-9E56-759457302D23}" name="OCAProtocolProcessor">
+                <FILE id="xeEx4I" name="OCAProtocolProcessor.cpp" compile="1" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/OCAProtocolProcessor/OCAProtocolProcessor.cpp"/>
+                <FILE id="ZbzBAJ" name="OCAProtocolProcessor.h" compile="0" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/OCAProtocolProcessor/OCAProtocolProcessor.h"/>
+              </GROUP>
+              <GROUP id="{0897BD76-991F-F530-320F-B55D3A67F2FD}" name="OSCProtocolProcessor">
+                <FILE id="FqILmm" name="OSCProtocolProcessor.cpp" compile="1" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/OSCProtocolProcessor/OSCProtocolProcessor.cpp"/>
+                <FILE id="EKwuLB" name="OSCProtocolProcessor.h" compile="0" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/OSCProtocolProcessor/OSCProtocolProcessor.h"/>
+                <FILE id="gQY7iU" name="SenderAwareOSCReceiver.cpp" compile="1" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/OSCProtocolProcessor/SenderAwareOSCReceiver.cpp"/>
+                <FILE id="H3sAQf" name="SenderAwareOSCReceiver.h" compile="0" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/OSCProtocolProcessor/SenderAwareOSCReceiver.h"/>
+              </GROUP>
+              <FILE id="i3TpwC" name="ProtocolProcessor_Abstract.cpp" compile="1"
+                    resource="0" file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/ProtocolProcessor_Abstract.cpp"/>
+              <FILE id="RVmY7H" name="ProtocolProcessor_Abstract.h" compile="0" resource="0"
+                    file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/ProtocolProcessor_Abstract.h"/>
             </GROUP>
-            <GROUP id="{0897BD76-991F-F530-320F-B55D3A67F2FD}" name="OSCProtocolProcessor">
-              <FILE id="OEd6UA" name="OSCProtocolProcessor.cpp" compile="1" resource="0"
-                    file="submodules/RemoteProtocolBridge/Source/ProtocolProcessor/OSCProtocolProcessor/OSCProtocolProcessor.cpp"/>
-              <FILE id="EJanrl" name="OSCProtocolProcessor.h" compile="0" resource="0"
-                    file="submodules/RemoteProtocolBridge/Source/ProtocolProcessor/OSCProtocolProcessor/OSCProtocolProcessor.h"/>
-              <FILE id="GBfE9O" name="SenderAwareOSCReceiver.cpp" compile="1" resource="0"
-                    file="submodules/RemoteProtocolBridge/Source/ProtocolProcessor/OSCProtocolProcessor/SenderAwareOSCReceiver.cpp"/>
-              <FILE id="gh4J88" name="SenderAwareOSCReceiver.h" compile="0" resource="0"
-                    file="submodules/RemoteProtocolBridge/Source/ProtocolProcessor/OSCProtocolProcessor/SenderAwareOSCReceiver.h"/>
-            </GROUP>
-            <FILE id="NtzSnJ" name="ProtocolProcessor_Abstract.cpp" compile="1"
-                  resource="0" file="submodules/RemoteProtocolBridge/Source/ProtocolProcessor/ProtocolProcessor_Abstract.cpp"/>
-            <FILE id="XzCjBz" name="ProtocolProcessor_Abstract.h" compile="0" resource="0"
-                  file="submodules/RemoteProtocolBridge/Source/ProtocolProcessor/ProtocolProcessor_Abstract.h"/>
+            <FILE id="B0REQz" name="ProcessingEngineConfig.cpp" compile="1" resource="0"
+                  file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProcessingEngineConfig.cpp"/>
+            <FILE id="B0Y23H" name="ProcessingEngineConfig.h" compile="0" resource="0"
+                  file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProcessingEngineConfig.h"/>
+            <FILE id="COthVK" name="ProcessingEngineNode.cpp" compile="1" resource="0"
+                  file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProcessingEngineNode.cpp"/>
+            <FILE id="J8arXS" name="ProcessingEngineNode.h" compile="0" resource="0"
+                  file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProcessingEngineNode.h"/>
           </GROUP>
-          <FILE id="Gxhow5" name="ObjectDataHandling.cpp" compile="1" resource="0"
-                file="submodules/RemoteProtocolBridge/Source/ObjectDataHandling.cpp"/>
-          <FILE id="ws2gnM" name="ObjectDataHandling.h" compile="0" resource="0"
-                file="submodules/RemoteProtocolBridge/Source/ObjectDataHandling.h"/>
-          <FILE id="gXG1Qm" name="ProcessingEngineConfig.cpp" compile="1" resource="0"
-                file="submodules/RemoteProtocolBridge/Source/ProcessingEngineConfig.cpp"/>
-          <FILE id="BOC8Mj" name="ProcessingEngineConfig.h" compile="0" resource="0"
-                file="submodules/RemoteProtocolBridge/Source/ProcessingEngineConfig.h"/>
-          <FILE id="Ha7Pox" name="ProcessingEngineNode.cpp" compile="1" resource="0"
-                file="submodules/RemoteProtocolBridge/Source/ProcessingEngineNode.cpp"/>
-          <FILE id="zirv9W" name="ProcessingEngineNode.h" compile="0" resource="0"
-                file="submodules/RemoteProtocolBridge/Source/ProcessingEngineNode.h"/>
           <FILE id="TePn3T" name="RemoteProtocolBridgeCommon.h" compile="0" resource="0"
                 file="submodules/RemoteProtocolBridge/Source/RemoteProtocolBridgeCommon.h"/>
         </GROUP>

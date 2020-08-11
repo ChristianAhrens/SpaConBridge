@@ -37,6 +37,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "SoundscapeBridgeAppCommon.h"
 #include "AppConfiguration.h"
+#include "ProtocolBridgingWrapper.h"
 
 #include <ProcessingEngine/ProcessingEngineNode.h>
 
@@ -57,9 +58,9 @@ class SoundsourceProcessor;
  * NOTE: This is a singleton class, i.e. there is only one instance.
  */
 class CController :
-	public ProcessingEngineNode::NodeListener,
 	private Timer,
-	public AppConfiguration::XmlConfigurableElement
+	public AppConfiguration::XmlConfigurableElement,
+	public ProtocolBridgingWrapper::Listener
 {
 public:
 	CController();
@@ -90,17 +91,10 @@ public:
 	void Reconnect();
 	bool GetOnline() const;
 
-	void SetupBridgingNode();
-	void HandleNodeData(NodeId nodeId, ProtocolId senderProtocolId, ProtocolType senderProtocolType, RemoteObjectIdentifier objectId, RemoteObjectMessageData& msgData) override;
-	bool SendMessage(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData);
-
 	std::unique_ptr<XmlElement> createStateXml() override;
 	bool setStateXml(XmlElement* stateXml) override;
 
-	bool ActivateDS100SourceId(int sourceId, int mappingId);
-	bool DeactivateDS100SourceId(int sourceId, int mappingId);
-	bool SetDS100IpAddress(String ipAddress);
-	bool SetDS100MsgRate(int msgRate);
+	void HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData) override;
 
 private:
 	void timerCallback() override;
@@ -121,12 +115,9 @@ protected:
 	Array<SoundsourceProcessor*>	m_processors;
 
 	/**
-	 * A processing engine node can send data to and receive data from multiple protocols that is encapsulates.
-	 * Depending on the node configuration, there can exist two groups of protocols, A and B, that are handled 
-	 * in a specific way to pass incoming and outgoing data to each other and this parent controller instance.
+	 * The wrapper for protocol bridging node, allowing to easily interface with it
 	 */
-	ProcessingEngineNode	m_processingNode;	/**< The node that encapsulates the protocols that are used to send, receive and bridge data. */
-	XmlElement				m_bridgingXml;	/**< The current xml config for bridging (contains node xml). */
+	ProtocolBridgingWrapper	m_protocolBridge;
 
 	/**
 	 * IP Address where OSC messages will be sent to / received from.

@@ -55,7 +55,10 @@ namespace SoundscapeBridgeApp
 CSettingsContainer::CSettingsContainer()
 	: AOverlay(OT_Settings)
 {
-	// Add multi-slider
+	m_applyButton = std::make_unique<TextButton>("Apply");
+	m_applyButton->onClick = [this] { onApplyClicked(); };
+	addAndMakeVisible(m_applyButton.get());
+
 	m_settingsRawEditor = std::make_unique<TextEditor>();
 	m_settingsRawEditor->setMultiLine(true, false);
 	addAndMakeVisible(m_settingsRawEditor.get());
@@ -88,8 +91,9 @@ void CSettingsContainer::paint(Graphics& g)
  */
 void CSettingsContainer::resized()
 {
-	// Raw text settings editor
-	m_settingsRawEditor->setBounds(getLocalBounds().reduced(5));
+	auto bounds = getLocalBounds().reduced(5);
+	m_applyButton->setBounds(bounds.removeFromTop(20));
+	m_settingsRawEditor->setBounds(bounds);
 }
 
 /**
@@ -110,6 +114,28 @@ void CSettingsContainer::onConfigUpdated()
 		auto configXml = config->getConfigState();
 		auto configText = configXml->toString();
 		m_settingsRawEditor->setText(configText);
+	}
+}
+
+void CSettingsContainer::onApplyClicked()
+{
+	auto config = AppConfiguration::getInstance();
+	if (config != nullptr)
+	{
+		XmlDocument configXmlDocument(m_settingsRawEditor->getText());
+		auto configXmlElement = configXmlDocument.getDocumentElement();
+		if (configXmlElement)
+		{
+			auto controllerXmlElement = configXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER));
+			if (controllerXmlElement)
+				config->setConfigState(std::make_unique<XmlElement>(*controllerXmlElement));
+
+			auto overviewXmlElement = configXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW));
+			if (overviewXmlElement)
+				config->setConfigState(std::make_unique<XmlElement>(*overviewXmlElement));
+
+			config->triggerWatcherUpdate();
+		}
 	}
 }
 

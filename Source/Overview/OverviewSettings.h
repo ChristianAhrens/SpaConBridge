@@ -62,7 +62,10 @@ protected:
 	void paint(Graphics&) override;
 	void resized() override;
 
+	void onApplyClicked();
+
 private:
+	std::unique_ptr<TextButton> m_applyButton;
 	std::unique_ptr<TextEditor>	m_settingsRawEditor;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CSettingsContainer)

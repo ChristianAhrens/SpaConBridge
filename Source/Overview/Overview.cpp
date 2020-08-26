@@ -471,7 +471,7 @@ void CTabBarButton::paintButton(Graphics& g, bool isMouseOverButton, bool isButt
 
 	Rectangle<int> activeArea(getActiveArea());
 	g.setColour(buttonBackground);
-	g.fillRect(getActiveArea());
+	g.fillRect(activeArea);
 
 	// make the drawable visible that corresponds to the given bool flag values
 	Drawable* visibleDrawable{ m_normalImage.get() };

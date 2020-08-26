@@ -379,7 +379,7 @@ std::unique_ptr<XmlElement> SoundsourceProcessor::createStateXml()
 {
 	auto processorInstanceXmlElement = std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE) + String(GetProcessorId()));
 
-	return std::move(processorInstanceXmlElement);
+    return processorInstanceXmlElement;
 }
 
 /**

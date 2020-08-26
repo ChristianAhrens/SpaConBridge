@@ -221,7 +221,7 @@ std::unique_ptr<XmlElement> COverviewManager::createStateXml()
 	auto overviewXmlElement = std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW));
 	overviewXmlElement->setAttribute(AppConfiguration::getTagName(AppConfiguration::TagID::ACTIVEOVRTAB), GetActiveTab());
 
-	return std::move(overviewXmlElement);
+    return overviewXmlElement;
 }
 
 

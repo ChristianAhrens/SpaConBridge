@@ -119,7 +119,7 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::createStateXml()
 	//	}
 	//}
 
-	return std::move(bridgingXmlElement);
+    return bridgingXmlElement;
 }
 
 /**

@@ -1166,8 +1166,6 @@ void CMuteButtonContainer::buttonClicked(Button* button)
 	if (ctrl &&
 		((button == &m_muteButton)))
 	{
-		bool newToggleState = button->getToggleState();
-
 		// Get the list of rows which are currently selected on the table.
 		std::vector<int> selectedRows = m_owner.GetSelectedRows();
 		if ((selectedRows.size() < 2) ||

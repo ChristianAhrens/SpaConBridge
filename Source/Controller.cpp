@@ -854,7 +854,7 @@ std::unique_ptr<XmlElement> CController::createStateXml()
 	if (bridgingXmlElement)
 		controllerXmlElement->addChildElement(bridgingXmlElement.release());
 
-	return std::move(controllerXmlElement);
+    return controllerXmlElement;
 }
 
 } // namespace SoundscapeBridgeApp

@@ -315,11 +315,11 @@ CTableModelComponent::CTableModelComponent()
 
 	// Add columns to the table header
 	int tableHeaderFlags = (TableHeaderComponent::visible | TableHeaderComponent::sortable);
-	m_table.getHeader().addColumn("Track", OC_TrackID, 50, 30, -1, tableHeaderFlags);
-	m_table.getHeader().addColumn("Input", OC_SourceID, 50, 30, -1, tableHeaderFlags);
-	m_table.getHeader().addColumn("Mapping", OC_Mapping, 50, 30, -1, tableHeaderFlags);
+	m_table.getHeader().addColumn("", OC_TrackID, 15, 15, -1, tableHeaderFlags);
+	m_table.getHeader().addColumn("Input", OC_SourceID, 40, 30, -1, tableHeaderFlags);
+	m_table.getHeader().addColumn("Mapping", OC_Mapping, 40, 30, -1, tableHeaderFlags);
 	m_table.getHeader().addColumn("Mode", OC_ComsMode, 40, 30, -1, tableHeaderFlags);
-	m_table.getHeader().addColumn("Bridge", OC_BridgingMute, 20, 20, -1, tableHeaderFlags);
+	m_table.getHeader().addColumn("Bridge", OC_BridgingMute, 40, 30, -1, tableHeaderFlags);
 	m_table.getHeader().setSortColumnId(OC_SourceID, true); // sort forwards by the Input number column
 	m_table.getHeader().setStretchToFitActive(true);
 
@@ -760,15 +760,15 @@ int CTableModelComponent::getColumnAutoSizeWidth(int columnId)
 	switch (columnId)
 	{
 	case OC_TrackID:
-		return 50;
+		return 15;
 	case OC_SourceID:
-		return 50;
+		return 40;
 	case OC_Mapping:
-		return 100;
+		return 40;
 	case OC_ComsMode:
-		return 100;
+		return 40;
 	case OC_BridgingMute:
-		return 60;
+		return 40;
 	default:
 		break;
 	}

@@ -99,8 +99,8 @@ CController::CController()
 
 	// Default OSC server settings. These might become overwritten 
 	// by setStateInformation()
-	SetRate(DCS_Init, PROTOCOL_INTERVAL_DEF);
-	SetIpAddress(DCS_Init, PROTOCOL_DEFAULT_IP);
+	SetRate(DCS_Init, PROTOCOL_INTERVAL_DEF, true);
+	SetIpAddress(DCS_Init, PROTOCOL_DEFAULT_IP, true);
 }
 
 /**
@@ -323,8 +323,9 @@ String CController::GetDefaultIpAddress()
  * NOTE: changing ip address will disconnect m_oscSender and m_oscReceiver.
  * @param changeSource	The application module which is causing the property change.
  * @param ipAddress		New IP address.
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  */
-void CController::SetIpAddress(DataChangeSource changeSource, String ipAddress)
+void CController::SetIpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification)
 {
 	if (m_ipAddress != ipAddress)
 	{
@@ -332,7 +333,7 @@ void CController::SetIpAddress(DataChangeSource changeSource, String ipAddress)
 
 		m_ipAddress = ipAddress;
 
-		m_protocolBridge.SetDS100IpAddress(ipAddress);
+		m_protocolBridge.SetDS100IpAddress(ipAddress, dontSendNotification);
 
 		// Start "offline" after changing IP address
 		m_heartBeatsRx = MAX_HEARTBEAT_COUNT;
@@ -368,8 +369,9 @@ int CController::GetRate() const
  * Setter for the rate at which OSC messages are being sent out.
  * @param changeSource	The application module which is causing the property change.
  * @param rate	New messaging rate, in milliseconds.
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  */
-void CController::SetRate(DataChangeSource changeSource, int rate)
+void CController::SetRate(DataChangeSource changeSource, int rate, bool dontSendNotification)
 {
 	if (rate != m_oscMsgRate)
 	{
@@ -380,7 +382,7 @@ void CController::SetRate(DataChangeSource changeSource, int rate)
 
 		m_oscMsgRate = rate;
 
-		m_protocolBridge.SetDS100MsgRate(rate);
+		m_protocolBridge.SetDS100MsgRate(rate, dontSendNotification);
 
 		// Signal the change to all Processors.
 		SetParameterChanged(changeSource, DCT_MessageRate);
@@ -825,7 +827,13 @@ bool CController::setStateXml(XmlElement* stateXml)
 
 	auto bridgingXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::BRIDGING));
 	if (bridgingXmlElement)
-		m_protocolBridge.setStateXml(bridgingXmlElement);
+	{
+		if (m_protocolBridge.setStateXml(bridgingXmlElement))
+		{
+			SetIpAddress(DataChangeSource::DCS_Host, m_protocolBridge.GetDS100IpAddress(), true);
+			SetRate(DataChangeSource::DCS_Host, m_protocolBridge.GetDS100MsgRate(), true);
+		}
+	}
 
 	return retVal;
 }

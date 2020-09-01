@@ -64,8 +64,12 @@ public:
 
 	bool ActivateDS100SourceId(juce::int16 sourceId, juce::int16 mappingId);
 	bool DeactivateDS100SourceId(juce::int16 sourceId, juce::int16 mappingId);
-	bool SetDS100IpAddress(String ipAddress);
-	bool SetDS100MsgRate(int msgRate);
+
+	String GetDS100IpAddress();
+	bool SetDS100IpAddress(String ipAddress, bool dontSendNotification = false);
+
+	int GetDS100MsgRate();
+	bool SetDS100MsgRate(int msgRate, bool dontSendNotification = false);
 
 	std::unique_ptr<XmlElement> createStateXml() override;
 	bool setStateXml(XmlElement* stateXml) override;

@@ -319,13 +319,37 @@ bool ProtocolBridgingWrapper::DeactivateDS100SourceId(juce::int16 sourceId, juce
 }
 
 /**
+ * Gets the currently set DS100 client ip address.
+ * @return	The ip address string
+ */
+String ProtocolBridgingWrapper::GetDS100IpAddress()
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+		{
+			auto ipAddressXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
+			if (ipAddressXmlElement)
+			{
+				return ipAddressXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS));
+			}
+		}
+	}
+
+	return INVALID_IPADDRESS_VALUE;
+}
+
+/**
  * Sets the desired protocol client ip address.
  * This method inserts the ip address into the cached xml element,
  * pushes the updated xml element into processing node and triggers configuration updating.
  * @param ipAddress	The new ip address string
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  * @return	True on succes, false if failure
  */
-bool ProtocolBridgingWrapper::SetDS100IpAddress(String ipAddress)
+bool ProtocolBridgingWrapper::SetDS100IpAddress(String ipAddress, bool dontSendNotification)
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
@@ -345,7 +369,9 @@ bool ProtocolBridgingWrapper::SetDS100IpAddress(String ipAddress)
 			return false;
 
 		m_processingNode.setStateXml(nodeXmlElement);
-		triggerConfigurationUpdate();
+
+		if (!dontSendNotification)
+			triggerConfigurationUpdate();
 
 		return true;
 	}
@@ -354,13 +380,37 @@ bool ProtocolBridgingWrapper::SetDS100IpAddress(String ipAddress)
 }
 
 /**
+ * Gets the currently active message rate for protocol polling.
+ * @return	True on succes, false if failure
+ */
+int ProtocolBridgingWrapper::GetDS100MsgRate()
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+		{
+			auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
+			if (pollingIntervalXmlElement)
+			{
+				return pollingIntervalXmlElement->getIntAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::INTERVAL));
+			}
+		}
+	}
+	
+	return INVALID_RATE_VALUE;
+}
+
+/**
  * Sets the desired message rate for protocol polling.
  * This method inserts the rate value into the cached xml element,
  * pushes the updated xml element into processing node and triggers configuration updating.
  * @param msgRate	The new message rate value in ms
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  * @return	True on succes, false if failure
  */
-bool ProtocolBridgingWrapper::SetDS100MsgRate(int msgRate)
+bool ProtocolBridgingWrapper::SetDS100MsgRate(int msgRate, bool dontSendNotification)
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
@@ -380,7 +430,9 @@ bool ProtocolBridgingWrapper::SetDS100MsgRate(int msgRate)
 			return false;
 
 		m_processingNode.setStateXml(nodeXmlElement);
-		triggerConfigurationUpdate();
+
+		if (!dontSendNotification)
+			triggerConfigurationUpdate();
 
 		return true;
 	}

@@ -30,6 +30,14 @@ MainSoundscapeBridgeAppComponent::MainSoundscapeBridgeAppComponent()
 {
     m_config = std::make_unique<AppConfiguration>(JUCEAppBasics::AppConfigurationBase::getDefaultConfigFilePath());
     m_config->addDumper(this);
+    m_config->addWatcher(this);
+    
+    if (!m_config->isValid())
+    {
+        m_config->triggerConfigurationDump();
+    }
+
+    m_config->triggerWatcherUpdate();
 
     auto ctrl = SoundscapeBridgeApp::CController::GetInstance();
     ignoreUnused(ctrl);
@@ -40,28 +48,7 @@ MainSoundscapeBridgeAppComponent::MainSoundscapeBridgeAppComponent()
         addAndMakeVisible(overview);
     }
 
-    if (!m_config->isValid())
-    {
-        m_config->triggerConfigurationDump();
-    }
-    else
-    {
-        // get all the modules' configs first, because the initialization process might already trigger dumping, that would override data
-        auto ctrlConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER));
-        auto ovrConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW));
-
-        // set the controller modules' config
-        if (ctrl)
-            ctrl->setStateXml(ctrlConfigState.get());
-
-        // set the overview manager modules' config
-        if (ovrMgr)
-            ovrMgr->setStateXml(ovrConfigState.get());
-    }
-
     setSize(896, 414);
-
-    m_config->triggerWatcherUpdate();
 }
 
 MainSoundscapeBridgeAppComponent::~MainSoundscapeBridgeAppComponent()
@@ -125,6 +112,23 @@ void MainSoundscapeBridgeAppComponent::performConfigurationDump()
     auto ovrMgr = SoundscapeBridgeApp::COverviewManager::GetInstance();
     if (ovrMgr)
         m_config->setConfigState(ovrMgr->createStateXml());
+}
+
+void MainSoundscapeBridgeAppComponent::onConfigUpdated()
+{
+    // get all the modules' configs first, because the initialization process might already trigger dumping, that would override data
+    auto ctrlConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER));
+    auto ovrConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW));
+
+    // set the controller modules' config
+    auto ctrl = SoundscapeBridgeApp::CController::GetInstance();
+    if (ctrl)
+        ctrl->setStateXml(ctrlConfigState.get());
+
+    // set the overview manager modules' config
+    auto ovrMgr = SoundscapeBridgeApp::COverviewManager::GetInstance();
+    if (ovrMgr)
+        ovrMgr->setStateXml(ovrConfigState.get());
 }
 
 }

@@ -163,12 +163,15 @@ void COverviewManager::SetActiveTab(int tabIdx, bool dontSendNotification)
 {
 	m_selectedTab = tabIdx;
 
-	if (!dontSendNotification && m_overview != nullptr)
+	if (m_overview != nullptr)
 	{
 		m_overview->SetActiveTab(tabIdx);
 	}
 
-	triggerConfigurationUpdate();
+	if (!dontSendNotification)
+	{
+		triggerConfigurationUpdate();
+	}
 }
 
 /**
@@ -200,14 +203,15 @@ bool COverviewManager::setStateXml(XmlElement* stateXml)
 	if (!stateXml || (stateXml->getTagName() != AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW)))
 		return false;
 
+	auto retVal = true;
+
 	auto tabIdx = stateXml->getIntAttribute(AppConfiguration::getTagName(AppConfiguration::TagID::ACTIVEOVRTAB), -1);
 	if (tabIdx != -1)
 	{
-		SetActiveTab(tabIdx, false);
-		return true;
+		SetActiveTab(tabIdx, true);
 	}
 	else
-		return false;
+		retVal = false;
 }
 
 /**

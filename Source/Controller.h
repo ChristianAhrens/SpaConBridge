@@ -79,10 +79,10 @@ public:
 
 	String GetIpAddress() const;
 	static String GetDefaultIpAddress();
-	void SetIpAddress(DataChangeSource changeSource, String ipAddress);
+	void SetIpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification = false);
 
 	int GetRate() const;
-	void SetRate(DataChangeSource changeSource, int rate);
+	void SetRate(DataChangeSource changeSource, int rate, bool dontSendNotification = false);
 	static std::pair<int, int> GetSupportedRateRange();
 
 	void InitGlobalSettings(DataChangeSource changeSource, String ipAddress, int rate);

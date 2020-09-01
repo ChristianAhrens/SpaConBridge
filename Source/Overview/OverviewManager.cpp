@@ -212,6 +212,8 @@ bool COverviewManager::setStateXml(XmlElement* stateXml)
 	}
 	else
 		retVal = false;
+
+	return retVal;
 }
 
 /**

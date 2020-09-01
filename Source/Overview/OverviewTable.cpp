@@ -863,7 +863,7 @@ void CComboBoxContainer::comboBoxChanged(ComboBox *comboBox)
 	if (ctrl)
 	{
 		// New MappingID which should be applied to all plugins in the selected rows.
-		int newMapping = comboBox->getSelectedId();
+		int newMapping = static_cast<MappingId>(comboBox->getSelectedId());
 		for (std::size_t i = 0; i < ProcessorIds.size(); ++i)
 		{
 			// Set the value of the combobox to the current MappingID of the corresponding plugin.

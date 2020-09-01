@@ -104,21 +104,6 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::createStateXml()
 {
 	auto bridgingXmlElement = std::make_unique<XmlElement>(m_bridgingXml);
 
-	//auto bridgingXmlElement = controllerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::BRIDGING));
-	//if (bridgingXmlElement)
-	//{
-	//	auto nodeXmlElement = m_processingNode.createStateXml();
-	//	if (nodeXmlElement)
-	//	{
-	//		bridgingXmlElement->addChildElement(nodeXmlElement.release());
-	//		m_bridgingXml = *bridgingXmlElement;
-	//	}
-	//	else
-	//	{
-	//		controllerXmlElement->replaceChildElement(bridgingXmlElement, std::make_unique<XmlElement>(m_bridgingXml).release());
-	//	}
-	//}
-
     return bridgingXmlElement;
 }
 
@@ -161,6 +146,7 @@ void ProtocolBridgingWrapper::SetupBridgingNode()
 		objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Bypass));
 	}
 
+	// DS100 protocol - RoleA
 	auto protocolAXmlElement = nodeXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLA));
 	if (protocolAXmlElement)
 	{
@@ -171,30 +157,16 @@ void ProtocolBridgingWrapper::SetupBridgingNode()
 
 		auto clientPortXmlElement = protocolAXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
 		if (clientPortXmlElement)
-			clientPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_DS100);
+			clientPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_DS100_DEVICE);
 
 		auto hostPortXmlElement = protocolAXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
 		if (hostPortXmlElement)
-			hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_HOST);
+			hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_DS100_HOST);
 
 		// Active objects preparation
 		Array<RemoteObject> activeObjects;
 		RemoteObject objectX, objectY;
-		//
-		//objectX.Id = ROI_SoundObject_Position_X;
-		//objectY.Id = ROI_SoundObject_Position_Y;
-		//for (int16 i = 1; i <= 16; ++i)
-		//{
-		//	RemoteObjectAddressing addr;
-		//	addr.first = i; //channel = source
-		//	addr.second = 1; //record = mapping
-		//
-		//	objectX.Addr = addr;
-		//	objectY.Addr = addr;
-		//
-		//	activeObjects.add(objectX);
-		//	activeObjects.add(objectY);
-		//}
+
 		auto activeObjsXmlElement = protocolAXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ACTIVEOBJECTS));
 		if (activeObjsXmlElement)
 			ProcessingEngineConfig::WriteActiveObjects(activeObjsXmlElement, activeObjects);
@@ -208,9 +180,221 @@ void ProtocolBridgingWrapper::SetupBridgingNode()
 			pollIntervalXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::INTERVAL), ET_DefaultPollingRate);
 	}
 
+	// DiGiCo protocol - RoleB
+	auto protocolBXmlElement = nodeXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLB));
+	if (protocolBXmlElement)
+	{
+		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), DIGICO_PROCESSINGPROTOCOL_ID);
+
+		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), ProcessingEngineConfig::ProtocolTypeToString(PT_OSCProtocol));
+		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::USESACTIVEOBJ), 0);
+
+		auto clientPortXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+		if (clientPortXmlElement)
+			clientPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_DIGICO_DEVICE);
+
+		auto hostPortXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
+		if (hostPortXmlElement)
+			hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_DIGICO_HOST);
+
+		auto ipAdressXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
+		if (ipAdressXmlElement)
+			ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
+
+		auto mutedChannelsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDCHANNELS));
+		if (mutedChannelsXmlElement)
+			mutedChannelsXmlElement->createTextElement(String());
+	}
+
+	// GenericOSC protocol - RoleB
+	protocolBXmlElement = nodeXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLB));
+	if (protocolBXmlElement)
+	{
+		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), GENERICOSC_PROCESSINGPROTOCOL_ID);
+
+		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), ProcessingEngineConfig::ProtocolTypeToString(PT_OSCProtocol));
+		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::USESACTIVEOBJ), 0);
+
+		auto clientPortXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+		if (clientPortXmlElement)
+			clientPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_GENERICOSC_DEVICE);
+
+		auto hostPortXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
+		if (hostPortXmlElement)
+			hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_GENERICOSC_HOST);
+
+		auto ipAdressXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
+		if (ipAdressXmlElement)
+			ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
+
+		auto mutedChannelsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDCHANNELS));
+		if (mutedChannelsXmlElement)
+			mutedChannelsXmlElement->createTextElement(String());
+	}
+
 	m_processingNode.setStateXml(nodeXmlElement.get());
 
 	m_bridgingXml.addChildElement(nodeXmlElement.release());
+}
+
+/**
+ * Gets the mute state of the given source of given protocol
+ * @param protocolId The id of the protocol the muted state shall be returned of
+ * @param sourceId The id of the source that shall be muted
+ * @return True if mute is active, false if not
+ */
+bool ProtocolBridgingWrapper::GetMuteProtocolSourceId(ProtocolId protocolId, juce::int16 sourceId)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto channel = sourceId + 1;
+
+			auto mutedObjChsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDCHANNELS));
+			Array<int> mutedChannels;
+			ProcessingEngineConfig::ReadMutedObjectChannels(mutedObjChsXmlElement, mutedChannels);
+			
+			return mutedChannels.contains(channel);
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Sets the given source of given protocol to be muted
+ * @param protocolId The id of the protocol the source shall be muted of
+ * @param sourceId The id of the source that shall be muted
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteProtocolSourceId(ProtocolId protocolId, juce::int16 sourceId)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto channel = sourceId + 1;
+
+			auto mutedObjChsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDCHANNELS));
+			Array<int> mutedChannels;
+			ProcessingEngineConfig::ReadMutedObjectChannels(mutedObjChsXmlElement, mutedChannels);
+			if (!mutedChannels.contains(channel))
+			{
+				mutedChannels.add(channel);
+				ProcessingEngineConfig::WriteMutedObjectChannels(mutedObjChsXmlElement, mutedChannels);
+			}
+
+			m_processingNode.setStateXml(nodeXmlElement);
+			triggerConfigurationUpdate();
+
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Sets the given source of given protocol to be unmuted
+ * @param protocolId The id of the protocol the source shall be unmuted of
+ * @param sourceId The id of the source that shall be unmuted
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetUnmuteProtocolSourceId(ProtocolId protocolId, juce::int16 sourceId)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto channel = sourceId + 1;
+
+			auto mutedObjChsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDCHANNELS));
+			Array<int> mutedChannels;
+			ProcessingEngineConfig::ReadMutedObjectChannels(mutedObjChsXmlElement, mutedChannels);
+			if (mutedChannels.contains(channel))
+			{
+				mutedChannels.removeAllInstancesOf(channel);
+				ProcessingEngineConfig::WriteMutedObjectChannels(mutedObjChsXmlElement, mutedChannels);
+			}
+
+			m_processingNode.setStateXml(nodeXmlElement);
+			triggerConfigurationUpdate();
+
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Gets the currently set DS100 client ip address.
+ * @param protocolId The id of the protocol for which to get the currently configured ip address
+ * @return	The ip address string
+ */
+String ProtocolBridgingWrapper::GetProtocolIpAddress(ProtocolId protocolId)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto ipAddressXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
+			if (ipAddressXmlElement)
+			{
+				return ipAddressXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS));
+			}
+		}
+	}
+
+	return INVALID_IPADDRESS_VALUE;
+}
+
+/**
+ * Sets the desired protocol client ip address.
+ * This method inserts the ip address into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param protocolId The id of the protocol for which to set the ip address
+ * @param ipAddress	The new ip address string
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetProtocolIpAddress(ProtocolId protocolId, String ipAddress, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto ipAddressXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
+			if (ipAddressXmlElement)
+			{
+				ipAddressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), ipAddress);
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+
+		m_processingNode.setStateXml(nodeXmlElement);
+
+		if (!dontSendNotification)
+			triggerConfigurationUpdate();
+
+		return true;
+	}
+	else
+		return false;
 }
 
 /**
@@ -320,63 +504,24 @@ bool ProtocolBridgingWrapper::DeactivateDS100SourceId(juce::int16 sourceId, juce
 
 /**
  * Gets the currently set DS100 client ip address.
+ * This method forwards the call to the generic implementation.
  * @return	The ip address string
  */
 String ProtocolBridgingWrapper::GetDS100IpAddress()
 {
-	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
-	if (nodeXmlElement)
-	{
-		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_PROCESSINGPROTOCOL_ID));
-		if (protocolXmlElement)
-		{
-			auto ipAddressXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
-			if (ipAddressXmlElement)
-			{
-				return ipAddressXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS));
-			}
-		}
-	}
-
-	return INVALID_IPADDRESS_VALUE;
+	return GetProtocolIpAddress(DS100_PROCESSINGPROTOCOL_ID);
 }
 
 /**
  * Sets the desired protocol client ip address.
- * This method inserts the ip address into the cached xml element,
- * pushes the updated xml element into processing node and triggers configuration updating.
+ * This method forwards the call to the generic implementation.
  * @param ipAddress	The new ip address string
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  * @return	True on succes, false if failure
  */
 bool ProtocolBridgingWrapper::SetDS100IpAddress(String ipAddress, bool dontSendNotification)
 {
-	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
-	if (nodeXmlElement)
-	{
-		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_PROCESSINGPROTOCOL_ID));
-		if (protocolXmlElement)
-		{
-			auto ipAddressXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
-			if (ipAddressXmlElement)
-			{
-				ipAddressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), ipAddress);
-			}
-			else
-				return false;
-		}
-		else
-			return false;
-
-		m_processingNode.setStateXml(nodeXmlElement);
-
-		if (!dontSendNotification)
-			triggerConfigurationUpdate();
-
-		return true;
-	}
-	else
-		return false;
+	return SetProtocolIpAddress(DS100_PROCESSINGPROTOCOL_ID, ipAddress, dontSendNotification);
 }
 
 /**
@@ -438,6 +583,98 @@ bool ProtocolBridgingWrapper::SetDS100MsgRate(int msgRate, bool dontSendNotifica
 	}
 	else
 		return false;
+}
+
+/**
+ * Gets the mute state of the given source
+ * @param sourceId The id of the source for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteDiGiCoSourceId(juce::int16 sourceId)
+{
+	return GetMuteProtocolSourceId(DIGICO_PROCESSINGPROTOCOL_ID, sourceId);
+}
+
+/**
+ * Sets the given source to be (un-)muted
+ * @param sourceId The id of the source that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteDiGiCoSourceId(juce::int16 sourceId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolSourceId(DIGICO_PROCESSINGPROTOCOL_ID, sourceId);
+	else
+		return SetUnmuteProtocolSourceId(DIGICO_PROCESSINGPROTOCOL_ID, sourceId);
+}
+
+/**
+ * Gets the currently set DiGiCo client ip address.
+ * This method forwards the call to the generic implementation.
+ * @return	The ip address string
+ */
+String ProtocolBridgingWrapper::GetDiGiCoIpAddress()
+{
+	return GetProtocolIpAddress(DIGICO_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol client ip address.
+ * This method forwards the call to the generic implementation.
+ * @param ipAddress	The new ip address string
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetDiGiCoIpAddress(String ipAddress, bool dontSendNotification)
+{
+	return SetProtocolIpAddress(DIGICO_PROCESSINGPROTOCOL_ID, ipAddress, dontSendNotification);
+}
+
+/**
+ * Gets the mute state of the given source
+ * @param sourceId The id of the source for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteGenericOSCSourceId(juce::int16 sourceId)
+{
+	return GetMuteProtocolSourceId(GENERICOSC_PROCESSINGPROTOCOL_ID, sourceId);
+}
+
+/**
+ * Sets the given source to be (un-)muted
+ * @param sourceId The id of the source that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteGenericOSCSourceId(juce::int16 sourceId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolSourceId(GENERICOSC_PROCESSINGPROTOCOL_ID, sourceId);
+	else
+		return SetUnmuteProtocolSourceId(GENERICOSC_PROCESSINGPROTOCOL_ID, sourceId);
+}
+
+/**
+ * Gets the currently set GenericOSC client ip address.
+ * This method forwards the call to the generic implementation.
+ * @return	The ip address string
+ */
+String ProtocolBridgingWrapper::GetGenericOSCIpAddress()
+{
+	return GetProtocolIpAddress(GENERICOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol client ip address.
+ * This method forwards the call to the generic implementation.
+ * @param ipAddress	The new ip address string
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetGenericOSCIpAddress(String ipAddress, bool dontSendNotification)
+{
+	return SetProtocolIpAddress(GENERICOSC_PROCESSINGPROTOCOL_ID, ipAddress, dontSendNotification);
 }
 
 }

@@ -48,7 +48,7 @@ namespace SoundscapeBridgeApp
  * Forward declarations
  */
 class CTabbedComponent;
-class COverviewTableContainer;
+class OverviewTableContainer;
 class COverviewMultiSurface;
 class CSettingsContainer;
 
@@ -130,7 +130,7 @@ private:
 	/**
 	 * The actual table container inside this component.
 	 */
-	std::unique_ptr<COverviewTableContainer> m_tableContainer;
+	std::unique_ptr<OverviewTableContainer> m_tableContainer;
 
 	/**
 	 * Container for multi-slider.

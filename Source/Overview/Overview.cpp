@@ -107,7 +107,7 @@ COverviewComponent::COverviewComponent()
 	addAndMakeVisible(m_titleLabel.get());
 
 	// Create the table container.
-	m_tableContainer = std::make_unique<COverviewTableContainer>();
+	m_tableContainer = std::make_unique<OverviewTableContainer>();
 	m_multiSliderContainer = std::make_unique<COverviewMultiSurface>();
 	m_settingsContainer = std::make_unique<CSettingsContainer>();
 

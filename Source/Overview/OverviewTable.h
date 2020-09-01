@@ -47,25 +47,26 @@ namespace SoundscapeBridgeApp
 /**
  * Forward declarations
  */
-class COverviewTableContainer;
-class CTableModelComponent;
-class CComboBoxContainer;
-class CTextEditorContainer;
-class CRadioButtonContainer;
-class CEditableLabelContainer;
+class OverviewTableContainer;
+class CustomTableHeaderComponent;
+class TableModelComponent;
+class ComboBoxContainer;
+class TextEditorContainer;
+class RadioButtonContainer;
+class EditableLabelContainer;
 class SoundsourceProcessorEditor;
 
 
 /**
- * Class COverviewTableContainer is just a component which contains the overview table 
+ * Class OverviewTableContainer is just a component which contains the overview table 
  * and it's quick selection buttons.
  */
-class COverviewTableContainer : public AOverlay,
+class OverviewTableContainer : public AOverlay,
 	public Button::Listener
 {
 public:
-	COverviewTableContainer();
-	~COverviewTableContainer() override;
+	OverviewTableContainer();
+	~OverviewTableContainer() override;
 
 	void UpdateGui(bool init) override;
 	void buttonClicked(Button*) override;
@@ -80,7 +81,7 @@ private:
 	/**
 	 * The actual table model / component inside this component.
 	 */
-	std::unique_ptr<CTableModelComponent> m_overviewTable;
+	std::unique_ptr<TableModelComponent> m_overviewTable;
 
 	/**
 	 * The processor editor component corresponding to the selected row
@@ -112,14 +113,27 @@ private:
 	 */
 	std::unique_ptr<CButton> m_selectNone;
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(COverviewTableContainer)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OverviewTableContainer)
 };
 
+/**
+ * Class CustomTableHeaderComponent acts as a table model and a component at the same time.
+ */
+class CustomTableHeaderComponent : public TableHeaderComponent
+{
+public:
+	CustomTableHeaderComponent();
+	~CustomTableHeaderComponent() override;
+
+	void paint(Graphics& g) override;
+
+private:
+};
 
 /**
- * Class CTableModelComponent acts as a table model and a component at the same time.
+ * Class TableModelComponent acts as a table model and a component at the same time.
  */
-class CTableModelComponent : public Component,
+class TableModelComponent : public Component,
 	public TableListBoxModel
 {
 public:
@@ -138,8 +152,8 @@ public:
 		OC_MAX_COLUMNS
 	};
 
-	CTableModelComponent();
-	~CTableModelComponent() override;
+	TableModelComponent();
+	~TableModelComponent() override;
 
 	static bool LessThanSourceId(ProcessorId pId1, ProcessorId pId2);
 	static bool LessThanMapping(ProcessorId pId1, ProcessorId pId2);
@@ -183,19 +197,19 @@ private:
 	 */
 	std::vector<ProcessorId> m_ids;
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CTableModelComponent)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TableModelComponent)
 };
 
 
 /**
- * Class CComboBoxContainer is a container for the MappingId Combo box component used in the Overview table.
+ * Class ComboBoxContainer is a container for the MappingId Combo box component used in the Overview table.
  */
-class CComboBoxContainer : public Component,
+class ComboBoxContainer : public Component,
 	public ComboBox::Listener
 {
 public:
-	explicit CComboBoxContainer(CTableModelComponent& td);
-	~CComboBoxContainer() override;
+	explicit ComboBoxContainer(TableModelComponent& td);
+	~ComboBoxContainer() override;
 
 	void comboBoxChanged(ComboBox *comboBox) override;
 	void resized() override;
@@ -205,7 +219,7 @@ private:
 	/**
 	 * Table where this component is contained.
 	 */
-	CTableModelComponent&	m_owner;
+	TableModelComponent&	m_owner;
 
 	/**
 	 * Actual combo box component.
@@ -217,19 +231,19 @@ private:
 	 */
 	int						m_row;
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CComboBoxContainer)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ComboBoxContainer)
 };
 
 
 /**
- * Class CTextEditorContainer is a container for the SourceID CTextEditor component used in the Overview table.
+ * Class TextEditorContainer is a container for the SourceID CTextEditor component used in the Overview table.
  */
-class CTextEditorContainer : public Component,
+class TextEditorContainer : public Component,
 	public TextEditor::Listener
 {
 public:
-	explicit CTextEditorContainer(CTableModelComponent& td);
-	~CTextEditorContainer() override;
+	explicit TextEditorContainer(TableModelComponent& td);
+	~TextEditorContainer() override;
 
 	void textEditorFocusLost(TextEditor &) override;
 	void textEditorReturnKeyPressed(TextEditor &) override;
@@ -240,7 +254,7 @@ private:
 	/**
 	 * Table where this component is contained.
 	 */
-	CTableModelComponent&	m_owner;
+	TableModelComponent&	m_owner;
 
 	/**
 	 * Actual text editor.
@@ -252,19 +266,19 @@ private:
 	 */
 	int						m_row;
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CTextEditorContainer)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TextEditorContainer)
 };
 
 
 /**
- * Class CRadioButtonContainer is a container for the Tx/Rx buttons used in the Overview table.
+ * Class RadioButtonContainer is a container for the Tx/Rx buttons used in the Overview table.
  */
-class CRadioButtonContainer : public Component,
+class RadioButtonContainer : public Component,
 	public Button::Listener
 {
 public:
-	explicit CRadioButtonContainer(CTableModelComponent& td);
-	~CRadioButtonContainer() override;
+	explicit RadioButtonContainer(TableModelComponent& td);
+	~RadioButtonContainer() override;
 
 	void buttonClicked(Button*) override;
 	void resized() override;
@@ -274,7 +288,7 @@ private:
 	/**
 	 * Table where this component is contained.
 	 */
-	CTableModelComponent&	m_owner;
+	TableModelComponent&	m_owner;
 
 	/**
 	 * Actual Tx button.
@@ -291,19 +305,19 @@ private:
 	 */
 	int						m_row;
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CRadioButtonContainer)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RadioButtonContainer)
 };
 
 
 /**
- * Class CMuteButtonContainer is a container for the Bridging Mute buttons used in the Overview table.
+ * Class MuteButtonContainer is a container for the Bridging Mute buttons used in the Overview table.
  */
-class CMuteButtonContainer : public Component,
+class MuteButtonContainer : public Component,
 	public Button::Listener
 {
 public:
-	explicit CMuteButtonContainer(CTableModelComponent& td);
-	~CMuteButtonContainer() override;
+	explicit MuteButtonContainer(TableModelComponent& td);
+	~MuteButtonContainer() override;
 
 	void buttonClicked(Button*) override;
 	void resized() override;
@@ -313,30 +327,35 @@ private:
 	/**
 	 * Table where this component is contained.
 	 */
-	CTableModelComponent& m_owner;
+	TableModelComponent& m_owner;
 
 	/**
-	 * Actual Mute button.
+	 * DiGiCo Mute button.
 	 */
-	CMuteButton				m_muteButton;
+	CMuteButton			m_muteDiGiCoButton;
+
+	/**
+	 * GenericOSC Mute button.
+	 */
+	CMuteButton			m_muteGenericOSCButton;
 
 	/**
 	 * Row number where this component is located inside the table.
 	 */
-	int						m_row;
+	int					m_row;
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CMuteButtonContainer)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MuteButtonContainer)
 };
 
 
 /**
- * Class CEditableLabelContainer is a container for editable labels used in the Overview table.
+ * Class EditableLabelContainer is a container for editable labels used in the Overview table.
  */
-class CEditableLabelContainer : public Label
+class EditableLabelContainer : public Label
 {
 public:
-	explicit CEditableLabelContainer(CTableModelComponent& td);
-	~CEditableLabelContainer() override;
+	explicit EditableLabelContainer(TableModelComponent& td);
+	~EditableLabelContainer() override;
 
 	void mouseDown(const MouseEvent& event) override;
 	void mouseDoubleClick(const MouseEvent &) override;
@@ -346,14 +365,14 @@ private:
 	/**
 	 * Table where this component is contained.
 	 */
-	CTableModelComponent&	m_owner;
+	TableModelComponent&	m_owner;
 
 	/**
 	 * Row number where this component is located inside the table.
 	 */
 	int						m_row;
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CEditableLabelContainer)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EditableLabelContainer)
 };
 
 

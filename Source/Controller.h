@@ -77,19 +77,30 @@ public:
 	int GetProcessorCount() const;
 	SoundsourceProcessor* GetProcessor(ProcessorId idx) const;
 
+	//==========================================================================
 	String GetIpAddress() const;
 	static String GetDefaultIpAddress();
 	void SetIpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification = false);
 
+	//==========================================================================
 	int GetRate() const;
 	void SetRate(DataChangeSource changeSource, int rate, bool dontSendNotification = false);
 	static std::pair<int, int> GetSupportedRateRange();
 
+	//==========================================================================
 	void ActivateSoundSourceId(SourceId sourceId, MappingId mappingId);
 	void DeactivateSoundSourceId(SourceId sourceId, MappingId mappingId);
 
+	//==========================================================================
+	bool GetMuteDiGiCoSourceId(juce::int16 sourceId);
+	bool SetMuteDiGiCoSourceId(juce::int16 sourceId, bool mute);
+	bool GetMuteGenericOSCSourceId(juce::int16 sourceId);
+	bool SetMuteGenericOSCSourceId(juce::int16 sourceId, bool mute);
+
+	//==========================================================================
 	void InitGlobalSettings(DataChangeSource changeSource, String ipAddress, int rate);
 
+	//==========================================================================
 	void Disconnect();
 	void Reconnect();
 	bool GetOnline() const;

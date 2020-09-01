@@ -870,7 +870,7 @@ std::unique_ptr<XmlElement> CController::createStateXml()
 }
 
 /**
- * Activates the remote objects in protocol bridge proxy corresponding to given source/mapping
+ * Activates the remote objects in protocol bridge proxy corresponding to given source/mapping via proxy bridge object
  * @param sourceId	The soundsource object id to activate
  * @param mappingId	The soundsource mapping id to activate
  */
@@ -880,13 +880,55 @@ void CController::ActivateSoundSourceId(SourceId sourceId, MappingId mappingId)
 }
 
 /**
- * Deactivates the remote objects in protocol bridge proxy corresponding to given source/mapping
+ * Deactivates the remote objects in protocol bridge proxy corresponding to given source/mapping via proxy bridge object
  * @param sourceId	The soundsource object id to activate
  * @param mappingId	The soundsource mapping id to activate
  */
 void CController::DeactivateSoundSourceId(SourceId sourceId, MappingId mappingId)
 {
 	m_protocolBridge.DeactivateDS100SourceId(static_cast<juce::int16>(sourceId), static_cast<juce::int16>(mappingId));
+}
+
+/**
+ * Gets the mute state of the given source via proxy bridge object
+ * @param sourceId The id of the source for which the mute state shall be returned
+ * @return The mute state
+ */
+bool CController::GetMuteDiGiCoSourceId(juce::int16 sourceId)
+{
+	return m_protocolBridge.GetMuteDiGiCoSourceId(sourceId);
+}
+
+/**
+ * Sets the given source to be (un-)muted in DiGiCo protocol via proxy bridge object
+ * @param sourceId The id of the source that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool CController::SetMuteDiGiCoSourceId(juce::int16 sourceId, bool mute)
+{
+	return m_protocolBridge.SetMuteDiGiCoSourceId(sourceId, mute);
+}
+
+/**
+ * Gets the mute state of the given source via proxy bridge object
+ * @param sourceId The id of the source for which the mute state shall be returned
+ * @return The mute state
+ */
+bool CController::GetMuteGenericOSCSourceId(juce::int16 sourceId)
+{
+	return m_protocolBridge.GetMuteGenericOSCSourceId(sourceId);
+}
+
+/**
+ * Sets the given source to be (un-)muted in Generic OSC protocol via proxy bridge object
+ * @param sourceId The id of the source that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool CController::SetMuteGenericOSCSourceId(juce::int16 sourceId, bool mute)
+{
+	return m_protocolBridge.SetMuteGenericOSCSourceId(sourceId, mute);
 }
 
 } // namespace SoundscapeBridgeApp

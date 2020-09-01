@@ -251,8 +251,6 @@ ProcessorId CController::AddProcessor(SoundsourceProcessor* p)
 	// Set the new Processor's InputID to the next in sequence.
 	p->SetSourceId(DCS_Protocol, currentMaxSourceId + 1);
 
-	m_protocolBridge.ActivateDS100SourceId(static_cast<juce::int16>(p->GetSourceId()), static_cast<juce::int16>(p->GetMappingId()));
-
 	return newProcessorId;
 }
 
@@ -262,7 +260,7 @@ ProcessorId CController::AddProcessor(SoundsourceProcessor* p)
  */
 void CController::RemoveProcessor(SoundsourceProcessor* p)
 {
-	m_protocolBridge.DeactivateDS100SourceId(static_cast<juce::int16>(p->GetSourceId()), static_cast<juce::int16>(p->GetMappingId()));
+	DeactivateSoundSourceId(p->GetSourceId(), p->GetMappingId());
 
 	int idx = m_processors.indexOf(p);
 	jassert(idx >= 0); // Tried to remove inexistent Processor object.
@@ -803,7 +801,10 @@ bool CController::setStateXml(XmlElement* stateXml)
 			bool alreadyExists = false;
 			for (auto processor : m_processors)
 				if (processor->GetProcessorId() == elementProcessorId)
+				{
+					processor->setStateXml(processorXmlElement);
 					alreadyExists = true;
+				}
 
 			if (!alreadyExists)
 			{
@@ -811,7 +812,10 @@ bool CController::setStateXml(XmlElement* stateXml)
 				jassert(newProcessor->GetProcessorId() == elementProcessorId);
 				auto p = newProcessor.release();
 				jassert(m_processors.contains(p));
+				p->setStateXml(processorXmlElement);
 			}
+
+
 		}
 
 		auto ovrMgr = COverviewManager::GetInstance();
@@ -863,6 +867,26 @@ std::unique_ptr<XmlElement> CController::createStateXml()
 		controllerXmlElement->addChildElement(bridgingXmlElement.release());
 
     return controllerXmlElement;
+}
+
+/**
+ * Activates the remote objects in protocol bridge proxy corresponding to given source/mapping
+ * @param sourceId	The soundsource object id to activate
+ * @param mappingId	The soundsource mapping id to activate
+ */
+void CController::ActivateSoundSourceId(SourceId sourceId, MappingId mappingId)
+{
+	m_protocolBridge.ActivateDS100SourceId(static_cast<juce::int16>(sourceId), static_cast<juce::int16>(mappingId));
+}
+
+/**
+ * Deactivates the remote objects in protocol bridge proxy corresponding to given source/mapping
+ * @param sourceId	The soundsource object id to activate
+ * @param mappingId	The soundsource mapping id to activate
+ */
+void CController::DeactivateSoundSourceId(SourceId sourceId, MappingId mappingId)
+{
+	m_protocolBridge.DeactivateDS100SourceId(static_cast<juce::int16>(sourceId), static_cast<juce::int16>(mappingId));
 }
 
 } // namespace SoundscapeBridgeApp

@@ -46,6 +46,7 @@ namespace SoundscapeBridgeApp
  * Type definitions.
  */
 typedef juce::int32 SourceId;
+typedef juce::int8 MappingId;
 typedef juce::int32 ProcessorId;
 typedef juce::uint64 DataChangeTypes;
 typedef juce::uint8 ComsMode;

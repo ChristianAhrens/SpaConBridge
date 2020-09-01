@@ -80,8 +80,8 @@ public:
 	SourceId GetSourceId() const;
 	void SetSourceId(DataChangeSource changeSource, SourceId sourceId);
 
-	int GetMappingId() const;
-	void SetMappingId(DataChangeSource changeSource, int mappingId);
+	MappingId GetMappingId() const;
+	void SetMappingId(DataChangeSource changeSource, MappingId mappingId);
 
 	String GetIpAddress() const;
 	void SetIpAddress(DataChangeSource changeSource, String ipAddress);
@@ -196,7 +196,7 @@ protected:
 	/*
 	 * Coordinate mapping index (1 to 4).
 	 */
-	int							m_mappingId;
+	MappingId					m_mappingId;
 
 	/*
 	 * SourceID, or matrix input number.

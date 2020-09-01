@@ -85,6 +85,9 @@ public:
 	void SetRate(DataChangeSource changeSource, int rate, bool dontSendNotification = false);
 	static std::pair<int, int> GetSupportedRateRange();
 
+	void ActivateSoundSourceId(SourceId sourceId, MappingId mappingId);
+	void DeactivateSoundSourceId(SourceId sourceId, MappingId mappingId);
+
 	void InitGlobalSettings(DataChangeSource changeSource, String ipAddress, int rate);
 
 	void Disconnect();

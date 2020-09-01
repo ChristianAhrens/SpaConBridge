@@ -379,6 +379,14 @@ std::unique_ptr<XmlElement> SoundsourceProcessor::createStateXml()
 {
 	auto processorInstanceXmlElement = std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE) + String(GetProcessorId()));
 
+	auto processorComsModeXmlElement = processorInstanceXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORCOMSMODE));
+	if (processorComsModeXmlElement)
+	{
+		auto comsMode = GetComsMode();
+		auto processorComsModeTextXmlElement = processorComsModeXmlElement->createTextElement(String(static_cast<int>(comsMode)));
+		processorComsModeXmlElement->addChildElement(processorComsModeTextXmlElement);
+	}
+
     return processorInstanceXmlElement;
 }
 
@@ -390,7 +398,24 @@ std::unique_ptr<XmlElement> SoundsourceProcessor::createStateXml()
  */
 bool SoundsourceProcessor::setStateXml(XmlElement* stateXml)
 {
-	return false;
+	if (!stateXml || (stateXml->getTagName() != (AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE) + String(GetProcessorId()))))
+		return false;
+
+	auto processorComsModeXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORCOMSMODE));
+	if (processorComsModeXmlElement)
+	{
+		jassert(processorComsModeXmlElement->getNumChildElements() == 1);
+		auto processorComsModeTextXmlElement = processorComsModeXmlElement->getFirstChildElement();
+		if (processorComsModeTextXmlElement)
+		{
+			auto comsMode = static_cast<ComsMode>(processorComsModeTextXmlElement->getText().getIntValue());
+			SetComsMode(DCS_Host, comsMode);
+		}
+	}
+	else
+		return false;
+
+	return true;
 }
 
 /**
@@ -508,6 +533,16 @@ void SoundsourceProcessor::SetComsMode(DataChangeSource changeSource, ComsMode n
 		// If either CM_Rx or CM_Tx flags are set, bypass is off.
 		float bypassValue = ((m_comsMode & CM_Sync) == 0) ? 1.0f : 0.0f;
 		SetParameterValue(changeSource, ParamIdx_Bypass, bypassValue);
+
+		// Activate the corresponding soundsource id in controller
+		CController* ctrl = CController::GetInstance();
+		if (ctrl)
+		{
+			if (m_comsMode & CM_Rx)
+				ctrl->ActivateSoundSourceId(GetSourceId(), GetMappingId());
+			else
+				ctrl->DeactivateSoundSourceId(GetSourceId(), GetMappingId());
+		}
 	}
 }
 
@@ -535,7 +570,7 @@ ComsMode SoundsourceProcessor::GetComsMode() const
  * @param changeSource	The application module which is causing the property change.
  * @param mappingId		The new coordinate mapping ID
  */
-void SoundsourceProcessor::SetMappingId(DataChangeSource changeSource, int mappingId)
+void SoundsourceProcessor::SetMappingId(DataChangeSource changeSource, MappingId mappingId)
 {
 	if (m_mappingId != mappingId)
 	{
@@ -561,7 +596,7 @@ void SoundsourceProcessor::SetMappingId(DataChangeSource changeSource, int mappi
  * Getter function for the coordinate mapping Id
  * @return	The current coordinate mapping ID
  */
-int SoundsourceProcessor::GetMappingId() const
+MappingId SoundsourceProcessor::GetMappingId() const
 {
 	return m_mappingId;
 }
@@ -670,8 +705,10 @@ void SoundsourceProcessor::InitializeSettings(int sourceId, int mappingId, Strin
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
 	{
-		SetSourceId(DCS_Host, sourceId);
-		SetMappingId(DCS_Host, mappingId);
+		jassert(sourceId > 128);
+		SetSourceId(DCS_Host, static_cast<MappingId>(sourceId));
+		jassert(mappingId > 4);
+		SetMappingId(DCS_Host, static_cast<MappingId>(mappingId));
 		SetComsMode(DCS_Host, newMode);
 
 		// Only overwite the current IP settings if they haven't been changed from the defaults.

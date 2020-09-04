@@ -75,6 +75,9 @@ COverviewComponent::COverviewComponent()
 	// IP Settings
 	m_ipAddressTextEdit = std::make_unique<CTextEditor>("IP Address");
 	m_ipAddressTextEdit->addListener(this);
+    m_ipAddressTextEdit->setSelectAllWhenFocused(true);
+    m_ipAddressTextEdit->setPopupMenuEnabled(true);
+    m_ipAddressTextEdit->setKeyboardType(TextInputTarget::VirtualKeyboardType::decimalKeyboard);
 	addAndMakeVisible(m_ipAddressTextEdit.get());
 	m_ipAddressLabel = std::make_unique<CLabel>("IP Address Label", "IP Address:");
 	addAndMakeVisible(m_ipAddressLabel.get());

@@ -45,6 +45,120 @@ namespace SoundscapeBridgeApp
 
 /*
 ===============================================================================
+	Class HeaderWithElmListComponent
+===============================================================================
+*/
+
+/**
+ * Class constructor.
+ */
+HeaderWithElmListComponent::HeaderWithElmListComponent()
+{
+	m_headerLabel = std::make_unique<Label>("HEADER_LABEL");
+	addAndMakeVisible(m_headerLabel.get());
+
+	m_activeToggle = std::make_unique<ToggleButton>();
+	m_activeToggle->onStateChange = [this] { activeToggleClicked(); };
+	addAndMakeVisible(m_activeToggle.get());
+	m_activeToggleLabel = std::make_unique<Label>("ACTIVE_TOGGLE_LABEL");
+	m_activeToggleLabel->attachToComponent(m_activeToggle.get(), true);
+	addAndMakeVisible(m_activeToggleLabel.get());
+}
+
+/**
+ * Class destructor.
+ */
+HeaderWithElmListComponent::~HeaderWithElmListComponent()
+{
+
+}
+
+/**
+ *
+ */
+void HeaderWithElmListComponent::activeToggleClicked()
+{
+	auto toggleState = m_activeToggle->getToggleState();
+
+	for (auto const& component : m_components)
+		component->setEnabled(toggleState);
+
+	if (toggleIsActive)
+		toggleIsActive(toggleState);
+}
+
+/**
+ *
+ */
+void HeaderWithElmListComponent::setHasActiveToggle(bool hasActiveToggle)
+{
+	m_hasActiveToggle = hasActiveToggle;
+
+	m_activeToggle->setVisible(hasActiveToggle);
+	m_activeToggleLabel->setVisible(hasActiveToggle);
+}
+
+/**
+ *
+ */
+void HeaderWithElmListComponent::setHeaderText(String headerText)
+{
+	m_activeToggleLabel->setText("Use " + headerText, dontSendNotification);
+
+	auto font = m_headerLabel->getFont();
+	font.setBold(true);
+	m_headerLabel->setFont(font);
+	m_headerLabel->setText(headerText, dontSendNotification);
+}
+
+/**
+ *
+ */
+void HeaderWithElmListComponent::addComponent(Component* compo)
+{
+	m_components.push_back(std::unique_ptr<Component>(compo));
+}
+
+/**
+ *
+ */
+void HeaderWithElmListComponent::paint(Graphics& g)
+{
+	auto w = getWidth();
+	auto h = getHeight();
+
+	g.setColour(CDbStyle::GetDbColor(CDbStyle::MidColor));
+	g.fillRect(0, 0, w, h);
+
+	g.setColour(CDbStyle::GetDbColor(CDbStyle::DarkLineColor));
+	g.drawRect(0, 0, w, h);
+}
+
+/**
+ * 
+ */
+void HeaderWithElmListComponent::resized()
+{
+	auto bounds = getLocalBounds();
+
+	FlexBox headerfb;
+	headerfb.flexDirection = FlexBox::Direction::row;
+	headerfb.items.addArray({
+		FlexItem(*m_headerLabel.get()).withMaxHeight(20).withFlex(1),
+		FlexItem(*m_activeToggle.get()).withMaxHeight(20).withFlex(1)
+		});
+
+	FlexBox fb;
+	fb.flexDirection = FlexBox::Direction::column;
+	fb.items.add(FlexItem(headerfb).withMaxHeight(20).withFlex(1));
+	for (auto const& component : m_components)
+		fb.items.add(FlexItem(*component.get()).withMaxHeight(20).withFlex(1).withMargin(FlexItem::Margin(5, 5, 5, 5)));
+	fb.performLayout(bounds);
+}
+
+
+/*
+===============================================================================
  Class CSettingsContainer
 ===============================================================================
 */
@@ -70,6 +184,28 @@ CSettingsContainer::CSettingsContainer()
 	m_useRawConfigLabel->attachToComponent(m_useRawConfigButton.get(), true);
 	addAndMakeVisible(m_useRawConfigLabel.get());
 	onToggleRawConfigVisible();
+
+	m_DS100Settings = std::make_unique<HeaderWithElmListComponent>();
+	m_DS100Settings->setHeaderText("DS100 Settings");
+	m_DS100Settings->setHasActiveToggle(false);
+	addAndMakeVisible(m_DS100Settings.get());
+
+	auto ipAddressEdit = std::make_unique<TextEditor>("127.0.01");
+	m_DS100Settings->addAndMakeVisible(ipAddressEdit.get());
+	auto ipAddressLabel = std::make_unique<Label>("IP Address");
+	m_DS100Settings->addAndMakeVisible(ipAddressLabel.get());
+	ipAddressLabel->attachToComponent(ipAddressEdit.get(), true);
+	m_DS100Settings->addComponent(ipAddressEdit.release());
+
+	m_DiGiCoBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
+	m_DiGiCoBridgingSettings->setHeaderText("DiGiCo Bridging Settings");
+	m_DiGiCoBridgingSettings->setHasActiveToggle(true);
+	addAndMakeVisible(m_DiGiCoBridgingSettings.get());
+	
+	m_GenericOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
+	m_GenericOSCBridgingSettings->setHeaderText("Generic OSC Bridging Settings");
+	m_GenericOSCBridgingSettings->setHasActiveToggle(true);
+	addAndMakeVisible(m_GenericOSCBridgingSettings.get());
 
 	auto config = AppConfiguration::getInstance();
 	if (config)
@@ -106,7 +242,13 @@ void CSettingsContainer::resized()
 	m_useRawConfigButton->setBounds(rcbBounds.removeFromRight(25));
 
 	// regular configuration elements
-
+	FlexBox fb;
+	fb.flexDirection = FlexBox::Direction::column;
+	fb.items.addArray({ 
+		FlexItem(*m_DS100Settings.get()).withFlex(1).withMargin(FlexItem::Margin(10, 10, 5, 10)), 
+		FlexItem(*m_DiGiCoBridgingSettings.get()).withFlex(1).withMargin(FlexItem::Margin(5, 10, 5, 10)),
+		FlexItem(*m_GenericOSCBridgingSettings.get()).withFlex(1).withMargin(FlexItem::Margin(5, 10, 10, 10)) });
+	fb.performLayout(bounds);
 
 	// raw config textfield, etc. - not always visible!
 	m_applyButton->setBounds(bounds.removeFromTop(20));
@@ -161,7 +303,9 @@ void CSettingsContainer::onToggleRawConfigVisible()
 	if (m_useRawConfigButton->getToggleState())
 	{
 		m_applyButton->setVisible(true);
+		m_applyButton->toFront(true);
 		m_settingsRawEditor->setVisible(true);
+		m_settingsRawEditor->toFront(true);
 	}
 	else
 	{

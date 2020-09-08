@@ -44,6 +44,36 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace SoundscapeBridgeApp
 {
 
+/**
+ * HeaderWithElmListComponent is a component to hold a header component with multiple other components in a specific layout.
+ */
+class HeaderWithElmListComponent : public Component
+{
+public:
+	HeaderWithElmListComponent();
+	~HeaderWithElmListComponent() override;
+
+	void setHasActiveToggle(bool hasActiveToggle);
+	void setHeaderText(String headerText);
+	void addComponent(Component* compo);
+
+	void activeToggleClicked();
+
+	std::function<void(bool)>	toggleIsActive;
+
+protected:
+	void paint(Graphics&) override;
+	void resized() override;
+
+private:
+	bool									m_hasActiveToggle{ false };
+	std::unique_ptr<ToggleButton>			m_activeToggle;
+	std::unique_ptr<Label>					m_activeToggleLabel;
+	std::unique_ptr<Label>					m_headerLabel;
+	std::vector<std::unique_ptr<Component>>	m_components;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HeaderWithElmListComponent)
+};
 
 /**
  * CSettingsContainer is a component to hold multiple components that are dedicated to app configuration.
@@ -67,6 +97,10 @@ protected:
 	void onToggleRawConfigVisible();
 
 private:
+	std::unique_ptr<HeaderWithElmListComponent>	m_DS100Settings;
+	std::unique_ptr<HeaderWithElmListComponent>	m_DiGiCoBridgingSettings;
+	std::unique_ptr<HeaderWithElmListComponent>	m_GenericOSCBridgingSettings;
+
 	std::unique_ptr<TextButton>		m_applyButton;
 	std::unique_ptr<TextEditor>		m_settingsRawEditor;
 	std::unique_ptr<ToggleButton>	m_useRawConfigButton;

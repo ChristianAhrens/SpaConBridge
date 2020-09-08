@@ -63,6 +63,14 @@ CSettingsContainer::CSettingsContainer()
 	m_settingsRawEditor->setMultiLine(true, false);
 	addAndMakeVisible(m_settingsRawEditor.get());
 
+	m_useRawConfigButton = std::make_unique<ToggleButton>();
+	m_useRawConfigButton->onStateChange = [this] { onToggleRawConfigVisible(); };
+	addAndMakeVisible(m_useRawConfigButton.get());
+	m_useRawConfigLabel = std::make_unique<Label>("RAW CFG", "Show raw config");
+	m_useRawConfigLabel->attachToComponent(m_useRawConfigButton.get(), true);
+	addAndMakeVisible(m_useRawConfigLabel.get());
+	onToggleRawConfigVisible();
+
 	auto config = AppConfiguration::getInstance();
 	if (config)
 		config->addWatcher(this);
@@ -92,6 +100,15 @@ void CSettingsContainer::paint(Graphics& g)
 void CSettingsContainer::resized()
 {
 	auto bounds = getLocalBounds().reduced(5);
+
+	// toggle button for visibility of raw config textfield
+	auto rcbBounds = bounds.removeFromBottom(20).removeFromRight(150);
+	m_useRawConfigButton->setBounds(rcbBounds.removeFromRight(25));
+
+	// regular configuration elements
+
+
+	// raw config textfield, etc. - not always visible!
 	m_applyButton->setBounds(bounds.removeFromTop(20));
 	m_settingsRawEditor->setBounds(bounds);
 }
@@ -136,6 +153,20 @@ void CSettingsContainer::onApplyClicked()
 
 			config->triggerWatcherUpdate();
 		}
+	}
+}
+
+void CSettingsContainer::onToggleRawConfigVisible()
+{
+	if (m_useRawConfigButton->getToggleState())
+	{
+		m_applyButton->setVisible(true);
+		m_settingsRawEditor->setVisible(true);
+	}
+	else
+	{
+		m_applyButton->setVisible(false);
+		m_settingsRawEditor->setVisible(false);
 	}
 }
 

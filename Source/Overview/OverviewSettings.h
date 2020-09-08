@@ -64,9 +64,13 @@ protected:
 
 	void onApplyClicked();
 
+	void onToggleRawConfigVisible();
+
 private:
-	std::unique_ptr<TextButton> m_applyButton;
-	std::unique_ptr<TextEditor>	m_settingsRawEditor;
+	std::unique_ptr<TextButton>		m_applyButton;
+	std::unique_ptr<TextEditor>		m_settingsRawEditor;
+	std::unique_ptr<ToggleButton>	m_useRawConfigButton;
+	std::unique_ptr<Label>			m_useRawConfigLabel;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CSettingsContainer)
 };

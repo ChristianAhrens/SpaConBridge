@@ -43,6 +43,14 @@ namespace SoundscapeBridgeApp
 {
 
 
+static constexpr char* DS100_IP_EDIT_NAME = "DS100_IP_EDIT_NAME";
+static constexpr char* DS100_IP_LABEL_NAME = "DS100_IP_LABEL_NAME";
+static constexpr char* DIGICO_IP_EDIT_NAME = "DIGICO_IP_EDIT_NAME";
+static constexpr char* DIGICO_IP_LABEL_NAME = "DIGICO_IP_LABEL_NAME";
+static constexpr char* GENERICOSC_IP_EDIT_NAME = "GENERICOSC_IP_EDIT_NAME";
+static constexpr char* GENERICOSC_IP_LABEL_NAME = "GENERICOSC_IP_LABEL_NAME";
+
+
 /*
 ===============================================================================
 	Class HeaderWithElmListComponent
@@ -58,11 +66,13 @@ HeaderWithElmListComponent::HeaderWithElmListComponent()
 	addAndMakeVisible(m_headerLabel.get());
 
 	m_activeToggle = std::make_unique<ToggleButton>();
-	m_activeToggle->onStateChange = [this] { activeToggleClicked(); };
+	m_activeToggle->onStateChange = [this] { updateToggleActive(); };
 	addAndMakeVisible(m_activeToggle.get());
 	m_activeToggleLabel = std::make_unique<Label>("ACTIVE_TOGGLE_LABEL");
 	m_activeToggleLabel->attachToComponent(m_activeToggle.get(), true);
 	addAndMakeVisible(m_activeToggleLabel.get());
+
+	updateToggleActive();
 }
 
 /**
@@ -76,15 +86,19 @@ HeaderWithElmListComponent::~HeaderWithElmListComponent()
 /**
  *
  */
-void HeaderWithElmListComponent::activeToggleClicked()
+void HeaderWithElmListComponent::updateToggleActive()
 {
-	auto toggleState = m_activeToggle->getToggleState();
+	m_toggleState = m_hasActiveToggle ? m_activeToggle->getToggleState() : true;
 
+	m_headerLabel->setEnabled(m_toggleState);
 	for (auto const& component : m_components)
-		component->setEnabled(toggleState);
+		component.first->setEnabled(m_toggleState);
 
-	if (toggleIsActive)
-		toggleIsActive(toggleState);
+	if (toggleIsActiveCallback)
+		toggleIsActiveCallback(m_toggleState);
+
+	resized();
+	repaint();
 }
 
 /**
@@ -96,6 +110,8 @@ void HeaderWithElmListComponent::setHasActiveToggle(bool hasActiveToggle)
 
 	m_activeToggle->setVisible(hasActiveToggle);
 	m_activeToggleLabel->setVisible(hasActiveToggle);
+
+	updateToggleActive();
 }
 
 /**
@@ -108,15 +124,21 @@ void HeaderWithElmListComponent::setHeaderText(String headerText)
 	auto font = m_headerLabel->getFont();
 	font.setBold(true);
 	m_headerLabel->setFont(font);
-	m_headerLabel->setText(headerText, dontSendNotification);
+	m_headerLabel->setText(headerText + " Settings", dontSendNotification);
 }
 
 /**
  *
  */
-void HeaderWithElmListComponent::addComponent(Component* compo)
+void HeaderWithElmListComponent::addComponent(Component* compo, bool includeInLayout)
 {
-	m_components.push_back(std::unique_ptr<Component>(compo));
+	if (!compo)
+		return;
+
+	addAndMakeVisible(compo);
+	m_components.push_back(std::make_pair(std::unique_ptr<Component>(compo), includeInLayout));
+
+	compo->setEnabled(m_toggleState);
 }
 
 /**
@@ -127,7 +149,10 @@ void HeaderWithElmListComponent::paint(Graphics& g)
 	auto w = getWidth();
 	auto h = getHeight();
 
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::MidColor));
+	if (m_toggleState)
+		g.setColour(CDbStyle::GetDbColor(CDbStyle::MidColor));
+	else
+		g.setColour(CDbStyle::GetDbColor(CDbStyle::MidColor).darker());
 	g.fillRect(0, 0, w, h);
 
 	g.setColour(CDbStyle::GetDbColor(CDbStyle::DarkLineColor));
@@ -144,15 +169,21 @@ void HeaderWithElmListComponent::resized()
 	FlexBox headerfb;
 	headerfb.flexDirection = FlexBox::Direction::row;
 	headerfb.items.addArray({
-		FlexItem(*m_headerLabel.get()).withMaxHeight(20).withFlex(1),
-		FlexItem(*m_activeToggle.get()).withMaxHeight(20).withFlex(1)
+		FlexItem(*m_headerLabel.get()).withMaxHeight(25).withFlex(1, 1),
+		FlexItem(*m_activeToggle.get()).withMaxHeight(25).withFlex(0, 2, 25)
 		});
 
 	FlexBox fb;
 	fb.flexDirection = FlexBox::Direction::column;
-	fb.items.add(FlexItem(headerfb).withMaxHeight(20).withFlex(1));
+	fb.items.add(FlexItem(headerfb).withMaxHeight(25).withFlex(1).withMargin(FlexItem::Margin(2, 2, 2, 2)));
 	for (auto const& component : m_components)
-		fb.items.add(FlexItem(*component.get()).withMaxHeight(20).withFlex(1).withMargin(FlexItem::Margin(5, 5, 5, 5)));
+	{
+		auto includeInLayout = component.second;
+		if (includeInLayout)
+		{
+			fb.items.add(FlexItem(*component.first.get()).withMaxHeight(25).withFlex(1).withMargin(FlexItem::Margin(5, 5, 5, 120 + 5)));
+		}
+	}
 	fb.performLayout(bounds);
 }
 
@@ -185,28 +216,49 @@ CSettingsContainer::CSettingsContainer()
 	addAndMakeVisible(m_useRawConfigLabel.get());
 	onToggleRawConfigVisible();
 
+	// DS100 settings section
 	m_DS100Settings = std::make_unique<HeaderWithElmListComponent>();
-	m_DS100Settings->setHeaderText("DS100 Settings");
+	m_DS100Settings->setHeaderText("DS100");
 	m_DS100Settings->setHasActiveToggle(false);
 	addAndMakeVisible(m_DS100Settings.get());
 
-	auto ipAddressEdit = std::make_unique<TextEditor>("127.0.01");
-	m_DS100Settings->addAndMakeVisible(ipAddressEdit.get());
-	auto ipAddressLabel = std::make_unique<Label>("IP Address");
-	m_DS100Settings->addAndMakeVisible(ipAddressLabel.get());
+	auto ipAddressEdit = std::make_unique<CTextEditor>(DS100_IP_EDIT_NAME);
+	ipAddressEdit->setText("127.0.01");
+	auto ipAddressLabel = std::make_unique<CLabel>(DS100_IP_LABEL_NAME);
+	ipAddressLabel->setText("IP Address", dontSendNotification);
 	ipAddressLabel->attachToComponent(ipAddressEdit.get(), true);
-	m_DS100Settings->addComponent(ipAddressEdit.release());
+	m_DS100Settings->addComponent(ipAddressLabel.release(), false);
+	m_DS100Settings->addComponent(ipAddressEdit.release(), true);
 
+	// DiGiCo settings section
 	m_DiGiCoBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
-	m_DiGiCoBridgingSettings->setHeaderText("DiGiCo Bridging Settings");
+	m_DiGiCoBridgingSettings->setHeaderText("DiGiCo Bridging");
 	m_DiGiCoBridgingSettings->setHasActiveToggle(true);
 	addAndMakeVisible(m_DiGiCoBridgingSettings.get());
-	
+
+	ipAddressEdit = std::make_unique<CTextEditor>(DIGICO_IP_EDIT_NAME);
+	ipAddressEdit->setText("127.0.01");
+	ipAddressLabel = std::make_unique<CLabel>(DIGICO_IP_LABEL_NAME);
+	ipAddressLabel->setText("IP Address", dontSendNotification);
+	ipAddressLabel->attachToComponent(ipAddressEdit.get(), true);
+	m_DiGiCoBridgingSettings->addComponent(ipAddressLabel.release(), false);
+	m_DiGiCoBridgingSettings->addComponent(ipAddressEdit.release(), true);
+
+	// Generic OSC settings section
 	m_GenericOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
-	m_GenericOSCBridgingSettings->setHeaderText("Generic OSC Bridging Settings");
+	m_GenericOSCBridgingSettings->setHeaderText("Generic OSC Bridging");
 	m_GenericOSCBridgingSettings->setHasActiveToggle(true);
 	addAndMakeVisible(m_GenericOSCBridgingSettings.get());
 
+	ipAddressEdit = std::make_unique<CTextEditor>(GENERICOSC_IP_EDIT_NAME);
+	ipAddressEdit->setText("127.0.01");
+	ipAddressLabel = std::make_unique<CLabel>(GENERICOSC_IP_LABEL_NAME);
+	ipAddressLabel->setText("IP Address", dontSendNotification);
+	ipAddressLabel->attachToComponent(ipAddressEdit.get(), true);
+	m_GenericOSCBridgingSettings->addComponent(ipAddressLabel.release(), false);
+	m_GenericOSCBridgingSettings->addComponent(ipAddressEdit.release(), true);
+
+	// register this object as config watcher
 	auto config = AppConfiguration::getInstance();
 	if (config)
 		config->addWatcher(this);
@@ -245,9 +297,9 @@ void CSettingsContainer::resized()
 	FlexBox fb;
 	fb.flexDirection = FlexBox::Direction::column;
 	fb.items.addArray({ 
-		FlexItem(*m_DS100Settings.get()).withFlex(1).withMargin(FlexItem::Margin(10, 10, 5, 10)), 
-		FlexItem(*m_DiGiCoBridgingSettings.get()).withFlex(1).withMargin(FlexItem::Margin(5, 10, 5, 10)),
-		FlexItem(*m_GenericOSCBridgingSettings.get()).withFlex(1).withMargin(FlexItem::Margin(5, 10, 10, 10)) });
+		FlexItem(*m_DS100Settings.get()).withFlex(1).withMargin(FlexItem::Margin(3, 3, 3, 3)), 
+		FlexItem(*m_DiGiCoBridgingSettings.get()).withFlex(1).withMargin(FlexItem::Margin(3, 3, 3, 3)),
+		FlexItem(*m_GenericOSCBridgingSettings.get()).withFlex(1).withMargin(FlexItem::Margin(3, 3, 3, 3)) });
 	fb.performLayout(bounds);
 
 	// raw config textfield, etc. - not always visible!

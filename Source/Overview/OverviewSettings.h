@@ -55,22 +55,23 @@ public:
 
 	void setHasActiveToggle(bool hasActiveToggle);
 	void setHeaderText(String headerText);
-	void addComponent(Component* compo);
+	void addComponent(Component* compo, bool includeInLayout);
 
-	void activeToggleClicked();
+	void updateToggleActive();
 
-	std::function<void(bool)>	toggleIsActive;
+	std::function<void(bool)>	toggleIsActiveCallback;
 
 protected:
 	void paint(Graphics&) override;
 	void resized() override;
 
 private:
-	bool									m_hasActiveToggle{ false };
-	std::unique_ptr<ToggleButton>			m_activeToggle;
-	std::unique_ptr<Label>					m_activeToggleLabel;
-	std::unique_ptr<Label>					m_headerLabel;
-	std::vector<std::unique_ptr<Component>>	m_components;
+	bool														m_hasActiveToggle{ false };
+	bool														m_toggleState{ true };
+	std::unique_ptr<ToggleButton>								m_activeToggle;
+	std::unique_ptr<Label>										m_activeToggleLabel;
+	std::unique_ptr<Label>										m_headerLabel;
+	std::vector<std::pair<std::unique_ptr<Component>, bool>>	m_components;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HeaderWithElmListComponent)
 };

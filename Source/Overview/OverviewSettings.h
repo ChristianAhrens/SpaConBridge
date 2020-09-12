@@ -50,20 +50,20 @@ namespace SoundscapeBridgeApp
 class HeaderWithElmListComponent : public Component
 {
 public:
-	HeaderWithElmListComponent();
+	HeaderWithElmListComponent(const String& componentName = String());
 	~HeaderWithElmListComponent() override;
 
 	void setHasActiveToggle(bool hasActiveToggle);
 	void setHeaderText(String headerText);
-	void addComponent(Component* compo, bool includeInLayout);
+	void addComponent(Component* compo, bool includeInLayout = true);
 
 	void updateToggleActive();
 
-	std::function<void(bool)>	toggleIsActiveCallback;
-
-protected:
 	void paint(Graphics&) override;
 	void resized() override;
+
+	std::function<void(bool)>	toggleIsActiveCallback;
+
 
 private:
 	bool														m_hasActiveToggle{ false };
@@ -74,6 +74,26 @@ private:
 	std::vector<std::pair<std::unique_ptr<Component>, bool>>	m_components;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HeaderWithElmListComponent)
+};
+
+/**
+ * CSettingsComponent is the component to hold multiple components 
+ * that are dedicated to app configuration and itself resides within 
+ * a viewport for scrolling functionality.
+ */
+class CSettingsComponent : public Component
+{
+public:
+	CSettingsComponent();
+	~CSettingsComponent() override;
+
+	void paint(Graphics&) override;
+	void resized() override;
+
+private:
+	std::unique_ptr<HeaderWithElmListComponent>	m_DS100Settings;
+	std::unique_ptr<HeaderWithElmListComponent>	m_DiGiCoBridgingSettings;
+	std::unique_ptr<HeaderWithElmListComponent>	m_GenericOSCBridgingSettings;
 };
 
 /**
@@ -98,9 +118,8 @@ protected:
 	void onToggleRawConfigVisible();
 
 private:
-	std::unique_ptr<HeaderWithElmListComponent>	m_DS100Settings;
-	std::unique_ptr<HeaderWithElmListComponent>	m_DiGiCoBridgingSettings;
-	std::unique_ptr<HeaderWithElmListComponent>	m_GenericOSCBridgingSettings;
+	std::unique_ptr<CSettingsComponent>			m_settingsComponent;
+	std::unique_ptr<Viewport>					m_settingsViewport;
 
 	std::unique_ptr<TextButton>		m_applyButton;
 	std::unique_ptr<TextEditor>		m_settingsRawEditor;

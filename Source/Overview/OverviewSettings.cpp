@@ -43,12 +43,25 @@ namespace SoundscapeBridgeApp
 {
 
 
-static constexpr char* DS100_IP_EDIT_NAME = "DS100_IP_EDIT_NAME";
-static constexpr char* DS100_IP_LABEL_NAME = "DS100_IP_LABEL_NAME";
-static constexpr char* DIGICO_IP_EDIT_NAME = "DIGICO_IP_EDIT_NAME";
-static constexpr char* DIGICO_IP_LABEL_NAME = "DIGICO_IP_LABEL_NAME";
-static constexpr char* GENERICOSC_IP_EDIT_NAME = "GENERICOSC_IP_EDIT_NAME";
-static constexpr char* GENERICOSC_IP_LABEL_NAME = "GENERICOSC_IP_LABEL_NAME";
+static constexpr char* HEADER_LABEL_NAME = "HEADER_LABEL";
+static constexpr char* ACTIVE_TOGGLE_LABEL_NAME = "ACTIVE_TOGGLE_LABEL";
+static constexpr char* DS100_COMPO_NAME = "DS100_COMPO";
+static constexpr char* DS100_IP_EDIT_NAME = "DS100_IP_EDIT";
+static constexpr char* DS100_IP_LABEL_NAME = "DS100_IP_LABEL";
+static constexpr char* DIGICO_COMPO_NAME = "DIGICO_COMPO";
+static constexpr char* DIGICO_IP_EDIT_NAME = "DIGICO_IP_EDIT";
+static constexpr char* DIGICO_IP_LABEL_NAME = "DIGICO_IP_LABEL";
+static constexpr char* DIGICO_LISTENINGPORT_EDIT_NAME = "DIGICO_LISTENINGPORT_EDIT";
+static constexpr char* DIGICO_LISTENINGPORT_LABEL_NAME = "DIGICO_LISTENINGPORT_LABEL";
+static constexpr char* DIGICO_REMOTEPORT_EDIT_NAME = "DIGICO_REMOTEPORT_EDIT";
+static constexpr char* DIGICO_REMOTEPORT_LABEL_NAME = "DIGICO_REMOTEPORT_LABEL";
+static constexpr char* GENERICOSC_COMPO_NAME = "GENERICOSC_COMPO";
+static constexpr char* GENERICOSC_IP_EDIT_NAME = "GENERICOSC_IP_EDIT";
+static constexpr char* GENERICOSC_IP_LABEL_NAME = "GENERICOSC_IP_LABEL";
+static constexpr char* GENERICOSC_LISTENINGPORT_EDIT_NAME = "GENERICOSC_LISTENINGPORT_EDIT";
+static constexpr char* GENERICOSC_LISTENINGPORT_LABEL_NAME = "GENERICOSC_LISTENINGPORT_LABEL";
+static constexpr char* GENERICOSC_REMOTEPORT_EDIT_NAME = "GENERICOSC_REMOTEPORT_EDIT";
+static constexpr char* GENERICOSC_REMOTEPORT_LABEL_NAME = "GENERICOSC_REMOTEPORT_LABEL";
 
 
 /*
@@ -60,15 +73,16 @@ static constexpr char* GENERICOSC_IP_LABEL_NAME = "GENERICOSC_IP_LABEL_NAME";
 /**
  * Class constructor.
  */
-HeaderWithElmListComponent::HeaderWithElmListComponent()
+HeaderWithElmListComponent::HeaderWithElmListComponent(const String& componentName)
+	: Component(componentName)
 {
-	m_headerLabel = std::make_unique<Label>("HEADER_LABEL");
+	m_headerLabel = std::make_unique<Label>(HEADER_LABEL_NAME);
 	addAndMakeVisible(m_headerLabel.get());
 
 	m_activeToggle = std::make_unique<ToggleButton>();
 	m_activeToggle->onStateChange = [this] { updateToggleActive(); };
 	addAndMakeVisible(m_activeToggle.get());
-	m_activeToggleLabel = std::make_unique<Label>("ACTIVE_TOGGLE_LABEL");
+	m_activeToggleLabel = std::make_unique<Label>(ACTIVE_TOGGLE_LABEL_NAME);
 	m_activeToggleLabel->attachToComponent(m_activeToggle.get(), true);
 	addAndMakeVisible(m_activeToggleLabel.get());
 
@@ -164,26 +178,190 @@ void HeaderWithElmListComponent::paint(Graphics& g)
  */
 void HeaderWithElmListComponent::resized()
 {
-	auto bounds = getLocalBounds();
+	auto headerHeight = 25;
+	auto itemHeight = headerHeight;
+	auto itemMargin = 5;
+	auto headerMargin = 2;
+	auto itemCount = 0;
 
 	FlexBox headerfb;
 	headerfb.flexDirection = FlexBox::Direction::row;
 	headerfb.items.addArray({
-		FlexItem(*m_headerLabel.get()).withMaxHeight(25).withFlex(1, 1),
-		FlexItem(*m_activeToggle.get()).withMaxHeight(25).withFlex(0, 2, 25)
+		FlexItem(*m_headerLabel.get()).withFlex(1, 1),
+		FlexItem(*m_activeToggle.get()).withFlex(0, 2, itemHeight)
 		});
 
 	FlexBox fb;
 	fb.flexDirection = FlexBox::Direction::column;
-	fb.items.add(FlexItem(headerfb).withMaxHeight(25).withFlex(1).withMargin(FlexItem::Margin(2, 2, 2, 2)));
+	fb.justifyContent = FlexBox::JustifyContent::flexStart;
+	fb.items.add(FlexItem(headerfb)
+		.withHeight(headerHeight)
+		.withMargin(FlexItem::Margin(headerMargin, headerMargin, headerMargin, headerMargin)));
 	for (auto const& component : m_components)
 	{
 		auto includeInLayout = component.second;
 		if (includeInLayout)
 		{
-			fb.items.add(FlexItem(*component.first.get()).withMaxHeight(25).withFlex(1).withMargin(FlexItem::Margin(5, 5, 5, 120 + 5)));
+			fb.items.add(FlexItem(*component.first.get())
+				.withHeight(itemHeight)
+				.withMaxWidth(150)
+				.withMargin(FlexItem::Margin(itemMargin, itemMargin, itemMargin, 110 + itemMargin)));
+			itemCount++;
 		}
 	}
+
+	auto bounds = getLocalBounds();
+	bounds.setHeight(((itemHeight + (2 * itemMargin)) * itemCount) + (headerHeight + (2 * headerMargin)) + 5);
+	setSize(bounds.getWidth(), bounds.getHeight());
+
+	fb.performLayout(bounds);
+
+//#ifdef DEBUG
+//	DBG(getName() + "::" + __FUNCTION__ + " " + String(bounds.getWidth()) + "x" + String(bounds.getHeight()));
+//#endif
+}
+
+
+/*
+===============================================================================
+ Class CSettingsComponent
+===============================================================================
+*/
+
+/**
+ * Class constructor.
+ */
+CSettingsComponent::CSettingsComponent()
+{
+	// DS100 settings section
+	m_DS100Settings = std::make_unique<HeaderWithElmListComponent>(DS100_COMPO_NAME);
+	m_DS100Settings->setHeaderText("DS100");
+	m_DS100Settings->setHasActiveToggle(false);
+	addAndMakeVisible(m_DS100Settings.get());
+
+	auto ipAddressEdit = std::make_unique<CTextEditor>(DS100_IP_EDIT_NAME);
+	auto ipAddressLabel = std::make_unique<CLabel>(DS100_IP_LABEL_NAME);
+	ipAddressLabel->setText("IP Address", dontSendNotification);
+	ipAddressLabel->attachToComponent(ipAddressEdit.get(), true);
+	m_DS100Settings->addComponent(ipAddressLabel.release(), false);
+	m_DS100Settings->addComponent(ipAddressEdit.release(), true);
+
+	m_DS100Settings->resized();
+
+	// DiGiCo settings section
+	m_DiGiCoBridgingSettings = std::make_unique<HeaderWithElmListComponent>(DIGICO_COMPO_NAME);
+	m_DiGiCoBridgingSettings->setHeaderText("DiGiCo Bridging");
+	m_DiGiCoBridgingSettings->setHasActiveToggle(true);
+	addAndMakeVisible(m_DiGiCoBridgingSettings.get());
+
+	ipAddressEdit = std::make_unique<CTextEditor>(DIGICO_IP_EDIT_NAME);
+	ipAddressLabel = std::make_unique<CLabel>(DIGICO_IP_LABEL_NAME);
+	ipAddressLabel->setText("IP Address", dontSendNotification);
+	ipAddressLabel->attachToComponent(ipAddressEdit.get(), true);
+	m_DiGiCoBridgingSettings->addComponent(ipAddressLabel.release(), false);
+	m_DiGiCoBridgingSettings->addComponent(ipAddressEdit.release(), true);
+
+	auto listeningPortEdit = std::make_unique<CTextEditor>(DIGICO_LISTENINGPORT_EDIT_NAME);
+	auto listeningPortLabel = std::make_unique<CLabel>(DIGICO_LISTENINGPORT_LABEL_NAME);
+	listeningPortLabel->setText("Listening Port", dontSendNotification);
+	listeningPortLabel->attachToComponent(listeningPortEdit.get(), true);
+	m_DiGiCoBridgingSettings->addComponent(listeningPortLabel.release(), false);
+	m_DiGiCoBridgingSettings->addComponent(listeningPortEdit.release(), true);
+
+	auto remotePortEdit = std::make_unique<CTextEditor>(DIGICO_REMOTEPORT_EDIT_NAME);
+	auto remotePortLabel = std::make_unique<CLabel>(DIGICO_REMOTEPORT_LABEL_NAME);
+	remotePortLabel->setText("Remote Port", dontSendNotification);
+	remotePortLabel->attachToComponent(remotePortEdit.get(), true);
+	m_DiGiCoBridgingSettings->addComponent(remotePortLabel.release(), false);
+	m_DiGiCoBridgingSettings->addComponent(remotePortEdit.release(), true);
+
+	m_DiGiCoBridgingSettings->resized();
+
+	// Generic OSC settings section
+	m_GenericOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>(GENERICOSC_COMPO_NAME);
+	m_GenericOSCBridgingSettings->setHeaderText("Generic OSC Bridging");
+	m_GenericOSCBridgingSettings->setHasActiveToggle(true);
+	addAndMakeVisible(m_GenericOSCBridgingSettings.get());
+
+	ipAddressEdit = std::make_unique<CTextEditor>(GENERICOSC_IP_EDIT_NAME);
+	ipAddressLabel = std::make_unique<CLabel>(GENERICOSC_IP_LABEL_NAME);
+	ipAddressLabel->setText("IP Address", dontSendNotification);
+	ipAddressLabel->attachToComponent(ipAddressEdit.get(), true);
+	m_GenericOSCBridgingSettings->addComponent(ipAddressLabel.release(), false);
+	m_GenericOSCBridgingSettings->addComponent(ipAddressEdit.release(), true);
+
+	listeningPortEdit = std::make_unique<CTextEditor>(GENERICOSC_LISTENINGPORT_EDIT_NAME);
+	listeningPortLabel = std::make_unique<CLabel>(GENERICOSC_LISTENINGPORT_LABEL_NAME);
+	listeningPortLabel->setText("Listening Port", dontSendNotification);
+	listeningPortLabel->attachToComponent(listeningPortEdit.get(), true);
+	m_GenericOSCBridgingSettings->addComponent(listeningPortLabel.release(), false);
+	m_GenericOSCBridgingSettings->addComponent(listeningPortEdit.release(), true);
+
+	remotePortEdit = std::make_unique<CTextEditor>(GENERICOSC_REMOTEPORT_EDIT_NAME);
+	remotePortLabel = std::make_unique<CLabel>(GENERICOSC_REMOTEPORT_LABEL_NAME);
+	remotePortLabel->setText("Remote Port", dontSendNotification);
+	remotePortLabel->attachToComponent(remotePortEdit.get(), true);
+	m_GenericOSCBridgingSettings->addComponent(remotePortLabel.release(), false);
+	m_GenericOSCBridgingSettings->addComponent(remotePortEdit.release(), true);
+
+	m_GenericOSCBridgingSettings->resized();
+}
+
+/**
+ * Class destructor.
+ */
+CSettingsComponent::~CSettingsComponent()
+{
+}
+
+/**
+ * Reimplemented to paint background.
+ * @param g		Graphics context that must be used to do the drawing operations.
+ */
+void CSettingsComponent::paint(Graphics& g)
+{
+	// Paint background to cover the controls behind this overlay.
+	g.setColour(CDbStyle::GetDbColor(CDbStyle::DarkColor));
+	g.fillRect(Rectangle<int>(0, 0, getLocalBounds().getWidth(), getLocalBounds().getHeight()));
+}
+
+/**
+ * Reimplemented to resize and re-postion controls on the overview window.
+ */
+void CSettingsComponent::resized()
+{
+	auto margin = 3;
+
+	auto minWidth = 300;
+	auto minHeight = m_DS100Settings->getHeight()
+		+ m_DiGiCoBridgingSettings->getHeight()
+		+ m_GenericOSCBridgingSettings->getHeight()
+		+ (3 * 2 * margin);
+
+	auto bounds = getLocalBounds();
+	if (bounds.getWidth() < minWidth || bounds.getHeight() < minHeight)
+	{
+		if (bounds.getWidth() < minWidth)
+			bounds.setWidth(minWidth);
+		if (bounds.getHeight() < minHeight)
+			bounds.setHeight(minHeight);
+
+		setBounds(bounds);
+	}
+
+	FlexBox fb;
+	fb.flexDirection = FlexBox::Direction::column;
+	fb.justifyContent = FlexBox::JustifyContent::flexStart;
+	fb.items.addArray({
+		FlexItem(*m_DS100Settings.get())
+			.withHeight(m_DS100Settings->getHeight())
+			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
+		FlexItem(*m_DiGiCoBridgingSettings.get())
+			.withHeight(m_DiGiCoBridgingSettings->getHeight())
+			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
+		FlexItem(*m_GenericOSCBridgingSettings.get())
+			.withHeight(m_GenericOSCBridgingSettings->getHeight())
+			.withMargin(FlexItem::Margin(margin, margin, margin, margin)) });
 	fb.performLayout(bounds);
 }
 
@@ -216,47 +394,17 @@ CSettingsContainer::CSettingsContainer()
 	addAndMakeVisible(m_useRawConfigLabel.get());
 	onToggleRawConfigVisible();
 
-	// DS100 settings section
-	m_DS100Settings = std::make_unique<HeaderWithElmListComponent>();
-	m_DS100Settings->setHeaderText("DS100");
-	m_DS100Settings->setHasActiveToggle(false);
-	addAndMakeVisible(m_DS100Settings.get());
+	m_settingsComponent = std::make_unique<CSettingsComponent>();
 
-	auto ipAddressEdit = std::make_unique<CTextEditor>(DS100_IP_EDIT_NAME);
-	ipAddressEdit->setText("127.0.01");
-	auto ipAddressLabel = std::make_unique<CLabel>(DS100_IP_LABEL_NAME);
-	ipAddressLabel->setText("IP Address", dontSendNotification);
-	ipAddressLabel->attachToComponent(ipAddressEdit.get(), true);
-	m_DS100Settings->addComponent(ipAddressLabel.release(), false);
-	m_DS100Settings->addComponent(ipAddressEdit.release(), true);
-
-	// DiGiCo settings section
-	m_DiGiCoBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
-	m_DiGiCoBridgingSettings->setHeaderText("DiGiCo Bridging");
-	m_DiGiCoBridgingSettings->setHasActiveToggle(true);
-	addAndMakeVisible(m_DiGiCoBridgingSettings.get());
-
-	ipAddressEdit = std::make_unique<CTextEditor>(DIGICO_IP_EDIT_NAME);
-	ipAddressEdit->setText("127.0.01");
-	ipAddressLabel = std::make_unique<CLabel>(DIGICO_IP_LABEL_NAME);
-	ipAddressLabel->setText("IP Address", dontSendNotification);
-	ipAddressLabel->attachToComponent(ipAddressEdit.get(), true);
-	m_DiGiCoBridgingSettings->addComponent(ipAddressLabel.release(), false);
-	m_DiGiCoBridgingSettings->addComponent(ipAddressEdit.release(), true);
-
-	// Generic OSC settings section
-	m_GenericOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
-	m_GenericOSCBridgingSettings->setHeaderText("Generic OSC Bridging");
-	m_GenericOSCBridgingSettings->setHasActiveToggle(true);
-	addAndMakeVisible(m_GenericOSCBridgingSettings.get());
-
-	ipAddressEdit = std::make_unique<CTextEditor>(GENERICOSC_IP_EDIT_NAME);
-	ipAddressEdit->setText("127.0.01");
-	ipAddressLabel = std::make_unique<CLabel>(GENERICOSC_IP_LABEL_NAME);
-	ipAddressLabel->setText("IP Address", dontSendNotification);
-	ipAddressLabel->attachToComponent(ipAddressEdit.get(), true);
-	m_GenericOSCBridgingSettings->addComponent(ipAddressLabel.release(), false);
-	m_GenericOSCBridgingSettings->addComponent(ipAddressEdit.release(), true);
+	m_settingsViewport = std::make_unique<Viewport>();
+	m_settingsViewport->getHorizontalScrollBar().setColour(ScrollBar::backgroundColourId, CDbStyle::GetDbColor(CDbStyle::DarkColor));
+	m_settingsViewport->getHorizontalScrollBar().setColour(ScrollBar::thumbColourId, CDbStyle::GetDbColor(CDbStyle::DarkTextColor));
+	m_settingsViewport->getHorizontalScrollBar().setColour(ScrollBar::trackColourId, CDbStyle::GetDbColor(CDbStyle::MidColor));
+	m_settingsViewport->getVerticalScrollBar().setColour(ScrollBar::backgroundColourId, CDbStyle::GetDbColor(CDbStyle::DarkColor));
+	m_settingsViewport->getVerticalScrollBar().setColour(ScrollBar::thumbColourId, CDbStyle::GetDbColor(CDbStyle::DarkTextColor));
+	m_settingsViewport->getVerticalScrollBar().setColour(ScrollBar::trackColourId, CDbStyle::GetDbColor(CDbStyle::MidColor));
+	m_settingsViewport->setViewedComponent(m_settingsComponent.get(), false);
+	addAndMakeVisible(m_settingsViewport.get());
 
 	// register this object as config watcher
 	auto config = AppConfiguration::getInstance();
@@ -293,14 +441,21 @@ void CSettingsContainer::resized()
 	auto rcbBounds = bounds.removeFromBottom(20).removeFromRight(150);
 	m_useRawConfigButton->setBounds(rcbBounds.removeFromRight(25));
 
-	// regular configuration elements
-	FlexBox fb;
-	fb.flexDirection = FlexBox::Direction::column;
-	fb.items.addArray({ 
-		FlexItem(*m_DS100Settings.get()).withFlex(1).withMargin(FlexItem::Margin(3, 3, 3, 3)), 
-		FlexItem(*m_DiGiCoBridgingSettings.get()).withFlex(1).withMargin(FlexItem::Margin(3, 3, 3, 3)),
-		FlexItem(*m_GenericOSCBridgingSettings.get()).withFlex(1).withMargin(FlexItem::Margin(3, 3, 3, 3)) });
-	fb.performLayout(bounds);
+	m_settingsComponent->setBounds(bounds.reduced(1));
+	m_settingsViewport->setBounds(bounds);
+
+	if (m_settingsViewport->isVerticalScrollBarShown() || m_settingsViewport->isHorizontalScrollBarShown())
+	{
+		auto boundsWithoutScrollbars = bounds;
+
+		if (m_settingsViewport->isVerticalScrollBarShown())
+			boundsWithoutScrollbars.setWidth(bounds.getWidth() - m_settingsViewport->getVerticalScrollBar().getWidth());
+
+		if (m_settingsViewport->isHorizontalScrollBarShown())
+			boundsWithoutScrollbars.setHeight(bounds.getHeight() - m_settingsViewport->getHorizontalScrollBar().getHeight());
+
+		m_settingsComponent->setBounds(boundsWithoutScrollbars);
+	}
 
 	// raw config textfield, etc. - not always visible!
 	m_applyButton->setBounds(bounds.removeFromTop(20));

@@ -472,6 +472,9 @@ void CSettingsContainer::UpdateGui(bool init)
 	ignoreUnused(init);
 }
 
+/**
+ *
+ */
 void CSettingsContainer::onConfigUpdated()
 {
 	auto config = AppConfiguration::getInstance();
@@ -483,6 +486,9 @@ void CSettingsContainer::onConfigUpdated()
 	}
 }
 
+/**
+ *
+ */
 void CSettingsContainer::onApplyClicked()
 {
 	auto config = AppConfiguration::getInstance();
@@ -505,6 +511,9 @@ void CSettingsContainer::onApplyClicked()
 	}
 }
 
+/**
+ *
+ */
 void CSettingsContainer::onToggleRawConfigVisible()
 {
 	if (m_useRawConfigButton->getToggleState())

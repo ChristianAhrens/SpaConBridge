@@ -335,7 +335,7 @@ bool ProtocolBridgingWrapper::SetUnmuteProtocolSourceId(ProtocolId protocolId, j
 }
 
 /**
- * Gets the currently set DS100 client ip address.
+ * Gets the protocol's currently set client ip address.
  * @param protocolId The id of the protocol for which to get the currently configured ip address
  * @return	The ip address string
  */

@@ -39,7 +39,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "AppConfiguration.h"
 #include "ProtocolBridgingWrapper.h"
 
-#include <ProcessingEngine/ProcessingEngineNode.h>
 
 
 namespace SoundscapeBridgeApp

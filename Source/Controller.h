@@ -109,64 +109,33 @@ public:
 	void Reconnect();
 	bool GetOnline() const;
 
+	//==========================================================================
 	std::unique_ptr<XmlElement> createStateXml() override;
 	bool setStateXml(XmlElement* stateXml) override;
 
+	//==========================================================================
 	void HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData) override;
 
 private:
 	void timerCallback() override;
 
 protected:
-	/**
-	 * The one and only instance of CController.
-	 */
-	static CController		*m_singleton;		
-
-	/**
-	 * List of registered Plug-in processor instances. 
-	 * Incoming OSC messages will be forwarded to all processors on the list.
-	 * When adding Plug-in instances to a project (i.e. one for each DAW track), this list will grow.
-	 * When removing Plug-in instances from a project, this list will shrink. When the list becomes empty,
-	 * The CController singleton object is no longer necessary and will destruct itself.
-	 */
-	Array<SoundsourceProcessor*>	m_processors;
-
-	/**
-	 * The wrapper for protocol bridging node, allowing to easily interface with it
-	 */
-	ProtocolBridgingWrapper	m_protocolBridge;
-
-	/**
-	 * IP Address where OSC messages will be sent to / received from.
-	 */
-	String					m_ipAddress;
-
-	/**
-	 * Interval at which OSC messages are sent to the host, in ms.
-	 */
-	int						m_oscMsgRate;
-
-	/**
-	 * Keep track of which OSC parameters have changed recently. 
-	 * The array has one entry for each application module (see enum DataChangeSource).
-	 */
-	DataChangeTypes				m_parametersChanged[DCS_Max];
-
-	/**
-	 * Number of timer intervals since the last successful OSC message was received.
-	 */
-	int						m_heartBeatsRx;
-
-	/**
-	 * Number of timer intervals since the last OSC message was sent out.
-	 */
-	int						m_heartBeatsTx;
-
-	/**
-	 * A re-entrant mutex. Safety first.
-	 */
-	CriticalSection			m_mutex;
+	
+	static CController				*m_singleton;		/**< The one and only instance of CController. */
+	Array<SoundsourceProcessor*>	m_processors;		/**< List of registered Plug-in processor instances.
+														 * Incoming OSC messages will be forwarded to all processors on the list.
+														 * When adding Plug-in instances to a project (i.e. one for each DAW track), this list will grow.
+														 * When removing Plug-in instances from a project, this list will shrink. When the list becomes empty,
+														 * The CController singleton object is no longer necessary and will destruct itself.
+														 */
+	ProtocolBridgingWrapper			m_protocolBridge;	/**< The wrapper for protocol bridging node, allowing to easily interface with it. */
+	String							m_ipAddress;		/**< IP Address where OSC messages will be sent to / received from. */
+	int								m_oscMsgRate;		/**< Interval at which OSC messages are sent to the host, in ms. */
+	DataChangeTypes					m_parametersChanged[DCS_Max];	/**< Keep track of which OSC parameters have changed recently.
+																	 * The array has one entry for each application module (see enum DataChangeSource). */
+	int								m_heartBeatsRx;		/**< Number of timer intervals since the last successful OSC message was received. */
+	int								m_heartBeatsTx;		/**< Number of timer intervals since the last OSC message was sent out. */
+	CriticalSection					m_mutex;			/**< A re-entrant mutex. Safety first. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CController)
 };

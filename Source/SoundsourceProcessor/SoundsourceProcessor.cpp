@@ -151,7 +151,7 @@ void SoundsourceProcessor::SetProcessorId(DataChangeSource changeSource, Process
  * @return	True if any of the given parameters has changed it's value 
  *			since the last time PopParameterChanged() was called.
  */
-bool SoundsourceProcessor::GetParameterChanged(DataChangeSource changeSource, DataChangeTypes change)
+bool SoundsourceProcessor::GetParameterChanged(DataChangeSource changeSource, DataChangeType change)
 {
 	return ((m_parametersChanged[changeSource] & change) != 0);
 }
@@ -164,7 +164,7 @@ bool SoundsourceProcessor::GetParameterChanged(DataChangeSource changeSource, Da
  * @return	True if any of the given parameters has changed it's value 
  *			since the last time PopParameterChanged() was called.
  */
-bool SoundsourceProcessor::PopParameterChanged(DataChangeSource changeSource, DataChangeTypes change)
+bool SoundsourceProcessor::PopParameterChanged(DataChangeSource changeSource, DataChangeType change)
 {
 	bool ret((m_parametersChanged[changeSource] & change) != 0);
 	m_parametersChanged[changeSource] &= ~change; // Reset flag.
@@ -176,7 +176,7 @@ bool SoundsourceProcessor::PopParameterChanged(DataChangeSource changeSource, Da
  * @param changeSource	The application module which is causing the property change.
  * @param changeTypes	Defines which parameter or property has been changed.
  */
-void SoundsourceProcessor::SetParameterChanged(DataChangeSource changeSource, DataChangeTypes changeTypes)
+void SoundsourceProcessor::SetParameterChanged(DataChangeSource changeSource, DataChangeType changeTypes)
 {
 	// Set the specified change flag for all DataChangeSources.
 	for (int cs = 0; cs < DCS_Max; cs++)
@@ -340,7 +340,7 @@ void SoundsourceProcessor::Tick()
  * The given parameter(s) have a SET command message which has just been sent out on the network.
  * @param paramsChanged		Which parameter(s) should be marked as having a SET command in transit.
  */
-void SoundsourceProcessor::SetParamInTransit(DataChangeTypes paramsChanged)
+void SoundsourceProcessor::SetParamInTransit(DataChangeType paramsChanged)
 {
 	m_paramSetCommandsInTransit |= paramsChanged;
 }
@@ -349,7 +349,7 @@ void SoundsourceProcessor::SetParamInTransit(DataChangeTypes paramsChanged)
  * Check if the given parameter(s) have a SET command message which has just been sent out on the network.
  * @return True if the specified paranmeter(s) are marked as having a SET command in transit.
  */
-bool SoundsourceProcessor::IsParamInTransit(DataChangeTypes paramsChanged) const
+bool SoundsourceProcessor::IsParamInTransit(DataChangeType paramsChanged) const
 {
 	return ((m_paramSetCommandsInTransit & paramsChanged) != DCT_None);
 }
@@ -574,7 +574,7 @@ void SoundsourceProcessor::SetMappingId(DataChangeSource changeSource, MappingId
 {
 	if (m_mappingId != mappingId)
 	{
-		DataChangeTypes dct = DCT_MappingID;
+		DataChangeType dct = DCT_MappingID;
 
 		m_mappingId = mappingId;
 
@@ -796,7 +796,7 @@ String SoundsourceProcessor::FlushDebugMessages()
  */
 void SoundsourceProcessor::parameterValueChanged(int parameterIndex, float newValue)
 {
-	DataChangeTypes changed = DCT_None;
+	DataChangeType changed = DCT_None;
 
 	switch (parameterIndex)
 	{

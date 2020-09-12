@@ -98,13 +98,13 @@ public:
 	float GetParameterValue(AutomationParameterIndex paramIdx, bool normalized = false) const;
 	void SetParameterValue(DataChangeSource changeSource, AutomationParameterIndex paramIdx, float newValue);
 
-	bool GetParameterChanged(DataChangeSource changeSource, DataChangeTypes change);
-	bool PopParameterChanged(DataChangeSource changeSource, DataChangeTypes change);
-	void SetParameterChanged(DataChangeSource changeSource, DataChangeTypes changeTypes);
+	bool GetParameterChanged(DataChangeSource changeSource, DataChangeType change);
+	bool PopParameterChanged(DataChangeSource changeSource, DataChangeType change);
+	void SetParameterChanged(DataChangeSource changeSource, DataChangeType changeTypes);
 
 	void Tick();
-	void SetParamInTransit(DataChangeTypes paramsChanged);
-	bool IsParamInTransit(DataChangeTypes paramsChanged) const;
+	void SetParamInTransit(DataChangeType paramsChanged);
+	bool IsParamInTransit(DataChangeType paramsChanged) const;
 
 	void OnOverviewButtonClicked();
 
@@ -213,7 +213,7 @@ protected:
 	 * Keep track of which automation parameters have changed recently. 
 	 * The array has one entry for each application module (see enum DataChangeSource).
 	 */
-	DataChangeTypes				m_parametersChanged[DCS_Max];
+	DataChangeType				m_parametersChanged[DCS_Max];
 
 	/**
 	 * Flags used to indicate when a SET command for a parameter is currently out on the network.
@@ -221,7 +221,7 @@ protected:
 	 * This mechanism is used to ensure that parameters aren't overwritten right after having been
 	 * changed via the Gui or the host.
 	 */
-	DataChangeTypes				m_paramSetCommandsInTransit = DCT_None;
+	DataChangeType				m_paramSetCommandsInTransit = DCT_None;
 
 	/**
 	 * Name of this Plug-in instance. Some hosts (i.e. VST3) which support updateTrackProperties(..) 

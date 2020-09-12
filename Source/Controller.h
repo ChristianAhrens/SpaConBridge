@@ -67,9 +67,9 @@ public:
 	static CController* GetInstance();
 	void DestroyInstance();
 
-	bool GetParameterChanged(DataChangeSource changeSource, DataChangeTypes change);
-	bool PopParameterChanged(DataChangeSource changeSource, DataChangeTypes change);
-	void SetParameterChanged(DataChangeSource changeSource, DataChangeTypes changeTypes);
+	bool GetParameterChanged(DataChangeSource changeSource, DataChangeType change);
+	bool PopParameterChanged(DataChangeSource changeSource, DataChangeType change);
+	void SetParameterChanged(DataChangeSource changeSource, DataChangeType changeTypes);
 
 	ProcessorId AddProcessor(SoundsourceProcessor* p);
 	void RemoveProcessor(SoundsourceProcessor* p);
@@ -131,7 +131,7 @@ protected:
 	ProtocolBridgingWrapper			m_protocolBridge;	/**< The wrapper for protocol bridging node, allowing to easily interface with it. */
 	String							m_ipAddress;		/**< IP Address where OSC messages will be sent to / received from. */
 	int								m_oscMsgRate;		/**< Interval at which OSC messages are sent to the host, in ms. */
-	DataChangeTypes					m_parametersChanged[DCS_Max];	/**< Keep track of which OSC parameters have changed recently.
+	DataChangeType					m_parametersChanged[DCS_Max];	/**< Keep track of which OSC parameters have changed recently.
 																	 * The array has one entry for each application module (see enum DataChangeSource). */
 	int								m_heartBeatsRx;		/**< Number of timer intervals since the last successful OSC message was received. */
 	int								m_heartBeatsTx;		/**< Number of timer intervals since the last OSC message was sent out. */

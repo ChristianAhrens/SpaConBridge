@@ -149,7 +149,7 @@ void CController::DestroyInstance()
  * @param changeSource	The application module which is causing the property change.
  * @param changeTypes	Defines which parameter or property has been changed.
  */
-void CController::SetParameterChanged(DataChangeSource changeSource, DataChangeTypes changeTypes)
+void CController::SetParameterChanged(DataChangeSource changeSource, DataChangeType changeTypes)
 {
 	const ScopedLock lock(m_mutex);
 
@@ -199,7 +199,7 @@ void CController::SetParameterChanged(DataChangeSource changeSource, DataChangeT
  * @return	True if any of the given parameters has changed it's value 
  *			since the last time PopParameterChanged() was called.
  */
-bool CController::GetParameterChanged(DataChangeSource changeSource, DataChangeTypes change)
+bool CController::GetParameterChanged(DataChangeSource changeSource, DataChangeType change)
 {
 	const ScopedLock lock(m_mutex);
 	return ((m_parametersChanged[changeSource] & change) != 0);
@@ -212,7 +212,7 @@ bool CController::GetParameterChanged(DataChangeSource changeSource, DataChangeT
  * @param change		The desired parameter (or parameters).
  * @return	The state of the flag before the resetting.
  */
-bool CController::PopParameterChanged(DataChangeSource changeSource, DataChangeTypes change)
+bool CController::PopParameterChanged(DataChangeSource changeSource, DataChangeType change)
 {
 	const ScopedLock lock(m_mutex);
 	bool ret((m_parametersChanged[changeSource] & change) != 0);
@@ -454,7 +454,7 @@ void CController::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, 
 			if (sourceId > 0)
 			{
 				AutomationParameterIndex pIdx = ParamIdx_MaxIndex;
-				DataChangeTypes change = DCT_None;
+				DataChangeType change = DCT_None;
 				int mappingId = 0;
 
 				// Determine which parameter was changed depending on the incoming message's address pattern.
@@ -633,7 +633,7 @@ void CController::timerCallback()
 			pro->Tick();
 
 			bool msgSent;
-			DataChangeTypes paramSetsInTransit = DCT_None;
+			DataChangeType paramSetsInTransit = DCT_None;
 
 			newMsgData.addrVal.first = static_cast<juce::uint16>(pro->GetSourceId());
 			newMsgData.addrVal.second = static_cast<juce::uint16>(pro->GetMappingId());

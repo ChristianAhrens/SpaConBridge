@@ -48,7 +48,7 @@ namespace SoundscapeBridgeApp
 typedef juce::int32 SourceId;
 typedef juce::int8 MappingId;
 typedef juce::int32 ProcessorId;
-typedef juce::uint64 DataChangeTypes;
+typedef juce::uint64 DataChangeType;
 typedef juce::uint8 ComsMode;
 
 
@@ -101,23 +101,23 @@ enum ProtocolBridgingType
  * Data Change Type
  * Bitfields used to flag parameter changes.
  */
-static constexpr DataChangeTypes DCT_None					= 0x00000000; //< Nothing has changed.
-static constexpr DataChangeTypes DCT_NumProcessors			= 0x00000001; //< The number of SoundsourceProcessor instances in the project has changed.
-static constexpr DataChangeTypes DCT_IPAddress				= 0x00000002; //< The user has entered a new IP address for the DS100.
-static constexpr DataChangeTypes DCT_MessageRate			= 0x00000004; //< The user has entered a new interval for OSC messages.
-static constexpr DataChangeTypes DCT_Online					= 0x00000008; //< The Plug-in's Online status has changed, based on the time since last response.
-static constexpr DataChangeTypes DCT_OscConfig				= (DCT_IPAddress | DCT_MessageRate | DCT_Online); //< IP address, rate, and Online status.
-static constexpr DataChangeTypes DCT_SourceID				= 0x00000010; //< The SourceID / Matrix input number of this Plug-in instance has been changed.
-static constexpr DataChangeTypes DCT_MappingID				= 0x00000020; //< The user has selected a different coordinate mapping for this Plug-in.
-static constexpr DataChangeTypes DCT_ComsMode				= 0x00000040; //< The Rx / Tx mode of this Plug-in has been changed.
-static constexpr DataChangeTypes DCT_PluginInstanceConfig	= (DCT_SourceID | DCT_MappingID | DCT_ComsMode); //< SourceID, MappingID, and Rx/Tx.
-static constexpr DataChangeTypes DCT_SourcePosition			= 0x00000080; //< The X/Y coordinates of this SourceID have changed.
-static constexpr DataChangeTypes DCT_ReverbSendGain			= 0x00000100; //< The En-Space Gain for this SourceID has changed.
-static constexpr DataChangeTypes DCT_SourceSpread			= 0x00000200; //< The En-Scene Spread factor for this SourceID has changed.
-static constexpr DataChangeTypes DCT_DelayMode				= 0x00000400; //< The En-Scene Delay mode (Off/Tight/Full) of this SourceID has changed.
-static constexpr DataChangeTypes DCT_Bypass					= 0x00000800; //< The OSC Bypass parameter has changed.
-static constexpr DataChangeTypes DCT_AutomationParameters	= (DCT_SourcePosition | DCT_ReverbSendGain | DCT_SourceSpread | DCT_DelayMode | DCT_Bypass); //< All automation parameters.
-static constexpr DataChangeTypes DCT_DebugMessage			= 0x00001000; //< There is a new debug message to be displayed on the GUI.
+static constexpr DataChangeType DCT_None					= 0x00000000; //< Nothing has changed.
+static constexpr DataChangeType DCT_NumProcessors			= 0x00000001; //< The number of SoundsourceProcessor instances in the project has changed.
+static constexpr DataChangeType DCT_IPAddress				= 0x00000002; //< The user has entered a new IP address for the DS100.
+static constexpr DataChangeType DCT_MessageRate				= 0x00000004; //< The user has entered a new interval for OSC messages.
+static constexpr DataChangeType DCT_Online					= 0x00000008; //< The Plug-in's Online status has changed, based on the time since last response.
+static constexpr DataChangeType DCT_OscConfig				= (DCT_IPAddress | DCT_MessageRate | DCT_Online); //< IP address, rate, and Online status.
+static constexpr DataChangeType DCT_SourceID				= 0x00000010; //< The SourceID / Matrix input number of this Plug-in instance has been changed.
+static constexpr DataChangeType DCT_MappingID				= 0x00000020; //< The user has selected a different coordinate mapping for this Plug-in.
+static constexpr DataChangeType DCT_ComsMode				= 0x00000040; //< The Rx / Tx mode of this Plug-in has been changed.
+static constexpr DataChangeType DCT_PluginInstanceConfig	= (DCT_SourceID | DCT_MappingID | DCT_ComsMode); //< SourceID, MappingID, and Rx/Tx.
+static constexpr DataChangeType DCT_SourcePosition			= 0x00000080; //< The X/Y coordinates of this SourceID have changed.
+static constexpr DataChangeType DCT_ReverbSendGain			= 0x00000100; //< The En-Space Gain for this SourceID has changed.
+static constexpr DataChangeType DCT_SourceSpread			= 0x00000200; //< The En-Scene Spread factor for this SourceID has changed.
+static constexpr DataChangeType DCT_DelayMode				= 0x00000400; //< The En-Scene Delay mode (Off/Tight/Full) of this SourceID has changed.
+static constexpr DataChangeType DCT_Bypass					= 0x00000800; //< The OSC Bypass parameter has changed.
+static constexpr DataChangeType DCT_AutomationParameters	= (DCT_SourcePosition | DCT_ReverbSendGain | DCT_SourceSpread | DCT_DelayMode | DCT_Bypass); //< All automation parameters.
+static constexpr DataChangeType DCT_DebugMessage			= 0x00001000; //< There is a new debug message to be displayed on the GUI.
 
 
 /**

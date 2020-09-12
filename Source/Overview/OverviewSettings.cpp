@@ -76,7 +76,8 @@ HeaderWithElmListComponent::~HeaderWithElmListComponent()
 	for (auto& component : m_components)
 	{
 		auto dontDelete = !component.second.second;
-		component.first.release(); // release the pointer to not have the memory cleaned up for those elements that are still externally managed (flagged by second bool in second pair)
+        if (dontDelete)
+            component.first.release(); // release the pointer to not have the memory cleaned up for those elements that are still externally managed (flagged by second bool in second pair)
 	}
 }
 

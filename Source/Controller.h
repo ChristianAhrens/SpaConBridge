@@ -91,10 +91,15 @@ public:
 	void DeactivateSoundSourceId(SourceId sourceId, MappingId mappingId);
 
 	//==========================================================================
-	bool GetMuteDiGiCoSourceId(juce::int16 sourceId);
-	bool SetMuteDiGiCoSourceId(juce::int16 sourceId, bool mute);
-	bool GetMuteGenericOSCSourceId(juce::int16 sourceId);
-	bool SetMuteGenericOSCSourceId(juce::int16 sourceId, bool mute);
+	bool GetMuteBridgingSourceId(ProtocolBridgingType bridgingType, juce::int16 sourceId);
+	bool SetMuteBridgingSourceId(ProtocolBridgingType bridgingType, juce::int16 sourceId, bool mute);
+
+	String GetBridgingIpAddress(ProtocolBridgingType bridgingType);
+	bool SetBridgingIpAddress(ProtocolBridgingType bridgingType, String ipAddress, bool dontSendNotification = false);
+	int GetBridgingListeningPort(ProtocolBridgingType bridgingType);
+	bool SetBridgingListeningPort(ProtocolBridgingType bridgingType, int listeningPort, bool dontSendNotification = false);
+	int GetBridgingRemotePort(ProtocolBridgingType bridgingType);
+	bool SetBridgingRemotePort(ProtocolBridgingType bridgingType, int remotePort, bool dontSendNotification = false);
 
 	//==========================================================================
 	void InitGlobalSettings(DataChangeSource changeSource, String ipAddress, int rate);

@@ -398,6 +398,132 @@ bool ProtocolBridgingWrapper::SetProtocolIpAddress(ProtocolId protocolId, String
 }
 
 /**
+ * Gets the protocol's currently set listening (local host) port.
+ * @param protocolId The id of the protocol for which to get the currently configured port
+ * @return	The port number
+ */
+int ProtocolBridgingWrapper::GetProtocolListeningPort(ProtocolId protocolId)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto listeningPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
+			if (listeningPortXmlElement)
+			{
+				return listeningPortXmlElement->getIntAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT));
+			}
+		}
+	}
+
+	return INVALID_PORT_VALUE;
+}
+
+/**
+ * Sets the desired protocol listening port.
+ * This method inserts the port number into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param protocolId The id of the protocol for which to set the ip address
+ * @param listeningPort	The new port number to listen on
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetProtocolListeningPort(ProtocolId protocolId, int listeningPort, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto listeningPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
+			if (listeningPortXmlElement)
+			{
+				listeningPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), listeningPort);
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+
+		m_processingNode.setStateXml(nodeXmlElement);
+
+		if (!dontSendNotification)
+			triggerConfigurationUpdate();
+
+		return true;
+	}
+	else
+		return false;
+}
+
+/**
+ * Gets the protocol's currently set remote (target client) port.
+ * @param protocolId The id of the protocol for which to get the currently configured port
+ * @return	The port number
+ */
+int ProtocolBridgingWrapper::GetProtocolRemotePort(ProtocolId protocolId)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto remotePortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+			if (remotePortXmlElement)
+			{
+				return remotePortXmlElement->getIntAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT));
+			}
+		}
+	}
+
+	return INVALID_PORT_VALUE;
+}
+
+/**
+ * Sets the desired protocol remote (client) port.
+ * This method inserts the port number into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param protocolId The id of the protocol for which to set the ip address
+ * @param remotePort	The new port number to send to
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetProtocolRemotePort(ProtocolId protocolId, int remotePort, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto remotePortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+			if (remotePortXmlElement)
+			{
+				remotePortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), remotePort);
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+
+		m_processingNode.setStateXml(nodeXmlElement);
+
+		if (!dontSendNotification)
+			triggerConfigurationUpdate();
+
+		return true;
+	}
+	else
+		return false;
+}
+
+/**
  * Sets the given soundobject/mapping as to be activly handled.
  * This method inserts the object into the cached xml element,
  * pushes the updated xml element into processing node and triggers configuration updating.
@@ -632,6 +758,48 @@ bool ProtocolBridgingWrapper::SetDiGiCoIpAddress(String ipAddress, bool dontSend
 }
 
 /**
+ * Gets the desired protocol listening port.
+ * This method forwards the call to the generic implementation.
+ * @return	The requested listening port
+ */
+int ProtocolBridgingWrapper::GetDiGiCoListeningPort()
+{
+	return GetProtocolListeningPort(DIGICO_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol listening port.
+ * This method forwards the call to the generic implementation.
+ * @param	listeningPort	The protocol port to set as listening port
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetDiGiCoListeningPort(int listeningPort, bool dontSendNotification)
+{
+	return SetProtocolListeningPort(DIGICO_PROCESSINGPROTOCOL_ID, listeningPort, dontSendNotification);
+}
+
+/**
+ * Gets the desired protocol remote (target client) port.
+ * This method forwards the call to the generic implementation.
+ * @return	The requested remote port
+ */
+int ProtocolBridgingWrapper::GetDiGiCoRemotePort()
+{
+	return GetProtocolRemotePort(DIGICO_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol remote port.
+ * This method forwards the call to the generic implementation.
+ * @param	remotePort	The protocol port to set as remote port
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetDiGiCoRemotePort(int remotePort, bool dontSendNotification)
+{
+	return SetProtocolRemotePort(DIGICO_PROCESSINGPROTOCOL_ID, remotePort, dontSendNotification);
+}
+
+/**
  * Gets the mute state of the given source
  * @param sourceId The id of the source for which the mute state shall be returned
  * @return The mute state
@@ -675,6 +843,48 @@ String ProtocolBridgingWrapper::GetGenericOSCIpAddress()
 bool ProtocolBridgingWrapper::SetGenericOSCIpAddress(String ipAddress, bool dontSendNotification)
 {
 	return SetProtocolIpAddress(GENERICOSC_PROCESSINGPROTOCOL_ID, ipAddress, dontSendNotification);
+}
+
+/**
+ * Gets the desired protocol listening port.
+ * This method forwards the call to the generic implementation.
+ * @return	The requested listening port
+ */
+int ProtocolBridgingWrapper::GetGenericOSCListeningPort()
+{
+	return GetProtocolListeningPort(GENERICOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol listening port.
+ * This method forwards the call to the generic implementation.
+ * @param	listeningPort	The protocol port to set as listening port
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetGenericOSCListeningPort(int listeningPort, bool dontSendNotification)
+{
+	return SetProtocolListeningPort(GENERICOSC_PROCESSINGPROTOCOL_ID, listeningPort, dontSendNotification);
+}
+
+/**
+ * Gets the desired protocol remote (target client) port.
+ * This method forwards the call to the generic implementation.
+ * @return	The requested remote port
+ */
+int ProtocolBridgingWrapper::GetGenericOSCRemotePort()
+{
+	return GetProtocolRemotePort(GENERICOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol remote port.
+ * This method forwards the call to the generic implementation.
+ * @param	remotePort	The protocol port to set as remote port
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetGenericOSCRemotePort(int remotePort, bool dontSendNotification)
+{
+	return SetProtocolRemotePort(GENERICOSC_PROCESSINGPROTOCOL_ID, remotePort, dontSendNotification);
 }
 
 }

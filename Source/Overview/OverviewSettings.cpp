@@ -94,7 +94,11 @@ HeaderWithElmListComponent::HeaderWithElmListComponent(const String& componentNa
  */
 HeaderWithElmListComponent::~HeaderWithElmListComponent()
 {
-
+	for (auto& component : m_components)
+	{
+		auto dontDelete = !component.second.second;
+		component.first.release(); // release the pointer to not have the memory cleaned up for those elements that are still externally managed (flagged by second bool in second pair)
+	}
 }
 
 /**
@@ -144,13 +148,13 @@ void HeaderWithElmListComponent::setHeaderText(String headerText)
 /**
  *
  */
-void HeaderWithElmListComponent::addComponent(Component* compo, bool includeInLayout)
+void HeaderWithElmListComponent::addComponent(Component* compo, bool includeInLayout, bool takeOwnership)
 {
 	if (!compo)
 		return;
 
 	addAndMakeVisible(compo);
-	m_components.push_back(std::make_pair(std::unique_ptr<Component>(compo), includeInLayout));
+	m_components.push_back(std::make_pair(std::unique_ptr<Component>(compo), std::make_pair(includeInLayout, takeOwnership)));
 
 	compo->setEnabled(m_toggleState);
 }
@@ -199,7 +203,7 @@ void HeaderWithElmListComponent::resized()
 		.withMargin(FlexItem::Margin(headerMargin, headerMargin, headerMargin, headerMargin)));
 	for (auto const& component : m_components)
 	{
-		auto includeInLayout = component.second;
+		auto includeInLayout = component.second.first;
 		if (includeInLayout)
 		{
 			fb.items.add(FlexItem(*component.first.get())
@@ -239,12 +243,13 @@ CSettingsComponent::CSettingsComponent()
 	m_DS100Settings->setHasActiveToggle(false);
 	addAndMakeVisible(m_DS100Settings.get());
 
-	auto ipAddressEdit = std::make_unique<CTextEditor>(DS100_IP_EDIT_NAME);
-	auto ipAddressLabel = std::make_unique<CLabel>(DS100_IP_LABEL_NAME);
-	ipAddressLabel->setText("IP Address", dontSendNotification);
-	ipAddressLabel->attachToComponent(ipAddressEdit.get(), true);
-	m_DS100Settings->addComponent(ipAddressLabel.release(), false);
-	m_DS100Settings->addComponent(ipAddressEdit.release(), true);
+	m_DS100IpAddressEdit = std::make_unique<CTextEditor>(DS100_IP_EDIT_NAME);
+	m_DS100IpAddressEdit->addListener(this);
+	m_DS100IpAddressLabel = std::make_unique<CLabel>(DS100_IP_LABEL_NAME);
+	m_DS100IpAddressLabel->setText("IP Address", dontSendNotification);
+	m_DS100IpAddressLabel->attachToComponent(m_DS100IpAddressEdit.get(), true);
+	m_DS100Settings->addComponent(m_DS100IpAddressLabel.get(), false, false);
+	m_DS100Settings->addComponent(m_DS100IpAddressEdit.get(), true, false);
 
 	m_DS100Settings->resized();
 
@@ -254,26 +259,29 @@ CSettingsComponent::CSettingsComponent()
 	m_DiGiCoBridgingSettings->setHasActiveToggle(true);
 	addAndMakeVisible(m_DiGiCoBridgingSettings.get());
 
-	ipAddressEdit = std::make_unique<CTextEditor>(DIGICO_IP_EDIT_NAME);
-	ipAddressLabel = std::make_unique<CLabel>(DIGICO_IP_LABEL_NAME);
-	ipAddressLabel->setText("IP Address", dontSendNotification);
-	ipAddressLabel->attachToComponent(ipAddressEdit.get(), true);
-	m_DiGiCoBridgingSettings->addComponent(ipAddressLabel.release(), false);
-	m_DiGiCoBridgingSettings->addComponent(ipAddressEdit.release(), true);
+	m_DiGiCoIpAddressEdit = std::make_unique<CTextEditor>(DIGICO_IP_EDIT_NAME);
+	m_DiGiCoIpAddressEdit->addListener(this);
+	m_DiGiCoIpAddressLabel = std::make_unique<CLabel>(DIGICO_IP_LABEL_NAME);
+	m_DiGiCoIpAddressLabel->setText("IP Address", dontSendNotification);
+	m_DiGiCoIpAddressLabel->attachToComponent(m_DiGiCoIpAddressEdit.get(), true);
+	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoIpAddressLabel.get(), false, false);
+	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoIpAddressEdit.get(), true, false);
 
-	auto listeningPortEdit = std::make_unique<CTextEditor>(DIGICO_LISTENINGPORT_EDIT_NAME);
-	auto listeningPortLabel = std::make_unique<CLabel>(DIGICO_LISTENINGPORT_LABEL_NAME);
-	listeningPortLabel->setText("Listening Port", dontSendNotification);
-	listeningPortLabel->attachToComponent(listeningPortEdit.get(), true);
-	m_DiGiCoBridgingSettings->addComponent(listeningPortLabel.release(), false);
-	m_DiGiCoBridgingSettings->addComponent(listeningPortEdit.release(), true);
+	m_DiGiCoListeningPortEdit = std::make_unique<CTextEditor>(DIGICO_LISTENINGPORT_EDIT_NAME);
+	m_DiGiCoListeningPortEdit->addListener(this);
+	m_DiGiCoListeningPortLabel = std::make_unique<CLabel>(DIGICO_LISTENINGPORT_LABEL_NAME);
+	m_DiGiCoListeningPortLabel->setText("Listening Port", dontSendNotification);
+	m_DiGiCoListeningPortLabel->attachToComponent(m_DiGiCoListeningPortEdit.get(), true);
+	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoListeningPortLabel.get(), false, false);
+	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoListeningPortEdit.get(), true, false);
 
-	auto remotePortEdit = std::make_unique<CTextEditor>(DIGICO_REMOTEPORT_EDIT_NAME);
-	auto remotePortLabel = std::make_unique<CLabel>(DIGICO_REMOTEPORT_LABEL_NAME);
-	remotePortLabel->setText("Remote Port", dontSendNotification);
-	remotePortLabel->attachToComponent(remotePortEdit.get(), true);
-	m_DiGiCoBridgingSettings->addComponent(remotePortLabel.release(), false);
-	m_DiGiCoBridgingSettings->addComponent(remotePortEdit.release(), true);
+	m_DiGiCoRemotePortEdit = std::make_unique<CTextEditor>(DIGICO_REMOTEPORT_EDIT_NAME);
+	m_DiGiCoRemotePortEdit->addListener(this);
+	m_DiGiCoRemotePortLabel = std::make_unique<CLabel>(DIGICO_REMOTEPORT_LABEL_NAME);
+	m_DiGiCoRemotePortLabel->setText("Remote Port", dontSendNotification);
+	m_DiGiCoRemotePortLabel->attachToComponent(m_DiGiCoRemotePortEdit.get(), true);
+	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoRemotePortLabel.get(), false, false);
+	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoRemotePortEdit.get(), true, false);
 
 	m_DiGiCoBridgingSettings->resized();
 
@@ -283,26 +291,29 @@ CSettingsComponent::CSettingsComponent()
 	m_GenericOSCBridgingSettings->setHasActiveToggle(true);
 	addAndMakeVisible(m_GenericOSCBridgingSettings.get());
 
-	ipAddressEdit = std::make_unique<CTextEditor>(GENERICOSC_IP_EDIT_NAME);
-	ipAddressLabel = std::make_unique<CLabel>(GENERICOSC_IP_LABEL_NAME);
-	ipAddressLabel->setText("IP Address", dontSendNotification);
-	ipAddressLabel->attachToComponent(ipAddressEdit.get(), true);
-	m_GenericOSCBridgingSettings->addComponent(ipAddressLabel.release(), false);
-	m_GenericOSCBridgingSettings->addComponent(ipAddressEdit.release(), true);
+	m_GenericOSCIpAddressEdit = std::make_unique<CTextEditor>(GENERICOSC_IP_EDIT_NAME);
+	m_GenericOSCIpAddressEdit->addListener(this);
+	m_GenericOSCIpAddressLabel = std::make_unique<CLabel>(GENERICOSC_IP_LABEL_NAME);
+	m_GenericOSCIpAddressLabel->setText("IP Address", dontSendNotification);
+	m_GenericOSCIpAddressLabel->attachToComponent(m_GenericOSCIpAddressEdit.get(), true);
+	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCIpAddressLabel.get(), false, false);
+	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCIpAddressEdit.get(), true, false);
 
-	listeningPortEdit = std::make_unique<CTextEditor>(GENERICOSC_LISTENINGPORT_EDIT_NAME);
-	listeningPortLabel = std::make_unique<CLabel>(GENERICOSC_LISTENINGPORT_LABEL_NAME);
-	listeningPortLabel->setText("Listening Port", dontSendNotification);
-	listeningPortLabel->attachToComponent(listeningPortEdit.get(), true);
-	m_GenericOSCBridgingSettings->addComponent(listeningPortLabel.release(), false);
-	m_GenericOSCBridgingSettings->addComponent(listeningPortEdit.release(), true);
+	m_GenericOSCListeningPortEdit = std::make_unique<CTextEditor>(GENERICOSC_LISTENINGPORT_EDIT_NAME);
+	m_GenericOSCListeningPortEdit->addListener(this);
+	m_GenericOSCListeningPortLabel = std::make_unique<CLabel>(GENERICOSC_LISTENINGPORT_LABEL_NAME);
+	m_GenericOSCListeningPortLabel->setText("Listening Port", dontSendNotification);
+	m_GenericOSCListeningPortLabel->attachToComponent(m_GenericOSCListeningPortEdit.get(), true);
+	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCListeningPortLabel.get(), false, false);
+	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCListeningPortEdit.get(), true, false);
 
-	remotePortEdit = std::make_unique<CTextEditor>(GENERICOSC_REMOTEPORT_EDIT_NAME);
-	remotePortLabel = std::make_unique<CLabel>(GENERICOSC_REMOTEPORT_LABEL_NAME);
-	remotePortLabel->setText("Remote Port", dontSendNotification);
-	remotePortLabel->attachToComponent(remotePortEdit.get(), true);
-	m_GenericOSCBridgingSettings->addComponent(remotePortLabel.release(), false);
-	m_GenericOSCBridgingSettings->addComponent(remotePortEdit.release(), true);
+	m_GenericOSCRemotePortEdit = std::make_unique<CTextEditor>(GENERICOSC_REMOTEPORT_EDIT_NAME);
+	m_GenericOSCRemotePortEdit->addListener(this);
+	m_GenericOSCRemotePortLabel = std::make_unique<CLabel>(GENERICOSC_REMOTEPORT_LABEL_NAME);
+	m_GenericOSCRemotePortLabel->setText("Remote Port", dontSendNotification);
+	m_GenericOSCRemotePortLabel->attachToComponent(m_GenericOSCRemotePortEdit.get(), true);
+	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCRemotePortLabel.get(), false, false);
+	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCRemotePortEdit.get(), true, false);
 
 	m_GenericOSCBridgingSettings->resized();
 }
@@ -363,6 +374,89 @@ void CSettingsComponent::resized()
 			.withHeight(m_GenericOSCBridgingSettings->getHeight())
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)) });
 	fb.performLayout(bounds);
+}
+
+/**
+ * Reimplemented from TextEditor Listener.
+ * This just forwards it to private method that handles relevant changes in editor contents in general.
+ * @param editor	The editor component that changes were made in
+ */
+void CSettingsComponent::textEditorReturnKeyPressed(TextEditor& editor)
+{
+	textEditorUpdated(editor);
+}
+
+/**
+ * Reimplemented from TextEditor Listener.
+ * This just forwards it to private method that handles relevant changes in editor contents in general.
+ * @param editor	The editor component that changes were made in
+ */
+void CSettingsComponent::textEditorFocusLost(TextEditor& editor)
+{
+	textEditorUpdated(editor);
+}
+
+/**
+ * Method to handle relevant changes in text editors by processing them and inserting into config through controller interface
+ * @param editor	The editor component that changes were made in
+ */
+void CSettingsComponent::textEditorUpdated(TextEditor& editor)
+{
+	CController* ctrl = CController::GetInstance();
+	if (!ctrl)
+		return;
+
+	// DS100 settings section
+	if (m_DS100IpAddressEdit && m_DS100IpAddressEdit.get() == &editor)
+		ctrl->SetIpAddress(DCS_Gui, m_DS100IpAddressEdit->getText());
+
+	// DiGiCo settings section
+	if (m_DiGiCoIpAddressEdit && m_DiGiCoIpAddressEdit.get() == &editor)
+		ctrl->SetBridgingIpAddress(PBT_DiGiCo, m_DiGiCoIpAddressEdit->getText(), true);
+	if (m_DiGiCoListeningPortEdit && m_DiGiCoListeningPortEdit.get() == &editor)
+		ctrl->SetBridgingListeningPort(PBT_DiGiCo, m_DiGiCoListeningPortEdit->getText().getIntValue(), true);
+	if (m_DiGiCoRemotePortEdit && m_DiGiCoRemotePortEdit.get() == &editor)
+		ctrl->SetBridgingRemotePort(PBT_DiGiCo, m_DiGiCoRemotePortEdit->getText().getIntValue(), true);
+
+	// Generic OSC settings section
+	if (m_GenericOSCIpAddressEdit && m_GenericOSCIpAddressEdit.get() == &editor)
+		ctrl->SetBridgingIpAddress(PBT_GenericOSC, m_GenericOSCIpAddressEdit->getText(), true);
+	if (m_GenericOSCListeningPortEdit && m_GenericOSCListeningPortEdit.get() == &editor)
+		ctrl->SetBridgingListeningPort(PBT_GenericOSC, m_GenericOSCListeningPortEdit->getText().getIntValue(), true);
+	if (m_GenericOSCRemotePortEdit && m_GenericOSCRemotePortEdit.get() == &editor)
+		ctrl->SetBridgingRemotePort(PBT_GenericOSC, m_GenericOSCRemotePortEdit->getText().getIntValue(), true);
+}
+
+/**
+ * Method to update the elements on UI when app configuration changed.
+ * This is called by parent container component when it receives
+ * onConfigUpdated call (it's a config listener and subscribed to changes)
+ */
+void CSettingsComponent::processUpdatedConfig()
+{
+	CController* ctrl = CController::GetInstance();
+	if (!ctrl)
+		return;
+
+	// DS100 settings section
+	if (m_DS100IpAddressEdit)
+		m_DS100IpAddressEdit->setText(ctrl->GetIpAddress());
+
+	// DiGiCo settings section
+	if (m_DiGiCoIpAddressEdit)
+		m_DiGiCoIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_DiGiCo));
+	if (m_DiGiCoListeningPortEdit)
+		m_DiGiCoListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_DiGiCo)), false);
+	if (m_DiGiCoRemotePortEdit)
+		m_DiGiCoRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_DiGiCo)), false);
+
+	// Generic OSC settings section
+	if (m_GenericOSCIpAddressEdit)
+		m_GenericOSCIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_GenericOSC));
+	if (m_GenericOSCListeningPortEdit)
+		m_GenericOSCListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_GenericOSC)), false);
+	if (m_GenericOSCRemotePortEdit)
+		m_GenericOSCRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_GenericOSC)), false);
 }
 
 
@@ -480,9 +574,15 @@ void CSettingsContainer::onConfigUpdated()
 	auto config = AppConfiguration::getInstance();
 	if (config)
 	{
-		auto configXml = config->getConfigState();
-		auto configText = configXml->toString();
-		m_settingsRawEditor->setText(configText);
+		if (m_useRawConfigButton->getToggleState())
+		{
+			// get the config for filling raw texteditor (meant for debugging, ...)
+			auto configXml = config->getConfigState();
+			auto configText = configXml->toString();
+			m_settingsRawEditor->setText(configText);
+		}
+
+		m_settingsComponent->processUpdatedConfig();
 	}
 }
 
@@ -522,6 +622,9 @@ void CSettingsContainer::onToggleRawConfigVisible()
 		m_applyButton->toFront(true);
 		m_settingsRawEditor->setVisible(true);
 		m_settingsRawEditor->toFront(true);
+
+		// manually trigger config refresh, since we did not process config changes while raw settings editor was invisible
+		onConfigUpdated();
 	}
 	else
 	{

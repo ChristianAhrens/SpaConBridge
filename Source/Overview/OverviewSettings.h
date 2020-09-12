@@ -55,23 +55,25 @@ public:
 
 	void setHasActiveToggle(bool hasActiveToggle);
 	void setHeaderText(String headerText);
-	void addComponent(Component* compo, bool includeInLayout = true);
+	void addComponent(Component* compo, bool includeInLayout = true, bool takeOwnership = true);
 
 	void updateToggleActive();
 
+	//==========================================================================
 	void paint(Graphics&) override;
 	void resized() override;
 
+	//==========================================================================
 	std::function<void(bool)>	toggleIsActiveCallback;
 
 
 private:
-	bool														m_hasActiveToggle{ false };
-	bool														m_toggleState{ true };
-	std::unique_ptr<ToggleButton>								m_activeToggle;
-	std::unique_ptr<Label>										m_activeToggleLabel;
-	std::unique_ptr<Label>										m_headerLabel;
-	std::vector<std::pair<std::unique_ptr<Component>, bool>>	m_components;
+	bool																		m_hasActiveToggle{ false };
+	bool																		m_toggleState{ true };
+	std::unique_ptr<ToggleButton>												m_activeToggle;
+	std::unique_ptr<Label>														m_activeToggleLabel;
+	std::unique_ptr<Label>														m_headerLabel;
+	std::vector<std::pair<std::unique_ptr<Component>, std::pair<bool, bool>>>	m_components;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HeaderWithElmListComponent)
 };
@@ -81,19 +83,48 @@ private:
  * that are dedicated to app configuration and itself resides within 
  * a viewport for scrolling functionality.
  */
-class CSettingsComponent : public Component
+class CSettingsComponent : public Component, public TextEditor::Listener
 {
 public:
 	CSettingsComponent();
 	~CSettingsComponent() override;
 
+	void processUpdatedConfig();
+
+	//==========================================================================
 	void paint(Graphics&) override;
 	void resized() override;
 
+	//==========================================================================
+	void textEditorReturnKeyPressed(TextEditor&) override;
+	void textEditorFocusLost(TextEditor&) override;
+
 private:
+	//==========================================================================
+	void textEditorUpdated(TextEditor&);
+
+	// DS100 settings section
 	std::unique_ptr<HeaderWithElmListComponent>	m_DS100Settings;
+	std::unique_ptr<CTextEditor>				m_DS100IpAddressEdit;
+	std::unique_ptr<CLabel>						m_DS100IpAddressLabel;
+
+	// DiGiCo settings section
 	std::unique_ptr<HeaderWithElmListComponent>	m_DiGiCoBridgingSettings;
+	std::unique_ptr<CTextEditor>				m_DiGiCoIpAddressEdit;
+	std::unique_ptr<CLabel>						m_DiGiCoIpAddressLabel;
+	std::unique_ptr<CTextEditor>				m_DiGiCoListeningPortEdit;
+	std::unique_ptr<CLabel>						m_DiGiCoListeningPortLabel;
+	std::unique_ptr<CTextEditor>				m_DiGiCoRemotePortEdit;
+	std::unique_ptr<CLabel>						m_DiGiCoRemotePortLabel;
+
+	// Generic OSC settings section
 	std::unique_ptr<HeaderWithElmListComponent>	m_GenericOSCBridgingSettings;
+	std::unique_ptr<CTextEditor>				m_GenericOSCIpAddressEdit;
+	std::unique_ptr<CLabel>						m_GenericOSCIpAddressLabel;
+	std::unique_ptr<CTextEditor>				m_GenericOSCListeningPortEdit;
+	std::unique_ptr<CLabel>						m_GenericOSCListeningPortLabel;
+	std::unique_ptr<CTextEditor>				m_GenericOSCRemotePortEdit;
+	std::unique_ptr<CLabel>						m_GenericOSCRemotePortLabel;
 };
 
 /**
@@ -105,17 +136,19 @@ public:
 	CSettingsContainer();
 	~CSettingsContainer() override;
 
+	//==========================================================================
+	void onApplyClicked();
+	void onToggleRawConfigVisible();
+
+	//==========================================================================
 	void UpdateGui(bool init) override;
 
+	//==========================================================================
 	void onConfigUpdated() override;
 
-protected:
+	//==========================================================================
 	void paint(Graphics&) override;
 	void resized() override;
-
-	void onApplyClicked();
-
-	void onToggleRawConfigVisible();
 
 private:
 	std::unique_ptr<CSettingsComponent>			m_settingsComponent;

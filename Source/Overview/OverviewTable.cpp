@@ -1244,11 +1244,11 @@ void MuteButtonContainer::buttonClicked(Button* button)
 		{
 			if (button == &m_muteDiGiCoButton)
 			{
-				ctrl->SetMuteDiGiCoSourceId(static_cast<juce::int16>(processorId), newToggleState);
+				ctrl->SetMuteBridgingSourceId(PBT_DiGiCo, static_cast<juce::int16>(processorId), newToggleState);
 			}
 			if (button == &m_muteGenericOSCButton)
 			{
-				ctrl->SetMuteGenericOSCSourceId(static_cast<juce::int16>(processorId), newToggleState);
+				ctrl->SetMuteBridgingSourceId(PBT_GenericOSC, static_cast<juce::int16>(processorId), newToggleState);
 			}
 		}
 	}
@@ -1280,8 +1280,8 @@ void MuteButtonContainer::SetRow(int newRow)
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
 	{
-		m_muteDiGiCoButton.setToggleState(ctrl->GetMuteDiGiCoSourceId(processorId), dontSendNotification);
-		m_muteGenericOSCButton.setToggleState(ctrl->GetMuteGenericOSCSourceId(processorId), dontSendNotification);
+		m_muteDiGiCoButton.setToggleState(ctrl->GetMuteBridgingSourceId(PBT_DiGiCo, static_cast<uint16>(processorId)), dontSendNotification);
+		m_muteGenericOSCButton.setToggleState(ctrl->GetMuteBridgingSourceId(PBT_GenericOSC, static_cast<uint16>(processorId)), dontSendNotification);
 	}
 }
 

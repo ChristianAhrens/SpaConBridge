@@ -98,16 +98,6 @@ private:
 	Image							m_appLogo;
 
 	/**
-	 * DS100 IP Address label
-	 */
-	std::unique_ptr<CLabel>			m_ipAddressLabel;
-
-	/**
-	 * Text editor for the DS100 IP Address
-	 */
-	std::unique_ptr<CTextEditor>	m_ipAddressTextEdit;
-
-	/**
 	 * Send/receive rate label
 	 */
 	std::unique_ptr<CLabel>			m_rateLabel;
@@ -116,6 +106,11 @@ private:
 	 * Text editor for the OSC send/receive rate in ms.
 	 */
 	std::unique_ptr<CTextEditor>	m_rateTextEdit;
+
+	/**
+	 * Online indicator label
+	 */
+	std::unique_ptr<CLabel>			m_onlineLabel;
 
 	/**
 	 * Button used as Online indicator LED.

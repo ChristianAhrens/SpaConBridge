@@ -72,17 +72,9 @@ static constexpr int GUI_UPDATE_RATE_SLOW = 120;
  */
 COverviewComponent::COverviewComponent()
 {
-	// IP Settings
-	m_ipAddressTextEdit = std::make_unique<CTextEditor>("IP Address");
-	m_ipAddressTextEdit->addListener(this);
-    m_ipAddressTextEdit->setSelectAllWhenFocused(true);
-    m_ipAddressTextEdit->setPopupMenuEnabled(true);
-    m_ipAddressTextEdit->setKeyboardType(TextInputTarget::VirtualKeyboardType::decimalKeyboard);
-	addAndMakeVisible(m_ipAddressTextEdit.get());
-	m_ipAddressLabel = std::make_unique<CLabel>("IP Address Label", "IP Address:");
-	addAndMakeVisible(m_ipAddressLabel.get());
-
 	// Online
+	m_onlineLabel = std::make_unique<CLabel>("Online Label", "Online:");
+	addAndMakeVisible(m_onlineLabel.get());
 	m_onlineLed = std::make_unique<CButton>("");
 	m_onlineLed->setEnabled(false);
 	m_onlineLed->SetCornerRadius(10);
@@ -183,14 +175,12 @@ void COverviewComponent::resized()
 	bottomBarFB.justifyContent = FlexBox::JustifyContent::center;
 	bottomBarFB.alignContent = FlexBox::AlignContent::center;
 	bottomBarFB.items.addArray({
-		// Ip Address
-		FlexItem(*m_ipAddressLabel.get()).withWidth(74).withHeight(25).withMargin(FlexItem::Margin(5, 0, 5, 10)),
-		FlexItem(*m_ipAddressTextEdit.get()).withHeight(25).withFlex(1).withMargin(FlexItem::Margin(5, 0, 5, 0)),
 		// Rate
-		FlexItem(*m_rateLabel.get()).withWidth(65).withHeight(25).withMargin(FlexItem::Margin(5, 0, 5, 0)),
+		FlexItem(*m_rateLabel.get()).withWidth(65).withHeight(25).withMargin(FlexItem::Margin(5, 0, 5, 10)),
 		FlexItem(*m_rateTextEdit.get()).withHeight(25).withFlex(1).withMargin(FlexItem::Margin(5, 0, 5, 0)),
 		FlexItem().withFlex(1),
 		// Online
+		FlexItem(*m_onlineLabel.get()).withWidth(65).withHeight(25).withMargin(FlexItem::Margin(5, 0, 5, 0)),
 		FlexItem(*m_onlineLed.get()).withWidth(24).withHeight(24).withMargin(FlexItem::Margin(5, 10, 5, 0)),
 		});
 	bottomBarFB.performLayout(getLocalBounds().removeFromBottom(45));
@@ -220,20 +210,8 @@ void COverviewComponent::textEditorFocusLost(TextEditor& textEditor)
 	CController* ctrl = CController::GetInstance();
 	if (ctrl && myEditor)
 	{
-		// IP Address changed
-		if (myEditor == m_ipAddressTextEdit.get())
-		{
-			// IP address validation: If IPAddress::toString() returns the same string
-			// which was entered, it is a valid IP address.
-			IPAddress ip(myEditor->getText());
-			if (ip.toString() == myEditor->getText())
-				ctrl->SetIpAddress(DCS_Overview, myEditor->getText());
-			else
-				myEditor->setText(ctrl->GetIpAddress(), false);
-		}
-
 		// OSC message rate has changed
-		else if (myEditor == m_rateTextEdit.get())
+		if (myEditor == m_rateTextEdit.get())
 		{
 			ctrl->SetRate(DCS_Overview, myEditor->getText().getIntValue());
 		}
@@ -272,9 +250,6 @@ void COverviewComponent::UpdateGui(bool init)
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
 	{
-		if (ctrl->PopParameterChanged(DCS_Overview, DCT_IPAddress) || init)
-			m_ipAddressTextEdit->setText(ctrl->GetIpAddress(), false);
-
 		if (ctrl->PopParameterChanged(DCS_Overview, DCT_MessageRate) || init)
 			m_rateTextEdit->setText(String(ctrl->GetRate()), false);
 

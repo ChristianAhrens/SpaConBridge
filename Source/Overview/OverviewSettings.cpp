@@ -515,7 +515,7 @@ void CSettingsContainer::resized()
 	auto rcbBounds = bounds.removeFromBottom(20).removeFromRight(150);
 	m_useRawConfigButton->setBounds(rcbBounds.removeFromRight(25));
 
-	m_settingsComponent->setBounds(bounds.reduced(1));
+	m_settingsComponent->setBounds(bounds);
 	m_settingsViewport->setBounds(bounds);
 
 	if (m_settingsViewport->isVerticalScrollBarShown() || m_settingsViewport->isHorizontalScrollBarShown())

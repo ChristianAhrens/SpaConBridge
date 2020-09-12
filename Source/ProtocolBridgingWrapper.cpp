@@ -290,7 +290,7 @@ bool ProtocolBridgingWrapper::SetMuteProtocolSourceId(ProtocolId protocolId, juc
 			}
 
 			m_processingNode.setStateXml(nodeXmlElement);
-			triggerConfigurationUpdate();
+			triggerConfigurationUpdate(false);
 
 			return true;
 		}
@@ -325,7 +325,7 @@ bool ProtocolBridgingWrapper::SetUnmuteProtocolSourceId(ProtocolId protocolId, j
 			}
 
 			m_processingNode.setStateXml(nodeXmlElement);
-			triggerConfigurationUpdate();
+			triggerConfigurationUpdate(false);
 
 			return true;
 		}
@@ -389,7 +389,7 @@ bool ProtocolBridgingWrapper::SetProtocolIpAddress(ProtocolId protocolId, String
 		m_processingNode.setStateXml(nodeXmlElement);
 
 		if (!dontSendNotification)
-			triggerConfigurationUpdate();
+			triggerConfigurationUpdate(false);
 
 		return true;
 	}
@@ -452,7 +452,7 @@ bool ProtocolBridgingWrapper::SetProtocolListeningPort(ProtocolId protocolId, in
 		m_processingNode.setStateXml(nodeXmlElement);
 
 		if (!dontSendNotification)
-			triggerConfigurationUpdate();
+			triggerConfigurationUpdate(false);
 
 		return true;
 	}
@@ -515,7 +515,7 @@ bool ProtocolBridgingWrapper::SetProtocolRemotePort(ProtocolId protocolId, int r
 		m_processingNode.setStateXml(nodeXmlElement);
 
 		if (!dontSendNotification)
-			triggerConfigurationUpdate();
+			triggerConfigurationUpdate(false);
 
 		return true;
 	}
@@ -566,7 +566,7 @@ bool ProtocolBridgingWrapper::ActivateDS100SourceId(juce::int16 sourceId, juce::
 			return false;
 
 		m_processingNode.setStateXml(nodeXmlElement);
-		triggerConfigurationUpdate();
+		triggerConfigurationUpdate(false);
 
 		return true;
 	}
@@ -620,7 +620,7 @@ bool ProtocolBridgingWrapper::DeactivateDS100SourceId(juce::int16 sourceId, juce
 			return false;
 
 		m_processingNode.setStateXml(nodeXmlElement);
-		triggerConfigurationUpdate();
+		triggerConfigurationUpdate(false);
 
 		return true;
 	}
@@ -703,7 +703,7 @@ bool ProtocolBridgingWrapper::SetDS100MsgRate(int msgRate, bool dontSendNotifica
 		m_processingNode.setStateXml(nodeXmlElement);
 
 		if (!dontSendNotification)
-			triggerConfigurationUpdate();
+			triggerConfigurationUpdate(false);
 
 		return true;
 	}

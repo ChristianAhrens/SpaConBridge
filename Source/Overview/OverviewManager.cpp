@@ -170,7 +170,7 @@ void COverviewManager::SetActiveTab(int tabIdx, bool dontSendNotification)
 
 	if (!dontSendNotification)
 	{
-		triggerConfigurationUpdate();
+		triggerConfigurationUpdate(false);
 	}
 }
 

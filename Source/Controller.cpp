@@ -187,7 +187,7 @@ void CController::SetParameterChanged(DataChangeSource changeSource, DataChangeT
 	case DCT_DebugMessage:
 	default:
 		if(changeSource != DCS_Init)
-			triggerConfigurationUpdate();
+			triggerConfigurationUpdate(true);
 		break;
 	}
 }

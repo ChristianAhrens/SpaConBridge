@@ -43,27 +43,6 @@ namespace SoundscapeBridgeApp
 {
 
 
-static constexpr char* HEADER_LABEL_NAME = "HEADER_LABEL";
-static constexpr char* ACTIVE_TOGGLE_LABEL_NAME = "ACTIVE_TOGGLE_LABEL";
-static constexpr char* DS100_COMPO_NAME = "DS100_COMPO";
-static constexpr char* DS100_IP_EDIT_NAME = "DS100_IP_EDIT";
-static constexpr char* DS100_IP_LABEL_NAME = "DS100_IP_LABEL";
-static constexpr char* DIGICO_COMPO_NAME = "DIGICO_COMPO";
-static constexpr char* DIGICO_IP_EDIT_NAME = "DIGICO_IP_EDIT";
-static constexpr char* DIGICO_IP_LABEL_NAME = "DIGICO_IP_LABEL";
-static constexpr char* DIGICO_LISTENINGPORT_EDIT_NAME = "DIGICO_LISTENINGPORT_EDIT";
-static constexpr char* DIGICO_LISTENINGPORT_LABEL_NAME = "DIGICO_LISTENINGPORT_LABEL";
-static constexpr char* DIGICO_REMOTEPORT_EDIT_NAME = "DIGICO_REMOTEPORT_EDIT";
-static constexpr char* DIGICO_REMOTEPORT_LABEL_NAME = "DIGICO_REMOTEPORT_LABEL";
-static constexpr char* GENERICOSC_COMPO_NAME = "GENERICOSC_COMPO";
-static constexpr char* GENERICOSC_IP_EDIT_NAME = "GENERICOSC_IP_EDIT";
-static constexpr char* GENERICOSC_IP_LABEL_NAME = "GENERICOSC_IP_LABEL";
-static constexpr char* GENERICOSC_LISTENINGPORT_EDIT_NAME = "GENERICOSC_LISTENINGPORT_EDIT";
-static constexpr char* GENERICOSC_LISTENINGPORT_LABEL_NAME = "GENERICOSC_LISTENINGPORT_LABEL";
-static constexpr char* GENERICOSC_REMOTEPORT_EDIT_NAME = "GENERICOSC_REMOTEPORT_EDIT";
-static constexpr char* GENERICOSC_REMOTEPORT_LABEL_NAME = "GENERICOSC_REMOTEPORT_LABEL";
-
-
 /*
 ===============================================================================
 	Class HeaderWithElmListComponent
@@ -76,13 +55,13 @@ static constexpr char* GENERICOSC_REMOTEPORT_LABEL_NAME = "GENERICOSC_REMOTEPORT
 HeaderWithElmListComponent::HeaderWithElmListComponent(const String& componentName)
 	: Component(componentName)
 {
-	m_headerLabel = std::make_unique<Label>(HEADER_LABEL_NAME);
+	m_headerLabel = std::make_unique<Label>();
 	addAndMakeVisible(m_headerLabel.get());
 
 	m_activeToggle = std::make_unique<ToggleButton>();
 	m_activeToggle->onStateChange = [this] { updateToggleActive(); };
 	addAndMakeVisible(m_activeToggle.get());
-	m_activeToggleLabel = std::make_unique<Label>(ACTIVE_TOGGLE_LABEL_NAME);
+	m_activeToggleLabel = std::make_unique<Label>();
 	m_activeToggleLabel->attachToComponent(m_activeToggle.get(), true);
 	addAndMakeVisible(m_activeToggleLabel.get());
 
@@ -238,14 +217,14 @@ void HeaderWithElmListComponent::resized()
 CSettingsComponent::CSettingsComponent()
 {
 	// DS100 settings section
-	m_DS100Settings = std::make_unique<HeaderWithElmListComponent>(DS100_COMPO_NAME);
+	m_DS100Settings = std::make_unique<HeaderWithElmListComponent>();
 	m_DS100Settings->setHeaderText("DS100");
 	m_DS100Settings->setHasActiveToggle(false);
 	addAndMakeVisible(m_DS100Settings.get());
 
-	m_DS100IpAddressEdit = std::make_unique<CTextEditor>(DS100_IP_EDIT_NAME);
+	m_DS100IpAddressEdit = std::make_unique<CTextEditor>();
 	m_DS100IpAddressEdit->addListener(this);
-	m_DS100IpAddressLabel = std::make_unique<CLabel>(DS100_IP_LABEL_NAME);
+	m_DS100IpAddressLabel = std::make_unique<CLabel>();
 	m_DS100IpAddressLabel->setText("IP Address", dontSendNotification);
 	m_DS100IpAddressLabel->attachToComponent(m_DS100IpAddressEdit.get(), true);
 	m_DS100Settings->addComponent(m_DS100IpAddressLabel.get(), false, false);
@@ -254,30 +233,30 @@ CSettingsComponent::CSettingsComponent()
 	m_DS100Settings->resized();
 
 	// DiGiCo settings section
-	m_DiGiCoBridgingSettings = std::make_unique<HeaderWithElmListComponent>(DIGICO_COMPO_NAME);
+	m_DiGiCoBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
 	m_DiGiCoBridgingSettings->setHeaderText("DiGiCo Bridging");
 	m_DiGiCoBridgingSettings->setHasActiveToggle(true);
 	addAndMakeVisible(m_DiGiCoBridgingSettings.get());
 
-	m_DiGiCoIpAddressEdit = std::make_unique<CTextEditor>(DIGICO_IP_EDIT_NAME);
+	m_DiGiCoIpAddressEdit = std::make_unique<CTextEditor>();
 	m_DiGiCoIpAddressEdit->addListener(this);
-	m_DiGiCoIpAddressLabel = std::make_unique<CLabel>(DIGICO_IP_LABEL_NAME);
+	m_DiGiCoIpAddressLabel = std::make_unique<CLabel>();
 	m_DiGiCoIpAddressLabel->setText("IP Address", dontSendNotification);
 	m_DiGiCoIpAddressLabel->attachToComponent(m_DiGiCoIpAddressEdit.get(), true);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoIpAddressLabel.get(), false, false);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoIpAddressEdit.get(), true, false);
 
-	m_DiGiCoListeningPortEdit = std::make_unique<CTextEditor>(DIGICO_LISTENINGPORT_EDIT_NAME);
+	m_DiGiCoListeningPortEdit = std::make_unique<CTextEditor>();
 	m_DiGiCoListeningPortEdit->addListener(this);
-	m_DiGiCoListeningPortLabel = std::make_unique<CLabel>(DIGICO_LISTENINGPORT_LABEL_NAME);
+	m_DiGiCoListeningPortLabel = std::make_unique<CLabel>();
 	m_DiGiCoListeningPortLabel->setText("Listening Port", dontSendNotification);
 	m_DiGiCoListeningPortLabel->attachToComponent(m_DiGiCoListeningPortEdit.get(), true);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoListeningPortLabel.get(), false, false);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoListeningPortEdit.get(), true, false);
 
-	m_DiGiCoRemotePortEdit = std::make_unique<CTextEditor>(DIGICO_REMOTEPORT_EDIT_NAME);
+	m_DiGiCoRemotePortEdit = std::make_unique<CTextEditor>();
 	m_DiGiCoRemotePortEdit->addListener(this);
-	m_DiGiCoRemotePortLabel = std::make_unique<CLabel>(DIGICO_REMOTEPORT_LABEL_NAME);
+	m_DiGiCoRemotePortLabel = std::make_unique<CLabel>();
 	m_DiGiCoRemotePortLabel->setText("Remote Port", dontSendNotification);
 	m_DiGiCoRemotePortLabel->attachToComponent(m_DiGiCoRemotePortEdit.get(), true);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoRemotePortLabel.get(), false, false);
@@ -286,30 +265,30 @@ CSettingsComponent::CSettingsComponent()
 	m_DiGiCoBridgingSettings->resized();
 
 	// Generic OSC settings section
-	m_GenericOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>(GENERICOSC_COMPO_NAME);
+	m_GenericOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
 	m_GenericOSCBridgingSettings->setHeaderText("Generic OSC Bridging");
 	m_GenericOSCBridgingSettings->setHasActiveToggle(true);
 	addAndMakeVisible(m_GenericOSCBridgingSettings.get());
 
-	m_GenericOSCIpAddressEdit = std::make_unique<CTextEditor>(GENERICOSC_IP_EDIT_NAME);
+	m_GenericOSCIpAddressEdit = std::make_unique<CTextEditor>();
 	m_GenericOSCIpAddressEdit->addListener(this);
-	m_GenericOSCIpAddressLabel = std::make_unique<CLabel>(GENERICOSC_IP_LABEL_NAME);
+	m_GenericOSCIpAddressLabel = std::make_unique<CLabel>();
 	m_GenericOSCIpAddressLabel->setText("IP Address", dontSendNotification);
 	m_GenericOSCIpAddressLabel->attachToComponent(m_GenericOSCIpAddressEdit.get(), true);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCIpAddressLabel.get(), false, false);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCIpAddressEdit.get(), true, false);
 
-	m_GenericOSCListeningPortEdit = std::make_unique<CTextEditor>(GENERICOSC_LISTENINGPORT_EDIT_NAME);
+	m_GenericOSCListeningPortEdit = std::make_unique<CTextEditor>();
 	m_GenericOSCListeningPortEdit->addListener(this);
-	m_GenericOSCListeningPortLabel = std::make_unique<CLabel>(GENERICOSC_LISTENINGPORT_LABEL_NAME);
+	m_GenericOSCListeningPortLabel = std::make_unique<CLabel>();
 	m_GenericOSCListeningPortLabel->setText("Listening Port", dontSendNotification);
 	m_GenericOSCListeningPortLabel->attachToComponent(m_GenericOSCListeningPortEdit.get(), true);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCListeningPortLabel.get(), false, false);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCListeningPortEdit.get(), true, false);
 
-	m_GenericOSCRemotePortEdit = std::make_unique<CTextEditor>(GENERICOSC_REMOTEPORT_EDIT_NAME);
+	m_GenericOSCRemotePortEdit = std::make_unique<CTextEditor>();
 	m_GenericOSCRemotePortEdit->addListener(this);
-	m_GenericOSCRemotePortLabel = std::make_unique<CLabel>(GENERICOSC_REMOTEPORT_LABEL_NAME);
+	m_GenericOSCRemotePortLabel = std::make_unique<CLabel>();
 	m_GenericOSCRemotePortLabel->setText("Remote Port", dontSendNotification);
 	m_GenericOSCRemotePortLabel->attachToComponent(m_GenericOSCRemotePortEdit.get(), true);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCRemotePortLabel.get(), false, false);

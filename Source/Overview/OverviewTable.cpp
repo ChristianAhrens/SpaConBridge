@@ -527,6 +527,9 @@ bool TableModelComponent::LessThanComsMode(ProcessorId pId1, ProcessorId pId2)
  */
 bool TableModelComponent::LessThanBridgingMute(ProcessorId pId1, ProcessorId pId2)
 {
+	ignoreUnused(pId1);
+	ignoreUnused(pId2);
+
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
 	{
@@ -914,7 +917,7 @@ void ComboBoxContainer::comboBoxChanged(ComboBox *comboBox)
 	if (ctrl)
 	{
 		// New MappingID which should be applied to all plugins in the selected rows.
-		int newMapping = static_cast<MappingId>(comboBox->getSelectedId());
+		auto newMapping = static_cast<MappingId>(comboBox->getSelectedId());
 		for (std::size_t i = 0; i < ProcessorIds.size(); ++i)
 		{
 			// Set the value of the combobox to the current MappingID of the corresponding plugin.
@@ -1241,11 +1244,11 @@ void MuteButtonContainer::buttonClicked(Button* button)
 		{
 			if (button == &m_muteDiGiCoButton)
 			{
-				ctrl->SetMuteDiGiCoSourceId(static_cast<juce::int16>(processorId), newToggleState);
+				ctrl->SetMuteBridgingSourceId(PBT_DiGiCo, static_cast<juce::int16>(processorId), newToggleState);
 			}
 			if (button == &m_muteGenericOSCButton)
 			{
-				ctrl->SetMuteGenericOSCSourceId(static_cast<juce::int16>(processorId), newToggleState);
+				ctrl->SetMuteBridgingSourceId(PBT_GenericOSC, static_cast<juce::int16>(processorId), newToggleState);
 			}
 		}
 	}
@@ -1259,8 +1262,8 @@ void MuteButtonContainer::resized()
 	int w = getLocalBounds().getWidth();
 	int h = getLocalBounds().getHeight();
 
-	m_muteDiGiCoButton.setBounds(2, 2, (0.5*w) - 3, h - 5);
-	m_muteGenericOSCButton.setBounds(2 + (0.5 * w), 2, (0.5 * w) - 3, h - 5);
+	m_muteDiGiCoButton.setBounds(2, 2, (w/2) - 3, h - 5);
+	m_muteGenericOSCButton.setBounds(2 + (w/2), 2, (w/2) - 3, h - 5);
 }
 
 /**
@@ -1277,8 +1280,8 @@ void MuteButtonContainer::SetRow(int newRow)
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
 	{
-		m_muteDiGiCoButton.setToggleState(ctrl->GetMuteDiGiCoSourceId(processorId), dontSendNotification);
-		m_muteGenericOSCButton.setToggleState(ctrl->GetMuteGenericOSCSourceId(processorId), dontSendNotification);
+		m_muteDiGiCoButton.setToggleState(ctrl->GetMuteBridgingSourceId(PBT_DiGiCo, static_cast<uint16>(processorId)), dontSendNotification);
+		m_muteGenericOSCButton.setToggleState(ctrl->GetMuteBridgingSourceId(PBT_GenericOSC, static_cast<uint16>(processorId)), dontSendNotification);
 	}
 }
 

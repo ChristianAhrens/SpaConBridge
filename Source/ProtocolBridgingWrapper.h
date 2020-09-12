@@ -86,6 +86,10 @@ public:
 
 	String GetDiGiCoIpAddress();
 	bool SetDiGiCoIpAddress(String ipAddress, bool dontSendNotification = false);
+	int GetDiGiCoListeningPort();
+	bool SetDiGiCoListeningPort(int listeningPort, bool dontSendNotification = false);
+	int GetDiGiCoRemotePort();
+	bool SetDiGiCoRemotePort(int remotePort, bool dontSendNotification = false);
 
 	//==========================================================================
 	bool GetMuteGenericOSCSourceId(juce::int16 sourceId);
@@ -93,6 +97,10 @@ public:
 
 	String GetGenericOSCIpAddress();
 	bool SetGenericOSCIpAddress(String ipAddress, bool dontSendNotification = false);
+	int GetGenericOSCListeningPort();
+	bool SetGenericOSCListeningPort(int listeningPort, bool dontSendNotification = false);
+	int GetGenericOSCRemotePort();
+	bool SetGenericOSCRemotePort(int remotePort, bool dontSendNotification = false);
 
 	//==========================================================================
 	std::unique_ptr<XmlElement> createStateXml() override;
@@ -110,6 +118,10 @@ private:
 
 	String GetProtocolIpAddress(ProtocolId protocolId);
 	bool SetProtocolIpAddress(ProtocolId protocolId, String ipAddress, bool dontSendNotification = false);
+	int GetProtocolListeningPort(ProtocolId protocolId);
+	bool SetProtocolListeningPort(ProtocolId protocolId, int listeningPort, bool dontSendNotification = false);
+	int GetProtocolRemotePort(ProtocolId protocolId);
+	bool SetProtocolRemotePort(ProtocolId protocolId, int remotePort, bool dontSendNotification = false);
 
 	/**
 	 * A processing engine node can send data to and receive data from multiple protocols that is encapsulates.

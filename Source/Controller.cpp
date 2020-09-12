@@ -894,9 +894,22 @@ void CController::DeactivateSoundSourceId(SourceId sourceId, MappingId mappingId
  * @param sourceId The id of the source for which the mute state shall be returned
  * @return The mute state
  */
-bool CController::GetMuteDiGiCoSourceId(juce::int16 sourceId)
+bool CController::GetMuteBridgingSourceId(ProtocolBridgingType bridgingType, juce::int16 sourceId)
 {
-	return m_protocolBridge.GetMuteDiGiCoSourceId(sourceId);
+	switch (bridgingType)
+	{
+	case PBT_DiGiCo:
+		return m_protocolBridge.GetMuteDiGiCoSourceId(sourceId);
+	case PBT_GenericOSC:
+		return m_protocolBridge.GetMuteGenericOSCSourceId(sourceId);
+	case PBT_BlacktraxRTTRP:
+	case PBT_GenericMIDI:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	default:
+		jassertfalse;
+		return false;
+	}
 }
 
 /**
@@ -905,30 +918,130 @@ bool CController::GetMuteDiGiCoSourceId(juce::int16 sourceId)
  * @param mute Set to true for mute and false for unmute
  * @return True on success, false on failure
  */
-bool CController::SetMuteDiGiCoSourceId(juce::int16 sourceId, bool mute)
+bool CController::SetMuteBridgingSourceId(ProtocolBridgingType bridgingType, juce::int16 sourceId, bool mute)
 {
-	return m_protocolBridge.SetMuteDiGiCoSourceId(sourceId, mute);
+	switch (bridgingType)
+	{
+	case PBT_DiGiCo:
+		return m_protocolBridge.SetMuteDiGiCoSourceId(sourceId, mute);
+	case PBT_GenericOSC:
+		return m_protocolBridge.SetMuteGenericOSCSourceId(sourceId, mute);
+	case PBT_BlacktraxRTTRP:
+	case PBT_GenericMIDI:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	default:
+		jassertfalse;
+		return false;
+	}
 }
 
-/**
- * Gets the mute state of the given source via proxy bridge object
- * @param sourceId The id of the source for which the mute state shall be returned
- * @return The mute state
- */
-bool CController::GetMuteGenericOSCSourceId(juce::int16 sourceId)
+String CController::GetBridgingIpAddress(ProtocolBridgingType bridgingType)
 {
-	return m_protocolBridge.GetMuteGenericOSCSourceId(sourceId);
+	switch (bridgingType)
+	{
+	case PBT_DiGiCo:
+		return m_protocolBridge.GetDiGiCoIpAddress();
+	case PBT_GenericOSC:
+		return m_protocolBridge.GetGenericOSCIpAddress();
+	case PBT_BlacktraxRTTRP:
+	case PBT_GenericMIDI:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	default:
+		jassertfalse;
+		return String();
+	}
 }
 
-/**
- * Sets the given source to be (un-)muted in Generic OSC protocol via proxy bridge object
- * @param sourceId The id of the source that shall be muted
- * @param mute Set to true for mute and false for unmute
- * @return True on success, false on failure
- */
-bool CController::SetMuteGenericOSCSourceId(juce::int16 sourceId, bool mute)
+bool CController::SetBridgingIpAddress(ProtocolBridgingType bridgingType, String ipAddress, bool dontSendNotification)
 {
-	return m_protocolBridge.SetMuteGenericOSCSourceId(sourceId, mute);
+	switch (bridgingType)
+	{
+	case PBT_DiGiCo:
+		return m_protocolBridge.SetDiGiCoIpAddress(ipAddress, dontSendNotification);
+	case PBT_GenericOSC:
+		return m_protocolBridge.SetGenericOSCIpAddress(ipAddress, dontSendNotification);
+	case PBT_BlacktraxRTTRP:
+	case PBT_GenericMIDI:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
+int CController::GetBridgingListeningPort(ProtocolBridgingType bridgingType)
+{
+	switch (bridgingType)
+	{
+	case PBT_DiGiCo:
+		return m_protocolBridge.GetDiGiCoListeningPort();
+	case PBT_GenericOSC:
+		return m_protocolBridge.GetGenericOSCListeningPort();
+	case PBT_BlacktraxRTTRP:
+	case PBT_GenericMIDI:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
+bool CController::SetBridgingListeningPort(ProtocolBridgingType bridgingType, int listeningPort, bool dontSendNotification)
+{
+	switch (bridgingType)
+	{
+	case PBT_DiGiCo:
+		return m_protocolBridge.SetDiGiCoListeningPort(listeningPort, dontSendNotification);
+	case PBT_GenericOSC:
+		return m_protocolBridge.SetGenericOSCListeningPort(listeningPort, dontSendNotification);
+	case PBT_BlacktraxRTTRP:
+	case PBT_GenericMIDI:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
+int CController::GetBridgingRemotePort(ProtocolBridgingType bridgingType)
+{
+	switch (bridgingType)
+	{
+	case PBT_DiGiCo:
+		return m_protocolBridge.GetDiGiCoRemotePort();
+	case PBT_GenericOSC:
+		return m_protocolBridge.GetGenericOSCRemotePort();
+	case PBT_BlacktraxRTTRP:
+	case PBT_GenericMIDI:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
+bool CController::SetBridgingRemotePort(ProtocolBridgingType bridgingType, int remotePort, bool dontSendNotification)
+{
+	switch (bridgingType)
+	{
+	case PBT_DiGiCo:
+		return m_protocolBridge.SetDiGiCoRemotePort(remotePort, dontSendNotification);
+	case PBT_GenericOSC:
+		return m_protocolBridge.SetGenericOSCRemotePort(remotePort, dontSendNotification);
+	case PBT_BlacktraxRTTRP:
+	case PBT_GenericMIDI:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	default:
+		jassertfalse;
+		return false;
+	}
 }
 
 } // namespace SoundscapeBridgeApp

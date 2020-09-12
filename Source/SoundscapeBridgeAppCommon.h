@@ -81,6 +81,21 @@ enum AutomationParameterIndex
 	ParamIdx_MaxIndex
 };
 
+/**
+ * Protocol Bridging Type
+ * Enum used to define different bridging types.
+ */
+enum ProtocolBridgingType
+{
+	PBT_DiGiCo = 1,
+	PBT_GenericOSC,
+	PBT_BlacktraxRTTRP,
+	PBT_GenericMIDI,
+	PBT_YamahaSQ,
+	PBT_HUI,
+	PBT_Max						//< Number of bridging types.
+};
+
 
 /**
  * Data Change Type

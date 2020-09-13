@@ -127,7 +127,10 @@ public:
 
 	void paint(Graphics& g) override;
 
+	void updateBridgingTitles();
+
 private:
+	std::vector<String>	m_activeBridgingTitles;
 };
 
 /**
@@ -319,30 +322,17 @@ public:
 	explicit MuteButtonContainer(TableModelComponent& td);
 	~MuteButtonContainer() override;
 
+	void updateBridgingMuteButtons();
+	
 	void buttonClicked(Button*) override;
 	void resized() override;
 	void SetRow(int newRow);
 
 private:
-	/**
-	 * Table where this component is contained.
-	 */
-	TableModelComponent& m_owner;
-
-	/**
-	 * DiGiCo Mute button.
-	 */
-	CMuteButton			m_muteDiGiCoButton;
-
-	/**
-	 * GenericOSC Mute button.
-	 */
-	CMuteButton			m_muteGenericOSCButton;
-
-	/**
-	 * Row number where this component is located inside the table.
-	 */
-	int					m_row;
+	TableModelComponent&						m_owner;			/**< Table where this component is contained. */
+	int											m_row;				/**< Row number where this component is located inside the table. */
+	std::map<ProtocolBridgingType, CMuteButton>	m_bridgingMutes;	/**< The mute buttons currently in use. */
+	std::vector<ProtocolBridgingType>			m_knowntypes = { PBT_DiGiCo, PBT_GenericOSC, PBT_BlacktraxRTTRP, PBT_GenericMIDI, PBT_YamahaSQ, PBT_HUI };
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MuteButtonContainer)
 };

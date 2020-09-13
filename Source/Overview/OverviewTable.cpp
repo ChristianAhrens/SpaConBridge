@@ -322,6 +322,7 @@ CustomTableHeaderComponent::CustomTableHeaderComponent()
 	setColour(TableHeaderComponent::outlineColourId, CDbStyle::GetDbColor(CDbStyle::DarkLineColor));
 	setColour(TableHeaderComponent::highlightColourId, CDbStyle::GetDbColor(CDbStyle::HighlightColor));
 
+	updateBridgingTitles();
 }
 
 /**
@@ -329,6 +330,34 @@ CustomTableHeaderComponent::CustomTableHeaderComponent()
  */
 CustomTableHeaderComponent::~CustomTableHeaderComponent()
 {
+}
+
+/**
+ * Helper method to update the list of bridging titles by querying
+ * data from controller. This should be called on configuration updates
+ * that affect bridging protocol active state.
+ */
+void CustomTableHeaderComponent::updateBridgingTitles()
+{
+	CController* ctrl = CController::GetInstance();
+	if (!ctrl)
+		return;
+
+	m_activeBridgingTitles.clear();
+
+	auto activeBridging = ctrl->GetActiveProtocolBridging();
+	if ((activeBridging & PBT_DiGiCo) == PBT_DiGiCo)
+		m_activeBridgingTitles.push_back("DiGiCo");
+	if ((activeBridging & PBT_GenericOSC) == PBT_GenericOSC)
+		m_activeBridgingTitles.push_back("Generic OSC");
+	if ((activeBridging & PBT_BlacktraxRTTRP) == PBT_BlacktraxRTTRP)
+		m_activeBridgingTitles.push_back("Blacktrax");
+	if ((activeBridging & PBT_GenericMIDI) == PBT_GenericMIDI)
+		m_activeBridgingTitles.push_back("MIDI");
+	if ((activeBridging & PBT_YamahaSQ) == PBT_YamahaSQ)
+		m_activeBridgingTitles.push_back("Yamaha");
+	if ((activeBridging & PBT_HUI) == PBT_HUI)
+		m_activeBridgingTitles.push_back("HUI");
 }
 
 /**
@@ -345,20 +374,29 @@ void CustomTableHeaderComponent::paint(Graphics& g)
 	font.setBold(true);
 	g.setFont(font);
 	g.setColour(CDbStyle::GetDbColor(CDbStyle::TextColor));
+
+	if (m_activeBridgingTitles.empty())
+	{
+		g.drawText("Bridging", bridgingCellRect, Justification::centredLeft);
+	}
+	else
+	{
+		auto upperHalfCellRect = bridgingCellRect.removeFromTop(bridgingCellRect.getHeight() / 2).reduced(2);
+		g.drawText("Bridging", upperHalfCellRect, Justification::centred);
+
+		font.setBold(false);
+		auto fh = font.getHeight();
+		font.setHeight(fh - 2);
+		g.setFont(font);
 	
-	auto upperHalfCellRect = bridgingCellRect.removeFromTop(bridgingCellRect.getHeight() / 2).reduced(2);
-	g.drawText("Bridging", upperHalfCellRect, Justification::centred);
+		auto singleTitleWidth = bridgingCellRect.getWidth() / m_activeBridgingTitles.size();
 
-	font.setBold(false);
-	auto fh = font.getHeight();
-	font.setHeight(fh - 2);
-	g.setFont(font);
-
-	auto digicoTitleRect = bridgingCellRect.removeFromLeft(bridgingCellRect.getWidth() / 2).reduced(2);
-	auto genericOSCTitleRect = bridgingCellRect.reduced(2);
-	g.drawText("DiGiCo", digicoTitleRect, Justification::centredLeft);
-	g.drawText("Generic OSC", genericOSCTitleRect, Justification::centredLeft);
-
+		for (auto title : m_activeBridgingTitles)
+		{
+			auto titleRect = bridgingCellRect.removeFromLeft(singleTitleWidth).reduced(2);
+			g.drawText(title, titleRect, Justification::centredLeft);
+		}
+	}
 }
 
 
@@ -573,6 +611,11 @@ void TableModelComponent::UpdateTable()
 
 	// Refresh table
 	m_table.updateContent();
+
+	// Refresh table header
+	auto customTableHeader = dynamic_cast<CustomTableHeaderComponent*>(&m_table.getHeader());
+	if (customTableHeader)
+		customTableHeader->updateBridgingTitles();
 }
 
 /**
@@ -790,6 +833,7 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 
 			// Ensure that the component knows which row number it is located at.
 			muteButton->SetRow(rowNumber);
+			muteButton->updateBridgingMuteButtons();
 
 			// Return a pointer to the component.
 			ret = muteButton;
@@ -1196,15 +1240,6 @@ void RadioButtonContainer::SetRow(int newRow)
 MuteButtonContainer::MuteButtonContainer(TableModelComponent& td)
 	: m_owner(td)
 {
-	// Create and configure button components inside this container.
-	m_muteDiGiCoButton.setName("Mute");
-	m_muteDiGiCoButton.setEnabled(true);
-	m_muteDiGiCoButton.addListener(this);
-	addAndMakeVisible(m_muteDiGiCoButton);
-	m_muteGenericOSCButton.setName("Mute");
-	m_muteGenericOSCButton.setEnabled(true);
-	m_muteGenericOSCButton.addListener(this);
-	addAndMakeVisible(m_muteGenericOSCButton);
 }
 
 /**
@@ -1215,40 +1250,69 @@ MuteButtonContainer::~MuteButtonContainer()
 }
 
 /**
+ * Helper method to update the map of bridging mute buttons by querying
+ * data from controller. This should be called on configuration updates
+ * that affect bridging protocol active state.
+ */
+void MuteButtonContainer::updateBridgingMuteButtons()
+{
+	CController* ctrl = CController::GetInstance();
+	if (!ctrl)
+		return;
+
+	auto activeBridging = ctrl->GetActiveProtocolBridging();
+
+	for (auto type : m_knowntypes)
+	{
+		if (((activeBridging & type) == type) && (m_bridgingMutes.count(type) == 0))
+		{
+			m_bridgingMutes[type].setName("Mute");
+			m_bridgingMutes[type].setEnabled(true);
+			m_bridgingMutes[type].addListener(this);
+			addAndMakeVisible(&m_bridgingMutes.at(type));
+		}
+		else if (((activeBridging & type) != type) && (m_bridgingMutes.count(type) > 0))
+		{
+			m_bridgingMutes.erase(type);
+		}
+	}
+
+	resized();
+}
+
+/**
  * Reimplemented from Button::Listener, gets called whenever the buttons are clicked.
  * @param button	The button which has been clicked.
  */
 void MuteButtonContainer::buttonClicked(Button* button)
 {
 	CController* ctrl = CController::GetInstance();
-	if (ctrl &&
-		((button == &m_muteDiGiCoButton) || (button == &m_muteGenericOSCButton)))
+	if (!ctrl)
+		return;
+
+	for (auto type : m_knowntypes)
 	{
-		bool newToggleState = button->getToggleState();
-
-		// Get the list of rows which are currently selected on the table.
-		std::vector<int> selectedRows = m_owner.GetSelectedRows();
-		if ((selectedRows.size() < 2) ||
-			(std::find(selectedRows.begin(), selectedRows.end(), m_row) == selectedRows.end()))
+		if ((m_bridgingMutes.count(type) > 0) && (button == &m_bridgingMutes.at(type)))
 		{
-			// If this button's row (m_row) is NOT selected, or if no multi-selection was made 
-			// then modify the selectedRows list so that it only contains m_row.
-			selectedRows.clear();
-			selectedRows.push_back(m_row);
-		}
+			bool newToggleState = button->getToggleState();
 
-		// Get the IDs of the plugins on the selected rows.
-		std::vector<ProcessorId> ProcessorIds = m_owner.GetProcessorIdsForRows(selectedRows);
-
-		for (auto processorId : ProcessorIds)
-		{
-			if (button == &m_muteDiGiCoButton)
+			// Get the list of rows which are currently selected on the table.
+			std::vector<int> selectedRows = m_owner.GetSelectedRows();
+			if ((selectedRows.size() < 2) ||
+				(std::find(selectedRows.begin(), selectedRows.end(), m_row) == selectedRows.end()))
 			{
-				ctrl->SetMuteBridgingSourceId(PBT_DiGiCo, static_cast<juce::int16>(processorId), newToggleState);
+				// If this button's row (m_row) is NOT selected, or if no multi-selection was made 
+				// then modify the selectedRows list so that it only contains m_row.
+				selectedRows.clear();
+				selectedRows.push_back(m_row);
 			}
-			if (button == &m_muteGenericOSCButton)
+
+			// Get the IDs of the plugins on the selected rows.
+			std::vector<ProcessorId> ProcessorIds = m_owner.GetProcessorIdsForRows(selectedRows);
+
+			for (auto processorId : ProcessorIds)
 			{
-				ctrl->SetMuteBridgingSourceId(PBT_GenericOSC, static_cast<juce::int16>(processorId), newToggleState);
+				ctrl->SetMuteBridgingSourceId(type, static_cast<juce::int16>(processorId), newToggleState);
 			}
 		}
 	}
@@ -1259,16 +1323,23 @@ void MuteButtonContainer::buttonClicked(Button* button)
  */
 void MuteButtonContainer::resized()
 {
-	int w = getLocalBounds().getWidth();
-	int h = getLocalBounds().getHeight();
+	if (m_bridgingMutes.empty())
+		return;
 
-	m_muteDiGiCoButton.setBounds(2, 2, (w/2) - 3, h - 5);
-	m_muteGenericOSCButton.setBounds(2 + (w/2), 2, (w/2) - 3, h - 5);
+	auto bounds = getLocalBounds();
+	bounds.removeFromBottom(1);;
+	auto singleButtonWidth = bounds.getWidth() / m_bridgingMutes.size();
+
+	for (auto& buttonKV : m_bridgingMutes)
+	{
+		auto buttonRect = bounds.removeFromLeft(singleButtonWidth).reduced(2);
+		buttonKV.second.setBounds(buttonRect);
+	}
 }
 
 /**
  * Saves the row number where this component is located inside the overview table.
- * It also updates the radio buttons with the current ComsMode.
+ * It also updates the radio buttons with the current mute state.
  * @param newRow	The new row number.
  */
 void MuteButtonContainer::SetRow(int newRow)
@@ -1280,8 +1351,13 @@ void MuteButtonContainer::SetRow(int newRow)
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
 	{
-		m_muteDiGiCoButton.setToggleState(ctrl->GetMuteBridgingSourceId(PBT_DiGiCo, static_cast<uint16>(processorId)), dontSendNotification);
-		m_muteGenericOSCButton.setToggleState(ctrl->GetMuteBridgingSourceId(PBT_GenericOSC, static_cast<uint16>(processorId)), dontSendNotification);
+		for (auto type : m_knowntypes)
+		{
+			if (m_bridgingMutes.count(type) > 0)
+			{
+				m_bridgingMutes.at(type).setToggleState(ctrl->GetMuteBridgingSourceId(type, static_cast<uint16>(processorId)), dontSendNotification);
+			}
+		}
 	}
 }
 

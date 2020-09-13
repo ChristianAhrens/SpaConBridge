@@ -890,6 +890,24 @@ void CController::DeactivateSoundSourceId(SourceId sourceId, MappingId mappingId
 }
 
 /**
+ * Getter for the active protocol bridging types (active protocols RoleB - those are used for bridging to DS100 running as RoleA, see RemoteProtocolBridge for details)
+ * @return The bitfield containing all active bridging types
+ */
+ProtocolBridgingType CController::GetActiveProtocolBridging()
+{
+	return m_protocolBridge.GetActiveBridgingProtocols();
+}
+
+/**
+ * Setter for protocol bridging types that shall be active.
+ * @param	bridgingTypes	Bitfield containing all types that are to be active.
+ */
+void CController::SetActiveProtocolBridging(ProtocolBridgingType bridgingTypes)
+{
+	m_protocolBridge.SetActiveBridgingProtocols(bridgingTypes);
+}
+
+/**
  * Gets the mute state of the given source via proxy bridge object
  * @param sourceId The id of the source for which the mute state shall be returned
  * @return The mute state

@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "SoundscapeBridgeAppCommon.h"
 #include "AppConfiguration.h"
 
 #include <ProcessingEngine/ProcessingEngineNode.h>
@@ -66,9 +67,12 @@ public:
 
 	void AddListener(ProtocolBridgingWrapper::Listener* listener);
 
-	void SetupBridgingNode();
 	void HandleNodeData(NodeId nodeId, ProtocolId senderProtocolId, ProtocolType senderProtocolType, RemoteObjectIdentifier objectId, RemoteObjectMessageData& msgData) override;
 	bool SendMessage(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData);
+
+	//==========================================================================
+	ProtocolBridgingType GetActiveBridgingProtocols();
+	void SetActiveBridgingProtocols(ProtocolBridgingType desiredActiveBridgingTypes);
 
 	//==========================================================================
 	bool ActivateDS100SourceId(juce::int16 sourceId, juce::int16 mappingId);
@@ -123,13 +127,19 @@ private:
 	int GetProtocolRemotePort(ProtocolId protocolId);
 	bool SetProtocolRemotePort(ProtocolId protocolId, int remotePort, bool dontSendNotification = false);
 
+	//==========================================================================
+	void SetupBridgingNode();
+	std::unique_ptr<XmlElement> SetupDiGiCoBridgingProtocol();
+	std::unique_ptr<XmlElement> SetupGenericOSCBridgingProtocol();
+
 	/**
 	 * A processing engine node can send data to and receive data from multiple protocols that is encapsulates.
 	 * Depending on the node configuration, there can exist two groups of protocols, A and B, that are handled
 	 * in a specific way to pass incoming and outgoing data to each other and this parent controller instance.
 	 */
-	ProcessingEngineNode							m_processingNode;	/**< The node that encapsulates the protocols that are used to send, receive and bridge data. */
-	XmlElement										m_bridgingXml;		/**< The current xml config for bridging (contains node xml). */
+	ProcessingEngineNode	m_processingNode;	/**< The node that encapsulates the protocols that are used to send, receive and bridge data. */
+	XmlElement				m_bridgingXml;		/**< The current xml config for bridging (contains node xml). */
+	std::map<ProtocolBridgingType, XmlElement>	m_bridgingProtocolCacheMap;	/**< Map that holds the xml config elements of bridging elements when currently not active, to be able to reactivate correct previous config on request. */
 
 	std::vector<ProtocolBridgingWrapper::Listener*>	m_listeners;		/**< The listner objects, for message data handling callback. */
 

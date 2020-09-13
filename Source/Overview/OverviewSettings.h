@@ -56,18 +56,23 @@ public:
 	void setHasActiveToggle(bool hasActiveToggle);
 	void setHeaderText(String headerText);
 	void addComponent(Component* compo, bool includeInLayout = true, bool takeOwnership = true);
-
-	void updateToggleActive();
+	void setToggleActiveState(bool toggleState);
+	
+	void onToggleActive();
 
 	//==========================================================================
 	void paint(Graphics&) override;
 	void resized() override;
 
 	//==========================================================================
-	std::function<void(bool)>	toggleIsActiveCallback;
+	std::function<void(HeaderWithElmListComponent*, bool)>	toggleIsActiveCallback;
 
+protected:
+	//==========================================================================
+	void setElementsActiveState(bool toggleState);
 
 private:
+	//==========================================================================
 	bool																		m_hasActiveToggle{ false };
 	bool																		m_toggleState{ true };
 	std::unique_ptr<ToggleButton>												m_activeToggle;
@@ -99,9 +104,16 @@ public:
 	void textEditorReturnKeyPressed(TextEditor&) override;
 	void textEditorFocusLost(TextEditor&) override;
 
+	//==========================================================================
+	void setSettingsSectionActiveState(HeaderWithElmListComponent* settingsSection, bool activeState);
+
 private:
 	//==========================================================================
 	void textEditorUpdated(TextEditor&);
+
+	// input filters for texteditors
+	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_ipAddressEditFilter;
+	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_portEditFilter;
 
 	// DS100 settings section
 	std::unique_ptr<HeaderWithElmListComponent>	m_DS100Settings;

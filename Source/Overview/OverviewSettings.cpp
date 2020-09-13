@@ -59,13 +59,13 @@ HeaderWithElmListComponent::HeaderWithElmListComponent(const String& componentNa
 	addAndMakeVisible(m_headerLabel.get());
 
 	m_activeToggle = std::make_unique<ToggleButton>();
-	m_activeToggle->onStateChange = [this] { updateToggleActive(); };
+	m_activeToggle->onClick = [this] { onToggleActive(); };
 	addAndMakeVisible(m_activeToggle.get());
 	m_activeToggleLabel = std::make_unique<Label>();
 	m_activeToggleLabel->attachToComponent(m_activeToggle.get(), true);
 	addAndMakeVisible(m_activeToggleLabel.get());
 
-	updateToggleActive();
+	setElementsActiveState(m_toggleState);
 }
 
 /**
@@ -84,19 +84,47 @@ HeaderWithElmListComponent::~HeaderWithElmListComponent()
 /**
  *
  */
-void HeaderWithElmListComponent::updateToggleActive()
+void HeaderWithElmListComponent::setToggleActiveState(bool toggleState)
 {
-	m_toggleState = m_hasActiveToggle ? m_activeToggle->getToggleState() : true;
+	if (m_activeToggle)
+		m_activeToggle->setToggleState(toggleState, dontSendNotification);
+
+	m_toggleState = toggleState;
+
+	setElementsActiveState(m_toggleState);
+}
+
+void HeaderWithElmListComponent::setElementsActiveState(bool toggleState)
+{
+	m_toggleState = toggleState;
 
 	m_headerLabel->setEnabled(m_toggleState);
 	for (auto const& component : m_components)
+	{
 		component.first->setEnabled(m_toggleState);
-
-	if (toggleIsActiveCallback)
-		toggleIsActiveCallback(m_toggleState);
+	}
 
 	resized();
 	repaint();
+}
+
+/**
+ *
+ */
+void HeaderWithElmListComponent::onToggleActive()
+{
+	if (m_activeToggle)
+	{
+		auto newActiveState = m_activeToggle->getToggleState();
+
+		if (newActiveState == m_toggleState)
+			return;
+
+		setElementsActiveState(m_hasActiveToggle ? newActiveState : true);
+
+		if (toggleIsActiveCallback)
+			toggleIsActiveCallback(this, m_toggleState);
+	}
 }
 
 /**
@@ -109,7 +137,7 @@ void HeaderWithElmListComponent::setHasActiveToggle(bool hasActiveToggle)
 	m_activeToggle->setVisible(hasActiveToggle);
 	m_activeToggleLabel->setVisible(hasActiveToggle);
 
-	updateToggleActive();
+	setElementsActiveState(m_toggleState);
 }
 
 /**
@@ -217,6 +245,9 @@ void HeaderWithElmListComponent::resized()
  */
 CSettingsComponent::CSettingsComponent()
 {
+	m_ipAddressEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(15, "1234567890.");;
+	m_portEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(5, "1234567890");
+
 	// DS100 settings section
 	m_DS100Settings = std::make_unique<HeaderWithElmListComponent>();
 	m_DS100Settings->setHeaderText("DS100");
@@ -225,6 +256,7 @@ CSettingsComponent::CSettingsComponent()
 
 	m_DS100IpAddressEdit = std::make_unique<CTextEditor>();
 	m_DS100IpAddressEdit->addListener(this);
+	m_DS100IpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
 	m_DS100IpAddressLabel = std::make_unique<CLabel>();
 	m_DS100IpAddressLabel->setText("IP Address", dontSendNotification);
 	m_DS100IpAddressLabel->attachToComponent(m_DS100IpAddressEdit.get(), true);
@@ -237,10 +269,12 @@ CSettingsComponent::CSettingsComponent()
 	m_DiGiCoBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
 	m_DiGiCoBridgingSettings->setHeaderText("DiGiCo Bridging");
 	m_DiGiCoBridgingSettings->setHasActiveToggle(true);
+	m_DiGiCoBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_DiGiCoBridgingSettings.get());
 
 	m_DiGiCoIpAddressEdit = std::make_unique<CTextEditor>();
 	m_DiGiCoIpAddressEdit->addListener(this);
+	m_DiGiCoIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
 	m_DiGiCoIpAddressLabel = std::make_unique<CLabel>();
 	m_DiGiCoIpAddressLabel->setText("IP Address", dontSendNotification);
 	m_DiGiCoIpAddressLabel->attachToComponent(m_DiGiCoIpAddressEdit.get(), true);
@@ -249,6 +283,7 @@ CSettingsComponent::CSettingsComponent()
 
 	m_DiGiCoListeningPortEdit = std::make_unique<CTextEditor>();
 	m_DiGiCoListeningPortEdit->addListener(this);
+	m_DiGiCoListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
 	m_DiGiCoListeningPortLabel = std::make_unique<CLabel>();
 	m_DiGiCoListeningPortLabel->setText("Listening Port", dontSendNotification);
 	m_DiGiCoListeningPortLabel->attachToComponent(m_DiGiCoListeningPortEdit.get(), true);
@@ -257,6 +292,7 @@ CSettingsComponent::CSettingsComponent()
 
 	m_DiGiCoRemotePortEdit = std::make_unique<CTextEditor>();
 	m_DiGiCoRemotePortEdit->addListener(this);
+	m_DiGiCoRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
 	m_DiGiCoRemotePortLabel = std::make_unique<CLabel>();
 	m_DiGiCoRemotePortLabel->setText("Remote Port", dontSendNotification);
 	m_DiGiCoRemotePortLabel->attachToComponent(m_DiGiCoRemotePortEdit.get(), true);
@@ -269,10 +305,12 @@ CSettingsComponent::CSettingsComponent()
 	m_GenericOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
 	m_GenericOSCBridgingSettings->setHeaderText("Generic OSC Bridging");
 	m_GenericOSCBridgingSettings->setHasActiveToggle(true);
+	m_GenericOSCBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_GenericOSCBridgingSettings.get());
 
 	m_GenericOSCIpAddressEdit = std::make_unique<CTextEditor>();
 	m_GenericOSCIpAddressEdit->addListener(this);
+	m_GenericOSCIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
 	m_GenericOSCIpAddressLabel = std::make_unique<CLabel>();
 	m_GenericOSCIpAddressLabel->setText("IP Address", dontSendNotification);
 	m_GenericOSCIpAddressLabel->attachToComponent(m_GenericOSCIpAddressEdit.get(), true);
@@ -281,6 +319,7 @@ CSettingsComponent::CSettingsComponent()
 
 	m_GenericOSCListeningPortEdit = std::make_unique<CTextEditor>();
 	m_GenericOSCListeningPortEdit->addListener(this);
+	m_GenericOSCListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
 	m_GenericOSCListeningPortLabel = std::make_unique<CLabel>();
 	m_GenericOSCListeningPortLabel->setText("Listening Port", dontSendNotification);
 	m_GenericOSCListeningPortLabel->attachToComponent(m_GenericOSCListeningPortEdit.get(), true);
@@ -289,6 +328,7 @@ CSettingsComponent::CSettingsComponent()
 
 	m_GenericOSCRemotePortEdit = std::make_unique<CTextEditor>();
 	m_GenericOSCRemotePortEdit->addListener(this);
+	m_GenericOSCRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
 	m_GenericOSCRemotePortLabel = std::make_unique<CLabel>();
 	m_GenericOSCRemotePortLabel->setText("Remote Port", dontSendNotification);
 	m_GenericOSCRemotePortLabel->attachToComponent(m_GenericOSCRemotePortEdit.get(), true);
@@ -321,7 +361,7 @@ void CSettingsComponent::paint(Graphics& g)
  */
 void CSettingsComponent::resized()
 {
-	auto margin = 3;
+	auto margin = 3.0f;
 
 	auto minWidth = 300;
 	auto minHeight = m_DS100Settings->getHeight()
@@ -408,6 +448,28 @@ void CSettingsComponent::textEditorUpdated(TextEditor& editor)
 }
 
 /**
+ * Proxy method to activate a single bridging protocol in controller.
+ * @param sectionType	The protocolType to be active from now on.
+ */
+void CSettingsComponent::setSettingsSectionActiveState(HeaderWithElmListComponent* settingsSection, bool activeState)
+{
+	CController* ctrl = CController::GetInstance();
+	if (!ctrl)
+		return;
+
+	ProtocolBridgingType sectionType = PBT_None;
+	if (settingsSection == m_DiGiCoBridgingSettings.get())
+		sectionType = PBT_DiGiCo;
+	else if (settingsSection == m_GenericOSCBridgingSettings.get())
+		sectionType = PBT_GenericOSC;
+
+	if (activeState)
+		ctrl->SetActiveProtocolBridging(ctrl->GetActiveProtocolBridging() | sectionType);
+	else
+		ctrl->SetActiveProtocolBridging(ctrl->GetActiveProtocolBridging() & ~sectionType);
+}
+
+/**
  * Method to update the elements on UI when app configuration changed.
  * This is called by parent container component when it receives
  * onConfigUpdated call (it's a config listener and subscribed to changes)
@@ -423,6 +485,9 @@ void CSettingsComponent::processUpdatedConfig()
 		m_DS100IpAddressEdit->setText(ctrl->GetIpAddress());
 
 	// DiGiCo settings section
+	auto DiGiCoBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_DiGiCo) == PBT_DiGiCo;
+	if (m_DiGiCoBridgingSettings)
+		m_DiGiCoBridgingSettings->setToggleActiveState(DiGiCoBridgingActive);
 	if (m_DiGiCoIpAddressEdit)
 		m_DiGiCoIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_DiGiCo));
 	if (m_DiGiCoListeningPortEdit)
@@ -431,6 +496,9 @@ void CSettingsComponent::processUpdatedConfig()
 		m_DiGiCoRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_DiGiCo)), false);
 
 	// Generic OSC settings section
+	auto GenericOSCBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_GenericOSC) == PBT_GenericOSC;
+	if (m_GenericOSCBridgingSettings)
+		m_GenericOSCBridgingSettings->setToggleActiveState(GenericOSCBridgingActive);
 	if (m_GenericOSCIpAddressEdit)
 		m_GenericOSCIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_GenericOSC));
 	if (m_GenericOSCListeningPortEdit)
@@ -461,7 +529,7 @@ CSettingsContainer::CSettingsContainer()
 	addAndMakeVisible(m_settingsRawEditor.get());
 
 	m_useRawConfigButton = std::make_unique<ToggleButton>();
-	m_useRawConfigButton->onStateChange = [this] { onToggleRawConfigVisible(); };
+	m_useRawConfigButton->onClick = [this] { onToggleRawConfigVisible(); };
 	addAndMakeVisible(m_useRawConfigButton.get());
 	m_useRawConfigLabel = std::make_unique<Label>("RAW CFG", "Show raw config");
 	m_useRawConfigLabel->attachToComponent(m_useRawConfigButton.get(), true);

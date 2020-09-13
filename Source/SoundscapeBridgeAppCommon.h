@@ -49,6 +49,7 @@ typedef juce::int32 SourceId;
 typedef juce::int8 MappingId;
 typedef juce::int32 ProcessorId;
 typedef juce::uint64 DataChangeType;
+typedef juce::uint32 ProtocolBridgingType;
 typedef juce::uint8 ComsMode;
 
 
@@ -81,21 +82,6 @@ enum AutomationParameterIndex
 	ParamIdx_MaxIndex
 };
 
-/**
- * Protocol Bridging Type
- * Enum used to define different bridging types.
- */
-enum ProtocolBridgingType
-{
-	PBT_DiGiCo = 1,
-	PBT_GenericOSC,
-	PBT_BlacktraxRTTRP,
-	PBT_GenericMIDI,
-	PBT_YamahaSQ,
-	PBT_HUI,
-	PBT_Max						//< Number of bridging types.
-};
-
 
 /**
  * Data Change Type
@@ -118,6 +104,18 @@ static constexpr DataChangeType DCT_DelayMode				= 0x00000400; //< The En-Scene 
 static constexpr DataChangeType DCT_Bypass					= 0x00000800; //< The OSC Bypass parameter has changed.
 static constexpr DataChangeType DCT_AutomationParameters	= (DCT_SourcePosition | DCT_ReverbSendGain | DCT_SourceSpread | DCT_DelayMode | DCT_Bypass); //< All automation parameters.
 static constexpr DataChangeType DCT_DebugMessage			= 0x00001000; //< There is a new debug message to be displayed on the GUI.
+
+/**
+ * Protocol Bridging Type
+ * Bitfields used to define different bridging types.
+ */
+static constexpr ProtocolBridgingType PBT_None				= 0x00000000;
+static constexpr ProtocolBridgingType PBT_DiGiCo			= 0x00000001;
+static constexpr ProtocolBridgingType PBT_GenericOSC		= 0x00000002;
+static constexpr ProtocolBridgingType PBT_BlacktraxRTTRP	= 0x00000004;
+static constexpr ProtocolBridgingType PBT_GenericMIDI		= 0x00000008;
+static constexpr ProtocolBridgingType PBT_YamahaSQ			= 0x00000010;
+static constexpr ProtocolBridgingType PBT_HUI				= 0x00000020;
 
 
 /**

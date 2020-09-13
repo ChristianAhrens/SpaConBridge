@@ -120,7 +120,16 @@ bool ProtocolBridgingWrapper::setStateXml(XmlElement* stateXml)
 		m_bridgingXml = *stateXml;
 		auto nodeXmlElement = stateXml->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::NODE));
 		if (nodeXmlElement)
+		{
+			auto digicoProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DIGICO_PROCESSINGPROTOCOL_ID));
+			if (digicoProtocolXmlElement)
+				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_DiGiCo, *digicoProtocolXmlElement));
+			auto genericOSCProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(GENERICOSC_PROCESSINGPROTOCOL_ID));
+			if (genericOSCProtocolXmlElement)
+				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericOSC, *genericOSCProtocolXmlElement));
+
 			return m_processingNode.setStateXml(nodeXmlElement);
+		}
 	}
 	else
 	{
@@ -181,7 +190,34 @@ void ProtocolBridgingWrapper::SetupBridgingNode()
 	}
 
 	// DiGiCo protocol - RoleB
-	auto protocolBXmlElement = nodeXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLB));
+	auto digicoBridgingXmlElement = SetupDiGiCoBridgingProtocol();
+	if (digicoBridgingXmlElement)
+	{
+		m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_DiGiCo, *digicoBridgingXmlElement));
+		nodeXmlElement->addChildElement(digicoBridgingXmlElement.release());
+	}
+
+	// GenericOSC protocol - RoleB
+	auto genericOSCBridgingXmlElement = SetupGenericOSCBridgingProtocol();
+	if (genericOSCBridgingXmlElement)
+	{
+		m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericOSC, *genericOSCBridgingXmlElement));
+		nodeXmlElement->addChildElement(genericOSCBridgingXmlElement.release());
+	}
+
+	m_processingNode.setStateXml(nodeXmlElement.get());
+
+	m_bridgingXml.addChildElement(nodeXmlElement.release());
+}
+
+/**
+ * Method to create the default digico bridging protocol xml element.
+ * @return	The protocol xml element that was created
+ */
+std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupDiGiCoBridgingProtocol()
+{
+	// DiGiCo protocol - RoleB
+	auto protocolBXmlElement = std::make_unique<XmlElement>(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLB));
 	if (protocolBXmlElement)
 	{
 		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), DIGICO_PROCESSINGPROTOCOL_ID);
@@ -206,8 +242,17 @@ void ProtocolBridgingWrapper::SetupBridgingNode()
 			mutedChannelsXmlElement->createTextElement(String());
 	}
 
+	return protocolBXmlElement;
+}
+
+/**
+ * Method to create the default generic OSC bridging protocol xml element.
+ * @return	The protocol xml element that was created
+ */
+std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupGenericOSCBridgingProtocol()
+{
 	// GenericOSC protocol - RoleB
-	protocolBXmlElement = nodeXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLB));
+	auto protocolBXmlElement = std::make_unique<XmlElement>(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLB));
 	if (protocolBXmlElement)
 	{
 		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), GENERICOSC_PROCESSINGPROTOCOL_ID);
@@ -232,9 +277,7 @@ void ProtocolBridgingWrapper::SetupBridgingNode()
 			mutedChannelsXmlElement->createTextElement(String());
 	}
 
-	m_processingNode.setStateXml(nodeXmlElement.get());
-
-	m_bridgingXml.addChildElement(nodeXmlElement.release());
+	return protocolBXmlElement;
 }
 
 /**
@@ -521,6 +564,82 @@ bool ProtocolBridgingWrapper::SetProtocolRemotePort(ProtocolId protocolId, int r
 	}
 	else
 		return false;
+}
+
+/**
+ * Getter for the active protocol bridging types (active protocols RoleB - those are used for bridging to DS100 running as RoleA, see RemoteProtocolBridge for details)
+ * @return The bitfield containing all active bridging types
+ */
+ProtocolBridgingType ProtocolBridgingWrapper::GetActiveBridgingProtocols()
+{
+	ProtocolBridgingType activeBridgingTypes = PBT_None;
+
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DIGICO_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+			activeBridgingTypes |= PBT_DiGiCo;
+
+		protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(GENERICOSC_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+			activeBridgingTypes |= PBT_GenericOSC;
+	}
+
+	return activeBridgingTypes;
+}
+
+/**
+ * Setter for protocol bridging types that shall be active.
+ * @param	desiredActiveBridgingTypes	Bitfield containing all types that are to be active.
+ */
+void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType desiredActiveBridgingTypes)
+{
+	auto currentlyActiveBridgingTypes = GetActiveBridgingProtocols();
+
+	if (currentlyActiveBridgingTypes != desiredActiveBridgingTypes)
+	{
+		// we need to do something, since currently active protocols are not what the user wants any more
+		auto addDiGiCoBridging = ((desiredActiveBridgingTypes & PBT_DiGiCo) && !(currentlyActiveBridgingTypes & PBT_DiGiCo));
+		auto removeDiGiCoBridging = (!(desiredActiveBridgingTypes & PBT_DiGiCo) && (currentlyActiveBridgingTypes & PBT_DiGiCo));
+		auto addGenericOSCBridging = ((desiredActiveBridgingTypes & PBT_GenericOSC) && !(currentlyActiveBridgingTypes & PBT_GenericOSC));
+		auto removeGenericOSCBridging = (!(desiredActiveBridgingTypes & PBT_GenericOSC) && (currentlyActiveBridgingTypes & PBT_GenericOSC));
+
+		auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+		if (nodeXmlElement)
+		{
+			if (addDiGiCoBridging)
+			{
+				nodeXmlElement->addChildElement(std::make_unique<XmlElement>(m_bridgingProtocolCacheMap.at(PBT_DiGiCo)).release());
+			}
+			else if (removeDiGiCoBridging)
+			{
+				auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DIGICO_PROCESSINGPROTOCOL_ID));
+				if (protocolXmlElement)
+				{
+					m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_DiGiCo, *protocolXmlElement));
+					nodeXmlElement->removeChildElement(protocolXmlElement, true);
+				}
+			}
+
+			if (addGenericOSCBridging)
+			{
+				nodeXmlElement->addChildElement(std::make_unique<XmlElement>(m_bridgingProtocolCacheMap.at(PBT_GenericOSC)).release());
+			}
+			else if (removeGenericOSCBridging)
+			{
+				auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(GENERICOSC_PROCESSINGPROTOCOL_ID));
+				if (protocolXmlElement)
+				{
+					m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericOSC, *protocolXmlElement));
+					nodeXmlElement->removeChildElement(protocolXmlElement, true);
+				}
+			}
+
+			m_processingNode.setStateXml(nodeXmlElement);
+			triggerConfigurationUpdate(true);
+		}
+	}
 }
 
 /**

@@ -91,6 +91,9 @@ public:
 	void DeactivateSoundSourceId(SourceId sourceId, MappingId mappingId);
 
 	//==========================================================================
+	ProtocolBridgingType GetActiveProtocolBridging();
+	void SetActiveProtocolBridging(ProtocolBridgingType bridgingType);
+	
 	bool GetMuteBridgingSourceId(ProtocolBridgingType bridgingType, juce::int16 sourceId);
 	bool SetMuteBridgingSourceId(ProtocolBridgingType bridgingType, juce::int16 sourceId, bool mute);
 

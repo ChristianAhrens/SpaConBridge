@@ -37,8 +37,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../SoundsourceProcessor/SoundsourceProcessor.h"
 #include "../SoundsourceProcessor/SoundsourceProcessorEditor.h"
-#include "../Controller.h"
 #include "../SoundsourceProcessor/SurfaceSlider.h"
+
+#include "../Controller.h"
 
 #include <Image_utils.hpp>
 
@@ -434,6 +435,11 @@ TableModelComponent::TableModelComponent()
 	m_table.setOutlineThickness(1);
 	m_table.setClickingTogglesRowSelection(false);
 	m_table.setMultipleSelectionEnabled(true);
+
+	// register this object as config watcher
+	auto config = AppConfiguration::getInstance();
+	if (config)
+		config->addWatcher(this);
 }
 
 /**
@@ -901,6 +907,15 @@ void TableModelComponent::resized()
 	m_table.setBounds(getLocalBounds());
 }
 
+/**
+ * Overridden from AppConfiguration Watcher to be able
+ * to live react on config changes and update the table contents.
+ */
+void TableModelComponent::onConfigUpdated()
+{
+	UpdateTable();
+}
+
 
 /*
 ===============================================================================
@@ -1327,7 +1342,7 @@ void MuteButtonContainer::resized()
 		return;
 
 	auto bounds = getLocalBounds();
-	bounds.removeFromBottom(1);;
+	bounds.removeFromBottom(1);
 	auto singleButtonWidth = bounds.getWidth() / m_bridgingMutes.size();
 
 	for (auto& buttonKV : m_bridgingMutes)

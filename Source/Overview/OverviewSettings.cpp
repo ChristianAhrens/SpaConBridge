@@ -36,7 +36,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "OverviewSettings.h"
 
 #include "../Controller.h"
-#include "../AppConfiguration.h"
 
 
 namespace SoundscapeBridgeApp

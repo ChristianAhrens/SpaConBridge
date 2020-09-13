@@ -38,6 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../About.h"
 #include "../Gui.h"
 #include "../SoundscapeBridgeAppCommon.h"
+#include "../AppConfiguration.h"
 
 
 namespace SoundscapeBridgeApp
@@ -137,7 +138,8 @@ private:
  * Class TableModelComponent acts as a table model and a component at the same time.
  */
 class TableModelComponent : public Component,
-	public TableListBoxModel
+							public TableListBoxModel,
+							public AppConfiguration::Watcher
 {
 public:
 
@@ -171,8 +173,7 @@ public:
 	void UpdateTable();
 	TableListBox& GetTable() { return m_table; }
 
-
-	// Overriden methods from TableListBoxModel
+	//==========================================================================
 	void backgroundClicked(const MouseEvent &) override;
 	int getNumRows() override;
 	void paintRowBackground(Graphics& g, int rowNumber, int width, int height, bool rowIsSelected) override;
@@ -182,9 +183,11 @@ public:
 	int getColumnAutoSizeWidth(int columnId) override;
 	void selectedRowsChanged(int lastRowSelected) override;
 
-
-	// Overriden methods from Component
+	//==========================================================================
 	void resized() override;
+
+	//==========================================================================
+	void onConfigUpdated() override;
 
 	// Callback functions
 	std::function<void(ProcessorId)>	currentSelectedProcessorChanged;

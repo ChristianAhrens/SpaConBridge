@@ -162,10 +162,10 @@ void HeaderWithElmListComponent::paint(Graphics& g)
  */
 void HeaderWithElmListComponent::resized()
 {
-	auto headerHeight = 25;
+	auto headerHeight = 25.0f;
 	auto itemHeight = headerHeight;
-	auto itemMargin = 5;
-	auto headerMargin = 2;
+	auto itemMargin = 5.0f;
+	auto headerMargin = 2.0f;
 	auto itemCount = 0;
 
 	FlexBox headerfb;
@@ -345,13 +345,13 @@ void CSettingsComponent::resized()
 	fb.justifyContent = FlexBox::JustifyContent::flexStart;
 	fb.items.addArray({
 		FlexItem(*m_DS100Settings.get())
-			.withHeight(m_DS100Settings->getHeight())
+			.withHeight(static_cast<float>(m_DS100Settings->getHeight()))
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
 		FlexItem(*m_DiGiCoBridgingSettings.get())
-			.withHeight(m_DiGiCoBridgingSettings->getHeight())
+			.withHeight(static_cast<float>(m_DiGiCoBridgingSettings->getHeight()))
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
 		FlexItem(*m_GenericOSCBridgingSettings.get())
-			.withHeight(m_GenericOSCBridgingSettings->getHeight())
+			.withHeight(static_cast<float>(m_GenericOSCBridgingSettings->getHeight()))
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)) });
 	fb.performLayout(bounds);
 }

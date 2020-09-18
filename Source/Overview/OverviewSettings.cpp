@@ -259,8 +259,13 @@ CSettingsComponent::CSettingsComponent()
 	m_DS100IpAddressLabel = std::make_unique<CLabel>();
 	m_DS100IpAddressLabel->setText("IP Address", dontSendNotification);
 	m_DS100IpAddressLabel->attachToComponent(m_DS100IpAddressEdit.get(), true);
+	m_DS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>(false, false);
+	m_DS100ZeroconfDiscovery->onServiceSelected = [=](JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info) { handleDS100ServiceSelected(type, info); };
+	m_DS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC, RX_PORT_DS100_HOST);
+	m_DS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OCA);
 	m_DS100Settings->addComponent(m_DS100IpAddressLabel.get(), false, false);
 	m_DS100Settings->addComponent(m_DS100IpAddressEdit.get(), true, false);
+	m_DS100Settings->addComponent(m_DS100ZeroconfDiscovery.get(), true, false);
 
 	m_DS100Settings->resized();
 
@@ -506,6 +511,18 @@ void CSettingsComponent::processUpdatedConfig()
 		m_GenericOSCRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_GenericOSC)), false);
 }
 
+/**
+ * Callback method to be registered with ZeroconfDiscoveryComponent to handle user input regarding service selection.
+ * @param type	The service type that was selected
+ * @param info	The detailed info on the service that was selected
+ */
+void CSettingsComponent::handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info)
+{
+	if (type != JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_Unkown && info)
+	{
+		m_DS100IpAddressEdit->setText(info->ip, true);
+	}
+}
 
 /*
 ===============================================================================

@@ -128,9 +128,15 @@
                 file="submodules/JUCE-AppBasics/Source/AppConfigurationBase.h"/>
           <FILE id="GDtXdS" name="Image_utils.hpp" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Image_utils.hpp"/>
           <FILE id="yq1Bqf" name="iOS_utils.hpp" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/iOS_utils.hpp"/>
+          <FILE id="GxtIGk" name="ZeroconfDiscoverComponent.cpp" compile="1"
+                resource="0" file="submodules/JUCE-AppBasics/Source/ZeroconfDiscoverComponent.cpp"/>
+          <FILE id="wlldmg" name="ZeroconfDiscoverComponent.h" compile="0" resource="0"
+                file="submodules/JUCE-AppBasics/Source/ZeroconfDiscoverComponent.h"/>
         </GROUP>
         <GROUP id="{A1501CBC-FDBD-6A07-19CE-0B89ABD08D89}" name="Resources">
           <GROUP id="{49230987-3CBC-5512-5852-2C92F74CB3FC}" name="Images">
+            <FILE id="oihE0b" name="find_replace-24px.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/find_replace-24px.svg"/>
             <FILE id="N9NqBe" name="grain-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/grain-24px.svg"/>
             <FILE id="vVMBfg" name="settings-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/settings-24px.svg"/>

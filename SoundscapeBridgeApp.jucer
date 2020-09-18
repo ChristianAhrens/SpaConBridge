@@ -4,7 +4,8 @@
               bundleIdentifier="com.ChristianAhrens.SoundscapeBridgeApp" companyName="Christian Ahrens"
               companyEmail="christianahrens@me.com" displaySplashScreen="0"
               reportAppUsage="0" companyCopyright="2020" jucerFormatVersion="1"
-              headerPath="../../submodules/RemoteProtocolBridge/Source;&#10;../../submodules/JUCE-AppBasics/Source;">
+              headerPath="../../submodules/RemoteProtocolBridge/Source;&#10;../../submodules/JUCE-AppBasics/Source;"
+              defines="SERVUS_STATIC">
   <MAINGROUP id="cS7SrP" name="SoundscapeBridgeApp">
     <GROUP id="{F93FDF74-FF39-A47E-E403-31E5ADA7ADD3}" name="submodules">
       <GROUP id="{5D1CEB5A-DB08-BAC9-EF17-843234394AA4}" name="RemoteProtocolBridge">
@@ -88,6 +89,39 @@
       </GROUP>
       <GROUP id="{FAEFB6F6-97A8-A4B1-8911-35FBC344E2EF}" name="JUCE-AppBasics">
         <GROUP id="{AEF488F2-ECE4-B5B0-0BC4-9A3644EF8A18}" name="Source">
+          <GROUP id="{9DC096DA-91BA-7269-7279-360739D665F3}" name="Servus">
+            <GROUP id="{E9256957-8D38-B004-8077-6812D1D88FEB}" name="avahi">
+              <FILE id="LUL4V8" name="servus.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/avahi/servus.h"/>
+            </GROUP>
+            <GROUP id="{68DD6299-EF70-ED03-FF86-0CBA0B159CE2}" name="dnssd">
+              <FILE id="JCqzHd" name="servus.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/dnssd/servus.h"/>
+            </GROUP>
+            <GROUP id="{D20DC9DA-75CD-9546-88F1-BCAC8D625082}" name="md5">
+              <FILE id="AVALBo" name="md5.cc" compile="1" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/md5/md5.cc"/>
+              <FILE id="g5CkAc" name="md5.hh" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/md5/md5.hh"/>
+            </GROUP>
+            <GROUP id="{AC81F2E5-03B5-A116-7C44-5DCF6D317A34}" name="none">
+              <FILE id="pz5IMJ" name="servus.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/none/servus.h"/>
+            </GROUP>
+            <FILE id="KyRPg3" name="api.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/api.h"/>
+            <FILE id="vDKO10" name="defines.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/defines.h"/>
+            <FILE id="QbzSjx" name="definesDarwin.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/definesDarwin.h"/>
+            <FILE id="wIZuny" name="definesWin32.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/definesWin32.h"/>
+            <FILE id="UuxeOC" name="listener.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/listener.h"/>
+            <FILE id="ygXKpb" name="result.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/result.h"/>
+            <FILE id="UUQsfB" name="serializable.cpp" compile="1" resource="0"
+                  file="submodules/JUCE-AppBasics/Source/Servus/serializable.cpp"/>
+            <FILE id="Lq6495" name="serializable.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/serializable.h"/>
+            <FILE id="sJvywt" name="servus.cpp" compile="1" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/servus.cpp"/>
+            <FILE id="AgnNuU" name="servus.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/servus.h"/>
+            <FILE id="KdoLTK" name="types.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/types.h"/>
+            <FILE id="aIRn4g" name="uint128_t.cpp" compile="1" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/uint128_t.cpp"/>
+            <FILE id="toEKd2" name="uint128_t.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/uint128_t.h"/>
+            <FILE id="F5uPLJ" name="uri.cpp" compile="1" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/uri.cpp"/>
+            <FILE id="HH99Mv" name="uri.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/uri.h"/>
+            <FILE id="Yuozpo" name="version.cpp" compile="1" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/version.cpp"/>
+            <FILE id="mC6394" name="version.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/version.h"/>
+          </GROUP>
           <FILE id="vbXiyi" name="AppConfigurationBase.cpp" compile="1" resource="0"
                 file="submodules/JUCE-AppBasics/Source/AppConfigurationBase.cpp"/>
           <FILE id="YDW7K8" name="AppConfigurationBase.h" compile="0" resource="0"
@@ -176,8 +210,8 @@
   <EXPORTFORMATS>
     <VS2019 targetFolder="Builds/VisualStudio2019" smallIcon="ZgXgfh" bigIcon="ZgXgfh">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug"/>
-        <CONFIGURATION isDebug="0" name="Release"/>
+        <CONFIGURATION isDebug="1" name="Debug" headerPath="../../submodules/JUCE-AppBasics/Source/"/>
+        <CONFIGURATION isDebug="0" name="Release" headerPath="../../submodules/JUCE-AppBasics/Source/"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_osc"/>
@@ -194,8 +228,8 @@
     </VS2019>
     <XCODE_MAC targetFolder="Builds/MacOSX" smallIcon="ZgXgfh" bigIcon="ZgXgfh">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug"/>
-        <CONFIGURATION isDebug="0" name="Release"/>
+        <CONFIGURATION isDebug="1" name="Debug" headerPath="../../submodules/JUCE-AppBasics/Source/"/>
+        <CONFIGURATION isDebug="0" name="Release" headerPath="../../submodules/JUCE-AppBasics/Source/"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_osc"/>
@@ -216,8 +250,8 @@
                   iPadScreenOrientation="UIInterfaceOrientationLandscapeLeft,UIInterfaceOrientationLandscapeRight,UIInterfaceOrientationPortrait"
                   customLaunchStoryboard="Resources/Deployment/iOS/Launchscreen.storyboard">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug"/>
-        <CONFIGURATION isDebug="0" name="Release"/>
+        <CONFIGURATION isDebug="1" name="Debug" headerPath="../../submodules/JUCE-AppBasics/Source/"/>
+        <CONFIGURATION isDebug="0" name="Release" headerPath="../../submodules/JUCE-AppBasics/Source/"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_osc"/>

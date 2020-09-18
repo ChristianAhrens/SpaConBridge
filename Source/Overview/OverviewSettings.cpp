@@ -518,9 +518,13 @@ void CSettingsComponent::processUpdatedConfig()
  */
 void CSettingsComponent::handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info)
 {
-	if (type != JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_Unkown && info)
+	if (info)
 	{
 		m_DS100IpAddressEdit->setText(info->ip, true);
+        
+        CController* ctrl = CController::GetInstance();
+        if (ctrl)
+            ctrl->SetIpAddress(DCS_Gui, info->ip);
 	}
 }
 

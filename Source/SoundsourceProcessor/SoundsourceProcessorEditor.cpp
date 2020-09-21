@@ -164,15 +164,6 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 	m_displayNameLabel->setColour(Label::textColourId, CDbStyle::GetDbColor(CDbStyle::DarkTextColor));
 	addAndMakeVisible(m_displayNameLabel.get());
 
-#ifdef JUCE_DEBUG
-	// Special testfield for displaying debugging messages.
-	m_debugTextEdit = std::make_unique<TextEditor>("Debug");
-	m_debugTextEdit->setMultiLine(true, true);
-	m_debugTextEdit->setReadOnly(true);
-	m_debugTextEdit->setScrollbarsShown(true);
-	addAndMakeVisible(m_debugTextEdit.get());
-#endif
-
 	// Start GUI-refreshing timer.
 	startTimer(GUI_UPDATE_RATE_FAST);
 }
@@ -373,9 +364,6 @@ void SoundsourceProcessorEditor::resized()
 	surfaceSliderBounds.removeFromLeft(ySliderStripWidth);
 	surfaceSliderBounds.removeFromBottom(xSliderStripWidth);
 	m_surfaceSlider->setBounds(surfaceSliderBounds);
-#ifdef JUCE_DEBUG	
-	m_debugTextEdit->setBounds(surfaceSliderBounds.reduced(8));
-#endif
 	
 	// X Slider
 	auto xSliderBounds = twoDSurfaceArea;
@@ -524,15 +512,6 @@ void SoundsourceProcessorEditor::UpdateGui(bool init)
 			// Update the displayName (Host probably called updateTrackProperties or changeProgramName)
 			m_displayNameLabel->setText(pro->getProgramName(0), dontSendNotification);
 		}
-
-#ifdef JUCE_DEBUG
-		if (pro->PopParameterChanged(DCS_Gui, DCT_DebugMessage))
-		{
-			// Append newest messages.
-			m_debugTextEdit->moveCaretToEnd();
-			m_debugTextEdit->insertTextAtCaret(pro->FlushDebugMessages());
-		}
-#endif
 	}
 
 	if (somethingChanged)

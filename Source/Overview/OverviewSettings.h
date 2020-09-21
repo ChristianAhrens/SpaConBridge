@@ -40,6 +40,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../SoundscapeBridgeAppCommon.h"
 #include "../AppConfiguration.h"
 
+#include "../submodules/JUCE-AppBasics/Source/ZeroconfDiscoverComponent.h"
+
 
 namespace SoundscapeBridgeApp
 {
@@ -111,14 +113,18 @@ private:
 	//==========================================================================
 	void textEditorUpdated(TextEditor&);
 
+	//==============================================================================
+	void handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info);
+
 	// input filters for texteditors
 	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_ipAddressEditFilter;
 	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_portEditFilter;
 
 	// DS100 settings section
-	std::unique_ptr<HeaderWithElmListComponent>	m_DS100Settings;
-	std::unique_ptr<CTextEditor>				m_DS100IpAddressEdit;
-	std::unique_ptr<CLabel>						m_DS100IpAddressLabel;
+	std::unique_ptr<HeaderWithElmListComponent>					m_DS100Settings;
+	std::unique_ptr<CTextEditor>								m_DS100IpAddressEdit;
+	std::unique_ptr<CLabel>										m_DS100IpAddressLabel;
+	std::unique_ptr<JUCEAppBasics::ZeroconfDiscoverComponent>	m_DS100ZeroconfDiscovery;
 
 	// DiGiCo settings section
 	std::unique_ptr<HeaderWithElmListComponent>	m_DiGiCoBridgingSettings;

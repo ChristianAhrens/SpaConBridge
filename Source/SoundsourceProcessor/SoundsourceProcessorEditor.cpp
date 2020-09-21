@@ -377,7 +377,7 @@ void SoundsourceProcessorEditor::resized()
 
 	//==============================================================================
 	bool paramSliderLabelVisible = true;
-	if (parameterEditArea.getHeight() < 250)
+	if (parameterEditArea.getHeight() < 265 && !isPortrait)
 		paramSliderLabelVisible = false;
 	auto labelHeight = 25;
 	auto sliderHeight = paramSliderLabelVisible ? 75 : 55;
@@ -392,11 +392,13 @@ void SoundsourceProcessorEditor::resized()
 		// ReverbSendGain Slider
 		m_reverbSendGainLabel->setBounds(Rectangle<int>(hPos, vPos, labelSliderWidth, labelHeight));
 		m_reverbSendGainSlider->setBounds(Rectangle<int>(hPos, vPos + 18, labelSliderWidth, sliderHeight));
+        m_reverbSendGainSlider->setTextBoxStyle(paramSliderLabelVisible ? Slider::TextBoxBelow : Slider::NoTextBox, false, 80, 20);
 		hPos += 85;
 
 		// SourceSpread Slider
 		m_sourceSpreadLabel->setBounds(Rectangle<int>(hPos, vPos, labelSliderWidth, labelHeight));
 		m_sourceSpreadSlider->setBounds(Rectangle<int>(hPos, vPos + 18, labelSliderWidth, sliderHeight));
+        m_sourceSpreadSlider->setTextBoxStyle(paramSliderLabelVisible ? Slider::TextBoxBelow : Slider::NoTextBox, false, 80, 20);
 		hPos += 85;
 
 		// DelayMode ComboBox

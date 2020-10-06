@@ -172,12 +172,15 @@ void CController::SetParameterChanged(DataChangeSource changeSource, DataChangeT
 	case DCT_None:
 	case DCT_IPAddress:
 	case DCT_MessageRate:
-	case DCT_Online:
 	case DCT_OscConfig:
 	case DCT_SourceID:
 	case DCT_MappingID:
 	case DCT_ComsMode:
 	case DCT_PluginInstanceConfig:
+		if (changeSource != DCS_Init)
+			triggerConfigurationUpdate(true);
+		break;
+	case DCT_Online:
 	case DCT_SourcePosition:
 	case DCT_ReverbSendGain:
 	case DCT_SourceSpread:
@@ -186,8 +189,6 @@ void CController::SetParameterChanged(DataChangeSource changeSource, DataChangeT
 	case DCT_AutomationParameters:
 	case DCT_DebugMessage:
 	default:
-		if(changeSource != DCS_Init)
-			triggerConfigurationUpdate(true);
 		break;
 	}
 }

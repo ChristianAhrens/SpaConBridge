@@ -1358,11 +1358,14 @@ void MuteButtonContainer::resized()
 	auto bounds = getLocalBounds();
 	bounds.removeFromBottom(1);
 	auto singleButtonWidth = bounds.getWidth() / m_bridgingMutes.size();
+    
+    auto buttonText = ((1.5f * bounds.getHeight()) > singleButtonWidth) ? "M" : "Mute";
 
 	for (auto& buttonKV : m_bridgingMutes)
 	{
 		auto buttonRect = bounds.removeFromLeft(singleButtonWidth).reduced(2);
 		buttonKV.second.setBounds(buttonRect);
+        buttonKV.second.setName(buttonText);
 	}
 }
 

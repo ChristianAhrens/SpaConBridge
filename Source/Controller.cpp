@@ -809,7 +809,7 @@ bool CController::setStateXml(XmlElement* stateXml)
 			if (!alreadyExists)
 			{
 				auto newProcessor =	std::make_unique<SoundsourceProcessor>();
-				jassert(newProcessor->GetProcessorId() == elementProcessorId);
+				newProcessor->SetProcessorId(DCS_Host, elementProcessorId);
 				auto p = newProcessor.release();
 				jassert(m_processors.contains(p));
 				p->setStateXml(processorXmlElement);

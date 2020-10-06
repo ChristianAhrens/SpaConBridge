@@ -378,13 +378,17 @@ void SoundsourceProcessor::OnOverviewButtonClicked()
 std::unique_ptr<XmlElement> SoundsourceProcessor::createStateXml()
 {
 	auto processorInstanceXmlElement = std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE) + String(GetProcessorId()));
-
-	auto processorComsModeXmlElement = processorInstanceXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORCOMSMODE));
-	if (processorComsModeXmlElement)
+	if (processorInstanceXmlElement)
 	{
-		auto comsMode = GetComsMode();
-		auto processorComsModeTextXmlElement = processorComsModeXmlElement->createTextElement(String(static_cast<int>(comsMode)));
-		processorComsModeXmlElement->addChildElement(processorComsModeTextXmlElement);
+		processorInstanceXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORSOURCEID), static_cast<int>(GetSourceId()));
+
+		auto processorComsModeXmlElement = processorInstanceXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORCOMSMODE));
+		if (processorComsModeXmlElement)
+		{
+			auto comsMode = GetComsMode();
+			auto processorComsModeTextXmlElement = processorComsModeXmlElement->createTextElement(String(static_cast<int>(comsMode)));
+			processorComsModeXmlElement->addChildElement(processorComsModeTextXmlElement);
+		}
 	}
 
     return processorInstanceXmlElement;
@@ -400,6 +404,8 @@ bool SoundsourceProcessor::setStateXml(XmlElement* stateXml)
 {
 	if (!stateXml || (stateXml->getTagName() != (AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE) + String(GetProcessorId()))))
 		return false;
+
+	SetSourceId(DCS_Host, stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORSOURCEID)));
 
 	auto processorComsModeXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORCOMSMODE));
 	if (processorComsModeXmlElement)
@@ -615,6 +621,9 @@ void SoundsourceProcessor::SetSourceId(DataChangeSource changeSource, SourceId s
 
 		// Signal change to other modules in the plugin.
 		SetParameterChanged(changeSource, DCT_SourceID);
+
+		// finally trigger config update
+		triggerConfigurationUpdate(false);
 	}
 }
 

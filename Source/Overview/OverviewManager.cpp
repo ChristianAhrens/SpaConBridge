@@ -38,7 +38,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Overview.h"
 
 #include "../SoundsourceProcessor/SoundsourceProcessor.h"
-#include "../SoundsourceProcessor/SoundsourceProcessorEditor.h"
 #include "../Controller.h"
 #include "../SoundsourceProcessor/SurfaceSlider.h"
 

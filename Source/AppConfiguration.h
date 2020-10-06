@@ -44,6 +44,21 @@ public:
         }
 	};
 
+	enum AttributeID
+	{
+		PROCESSORSOURCEID,
+	};
+	static String getAttributeName(AttributeID Id)
+	{
+		switch (Id)
+		{
+        case PROCESSORSOURCEID:
+            return "ProcSrcId";
+		default:
+			return "INVALID";
+		}
+	};
+
 public:
 	AppConfiguration(const File &file);
 	~AppConfiguration() override;

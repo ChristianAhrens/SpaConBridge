@@ -89,6 +89,11 @@ OverviewTableContainer::OverviewTableContainer()
 	m_selectNone->setEnabled(true);
 	m_selectNone->addListener(this);
 	addAndMakeVisible(m_selectNone.get());
+
+	// register this object as config watcher
+	auto config = AppConfiguration::getInstance();
+	if (config)
+		config->addWatcher(this);
 }
 
 /**
@@ -211,18 +216,20 @@ void OverviewTableContainer::buttonClicked(Button *button)
 			}
 			else
 			{
-				auto const& processorIds = m_overviewTable->GetSelectedRows();
+				auto const& selectedProcessorIds = m_overviewTable->GetSelectedRows();
 
-				if (ctrl->GetProcessorCount() <= processorIds.size())
+				if (ctrl->GetProcessorCount() <= selectedProcessorIds.size())
 					onCurrentSelectedProcessorChanged(INVALID_PROCESSOR_ID);
 				else
 				{
-					ProcessorId nextStillExistingId = static_cast<ProcessorId>(ctrl->GetProcessorCount() - processorIds.size());
+					auto processorCount = ctrl->GetProcessorCount();
+					auto currentLastProcessorId = processorCount - 1;
+					auto selectedProcessorsToRemoveCount = selectedProcessorIds.size();
+					auto nextStillExistingId = static_cast<ProcessorId>(currentLastProcessorId - selectedProcessorsToRemoveCount);
 					m_overviewTable->selectedRowsChanged(nextStillExistingId);
-					//onCurrentSelectedProcessorChanged(nextStillExistingId);
 				}
 
-				for (auto processorId : processorIds)
+				for (auto processorId : selectedProcessorIds)
 				{
 					if (ctrl->GetProcessorCount() >= 1)
 						auto processor = std::unique_ptr<SoundsourceProcessor>(ctrl->GetProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
@@ -242,10 +249,11 @@ void OverviewTableContainer::onCurrentSelectedProcessorChanged(ProcessorId selec
 		if (m_selectedProcessorInstanceEditor)
 		{
 			removeChildComponent(m_selectedProcessorInstanceEditor.get());
-			m_selectedProcessorInstanceEditor.release();
+			m_selectedProcessorInstanceEditor.reset();
 			resized();
 		}
 
+		// since we just removed the editor after the last table row was removed, the remove button must be deactivated as well
 		m_removeInstance->setEnabled(false);
 	}
 	else
@@ -254,13 +262,24 @@ void OverviewTableContainer::onCurrentSelectedProcessorChanged(ProcessorId selec
 		if (ctrl)
 		{
 			auto processor = ctrl->GetProcessor(selectedProcessorId);
-			m_selectedProcessorInstanceEditor = std::make_unique<SoundsourceProcessorEditor>(*processor);
-			addAndMakeVisible(m_selectedProcessorInstanceEditor.get());
-			m_selectedProcessorInstanceEditor->UpdateGui(true);
-			resized();
-		}
+			auto processorEditor = processor->createEditorIfNeeded();
+			auto sspEditor = dynamic_cast<SoundsourceProcessorEditor*>(processorEditor);
+			if (sspEditor != m_selectedProcessorInstanceEditor.get())
+			{
+				removeChildComponent(m_selectedProcessorInstanceEditor.get());
+				m_selectedProcessorInstanceEditor.reset();
+				m_selectedProcessorInstanceEditor = std::unique_ptr<SoundsourceProcessorEditor>(sspEditor);
+				if (m_selectedProcessorInstanceEditor)
+				{
+					addAndMakeVisible(m_selectedProcessorInstanceEditor.get());
+					m_selectedProcessorInstanceEditor->UpdateGui(true);
+				}
+				resized();
 
-		m_removeInstance->setEnabled(true);
+				// since we just added another editor, remove button can be enabled (regardless of if it already was enabled)
+				m_removeInstance->setEnabled(true);
+			}
+		}
 	}
 }
 
@@ -293,6 +312,15 @@ void OverviewTableContainer::UpdateGui(bool init)
 			}
 		}
 	}
+}
+
+/**
+ * Overridden from AppConfiguration Watcher to be able
+ * to live react on config changes and update the table contents.
+ */
+void OverviewTableContainer::onConfigUpdated()
+{
+	UpdateGui(false);
 }
 
 
@@ -435,11 +463,6 @@ TableModelComponent::TableModelComponent()
 	m_table.setOutlineThickness(1);
 	m_table.setClickingTogglesRowSelection(false);
 	m_table.setMultipleSelectionEnabled(true);
-
-	// register this object as config watcher
-	auto config = AppConfiguration::getInstance();
-	if (config)
-		config->addWatcher(this);
 }
 
 /**
@@ -905,15 +928,6 @@ void TableModelComponent::selectedRowsChanged(int lastRowSelected)
 void TableModelComponent::resized()
 {
 	m_table.setBounds(getLocalBounds());
-}
-
-/**
- * Overridden from AppConfiguration Watcher to be able
- * to live react on config changes and update the table contents.
- */
-void TableModelComponent::onConfigUpdated()
-{
-	UpdateTable();
 }
 
 

@@ -166,6 +166,8 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 
 	// Start GUI-refreshing timer.
 	startTimer(GUI_UPDATE_RATE_FAST);
+
+	setSize(20, 20);
 }
 
 /**
@@ -174,6 +176,8 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 SoundsourceProcessorEditor::~SoundsourceProcessorEditor()
 {
 	stopTimer();
+
+	processor.editorBeingDeleted(this);
 }
 
 /**

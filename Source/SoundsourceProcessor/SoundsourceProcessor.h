@@ -114,25 +114,21 @@ public:
 #endif
 
 	// Overriden functions of class AppConfiguration::XmlConfigurableElement
-
 	std::unique_ptr<XmlElement> createStateXml() override;
 	bool setStateXml(XmlElement* stateXml) override;
 
 	// Overriden functions of class AudioProcessor
-
 	virtual void getStateInformation(MemoryBlock& destData) override;
 	virtual void setStateInformation(const void* data, int sizeInBytes) override;
 	virtual void updateTrackProperties(const TrackProperties& properties) override;
 	virtual AudioProcessorParameter* getBypassParameter() const override;
 
 	// Overriden functions of class AudioProcessorParameter::Listener
-
 	virtual void parameterValueChanged(int parameterIndex, float newValue) override;
 	virtual void parameterGestureChanged(int parameterIndex, bool gestureIsStarting) override;
 
 	// Functions which need to be reimplemented from class AudioProcessor, but which 
 	// aren't relevant for our use.
-
 	bool acceptsMidi() const override;
 	void changeProgramName(int index, const String& newName) override;
 	AudioProcessorEditor* createEditor() override;

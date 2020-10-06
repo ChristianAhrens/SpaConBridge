@@ -15,7 +15,6 @@
 #include "Overview/Overview.h"
 #include "Overview/OverviewManager.h"
 
-#include "SoundsourceProcessor/SoundsourceProcessorEditor.h"
 #include "SoundsourceProcessor/SoundsourceProcessor.h"
 
 #include <iOS_utils.hpp>
@@ -64,6 +63,7 @@ MainSoundscapeBridgeAppComponent::~MainSoundscapeBridgeAppComponent()
     {
         auto overview = ovrMgr->GetOverview();
         removeChildComponent(overview);
+        ovrMgr->CloseOverview(true);
     }
 
     auto ctrl = SoundscapeBridgeApp::CController::GetInstance();

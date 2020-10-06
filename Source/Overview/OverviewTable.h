@@ -62,8 +62,9 @@ class SoundsourceProcessorEditor;
  * Class OverviewTableContainer is just a component which contains the overview table 
  * and it's quick selection buttons.
  */
-class OverviewTableContainer : public AOverlay,
-	public Button::Listener
+class OverviewTableContainer :	public AOverlay,
+								public Button::Listener,
+								public AppConfiguration::Watcher
 {
 public:
 	OverviewTableContainer();
@@ -73,6 +74,9 @@ public:
 	void buttonClicked(Button*) override;
 
 	void onCurrentSelectedProcessorChanged(ProcessorId selectedProcessorId);
+
+	//==========================================================================
+	void onConfigUpdated() override;
 
 protected:
 	void paint(Graphics&) override;
@@ -138,8 +142,7 @@ private:
  * Class TableModelComponent acts as a table model and a component at the same time.
  */
 class TableModelComponent : public Component,
-							public TableListBoxModel,
-							public AppConfiguration::Watcher
+							public TableListBoxModel
 {
 public:
 
@@ -185,9 +188,6 @@ public:
 
 	//==========================================================================
 	void resized() override;
-
-	//==========================================================================
-	void onConfigUpdated() override;
 
 	// Callback functions
 	std::function<void(ProcessorId)>	currentSelectedProcessorChanged;

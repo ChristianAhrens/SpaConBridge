@@ -12,6 +12,18 @@
         <GROUP id="{101B7526-C17E-A526-9CCF-9B16385E1D4F}" name="Source">
           <GROUP id="{7BEDE2E7-D445-0646-3278-7EE2B5985D06}" name="ProcessingEngine">
             <GROUP id="{E942E9CB-791F-AAD7-FE92-FD5DE9A476C6}" name="ObjectDataHandling">
+              <GROUP id="{87A64548-B49E-C1F3-7B13-1C5ADEB22427}" name="Reverse_B_to_A_only">
+                <FILE id="aLJDUz" name="Reverse_B_to_A_only.cpp" compile="1" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ObjectDataHandling/Reverse_B_to_A_only/Reverse_B_to_A_only.cpp"/>
+                <FILE id="Ew5xgb" name="Reverse_B_to_A_only.h" compile="0" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ObjectDataHandling/Reverse_B_to_A_only/Reverse_B_to_A_only.h"/>
+              </GROUP>
+              <GROUP id="{0E52538D-F25C-1F1C-9351-00729D636E99}" name="Forward_A_to_B_only">
+                <FILE id="vB54nO" name="Forward_A_to_B_only.cpp" compile="1" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ObjectDataHandling/Forward_A_to_B_only/Forward_A_to_B_only.cpp"/>
+                <FILE id="peleqy" name="Forward_A_to_B_only.h" compile="0" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ObjectDataHandling/Forward_A_to_B_only/Forward_A_to_B_only.h"/>
+              </GROUP>
               <GROUP id="{46902F9A-189C-CE71-4F7B-DD512B71B27B}" name="Remap_A_X_Y_to_B_XY_Handling">
                 <FILE id="xGykBk" name="Remap_A_X_Y_to_B_XY_Handling.cpp" compile="1"
                       resource="0" file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ObjectDataHandling/Remap_A_X_Y_to_B_XY_Handling/Remap_A_X_Y_to_B_XY_Handling.cpp"/>

@@ -237,9 +237,7 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupDiGiCoBridgingProtocol
 		if (ipAdressXmlElement)
 			ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
 
-		auto mutedChannelsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDCHANNELS));
-		if (mutedChannelsXmlElement)
-			mutedChannelsXmlElement->createTextElement(String());
+		protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDCHANNELS));
 	}
 
 	return protocolBXmlElement;
@@ -272,9 +270,7 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupGenericOSCBridgingProt
 		if (ipAdressXmlElement)
 			ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
 
-		auto mutedChannelsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDCHANNELS));
-		if (mutedChannelsXmlElement)
-			mutedChannelsXmlElement->createTextElement(String());
+		protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDCHANNELS));
 	}
 
 	return protocolBXmlElement;

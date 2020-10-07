@@ -211,8 +211,7 @@ void OverviewTableContainer::buttonClicked(Button *button)
 		{
 			if (addInstance)
 			{
-				auto processor = std::make_unique<SoundscapeBridgeApp::SoundsourceProcessor>();
-				processor.release(); // let go of the instance here, we do not want to destroy it, since it lives as member of CCOntroller when constructed
+				ctrl->createNewProcessor();
 			}
 			else
 			{

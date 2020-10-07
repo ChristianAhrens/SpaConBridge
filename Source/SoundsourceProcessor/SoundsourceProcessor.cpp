@@ -61,7 +61,7 @@ static constexpr int DEFAULT_COORD_MAPPING = 1;		//< Default coordinate mapping
 /**
  * Class constructor for the processor.
  */
-SoundsourceProcessor::SoundsourceProcessor()
+SoundsourceProcessor::SoundsourceProcessor(bool insertToConfig)
 {
 	// Automation parameters.
 	m_xPos = new CAudioParameterFloat("x_pos", "x", 0.0f, 1.0f, 0.001f, 0.5f);
@@ -108,7 +108,7 @@ SoundsourceProcessor::SoundsourceProcessor()
 	// Register this new plugin instance to the singleton CController object's internal list.
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
-		m_processorId = ctrl->AddProcessor(this);
+		m_processorId = ctrl->AddProcessor(insertToConfig ? DCS_Host : DCS_Init, this);
 }
 
 /**
@@ -623,7 +623,8 @@ void SoundsourceProcessor::SetSourceId(DataChangeSource changeSource, SourceId s
 		SetParameterChanged(changeSource, DCT_SourceID);
 
 		// finally trigger config update
-		triggerConfigurationUpdate(false);
+		if (changeSource != DCS_Init)
+			triggerConfigurationUpdate(false);
 	}
 }
 

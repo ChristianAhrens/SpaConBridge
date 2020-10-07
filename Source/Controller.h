@@ -71,7 +71,8 @@ public:
 	bool PopParameterChanged(DataChangeSource changeSource, DataChangeType change);
 	void SetParameterChanged(DataChangeSource changeSource, DataChangeType changeTypes);
 
-	ProcessorId AddProcessor(SoundsourceProcessor* p);
+	void createNewProcessor();
+	ProcessorId AddProcessor(DataChangeSource changeSource, SoundsourceProcessor* p);
 	void RemoveProcessor(SoundsourceProcessor* p);
 	int GetProcessorCount() const;
 	SoundsourceProcessor* GetProcessor(ProcessorId idx) const;

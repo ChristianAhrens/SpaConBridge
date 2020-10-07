@@ -69,7 +69,7 @@ public:
 		TargetHost_S6L
 	};
 
-	SoundsourceProcessor();
+	SoundsourceProcessor(bool insertToConfig = true);
 	~SoundsourceProcessor() override;
 
 	int GetProcessorId() const;

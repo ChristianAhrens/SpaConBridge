@@ -222,11 +222,22 @@ bool CController::PopParameterChanged(DataChangeSource changeSource, DataChangeT
 }
 
 /**
- * Register a processor instance to the local list of processors. 
- * @param p		Pointer to newly crated processor processor object.
- * @return		The ProcessorId of the newly added processor.
+ * Helper method to create a new processor incl. implicit triggering of
+ * inserting it into xml config (by setting constructor bool flag to insertToConfig=true)
  */
-ProcessorId CController::AddProcessor(SoundsourceProcessor* p)
+void CController::createNewProcessor()
+{
+	auto processor = std::make_unique<SoundscapeBridgeApp::SoundsourceProcessor>(true);
+	processor.release(); // let go of the instance here, we do not want to destroy it, since it lives as member of CCOntroller when constructed
+}
+
+/**
+ * Register a processor instance to the local list of processors. 
+ * @param changeSource	The application module which is causing the property change.
+ * @param p				Pointer to newly crated processor processor object.
+ * @return				The ProcessorId of the newly added processor.
+ */
+ProcessorId CController::AddProcessor(DataChangeSource changeSource, SoundsourceProcessor* p)
 {
 	const ScopedLock lock(m_mutex);
 
@@ -242,15 +253,15 @@ ProcessorId CController::AddProcessor(SoundsourceProcessor* p)
 	ProcessorId newProcessorId = static_cast<ProcessorId>(m_processors.size() - 1);
 
 	// Set the new Processor's id
-	p->SetProcessorId(DCS_Init, newProcessorId);
+	p->SetProcessorId(changeSource, newProcessorId);
 	
 #ifdef JUCE_DEBUG
 	p->PushDebugMessage("CController::AddProcessor: #" + String(newProcessorId));
 #endif
-	SetParameterChanged(DCS_Protocol, DCT_NumProcessors);
+	SetParameterChanged(changeSource, DCT_NumProcessors);
 
 	// Set the new Processor's InputID to the next in sequence.
-	p->SetSourceId(DCS_Protocol, currentMaxSourceId + 1);
+	p->SetSourceId(changeSource, currentMaxSourceId + 1);
 
 	return newProcessorId;
 }
@@ -808,14 +819,12 @@ bool CController::setStateXml(XmlElement* stateXml)
 
 			if (!alreadyExists)
 			{
-				auto newProcessor =	std::make_unique<SoundsourceProcessor>();
-				newProcessor->SetProcessorId(DCS_Host, elementProcessorId);
+				auto newProcessor =	std::make_unique<SoundsourceProcessor>(false);
+				newProcessor->SetProcessorId(DCS_Init, elementProcessorId);
 				auto p = newProcessor.release();
 				jassert(m_processors.contains(p));
 				p->setStateXml(processorXmlElement);
 			}
-
-
 		}
 
 		auto ovrMgr = COverviewManager::GetInstance();

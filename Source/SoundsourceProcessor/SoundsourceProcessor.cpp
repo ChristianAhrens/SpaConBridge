@@ -96,8 +96,8 @@ SoundsourceProcessor::SoundsourceProcessor()
 	m_mappingId = DEFAULT_COORD_MAPPING; // Default: coordinate mapping 1.
 	m_processorId = INVALID_PROCESSOR_ID;
 
-	// Default OSC communication mode. In the console version, default is "sync" mode.
-	m_comsMode = CM_Tx;
+	// Default OSC communication mode.
+	m_comsMode = CM_Off;
 	m_comsModeWhenNotBypassed = m_comsMode;
 
 	// Start with all parameter changed flags cleared. Function setStateInformation() 

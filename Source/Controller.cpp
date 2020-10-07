@@ -435,7 +435,6 @@ void CController::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, 
 		return;
 
 	const ScopedLock lock(m_mutex);
-	jassert(m_processors.size() > 0);
 
 	if (m_processors.size() > 0)
 	{

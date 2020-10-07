@@ -18,7 +18,6 @@ public:
         CONTROLLER,
         SOUNDSOURCEPROCESSORS,
         PROCESSORINSTANCE,
-        PROCESSORCOMSMODE,
 		BRIDGING,
     };
     static String getTagName(TagID ID)
@@ -35,8 +34,6 @@ public:
             return "SoundsourceProcessors";
         case PROCESSORINSTANCE:
             return "Proc";
-        case PROCESSORCOMSMODE:
-            return "ComsMode";
         case BRIDGING:
             return "Bridging";
 		default:
@@ -47,6 +44,8 @@ public:
 	enum AttributeID
 	{
 		PROCESSORSOURCEID,
+        PROCESSORMAPPINGID,
+        PROCESSORCOMSMODE,
 	};
 	static String getAttributeName(AttributeID Id)
 	{
@@ -54,6 +53,10 @@ public:
 		{
         case PROCESSORSOURCEID:
             return "ProcSrcId";
+        case PROCESSORMAPPINGID:
+            return "MappingId";
+        case PROCESSORCOMSMODE:
+            return "ComsMode";
 		default:
 			return "INVALID";
 		}

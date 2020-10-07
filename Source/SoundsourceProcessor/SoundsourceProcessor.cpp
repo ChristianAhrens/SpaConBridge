@@ -381,14 +381,8 @@ std::unique_ptr<XmlElement> SoundsourceProcessor::createStateXml()
 	if (processorInstanceXmlElement)
 	{
 		processorInstanceXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORSOURCEID), static_cast<int>(GetSourceId()));
-
-		auto processorComsModeXmlElement = processorInstanceXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORCOMSMODE));
-		if (processorComsModeXmlElement)
-		{
-			auto comsMode = GetComsMode();
-			auto processorComsModeTextXmlElement = processorComsModeXmlElement->createTextElement(String(static_cast<int>(comsMode)));
-			processorComsModeXmlElement->addChildElement(processorComsModeTextXmlElement);
-		}
+        processorInstanceXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORMAPPINGID), static_cast<int>(GetMappingId()));
+        processorInstanceXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORCOMSMODE), static_cast<int>(GetComsMode()));
 	}
 
     return processorInstanceXmlElement;
@@ -405,21 +399,9 @@ bool SoundsourceProcessor::setStateXml(XmlElement* stateXml)
 	if (!stateXml || (stateXml->getTagName() != (AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE) + String(GetProcessorId()))))
 		return false;
 
-	SetSourceId(DCS_Host, stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORSOURCEID)));
-
-	auto processorComsModeXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORCOMSMODE));
-	if (processorComsModeXmlElement)
-	{
-		jassert(processorComsModeXmlElement->getNumChildElements() == 1);
-		auto processorComsModeTextXmlElement = processorComsModeXmlElement->getFirstChildElement();
-		if (processorComsModeTextXmlElement)
-		{
-			auto comsMode = static_cast<ComsMode>(processorComsModeTextXmlElement->getText().getIntValue());
-			SetComsMode(DCS_Host, comsMode);
-		}
-	}
-	else
-		return false;
+	SetSourceId(DCS_Init, static_cast<SourceId>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORSOURCEID))));
+    SetMappingId(DCS_Init, static_cast<MappingId>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORMAPPINGID))));
+    SetComsMode(DCS_Init, static_cast<ComsMode>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORCOMSMODE))));
 
 	return true;
 }
@@ -542,7 +524,7 @@ void SoundsourceProcessor::SetComsMode(DataChangeSource changeSource, ComsMode n
 
 		// Activate the corresponding soundsource id in controller
 		CController* ctrl = CController::GetInstance();
-		if (ctrl)
+		if (ctrl && (changeSource != DCS_Init))
 		{
 			if (m_comsMode & CM_Rx)
 				ctrl->ActivateSoundSourceId(GetSourceId(), GetMappingId());
@@ -595,6 +577,10 @@ void SoundsourceProcessor::SetMappingId(DataChangeSource changeSource, MappingId
 
 		// Signal change to other modules in the plugin.
 		SetParameterChanged(changeSource, dct);
+        
+        // finally trigger config update
+        if (changeSource != DCS_Init)
+            triggerConfigurationUpdate(false);
 	}
 }
 
@@ -621,10 +607,10 @@ void SoundsourceProcessor::SetSourceId(DataChangeSource changeSource, SourceId s
 
 		// Signal change to other modules in the plugin.
 		SetParameterChanged(changeSource, DCT_SourceID);
-
-		// finally trigger config update
-		if (changeSource != DCS_Init)
-			triggerConfigurationUpdate(false);
+        
+        // finally trigger config update
+        if (changeSource != DCS_Init)
+            triggerConfigurationUpdate(false);
 	}
 }
 
@@ -716,15 +702,15 @@ void SoundsourceProcessor::InitializeSettings(int sourceId, int mappingId, Strin
 	if (ctrl)
 	{
 		jassert(sourceId > 128);
-		SetSourceId(DCS_Host, static_cast<MappingId>(sourceId));
+		SetSourceId(DCS_Init, static_cast<MappingId>(sourceId));
 		jassert(mappingId > 4);
-		SetMappingId(DCS_Host, static_cast<MappingId>(mappingId));
-		SetComsMode(DCS_Host, newMode);
+		SetMappingId(DCS_Init, static_cast<MappingId>(mappingId));
+		SetComsMode(DCS_Init, newMode);
 
 		// Only overwite the current IP settings if they haven't been changed from the defaults.
 		if (GetIpAddress() == ctrl->GetDefaultIpAddress())
 		{
-			ctrl->InitGlobalSettings(DCS_Host, ipAddress, oscMsgRate);
+			ctrl->InitGlobalSettings(DCS_Init, ipAddress, oscMsgRate);
 		}
 	}
 }

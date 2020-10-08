@@ -94,6 +94,7 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 
 		// Label for X slider
 		m_xAxisLabel = std::make_unique<Label>(param->name, param->name);
+		m_xAxisLabel->setJustificationType(Justification::centred);
 		addAndMakeVisible(m_xAxisLabel.get());
 
 		//--- Y Slider ---//
@@ -107,6 +108,7 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 
 		// Label for Y slider
 		m_yAxisLabel = std::make_unique<Label>(param->name, param->name);
+		m_yAxisLabel->setJustificationType(Justification::centred);
 		addAndMakeVisible(m_yAxisLabel.get());
 
 		if (params.size() == ParamIdx_MaxIndex)
@@ -122,6 +124,7 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 
 			// Label for ReverbSendGain
 			m_reverbSendGainLabel = std::make_unique<Label>(param->name, param->name);
+			m_reverbSendGainLabel->setJustificationType(Justification::centred);
 			addAndMakeVisible(m_reverbSendGainLabel.get());
 
 			//--- SourceSpread Slider ---//
@@ -135,6 +138,7 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 
 			// Label for SourceSpread
 			m_sourceSpreadLabel = std::make_unique<Label>(param->name, param->name);
+			m_sourceSpreadLabel->setJustificationType(Justification::centred);
 			addAndMakeVisible(m_sourceSpreadLabel.get());
 
 			//--- DelayMode ComboBox ---//
@@ -154,6 +158,7 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 
 			// Label for DelayMode
 			m_delayModeLabel = std::make_unique<Label>(choiceParam->name, choiceParam->name);
+			m_delayModeLabel->setJustificationType(Justification::centred);
 			addAndMakeVisible(m_delayModeLabel.get());
 		}
 	}

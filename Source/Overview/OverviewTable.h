@@ -83,40 +83,13 @@ protected:
 	void resized() override;
 
 private:
-	/**
-	 * The actual table model / component inside this component.
-	 */
-	std::unique_ptr<TableModelComponent> m_overviewTable;
-
-	/**
-	 * The processor editor component corresponding to the selected row
-	 */
-	std::unique_ptr<SoundsourceProcessorEditor> m_selectedProcessorInstanceEditor;
-
-	/**
-	 * Button to add a processor instance
-	 */
-	std::unique_ptr<CButton> m_addInstance;
-
-	/**
-	 * Button to remove the selected processor instance
-	 */
-	std::unique_ptr<CButton> m_removeInstance;
-
-	/**
-	 * Quick select label
-	 */
-	std::unique_ptr<Label>	m_selectLabel;
-
-	/**
-	 * Select all rows button.
-	 */
-	std::unique_ptr<CButton> m_selectAll;
-
-	/**
-	 * Select no rows button.
-	 */
-	std::unique_ptr<CButton> m_selectNone;
+	std::unique_ptr<TableModelComponent>		m_overviewTable;					/**> The actual table model / component inside this component. */
+	std::unique_ptr<SoundsourceProcessorEditor> m_selectedProcessorInstanceEditor;	/**> The processor editor component corresponding to the selected row */
+	std::unique_ptr<CButton>					m_addInstance;						/**> Button to add a processor instance */
+	std::unique_ptr<CButton>					m_removeInstance;					/**> Button to remove the selected processor instance */
+	std::unique_ptr<Label>						m_selectLabel;						/**> Quick select label */
+	std::unique_ptr<CButton>					m_selectAll;						/**> Select all rows button. */
+	std::unique_ptr<CButton>					m_selectNone;						/**> Select no rows button. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OverviewTableContainer)
 };
@@ -291,25 +264,10 @@ public:
 	void SetRow(int newRow);
 
 private:
-	/**
-	 * Table where this component is contained.
-	 */
-	TableModelComponent&	m_owner;
-
-	/**
-	 * Actual Tx button.
-	 */
-	CButton				m_txButton;
-
-	/**
-	 * Actual Rx button.
-	 */
-	CButton				m_rxButton;
-
-	/**
-	 * Row number where this component is located inside the table.
-	 */
-	int						m_row;
+	TableModelComponent&	m_owner;	/**> Table where this component is contained. */
+	CButton					m_txButton;	/**> Actual Tx button. */
+	CButton					m_rxButton;	/**> Actual Rx button. */
+	int						m_row;		/**> Row number where this component is located inside the table. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RadioButtonContainer)
 };

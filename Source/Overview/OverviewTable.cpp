@@ -78,6 +78,7 @@ OverviewTableContainer::OverviewTableContainer()
 
 	// Create quick selection buttons
 	m_selectLabel = std::make_unique<Label>("Select:", "Select:");
+	m_selectLabel->setJustificationType(Justification::centred);
 	addAndMakeVisible(m_selectLabel.get());
 
 	m_selectAll = std::make_unique<CButton>("All");

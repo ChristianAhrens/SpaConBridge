@@ -55,12 +55,14 @@ HeaderWithElmListComponent::HeaderWithElmListComponent(const String& componentNa
 	: Component(componentName)
 {
 	m_headerLabel = std::make_unique<Label>();
+	m_headerLabel->setJustificationType(Justification::centred);
 	addAndMakeVisible(m_headerLabel.get());
 
 	m_activeToggle = std::make_unique<ToggleButton>();
 	m_activeToggle->onClick = [this] { onToggleActive(); };
 	addAndMakeVisible(m_activeToggle.get());
 	m_activeToggleLabel = std::make_unique<Label>();
+	m_activeToggleLabel->setJustificationType(Justification::centred);
 	m_activeToggleLabel->attachToComponent(m_activeToggle.get(), true);
 	addAndMakeVisible(m_activeToggleLabel.get());
 
@@ -257,6 +259,7 @@ CSettingsComponent::CSettingsComponent()
 	m_DS100IpAddressEdit->addListener(this);
 	m_DS100IpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
 	m_DS100IpAddressLabel = std::make_unique<Label>();
+	m_DS100IpAddressLabel->setJustificationType(Justification::centred);
 	m_DS100IpAddressLabel->setText("IP Address", dontSendNotification);
 	m_DS100IpAddressLabel->attachToComponent(m_DS100IpAddressEdit.get(), true);
 	m_DS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>(false, false);
@@ -280,6 +283,7 @@ CSettingsComponent::CSettingsComponent()
 	m_DiGiCoIpAddressEdit->addListener(this);
 	m_DiGiCoIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
 	m_DiGiCoIpAddressLabel = std::make_unique<Label>();
+	m_DiGiCoIpAddressLabel->setJustificationType(Justification::centred);
 	m_DiGiCoIpAddressLabel->setText("IP Address", dontSendNotification);
 	m_DiGiCoIpAddressLabel->attachToComponent(m_DiGiCoIpAddressEdit.get(), true);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoIpAddressLabel.get(), false, false);
@@ -289,6 +293,7 @@ CSettingsComponent::CSettingsComponent()
 	m_DiGiCoListeningPortEdit->addListener(this);
 	m_DiGiCoListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
 	m_DiGiCoListeningPortLabel = std::make_unique<Label>();
+	m_DiGiCoListeningPortLabel->setJustificationType(Justification::centred);
 	m_DiGiCoListeningPortLabel->setText("Listening Port", dontSendNotification);
 	m_DiGiCoListeningPortLabel->attachToComponent(m_DiGiCoListeningPortEdit.get(), true);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoListeningPortLabel.get(), false, false);
@@ -298,6 +303,7 @@ CSettingsComponent::CSettingsComponent()
 	m_DiGiCoRemotePortEdit->addListener(this);
 	m_DiGiCoRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
 	m_DiGiCoRemotePortLabel = std::make_unique<Label>();
+	m_DiGiCoRemotePortLabel->setJustificationType(Justification::centred);
 	m_DiGiCoRemotePortLabel->setText("Remote Port", dontSendNotification);
 	m_DiGiCoRemotePortLabel->attachToComponent(m_DiGiCoRemotePortEdit.get(), true);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoRemotePortLabel.get(), false, false);
@@ -316,6 +322,7 @@ CSettingsComponent::CSettingsComponent()
 	m_GenericOSCIpAddressEdit->addListener(this);
 	m_GenericOSCIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
 	m_GenericOSCIpAddressLabel = std::make_unique<Label>();
+	m_GenericOSCIpAddressLabel->setJustificationType(Justification::centred);
 	m_GenericOSCIpAddressLabel->setText("IP Address", dontSendNotification);
 	m_GenericOSCIpAddressLabel->attachToComponent(m_GenericOSCIpAddressEdit.get(), true);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCIpAddressLabel.get(), false, false);
@@ -325,6 +332,7 @@ CSettingsComponent::CSettingsComponent()
 	m_GenericOSCListeningPortEdit->addListener(this);
 	m_GenericOSCListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
 	m_GenericOSCListeningPortLabel = std::make_unique<Label>();
+	m_GenericOSCListeningPortLabel->setJustificationType(Justification::centred);
 	m_GenericOSCListeningPortLabel->setText("Listening Port", dontSendNotification);
 	m_GenericOSCListeningPortLabel->attachToComponent(m_GenericOSCListeningPortEdit.get(), true);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCListeningPortLabel.get(), false, false);
@@ -334,6 +342,7 @@ CSettingsComponent::CSettingsComponent()
 	m_GenericOSCRemotePortEdit->addListener(this);
 	m_GenericOSCRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
 	m_GenericOSCRemotePortLabel = std::make_unique<Label>();
+	m_GenericOSCRemotePortLabel->setJustificationType(Justification::centred);
 	m_GenericOSCRemotePortLabel->setText("Remote Port", dontSendNotification);
 	m_GenericOSCRemotePortLabel->attachToComponent(m_GenericOSCRemotePortEdit.get(), true);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCRemotePortLabel.get(), false, false);
@@ -552,6 +561,7 @@ CSettingsContainer::CSettingsContainer()
 	m_useRawConfigButton->onClick = [this] { onToggleRawConfigVisible(); };
 	addAndMakeVisible(m_useRawConfigButton.get());
 	m_useRawConfigLabel = std::make_unique<Label>("RAW CFG", "Show raw config");
+	m_useRawConfigLabel->setJustificationType(Justification::centred);
 	m_useRawConfigLabel->attachToComponent(m_useRawConfigButton.get(), true);
 	addAndMakeVisible(m_useRawConfigLabel.get());
 	onToggleRawConfigVisible();

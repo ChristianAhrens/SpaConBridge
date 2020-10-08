@@ -73,7 +73,7 @@ static constexpr int GUI_UPDATE_RATE_SLOW = 120;
 COverviewComponent::COverviewComponent()
 {
 	// Online
-	m_onlineLabel = std::make_unique<CLabel>("Online Label", "Online:");
+	m_onlineLabel = std::make_unique<Label>("Online Label", "Online:");
 	addAndMakeVisible(m_onlineLabel.get());
 	m_onlineLed = std::make_unique<CButton>("");
 	m_onlineLed->setEnabled(false);
@@ -85,20 +85,20 @@ COverviewComponent::COverviewComponent()
 	m_rateTextEdit->SetSuffix("ms");
 	m_rateTextEdit->addListener(this);
 	addAndMakeVisible(m_rateTextEdit.get());
-	m_rateLabel = std::make_unique<CLabel>("OSC Send Rate", "Interval:");
+	m_rateLabel = std::make_unique<Label>("OSC Send Rate", "Interval:");
 	addAndMakeVisible(m_rateLabel.get());
 
 	// d&b logo and Plugin version label
 	m_appLogo = ImageCache::getFromMemory(BinaryData::SoundscapeBridgeApp_png, BinaryData::SoundscapeBridgeApp_pngSize);
-	m_versionLabel = std::make_unique<CLabel>("PluginVersion", String(JUCE_STRINGIFY(JUCE_APP_VERSION)));
+	m_versionLabel = std::make_unique<Label>("PluginVersion", String(JUCE_STRINGIFY(JUCE_APP_VERSION)));
 	m_versionLabel->setFont(Font(11));
 	addAndMakeVisible(m_versionLabel.get());
-	m_nameLabel = std::make_unique<CLabel>("PluginName", "Version");
+	m_nameLabel = std::make_unique<Label>("PluginName", "Version");
 	m_nameLabel->setFont(Font(11));
 	m_nameLabel->setColour(Label::textColourId, CDbStyle::GetDbColor(CDbStyle::DarkTextColor));
 	addAndMakeVisible(m_nameLabel.get());
 
-	m_titleLabel = std::make_unique<CLabel>("Title", "");
+	m_titleLabel = std::make_unique<Label>("Title", "");
 	addAndMakeVisible(m_titleLabel.get());
 
 	// Create the table container.

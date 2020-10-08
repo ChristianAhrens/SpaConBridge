@@ -77,65 +77,18 @@ private:
 	void timerCallback() override;
 
 private:
-	/**
-	 * App version label
-	 */
-	std::unique_ptr<CLabel>			m_versionLabel;
-
-	/**
-	 * App name
-	 */
-	std::unique_ptr<CLabel>			m_nameLabel;
-
-	/**
-	 * Overview title label
-	 */
-	std::unique_ptr<CLabel>			m_titleLabel;
-
-	/*
-	 * Logo image.
-	 */
-	Image							m_appLogo;
-
-	/**
-	 * Send/receive rate label
-	 */
-	std::unique_ptr<CLabel>			m_rateLabel;
-
-	/**
-	 * Text editor for the OSC send/receive rate in ms.
-	 */
-	std::unique_ptr<CTextEditor>	m_rateTextEdit;
-
-	/**
-	 * Online indicator label
-	 */
-	std::unique_ptr<CLabel>			m_onlineLabel;
-
-	/**
-	 * Button used as Online indicator LED.
-	 */
-	std::unique_ptr<CButton>		m_onlineLed;
-
-	/**
-	 * A container for tabs.
-	 */
-	std::unique_ptr<CTabbedComponent> m_tabbedComponent;
-
-	/**
-	 * The actual table container inside this component.
-	 */
-	std::unique_ptr<OverviewTableContainer> m_tableContainer;
-
-	/**
-	 * Container for multi-slider.
-	 */
-	std::unique_ptr<COverviewMultiSurface> m_multiSliderContainer;
-
-	/**
-	 * Container for settings component.
-	 */
-	std::unique_ptr<CSettingsContainer> m_settingsContainer;
+	std::unique_ptr<Label>					m_versionLabel;			/**> App version label. */
+	std::unique_ptr<Label>					m_nameLabel;			/**> App name. */
+	std::unique_ptr<Label>					m_titleLabel;			/**> Overview title label. */
+	Image									m_appLogo;				/**> Logo image. */
+	std::unique_ptr<Label>					m_rateLabel;			/**> Send/receive rate label. */
+	std::unique_ptr<CTextEditor>			m_rateTextEdit;			/**> Text editor for the OSC send/receive rate in ms. */
+	std::unique_ptr<Label>					m_onlineLabel;			/**> Online indicator label. */
+	std::unique_ptr<CButton>				m_onlineLed;			/**> Button used as Online indicator LED. */
+	std::unique_ptr<CTabbedComponent>		m_tabbedComponent;		/**> A container for tabs. */
+	std::unique_ptr<OverviewTableContainer> m_tableContainer;		/**> The actual table container inside this component. */
+	std::unique_ptr<COverviewMultiSurface>	m_multiSliderContainer;	/**> Container for multi-slider. */
+	std::unique_ptr<CSettingsContainer>		m_settingsContainer;	/**> Container for settings component. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(COverviewComponent)
 };

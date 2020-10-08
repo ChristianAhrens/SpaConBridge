@@ -56,7 +56,7 @@ AAboutOverlay::AAboutOverlay()
 	// Plugin version label
 	String versionString = String("Soundscape Plug-in V") + String(JUCE_STRINGIFY(JUCE_APP_VERSION));
 	versionString += String("\nCopyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2017-2019\nd&b audiotechnik GmbH & Co. KG,\nall rights reserved.");
-	m_versionLabel = std::make_unique<CLabel>("PluginVersion", versionString);
+	m_versionLabel = std::make_unique<Label>("PluginVersion", versionString);
 	m_versionLabel->setJustificationType(Justification::topLeft);
 	m_versionLabel->setFont(Font(13.0, Font::plain));
 	addAndMakeVisible(m_versionLabel.get());
@@ -99,7 +99,7 @@ AAboutOverlay::AAboutOverlay()
 
 	// JUCE copyright label
 	String juceLabelString = String("Made with JUCE.\nCopyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2017 - ROLI Ltd.");
-	m_juceLabel = std::make_unique<CLabel>("JuceLabel", juceLabelString);
+	m_juceLabel = std::make_unique<Label>("JuceLabel", juceLabelString);
 	m_juceLabel->setJustificationType(Justification::topRight);
 	m_juceLabel->setFont(Font(13.0, Font::plain));
 	addAndMakeVisible(m_juceLabel.get());
@@ -170,7 +170,7 @@ CAboutOverlayGeneric::CAboutOverlayGeneric()
 	// Plugin version label
 	String formatString = String("Audio Units (AU) Plug-in format. \nThe Audio Units logo is a trademark of Apple Computer, Inc. \nCopyright ") +
 		String(CharPointer_UTF8("\xc2\xa9")) + String(" 2005 Apple Computer, Inc. All rights reserved.");
-	m_formatInfoLabel = std::make_unique<CLabel>("FormatInfo", formatString);
+	m_formatInfoLabel = std::make_unique<Label>("FormatInfo", formatString);
 	m_formatInfoLabel->setJustificationType(Justification::topLeft);
 	m_formatInfoLabel->setFont(Font(13.0, Font::plain));
 	addAndMakeVisible(m_formatInfoLabel.get());

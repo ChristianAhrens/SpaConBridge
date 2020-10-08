@@ -63,7 +63,7 @@ private:
 	/**
 	 * App version label
 	 */
-	std::unique_ptr<CLabel>	m_versionLabel;
+	std::unique_ptr<Label>	m_versionLabel;
 
 	/**
 	 * Hyperlink to dbaudio.com
@@ -73,7 +73,7 @@ private:
 	/**
 	 * JUCE copyright label
 	 */
-	std::unique_ptr<CLabel>	m_juceLabel;
+	std::unique_ptr<Label>	m_juceLabel;
 
 	/**
 	 * Text field containing the d&b EULA.
@@ -102,7 +102,7 @@ private:
 	/**
 	 * Host format license into
 	 */
-	std::unique_ptr<CLabel>	m_formatInfoLabel;
+	std::unique_ptr<Label>	m_formatInfoLabel;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CAboutOverlayGeneric)
 };

@@ -65,7 +65,7 @@ COverviewMultiSurface::COverviewMultiSurface()
 	addAndMakeVisible(m_multiSlider.get());
 
 	// Add mapping label
-	m_posAreaLabel = std::make_unique<CLabel>("Coordinate mapping label", "View mapping:");
+	m_posAreaLabel = std::make_unique<Label>("Coordinate mapping label", "View mapping:");
 	addAndMakeVisible(m_posAreaLabel.get());
 
 	// Add mapping selector

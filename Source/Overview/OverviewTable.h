@@ -106,7 +106,7 @@ private:
 	/**
 	 * Quick select label
 	 */
-	std::unique_ptr<CLabel>	m_selectLabel;
+	std::unique_ptr<Label>	m_selectLabel;
 
 	/**
 	 * Select all rows button.

@@ -85,7 +85,7 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 	{
 		//--- X Slider ---//
 		AudioParameterFloat* param = dynamic_cast<AudioParameterFloat*> (params[ParamIdx_X]);
-		m_xSlider = std::make_unique<CSlider>(param->name);
+		m_xSlider = std::make_unique<Slider>(param->name);
 		m_xSlider->setRange(param->range.start, param->range.end, param->range.interval);
 		m_xSlider->setSliderStyle(Slider::LinearHorizontal);
 		m_xSlider->setTextBoxStyle(Slider::TextBoxBelow, false, 80, 20);
@@ -93,12 +93,12 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 		addAndMakeVisible(m_xSlider.get());
 
 		// Label for X slider
-		m_xAxisLabel = std::make_unique<CLabel>(param->name, param->name);
+		m_xAxisLabel = std::make_unique<Label>(param->name, param->name);
 		addAndMakeVisible(m_xAxisLabel.get());
 
 		//--- Y Slider ---//
 		param = dynamic_cast<AudioParameterFloat*> (params[ParamIdx_Y]);
-		m_ySlider = std::make_unique<CSlider>(param->name);
+		m_ySlider = std::make_unique<Slider>(param->name);
 		m_ySlider->setRange(param->range.start, param->range.end, param->range.interval);
 		m_ySlider->setSliderStyle(Slider::LinearVertical);
 		m_ySlider->setTextBoxStyle(Slider::TextBoxLeft, false, 80, 20);
@@ -106,7 +106,7 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 		addAndMakeVisible(m_ySlider.get());
 
 		// Label for Y slider
-		m_yAxisLabel = std::make_unique<CLabel>(param->name, param->name);
+		m_yAxisLabel = std::make_unique<Label>(param->name, param->name);
 		addAndMakeVisible(m_yAxisLabel.get());
 
 		if (params.size() == ParamIdx_MaxIndex)
@@ -121,7 +121,7 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 			addAndMakeVisible(m_reverbSendGainSlider.get());
 
 			// Label for ReverbSendGain
-			m_reverbSendGainLabel = std::make_unique<CLabel>(param->name, param->name);
+			m_reverbSendGainLabel = std::make_unique<Label>(param->name, param->name);
 			addAndMakeVisible(m_reverbSendGainLabel.get());
 
 			//--- SourceSpread Slider ---//
@@ -134,7 +134,7 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 			addAndMakeVisible(m_sourceSpreadSlider.get());
 
 			// Label for SourceSpread
-			m_sourceSpreadLabel = std::make_unique<CLabel>(param->name, param->name);
+			m_sourceSpreadLabel = std::make_unique<Label>(param->name, param->name);
 			addAndMakeVisible(m_sourceSpreadLabel.get());
 
 			//--- DelayMode ComboBox ---//
@@ -153,13 +153,13 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 			addAndMakeVisible(m_delayModeComboBox.get());
 
 			// Label for DelayMode
-			m_delayModeLabel = std::make_unique<CLabel>(choiceParam->name, choiceParam->name);
+			m_delayModeLabel = std::make_unique<Label>(choiceParam->name, choiceParam->name);
 			addAndMakeVisible(m_delayModeLabel.get());
 		}
 	}
 
 	// Label for Plugin' display name.
-	m_displayNameLabel = std::make_unique<CLabel>("DisplayName");
+	m_displayNameLabel = std::make_unique<Label>("DisplayName");
 	m_displayNameLabel->setJustificationType(Justification(Justification::centredLeft));
 	m_displayNameLabel->setColour(Label::textColourId, CDbStyle::GetDbColor(CDbStyle::DarkTextColor));
 	addAndMakeVisible(m_displayNameLabel.get());
@@ -185,7 +185,7 @@ SoundsourceProcessorEditor::~SoundsourceProcessorEditor()
  * @param slider	The slider object for which the parameter is desired.
  * @return			The desired plugin parameter.
  */
-CAudioParameterFloat* SoundsourceProcessorEditor::GetParameterForSlider(CSlider* slider)
+CAudioParameterFloat* SoundsourceProcessorEditor::GetParameterForSlider(Slider* slider)
 {
 	const Array<AudioProcessorParameter*>& params = getAudioProcessor()->getParameters();
 	if (slider == m_xSlider.get())
@@ -235,7 +235,7 @@ void SoundsourceProcessorEditor::sliderValueChanged(Slider* slider)
  */
 void SoundsourceProcessorEditor::sliderDragStarted(Slider* slider)
 {
-	if (CAudioParameterFloat* param = GetParameterForSlider(static_cast<CSlider*>(slider)))
+	if (CAudioParameterFloat* param = GetParameterForSlider(static_cast<Slider*>(slider)))
 		param->BeginGuiGesture();
 }
 
@@ -245,7 +245,7 @@ void SoundsourceProcessorEditor::sliderDragStarted(Slider* slider)
  */
 void SoundsourceProcessorEditor::sliderDragEnded(Slider* slider)
 {
-	if (CAudioParameterFloat* param = GetParameterForSlider(static_cast<CSlider*>(slider)))
+	if (CAudioParameterFloat* param = GetParameterForSlider(static_cast<Slider*>(slider)))
 		param->EndGuiGesture();
 }
 

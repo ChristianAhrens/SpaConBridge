@@ -256,7 +256,7 @@ CSettingsComponent::CSettingsComponent()
 	m_DS100IpAddressEdit = std::make_unique<CTextEditor>();
 	m_DS100IpAddressEdit->addListener(this);
 	m_DS100IpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
-	m_DS100IpAddressLabel = std::make_unique<CLabel>();
+	m_DS100IpAddressLabel = std::make_unique<Label>();
 	m_DS100IpAddressLabel->setText("IP Address", dontSendNotification);
 	m_DS100IpAddressLabel->attachToComponent(m_DS100IpAddressEdit.get(), true);
 	m_DS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>(false, false);
@@ -279,7 +279,7 @@ CSettingsComponent::CSettingsComponent()
 	m_DiGiCoIpAddressEdit = std::make_unique<CTextEditor>();
 	m_DiGiCoIpAddressEdit->addListener(this);
 	m_DiGiCoIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
-	m_DiGiCoIpAddressLabel = std::make_unique<CLabel>();
+	m_DiGiCoIpAddressLabel = std::make_unique<Label>();
 	m_DiGiCoIpAddressLabel->setText("IP Address", dontSendNotification);
 	m_DiGiCoIpAddressLabel->attachToComponent(m_DiGiCoIpAddressEdit.get(), true);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoIpAddressLabel.get(), false, false);
@@ -288,7 +288,7 @@ CSettingsComponent::CSettingsComponent()
 	m_DiGiCoListeningPortEdit = std::make_unique<CTextEditor>();
 	m_DiGiCoListeningPortEdit->addListener(this);
 	m_DiGiCoListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
-	m_DiGiCoListeningPortLabel = std::make_unique<CLabel>();
+	m_DiGiCoListeningPortLabel = std::make_unique<Label>();
 	m_DiGiCoListeningPortLabel->setText("Listening Port", dontSendNotification);
 	m_DiGiCoListeningPortLabel->attachToComponent(m_DiGiCoListeningPortEdit.get(), true);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoListeningPortLabel.get(), false, false);
@@ -297,7 +297,7 @@ CSettingsComponent::CSettingsComponent()
 	m_DiGiCoRemotePortEdit = std::make_unique<CTextEditor>();
 	m_DiGiCoRemotePortEdit->addListener(this);
 	m_DiGiCoRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
-	m_DiGiCoRemotePortLabel = std::make_unique<CLabel>();
+	m_DiGiCoRemotePortLabel = std::make_unique<Label>();
 	m_DiGiCoRemotePortLabel->setText("Remote Port", dontSendNotification);
 	m_DiGiCoRemotePortLabel->attachToComponent(m_DiGiCoRemotePortEdit.get(), true);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoRemotePortLabel.get(), false, false);
@@ -315,7 +315,7 @@ CSettingsComponent::CSettingsComponent()
 	m_GenericOSCIpAddressEdit = std::make_unique<CTextEditor>();
 	m_GenericOSCIpAddressEdit->addListener(this);
 	m_GenericOSCIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
-	m_GenericOSCIpAddressLabel = std::make_unique<CLabel>();
+	m_GenericOSCIpAddressLabel = std::make_unique<Label>();
 	m_GenericOSCIpAddressLabel->setText("IP Address", dontSendNotification);
 	m_GenericOSCIpAddressLabel->attachToComponent(m_GenericOSCIpAddressEdit.get(), true);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCIpAddressLabel.get(), false, false);
@@ -324,7 +324,7 @@ CSettingsComponent::CSettingsComponent()
 	m_GenericOSCListeningPortEdit = std::make_unique<CTextEditor>();
 	m_GenericOSCListeningPortEdit->addListener(this);
 	m_GenericOSCListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
-	m_GenericOSCListeningPortLabel = std::make_unique<CLabel>();
+	m_GenericOSCListeningPortLabel = std::make_unique<Label>();
 	m_GenericOSCListeningPortLabel->setText("Listening Port", dontSendNotification);
 	m_GenericOSCListeningPortLabel->attachToComponent(m_GenericOSCListeningPortEdit.get(), true);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCListeningPortLabel.get(), false, false);
@@ -333,7 +333,7 @@ CSettingsComponent::CSettingsComponent()
 	m_GenericOSCRemotePortEdit = std::make_unique<CTextEditor>();
 	m_GenericOSCRemotePortEdit->addListener(this);
 	m_GenericOSCRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
-	m_GenericOSCRemotePortLabel = std::make_unique<CLabel>();
+	m_GenericOSCRemotePortLabel = std::make_unique<Label>();
 	m_GenericOSCRemotePortLabel->setText("Remote Port", dontSendNotification);
 	m_GenericOSCRemotePortLabel->attachToComponent(m_GenericOSCRemotePortEdit.get(), true);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCRemotePortLabel.get(), false, false);

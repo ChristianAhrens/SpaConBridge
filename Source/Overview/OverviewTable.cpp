@@ -77,7 +77,7 @@ OverviewTableContainer::OverviewTableContainer()
 	addAndMakeVisible(m_removeInstance.get());
 
 	// Create quick selection buttons
-	m_selectLabel = std::make_unique<CLabel>("Select:", "Select:");
+	m_selectLabel = std::make_unique<Label>("Select:", "Select:");
 	addAndMakeVisible(m_selectLabel.get());
 
 	m_selectAll = std::make_unique<CButton>("All");

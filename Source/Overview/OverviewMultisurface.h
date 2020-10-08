@@ -71,7 +71,7 @@ private:
 	/*
 	 * Mapping selector label
 	 */
-	std::unique_ptr<CLabel>	m_posAreaLabel;
+	std::unique_ptr<Label>	m_posAreaLabel;
 
 	/**
 	 * ComboBox selector for the coordinate mapping area

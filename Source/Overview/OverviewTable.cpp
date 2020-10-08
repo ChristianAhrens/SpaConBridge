@@ -1295,7 +1295,10 @@ void MuteButtonContainer::updateBridgingMuteButtons()
 	{
 		if (((activeBridging & type) == type) && (m_bridgingMutes.count(type) == 0))
 		{
-			m_bridgingMutes[type].setName("Mute");
+			m_bridgingMutes[type].setButtonText("Mute");
+			m_bridgingMutes[type].setClickingTogglesState(true);
+			m_bridgingMutes[type].setColour(TextButton::ColourIds::buttonColourId, CDbStyle::GetDbColor(CDbStyle::ButtonColor));
+			m_bridgingMutes[type].setColour(TextButton::ColourIds::buttonOnColourId, CDbStyle::GetDbColor(CDbStyle::ButtonRedColor).brighter(0.05f));
 			m_bridgingMutes[type].setEnabled(true);
 			m_bridgingMutes[type].addListener(this);
 			addAndMakeVisible(&m_bridgingMutes.at(type));

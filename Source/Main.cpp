@@ -2,6 +2,8 @@
 
 #include "MainSoundscapeBridgeAppComponent.h"
 
+#include "LookAndFeel.h"
+
 namespace SoundscapeBridgeApp
 {
 
@@ -53,6 +55,9 @@ public:
             .findColour(ResizableWindow::backgroundColourId),
             DocumentWindow::allButtons)
         {
+            m_customLookAndFeel = std::unique_ptr<LookAndFeel>(new DarkLookAndFeel);
+            Desktop::getInstance().setDefaultLookAndFeel(m_customLookAndFeel.get());
+
             m_mainComponent = std::make_unique<MainSoundscapeBridgeAppComponent>();
 
             setUsingNativeTitleBar(true);
@@ -84,7 +89,8 @@ public:
         */
 
     private:
-        std::unique_ptr<MainSoundscapeBridgeAppComponent>  m_mainComponent;
+        std::unique_ptr<LookAndFeel>	                    m_customLookAndFeel; // our own look and feel implementation instance
+        std::unique_ptr<MainSoundscapeBridgeAppComponent>   m_mainComponent;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainWindow)
     };

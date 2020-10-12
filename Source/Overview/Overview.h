@@ -36,8 +36,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include "../About.h"
-#include "../Gui.h"
 #include "../SoundscapeBridgeAppCommon.h"
+#include "../LookAndFeel.h"
 
 
 namespace SoundscapeBridgeApp
@@ -77,31 +77,34 @@ protected:
 		bool on = getToggleState();
 		bool enabled = isEnabled();
 
+		auto blueColour = Colours::blue;
+		auto lookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+		if (lookAndFeel)
+			blueColour = lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonBlueColor);
+
 		// Button's main colour
 		if (on)
 		{
-			Colour col = DbStyle::GetDbColor(DbStyle::ButtonBlueColor);
 			if (isButtonDown)
-				col = col.brighter(0.1f);
+				blueColour = blueColour.brighter(0.1f);
 			else if (isMouseOverButton)
-				col = col.brighter(0.05f);
-			g.setColour(col);
+				blueColour = blueColour.brighter(0.05f);
+			g.setColour(blueColour);
 		}
 		else
 		{
-			Colour col = DbStyle::GetDbColor(DbStyle::ButtonColor);
+			Colour col = getLookAndFeel().findColour(TextButton::buttonColourId);
 			if (!enabled)
-				col = getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker();
+				col = getLookAndFeel().findColour(TextEditor::backgroundColourId);
 			else if (isButtonDown)
-				col = DbStyle::GetDbColor(DbStyle::ButtonBlueColor).brighter(0.05f);
+				col = blueColour.brighter(0.05f);
 			else if (isMouseOverButton)
-				col = getLookAndFeel().findColour(ResizableWindow::backgroundColourId).brighter(0.05f);
+				col = getLookAndFeel().findColour(TextEditor::backgroundColourId).brighter(0.05f);
 			g.setColour(col);
 		}
 
 		g.fillRoundedRectangle(buttonRectF, 10);
-		//g.setColour(CDbStyle::GetDbColor(CDbStyle::WindowColor));
-		g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
+		g.setColour(getLookAndFeel().findColour(TextEditor::outlineColourId));
 		g.drawRoundedRectangle(buttonRectF, 10, 1);
 	}
 

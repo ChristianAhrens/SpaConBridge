@@ -86,9 +86,6 @@ AboutOverlay::AboutOverlay()
 		"10. This Agreement shall be governed by the laws of Germany.\n" \
 		"If you have any questions concerning this Agreement, please contact d&b audiotechnik's support.");
 	m_eulaField = std::make_unique<TextEditor>("eula");
-	//m_eulaField->setColour(TextEditor::backgroundColourId, CDbStyle::GetDbColor(CDbStyle::MidColor));
-	//m_eulaField->setColour(TextEditor::textColourId, CDbStyle::GetDbColor(CDbStyle::TextColor));
-	//m_eulaField->setColour(TextEditor::outlineColourId, CDbStyle::GetDbColor(CDbStyle::ButtonColor));
 	m_eulaField->setReadOnly(true);
 	m_eulaField->setFont(Font(13.0, Font::plain));
 	m_eulaField->setCaretVisible(false);
@@ -133,7 +130,7 @@ void AboutOverlay::paint(Graphics& g)
 	int h = getLocalBounds().getHeight();
 
 	// Background
-	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker()/*CDbStyle::GetDbColor(CDbStyle::DarkColor)*/);
+	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
 	g.fillRect(Rectangle<int>(8, 8, w - 16, h - 16));
 
 	// JUCE logo

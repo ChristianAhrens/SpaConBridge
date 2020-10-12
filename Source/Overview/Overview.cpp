@@ -97,7 +97,6 @@ COverviewComponent::COverviewComponent()
 	m_nameLabel = std::make_unique<Label>("PluginName", "Version");
 	m_nameLabel->setJustificationType(Justification::centred);
 	m_nameLabel->setFont(Font(11));
-	//m_nameLabel->setColour(Label::textColourId, CDbStyle::GetDbColor(CDbStyle::DarkTextColor));
 	addAndMakeVisible(m_nameLabel.get());
 
 	m_titleLabel = std::make_unique<Label>("Title", "");
@@ -118,9 +117,9 @@ COverviewComponent::COverviewComponent()
 
 	// Add the overview tabs.
 	m_tabbedComponent->SetIsHandlingChanges(false);
-	m_tabbedComponent->addTab("Table", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker()/*CDbStyle::GetDbColor(CDbStyle::DarkColor)*/, m_tableContainer.get(), false);
-	m_tabbedComponent->addTab("Slider", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker()/*CDbStyle::GetDbColor(CDbStyle::DarkColor)*/, m_multiSliderContainer.get(), false);
-	m_tabbedComponent->addTab("Settings", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker()/*CDbStyle::GetDbColor(CDbStyle::DarkColor)*/, m_settingsContainer.get(), false);
+	m_tabbedComponent->addTab("Table", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_tableContainer.get(), false);
+	m_tabbedComponent->addTab("Slider", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSliderContainer.get(), false);
+	m_tabbedComponent->addTab("Settings", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_settingsContainer.get(), false);
 	m_tabbedComponent->SetIsHandlingChanges(true);
 
 	// Start GUI-refreshing timer.
@@ -144,15 +143,15 @@ void COverviewComponent::paint(Graphics& g)
 	int h = getLocalBounds().getHeight();	
 
 	// Bars above and below
-	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId)/*CDbStyle::GetDbColor(CDbStyle::MidColor)*/);
+	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
 	g.fillRect(getLocalBounds());
 
 	// Background
-	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker()/*CDbStyle::GetDbColor(CDbStyle::DarkColor)*/);
+	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
 	g.fillRect(Rectangle<int>(0, 43, w, h - 87));
 
 	// Little lines between version and logo
-	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).brighter()/*CDbStyle::GetDbColor(CDbStyle::ButtonColor)*/);
+	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).brighter());
 	g.fillRect(Rectangle<int>(w - 39, 6, 1, 30));
 	g.fillRect(Rectangle<int>(w - 86, 6, 1, 30));
 
@@ -441,9 +440,9 @@ void CTabBarButton::paintButton(Graphics& g, bool isMouseOverButton, bool isButt
 {
 	// The original TabBarButton::paintButton draws a gradient on the buttons which
 	// are inactive. We don't want that, just paint them with the background color.
-	Colour buttonBackground(getLookAndFeel().findColour(ResizableWindow::backgroundColourId)/*CDbStyle::GetDbColor(CDbStyle::MidColor)*/);
+	Colour buttonBackground(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
 	if (getToggleState())
-		buttonBackground = getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker();// CDbStyle::GetDbColor(CDbStyle::DarkColor);
+		buttonBackground = getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker();
 	else if (isButtonDown)
 		buttonBackground = buttonBackground.brighter(0.1f);
 	else if (isMouseOverButton)

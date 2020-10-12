@@ -37,7 +37,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "SoundsourceProcessor.h"
 
-#include "../Gui.h"
 #include "SurfaceSlider.h"
 
 

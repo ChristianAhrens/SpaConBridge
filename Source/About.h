@@ -35,7 +35,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "Gui.h"			//<USE CDbStyle
 #include "OverlayBase.h"	//<USE OverlayBase
 #include <utility>			//<USE std::unique_ptr
 

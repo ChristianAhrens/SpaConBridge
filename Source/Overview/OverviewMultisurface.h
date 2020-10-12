@@ -36,7 +36,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include "../About.h"
-#include "../Gui.h"
 #include "../SoundscapeBridgeAppCommon.h"
 
 

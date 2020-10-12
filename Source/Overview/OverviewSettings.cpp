@@ -186,12 +186,12 @@ void HeaderWithElmListComponent::paint(Graphics& g)
 	auto h = getHeight();
 
 	if (m_toggleState)
-		g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId)/*CDbStyle::GetDbColor(CDbStyle::MidColor)*/);
+		g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId));
 	else
-		g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId).darker()/*CDbStyle::GetDbColor(CDbStyle::MidColor).darker()*/);
+		g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId).darker());
 	g.fillRect(0, 0, w, h);
 
-	g.setColour(getLookAndFeel().findColour(TableListBox::outlineColourId)/*CDbStyle::GetDbColor(CDbStyle::DarkLineColor)*/);
+	g.setColour(getLookAndFeel().findColour(TableListBox::outlineColourId));
 	g.drawRect(0, 0, w, h);
 }
 
@@ -374,7 +374,7 @@ CSettingsComponent::~CSettingsComponent()
 void CSettingsComponent::paint(Graphics& g)
 {
 	// Paint background to cover the controls behind this overlay.
-	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker()/*CDbStyle::GetDbColor(CDbStyle::DarkColor)*/);
+	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
 	g.fillRect(Rectangle<int>(0, 0, getLocalBounds().getWidth(), getLocalBounds().getHeight()));
 }
 
@@ -578,12 +578,6 @@ CSettingsContainer::CSettingsContainer()
 	m_settingsComponent = std::make_unique<CSettingsComponent>();
 
 	m_settingsViewport = std::make_unique<Viewport>();
-	//m_settingsViewport->getHorizontalScrollBar().setColour(ScrollBar::backgroundColourId, CDbStyle::GetDbColor(CDbStyle::DarkColor));
-	//m_settingsViewport->getHorizontalScrollBar().setColour(ScrollBar::thumbColourId, CDbStyle::GetDbColor(CDbStyle::DarkTextColor));
-	//m_settingsViewport->getHorizontalScrollBar().setColour(ScrollBar::trackColourId, CDbStyle::GetDbColor(CDbStyle::MidColor));
-	//m_settingsViewport->getVerticalScrollBar().setColour(ScrollBar::backgroundColourId, CDbStyle::GetDbColor(CDbStyle::DarkColor));
-	//m_settingsViewport->getVerticalScrollBar().setColour(ScrollBar::thumbColourId, CDbStyle::GetDbColor(CDbStyle::DarkTextColor));
-	//m_settingsViewport->getVerticalScrollBar().setColour(ScrollBar::trackColourId, CDbStyle::GetDbColor(CDbStyle::MidColor));
 	m_settingsViewport->setViewedComponent(m_settingsComponent.get(), false);
 	addAndMakeVisible(m_settingsViewport.get());
 
@@ -607,7 +601,7 @@ CSettingsContainer::~CSettingsContainer()
 void CSettingsContainer::paint(Graphics& g)
 {
 	// Paint background to cover the controls behind this overlay.
-	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker()/*CDbStyle::GetDbColor(CDbStyle::DarkColor)*/);
+	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
 	g.fillRect(Rectangle<int>(0, 0, getLocalBounds().getWidth(), getLocalBounds().getHeight()));
 }
 

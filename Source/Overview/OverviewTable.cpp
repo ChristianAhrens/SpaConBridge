@@ -121,11 +121,11 @@ void OverviewTableContainer::paint(Graphics& g)
 	int h = getLocalBounds().getHeight();	
 
 	// Background
-	g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId)/*CDbStyle::GetDbColor(CDbStyle::MidColor)*/);
+	g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId));
 	g.fillRect(Rectangle<int>(8, h - 41, w - 16, 34));
 
 	// Frame
-	g.setColour(getLookAndFeel().findColour(TableListBox::outlineColourId)/*CDbStyle::GetDbColor(CDbStyle::DarkLineColor)*/);
+	g.setColour(getLookAndFeel().findColour(TableListBox::outlineColourId));
 	g.drawRect(Rectangle<int>(8, h - 41, w - 16, 34), 1);
 }
 
@@ -352,12 +352,6 @@ CustomTableHeaderComponent::CustomTableHeaderComponent()
 	setSortColumnId(TableModelComponent::OC_SourceID, true); // sort forwards by the Input number column
 	setStretchToFitActive(true);
 
-	// Header colors
-	//setColour(TableHeaderComponent::textColourId, getLookAndFeel().findColour(TextEditor::textColourId)/*CDbStyle::GetDbColor(CDbStyle::TextColor)*/);
-	//setColour(TableHeaderComponent::backgroundColourId, getLookAndFeel().findColour(ResizableWindow::backgroundColourId)/*CDbStyle::GetDbColor(CDbStyle::MidColor)*/);
-	//setColour(TableHeaderComponent::outlineColourId, getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker()/*CDbStyle::GetDbColor(CDbStyle::DarkLineColor)*/);
-	//setColour(TableHeaderComponent::highlightColourId, getLookAndFeel().findColour(ResizableWindow::backgroundColourId).brighter(0.2f)/*CDbStyle::GetDbColor(CDbStyle::HighlightColor)*/);
-
 	updateBridgingTitles();
 }
 
@@ -409,7 +403,7 @@ void CustomTableHeaderComponent::paint(Graphics& g)
 	auto font = g.getCurrentFont();
 	font.setBold(true);
 	g.setFont(font);
-	g.setColour(getLookAndFeel().findColour(TableHeaderComponent::textColourId)/*CDbStyle::GetDbColor(CDbStyle::TextColor)*/);
+	g.setColour(getLookAndFeel().findColour(TableHeaderComponent::textColourId));
 
 	if (m_activeBridgingTitles.empty())
 	{
@@ -455,16 +449,6 @@ TableModelComponent::TableModelComponent()
 	m_table.setModel(this);
 
 	m_table.setHeader(std::make_unique<CustomTableHeaderComponent>());
-
-	// Scroll bar colors
-	//m_table.getVerticalScrollBar().setColour(ScrollBar::backgroundColourId, CDbStyle::GetDbColor(CDbStyle::MidColor));
-	//m_table.getVerticalScrollBar().setColour(ScrollBar::thumbColourId, CDbStyle::GetDbColor(CDbStyle::DarkTextColor));
-	//m_table.getVerticalScrollBar().setColour(ScrollBar::trackColourId, CDbStyle::GetDbColor(CDbStyle::MidColor));
-
-	// Table colors
-	//m_table.setColour(TableListBox::backgroundColourId, CDbStyle::GetDbColor(CDbStyle::DarkColor));
-	//m_table.setColour(TableListBox::outlineColourId, CDbStyle::GetDbColor(CDbStyle::DarkLineColor));
-	//m_table.setColour(TableListBox::textColourId, CDbStyle::GetDbColor(CDbStyle::TextColor));
 
 	m_table.setRowHeight(33);
 	m_table.setOutlineThickness(1);
@@ -696,13 +680,13 @@ void TableModelComponent::paintRowBackground(Graphics& g, int rowNumber, int wid
 
 	// Selected rows have a different background color.
 	if (rowIsSelected)
-		g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId).brighter()/*CDbStyle::GetDbColor(CDbStyle::HighlightColor)*/);
+		g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId).brighter());
 	else
-		g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId)/*CDbStyle::GetDbColor(CDbStyle::MidColor)*/);
+		g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId));
 	g.fillRect(0, 0, width, height - 1);
 
 	// Line between rows.
-	g.setColour(getLookAndFeel().findColour(TableListBox::outlineColourId)/*CDbStyle::GetDbColor(CDbStyle::DarkLineColor)*/);
+	g.setColour(getLookAndFeel().findColour(TableListBox::outlineColourId));
 	g.fillRect(0, height - 1, width, height - 1);
 }
 
@@ -957,11 +941,6 @@ ComboBoxContainer::ComboBoxContainer(TableModelComponent& td)
 	m_comboBox.addItem("3", 3);
 	m_comboBox.addItem("4", 4);
 	m_comboBox.addListener(this);
-	//m_comboBox.setColour(ComboBox::backgroundColourId, CDbStyle::GetDbColor(CDbStyle::DarkColor));
-	//m_comboBox.setColour(ComboBox::textColourId, CDbStyle::GetDbColor(CDbStyle::TextColor));
-	//m_comboBox.setColour(ComboBox::outlineColourId, CDbStyle::GetDbColor(CDbStyle::WindowColor));
-	//m_comboBox.setColour(ComboBox::buttonColourId, CDbStyle::GetDbColor(CDbStyle::MidColor));
-	//m_comboBox.setColour(ComboBox::arrowColourId, CDbStyle::GetDbColor(CDbStyle::TextColor));
 	m_comboBox.setWantsKeyboardFocus(false);
 	addAndMakeVisible(m_comboBox);
 }

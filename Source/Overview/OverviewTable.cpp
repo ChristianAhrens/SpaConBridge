@@ -178,12 +178,12 @@ void OverviewTableContainer::resized()
 	bottomBarFlex.justifyContent = FlexBox::JustifyContent::center;
 	bottomBarFlex.alignContent = FlexBox::AlignContent::center;
 	bottomBarFlex.items.addArray({
-		FlexItem(*m_addInstance.get()).withFlex(1).withMaxWidth(40).withMargin(FlexItem::Margin(2)),
+		FlexItem(*m_addInstance.get()).withFlex(1).withMaxWidth(40).withMargin(FlexItem::Margin(2, 2, 2, 4)),
 		FlexItem(*m_removeInstance.get()).withFlex(1).withMaxWidth(60).withMargin(FlexItem::Margin(2)),
 		FlexItem().withFlex(2).withHeight(30),
 		FlexItem(*m_selectLabel.get()).withFlex(1).withMaxWidth(80),
 		FlexItem(*m_selectAll.get()).withFlex(1).withMaxWidth(40).withMargin(FlexItem::Margin(2)),
-		FlexItem(*m_selectNone.get()).withFlex(1).withMaxWidth(46).withMargin(FlexItem::Margin(2)),
+		FlexItem(*m_selectNone.get()).withFlex(1).withMaxWidth(46).withMargin(FlexItem::Margin(2, 4, 2, 2)),
 		});
 
 	FlexBox mainFB;

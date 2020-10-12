@@ -1082,12 +1082,11 @@ void TextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
 	std::vector<ProcessorId> ProcessorIds = m_owner.GetProcessorIdsForRows(selectedRows);
 
 	CController* ctrl = CController::GetInstance();
-	CTextEditor *myEditor = static_cast<CTextEditor*>(&textEditor);
-	if (myEditor && ctrl)
+	if (ctrl)
 	{
 		// New SourceID which should be applied to all plugins in the selected rows.
 		int newSourceId;
-		newSourceId = myEditor->getText().getIntValue();
+		newSourceId = textEditor.getText().getIntValue();
 		for (std::size_t i = 0; i < ProcessorIds.size(); ++i)
 		{
 			// Set the value of the combobox to the current MappingID of the corresponding plugin.

@@ -122,26 +122,26 @@ private:
 
 	// DS100 settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_DS100Settings;
-	std::unique_ptr<CTextEditor>								m_DS100IpAddressEdit;
+	std::unique_ptr<TextEditor>								m_DS100IpAddressEdit;
 	std::unique_ptr<Label>										m_DS100IpAddressLabel;
 	std::unique_ptr<JUCEAppBasics::ZeroconfDiscoverComponent>	m_DS100ZeroconfDiscovery;
 
 	// DiGiCo settings section
 	std::unique_ptr<HeaderWithElmListComponent>	m_DiGiCoBridgingSettings;
-	std::unique_ptr<CTextEditor>				m_DiGiCoIpAddressEdit;
+	std::unique_ptr<TextEditor>				m_DiGiCoIpAddressEdit;
 	std::unique_ptr<Label>						m_DiGiCoIpAddressLabel;
-	std::unique_ptr<CTextEditor>				m_DiGiCoListeningPortEdit;
+	std::unique_ptr<TextEditor>				m_DiGiCoListeningPortEdit;
 	std::unique_ptr<Label>						m_DiGiCoListeningPortLabel;
-	std::unique_ptr<CTextEditor>				m_DiGiCoRemotePortEdit;
+	std::unique_ptr<TextEditor>				m_DiGiCoRemotePortEdit;
 	std::unique_ptr<Label>						m_DiGiCoRemotePortLabel;
 
 	// Generic OSC settings section
 	std::unique_ptr<HeaderWithElmListComponent>	m_GenericOSCBridgingSettings;
-	std::unique_ptr<CTextEditor>				m_GenericOSCIpAddressEdit;
+	std::unique_ptr<TextEditor>				m_GenericOSCIpAddressEdit;
 	std::unique_ptr<Label>						m_GenericOSCIpAddressLabel;
-	std::unique_ptr<CTextEditor>				m_GenericOSCListeningPortEdit;
+	std::unique_ptr<TextEditor>				m_GenericOSCListeningPortEdit;
 	std::unique_ptr<Label>						m_GenericOSCListeningPortLabel;
-	std::unique_ptr<CTextEditor>				m_GenericOSCRemotePortEdit;
+	std::unique_ptr<TextEditor>				m_GenericOSCRemotePortEdit;
 	std::unique_ptr<Label>						m_GenericOSCRemotePortLabel;
 };
 

@@ -81,8 +81,7 @@ COverviewComponent::COverviewComponent()
 	addAndMakeVisible(m_onlineLed.get());
 
 	// Interval
-	m_rateTextEdit = std::make_unique<CTextEditor>("OSC Send Rate");
-	m_rateTextEdit->SetSuffix("ms");
+	m_rateTextEdit = std::make_unique<TextEditor>("OSC Send Rate");
 	m_rateTextEdit->addListener(this);
 	addAndMakeVisible(m_rateTextEdit.get());
 	m_rateLabel = std::make_unique<Label>("OSC Send Rate", "Interval:");
@@ -210,14 +209,13 @@ void COverviewComponent::resized()
  */
 void COverviewComponent::textEditorFocusLost(TextEditor& textEditor)
 {
-	CTextEditor *myEditor = static_cast<CTextEditor*>(&textEditor);
 	CController* ctrl = CController::GetInstance();
-	if (ctrl && myEditor)
+	if (ctrl)
 	{
 		// OSC message rate has changed
-		if (myEditor == m_rateTextEdit.get())
+		if (&textEditor == m_rateTextEdit.get())
 		{
-			ctrl->SetRate(DCS_Overview, myEditor->getText().getIntValue());
+			ctrl->SetRate(DCS_Overview, textEditor.getText().getIntValue());
 		}
 	}
 }
@@ -255,7 +253,7 @@ void COverviewComponent::UpdateGui(bool init)
 	if (ctrl)
 	{
 		if (ctrl->PopParameterChanged(DCS_Overview, DCT_MessageRate) || init)
-			m_rateTextEdit->setText(String(ctrl->GetRate()), false);
+			m_rateTextEdit->setText(String(ctrl->GetRate()) + " ms", false);
 
 		if (ctrl->PopParameterChanged(DCS_Overview, DCT_Online) || init)
 			m_onlineLed->setToggleState(ctrl->GetOnline(), NotificationType::dontSendNotification);

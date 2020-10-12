@@ -255,7 +255,7 @@ CSettingsComponent::CSettingsComponent()
 	m_DS100Settings->setHasActiveToggle(false);
 	addAndMakeVisible(m_DS100Settings.get());
 
-	m_DS100IpAddressEdit = std::make_unique<CTextEditor>();
+	m_DS100IpAddressEdit = std::make_unique<TextEditor>();
 	m_DS100IpAddressEdit->addListener(this);
 	m_DS100IpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
 	m_DS100IpAddressLabel = std::make_unique<Label>();
@@ -279,7 +279,7 @@ CSettingsComponent::CSettingsComponent()
 	m_DiGiCoBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_DiGiCoBridgingSettings.get());
 
-	m_DiGiCoIpAddressEdit = std::make_unique<CTextEditor>();
+	m_DiGiCoIpAddressEdit = std::make_unique<TextEditor>();
 	m_DiGiCoIpAddressEdit->addListener(this);
 	m_DiGiCoIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
 	m_DiGiCoIpAddressLabel = std::make_unique<Label>();
@@ -289,7 +289,7 @@ CSettingsComponent::CSettingsComponent()
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoIpAddressLabel.get(), false, false);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoIpAddressEdit.get(), true, false);
 
-	m_DiGiCoListeningPortEdit = std::make_unique<CTextEditor>();
+	m_DiGiCoListeningPortEdit = std::make_unique<TextEditor>();
 	m_DiGiCoListeningPortEdit->addListener(this);
 	m_DiGiCoListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
 	m_DiGiCoListeningPortLabel = std::make_unique<Label>();
@@ -299,7 +299,7 @@ CSettingsComponent::CSettingsComponent()
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoListeningPortLabel.get(), false, false);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoListeningPortEdit.get(), true, false);
 
-	m_DiGiCoRemotePortEdit = std::make_unique<CTextEditor>();
+	m_DiGiCoRemotePortEdit = std::make_unique<TextEditor>();
 	m_DiGiCoRemotePortEdit->addListener(this);
 	m_DiGiCoRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
 	m_DiGiCoRemotePortLabel = std::make_unique<Label>();
@@ -318,7 +318,7 @@ CSettingsComponent::CSettingsComponent()
 	m_GenericOSCBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_GenericOSCBridgingSettings.get());
 
-	m_GenericOSCIpAddressEdit = std::make_unique<CTextEditor>();
+	m_GenericOSCIpAddressEdit = std::make_unique<TextEditor>();
 	m_GenericOSCIpAddressEdit->addListener(this);
 	m_GenericOSCIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
 	m_GenericOSCIpAddressLabel = std::make_unique<Label>();
@@ -328,7 +328,7 @@ CSettingsComponent::CSettingsComponent()
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCIpAddressLabel.get(), false, false);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCIpAddressEdit.get(), true, false);
 
-	m_GenericOSCListeningPortEdit = std::make_unique<CTextEditor>();
+	m_GenericOSCListeningPortEdit = std::make_unique<TextEditor>();
 	m_GenericOSCListeningPortEdit->addListener(this);
 	m_GenericOSCListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
 	m_GenericOSCListeningPortLabel = std::make_unique<Label>();
@@ -338,7 +338,7 @@ CSettingsComponent::CSettingsComponent()
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCListeningPortLabel.get(), false, false);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCListeningPortEdit.get(), true, false);
 
-	m_GenericOSCRemotePortEdit = std::make_unique<CTextEditor>();
+	m_GenericOSCRemotePortEdit = std::make_unique<TextEditor>();
 	m_GenericOSCRemotePortEdit->addListener(this);
 	m_GenericOSCRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
 	m_GenericOSCRemotePortLabel = std::make_unique<Label>();

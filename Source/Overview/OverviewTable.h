@@ -215,7 +215,7 @@ private:
 
 
 /**
- * Class TextEditorContainer is a container for the SourceID CTextEditor component used in the Overview table.
+ * Class TextEditorContainer is a container for the SourceID TextEditor component used in the Overview table.
  */
 class TextEditorContainer : public Component,
 	public TextEditor::Listener
@@ -230,20 +230,9 @@ public:
 	void SetRow(int newRow);
 
 private:
-	/**
-	 * Table where this component is contained.
-	 */
-	TableModelComponent&	m_owner;
-
-	/**
-	 * Actual text editor.
-	 */
-	CTextEditor				m_editor;
-
-	/**
-	 * Row number where this component is located inside the table.
-	 */
-	int						m_row;
+	TableModelComponent&	m_owner;	/**> Table where this component is contained. */
+	TextEditor				m_editor;	/**> Actual text editor. */
+	int						m_row;		/**> Row number where this component is located inside the table. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TextEditorContainer)
 };

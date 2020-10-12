@@ -43,36 +43,38 @@ namespace SoundscapeBridgeApp
 
 
 /**
- * A style for d&b software look and feel.
+ * Abstract class OverlayBase.
+ * Must be reimplemented to provide a GUI overlay.
  */
-class CDbStyle
+class OverlayBase : public Component
 {
 public:
+
 	/**
-	 * d&b Color codes
+	 * Overlay types. There can only be one active at the time.
 	 */
-	enum DbColor
+	enum OverlayType
 	{
-		WindowColor,		// 27 27 27	- Window background
-		DarkLineColor,		// 49 49 49 - Dark lines between table rows
-		DarkColor,			// 67 67 67	- Dark
-		MidColor,			// 83 83 83	- Mid
-		ButtonColor,		// 125 125 125 - Button off
-		LightColor,			// 201 201 201	- Light
-		TextColor,			// 238 238 238 - Text
-		DarkTextColor,		// 180 180 180 - Dark text
-		HighlightColor,		// 115 140 155 - Highlighted text
-		FaderGreenColor,	// 140 180 90 - Green sliders
-		ButtonBlueColor,	// 28 122 166 - Button Blue
-		ButtonRedColor,		// 226 41 41 - Button Red
+		OT_Unknown = 0,
+		OT_Overview,
+		OT_MultiSlide,
+		OT_Settings,
+		OT_About
 	};
 
-	CDbStyle() {};
-	virtual ~CDbStyle() = default;
+	explicit OverlayBase(OverlayType type);
+	~OverlayBase() override;
 
-	static Colour GetDbColor(DbColor color);
+	OverlayType GetOverlayType() const;
+	virtual void UpdateGui(bool init) = 0;
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CDbStyle)
+private:
+	/**
+	 * Type of overlay as specified by the OverlayType enum.
+	 */
+	OverlayType	m_overlayType;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OverlayBase)
 };
 
 

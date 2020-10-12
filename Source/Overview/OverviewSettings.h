@@ -148,7 +148,7 @@ private:
 /**
  * CSettingsContainer is a component to hold multiple components that are dedicated to app configuration.
  */
-class CSettingsContainer : public AOverlay, public AppConfiguration::Watcher
+class CSettingsContainer : public OverlayBase, public AppConfiguration::Watcher
 {
 public:
 	CSettingsContainer();

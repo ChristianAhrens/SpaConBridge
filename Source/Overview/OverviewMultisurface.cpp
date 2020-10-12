@@ -58,7 +58,7 @@ namespace SoundscapeBridgeApp
  * Class constructor.
  */
 COverviewMultiSurface::COverviewMultiSurface()
-	: AOverlay(OT_MultiSlide)
+	: OverlayBase(OT_MultiSlide)
 {
 	// Add multi-slider
 	m_multiSlider = std::make_unique<CSurfaceMultiSlider>();

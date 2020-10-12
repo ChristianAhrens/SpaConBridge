@@ -547,7 +547,7 @@ void CSettingsComponent::handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDisco
  * Class constructor.
  */
 CSettingsContainer::CSettingsContainer()
-	: AOverlay(OT_Settings)
+	: OverlayBase(OT_Settings)
 {
 	m_applyButton = std::make_unique<TextButton>("Apply");
 	m_applyButton->onClick = [this] { onApplyClicked(); };

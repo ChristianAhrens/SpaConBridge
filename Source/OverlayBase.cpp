@@ -33,47 +33,42 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#pragma once
-
-#include <JuceHeader.h>
+#include "OverlayBase.h"
 
 
 namespace SoundscapeBridgeApp
 {
 
 
+/*
+===============================================================================
+ Class OverlayBase
+===============================================================================
+*/
+
 /**
- * A style for d&b software look and feel.
+ * Class constructor.
  */
-class CDbStyle
+OverlayBase::OverlayBase(OverlayType type)
+	: Component()
 {
-public:
-	/**
-	 * d&b Color codes
-	 */
-	enum DbColor
-	{
-		WindowColor,		// 27 27 27	- Window background
-		DarkLineColor,		// 49 49 49 - Dark lines between table rows
-		DarkColor,			// 67 67 67	- Dark
-		MidColor,			// 83 83 83	- Mid
-		ButtonColor,		// 125 125 125 - Button off
-		LightColor,			// 201 201 201	- Light
-		TextColor,			// 238 238 238 - Text
-		DarkTextColor,		// 180 180 180 - Dark text
-		HighlightColor,		// 115 140 155 - Highlighted text
-		FaderGreenColor,	// 140 180 90 - Green sliders
-		ButtonBlueColor,	// 28 122 166 - Button Blue
-		ButtonRedColor,		// 226 41 41 - Button Red
-	};
+	m_overlayType = type;
+}
 
-	CDbStyle() {};
-	virtual ~CDbStyle() = default;
+/**
+ * Class destructor.
+ */
+OverlayBase::~OverlayBase()
+{
+}
 
-	static Colour GetDbColor(DbColor color);
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CDbStyle)
-};
+/**
+ * Get this overlay's type.
+ */
+OverlayBase::OverlayType OverlayBase::GetOverlayType() const
+{
+	return m_overlayType;
+}
 
 
 } // namespace SoundscapeBridgeApp

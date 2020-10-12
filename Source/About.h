@@ -35,8 +35,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "Gui.h"	//<USE AOverlay
-#include <utility>	//<USE std::unique_ptr
+#include "Gui.h"			//<USE CDbStyle
+#include "OverlayBase.h"	//<USE OverlayBase
+#include <utility>			//<USE std::unique_ptr
 
 
 namespace SoundscapeBridgeApp
@@ -44,14 +45,14 @@ namespace SoundscapeBridgeApp
 
 
 /**
- * Class AAboutOverlay is a GUI overlay which provides copyright and licensing info.
+ * Class AboutOverlay is a GUI overlay which provides copyright and licensing info.
  * This is the base class for a generic "about" overlay, and must be subclassed for each host format (VST, AAX, etc).
  */
-class AAboutOverlay : public AOverlay
+class AboutOverlay : public OverlayBase
 {
 public:
-	AAboutOverlay();
-	~AAboutOverlay() override;
+	AboutOverlay();
+	~AboutOverlay() override;
 
 	void UpdateGui(bool init) override;
 
@@ -81,14 +82,14 @@ private:
 	std::unique_ptr<TextEditor>	m_eulaField;
 	
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AAboutOverlay)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AboutOverlay)
 };
 
 
 /**
  * Class CAboutOverlayGeneric is a GUI overlay which provides .
  */
-class CAboutOverlayGeneric : public AAboutOverlay
+class CAboutOverlayGeneric : public AboutOverlay
 {
 public:
 	CAboutOverlayGeneric();

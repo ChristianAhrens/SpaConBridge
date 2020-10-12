@@ -87,35 +87,4 @@ Colour CDbStyle::GetDbColor(DbColor color)
 }
 
 
-/*
-===============================================================================
- Class AOverlay
-===============================================================================
-*/
-
-/**
- * Class constructor.
- */
-AOverlay::AOverlay(OverlayType type)
-	: Component()
-{
-	m_overlayType = type;
-}
-
-/**
- * Class destructor.
- */
-AOverlay::~AOverlay()
-{
-}
-
-/**
- * Get this overlay's type.
- */
-AOverlay::OverlayType AOverlay::GetOverlayType() const
-{
-	return m_overlayType;
-}
-
-
 } // namespace SoundscapeBridgeApp

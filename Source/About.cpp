@@ -43,15 +43,15 @@ namespace SoundscapeBridgeApp
 
 /*
 ===============================================================================
- Class AAboutOverlay
+ Class AboutOverlay
 ===============================================================================
 */
 
 /**
  * Class constructor.
  */
-AAboutOverlay::AAboutOverlay()
-	: AOverlay(OT_About)
+AboutOverlay::AboutOverlay()
+	: OverlayBase(OT_About)
 {
 	// Plugin version label
 	String versionString = String("Soundscape Plug-in V") + String(JUCE_STRINGIFY(JUCE_APP_VERSION));
@@ -108,7 +108,7 @@ AAboutOverlay::AAboutOverlay()
 /**
  * Class destructor.
  */
-AAboutOverlay::~AAboutOverlay()
+AboutOverlay::~AboutOverlay()
 {
 }
 
@@ -118,7 +118,7 @@ AAboutOverlay::~AAboutOverlay()
  * @param init	True to ignore any changed flags and update the plugin parameters
  *				in the GUI anyway. Good for when opening the Overview for the first time.
  */
-void AAboutOverlay::UpdateGui(bool init)
+void AboutOverlay::UpdateGui(bool init)
 {
 	ignoreUnused(init);
 }
@@ -127,7 +127,7 @@ void AAboutOverlay::UpdateGui(bool init)
  * Reimplemented to paint the overlay's background.
  * @param g		Graphics context that must be used to do the drawing operations.
  */
-void AAboutOverlay::paint(Graphics& g)
+void AboutOverlay::paint(Graphics& g)
 {
 	int w = getLocalBounds().getWidth();
 	int h = getLocalBounds().getHeight();
@@ -144,7 +144,7 @@ void AAboutOverlay::paint(Graphics& g)
 /**
  * Reimplemented to resize and re-postion controls & labels.
  */
-void AAboutOverlay::resized()
+void AboutOverlay::resized()
 {
 	int eulaVPos = 170;
 	int eulaHeight = jmin((getLocalBounds().getHeight() - (eulaVPos + 20)), 270);
@@ -190,7 +190,7 @@ CAboutOverlayGeneric::~CAboutOverlayGeneric()
 void CAboutOverlayGeneric::paint(Graphics& g)
 {
 	// First paint base class
-	AAboutOverlay::paint(g);
+	AboutOverlay::paint(g);
 
 }
 
@@ -200,7 +200,7 @@ void CAboutOverlayGeneric::paint(Graphics& g)
 void CAboutOverlayGeneric::resized()
 {
 	// First resize base class components
-	AAboutOverlay::resized();
+	AboutOverlay::resized();
 
 	m_formatInfoLabel->setBounds(95, 105, getLocalBounds().getWidth() - 135, 70);
 }

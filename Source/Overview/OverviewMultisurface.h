@@ -48,7 +48,7 @@ namespace SoundscapeBridgeApp
  * Class COverviewMultiSurface is just a component which contains the multi-source slider
  * and the mapping selection control.
  */
-class COverviewMultiSurface : public AOverlay,
+class COverviewMultiSurface : public OverlayBase,
 	public ComboBox::Listener
 {
 public:

@@ -62,7 +62,7 @@ class SoundsourceProcessorEditor;
  * Class OverviewTableContainer is just a component which contains the overview table 
  * and it's quick selection buttons.
  */
-class OverviewTableContainer :	public AOverlay,
+class OverviewTableContainer :	public OverlayBase,
 								public Button::Listener,
 								public AppConfiguration::Watcher
 {

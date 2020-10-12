@@ -84,7 +84,7 @@ private:
 	std::unique_ptr<Label>					m_rateLabel;			/**> Send/receive rate label. */
 	std::unique_ptr<CTextEditor>			m_rateTextEdit;			/**> Text editor for the OSC send/receive rate in ms. */
 	std::unique_ptr<Label>					m_onlineLabel;			/**> Online indicator label. */
-	std::unique_ptr<CButton>				m_onlineLed;			/**> Button used as Online indicator LED. */
+	std::unique_ptr<LedButton>				m_onlineLed;			/**> Button used as Online indicator LED. */
 	std::unique_ptr<CTabbedComponent>		m_tabbedComponent;		/**> A container for tabs. */
 	std::unique_ptr<OverviewTableContainer> m_tableContainer;		/**> The actual table container inside this component. */
 	std::unique_ptr<COverviewMultiSurface>	m_multiSliderContainer;	/**> Container for multi-slider. */

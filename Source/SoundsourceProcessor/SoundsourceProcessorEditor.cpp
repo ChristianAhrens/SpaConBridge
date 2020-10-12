@@ -115,7 +115,7 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 		{
 			//--- ReverbSendGain Slider ---//
 			param = dynamic_cast<AudioParameterFloat*> (params[ParamIdx_ReverbSendGain]);
-			m_reverbSendGainSlider = std::make_unique<CKnob>(param->name);
+			m_reverbSendGainSlider = std::make_unique<Slider>(param->name);
 			m_reverbSendGainSlider->setRange(param->range.start, param->range.end, param->range.interval);
 			m_reverbSendGainSlider->setSliderStyle(Slider::Rotary);
 			m_reverbSendGainSlider->setTextBoxStyle(Slider::TextBoxBelow, false, 80, 20);
@@ -129,7 +129,7 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 
 			//--- SourceSpread Slider ---//
 			param = dynamic_cast<AudioParameterFloat*> (params[ParamIdx_SourceSpread]);
-			m_sourceSpreadSlider = std::make_unique<CKnob>(param->name);
+			m_sourceSpreadSlider = std::make_unique<Slider>(param->name);
 			m_sourceSpreadSlider->setRange(param->range.start, param->range.end, param->range.interval);
 			m_sourceSpreadSlider->setSliderStyle(Slider::Rotary);
 			m_sourceSpreadSlider->setTextBoxStyle(Slider::TextBoxBelow, false, 80, 20);

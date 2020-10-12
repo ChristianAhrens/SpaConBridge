@@ -76,9 +76,8 @@ COverviewComponent::COverviewComponent()
 	m_onlineLabel = std::make_unique<Label>("Online Label", "Online:");
 	m_onlineLabel->setJustificationType(Justification::centred);
 	addAndMakeVisible(m_onlineLabel.get());
-	m_onlineLed = std::make_unique<CButton>("");
+	m_onlineLed = std::make_unique<LedButton>();
 	m_onlineLed->setEnabled(false);
-	m_onlineLed->SetCornerRadius(10);
 	addAndMakeVisible(m_onlineLed.get());
 
 	// Interval

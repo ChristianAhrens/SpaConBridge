@@ -73,10 +73,10 @@ private:
 	void timerCallback() override;
 	bool getResizePaintAreaSplit(Rectangle<int>& twoDSurfaceArea, Rectangle<int>& parameterEditArea);
 
-	std::unique_ptr<Slider>		m_xSlider;					/**> Horizontal slider for X axis. */
-	std::unique_ptr<Slider>		m_ySlider;					/**> Vertical slider for Y axis. */
-	std::unique_ptr<Slider>		m_reverbSendGainSlider;		/**> Slider for ReverbSendGain */
-	std::unique_ptr<Slider>		m_sourceSpreadSlider;		/**> Slider for SourceSpread */
+	std::unique_ptr<Slider>			m_xSlider;					/**> Horizontal slider for X axis. */
+	std::unique_ptr<Slider>			m_ySlider;					/**> Vertical slider for Y axis. */
+	std::unique_ptr<Slider>			m_reverbSendGainSlider;		/**> Slider for ReverbSendGain */
+	std::unique_ptr<Slider>			m_sourceSpreadSlider;		/**> Slider for SourceSpread */
 	std::unique_ptr<ComboBox>		m_delayModeComboBox;		/**> ComboBox for DelayMode */
 	std::unique_ptr<Label>			m_xAxisLabel;				/**> X axis slider label */
 	std::unique_ptr<Label>			m_yAxisLabel;				/**> Y axis slider label */

@@ -54,6 +54,61 @@ class CSettingsContainer;
 
 
 /**
+ * class LedButton, a custom ToggleButton
+ */
+class LedButton : public ToggleButton
+{
+public:
+	explicit LedButton()
+		: ToggleButton()
+	{
+
+	}
+	~LedButton() override
+	{
+
+	}
+
+protected:
+	void paintButton(Graphics& g, bool isMouseOverButton, bool isButtonDown) override
+	{
+		Rectangle<int> bounds = getLocalBounds();
+		Rectangle<float> buttonRectF = Rectangle<float>(2.5f, 2.5f, bounds.getWidth() - 4.0f, bounds.getHeight() - 4.0f);
+		bool on = getToggleState();
+		bool enabled = isEnabled();
+
+		// Button's main colour
+		if (on)
+		{
+			Colour col = CDbStyle::GetDbColor(CDbStyle::ButtonBlueColor);
+			if (isButtonDown)
+				col = col.brighter(0.1f);
+			else if (isMouseOverButton)
+				col = col.brighter(0.05f);
+			g.setColour(col);
+		}
+		else
+		{
+			Colour col = CDbStyle::GetDbColor(CDbStyle::ButtonColor);
+			if (!enabled)
+				col = col.darker(0.5f);
+			else if (isButtonDown)
+				col = CDbStyle::GetDbColor(CDbStyle::ButtonBlueColor).brighter(0.05f);
+			else if (isMouseOverButton)
+				col = col.brighter(0.05f);
+			g.setColour(col);
+		}
+
+		g.fillRoundedRectangle(buttonRectF, 10);
+		g.setColour(CDbStyle::GetDbColor(CDbStyle::WindowColor));
+		g.drawRoundedRectangle(buttonRectF, 10, 1);
+	}
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LedButton)
+};
+
+
+/**
  * Class COverviewComponent is a simple container used to hold the GUI controls.
  */
 class COverviewComponent : public Component,

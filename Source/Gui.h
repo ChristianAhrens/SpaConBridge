@@ -77,42 +77,6 @@ public:
 
 
 /**
- * class CTextEditor, a custom TextEditor
- */
-class CTextEditor : public TextEditor
-{
-public:
-	explicit CTextEditor(const String& componentName = String(), juce_wchar passwordCharacter = 0);
-	~CTextEditor() override;
-
-	void SetSuffix(String suffix);
-
-protected:
-	void InitStyle();
-	void paint(Graphics &) override;
-
-	String m_suffix;		/**< Suffix to append to displayed text, such as units. */
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CTextEditor)
-};
-
-/**
- * class LedButton, a custom ToggleButton
- */
-class LedButton : public ToggleButton
-{
-public:
-	explicit LedButton();
-	~LedButton() override;
-
-protected:
-	void paintButton(Graphics&, bool isMouseOverButton, bool isButtonDown) override;
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LedButton)
-};
-
-
-/**
  * Abstract class AOverlay.
  * Must be reimplemented to provide a GUI overlay.
  */

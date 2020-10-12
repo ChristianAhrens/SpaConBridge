@@ -265,8 +265,8 @@ public:
 
 private:
 	TableModelComponent&	m_owner;	/**> Table where this component is contained. */
-	CButton					m_txButton;	/**> Actual Tx button. */
-	CButton					m_rxButton;	/**> Actual Rx button. */
+	TextButton				m_txButton;	/**> Actual Tx button. */
+	TextButton				m_rxButton;	/**> Actual Rx button. */
 	int						m_row;		/**> Row number where this component is located inside the table. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RadioButtonContainer)

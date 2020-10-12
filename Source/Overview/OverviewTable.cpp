@@ -1157,12 +1157,18 @@ RadioButtonContainer::RadioButtonContainer(TableModelComponent& td)
 	: m_owner(td)
 {
 	// Create and configure button components inside this container.
-	m_txButton.setName("Tx");
+	m_txButton.setButtonText("Tx");
+	m_txButton.setClickingTogglesState(true);
+	m_txButton.setColour(TextButton::ColourIds::buttonColourId, CDbStyle::GetDbColor(CDbStyle::ButtonColor));
+	m_txButton.setColour(TextButton::ColourIds::buttonOnColourId, CDbStyle::GetDbColor(CDbStyle::ButtonBlueColor).brighter(0.05f));
 	m_txButton.setEnabled(true);
 	m_txButton.addListener(this);
 	addAndMakeVisible(m_txButton);
 
-	m_rxButton.setName("Rx");
+	m_rxButton.setButtonText("Rx");
+	m_rxButton.setClickingTogglesState(true);
+	m_rxButton.setColour(TextButton::ColourIds::buttonColourId, CDbStyle::GetDbColor(CDbStyle::ButtonColor));
+	m_rxButton.setColour(TextButton::ColourIds::buttonOnColourId, CDbStyle::GetDbColor(CDbStyle::ButtonBlueColor).brighter(0.05f));
 	m_rxButton.setEnabled(true);
 	m_rxButton.addListener(this);
 	addAndMakeVisible(m_rxButton);

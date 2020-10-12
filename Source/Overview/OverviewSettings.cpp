@@ -55,14 +55,12 @@ HeaderWithElmListComponent::HeaderWithElmListComponent(const String& componentNa
 	: Component(componentName)
 {
 	m_headerLabel = std::make_unique<Label>();
-	m_headerLabel->setJustificationType(Justification::centred);
 	addAndMakeVisible(m_headerLabel.get());
 
 	m_activeToggle = std::make_unique<ToggleButton>();
 	m_activeToggle->onClick = [this] { onToggleActive(); };
 	addAndMakeVisible(m_activeToggle.get());
 	m_activeToggleLabel = std::make_unique<Label>();
-	m_activeToggleLabel->setJustificationType(Justification::centred);
 	m_activeToggleLabel->attachToComponent(m_activeToggle.get(), true);
 	addAndMakeVisible(m_activeToggleLabel.get());
 

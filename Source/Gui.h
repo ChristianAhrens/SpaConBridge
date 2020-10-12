@@ -143,6 +143,20 @@ protected:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CTextEditor)
 };
 
+/**
+ * class LedButton, a custom ToggleButton
+ */
+class LedButton : public ToggleButton
+{
+public:
+	explicit LedButton();
+	~LedButton() override;
+
+protected:
+	void paintButton(Graphics&, bool isMouseOverButton, bool isButtonDown) override;
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LedButton)
+};
 
 /**
  * class CButton, a custom ToggleButton

@@ -1012,7 +1012,7 @@ void ComboBoxContainer::comboBoxChanged(ComboBox *comboBox)
  */
 void ComboBoxContainer::resized()
 {
-	m_comboBox.setBoundsInset(BorderSize<int>(4));
+	m_comboBox.setBoundsInset(BorderSize<int>(4, 4, 5, 4));
 }
 
 /**
@@ -1118,7 +1118,7 @@ void TextEditorContainer::textEditorReturnKeyPressed(TextEditor& textEditor)
  */
 void TextEditorContainer::resized()
 {
-	m_editor.setBoundsInset(BorderSize<int>(4));
+	m_editor.setBoundsInset(BorderSize<int>(4, 4, 5, 4));
 }
 
 /**
@@ -1230,10 +1230,14 @@ void RadioButtonContainer::buttonClicked(Button *button)
  */
 void RadioButtonContainer::resized()
 {
-	int w = getLocalBounds().getWidth();
-	int h = getLocalBounds().getHeight();
-	m_txButton.setBounds(2, 2, (w / 2) - 3, h - 5);
-	m_rxButton.setBounds(w / 2, 2, (w / 2) - 3, h - 5);
+	auto bounds = getLocalBounds();
+	bounds.removeFromBottom(1);
+	auto singleButtonWidth = 0.5f * bounds.getWidth();
+
+	auto buttonRect = bounds.removeFromLeft(singleButtonWidth).reduced(4);
+	m_txButton.setBounds(buttonRect);
+	buttonRect = bounds.removeFromLeft(singleButtonWidth).reduced(4);
+	m_rxButton.setBounds(buttonRect);
 }
 
 /**
@@ -1377,7 +1381,7 @@ void MuteButtonContainer::resized()
 
 	for (auto& buttonKV : m_bridgingMutes)
 	{
-		auto buttonRect = bounds.removeFromLeft(singleButtonWidth).reduced(2);
+		auto buttonRect = bounds.removeFromLeft(singleButtonWidth).reduced(4);
 		buttonKV.second.setBounds(buttonRect);
         buttonKV.second.setName(buttonText);
 	}

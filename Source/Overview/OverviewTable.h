@@ -85,11 +85,11 @@ protected:
 private:
 	std::unique_ptr<TableModelComponent>		m_overviewTable;					/**> The actual table model / component inside this component. */
 	std::unique_ptr<SoundsourceProcessorEditor> m_selectedProcessorInstanceEditor;	/**> The processor editor component corresponding to the selected row */
-	std::unique_ptr<CButton>					m_addInstance;						/**> Button to add a processor instance */
-	std::unique_ptr<CButton>					m_removeInstance;					/**> Button to remove the selected processor instance */
+	std::unique_ptr<TextButton>					m_addInstance;						/**> Button to add a processor instance */
+	std::unique_ptr<TextButton>					m_removeInstance;					/**> Button to remove the selected processor instance */
 	std::unique_ptr<Label>						m_selectLabel;						/**> Quick select label */
-	std::unique_ptr<CButton>					m_selectAll;						/**> Select all rows button. */
-	std::unique_ptr<CButton>					m_selectNone;						/**> Select no rows button. */
+	std::unique_ptr<TextButton>					m_selectAll;						/**> Select all rows button. */
+	std::unique_ptr<TextButton>					m_selectNone;						/**> Select no rows button. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OverviewTableContainer)
 };

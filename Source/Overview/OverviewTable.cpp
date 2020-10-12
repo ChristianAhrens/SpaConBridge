@@ -66,12 +66,14 @@ OverviewTableContainer::OverviewTableContainer()
 	addAndMakeVisible(m_overviewTable.get());
 
 	// Add/Remove Buttons
-	m_addInstance = std::make_unique<CButton>("Add");
+	m_addInstance = std::make_unique<TextButton>();
 	m_addInstance->setClickingTogglesState(false);
+	m_addInstance->setButtonText("Add");
 	m_addInstance->addListener(this);
 	addAndMakeVisible(m_addInstance.get());
-	m_removeInstance = std::make_unique<CButton>("Remove");
+	m_removeInstance = std::make_unique<TextButton>();
 	m_removeInstance->setClickingTogglesState(false);
+	m_removeInstance->setButtonText("Remove");
 	m_removeInstance->setEnabled(false);
 	m_removeInstance->addListener(this);
 	addAndMakeVisible(m_removeInstance.get());
@@ -81,12 +83,16 @@ OverviewTableContainer::OverviewTableContainer()
 	m_selectLabel->setJustificationType(Justification::centred);
 	addAndMakeVisible(m_selectLabel.get());
 
-	m_selectAll = std::make_unique<CButton>("All");
+	m_selectAll = std::make_unique<TextButton>();
+	m_selectAll->setClickingTogglesState(false);
+	m_selectAll->setButtonText("All");
 	m_selectAll->setEnabled(true);
 	m_selectAll->addListener(this);
 	addAndMakeVisible(m_selectAll.get());
 
-	m_selectNone = std::make_unique<CButton>("None");
+	m_selectNone = std::make_unique<TextButton>();
+	m_selectNone->setClickingTogglesState(false);
+	m_selectNone->setButtonText("None");
 	m_selectNone->setEnabled(true);
 	m_selectNone->addListener(this);
 	addAndMakeVisible(m_selectNone.get());

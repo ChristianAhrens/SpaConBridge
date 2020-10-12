@@ -55,7 +55,7 @@ public:
             .findColour(ResizableWindow::backgroundColourId),
             DocumentWindow::allButtons)
         {
-            m_customLookAndFeel = std::unique_ptr<LookAndFeel>(new DarkLookAndFeel);
+            m_customLookAndFeel = std::unique_ptr<LookAndFeel>(new DarkDbLookAndFeel);
             Desktop::getInstance().setDefaultLookAndFeel(m_customLookAndFeel.get());
 
             m_mainComponent = std::make_unique<MainSoundscapeBridgeAppComponent>();

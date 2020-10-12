@@ -15,34 +15,58 @@
 namespace SoundscapeBridgeApp
 {
 
-class DarkLookAndFeel : public LookAndFeel_V4
+class DbLookAndFeelBase : public LookAndFeel_V4
 {
+public:	
+	/**
+	 * d&b Color codes
+	 */
+	enum DbColor
+	{
+		WindowColor,	
+		DarkLineColor,	
+		DarkColor,		
+		MidColor,		
+		ButtonColor,	
+		LightColor,		
+		TextColor,		
+		DarkTextColor,	
+		HighlightColor,	
+		FaderGreenColor,
+		ButtonBlueColor,
+		ButtonRedColor,	
+	};
 
 public:
-	DarkLookAndFeel();
-	~DarkLookAndFeel();
+	DbLookAndFeelBase();
+	virtual ~DbLookAndFeelBase();
+
+	//==============================================================================
+	void InitColours();
+
+	//==============================================================================
+	virtual Colour GetDbColor(DbColor color) = 0;
 
 	//==============================================================================
 	void drawButtonBackground(Graphics&, Button&, const Colour& backgroundColour,
 		bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override;
 
-	//==============================================================================
-	void drawGroupComponentOutline(Graphics&, int w, int h, const String& text,
-		const Justification&, GroupComponent&) override;
+private:
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DbLookAndFeelBase)
+};
+
+class DarkDbLookAndFeel : public DbLookAndFeelBase
+{
+
+public:
+	DarkDbLookAndFeel();
+	~DarkDbLookAndFeel() override;
 
 	//==============================================================================
-	void drawTickBox(Graphics&, Component&,
-		float x, float y, float w, float h,
-		bool ticked, bool isEnabled,
-		bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override;
-
-	//==============================================================================
-	void drawComboBox(Graphics&, int width, int height, bool isButtonDown,
-		int buttonX, int buttonY, int buttonW, int buttonH,
-		ComboBox&) override;
+	Colour GetDbColor(DbColor color) override;
 
 private:
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DarkLookAndFeel)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DarkDbLookAndFeel)
 };
 
 }

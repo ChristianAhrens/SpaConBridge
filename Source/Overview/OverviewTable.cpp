@@ -40,6 +40,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../SoundsourceProcessor/SurfaceSlider.h"
 
 #include "../Controller.h"
+#include "../LookAndFeel.h"
 
 #include <Image_utils.hpp>
 
@@ -1155,19 +1156,22 @@ void TextEditorContainer::SetRow(int newRow)
 RadioButtonContainer::RadioButtonContainer(TableModelComponent& td)
 	: m_owner(td)
 {
+	auto blueColour = Colours::blue;
+	auto lookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (lookAndFeel)
+		blueColour = lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonBlueColor);
+
 	// Create and configure button components inside this container.
 	m_txButton.setButtonText("Tx");
 	m_txButton.setClickingTogglesState(true);
-	m_txButton.setColour(TextButton::ColourIds::buttonColourId, DbStyle::GetDbColor(DbStyle::ButtonColor));
-	m_txButton.setColour(TextButton::ColourIds::buttonOnColourId, DbStyle::GetDbColor(DbStyle::ButtonBlueColor).brighter(0.05f));
+	m_txButton.setColour(TextButton::ColourIds::buttonOnColourId, blueColour.brighter(0.05f));
 	m_txButton.setEnabled(true);
 	m_txButton.addListener(this);
 	addAndMakeVisible(m_txButton);
 
 	m_rxButton.setButtonText("Rx");
 	m_rxButton.setClickingTogglesState(true);
-	m_rxButton.setColour(TextButton::ColourIds::buttonColourId, DbStyle::GetDbColor(DbStyle::ButtonColor));
-	m_rxButton.setColour(TextButton::ColourIds::buttonOnColourId, DbStyle::GetDbColor(DbStyle::ButtonBlueColor).brighter(0.05f));
+	m_rxButton.setColour(TextButton::ColourIds::buttonOnColourId, blueColour.brighter(0.05f));
 	m_rxButton.setEnabled(true);
 	m_rxButton.addListener(this);
 	addAndMakeVisible(m_rxButton);
@@ -1306,14 +1310,18 @@ void MuteButtonContainer::updateBridgingMuteButtons()
 
 	auto activeBridging = ctrl->GetActiveProtocolBridging();
 
+	auto redColour = Colours::red;
+	auto lookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (lookAndFeel)
+		redColour = lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonRedColor);
+
 	for (auto type : m_knowntypes)
 	{
 		if (((activeBridging & type) == type) && (m_bridgingMutes.count(type) == 0))
 		{
 			m_bridgingMutes[type].setButtonText("Mute");
 			m_bridgingMutes[type].setClickingTogglesState(true);
-			m_bridgingMutes[type].setColour(TextButton::ColourIds::buttonColourId, DbStyle::GetDbColor(DbStyle::ButtonColor));
-			m_bridgingMutes[type].setColour(TextButton::ColourIds::buttonOnColourId, DbStyle::GetDbColor(DbStyle::ButtonRedColor).brighter(0.05f));
+			m_bridgingMutes[type].setColour(TextButton::ColourIds::buttonOnColourId, redColour.brighter(0.05f));
 			m_bridgingMutes[type].setEnabled(true);
 			m_bridgingMutes[type].addListener(this);
 			addAndMakeVisible(&m_bridgingMutes.at(type));

@@ -100,9 +100,9 @@ void CSurfaceSlider::paint(Graphics& g)
 	float knobSize = 10;
 	outline.addEllipse(x - (knobSize / 2), y - (knobSize / 2), knobSize, knobSize);
 
-	g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId)/*CDbStyle::GetDbColor(CDbStyle::MidColor)*/);
+	g.setColour(getLookAndFeel().findColour(LookAndFeel_V4::ColourScheme::defaultFill)/*CDbStyle::GetDbColor(CDbStyle::MidColor)*/);
 	g.fillPath(outline);
-	g.setColour(getLookAndFeel().findColour(TableListBox::outlineColourId)/*CDbStyle::GetDbColor(CDbStyle::ButtonColor)*/);
+	g.setColour(getLookAndFeel().findColour(LookAndFeel_V4::ColourScheme::outline)/*CDbStyle::GetDbColor(CDbStyle::ButtonColor)*/);
 	g.strokePath(outline, PathStrokeType(3)); // Stroke width
 
 }
@@ -211,13 +211,13 @@ void CSurfaceMultiSlider::paint(Graphics& g)
 	float h = static_cast<float>(getLocalBounds().getHeight());
 
 	// Surface background area
-	g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId)/*CDbStyle::GetDbColor(CDbStyle::MidColor)*/);
+	g.setColour(getLookAndFeel().findColour(LookAndFeel_V4::ColourScheme::defaultFill)/*CDbStyle::GetDbColor(CDbStyle::MidColor)*/);
 	g.fillRect(Rectangle<float>(0.0f, 0.0f, w, h));
 
 	// Draw grid
 	const float dashLengths[2] = { 5.0f, 6.0f };
 	const float lineThickness = 1.0f;
-	g.setColour(getLookAndFeel().findColour(TableListBox::outlineColourId).brighter(0.15f)/*CDbStyle::GetDbColor(CDbStyle::MidColor).brighter(0.15f)*/);
+	g.setColour(getLookAndFeel().findColour(LookAndFeel_V4::ColourScheme::outline).brighter(0.15f)/*CDbStyle::GetDbColor(CDbStyle::MidColor).brighter(0.15f)*/);
 	g.drawDashedLine(Line<float>(w * 0.25f, 0.0f, w * 0.25f, h), dashLengths, 2, lineThickness);
 	g.drawDashedLine(Line<float>(w * 0.50f, 0.0f, w * 0.50f, h), dashLengths, 2, lineThickness);
 	g.drawDashedLine(Line<float>(w * 0.75f, 0.0f, w * 0.75f, h), dashLengths, 2, lineThickness);
@@ -226,7 +226,7 @@ void CSurfaceMultiSlider::paint(Graphics& g)
 	g.drawDashedLine(Line<float>(0.0f, h * 0.75f, w, h * 0.75f), dashLengths, 2, lineThickness);
 
 	// Surface frame
-	g.setColour(getLookAndFeel().findColour(TableListBox::outlineColourId)/*CDbStyle::GetDbColor(CDbStyle::ButtonColor)*/);
+	g.setColour(getLookAndFeel().findColour(LookAndFeel_V4::ColourScheme::outline)/*CDbStyle::GetDbColor(CDbStyle::ButtonColor)*/);
 	g.drawRect(Rectangle<float>(0.0f, 0.0f, w, h), 1.5f);
 
 	float knobSize = 10.0f;

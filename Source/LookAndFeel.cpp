@@ -13,198 +13,184 @@
 namespace SoundscapeBridgeApp
 {
 
-DarkLookAndFeel::DarkLookAndFeel()
-{
-	setColour(ColourScheme::windowBackground, Colours::darkgrey);
-	setColour(ColourScheme::widgetBackground, Colours::grey);
-	setColour(ColourScheme::menuBackground, Colours::darkgrey.darker());
-	setColour(ColourScheme::outline, Colours::lightgrey);
-	setColour(ColourScheme::defaultText, Colours::lightgrey);
-	setColour(ColourScheme::defaultFill, Colours::grey);
-	setColour(ColourScheme::highlightedText, Colours::white);
-	setColour(ColourScheme::highlightedFill, Colours::grey);
-	setColour(ColourScheme::menuText, Colours::dimgrey);
-
-	setColour(ResizableWindow::ColourIds::backgroundColourId, Colours::darkgrey);
-
-	setColour(TextEditor::ColourIds::backgroundColourId, Colours::darkgrey);
-	setColour(TextEditor::ColourIds::textColourId, Colours::white);
-	setColour(TextEditor::ColourIds::highlightColourId, Colours::dimgrey);
-	setColour(TextEditor::ColourIds::highlightedTextColourId, Colours::lightgrey);
-	setColour(TextEditor::ColourIds::outlineColourId, Colours::lightgrey);
-	setColour(TextEditor::ColourIds::focusedOutlineColourId, Colours::lightgrey);
-	setColour(TextEditor::ColourIds::shadowColourId, Colours::grey);
-
-	setColour(ComboBox::ColourIds::arrowColourId, Colours::lightgrey);
-	setColour(ComboBox::ColourIds::backgroundColourId, Colours::darkgrey);
-	setColour(ComboBox::ColourIds::buttonColourId, Colours::grey);
-	setColour(ComboBox::ColourIds::focusedOutlineColourId, Colours::darkgrey);
-	setColour(ComboBox::ColourIds::outlineColourId, Colours::lightgrey);
-	setColour(ComboBox::ColourIds::textColourId, Colours::white);
-    
-    setColour(PopupMenu::ColourIds::backgroundColourId, Colours::darkgrey);
-    setColour(PopupMenu::ColourIds::textColourId, Colours::white);
-    setColour(PopupMenu::ColourIds::headerTextColourId, Colours::lightgrey);
-    setColour(PopupMenu::ColourIds::highlightedBackgroundColourId, Colours::white);
-    setColour(PopupMenu::ColourIds::highlightedTextColourId, Colours::lightgrey);
-
-	setColour(TextButton::ColourIds::buttonColourId, Colours::grey); // this applies for DrawableButton as well
-    setColour(TextButton::ColourIds::buttonOnColourId, Colours::lightgrey); // this applies for DrawableButton as well
-	setColour(TextButton::ColourIds::textColourOffId, Colours::white);
-	setColour(TextButton::ColourIds::textColourOnId, Colours::white);
-
-    setColour(DrawableButton::ColourIds::textColourId, Colours::white);
-    setColour(DrawableButton::ColourIds::textColourOnId, Colours::white);
-    setColour(DrawableButton::ColourIds::backgroundColourId, Colours::darkgrey);
-	setColour(DrawableButton::ColourIds::backgroundOnColourId, Colours::darkgrey);
-    
-    setColour(ListBox::ColourIds::backgroundColourId, Colours::darkgrey);
-    setColour(ListBox::ColourIds::outlineColourId, Colours::lightgrey);
-    setColour(ListBox::ColourIds::textColourId, Colours::white);
-	
-	setColour(TableHeaderComponent::ColourIds::textColourId, Colours::white);
-	setColour(TableHeaderComponent::ColourIds::backgroundColourId, Colours::darkgrey);
-	setColour(TableHeaderComponent::ColourIds::outlineColourId, Colours::grey);
-	setColour(TableHeaderComponent::ColourIds::highlightColourId, Colours::grey);
-
-	setColour(ScrollBar::ColourIds::backgroundColourId, Colours::darkgrey);
-	setColour(ScrollBar::ColourIds::thumbColourId, Colours::grey);
-	setColour(ScrollBar::ColourIds::trackColourId, Colours::grey);
-
-	setColour(TableListBox::ColourIds::backgroundColourId, Colours::darkgrey);
-	setColour(TableListBox::ColourIds::outlineColourId, Colours::lightgrey);
-	setColour(TableListBox::ColourIds::textColourId, Colours::white);
-
-	setColour(CodeEditorComponent::ColourIds::backgroundColourId, Colours::darkgrey);
-	setColour(CodeEditorComponent::ColourIds::defaultTextColourId, Colours::white);
-	setColour(CodeEditorComponent::ColourIds::highlightColourId, Colours::lightgrey);
-	setColour(CodeEditorComponent::ColourIds::lineNumberBackgroundId, Colours::grey);
-	setColour(CodeEditorComponent::ColourIds::lineNumberTextId, Colours::white);
-}
-
-DarkLookAndFeel::~DarkLookAndFeel()
+DbLookAndFeelBase::DbLookAndFeelBase()
 {
 }
 
-void DarkLookAndFeel::drawButtonBackground(Graphics& g,
+DbLookAndFeelBase::~DbLookAndFeelBase()
+{
+}
+
+void DbLookAndFeelBase::InitColours()
+{
+	setColour(ColourScheme::windowBackground, GetDbColor(DbColor::MidColor));
+	setColour(ColourScheme::widgetBackground, GetDbColor(DbColor::DarkColor));
+	setColour(ColourScheme::menuBackground, GetDbColor(DbColor::DarkColor));
+	setColour(ColourScheme::outline, GetDbColor(DbColor::ButtonColor));
+	setColour(ColourScheme::defaultText, GetDbColor(DbColor::TextColor));
+	setColour(ColourScheme::defaultFill, GetDbColor(DbColor::MidColor));
+	setColour(ColourScheme::highlightedText, GetDbColor(DbColor::TextColor));
+	setColour(ColourScheme::highlightedFill, GetDbColor(DbColor::HighlightColor));
+	setColour(ColourScheme::menuText, GetDbColor(DbColor::TextColor));
+
+	setColour(ResizableWindow::backgroundColourId, GetDbColor(DbColor::MidColor));
+
+	setColour(TextEditor::backgroundColourId, GetDbColor(DbColor::DarkColor));
+	setColour(TextEditor::textColourId, GetDbColor(DbColor::TextColor));
+	setColour(TextEditor::highlightColourId, GetDbColor(DbColor::HighlightColor));
+	setColour(TextEditor::highlightedTextColourId, GetDbColor(DbColor::TextColor));
+	setColour(TextEditor::outlineColourId, GetDbColor(DbColor::WindowColor));
+	setColour(TextEditor::focusedOutlineColourId, GetDbColor(DbColor::WindowColor));
+	setColour(TextEditor::shadowColourId, GetDbColor(DbColor::MidColor).darker());
+
+	setColour(ComboBox::arrowColourId, GetDbColor(DbColor::TextColor));
+	setColour(ComboBox::backgroundColourId, GetDbColor(DbColor::DarkColor));
+	setColour(ComboBox::buttonColourId, GetDbColor(DbColor::MidColor));
+	setColour(ComboBox::focusedOutlineColourId, GetDbColor(DbColor::WindowColor));
+	setColour(ComboBox::outlineColourId, GetDbColor(DbColor::WindowColor));
+	setColour(ComboBox::textColourId, GetDbColor(DbColor::TextColor));
+
+	setColour(PopupMenu::backgroundColourId, GetDbColor(DbColor::MidColor));
+	setColour(PopupMenu::textColourId, GetDbColor(DbColor::TextColor));
+	setColour(PopupMenu::headerTextColourId, GetDbColor(DbColor::TextColor));
+	setColour(PopupMenu::highlightedBackgroundColourId, GetDbColor(DbColor::HighlightColor));
+	setColour(PopupMenu::highlightedTextColourId, GetDbColor(DbColor::TextColor));
+
+	setColour(TextButton::buttonColourId, GetDbColor(DbColor::ButtonColor)); // this applies for DrawableButton as well
+	setColour(TextButton::buttonOnColourId, GetDbColor(DbColor::ButtonColor).brighter()); // this applies for DrawableButton as well
+	setColour(TextButton::textColourOffId, GetDbColor(DbColor::TextColor));
+	setColour(TextButton::textColourOnId, GetDbColor(DbColor::TextColor));
+
+	setColour(DrawableButton::textColourId, GetDbColor(DbColor::TextColor));
+	setColour(DrawableButton::textColourOnId, GetDbColor(DbColor::TextColor));
+	setColour(DrawableButton::backgroundColourId, GetDbColor(DbColor::MidColor));
+	setColour(DrawableButton::backgroundOnColourId, GetDbColor(DbColor::HighlightColor));
+
+	setColour(ListBox::backgroundColourId, GetDbColor(DbColor::MidColor));
+	setColour(ListBox::outlineColourId, GetDbColor(DbColor::DarkLineColor));
+	setColour(ListBox::textColourId, GetDbColor(DbColor::TextColor));
+
+	setColour(TableHeaderComponent::textColourId, GetDbColor(DbColor::TextColor));
+	setColour(TableHeaderComponent::backgroundColourId, GetDbColor(DbColor::MidColor));
+	setColour(TableHeaderComponent::outlineColourId, GetDbColor(DbColor::DarkLineColor));
+	setColour(TableHeaderComponent::highlightColourId, GetDbColor(DbColor::HighlightColor));
+
+	setColour(ScrollBar::backgroundColourId, GetDbColor(DbColor::MidColor));
+	setColour(ScrollBar::thumbColourId, GetDbColor(DbColor::DarkTextColor));
+	setColour(ScrollBar::trackColourId, GetDbColor(DbColor::MidColor));
+
+	setColour(TableListBox::backgroundColourId, GetDbColor(DbColor::MidColor));
+	setColour(TableListBox::outlineColourId, GetDbColor(DbColor::DarkLineColor));
+	setColour(TableListBox::textColourId, GetDbColor(DbColor::TextColor));
+
+	setColour(CodeEditorComponent::backgroundColourId, GetDbColor(DbColor::MidColor));
+	setColour(CodeEditorComponent::defaultTextColourId, GetDbColor(DbColor::TextColor));
+	setColour(CodeEditorComponent::highlightColourId, GetDbColor(DbColor::HighlightColor));
+	setColour(CodeEditorComponent::lineNumberBackgroundId, GetDbColor(DbColor::LightColor));
+	setColour(CodeEditorComponent::lineNumberTextId, GetDbColor(DbColor::DarkTextColor));
+
+	setColour(Slider::ColourIds::backgroundColourId, GetDbColor(DbColor::DarkColor));
+	setColour(Slider::ColourIds::rotarySliderFillColourId, GetDbColor(DbColor::DarkColor));
+	setColour(Slider::ColourIds::rotarySliderOutlineColourId, GetDbColor(DbColor::DarkLineColor));
+	setColour(Slider::ColourIds::textBoxBackgroundColourId, GetDbColor(DbColor::DarkColor));
+	setColour(Slider::ColourIds::textBoxHighlightColourId, GetDbColor(DbColor::HighlightColor));
+	setColour(Slider::ColourIds::textBoxOutlineColourId, GetDbColor(DbColor::WindowColor));
+	setColour(Slider::ColourIds::textBoxTextColourId, GetDbColor(DbColor::TextColor));
+	setColour(Slider::ColourIds::thumbColourId, GetDbColor(DbColor::ButtonColor));
+	setColour(Slider::ColourIds::trackColourId, GetDbColor(DbColor::MidColor));
+}
+
+void DbLookAndFeelBase::drawButtonBackground(Graphics& g,
     Button& button,
     const Colour& backgroundColour,
     bool shouldDrawButtonAsHighlighted,
     bool shouldDrawButtonAsDown)
 {
-    auto bounds = button.getLocalBounds().toFloat().reduced(0.5f, 0.5f);
+	auto cornerSize = 2.0f;
+	auto bounds = button.getLocalBounds().toFloat().reduced(0.5f, 0.5f);
 
-    auto baseColour = backgroundColour.withMultipliedSaturation(button.hasKeyboardFocus(true) ? 1.3f : 0.9f)
-        .withMultipliedAlpha(button.isEnabled() ? 1.0f : 0.5f);
+	auto baseColour = backgroundColour.withMultipliedSaturation(button.hasKeyboardFocus(true) ? 1.3f : 0.9f)
+		.withMultipliedAlpha(button.isEnabled() ? 1.0f : 0.5f);
 
-    if (shouldDrawButtonAsDown || shouldDrawButtonAsHighlighted)
-        baseColour = baseColour.contrasting(shouldDrawButtonAsDown ? 0.2f : 0.05f);
+	if (shouldDrawButtonAsDown || shouldDrawButtonAsHighlighted)
+		baseColour = baseColour.contrasting(shouldDrawButtonAsDown ? 0.2f : 0.05f);
 
-    g.setColour(baseColour);
-	g.fillRoundedRectangle(bounds, 0);
+	g.setColour(baseColour);
+
+	auto flatOnLeft = button.isConnectedOnLeft();
+	auto flatOnRight = button.isConnectedOnRight();
+	auto flatOnTop = button.isConnectedOnTop();
+	auto flatOnBottom = button.isConnectedOnBottom();
+
+	if (flatOnLeft || flatOnRight || flatOnTop || flatOnBottom)
+	{
+		Path path;
+		path.addRoundedRectangle(bounds.getX(), bounds.getY(),
+			bounds.getWidth(), bounds.getHeight(),
+			cornerSize, cornerSize,
+			!(flatOnLeft || flatOnTop),
+			!(flatOnRight || flatOnTop),
+			!(flatOnLeft || flatOnBottom),
+			!(flatOnRight || flatOnBottom));
+
+		g.fillPath(path);
+
+		g.setColour(button.findColour(ComboBox::outlineColourId));
+		g.strokePath(path, PathStrokeType(1.0f));
+	}
+	else
+	{
+		g.fillRoundedRectangle(bounds, cornerSize);
+
+		g.setColour(button.findColour(ComboBox::outlineColourId));
+		g.drawRoundedRectangle(bounds, cornerSize, 1.0f);
+	}
 }
 
-void DarkLookAndFeel::drawGroupComponentOutline(Graphics& g,
-	int width, 
-	int height, 
-	const String& text,
-	const Justification& position, 
-	GroupComponent& group)
+
+DarkDbLookAndFeel::DarkDbLookAndFeel()
 {
-	// code from LookAndFeel_V2 but without rounded edges
-
-    const float textH = 15.0f;
-    const float indent = 3.0f;
-    const float textEdgeGap = 4.0f;
-
-    Font f(textH);
-
-    Path p;
-    auto x = indent;
-    auto y = f.getAscent() - 3.0f;
-    auto w = jmax(0.0f, (float)width - x * 2.0f);
-    auto h = jmax(0.0f, (float)height - y - indent);
-
-    auto textW = text.isEmpty() ? 0
-        : jlimit(0.0f,
-            jmax(0.0f, w - textEdgeGap * 2),
-            (float)f.getStringWidth(text) + textEdgeGap * 2.0f);
-    auto textX = textEdgeGap;
-
-    if (position.testFlags(Justification::horizontallyCentred))
-        textX = (w - textW) * 0.5f;
-    else if (position.testFlags(Justification::right))
-        textX = w - textW - textEdgeGap;
-
-    p.startNewSubPath(x + textX + textW, y);
-    p.lineTo(x + w, y);
-
-    p.lineTo(x + w, y + h);
-
-    p.lineTo(x , y + h);
-
-    p.lineTo(x, y);
-
-    p.lineTo(x + textX, y);
-
-    auto alpha = group.isEnabled() ? 1.0f : 0.5f;
-
-    g.setColour(group.findColour(GroupComponent::outlineColourId)
-        .withMultipliedAlpha(alpha));
-
-    g.strokePath(p, PathStrokeType(2.0f));
-
-    g.setColour(group.findColour(GroupComponent::textColourId)
-        .withMultipliedAlpha(alpha));
-    g.setFont(f);
-    g.drawText(text,
-        roundToInt(x + textX), 0,
-        roundToInt(textW),
-        roundToInt(textH),
-        Justification::centred, true);
+	InitColours();
 }
 
-void DarkLookAndFeel::drawTickBox(Graphics& g, Component& component,
-    float x, float y, float w, float h,
-    const bool ticked,
-    const bool isEnabled,
-    const bool shouldDrawButtonAsHighlighted,
-    const bool shouldDrawButtonAsDown)
+DarkDbLookAndFeel::~DarkDbLookAndFeel()
 {
-    ignoreUnused(isEnabled, shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown);
-
-    Rectangle<float> tickBounds(x, y, w, h);
-
-    g.setColour(component.findColour(ToggleButton::tickDisabledColourId));
-    g.drawRect(tickBounds, 1.0f);
-
-    if (ticked)
-    {
-        g.setColour(component.findColour(ToggleButton::tickColourId));
-        auto tick = getTickShape(0.75f);
-        g.fillPath(tick, tick.getTransformToScaleToFit(tickBounds.reduced(4, 5).toFloat(), false));
-    }
 }
 
-void DarkLookAndFeel::drawComboBox(Graphics& g, int width, int height, bool,
-    int, int, int, int, ComboBox& box)
+Colour DarkDbLookAndFeel::GetDbColor(DbColor color)
 {
-    Rectangle<int> boxBounds(0, 0, width, height);
+	switch (color)
+	{
+	case WindowColor:
+		return Colour(27, 27, 27);
+	case DarkLineColor:
+		return Colour(49, 49, 49);
+	case DarkColor:
+		return Colour(67, 67, 67);
+	case MidColor:
+		return Colour(83, 83, 83);
+	case ButtonColor:
+		return Colour(125, 125, 125);
+	case LightColor:
+		return Colour(201, 201, 201);
+	case TextColor:
+		return Colour(238, 238, 238);
+	case DarkTextColor:
+		return Colour(180, 180, 180);
+	case HighlightColor:
+		return Colour(115, 140, 155);
+	case FaderGreenColor:
+		return Colour(140, 180, 90);
+	case ButtonBlueColor:
+		return Colour(27, 120, 163);
+	case ButtonRedColor:
+		return Colour(226, 41, 41);
+	default:
+		break;
+	}
 
-    g.setColour(box.findColour(ComboBox::backgroundColourId));
-    g.fillRect(boxBounds.toFloat());
-
-    g.setColour(box.findColour(ComboBox::outlineColourId));
-    g.drawRect(boxBounds.toFloat().reduced(0.5f, 0.5f), 1.0f);
-
-    Rectangle<int> arrowZone(width - 30, 0, 20, height);
-    Path path;
-    path.startNewSubPath((float)arrowZone.getX() + 3.0f, (float)arrowZone.getCentreY() - 2.0f);
-    path.lineTo((float)arrowZone.getCentreX(), (float)arrowZone.getCentreY() + 3.0f);
-    path.lineTo((float)arrowZone.getRight() - 3.0f, (float)arrowZone.getCentreY() - 2.0f);
-
-    g.setColour(box.findColour(ComboBox::arrowColourId).withAlpha((box.isEnabled() ? 0.9f : 0.2f)));
-    g.strokePath(path, PathStrokeType(2.0f));
+	jassertfalse;
+	return Colours::black;
 }
 
 }

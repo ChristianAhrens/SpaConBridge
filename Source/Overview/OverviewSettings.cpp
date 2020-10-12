@@ -93,6 +93,9 @@ void HeaderWithElmListComponent::setToggleActiveState(bool toggleState)
 	setElementsActiveState(m_toggleState);
 }
 
+/**
+ * 
+ */
 void HeaderWithElmListComponent::setElementsActiveState(bool toggleState)
 {
 	m_toggleState = toggleState;
@@ -108,7 +111,7 @@ void HeaderWithElmListComponent::setElementsActiveState(bool toggleState)
 }
 
 /**
- *
+ * Callback method for when active/deactive toggle was triggered
  */
 void HeaderWithElmListComponent::onToggleActive()
 {
@@ -127,7 +130,9 @@ void HeaderWithElmListComponent::onToggleActive()
 }
 
 /**
- *
+ * Method to set if this component shall display the enable/disable togglebutton
+ * in its upper right corner or not.
+ * @param hasActiveToggle	True if it shall show togglebutton, false if not
  */
 void HeaderWithElmListComponent::setHasActiveToggle(bool hasActiveToggle)
 {
@@ -140,7 +145,8 @@ void HeaderWithElmListComponent::setHasActiveToggle(bool hasActiveToggle)
 }
 
 /**
- *
+ * Setter for the header text of this component.
+ * @param headerText	The text to use as headline
  */
 void HeaderWithElmListComponent::setHeaderText(String headerText)
 {
@@ -153,7 +159,11 @@ void HeaderWithElmListComponent::setHeaderText(String headerText)
 }
 
 /**
- *
+ * Methdo to add a component to internal list of components that shall be layouted vertically.
+ * @param compo	The component to add.
+ * @param includeInLayout	Bool flag that can indicate if the component shall be made visible in this components 
+ *							context but not layouted. (e.g. a lable that is already attached to another component)
+ * @param takeOwnerShip		Bool flag that indicates if ownership of the given component shall be taken.
  */
 void HeaderWithElmListComponent::addComponent(Component* compo, bool includeInLayout, bool takeOwnership)
 {
@@ -167,7 +177,8 @@ void HeaderWithElmListComponent::addComponent(Component* compo, bool includeInLa
 }
 
 /**
- *
+ * Reimplemented paint method from Component that uses colours from TableListBox to give
+ * the user a similar impression as when using a table.
  */
 void HeaderWithElmListComponent::paint(Graphics& g)
 {
@@ -175,17 +186,17 @@ void HeaderWithElmListComponent::paint(Graphics& g)
 	auto h = getHeight();
 
 	if (m_toggleState)
-		g.setColour(CDbStyle::GetDbColor(CDbStyle::MidColor));
+		g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId)/*CDbStyle::GetDbColor(CDbStyle::MidColor)*/);
 	else
-		g.setColour(CDbStyle::GetDbColor(CDbStyle::MidColor).darker());
+		g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId).darker()/*CDbStyle::GetDbColor(CDbStyle::MidColor).darker()*/);
 	g.fillRect(0, 0, w, h);
 
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::DarkLineColor));
+	g.setColour(getLookAndFeel().findColour(TableListBox::outlineColourId)/*CDbStyle::GetDbColor(CDbStyle::DarkLineColor)*/);
 	g.drawRect(0, 0, w, h);
 }
 
 /**
- * 
+ * Reimplemented from Component to dynamically arrange items in vertical direction.
  */
 void HeaderWithElmListComponent::resized()
 {
@@ -363,7 +374,7 @@ CSettingsComponent::~CSettingsComponent()
 void CSettingsComponent::paint(Graphics& g)
 {
 	// Paint background to cover the controls behind this overlay.
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::DarkColor));
+	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker()/*CDbStyle::GetDbColor(CDbStyle::DarkColor)*/);
 	g.fillRect(Rectangle<int>(0, 0, getLocalBounds().getWidth(), getLocalBounds().getHeight()));
 }
 
@@ -567,12 +578,12 @@ CSettingsContainer::CSettingsContainer()
 	m_settingsComponent = std::make_unique<CSettingsComponent>();
 
 	m_settingsViewport = std::make_unique<Viewport>();
-	m_settingsViewport->getHorizontalScrollBar().setColour(ScrollBar::backgroundColourId, CDbStyle::GetDbColor(CDbStyle::DarkColor));
-	m_settingsViewport->getHorizontalScrollBar().setColour(ScrollBar::thumbColourId, CDbStyle::GetDbColor(CDbStyle::DarkTextColor));
-	m_settingsViewport->getHorizontalScrollBar().setColour(ScrollBar::trackColourId, CDbStyle::GetDbColor(CDbStyle::MidColor));
-	m_settingsViewport->getVerticalScrollBar().setColour(ScrollBar::backgroundColourId, CDbStyle::GetDbColor(CDbStyle::DarkColor));
-	m_settingsViewport->getVerticalScrollBar().setColour(ScrollBar::thumbColourId, CDbStyle::GetDbColor(CDbStyle::DarkTextColor));
-	m_settingsViewport->getVerticalScrollBar().setColour(ScrollBar::trackColourId, CDbStyle::GetDbColor(CDbStyle::MidColor));
+	//m_settingsViewport->getHorizontalScrollBar().setColour(ScrollBar::backgroundColourId, CDbStyle::GetDbColor(CDbStyle::DarkColor));
+	//m_settingsViewport->getHorizontalScrollBar().setColour(ScrollBar::thumbColourId, CDbStyle::GetDbColor(CDbStyle::DarkTextColor));
+	//m_settingsViewport->getHorizontalScrollBar().setColour(ScrollBar::trackColourId, CDbStyle::GetDbColor(CDbStyle::MidColor));
+	//m_settingsViewport->getVerticalScrollBar().setColour(ScrollBar::backgroundColourId, CDbStyle::GetDbColor(CDbStyle::DarkColor));
+	//m_settingsViewport->getVerticalScrollBar().setColour(ScrollBar::thumbColourId, CDbStyle::GetDbColor(CDbStyle::DarkTextColor));
+	//m_settingsViewport->getVerticalScrollBar().setColour(ScrollBar::trackColourId, CDbStyle::GetDbColor(CDbStyle::MidColor));
 	m_settingsViewport->setViewedComponent(m_settingsComponent.get(), false);
 	addAndMakeVisible(m_settingsViewport.get());
 
@@ -596,7 +607,7 @@ CSettingsContainer::~CSettingsContainer()
 void CSettingsContainer::paint(Graphics& g)
 {
 	// Paint background to cover the controls behind this overlay.
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::DarkColor));
+	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker()/*CDbStyle::GetDbColor(CDbStyle::DarkColor)*/);
 	g.fillRect(Rectangle<int>(0, 0, getLocalBounds().getWidth(), getLocalBounds().getHeight()));
 }
 

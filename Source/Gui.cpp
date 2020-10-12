@@ -40,51 +40,5 @@ namespace SoundscapeBridgeApp
 {
 
 
-/*
-===============================================================================
- Class CDbStyle
-===============================================================================
-*/
-
-/**
- * Get the desired color.
- * @param color Desired color code.
- */
-Colour CDbStyle::GetDbColor(DbColor color)
-{
-	switch (color)
-	{
-	case WindowColor:
-		return Colour(27, 27, 27);
-	case DarkLineColor:
-		return Colour(49, 49, 49);
-	case DarkColor:
-		return Colour(67, 67, 67);
-	case MidColor:
-		return Colour(83, 83, 83);
-	case ButtonColor:
-		return Colour(125, 125, 125);
-	case LightColor:
-		return Colour(201, 201, 201);
-	case TextColor:
-		return Colour(238, 238, 238);
-	case DarkTextColor:
-		return Colour(180, 180, 180);
-	case HighlightColor:
-		return Colour(115, 140, 155);
-	case FaderGreenColor:
-		return Colour(140, 180, 90);
-	case ButtonBlueColor:
-		return Colour(27, 120, 163);
-	case ButtonRedColor:
-		return Colour(226, 41, 41);
-	default:
-		break;
-	}
-
-	jassertfalse;
-	return Colours::black;
-}
-
 
 } // namespace SoundscapeBridgeApp

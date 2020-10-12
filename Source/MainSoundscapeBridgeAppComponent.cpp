@@ -82,7 +82,7 @@ MainSoundscapeBridgeAppComponent::~MainSoundscapeBridgeAppComponent()
 void MainSoundscapeBridgeAppComponent::paint(juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll(SoundscapeBridgeApp::CDbStyle::GetDbColor(SoundscapeBridgeApp::CDbStyle::DarkColor));
+    g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId)/*SoundscapeBridgeApp::CDbStyle::GetDbColor(SoundscapeBridgeApp::CDbStyle::DarkColor)*/);
 }
 
 void MainSoundscapeBridgeAppComponent::resized()

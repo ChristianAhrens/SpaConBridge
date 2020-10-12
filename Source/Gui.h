@@ -45,7 +45,7 @@ namespace SoundscapeBridgeApp
 /**
  * A style for d&b software look and feel.
  */
-class CDbStyle
+class DbStyle
 {
 public:
 	/**
@@ -67,12 +67,46 @@ public:
 		ButtonRedColor,		// 226 41 41 - Button Red
 	};
 
-	CDbStyle() {};
-	virtual ~CDbStyle() = default;
+	DbStyle() {};
+	virtual ~DbStyle() = default;
 
-	static Colour GetDbColor(DbColor color);
+	static Colour GetDbColor(DbColor color)
+	{
+		switch (color)
+		{
+		case WindowColor:
+			return Colour(27, 27, 27);
+		case DarkLineColor:
+			return Colour(49, 49, 49);
+		case DarkColor:
+			return Colour(67, 67, 67);
+		case MidColor:
+			return Colour(83, 83, 83);
+		case ButtonColor:
+			return Colour(125, 125, 125);
+		case LightColor:
+			return Colour(201, 201, 201);
+		case TextColor:
+			return Colour(238, 238, 238);
+		case DarkTextColor:
+			return Colour(180, 180, 180);
+		case HighlightColor:
+			return Colour(115, 140, 155);
+		case FaderGreenColor:
+			return Colour(140, 180, 90);
+		case ButtonBlueColor:
+			return Colour(27, 120, 163);
+		case ButtonRedColor:
+			return Colour(226, 41, 41);
+		default:
+			break;
+		}
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CDbStyle)
+		jassertfalse;
+		return Colours::black;
+	}
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DbStyle)
 };
 
 

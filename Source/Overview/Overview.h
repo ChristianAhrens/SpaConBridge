@@ -80,7 +80,7 @@ protected:
 		// Button's main colour
 		if (on)
 		{
-			Colour col = CDbStyle::GetDbColor(CDbStyle::ButtonBlueColor);
+			Colour col = DbStyle::GetDbColor(DbStyle::ButtonBlueColor);
 			if (isButtonDown)
 				col = col.brighter(0.1f);
 			else if (isMouseOverButton)
@@ -89,18 +89,19 @@ protected:
 		}
 		else
 		{
-			Colour col = CDbStyle::GetDbColor(CDbStyle::ButtonColor);
+			Colour col = DbStyle::GetDbColor(DbStyle::ButtonColor);
 			if (!enabled)
-				col = col.darker(0.5f);
+				col = getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker();
 			else if (isButtonDown)
-				col = CDbStyle::GetDbColor(CDbStyle::ButtonBlueColor).brighter(0.05f);
+				col = DbStyle::GetDbColor(DbStyle::ButtonBlueColor).brighter(0.05f);
 			else if (isMouseOverButton)
-				col = col.brighter(0.05f);
+				col = getLookAndFeel().findColour(ResizableWindow::backgroundColourId).brighter(0.05f);
 			g.setColour(col);
 		}
 
 		g.fillRoundedRectangle(buttonRectF, 10);
-		g.setColour(CDbStyle::GetDbColor(CDbStyle::WindowColor));
+		//g.setColour(CDbStyle::GetDbColor(CDbStyle::WindowColor));
+		g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
 		g.drawRoundedRectangle(buttonRectF, 10, 1);
 	}
 

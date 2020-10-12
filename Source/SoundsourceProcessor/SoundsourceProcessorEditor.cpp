@@ -148,11 +148,11 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 			m_delayModeComboBox->addItem("Off",	1);
 			m_delayModeComboBox->addItem("Tight", 2);
 			m_delayModeComboBox->addItem("Full", 3);
-			m_delayModeComboBox->setColour(ComboBox::backgroundColourId, CDbStyle::GetDbColor(CDbStyle::DarkColor));
-			m_delayModeComboBox->setColour(ComboBox::textColourId, CDbStyle::GetDbColor(CDbStyle::TextColor));
-			m_delayModeComboBox->setColour(ComboBox::outlineColourId, CDbStyle::GetDbColor(CDbStyle::WindowColor));
-			m_delayModeComboBox->setColour(ComboBox::buttonColourId, CDbStyle::GetDbColor(CDbStyle::MidColor));
-			m_delayModeComboBox->setColour(ComboBox::arrowColourId, CDbStyle::GetDbColor(CDbStyle::TextColor));
+			//m_delayModeComboBox->setColour(ComboBox::backgroundColourId, CDbStyle::GetDbColor(CDbStyle::DarkColor));
+			//m_delayModeComboBox->setColour(ComboBox::textColourId, CDbStyle::GetDbColor(CDbStyle::TextColor));
+			//m_delayModeComboBox->setColour(ComboBox::outlineColourId, CDbStyle::GetDbColor(CDbStyle::WindowColor));
+			//m_delayModeComboBox->setColour(ComboBox::buttonColourId, CDbStyle::GetDbColor(CDbStyle::MidColor));
+			//m_delayModeComboBox->setColour(ComboBox::arrowColourId, CDbStyle::GetDbColor(CDbStyle::TextColor));
 			m_delayModeComboBox->addListener(this);
 			addAndMakeVisible(m_delayModeComboBox.get());
 
@@ -166,7 +166,7 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 	// Label for Plugin' display name.
 	m_displayNameLabel = std::make_unique<Label>("DisplayName");
 	m_displayNameLabel->setJustificationType(Justification(Justification::centredLeft));
-	m_displayNameLabel->setColour(Label::textColourId, CDbStyle::GetDbColor(CDbStyle::DarkTextColor));
+	//m_displayNameLabel->setColour(Label::textColourId, CDbStyle::GetDbColor(CDbStyle::DarkTextColor));
 	addAndMakeVisible(m_displayNameLabel.get());
 
 	// Start GUI-refreshing timer.
@@ -296,15 +296,15 @@ void SoundsourceProcessorEditor::paint(Graphics& g)
 	getResizePaintAreaSplit(twoDSurfaceArea, parameterEditArea);
 
 	// Background of 2D slider area
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::DarkColor));
+	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker()/*CDbStyle::GetDbColor(CDbStyle::DarkColor)*/);
 	g.fillRect(twoDSurfaceArea);
 
 	// Background of parameter edit elements
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::MidColor));
+	g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId)/*CDbStyle::GetDbColor(CDbStyle::MidColor)*/);
 	g.fillRect(parameterEditArea);
 	
-	// Black frame
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::DarkLineColor));
+	// Frame
+	g.setColour(getLookAndFeel().findColour(TableListBox::outlineColourId)/*CDbStyle::GetDbColor(CDbStyle::DarkLineColor)*/);
 	g.drawRect(getLocalBounds().toFloat());
 }
 

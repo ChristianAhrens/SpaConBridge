@@ -1258,7 +1258,6 @@ void RadioButtonContainer::SetRow(int newRow)
 }
 
 
-
 /*
 ===============================================================================
  Class MuteButtonContainer
@@ -1291,23 +1290,40 @@ void MuteButtonContainer::updateBridgingMuteButtons()
 	if (!ctrl)
 		return;
 
+	auto lookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (!lookAndFeel)
+		return;
+
+	// create the required button drawable images based on lookandfeel colours
+	String imageName = BinaryData::volume_off24px_svg;
+	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
+	JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+
+	// collect what bridging modules are active
 	auto activeBridging = ctrl->GetActiveProtocolBridging();
 
-	auto redColour = Colours::red;
-	auto lookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
-	if (lookAndFeel)
-		redColour = lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonRedColor);
+	// determine the right red colour from lookandfeel
+	auto redColour = lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonRedColor);
 
 	for (auto type : m_knowntypes)
 	{
 		if (((activeBridging & type) == type) && (m_bridgingMutes.count(type) == 0))
 		{
-			m_bridgingMutes[type].setButtonText("Mute");
-			m_bridgingMutes[type].setClickingTogglesState(true);
-			m_bridgingMutes[type].setColour(TextButton::ColourIds::buttonOnColourId, redColour.brighter(0.05f));
-			m_bridgingMutes[type].setEnabled(true);
-			m_bridgingMutes[type].addListener(this);
-			addAndMakeVisible(&m_bridgingMutes.at(type));
+			m_bridgingMutes.insert(std::make_pair(type, std::make_unique<DrawableButton>("Mute", DrawableButton::ButtonStyle::ImageOnButtonBackground)));
+			m_bridgingMutes[type]->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+			m_bridgingMutes[type]->setClickingTogglesState(true);
+			m_bridgingMutes[type]->setColour(TextButton::ColourIds::buttonOnColourId, redColour.brighter(0.05f));
+			m_bridgingMutes[type]->setEnabled(true);
+			m_bridgingMutes[type]->addListener(this);
+			addAndMakeVisible(m_bridgingMutes.at(type).get());
 		}
 		else if (((activeBridging & type) != type) && (m_bridgingMutes.count(type) > 0))
 		{
@@ -1316,6 +1332,49 @@ void MuteButtonContainer::updateBridgingMuteButtons()
 	}
 
 	resized();
+}
+
+/**
+ * Helper method to update the drawables used for buttons to match the text colour
+ */
+void MuteButtonContainer::updateDrawableButtonImageColours()
+{
+	CController* ctrl = CController::GetInstance();
+	if (!ctrl)
+		return;
+
+	auto lookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (!lookAndFeel)
+		return;
+
+	// create the required button drawable images based on lookandfeel colours
+	String imageName = BinaryData::volume_off24px_svg;
+	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
+	JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+
+	// collect what bridging modules are active
+	auto activeBridging = ctrl->GetActiveProtocolBridging();
+
+	// determine the right red colour from lookandfeel
+	auto redColour = lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonRedColor);
+
+	// set the images to button
+	for (auto type : m_knowntypes)
+	{
+		if (((activeBridging & type) == type) && (m_bridgingMutes.count(type) == 0))
+		{
+			m_bridgingMutes[type]->setColour(TextButton::ColourIds::buttonOnColourId, redColour.brighter(0.05f));
+			m_bridgingMutes[type]->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+		}
+	}
 }
 
 /**
@@ -1330,7 +1389,7 @@ void MuteButtonContainer::buttonClicked(Button* button)
 
 	for (auto type : m_knowntypes)
 	{
-		if ((m_bridgingMutes.count(type) > 0) && (button == &m_bridgingMutes.at(type)))
+		if ((m_bridgingMutes.count(type) > 0) && (button == m_bridgingMutes.at(type).get()))
 		{
 			bool newToggleState = button->getToggleState();
 
@@ -1367,14 +1426,11 @@ void MuteButtonContainer::resized()
 	auto bounds = getLocalBounds();
 	bounds.removeFromBottom(1);
 	auto singleButtonWidth = bounds.getWidth() / m_bridgingMutes.size();
-    
-    auto buttonText = ((1.5f * bounds.getHeight()) > singleButtonWidth) ? "M" : "Mute";
 
 	for (auto& buttonKV : m_bridgingMutes)
 	{
 		auto buttonRect = bounds.removeFromLeft(singleButtonWidth).reduced(4);
-		buttonKV.second.setBounds(buttonRect);
-        buttonKV.second.setName(buttonText);
+		buttonKV.second->setBounds(buttonRect);
 	}
 }
 
@@ -1396,7 +1452,7 @@ void MuteButtonContainer::SetRow(int newRow)
 		{
 			if (m_bridgingMutes.count(type) > 0)
 			{
-				m_bridgingMutes.at(type).setToggleState(ctrl->GetMuteBridgingSourceId(type, static_cast<uint16>(processorId)), dontSendNotification);
+				m_bridgingMutes.at(type)->setToggleState(ctrl->GetMuteBridgingSourceId(type, static_cast<uint16>(processorId)), dontSendNotification);
 			}
 		}
 	}

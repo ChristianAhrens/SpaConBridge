@@ -154,6 +154,8 @@
                   file="submodules/JUCE-AppBasics/Resources/Images/settings-24px.svg"/>
             <FILE id="YFXXxo" name="vertical_split-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/vertical_split-24px.svg"/>
+            <FILE id="nTMZyk" name="volume_off-24px.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/volume_off-24px.svg"/>
           </GROUP>
         </GROUP>
       </GROUP>

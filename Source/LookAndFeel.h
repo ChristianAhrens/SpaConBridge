@@ -92,7 +92,7 @@ public:
 	~DarkDbLookAndFeel() override;
 
 	//==============================================================================
-	virtual LookAndFeelType GetType() { return LAFT_Dark; };
+	virtual LookAndFeelType GetType() override { return LAFT_Dark; };
 	Colour GetDbColor(DbColor color) override;
 
 private:
@@ -107,7 +107,7 @@ public:
 	~LightDbLookAndFeel() override;
 
 	//==============================================================================
-	virtual LookAndFeelType GetType() { return LAFT_Light; };
+	virtual LookAndFeelType GetType() override { return LAFT_Light; };
 	Colour GetDbColor(DbColor color) override;
 
 private:

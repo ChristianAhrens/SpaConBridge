@@ -198,6 +198,10 @@ public:
 	CTabBarButton(int tabIdx, TabbedButtonBar& ownerBar);
 	~CTabBarButton() override;
 
+	void updateDrawableButtonImageColours();
+
+	void lookAndFeelChanged() override;
+
 protected:
 	void paintButton(Graphics&, bool, bool) override;
 	void resized() override;

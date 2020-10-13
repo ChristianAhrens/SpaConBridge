@@ -36,6 +36,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "OverviewSettings.h"
 
 #include "../Controller.h"
+#include "../LookAndFeel.h"
 
 
 namespace SoundscapeBridgeApp
@@ -536,6 +537,8 @@ void CSettingsComponent::processUpdatedConfig()
  */
 void CSettingsComponent::handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info)
 {
+	ignoreUnused(type);
+
 	if (info)
 	{
 		m_DS100IpAddressEdit->setText(info->ip, true);
@@ -545,6 +548,7 @@ void CSettingsComponent::handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDisco
             ctrl->SetIpAddress(DCS_Gui, info->ip);
 	}
 }
+
 
 /*
 ===============================================================================
@@ -566,6 +570,18 @@ CSettingsContainer::CSettingsContainer()
 	m_settingsRawEditor->setMultiLine(true, false);
 	addAndMakeVisible(m_settingsRawEditor.get());
 
+	m_lookAndFeelSelect = std::make_unique<ComboBox>();
+	//for (auto t = static_cast<int>(DbLookAndFeelBase::LAFT_InvalidFirst + 1); t < static_cast<int>(DbLookAndFeelBase::LAFT_InvalidLast); ++t)
+	//	m_lookAndFeelSelect->addItem(DbLookAndFeelBase::getLookAndFeelName(static_cast<DbLookAndFeelBase::LookAndFeelType>(t)), t);
+	m_lookAndFeelSelect->addItem(DbLookAndFeelBase::getLookAndFeelName(DbLookAndFeelBase::LAFT_Dark), DbLookAndFeelBase::LAFT_Dark);
+	m_lookAndFeelSelect->addItem(DbLookAndFeelBase::getLookAndFeelName(DbLookAndFeelBase::LAFT_Light), DbLookAndFeelBase::LAFT_Light);
+	m_lookAndFeelSelect->onChange = [this] { onSelectedLookAndFeelChanged(); };
+	addAndMakeVisible(m_lookAndFeelSelect.get());
+	m_lookAndFeelLabel = std::make_unique<Label>("LookAndFeelSelect", "Look and feel:");
+	m_lookAndFeelLabel->setJustificationType(Justification::centred);
+	m_lookAndFeelLabel->attachToComponent(m_lookAndFeelSelect.get(), true);
+	addAndMakeVisible(m_lookAndFeelLabel.get());
+
 	m_useRawConfigButton = std::make_unique<ToggleButton>();
 	m_useRawConfigButton->onClick = [this] { onToggleRawConfigVisible(); };
 	addAndMakeVisible(m_useRawConfigButton.get());
@@ -584,7 +600,10 @@ CSettingsContainer::CSettingsContainer()
 	// register this object as config watcher
 	auto config = AppConfiguration::getInstance();
 	if (config)
+	{
 		config->addWatcher(this);
+		config->addDumper(this);
+	}
 }
 
 /**
@@ -613,8 +632,11 @@ void CSettingsContainer::resized()
 	auto bounds = getLocalBounds().reduced(5);
 
 	// toggle button for visibility of raw config textfield
-	auto rcbBounds = bounds.removeFromBottom(20).removeFromRight(150);
-	m_useRawConfigButton->setBounds(rcbBounds.removeFromRight(25));
+	auto bottomBarControlBounds = bounds.removeFromBottom(20);
+	m_useRawConfigButton->setBounds(bottomBarControlBounds.removeFromRight(25));
+	m_lookAndFeelSelect->setBounds(bottomBarControlBounds.removeFromLeft(210).removeFromRight(110));
+
+	bounds.removeFromBottom(5);
 
 	m_settingsComponent->setBounds(bounds);
 	m_settingsViewport->setBounds(bounds);
@@ -650,11 +672,45 @@ void CSettingsContainer::UpdateGui(bool init)
 /**
  *
  */
+void CSettingsContainer::performConfigurationDump()
+{
+	auto config = AppConfiguration::getInstance();
+	if (config && m_lookAndFeelSelect)
+	{
+		auto lafConfigState = std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::LOOKANDFEEL));
+		auto lafType = static_cast<DbLookAndFeelBase::LookAndFeelType>(m_lookAndFeelSelect->getSelectedId());
+		if (lafConfigState)
+		{
+			lafConfigState->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::LOOKANDFEELTYPE), lafType);
+			config->setConfigState(std::move(lafConfigState));
+		}
+	}
+}
+
+/**
+ *
+ */
 void CSettingsContainer::onConfigUpdated()
 {
 	auto config = AppConfiguration::getInstance();
 	if (config)
 	{
+		// trigger updating the settings visu in general
+		m_settingsComponent->processUpdatedConfig();
+
+		// get current selected lookandfeel to update selection dropdown
+		auto lafConfigState = config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::LOOKANDFEEL));
+		if (lafConfigState)
+		{
+			auto lafAttrName = AppConfiguration::getAttributeName(AppConfiguration::AttributeID::LOOKANDFEELTYPE);
+			auto lafVal = lafConfigState->getIntAttribute(lafAttrName, DbLookAndFeelBase::LookAndFeelType::LAFT_DefaultJUCE);
+			auto lafType = static_cast<DbLookAndFeelBase::LookAndFeelType>(lafVal);
+
+			if (m_lookAndFeelSelect)
+				m_lookAndFeelSelect->setSelectedId(lafType, dontSendNotification);
+		}
+
+		// if the raw config is currently visible, go into updating it as well
 		if (m_useRawConfigButton->getToggleState())
 		{
 			// get the config for filling raw texteditor (meant for debugging, ...)
@@ -662,8 +718,6 @@ void CSettingsContainer::onConfigUpdated()
 			auto configText = configXml->toString();
 			m_settingsRawEditor->setText(configText);
 		}
-
-		m_settingsComponent->processUpdatedConfig();
 	}
 }
 
@@ -712,6 +766,16 @@ void CSettingsContainer::onToggleRawConfigVisible()
 		m_applyButton->setVisible(false);
 		m_settingsRawEditor->setVisible(false);
 	}
+}
+
+/**
+ *
+ */
+void CSettingsContainer::onSelectedLookAndFeelChanged()
+{
+	auto config = AppConfiguration::getInstance();
+	if (config)
+		config->triggerConfigurationDump(true);
 }
 
 

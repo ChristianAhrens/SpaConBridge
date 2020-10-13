@@ -121,6 +121,10 @@ void OverviewTableContainer::paint(Graphics& g)
 	int h = getLocalBounds().getHeight();	
 
 	// Background
+	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
+	g.fillRect(getLocalBounds());
+
+	// Bottm bar background
 	g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId));
 	g.fillRect(Rectangle<int>(8, h - 41, w - 16, 34));
 
@@ -680,13 +684,13 @@ void TableModelComponent::paintRowBackground(Graphics& g, int rowNumber, int wid
 
 	// Selected rows have a different background color.
 	if (rowIsSelected)
-		g.setColour(getLookAndFeel().findColour(LookAndFeel_V4::ColourScheme::highlightedFill));
+		g.setColour(getLookAndFeel().findColour(TableHeaderComponent::highlightColourId));
 	else
 		g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId));
 	g.fillRect(0, 0, width, height - 1);
 
 	// Line between rows.
-	g.setColour(getLookAndFeel().findColour(LookAndFeel_V4::ColourScheme::outline));
+	g.setColour(getLookAndFeel().findColour(ListBox::outlineColourId));
 	g.fillRect(0, height - 1, width, height - 1);
 }
 

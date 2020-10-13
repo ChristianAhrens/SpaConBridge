@@ -147,7 +147,9 @@ private:
 /**
  * CSettingsContainer is a component to hold multiple components that are dedicated to app configuration.
  */
-class CSettingsContainer : public OverlayBase, public AppConfiguration::Watcher
+class CSettingsContainer :	public OverlayBase, 
+							public AppConfiguration::Watcher, 
+							public AppConfiguration::Dumper
 {
 public:
 	CSettingsContainer();
@@ -156,9 +158,13 @@ public:
 	//==========================================================================
 	void onApplyClicked();
 	void onToggleRawConfigVisible();
+	void onSelectedLookAndFeelChanged();
 
 	//==========================================================================
 	void UpdateGui(bool init) override;
+
+	//==========================================================================
+	void performConfigurationDump() override;
 
 	//==========================================================================
 	void onConfigUpdated() override;
@@ -173,6 +179,8 @@ private:
 
 	std::unique_ptr<TextButton>		m_applyButton;
 	std::unique_ptr<TextEditor>		m_settingsRawEditor;
+	std::unique_ptr<ComboBox>		m_lookAndFeelSelect;
+	std::unique_ptr<Label>			m_lookAndFeelLabel;
 	std::unique_ptr<ToggleButton>	m_useRawConfigButton;
 	std::unique_ptr<Label>			m_useRawConfigLabel;
 

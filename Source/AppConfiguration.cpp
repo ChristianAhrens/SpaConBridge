@@ -27,6 +27,15 @@ bool AppConfiguration::isValid()
 	else
 		return false;
 
+	XmlElement* lafSectionElement = m_xml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::LOOKANDFEEL));
+	if (lafSectionElement)
+	{
+		if (!lafSectionElement->hasAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::LOOKANDFEELTYPE)))
+			return false;
+	}
+	else
+		return false;
+
 	XmlElement* ctrlSectionElement = m_xml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER));
 	if (ctrlSectionElement)
 	{

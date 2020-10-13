@@ -11,6 +11,7 @@
 #pragma once
 
 #include "AppConfiguration.h"
+#include "LookAndFeel.h"
 
 #include <JuceHeader.h>
 
@@ -28,6 +29,7 @@ class MainSoundscapeBridgeAppComponent :    public juce::Component,
 {
 public:
     MainSoundscapeBridgeAppComponent();
+    MainSoundscapeBridgeAppComponent(std::function<void(DbLookAndFeelBase::LookAndFeelType)> lafUpdateCallback);
     ~MainSoundscapeBridgeAppComponent() override;
 
     //==========================================================================
@@ -39,6 +41,9 @@ public:
 
     //==========================================================================
     void onConfigUpdated() override;
+
+    //==========================================================================
+    std::function<void(DbLookAndFeelBase::LookAndFeelType)>	onUpdateLookAndFeel;
 
 private:
     std::unique_ptr<AppConfiguration>           m_config;

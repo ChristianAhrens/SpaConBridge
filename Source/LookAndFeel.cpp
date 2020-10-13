@@ -23,16 +23,6 @@ DbLookAndFeelBase::~DbLookAndFeelBase()
 
 void DbLookAndFeelBase::InitColours()
 {
-	setColour(ColourScheme::windowBackground, GetDbColor(DbColor::MidColor));
-	setColour(ColourScheme::widgetBackground, GetDbColor(DbColor::ButtonColor));
-	setColour(ColourScheme::menuBackground, GetDbColor(DbColor::DarkColor));
-	setColour(ColourScheme::outline, GetDbColor(DbColor::DarkLineColor));
-	setColour(ColourScheme::defaultText, GetDbColor(DbColor::TextColor));
-	setColour(ColourScheme::defaultFill, GetDbColor(DbColor::MidColor));
-	setColour(ColourScheme::highlightedText, GetDbColor(DbColor::TextColor));
-	setColour(ColourScheme::highlightedFill, GetDbColor(DbColor::HighlightColor));
-	setColour(ColourScheme::menuText, GetDbColor(DbColor::TextColor));
-
 	setColour(ResizableWindow::backgroundColourId, GetDbColor(DbColor::MidColor));
 
 	setColour(TextEditor::backgroundColourId, GetDbColor(DbColor::DarkColor));
@@ -40,7 +30,7 @@ void DbLookAndFeelBase::InitColours()
 	setColour(TextEditor::highlightColourId, GetDbColor(DbColor::HighlightColor));
 	setColour(TextEditor::highlightedTextColourId, GetDbColor(DbColor::TextColor));
 	setColour(TextEditor::outlineColourId, GetDbColor(DbColor::WindowColor));
-	setColour(TextEditor::focusedOutlineColourId, GetDbColor(DbColor::WindowColor));
+	setColour(TextEditor::focusedOutlineColourId, GetDbColor(DbColor::LightColor));
 	setColour(TextEditor::shadowColourId, GetDbColor(DbColor::MidColor).darker());
 
 	setColour(ComboBox::arrowColourId, GetDbColor(DbColor::TextColor));
@@ -235,9 +225,9 @@ Colour LightDbLookAndFeel::GetDbColor(DbColor color)
 	case FaderGreenColor:
 		return Colour(140, 180, 90);
 	case ButtonBlueColor:
-		return Colour(27, 120, 163);
+		return Colour(50, 155, 205);
 	case ButtonRedColor:
-		return Colour(226, 41, 41);
+		return Colour(230, 0, 0);
 	default:
 		break;
 	}

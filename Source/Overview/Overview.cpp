@@ -147,11 +147,11 @@ void COverviewComponent::paint(Graphics& g)
 	g.fillRect(getLocalBounds());
 
 	// Background
-	g.setColour(getLookAndFeel().findColour(LookAndFeel_V4::ColourScheme::widgetBackground));
+	g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
 	g.fillRect(Rectangle<int>(0, 43, w, h - 87));
 
 	// Little lines between version and logo
-	g.setColour(getLookAndFeel().findColour(LookAndFeel_V4::ColourScheme::widgetBackground));
+	g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
 	g.fillRect(Rectangle<int>(w - 39, 6, 1, 30));
 	g.fillRect(Rectangle<int>(w - 86, 6, 1, 30));
 
@@ -160,7 +160,7 @@ void COverviewComponent::paint(Graphics& g)
 
 	// Draw little line below right and left overlap of tabbedcomponent buttonbar to match with the line which is automatically drawn 
 	// by the CTabbedComponent's CTabBarButton.
-	g.setColour(getLookAndFeel().findColour(LookAndFeel_V4::ColourScheme::widgetBackground));
+	g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
 	g.drawRect(Rectangle<int>(0, 43, 40, 1), 1);
 	g.drawRect(Rectangle<int>(w - 86, 43, 86, 1), 1);
 }
@@ -395,6 +395,21 @@ CTabBarButton::CTabBarButton(int tabIdx, TabbedButtonBar& ownerBar)
 	: TabBarButton(String(), ownerBar),
 	m_tabIndex(tabIdx)
 {
+	updateDrawableButtonImageColours();
+}
+
+/**
+ * Class destructor.
+ */
+CTabBarButton::~CTabBarButton()
+{
+}
+
+/**
+ * Helper method to update the drawables used for buttons to match the text colour
+ */
+void CTabBarButton::updateDrawableButtonImageColours()
+{
 	String imageName;
 	switch (m_tabIndex)
 	{
@@ -411,11 +426,28 @@ CTabBarButton::CTabBarButton(int tabIdx, TabbedButtonBar& ownerBar)
 		break;
 	}
 
+	if (m_normalImage)
+		removeChildComponent(m_normalImage.get());
+	if (m_overImage)
+		removeChildComponent(m_overImage.get());
+	if (m_downImage)
+		removeChildComponent(m_downImage.get());
+	if (m_disabledImage)
+		removeChildComponent(m_disabledImage.get());
+	if (m_normalOnImage)
+		removeChildComponent(m_normalOnImage.get());
+	if (m_overOnImage)
+		removeChildComponent(m_overOnImage.get());
+	if (m_downOnImage)
+		removeChildComponent(m_downOnImage.get());
+	if (m_disabledOnImage)
+		removeChildComponent(m_disabledOnImage.get());
+
 	auto lookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
 	if (lookAndFeel)
 		JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, m_normalImage, m_overImage, m_downImage, m_disabledImage, m_normalOnImage, m_overOnImage, m_downOnImage, m_disabledOnImage,
-			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor), 
-			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor), 
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
 			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
 			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
 			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
@@ -436,10 +468,14 @@ CTabBarButton::CTabBarButton(int tabIdx, TabbedButtonBar& ownerBar)
 }
 
 /**
- * Class destructor.
- */
-CTabBarButton::~CTabBarButton()
+* Reimplemented from Component to recreate the button drawables accordingly.
+*/
+void CTabBarButton::lookAndFeelChanged()
 {
+	// update the drawable button images
+	updateDrawableButtonImageColours();
+	// and forward the call to base implementation
+	TabBarButton::lookAndFeelChanged();
 }
 
 /**

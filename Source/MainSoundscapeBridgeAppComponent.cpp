@@ -26,11 +26,17 @@ namespace SoundscapeBridgeApp
 
 //==============================================================================
 MainSoundscapeBridgeAppComponent::MainSoundscapeBridgeAppComponent()
+    : MainSoundscapeBridgeAppComponent(nullptr)
+{
+}
+
+MainSoundscapeBridgeAppComponent::MainSoundscapeBridgeAppComponent(std::function<void(DbLookAndFeelBase::LookAndFeelType)> lafUpdateCallback)
+    : onUpdateLookAndFeel(lafUpdateCallback)
 {
     m_config = std::make_unique<AppConfiguration>(JUCEAppBasics::AppConfigurationBase::getDefaultConfigFilePath());
     m_config->addDumper(this);
     m_config->addWatcher(this);
-    
+
     if (!m_config->isValid())
     {
         m_config->triggerConfigurationDump();
@@ -119,6 +125,7 @@ void MainSoundscapeBridgeAppComponent::onConfigUpdated()
     // get all the modules' configs first, because the initialization process might already trigger dumping, that would override data
     auto ctrlConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER));
     auto ovrConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW));
+    auto lafConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::LOOKANDFEEL));
 
     // set the controller modules' config
     auto ctrl = SoundscapeBridgeApp::CController::GetInstance();
@@ -129,6 +136,17 @@ void MainSoundscapeBridgeAppComponent::onConfigUpdated()
     auto ovrMgr = SoundscapeBridgeApp::COverviewManager::GetInstance();
     if (ovrMgr)
         ovrMgr->setStateXml(ovrConfigState.get());
+
+    // set the lookandfeel config (forwards to MainWindow where the magic happens)
+    if (lafConfigState)
+    {
+        auto lafAttrName = AppConfiguration::getAttributeName(AppConfiguration::AttributeID::LOOKANDFEELTYPE);
+        auto lafVal = lafConfigState->getIntAttribute(lafAttrName, DbLookAndFeelBase::LookAndFeelType::LAFT_DefaultJUCE);
+        auto lafType = static_cast<DbLookAndFeelBase::LookAndFeelType>(lafVal);
+
+        if (onUpdateLookAndFeel)
+            onUpdateLookAndFeel(lafType);
+    }
 }
 
 }

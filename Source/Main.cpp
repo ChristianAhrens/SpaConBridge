@@ -55,10 +55,9 @@ public:
             .findColour(ResizableWindow::backgroundColourId),
             DocumentWindow::allButtons)
         {
-            m_customLookAndFeel = std::unique_ptr<LookAndFeel>(new DarkDbLookAndFeel);
-            Desktop::getInstance().setDefaultLookAndFeel(m_customLookAndFeel.get());
+            updateLookAndFeel();
 
-            m_mainComponent = std::make_unique<MainSoundscapeBridgeAppComponent>();
+            m_mainComponent = std::make_unique<MainSoundscapeBridgeAppComponent>([=](DbLookAndFeelBase::LookAndFeelType type) { updateLookAndFeel(type); });
 
             setUsingNativeTitleBar(true);
             setContentOwned(m_mainComponent.get(), true);
@@ -87,6 +86,25 @@ public:
             you really have to override any DocumentWindow methods, make sure your
             subclass also calls the superclass's method.
         */
+
+        void updateLookAndFeel(DbLookAndFeelBase::LookAndFeelType type = DbLookAndFeelBase::LookAndFeelType::LAFT_OSdynamic)
+        {
+            switch (type)
+            {
+            case DbLookAndFeelBase::LookAndFeelType::LAFT_DefaultJUCE:
+                m_customLookAndFeel = nullptr;
+                break;
+            case DbLookAndFeelBase::LookAndFeelType::LAFT_Light:
+                m_customLookAndFeel = std::unique_ptr<LookAndFeel>(new LightDbLookAndFeel);
+                break;
+            case DbLookAndFeelBase::LookAndFeelType::LAFT_Dark:
+            case DbLookAndFeelBase::LookAndFeelType::LAFT_OSdynamic:
+            default:
+                m_customLookAndFeel = std::unique_ptr<LookAndFeel>(new DarkDbLookAndFeel);
+                break;
+            }
+            Desktop::getInstance().setDefaultLookAndFeel(m_customLookAndFeel.get());
+        }
 
     private:
         std::unique_ptr<LookAndFeel>	                    m_customLookAndFeel; // our own look and feel implementation instance

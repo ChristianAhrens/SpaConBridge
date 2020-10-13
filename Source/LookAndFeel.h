@@ -17,7 +17,35 @@ namespace SoundscapeBridgeApp
 
 class DbLookAndFeelBase : public LookAndFeel_V4
 {
-public:	
+public:
+	enum LookAndFeelType
+	{
+		LAFT_InvalidFirst,
+		LAFT_DefaultJUCE,
+		LAFT_Dark,
+		LAFT_Light,
+		LAFT_OSdynamic,
+		LAFT_InvalidLast
+	};
+	static String getLookAndFeelName(LookAndFeelType type)
+	{
+		switch (type)
+		{
+		case LAFT_DefaultJUCE:
+			return "Default JUCE";
+		case LAFT_Dark:
+			return "Dark";
+		case LAFT_Light:
+			return "Light";
+		case LAFT_OSdynamic:
+			return "- dynamic -";
+		case LAFT_InvalidFirst:
+		case LAFT_InvalidLast:
+		default:
+			return "INVALID";
+		}
+	};
+
 	/**
 	 * d&b Color codes
 	 */
@@ -45,6 +73,7 @@ public:
 	void InitColours();
 
 	//==============================================================================
+	virtual LookAndFeelType GetType() = 0;
 	virtual Colour GetDbColor(DbColor color) = 0;
 
 	//==============================================================================
@@ -63,6 +92,7 @@ public:
 	~DarkDbLookAndFeel() override;
 
 	//==============================================================================
+	virtual LookAndFeelType GetType() { return LAFT_Dark; };
 	Colour GetDbColor(DbColor color) override;
 
 private:
@@ -77,6 +107,7 @@ public:
 	~LightDbLookAndFeel() override;
 
 	//==============================================================================
+	virtual LookAndFeelType GetType() { return LAFT_Light; };
 	Colour GetDbColor(DbColor color) override;
 
 private:

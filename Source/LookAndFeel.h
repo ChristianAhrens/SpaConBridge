@@ -69,4 +69,18 @@ private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DarkDbLookAndFeel)
 };
 
+class LightDbLookAndFeel : public DbLookAndFeelBase
+{
+
+public:
+	LightDbLookAndFeel();
+	~LightDbLookAndFeel() override;
+
+	//==============================================================================
+	Colour GetDbColor(DbColor color) override;
+
+private:
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LightDbLookAndFeel)
+};
+
 }

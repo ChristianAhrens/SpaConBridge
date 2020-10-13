@@ -24,9 +24,9 @@ DbLookAndFeelBase::~DbLookAndFeelBase()
 void DbLookAndFeelBase::InitColours()
 {
 	setColour(ColourScheme::windowBackground, GetDbColor(DbColor::MidColor));
-	setColour(ColourScheme::widgetBackground, GetDbColor(DbColor::DarkColor));
+	setColour(ColourScheme::widgetBackground, GetDbColor(DbColor::ButtonColor));
 	setColour(ColourScheme::menuBackground, GetDbColor(DbColor::DarkColor));
-	setColour(ColourScheme::outline, GetDbColor(DbColor::ButtonColor));
+	setColour(ColourScheme::outline, GetDbColor(DbColor::DarkLineColor));
 	setColour(ColourScheme::defaultText, GetDbColor(DbColor::TextColor));
 	setColour(ColourScheme::defaultFill, GetDbColor(DbColor::MidColor));
 	setColour(ColourScheme::highlightedText, GetDbColor(DbColor::TextColor));
@@ -66,13 +66,17 @@ void DbLookAndFeelBase::InitColours()
 	setColour(DrawableButton::backgroundColourId, GetDbColor(DbColor::MidColor));
 	setColour(DrawableButton::backgroundOnColourId, GetDbColor(DbColor::HighlightColor));
 
+	setColour(ToggleButton::textColourId, GetDbColor(DbColor::TextColor));
+	setColour(ToggleButton::tickColourId, GetDbColor(DbColor::TextColor));
+	setColour(ToggleButton::tickDisabledColourId, GetDbColor(DbColor::DarkTextColor));
+
 	setColour(ListBox::backgroundColourId, GetDbColor(DbColor::MidColor));
 	setColour(ListBox::outlineColourId, GetDbColor(DbColor::DarkLineColor));
 	setColour(ListBox::textColourId, GetDbColor(DbColor::TextColor));
 
 	setColour(TableHeaderComponent::textColourId, GetDbColor(DbColor::TextColor));
 	setColour(TableHeaderComponent::backgroundColourId, GetDbColor(DbColor::MidColor));
-	setColour(TableHeaderComponent::outlineColourId, GetDbColor(DbColor::DarkLineColor));
+	setColour(TableHeaderComponent::outlineColourId, GetDbColor(DbColor::WindowColor));
 	setColour(TableHeaderComponent::highlightColourId, GetDbColor(DbColor::HighlightColor));
 
 	setColour(ScrollBar::backgroundColourId, GetDbColor(DbColor::MidColor));
@@ -80,7 +84,7 @@ void DbLookAndFeelBase::InitColours()
 	setColour(ScrollBar::trackColourId, GetDbColor(DbColor::MidColor));
 
 	setColour(TableListBox::backgroundColourId, GetDbColor(DbColor::MidColor));
-	setColour(TableListBox::outlineColourId, GetDbColor(DbColor::DarkLineColor));
+	setColour(TableListBox::outlineColourId, GetDbColor(DbColor::WindowColor));
 	setColour(TableListBox::textColourId, GetDbColor(DbColor::TextColor));
 
 	setColour(CodeEditorComponent::backgroundColourId, GetDbColor(DbColor::MidColor));
@@ -89,15 +93,18 @@ void DbLookAndFeelBase::InitColours()
 	setColour(CodeEditorComponent::lineNumberBackgroundId, GetDbColor(DbColor::LightColor));
 	setColour(CodeEditorComponent::lineNumberTextId, GetDbColor(DbColor::DarkTextColor));
 
-	setColour(Slider::ColourIds::backgroundColourId, GetDbColor(DbColor::DarkColor));
-	setColour(Slider::ColourIds::rotarySliderFillColourId, GetDbColor(DbColor::DarkColor));
-	setColour(Slider::ColourIds::rotarySliderOutlineColourId, GetDbColor(DbColor::DarkLineColor));
-	setColour(Slider::ColourIds::textBoxBackgroundColourId, GetDbColor(DbColor::DarkColor));
-	setColour(Slider::ColourIds::textBoxHighlightColourId, GetDbColor(DbColor::HighlightColor));
-	setColour(Slider::ColourIds::textBoxOutlineColourId, GetDbColor(DbColor::WindowColor));
-	setColour(Slider::ColourIds::textBoxTextColourId, GetDbColor(DbColor::TextColor));
-	setColour(Slider::ColourIds::thumbColourId, GetDbColor(DbColor::ButtonColor));
-	setColour(Slider::ColourIds::trackColourId, GetDbColor(DbColor::MidColor));
+	setColour(Slider::backgroundColourId, GetDbColor(DbColor::DarkColor));
+	setColour(Slider::rotarySliderFillColourId, GetDbColor(DbColor::DarkColor));
+	setColour(Slider::rotarySliderOutlineColourId, GetDbColor(DbColor::DarkLineColor));
+	setColour(Slider::textBoxBackgroundColourId, GetDbColor(DbColor::DarkColor));
+	setColour(Slider::textBoxHighlightColourId, GetDbColor(DbColor::HighlightColor));
+	setColour(Slider::textBoxOutlineColourId, GetDbColor(DbColor::WindowColor));
+	setColour(Slider::textBoxTextColourId, GetDbColor(DbColor::TextColor));
+	setColour(Slider::thumbColourId, GetDbColor(DbColor::ButtonColor));
+	setColour(Slider::trackColourId, GetDbColor(DbColor::MidColor));
+
+	setColour(Label::textColourId, GetDbColor(DbColor::TextColor));
+	setColour(Label::textWhenEditingColourId, GetDbColor(DbColor::TextColor));
 }
 
 void DbLookAndFeelBase::drawButtonBackground(Graphics& g,
@@ -179,6 +186,52 @@ Colour DarkDbLookAndFeel::GetDbColor(DbColor color)
 		return Colour(180, 180, 180);
 	case HighlightColor:
 		return Colour(115, 140, 155);
+	case FaderGreenColor:
+		return Colour(140, 180, 90);
+	case ButtonBlueColor:
+		return Colour(27, 120, 163);
+	case ButtonRedColor:
+		return Colour(226, 41, 41);
+	default:
+		break;
+	}
+
+	jassertfalse;
+	return Colours::black;
+}
+
+
+LightDbLookAndFeel::LightDbLookAndFeel()
+{
+	InitColours();
+}
+
+LightDbLookAndFeel::~LightDbLookAndFeel()
+{
+}
+
+Colour LightDbLookAndFeel::GetDbColor(DbColor color)
+{
+	switch (color)
+	{
+	case WindowColor:
+		return Colour(102, 102, 102);
+	case DarkLineColor:
+		return Colour(250, 250, 250);
+	case DarkColor:
+		return Colour(242, 242, 242);
+	case MidColor:
+		return Colour(230, 230, 230);
+	case ButtonColor:
+		return Colour(197, 197, 197);
+	case LightColor:
+		return Colour(49, 49, 49);
+	case TextColor:
+		return Colour(0, 0, 0);
+	case DarkTextColor:
+		return Colour(70, 70, 70);
+	case HighlightColor:
+		return Colour(255, 217, 115);
 	case FaderGreenColor:
 		return Colour(140, 180, 90);
 	case ButtonBlueColor:

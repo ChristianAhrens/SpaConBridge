@@ -680,13 +680,13 @@ void TableModelComponent::paintRowBackground(Graphics& g, int rowNumber, int wid
 
 	// Selected rows have a different background color.
 	if (rowIsSelected)
-		g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId).brighter());
+		g.setColour(getLookAndFeel().findColour(LookAndFeel_V4::ColourScheme::highlightedFill));
 	else
 		g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId));
 	g.fillRect(0, 0, width, height - 1);
 
 	// Line between rows.
-	g.setColour(getLookAndFeel().findColour(TableListBox::outlineColourId));
+	g.setColour(getLookAndFeel().findColour(LookAndFeel_V4::ColourScheme::outline));
 	g.fillRect(0, height - 1, width, height - 1);
 }
 

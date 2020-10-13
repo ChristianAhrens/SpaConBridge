@@ -147,11 +147,11 @@ void COverviewComponent::paint(Graphics& g)
 	g.fillRect(getLocalBounds());
 
 	// Background
-	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
+	g.setColour(getLookAndFeel().findColour(LookAndFeel_V4::ColourScheme::widgetBackground));
 	g.fillRect(Rectangle<int>(0, 43, w, h - 87));
 
 	// Little lines between version and logo
-	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).brighter());
+	g.setColour(getLookAndFeel().findColour(LookAndFeel_V4::ColourScheme::widgetBackground));
 	g.fillRect(Rectangle<int>(w - 39, 6, 1, 30));
 	g.fillRect(Rectangle<int>(w - 86, 6, 1, 30));
 
@@ -160,7 +160,7 @@ void COverviewComponent::paint(Graphics& g)
 
 	// Draw little line below right and left overlap of tabbedcomponent buttonbar to match with the line which is automatically drawn 
 	// by the CTabbedComponent's CTabBarButton.
-	g.setColour(Colour(108, 113, 115));
+	g.setColour(getLookAndFeel().findColour(LookAndFeel_V4::ColourScheme::widgetBackground));
 	g.drawRect(Rectangle<int>(0, 43, 40, 1), 1);
 	g.drawRect(Rectangle<int>(w - 86, 43, 86, 1), 1);
 }
@@ -411,7 +411,19 @@ CTabBarButton::CTabBarButton(int tabIdx, TabbedButtonBar& ownerBar)
 		break;
 	}
 
-	JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, m_normalImage, m_overImage, m_downImage, m_disabledImage, m_normalOnImage, m_overOnImage, m_downOnImage, m_disabledOnImage);
+	auto lookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (lookAndFeel)
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, m_normalImage, m_overImage, m_downImage, m_disabledImage, m_normalOnImage, m_overOnImage, m_downOnImage, m_disabledOnImage,
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor), 
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor), 
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+	else
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, m_normalImage, m_overImage, m_downImage, m_disabledImage, m_normalOnImage, m_overOnImage, m_downOnImage, m_disabledOnImage);
 
 	addChildComponent(m_normalImage.get());
 	addChildComponent(m_overImage.get());

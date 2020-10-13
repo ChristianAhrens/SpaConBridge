@@ -37,7 +37,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Parameters.h"
 #include "SoundsourceProcessor.h"
 #include "../Controller.h"
-#include "../Gui.h"
 
 
 namespace SoundscapeBridgeApp
@@ -76,34 +75,40 @@ CSurfaceSlider::~CSurfaceSlider()
  */
 void CSurfaceSlider::paint(Graphics& g)
 {
-	float w = static_cast<float>(getLocalBounds().getWidth());
-	float h = static_cast<float>(getLocalBounds().getHeight());
+	auto w = getLocalBounds().getWidth();
+	auto h = getLocalBounds().getHeight();
 
 	// Surface area
-	Path outline;
-	outline.addRectangle(0, 0, w, h);
+	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
+	g.fillRect(0, 0, w, h);
 
-	// X knob posiiton 
+	// Surface frame
+	g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
+	g.drawRect(Rectangle<float>(0.0f, 0.0f, w, h), 1.5f);
+
+	// X knob posiiton
+	Path knobOutline;
+
 	float x = 0;
 	const Array<AudioProcessorParameter*>& params = m_parent->getParameters();
 	AudioParameterFloat* param = dynamic_cast<AudioParameterFloat*> (params[ParamIdx_X]);
 	if (param)
-		x = static_cast<float>(*param) * w;
+		x = static_cast<float>(*param * w);
 
 	// Y knob position
 	float y = 0;
 	param = dynamic_cast<AudioParameterFloat*> (params[ParamIdx_Y]);
 	if (param)
-		y = h - (static_cast<float>(*param) * h);
+		y = h - (static_cast<float>(*param * h));
 
 	// Paint knob
 	float knobSize = 10;
-	outline.addEllipse(x - (knobSize / 2), y - (knobSize / 2), knobSize, knobSize);
+	knobOutline.addEllipse(x - (knobSize / 2), y - (knobSize / 2), knobSize, knobSize);
 
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::MidColor));
-	g.fillPath(outline);
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::ButtonColor));
-	g.strokePath(outline, PathStrokeType(3)); // Stroke width
+	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
+	g.fillPath(knobOutline);
+	g.setColour(getLookAndFeel().findColour(Slider::thumbColourId));
+	g.strokePath(knobOutline, PathStrokeType(3)); // Stroke width
 
 }
 
@@ -211,13 +216,13 @@ void CSurfaceMultiSlider::paint(Graphics& g)
 	float h = static_cast<float>(getLocalBounds().getHeight());
 
 	// Surface background area
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::MidColor));
+	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
 	g.fillRect(Rectangle<float>(0.0f, 0.0f, w, h));
 
 	// Draw grid
 	const float dashLengths[2] = { 5.0f, 6.0f };
 	const float lineThickness = 1.0f;
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::MidColor).brighter(0.15f));
+	g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId).brighter(0.15f));
 	g.drawDashedLine(Line<float>(w * 0.25f, 0.0f, w * 0.25f, h), dashLengths, 2, lineThickness);
 	g.drawDashedLine(Line<float>(w * 0.50f, 0.0f, w * 0.50f, h), dashLengths, 2, lineThickness);
 	g.drawDashedLine(Line<float>(w * 0.75f, 0.0f, w * 0.75f, h), dashLengths, 2, lineThickness);
@@ -226,7 +231,7 @@ void CSurfaceMultiSlider::paint(Graphics& g)
 	g.drawDashedLine(Line<float>(0.0f, h * 0.75f, w, h * 0.75f), dashLengths, 2, lineThickness);
 
 	// Surface frame
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::ButtonColor));
+	g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
 	g.drawRect(Rectangle<float>(0.0f, 0.0f, w, h), 1.5f);
 
 	float knobSize = 10.0f;
@@ -241,7 +246,7 @@ void CSurfaceMultiSlider::paint(Graphics& g)
 
 		// Generate a color variant based on the input number, so make the nipples easier to tell from each other.
 		Colour shade(juce::uint8(inputNo * 111), juce::uint8(inputNo * 222), juce::uint8(inputNo * 333));
-		g.setColour(CDbStyle::GetDbColor(CDbStyle::DarkTextColor).interpolatedWith(shade, 0.3f));
+		g.setColour(getLookAndFeel().findColour(Slider::thumbColourId).interpolatedWith(shade, 0.3f));
 
 		// Paint knob
 		g.drawEllipse(Rectangle<float>(x - (knobSize / 2.0f), y - (knobSize / 2.0f), knobSize, knobSize), 3.0f);

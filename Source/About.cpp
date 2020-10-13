@@ -43,20 +43,20 @@ namespace SoundscapeBridgeApp
 
 /*
 ===============================================================================
- Class AAboutOverlay
+ Class AboutOverlay
 ===============================================================================
 */
 
 /**
  * Class constructor.
  */
-AAboutOverlay::AAboutOverlay()
-	: AOverlay(OT_About)
+AboutOverlay::AboutOverlay()
+	: OverlayBase(OT_About)
 {
 	// Plugin version label
 	String versionString = String("Soundscape Plug-in V") + String(JUCE_STRINGIFY(JUCE_APP_VERSION));
 	versionString += String("\nCopyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2017-2019\nd&b audiotechnik GmbH & Co. KG,\nall rights reserved.");
-	m_versionLabel = std::make_unique<CLabel>("PluginVersion", versionString);
+	m_versionLabel = std::make_unique<Label>("PluginVersion", versionString);
 	m_versionLabel->setJustificationType(Justification::topLeft);
 	m_versionLabel->setFont(Font(13.0, Font::plain));
 	addAndMakeVisible(m_versionLabel.get());
@@ -86,9 +86,6 @@ AAboutOverlay::AAboutOverlay()
 		"10. This Agreement shall be governed by the laws of Germany.\n" \
 		"If you have any questions concerning this Agreement, please contact d&b audiotechnik's support.");
 	m_eulaField = std::make_unique<TextEditor>("eula");
-	m_eulaField->setColour(TextEditor::backgroundColourId, CDbStyle::GetDbColor(CDbStyle::MidColor));
-	m_eulaField->setColour(TextEditor::textColourId, CDbStyle::GetDbColor(CDbStyle::TextColor));
-	m_eulaField->setColour(TextEditor::outlineColourId, CDbStyle::GetDbColor(CDbStyle::ButtonColor));
 	m_eulaField->setReadOnly(true);
 	m_eulaField->setFont(Font(13.0, Font::plain));
 	m_eulaField->setCaretVisible(false);
@@ -99,7 +96,7 @@ AAboutOverlay::AAboutOverlay()
 
 	// JUCE copyright label
 	String juceLabelString = String("Made with JUCE.\nCopyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2017 - ROLI Ltd.");
-	m_juceLabel = std::make_unique<CLabel>("JuceLabel", juceLabelString);
+	m_juceLabel = std::make_unique<Label>("JuceLabel", juceLabelString);
 	m_juceLabel->setJustificationType(Justification::topRight);
 	m_juceLabel->setFont(Font(13.0, Font::plain));
 	addAndMakeVisible(m_juceLabel.get());
@@ -108,7 +105,7 @@ AAboutOverlay::AAboutOverlay()
 /**
  * Class destructor.
  */
-AAboutOverlay::~AAboutOverlay()
+AboutOverlay::~AboutOverlay()
 {
 }
 
@@ -118,7 +115,7 @@ AAboutOverlay::~AAboutOverlay()
  * @param init	True to ignore any changed flags and update the plugin parameters
  *				in the GUI anyway. Good for when opening the Overview for the first time.
  */
-void AAboutOverlay::UpdateGui(bool init)
+void AboutOverlay::UpdateGui(bool init)
 {
 	ignoreUnused(init);
 }
@@ -127,13 +124,13 @@ void AAboutOverlay::UpdateGui(bool init)
  * Reimplemented to paint the overlay's background.
  * @param g		Graphics context that must be used to do the drawing operations.
  */
-void AAboutOverlay::paint(Graphics& g)
+void AboutOverlay::paint(Graphics& g)
 {
 	int w = getLocalBounds().getWidth();
 	int h = getLocalBounds().getHeight();
 
 	// Background
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::DarkColor));
+	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
 	g.fillRect(Rectangle<int>(8, 8, w - 16, h - 16));
 
 	// JUCE logo
@@ -144,7 +141,7 @@ void AAboutOverlay::paint(Graphics& g)
 /**
  * Reimplemented to resize and re-postion controls & labels.
  */
-void AAboutOverlay::resized()
+void AboutOverlay::resized()
 {
 	int eulaVPos = 170;
 	int eulaHeight = jmin((getLocalBounds().getHeight() - (eulaVPos + 20)), 270);
@@ -170,7 +167,7 @@ CAboutOverlayGeneric::CAboutOverlayGeneric()
 	// Plugin version label
 	String formatString = String("Audio Units (AU) Plug-in format. \nThe Audio Units logo is a trademark of Apple Computer, Inc. \nCopyright ") +
 		String(CharPointer_UTF8("\xc2\xa9")) + String(" 2005 Apple Computer, Inc. All rights reserved.");
-	m_formatInfoLabel = std::make_unique<CLabel>("FormatInfo", formatString);
+	m_formatInfoLabel = std::make_unique<Label>("FormatInfo", formatString);
 	m_formatInfoLabel->setJustificationType(Justification::topLeft);
 	m_formatInfoLabel->setFont(Font(13.0, Font::plain));
 	addAndMakeVisible(m_formatInfoLabel.get());
@@ -190,7 +187,7 @@ CAboutOverlayGeneric::~CAboutOverlayGeneric()
 void CAboutOverlayGeneric::paint(Graphics& g)
 {
 	// First paint base class
-	AAboutOverlay::paint(g);
+	AboutOverlay::paint(g);
 
 }
 
@@ -200,7 +197,7 @@ void CAboutOverlayGeneric::paint(Graphics& g)
 void CAboutOverlayGeneric::resized()
 {
 	// First resize base class components
-	AAboutOverlay::resized();
+	AboutOverlay::resized();
 
 	m_formatInfoLabel->setBounds(95, 105, getLocalBounds().getWidth() - 135, 70);
 }

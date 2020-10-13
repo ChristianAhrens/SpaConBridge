@@ -843,8 +843,8 @@ bool CController::setStateXml(XmlElement* stateXml)
 	{
 		if (m_protocolBridge.setStateXml(bridgingXmlElement))
 		{
-			SetIpAddress(DataChangeSource::DCS_Host, m_protocolBridge.GetDS100IpAddress(), true);
-			SetRate(DataChangeSource::DCS_Host, m_protocolBridge.GetDS100MsgRate(), true);
+			SetIpAddress(DataChangeSource::DCS_Init, m_protocolBridge.GetDS100IpAddress(), true);
+			SetRate(DataChangeSource::DCS_Init, m_protocolBridge.GetDS100MsgRate(), true);
 		}
 	}
 

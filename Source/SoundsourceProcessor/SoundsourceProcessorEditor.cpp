@@ -85,7 +85,7 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 	{
 		//--- X Slider ---//
 		AudioParameterFloat* param = dynamic_cast<AudioParameterFloat*> (params[ParamIdx_X]);
-		m_xSlider = std::make_unique<CSlider>(param->name);
+		m_xSlider = std::make_unique<Slider>(param->name);
 		m_xSlider->setRange(param->range.start, param->range.end, param->range.interval);
 		m_xSlider->setSliderStyle(Slider::LinearHorizontal);
 		m_xSlider->setTextBoxStyle(Slider::TextBoxBelow, false, 80, 20);
@@ -93,12 +93,13 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 		addAndMakeVisible(m_xSlider.get());
 
 		// Label for X slider
-		m_xAxisLabel = std::make_unique<CLabel>(param->name, param->name);
+		m_xAxisLabel = std::make_unique<Label>(param->name, param->name);
+		m_xAxisLabel->setJustificationType(Justification::centred);
 		addAndMakeVisible(m_xAxisLabel.get());
 
 		//--- Y Slider ---//
 		param = dynamic_cast<AudioParameterFloat*> (params[ParamIdx_Y]);
-		m_ySlider = std::make_unique<CSlider>(param->name);
+		m_ySlider = std::make_unique<Slider>(param->name);
 		m_ySlider->setRange(param->range.start, param->range.end, param->range.interval);
 		m_ySlider->setSliderStyle(Slider::LinearVertical);
 		m_ySlider->setTextBoxStyle(Slider::TextBoxLeft, false, 80, 20);
@@ -106,14 +107,15 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 		addAndMakeVisible(m_ySlider.get());
 
 		// Label for Y slider
-		m_yAxisLabel = std::make_unique<CLabel>(param->name, param->name);
+		m_yAxisLabel = std::make_unique<Label>(param->name, param->name);
+		m_yAxisLabel->setJustificationType(Justification::centred);
 		addAndMakeVisible(m_yAxisLabel.get());
 
 		if (params.size() == ParamIdx_MaxIndex)
 		{
 			//--- ReverbSendGain Slider ---//
 			param = dynamic_cast<AudioParameterFloat*> (params[ParamIdx_ReverbSendGain]);
-			m_reverbSendGainSlider = std::make_unique<CKnob>(param->name);
+			m_reverbSendGainSlider = std::make_unique<Slider>(param->name);
 			m_reverbSendGainSlider->setRange(param->range.start, param->range.end, param->range.interval);
 			m_reverbSendGainSlider->setSliderStyle(Slider::Rotary);
 			m_reverbSendGainSlider->setTextBoxStyle(Slider::TextBoxBelow, false, 80, 20);
@@ -121,12 +123,13 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 			addAndMakeVisible(m_reverbSendGainSlider.get());
 
 			// Label for ReverbSendGain
-			m_reverbSendGainLabel = std::make_unique<CLabel>(param->name, param->name);
+			m_reverbSendGainLabel = std::make_unique<Label>(param->name, param->name);
+			m_reverbSendGainLabel->setJustificationType(Justification::centred);
 			addAndMakeVisible(m_reverbSendGainLabel.get());
 
 			//--- SourceSpread Slider ---//
 			param = dynamic_cast<AudioParameterFloat*> (params[ParamIdx_SourceSpread]);
-			m_sourceSpreadSlider = std::make_unique<CKnob>(param->name);
+			m_sourceSpreadSlider = std::make_unique<Slider>(param->name);
 			m_sourceSpreadSlider->setRange(param->range.start, param->range.end, param->range.interval);
 			m_sourceSpreadSlider->setSliderStyle(Slider::Rotary);
 			m_sourceSpreadSlider->setTextBoxStyle(Slider::TextBoxBelow, false, 80, 20);
@@ -134,7 +137,8 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 			addAndMakeVisible(m_sourceSpreadSlider.get());
 
 			// Label for SourceSpread
-			m_sourceSpreadLabel = std::make_unique<CLabel>(param->name, param->name);
+			m_sourceSpreadLabel = std::make_unique<Label>(param->name, param->name);
+			m_sourceSpreadLabel->setJustificationType(Justification::centred);
 			addAndMakeVisible(m_sourceSpreadLabel.get());
 
 			//--- DelayMode ComboBox ---//
@@ -144,24 +148,19 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 			m_delayModeComboBox->addItem("Off",	1);
 			m_delayModeComboBox->addItem("Tight", 2);
 			m_delayModeComboBox->addItem("Full", 3);
-			m_delayModeComboBox->setColour(ComboBox::backgroundColourId, CDbStyle::GetDbColor(CDbStyle::DarkColor));
-			m_delayModeComboBox->setColour(ComboBox::textColourId, CDbStyle::GetDbColor(CDbStyle::TextColor));
-			m_delayModeComboBox->setColour(ComboBox::outlineColourId, CDbStyle::GetDbColor(CDbStyle::WindowColor));
-			m_delayModeComboBox->setColour(ComboBox::buttonColourId, CDbStyle::GetDbColor(CDbStyle::MidColor));
-			m_delayModeComboBox->setColour(ComboBox::arrowColourId, CDbStyle::GetDbColor(CDbStyle::TextColor));
 			m_delayModeComboBox->addListener(this);
 			addAndMakeVisible(m_delayModeComboBox.get());
 
 			// Label for DelayMode
-			m_delayModeLabel = std::make_unique<CLabel>(choiceParam->name, choiceParam->name);
+			m_delayModeLabel = std::make_unique<Label>(choiceParam->name, choiceParam->name);
+			m_delayModeLabel->setJustificationType(Justification::centred);
 			addAndMakeVisible(m_delayModeLabel.get());
 		}
 	}
 
 	// Label for Plugin' display name.
-	m_displayNameLabel = std::make_unique<CLabel>("DisplayName");
+	m_displayNameLabel = std::make_unique<Label>("DisplayName");
 	m_displayNameLabel->setJustificationType(Justification(Justification::centredLeft));
-	m_displayNameLabel->setColour(Label::textColourId, CDbStyle::GetDbColor(CDbStyle::DarkTextColor));
 	addAndMakeVisible(m_displayNameLabel.get());
 
 	// Start GUI-refreshing timer.
@@ -185,7 +184,7 @@ SoundsourceProcessorEditor::~SoundsourceProcessorEditor()
  * @param slider	The slider object for which the parameter is desired.
  * @return			The desired plugin parameter.
  */
-CAudioParameterFloat* SoundsourceProcessorEditor::GetParameterForSlider(CSlider* slider)
+CAudioParameterFloat* SoundsourceProcessorEditor::GetParameterForSlider(Slider* slider)
 {
 	const Array<AudioProcessorParameter*>& params = getAudioProcessor()->getParameters();
 	if (slider == m_xSlider.get())
@@ -235,7 +234,7 @@ void SoundsourceProcessorEditor::sliderValueChanged(Slider* slider)
  */
 void SoundsourceProcessorEditor::sliderDragStarted(Slider* slider)
 {
-	if (CAudioParameterFloat* param = GetParameterForSlider(static_cast<CSlider*>(slider)))
+	if (CAudioParameterFloat* param = GetParameterForSlider(static_cast<Slider*>(slider)))
 		param->BeginGuiGesture();
 }
 
@@ -245,7 +244,7 @@ void SoundsourceProcessorEditor::sliderDragStarted(Slider* slider)
  */
 void SoundsourceProcessorEditor::sliderDragEnded(Slider* slider)
 {
-	if (CAudioParameterFloat* param = GetParameterForSlider(static_cast<CSlider*>(slider)))
+	if (CAudioParameterFloat* param = GetParameterForSlider(static_cast<Slider*>(slider)))
 		param->EndGuiGesture();
 }
 
@@ -291,15 +290,15 @@ void SoundsourceProcessorEditor::paint(Graphics& g)
 	getResizePaintAreaSplit(twoDSurfaceArea, parameterEditArea);
 
 	// Background of 2D slider area
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::DarkColor));
+	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
 	g.fillRect(twoDSurfaceArea);
 
 	// Background of parameter edit elements
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::MidColor));
+	g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId));
 	g.fillRect(parameterEditArea);
 	
-	// Black frame
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::DarkLineColor));
+	// Frame
+	g.setColour(getLookAndFeel().findColour(TableListBox::outlineColourId));
 	g.drawRect(getLocalBounds().toFloat());
 }
 

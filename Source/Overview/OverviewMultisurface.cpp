@@ -58,14 +58,15 @@ namespace SoundscapeBridgeApp
  * Class constructor.
  */
 COverviewMultiSurface::COverviewMultiSurface()
-	: AOverlay(OT_MultiSlide)
+	: OverlayBase(OT_MultiSlide)
 {
 	// Add multi-slider
 	m_multiSlider = std::make_unique<CSurfaceMultiSlider>();
 	addAndMakeVisible(m_multiSlider.get());
 
 	// Add mapping label
-	m_posAreaLabel = std::make_unique<CLabel>("Coordinate mapping label", "View mapping:");
+	m_posAreaLabel = std::make_unique<Label>("Coordinate mapping label", "View mapping:");
+	m_posAreaLabel->setJustificationType(Justification::centred);
 	addAndMakeVisible(m_posAreaLabel.get());
 
 	// Add mapping selector
@@ -76,11 +77,6 @@ COverviewMultiSurface::COverviewMultiSurface()
 	m_areaSelector->addItem("3", 3);
 	m_areaSelector->addItem("4", 4);
 	m_areaSelector->addListener(this);
-	m_areaSelector->setColour(ComboBox::backgroundColourId, CDbStyle::GetDbColor(CDbStyle::DarkColor));
-	m_areaSelector->setColour(ComboBox::textColourId, CDbStyle::GetDbColor(CDbStyle::TextColor));
-	m_areaSelector->setColour(ComboBox::outlineColourId, CDbStyle::GetDbColor(CDbStyle::WindowColor));
-	m_areaSelector->setColour(ComboBox::buttonColourId, CDbStyle::GetDbColor(CDbStyle::MidColor));
-	m_areaSelector->setColour(ComboBox::arrowColourId, CDbStyle::GetDbColor(CDbStyle::TextColor));
 	addAndMakeVisible(m_areaSelector.get());
 }
 
@@ -98,7 +94,7 @@ COverviewMultiSurface::~COverviewMultiSurface()
 void COverviewMultiSurface::paint(Graphics& g)
 {
 	// Paint background to cover the controls behind this overlay.
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::DarkColor));
+	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
 	g.fillRect(Rectangle<int>(0, 0, getLocalBounds().getWidth(), getLocalBounds().getHeight()));
 }
 

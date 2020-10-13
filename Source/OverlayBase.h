@@ -35,8 +35,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "../About.h"
-#include "../SoundscapeBridgeAppCommon.h"
+#include <JuceHeader.h>
 
 
 namespace SoundscapeBridgeApp
@@ -44,40 +43,38 @@ namespace SoundscapeBridgeApp
 
 
 /**
- * Class COverviewMultiSurface is just a component which contains the multi-source slider
- * and the mapping selection control.
+ * Abstract class OverlayBase.
+ * Must be reimplemented to provide a GUI overlay.
  */
-class COverviewMultiSurface : public OverlayBase,
-	public ComboBox::Listener
+class OverlayBase : public Component
 {
 public:
-	COverviewMultiSurface();
-	~COverviewMultiSurface() override;
 
-	void UpdateGui(bool init) override;
+	/**
+	 * Overlay types. There can only be one active at the time.
+	 */
+	enum OverlayType
+	{
+		OT_Unknown = 0,
+		OT_Overview,
+		OT_MultiSlide,
+		OT_Settings,
+		OT_About
+	};
 
-protected:
-	void paint(Graphics&) override;
-	void resized() override;
-	void comboBoxChanged(ComboBox *comboBox) override;
+	explicit OverlayBase(OverlayType type);
+	~OverlayBase() override;
+
+	OverlayType GetOverlayType() const;
+	virtual void UpdateGui(bool init) = 0;
 
 private:
 	/**
-	 * Multi-source 2D-Slider.
+	 * Type of overlay as specified by the OverlayType enum.
 	 */
-	std::unique_ptr<Component> m_multiSlider;
+	OverlayType	m_overlayType;
 
-	/*
-	 * Mapping selector label
-	 */
-	std::unique_ptr<Label>	m_posAreaLabel;
-
-	/**
-	 * ComboBox selector for the coordinate mapping area
-	 */
-	std::unique_ptr<ComboBox>	m_areaSelector;
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(COverviewMultiSurface)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OverlayBase)
 };
 
 

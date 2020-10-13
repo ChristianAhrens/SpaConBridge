@@ -36,7 +36,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include "../About.h"
-#include "../Gui.h"
 #include "../SoundscapeBridgeAppCommon.h"
 #include "../AppConfiguration.h"
 
@@ -62,7 +61,7 @@ class SoundsourceProcessorEditor;
  * Class OverviewTableContainer is just a component which contains the overview table 
  * and it's quick selection buttons.
  */
-class OverviewTableContainer :	public AOverlay,
+class OverviewTableContainer :	public OverlayBase,
 								public Button::Listener,
 								public AppConfiguration::Watcher
 {
@@ -83,40 +82,13 @@ protected:
 	void resized() override;
 
 private:
-	/**
-	 * The actual table model / component inside this component.
-	 */
-	std::unique_ptr<TableModelComponent> m_overviewTable;
-
-	/**
-	 * The processor editor component corresponding to the selected row
-	 */
-	std::unique_ptr<SoundsourceProcessorEditor> m_selectedProcessorInstanceEditor;
-
-	/**
-	 * Button to add a processor instance
-	 */
-	std::unique_ptr<CButton> m_addInstance;
-
-	/**
-	 * Button to remove the selected processor instance
-	 */
-	std::unique_ptr<CButton> m_removeInstance;
-
-	/**
-	 * Quick select label
-	 */
-	std::unique_ptr<CLabel>	m_selectLabel;
-
-	/**
-	 * Select all rows button.
-	 */
-	std::unique_ptr<CButton> m_selectAll;
-
-	/**
-	 * Select no rows button.
-	 */
-	std::unique_ptr<CButton> m_selectNone;
+	std::unique_ptr<TableModelComponent>		m_overviewTable;					/**> The actual table model / component inside this component. */
+	std::unique_ptr<SoundsourceProcessorEditor> m_selectedProcessorInstanceEditor;	/**> The processor editor component corresponding to the selected row */
+	std::unique_ptr<TextButton>					m_addInstance;						/**> Button to add a processor instance */
+	std::unique_ptr<TextButton>					m_removeInstance;					/**> Button to remove the selected processor instance */
+	std::unique_ptr<Label>						m_selectLabel;						/**> Quick select label */
+	std::unique_ptr<TextButton>					m_selectAll;						/**> Select all rows button. */
+	std::unique_ptr<TextButton>					m_selectNone;						/**> Select no rows button. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OverviewTableContainer)
 };
@@ -242,7 +214,7 @@ private:
 
 
 /**
- * Class TextEditorContainer is a container for the SourceID CTextEditor component used in the Overview table.
+ * Class TextEditorContainer is a container for the SourceID TextEditor component used in the Overview table.
  */
 class TextEditorContainer : public Component,
 	public TextEditor::Listener
@@ -257,20 +229,9 @@ public:
 	void SetRow(int newRow);
 
 private:
-	/**
-	 * Table where this component is contained.
-	 */
-	TableModelComponent&	m_owner;
-
-	/**
-	 * Actual text editor.
-	 */
-	CTextEditor				m_editor;
-
-	/**
-	 * Row number where this component is located inside the table.
-	 */
-	int						m_row;
+	TableModelComponent&	m_owner;	/**> Table where this component is contained. */
+	TextEditor				m_editor;	/**> Actual text editor. */
+	int						m_row;		/**> Row number where this component is located inside the table. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TextEditorContainer)
 };
@@ -291,25 +252,10 @@ public:
 	void SetRow(int newRow);
 
 private:
-	/**
-	 * Table where this component is contained.
-	 */
-	TableModelComponent&	m_owner;
-
-	/**
-	 * Actual Tx button.
-	 */
-	CButton				m_txButton;
-
-	/**
-	 * Actual Rx button.
-	 */
-	CButton				m_rxButton;
-
-	/**
-	 * Row number where this component is located inside the table.
-	 */
-	int						m_row;
+	TableModelComponent&	m_owner;	/**> Table where this component is contained. */
+	TextButton				m_txButton;	/**> Actual Tx button. */
+	TextButton				m_rxButton;	/**> Actual Rx button. */
+	int						m_row;		/**> Row number where this component is located inside the table. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RadioButtonContainer)
 };
@@ -334,7 +280,7 @@ public:
 private:
 	TableModelComponent&						m_owner;			/**< Table where this component is contained. */
 	int											m_row;				/**< Row number where this component is located inside the table. */
-	std::map<ProtocolBridgingType, CMuteButton>	m_bridgingMutes;	/**< The mute buttons currently in use. */
+	std::map<ProtocolBridgingType, TextButton>	m_bridgingMutes;	/**< The mute buttons currently in use. */
 	std::vector<ProtocolBridgingType>			m_knowntypes = { PBT_DiGiCo, PBT_GenericOSC, PBT_BlacktraxRTTRP, PBT_GenericMIDI, PBT_YamahaSQ, PBT_HUI };
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MuteButtonContainer)

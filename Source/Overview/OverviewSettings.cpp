@@ -36,6 +36,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "OverviewSettings.h"
 
 #include "../Controller.h"
+#include "../LookAndFeel.h"
 
 
 namespace SoundscapeBridgeApp
@@ -93,6 +94,9 @@ void HeaderWithElmListComponent::setToggleActiveState(bool toggleState)
 	setElementsActiveState(m_toggleState);
 }
 
+/**
+ * 
+ */
 void HeaderWithElmListComponent::setElementsActiveState(bool toggleState)
 {
 	m_toggleState = toggleState;
@@ -108,7 +112,7 @@ void HeaderWithElmListComponent::setElementsActiveState(bool toggleState)
 }
 
 /**
- *
+ * Callback method for when active/deactive toggle was triggered
  */
 void HeaderWithElmListComponent::onToggleActive()
 {
@@ -127,7 +131,9 @@ void HeaderWithElmListComponent::onToggleActive()
 }
 
 /**
- *
+ * Method to set if this component shall display the enable/disable togglebutton
+ * in its upper right corner or not.
+ * @param hasActiveToggle	True if it shall show togglebutton, false if not
  */
 void HeaderWithElmListComponent::setHasActiveToggle(bool hasActiveToggle)
 {
@@ -140,7 +146,8 @@ void HeaderWithElmListComponent::setHasActiveToggle(bool hasActiveToggle)
 }
 
 /**
- *
+ * Setter for the header text of this component.
+ * @param headerText	The text to use as headline
  */
 void HeaderWithElmListComponent::setHeaderText(String headerText)
 {
@@ -153,7 +160,11 @@ void HeaderWithElmListComponent::setHeaderText(String headerText)
 }
 
 /**
- *
+ * Methdo to add a component to internal list of components that shall be layouted vertically.
+ * @param compo	The component to add.
+ * @param includeInLayout	Bool flag that can indicate if the component shall be made visible in this components 
+ *							context but not layouted. (e.g. a lable that is already attached to another component)
+ * @param takeOwnerShip		Bool flag that indicates if ownership of the given component shall be taken.
  */
 void HeaderWithElmListComponent::addComponent(Component* compo, bool includeInLayout, bool takeOwnership)
 {
@@ -167,7 +178,8 @@ void HeaderWithElmListComponent::addComponent(Component* compo, bool includeInLa
 }
 
 /**
- *
+ * Reimplemented paint method from Component that uses colours from TableListBox to give
+ * the user a similar impression as when using a table.
  */
 void HeaderWithElmListComponent::paint(Graphics& g)
 {
@@ -175,17 +187,17 @@ void HeaderWithElmListComponent::paint(Graphics& g)
 	auto h = getHeight();
 
 	if (m_toggleState)
-		g.setColour(CDbStyle::GetDbColor(CDbStyle::MidColor));
+		g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId));
 	else
-		g.setColour(CDbStyle::GetDbColor(CDbStyle::MidColor).darker());
+		g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId).darker());
 	g.fillRect(0, 0, w, h);
 
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::DarkLineColor));
+	g.setColour(getLookAndFeel().findColour(TableListBox::outlineColourId));
 	g.drawRect(0, 0, w, h);
 }
 
 /**
- * 
+ * Reimplemented from Component to dynamically arrange items in vertical direction.
  */
 void HeaderWithElmListComponent::resized()
 {
@@ -253,10 +265,11 @@ CSettingsComponent::CSettingsComponent()
 	m_DS100Settings->setHasActiveToggle(false);
 	addAndMakeVisible(m_DS100Settings.get());
 
-	m_DS100IpAddressEdit = std::make_unique<CTextEditor>();
+	m_DS100IpAddressEdit = std::make_unique<TextEditor>();
 	m_DS100IpAddressEdit->addListener(this);
 	m_DS100IpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
-	m_DS100IpAddressLabel = std::make_unique<CLabel>();
+	m_DS100IpAddressLabel = std::make_unique<Label>();
+	m_DS100IpAddressLabel->setJustificationType(Justification::centred);
 	m_DS100IpAddressLabel->setText("IP Address", dontSendNotification);
 	m_DS100IpAddressLabel->attachToComponent(m_DS100IpAddressEdit.get(), true);
 	m_DS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>(false, false);
@@ -276,28 +289,31 @@ CSettingsComponent::CSettingsComponent()
 	m_DiGiCoBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_DiGiCoBridgingSettings.get());
 
-	m_DiGiCoIpAddressEdit = std::make_unique<CTextEditor>();
+	m_DiGiCoIpAddressEdit = std::make_unique<TextEditor>();
 	m_DiGiCoIpAddressEdit->addListener(this);
 	m_DiGiCoIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
-	m_DiGiCoIpAddressLabel = std::make_unique<CLabel>();
+	m_DiGiCoIpAddressLabel = std::make_unique<Label>();
+	m_DiGiCoIpAddressLabel->setJustificationType(Justification::centred);
 	m_DiGiCoIpAddressLabel->setText("IP Address", dontSendNotification);
 	m_DiGiCoIpAddressLabel->attachToComponent(m_DiGiCoIpAddressEdit.get(), true);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoIpAddressLabel.get(), false, false);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoIpAddressEdit.get(), true, false);
 
-	m_DiGiCoListeningPortEdit = std::make_unique<CTextEditor>();
+	m_DiGiCoListeningPortEdit = std::make_unique<TextEditor>();
 	m_DiGiCoListeningPortEdit->addListener(this);
 	m_DiGiCoListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
-	m_DiGiCoListeningPortLabel = std::make_unique<CLabel>();
+	m_DiGiCoListeningPortLabel = std::make_unique<Label>();
+	m_DiGiCoListeningPortLabel->setJustificationType(Justification::centred);
 	m_DiGiCoListeningPortLabel->setText("Listening Port", dontSendNotification);
 	m_DiGiCoListeningPortLabel->attachToComponent(m_DiGiCoListeningPortEdit.get(), true);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoListeningPortLabel.get(), false, false);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoListeningPortEdit.get(), true, false);
 
-	m_DiGiCoRemotePortEdit = std::make_unique<CTextEditor>();
+	m_DiGiCoRemotePortEdit = std::make_unique<TextEditor>();
 	m_DiGiCoRemotePortEdit->addListener(this);
 	m_DiGiCoRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
-	m_DiGiCoRemotePortLabel = std::make_unique<CLabel>();
+	m_DiGiCoRemotePortLabel = std::make_unique<Label>();
+	m_DiGiCoRemotePortLabel->setJustificationType(Justification::centred);
 	m_DiGiCoRemotePortLabel->setText("Remote Port", dontSendNotification);
 	m_DiGiCoRemotePortLabel->attachToComponent(m_DiGiCoRemotePortEdit.get(), true);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoRemotePortLabel.get(), false, false);
@@ -312,28 +328,31 @@ CSettingsComponent::CSettingsComponent()
 	m_GenericOSCBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_GenericOSCBridgingSettings.get());
 
-	m_GenericOSCIpAddressEdit = std::make_unique<CTextEditor>();
+	m_GenericOSCIpAddressEdit = std::make_unique<TextEditor>();
 	m_GenericOSCIpAddressEdit->addListener(this);
 	m_GenericOSCIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
-	m_GenericOSCIpAddressLabel = std::make_unique<CLabel>();
+	m_GenericOSCIpAddressLabel = std::make_unique<Label>();
+	m_GenericOSCIpAddressLabel->setJustificationType(Justification::centred);
 	m_GenericOSCIpAddressLabel->setText("IP Address", dontSendNotification);
 	m_GenericOSCIpAddressLabel->attachToComponent(m_GenericOSCIpAddressEdit.get(), true);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCIpAddressLabel.get(), false, false);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCIpAddressEdit.get(), true, false);
 
-	m_GenericOSCListeningPortEdit = std::make_unique<CTextEditor>();
+	m_GenericOSCListeningPortEdit = std::make_unique<TextEditor>();
 	m_GenericOSCListeningPortEdit->addListener(this);
 	m_GenericOSCListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
-	m_GenericOSCListeningPortLabel = std::make_unique<CLabel>();
+	m_GenericOSCListeningPortLabel = std::make_unique<Label>();
+	m_GenericOSCListeningPortLabel->setJustificationType(Justification::centred);
 	m_GenericOSCListeningPortLabel->setText("Listening Port", dontSendNotification);
 	m_GenericOSCListeningPortLabel->attachToComponent(m_GenericOSCListeningPortEdit.get(), true);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCListeningPortLabel.get(), false, false);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCListeningPortEdit.get(), true, false);
 
-	m_GenericOSCRemotePortEdit = std::make_unique<CTextEditor>();
+	m_GenericOSCRemotePortEdit = std::make_unique<TextEditor>();
 	m_GenericOSCRemotePortEdit->addListener(this);
 	m_GenericOSCRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
-	m_GenericOSCRemotePortLabel = std::make_unique<CLabel>();
+	m_GenericOSCRemotePortLabel = std::make_unique<Label>();
+	m_GenericOSCRemotePortLabel->setJustificationType(Justification::centred);
 	m_GenericOSCRemotePortLabel->setText("Remote Port", dontSendNotification);
 	m_GenericOSCRemotePortLabel->attachToComponent(m_GenericOSCRemotePortEdit.get(), true);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCRemotePortLabel.get(), false, false);
@@ -356,7 +375,7 @@ CSettingsComponent::~CSettingsComponent()
 void CSettingsComponent::paint(Graphics& g)
 {
 	// Paint background to cover the controls behind this overlay.
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::DarkColor));
+	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
 	g.fillRect(Rectangle<int>(0, 0, getLocalBounds().getWidth(), getLocalBounds().getHeight()));
 }
 
@@ -518,6 +537,8 @@ void CSettingsComponent::processUpdatedConfig()
  */
 void CSettingsComponent::handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info)
 {
+	ignoreUnused(type);
+
 	if (info)
 	{
 		m_DS100IpAddressEdit->setText(info->ip, true);
@@ -527,6 +548,7 @@ void CSettingsComponent::handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDisco
             ctrl->SetIpAddress(DCS_Gui, info->ip);
 	}
 }
+
 
 /*
 ===============================================================================
@@ -538,7 +560,7 @@ void CSettingsComponent::handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDisco
  * Class constructor.
  */
 CSettingsContainer::CSettingsContainer()
-	: AOverlay(OT_Settings)
+	: OverlayBase(OT_Settings)
 {
 	m_applyButton = std::make_unique<TextButton>("Apply");
 	m_applyButton->onClick = [this] { onApplyClicked(); };
@@ -548,10 +570,23 @@ CSettingsContainer::CSettingsContainer()
 	m_settingsRawEditor->setMultiLine(true, false);
 	addAndMakeVisible(m_settingsRawEditor.get());
 
+	m_lookAndFeelSelect = std::make_unique<ComboBox>();
+	//for (auto t = static_cast<int>(DbLookAndFeelBase::LAFT_InvalidFirst + 1); t < static_cast<int>(DbLookAndFeelBase::LAFT_InvalidLast); ++t)
+	//	m_lookAndFeelSelect->addItem(DbLookAndFeelBase::getLookAndFeelName(static_cast<DbLookAndFeelBase::LookAndFeelType>(t)), t);
+	m_lookAndFeelSelect->addItem(DbLookAndFeelBase::getLookAndFeelName(DbLookAndFeelBase::LAFT_Dark), DbLookAndFeelBase::LAFT_Dark);
+	m_lookAndFeelSelect->addItem(DbLookAndFeelBase::getLookAndFeelName(DbLookAndFeelBase::LAFT_Light), DbLookAndFeelBase::LAFT_Light);
+	m_lookAndFeelSelect->onChange = [this] { onSelectedLookAndFeelChanged(); };
+	addAndMakeVisible(m_lookAndFeelSelect.get());
+	m_lookAndFeelLabel = std::make_unique<Label>("LookAndFeelSelect", "Look and feel:");
+	m_lookAndFeelLabel->setJustificationType(Justification::centred);
+	m_lookAndFeelLabel->attachToComponent(m_lookAndFeelSelect.get(), true);
+	addAndMakeVisible(m_lookAndFeelLabel.get());
+
 	m_useRawConfigButton = std::make_unique<ToggleButton>();
 	m_useRawConfigButton->onClick = [this] { onToggleRawConfigVisible(); };
 	addAndMakeVisible(m_useRawConfigButton.get());
 	m_useRawConfigLabel = std::make_unique<Label>("RAW CFG", "Show raw config");
+	m_useRawConfigLabel->setJustificationType(Justification::centred);
 	m_useRawConfigLabel->attachToComponent(m_useRawConfigButton.get(), true);
 	addAndMakeVisible(m_useRawConfigLabel.get());
 	onToggleRawConfigVisible();
@@ -559,19 +594,16 @@ CSettingsContainer::CSettingsContainer()
 	m_settingsComponent = std::make_unique<CSettingsComponent>();
 
 	m_settingsViewport = std::make_unique<Viewport>();
-	m_settingsViewport->getHorizontalScrollBar().setColour(ScrollBar::backgroundColourId, CDbStyle::GetDbColor(CDbStyle::DarkColor));
-	m_settingsViewport->getHorizontalScrollBar().setColour(ScrollBar::thumbColourId, CDbStyle::GetDbColor(CDbStyle::DarkTextColor));
-	m_settingsViewport->getHorizontalScrollBar().setColour(ScrollBar::trackColourId, CDbStyle::GetDbColor(CDbStyle::MidColor));
-	m_settingsViewport->getVerticalScrollBar().setColour(ScrollBar::backgroundColourId, CDbStyle::GetDbColor(CDbStyle::DarkColor));
-	m_settingsViewport->getVerticalScrollBar().setColour(ScrollBar::thumbColourId, CDbStyle::GetDbColor(CDbStyle::DarkTextColor));
-	m_settingsViewport->getVerticalScrollBar().setColour(ScrollBar::trackColourId, CDbStyle::GetDbColor(CDbStyle::MidColor));
 	m_settingsViewport->setViewedComponent(m_settingsComponent.get(), false);
 	addAndMakeVisible(m_settingsViewport.get());
 
 	// register this object as config watcher
 	auto config = AppConfiguration::getInstance();
 	if (config)
+	{
 		config->addWatcher(this);
+		config->addDumper(this);
+	}
 }
 
 /**
@@ -588,7 +620,7 @@ CSettingsContainer::~CSettingsContainer()
 void CSettingsContainer::paint(Graphics& g)
 {
 	// Paint background to cover the controls behind this overlay.
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::DarkColor));
+	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
 	g.fillRect(Rectangle<int>(0, 0, getLocalBounds().getWidth(), getLocalBounds().getHeight()));
 }
 
@@ -600,8 +632,11 @@ void CSettingsContainer::resized()
 	auto bounds = getLocalBounds().reduced(5);
 
 	// toggle button for visibility of raw config textfield
-	auto rcbBounds = bounds.removeFromBottom(20).removeFromRight(150);
-	m_useRawConfigButton->setBounds(rcbBounds.removeFromRight(25));
+	auto bottomBarControlBounds = bounds.removeFromBottom(20);
+	m_useRawConfigButton->setBounds(bottomBarControlBounds.removeFromRight(25));
+	m_lookAndFeelSelect->setBounds(bottomBarControlBounds.removeFromLeft(210).removeFromRight(110));
+
+	bounds.removeFromBottom(5);
 
 	m_settingsComponent->setBounds(bounds);
 	m_settingsViewport->setBounds(bounds);
@@ -637,11 +672,45 @@ void CSettingsContainer::UpdateGui(bool init)
 /**
  *
  */
+void CSettingsContainer::performConfigurationDump()
+{
+	auto config = AppConfiguration::getInstance();
+	if (config && m_lookAndFeelSelect)
+	{
+		auto lafConfigState = std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::LOOKANDFEEL));
+		auto lafType = static_cast<DbLookAndFeelBase::LookAndFeelType>(m_lookAndFeelSelect->getSelectedId());
+		if (lafConfigState)
+		{
+			lafConfigState->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::LOOKANDFEELTYPE), lafType);
+			config->setConfigState(std::move(lafConfigState));
+		}
+	}
+}
+
+/**
+ *
+ */
 void CSettingsContainer::onConfigUpdated()
 {
 	auto config = AppConfiguration::getInstance();
 	if (config)
 	{
+		// trigger updating the settings visu in general
+		m_settingsComponent->processUpdatedConfig();
+
+		// get current selected lookandfeel to update selection dropdown
+		auto lafConfigState = config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::LOOKANDFEEL));
+		if (lafConfigState)
+		{
+			auto lafAttrName = AppConfiguration::getAttributeName(AppConfiguration::AttributeID::LOOKANDFEELTYPE);
+			auto lafVal = lafConfigState->getIntAttribute(lafAttrName, DbLookAndFeelBase::LookAndFeelType::LAFT_DefaultJUCE);
+			auto lafType = static_cast<DbLookAndFeelBase::LookAndFeelType>(lafVal);
+
+			if (m_lookAndFeelSelect)
+				m_lookAndFeelSelect->setSelectedId(lafType, dontSendNotification);
+		}
+
+		// if the raw config is currently visible, go into updating it as well
 		if (m_useRawConfigButton->getToggleState())
 		{
 			// get the config for filling raw texteditor (meant for debugging, ...)
@@ -649,8 +718,6 @@ void CSettingsContainer::onConfigUpdated()
 			auto configText = configXml->toString();
 			m_settingsRawEditor->setText(configText);
 		}
-
-		m_settingsComponent->processUpdatedConfig();
 	}
 }
 
@@ -699,6 +766,16 @@ void CSettingsContainer::onToggleRawConfigVisible()
 		m_applyButton->setVisible(false);
 		m_settingsRawEditor->setVisible(false);
 	}
+}
+
+/**
+ *
+ */
+void CSettingsContainer::onSelectedLookAndFeelChanged()
+{
+	auto config = AppConfiguration::getInstance();
+	if (config)
+		config->triggerConfigurationDump(true);
 }
 
 

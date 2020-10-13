@@ -40,6 +40,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../SoundsourceProcessor/SurfaceSlider.h"
 
 #include "../Controller.h"
+#include "../LookAndFeel.h"
 
 #include <Image_utils.hpp>
 
@@ -58,7 +59,7 @@ namespace SoundscapeBridgeApp
  * Class constructor.
  */
 OverviewTableContainer::OverviewTableContainer()
-	: AOverlay(OT_Overview)
+	: OverlayBase(OT_Overview)
 {
 	// Create the table model/component.
 	m_overviewTable = std::make_unique<TableModelComponent>();
@@ -66,26 +67,33 @@ OverviewTableContainer::OverviewTableContainer()
 	addAndMakeVisible(m_overviewTable.get());
 
 	// Add/Remove Buttons
-	m_addInstance = std::make_unique<CButton>("Add");
+	m_addInstance = std::make_unique<TextButton>();
 	m_addInstance->setClickingTogglesState(false);
+	m_addInstance->setButtonText("Add");
 	m_addInstance->addListener(this);
 	addAndMakeVisible(m_addInstance.get());
-	m_removeInstance = std::make_unique<CButton>("Remove");
+	m_removeInstance = std::make_unique<TextButton>();
 	m_removeInstance->setClickingTogglesState(false);
+	m_removeInstance->setButtonText("Remove");
 	m_removeInstance->setEnabled(false);
 	m_removeInstance->addListener(this);
 	addAndMakeVisible(m_removeInstance.get());
 
 	// Create quick selection buttons
-	m_selectLabel = std::make_unique<CLabel>("Select:", "Select:");
+	m_selectLabel = std::make_unique<Label>("Select:", "Select:");
+	m_selectLabel->setJustificationType(Justification::centred);
 	addAndMakeVisible(m_selectLabel.get());
 
-	m_selectAll = std::make_unique<CButton>("All");
+	m_selectAll = std::make_unique<TextButton>();
+	m_selectAll->setClickingTogglesState(false);
+	m_selectAll->setButtonText("All");
 	m_selectAll->setEnabled(true);
 	m_selectAll->addListener(this);
 	addAndMakeVisible(m_selectAll.get());
 
-	m_selectNone = std::make_unique<CButton>("None");
+	m_selectNone = std::make_unique<TextButton>();
+	m_selectNone->setClickingTogglesState(false);
+	m_selectNone->setButtonText("None");
 	m_selectNone->setEnabled(true);
 	m_selectNone->addListener(this);
 	addAndMakeVisible(m_selectNone.get());
@@ -113,11 +121,15 @@ void OverviewTableContainer::paint(Graphics& g)
 	int h = getLocalBounds().getHeight();	
 
 	// Background
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::MidColor));
+	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
+	g.fillRect(getLocalBounds());
+
+	// Bottm bar background
+	g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId));
 	g.fillRect(Rectangle<int>(8, h - 41, w - 16, 34));
 
 	// Frame
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::DarkLineColor));
+	g.setColour(getLookAndFeel().findColour(TableListBox::outlineColourId));
 	g.drawRect(Rectangle<int>(8, h - 41, w - 16, 34), 1);
 }
 
@@ -170,12 +182,12 @@ void OverviewTableContainer::resized()
 	bottomBarFlex.justifyContent = FlexBox::JustifyContent::center;
 	bottomBarFlex.alignContent = FlexBox::AlignContent::center;
 	bottomBarFlex.items.addArray({
-		FlexItem(*m_addInstance.get()).withFlex(1).withMaxWidth(40).withMargin(FlexItem::Margin(2)),
+		FlexItem(*m_addInstance.get()).withFlex(1).withMaxWidth(40).withMargin(FlexItem::Margin(2, 2, 2, 4)),
 		FlexItem(*m_removeInstance.get()).withFlex(1).withMaxWidth(60).withMargin(FlexItem::Margin(2)),
 		FlexItem().withFlex(2).withHeight(30),
 		FlexItem(*m_selectLabel.get()).withFlex(1).withMaxWidth(80),
 		FlexItem(*m_selectAll.get()).withFlex(1).withMaxWidth(40).withMargin(FlexItem::Margin(2)),
-		FlexItem(*m_selectNone.get()).withFlex(1).withMaxWidth(46).withMargin(FlexItem::Margin(2)),
+		FlexItem(*m_selectNone.get()).withFlex(1).withMaxWidth(46).withMargin(FlexItem::Margin(2, 4, 2, 2)),
 		});
 
 	FlexBox mainFB;
@@ -344,12 +356,6 @@ CustomTableHeaderComponent::CustomTableHeaderComponent()
 	setSortColumnId(TableModelComponent::OC_SourceID, true); // sort forwards by the Input number column
 	setStretchToFitActive(true);
 
-	// Header colors
-	setColour(TableHeaderComponent::textColourId, CDbStyle::GetDbColor(CDbStyle::TextColor));
-	setColour(TableHeaderComponent::backgroundColourId, CDbStyle::GetDbColor(CDbStyle::MidColor));
-	setColour(TableHeaderComponent::outlineColourId, CDbStyle::GetDbColor(CDbStyle::DarkLineColor));
-	setColour(TableHeaderComponent::highlightColourId, CDbStyle::GetDbColor(CDbStyle::HighlightColor));
-
 	updateBridgingTitles();
 }
 
@@ -401,7 +407,7 @@ void CustomTableHeaderComponent::paint(Graphics& g)
 	auto font = g.getCurrentFont();
 	font.setBold(true);
 	g.setFont(font);
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::TextColor));
+	g.setColour(getLookAndFeel().findColour(TableHeaderComponent::textColourId));
 
 	if (m_activeBridgingTitles.empty())
 	{
@@ -447,16 +453,6 @@ TableModelComponent::TableModelComponent()
 	m_table.setModel(this);
 
 	m_table.setHeader(std::make_unique<CustomTableHeaderComponent>());
-
-	// Scroll bar colors
-	m_table.getVerticalScrollBar().setColour(ScrollBar::backgroundColourId, CDbStyle::GetDbColor(CDbStyle::MidColor));
-	m_table.getVerticalScrollBar().setColour(ScrollBar::thumbColourId, CDbStyle::GetDbColor(CDbStyle::DarkTextColor));
-	m_table.getVerticalScrollBar().setColour(ScrollBar::trackColourId, CDbStyle::GetDbColor(CDbStyle::MidColor));
-
-	// Table colors
-	m_table.setColour(TableListBox::backgroundColourId, CDbStyle::GetDbColor(CDbStyle::DarkColor));
-	m_table.setColour(TableListBox::outlineColourId, CDbStyle::GetDbColor(CDbStyle::DarkLineColor));
-	m_table.setColour(TableListBox::textColourId, CDbStyle::GetDbColor(CDbStyle::TextColor));
 
 	m_table.setRowHeight(33);
 	m_table.setOutlineThickness(1);
@@ -688,13 +684,13 @@ void TableModelComponent::paintRowBackground(Graphics& g, int rowNumber, int wid
 
 	// Selected rows have a different background color.
 	if (rowIsSelected)
-		g.setColour(CDbStyle::GetDbColor(CDbStyle::HighlightColor));
+		g.setColour(getLookAndFeel().findColour(TableHeaderComponent::highlightColourId));
 	else
-		g.setColour(CDbStyle::GetDbColor(CDbStyle::MidColor));
+		g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId));
 	g.fillRect(0, 0, width, height - 1);
 
 	// Line between rows.
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::DarkLineColor));
+	g.setColour(getLookAndFeel().findColour(ListBox::outlineColourId));
 	g.fillRect(0, height - 1, width, height - 1);
 }
 
@@ -949,11 +945,6 @@ ComboBoxContainer::ComboBoxContainer(TableModelComponent& td)
 	m_comboBox.addItem("3", 3);
 	m_comboBox.addItem("4", 4);
 	m_comboBox.addListener(this);
-	m_comboBox.setColour(ComboBox::backgroundColourId, CDbStyle::GetDbColor(CDbStyle::DarkColor));
-	m_comboBox.setColour(ComboBox::textColourId, CDbStyle::GetDbColor(CDbStyle::TextColor));
-	m_comboBox.setColour(ComboBox::outlineColourId, CDbStyle::GetDbColor(CDbStyle::WindowColor));
-	m_comboBox.setColour(ComboBox::buttonColourId, CDbStyle::GetDbColor(CDbStyle::MidColor));
-	m_comboBox.setColour(ComboBox::arrowColourId, CDbStyle::GetDbColor(CDbStyle::TextColor));
 	m_comboBox.setWantsKeyboardFocus(false);
 	addAndMakeVisible(m_comboBox);
 }
@@ -1005,7 +996,7 @@ void ComboBoxContainer::comboBoxChanged(ComboBox *comboBox)
  */
 void ComboBoxContainer::resized()
 {
-	m_comboBox.setBoundsInset(BorderSize<int>(4));
+	m_comboBox.setBoundsInset(BorderSize<int>(4, 4, 5, 4));
 }
 
 /**
@@ -1075,12 +1066,11 @@ void TextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
 	std::vector<ProcessorId> ProcessorIds = m_owner.GetProcessorIdsForRows(selectedRows);
 
 	CController* ctrl = CController::GetInstance();
-	CTextEditor *myEditor = static_cast<CTextEditor*>(&textEditor);
-	if (myEditor && ctrl)
+	if (ctrl)
 	{
 		// New SourceID which should be applied to all plugins in the selected rows.
 		int newSourceId;
-		newSourceId = myEditor->getText().getIntValue();
+		newSourceId = textEditor.getText().getIntValue();
 		for (std::size_t i = 0; i < ProcessorIds.size(); ++i)
 		{
 			// Set the value of the combobox to the current MappingID of the corresponding plugin.
@@ -1112,7 +1102,7 @@ void TextEditorContainer::textEditorReturnKeyPressed(TextEditor& textEditor)
  */
 void TextEditorContainer::resized()
 {
-	m_editor.setBoundsInset(BorderSize<int>(4));
+	m_editor.setBoundsInset(BorderSize<int>(4, 4, 5, 4));
 }
 
 /**
@@ -1149,13 +1139,22 @@ void TextEditorContainer::SetRow(int newRow)
 RadioButtonContainer::RadioButtonContainer(TableModelComponent& td)
 	: m_owner(td)
 {
+	auto blueColour = Colours::blue;
+	auto lookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (lookAndFeel)
+		blueColour = lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonBlueColor);
+
 	// Create and configure button components inside this container.
-	m_txButton.setName("Tx");
+	m_txButton.setButtonText("Tx");
+	m_txButton.setClickingTogglesState(true);
+	m_txButton.setColour(TextButton::ColourIds::buttonOnColourId, blueColour.brighter(0.05f));
 	m_txButton.setEnabled(true);
 	m_txButton.addListener(this);
 	addAndMakeVisible(m_txButton);
 
-	m_rxButton.setName("Rx");
+	m_rxButton.setButtonText("Rx");
+	m_rxButton.setClickingTogglesState(true);
+	m_rxButton.setColour(TextButton::ColourIds::buttonOnColourId, blueColour.brighter(0.05f));
 	m_rxButton.setEnabled(true);
 	m_rxButton.addListener(this);
 	addAndMakeVisible(m_rxButton);
@@ -1218,10 +1217,14 @@ void RadioButtonContainer::buttonClicked(Button *button)
  */
 void RadioButtonContainer::resized()
 {
-	int w = getLocalBounds().getWidth();
-	int h = getLocalBounds().getHeight();
-	m_txButton.setBounds(2, 2, (w / 2) - 3, h - 5);
-	m_rxButton.setBounds(w / 2, 2, (w / 2) - 3, h - 5);
+	auto bounds = getLocalBounds();
+	bounds.removeFromBottom(1);
+	auto singleButtonWidth = 0.5f * bounds.getWidth();
+
+	auto buttonRect = bounds.removeFromLeft(singleButtonWidth).reduced(4);
+	m_txButton.setBounds(buttonRect);
+	buttonRect = bounds.removeFromLeft(singleButtonWidth).reduced(4);
+	m_rxButton.setBounds(buttonRect);
 }
 
 /**
@@ -1290,11 +1293,18 @@ void MuteButtonContainer::updateBridgingMuteButtons()
 
 	auto activeBridging = ctrl->GetActiveProtocolBridging();
 
+	auto redColour = Colours::red;
+	auto lookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (lookAndFeel)
+		redColour = lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonRedColor);
+
 	for (auto type : m_knowntypes)
 	{
 		if (((activeBridging & type) == type) && (m_bridgingMutes.count(type) == 0))
 		{
-			m_bridgingMutes[type].setName("Mute");
+			m_bridgingMutes[type].setButtonText("Mute");
+			m_bridgingMutes[type].setClickingTogglesState(true);
+			m_bridgingMutes[type].setColour(TextButton::ColourIds::buttonOnColourId, redColour.brighter(0.05f));
 			m_bridgingMutes[type].setEnabled(true);
 			m_bridgingMutes[type].addListener(this);
 			addAndMakeVisible(&m_bridgingMutes.at(type));
@@ -1362,7 +1372,7 @@ void MuteButtonContainer::resized()
 
 	for (auto& buttonKV : m_bridgingMutes)
 	{
-		auto buttonRect = bounds.removeFromLeft(singleButtonWidth).reduced(2);
+		auto buttonRect = bounds.removeFromLeft(singleButtonWidth).reduced(4);
 		buttonKV.second.setBounds(buttonRect);
         buttonKV.second.setName(buttonText);
 	}

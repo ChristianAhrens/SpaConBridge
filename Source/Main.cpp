@@ -2,6 +2,8 @@
 
 #include "MainSoundscapeBridgeAppComponent.h"
 
+#include "LookAndFeel.h"
+
 namespace SoundscapeBridgeApp
 {
 
@@ -53,7 +55,9 @@ public:
             .findColour(ResizableWindow::backgroundColourId),
             DocumentWindow::allButtons)
         {
-            m_mainComponent = std::make_unique<MainSoundscapeBridgeAppComponent>();
+            updateLookAndFeel();
+
+            m_mainComponent = std::make_unique<MainSoundscapeBridgeAppComponent>([=](DbLookAndFeelBase::LookAndFeelType type) { updateLookAndFeel(type); });
 
             setUsingNativeTitleBar(true);
             setContentOwned(m_mainComponent.get(), true);
@@ -83,8 +87,28 @@ public:
             subclass also calls the superclass's method.
         */
 
+        void updateLookAndFeel(DbLookAndFeelBase::LookAndFeelType type = DbLookAndFeelBase::LookAndFeelType::LAFT_OSdynamic)
+        {
+            switch (type)
+            {
+            case DbLookAndFeelBase::LookAndFeelType::LAFT_DefaultJUCE:
+                m_customLookAndFeel = nullptr;
+                break;
+            case DbLookAndFeelBase::LookAndFeelType::LAFT_Light:
+                m_customLookAndFeel = std::unique_ptr<LookAndFeel>(new LightDbLookAndFeel);
+                break;
+            case DbLookAndFeelBase::LookAndFeelType::LAFT_Dark:
+            case DbLookAndFeelBase::LookAndFeelType::LAFT_OSdynamic:
+            default:
+                m_customLookAndFeel = std::unique_ptr<LookAndFeel>(new DarkDbLookAndFeel);
+                break;
+            }
+            Desktop::getInstance().setDefaultLookAndFeel(m_customLookAndFeel.get());
+        }
+
     private:
-        std::unique_ptr<MainSoundscapeBridgeAppComponent>  m_mainComponent;
+        std::unique_ptr<LookAndFeel>	                    m_customLookAndFeel; // our own look and feel implementation instance
+        std::unique_ptr<MainSoundscapeBridgeAppComponent>   m_mainComponent;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainWindow)
     };

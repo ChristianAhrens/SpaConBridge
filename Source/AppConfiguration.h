@@ -19,6 +19,7 @@ public:
         SOUNDSOURCEPROCESSORS,
         PROCESSORINSTANCE,
 		BRIDGING,
+        LOOKANDFEEL,
     };
     static String getTagName(TagID ID)
     {
@@ -36,6 +37,8 @@ public:
             return "Proc";
         case BRIDGING:
             return "Bridging";
+        case LOOKANDFEEL:
+            return "LookAndFeel";
 		default:
 			return "INVALID";
         }
@@ -46,6 +49,7 @@ public:
 		PROCESSORSOURCEID,
         PROCESSORMAPPINGID,
         PROCESSORCOMSMODE,
+        LOOKANDFEELTYPE,
 	};
 	static String getAttributeName(AttributeID Id)
 	{
@@ -57,6 +61,8 @@ public:
             return "MappingId";
         case PROCESSORCOMSMODE:
             return "ComsMode";
+        case LOOKANDFEELTYPE:
+            return "LookAndFeelType";
 		default:
 			return "INVALID";
 		}

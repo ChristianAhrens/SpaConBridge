@@ -166,6 +166,10 @@
       </GROUP>
     </GROUP>
     <GROUP id="{2B9DD386-1093-ADF5-E47F-5954774132B5}" name="Source">
+      <FILE id="YNojdV" name="LookAndFeel.cpp" compile="1" resource="0" file="Source/LookAndFeel.cpp"/>
+      <FILE id="DEBTf5" name="LookAndFeel.h" compile="0" resource="0" file="Source/LookAndFeel.h"/>
+      <FILE id="ZB5BUF" name="OverlayBase.cpp" compile="1" resource="0" file="Source/OverlayBase.cpp"/>
+      <FILE id="CbGt31" name="OverlayBase.h" compile="0" resource="0" file="Source/OverlayBase.h"/>
       <FILE id="vQ5W43" name="ProtocolBridgingWrapper.cpp" compile="1" resource="0"
             file="Source/ProtocolBridgingWrapper.cpp"/>
       <FILE id="HbiWnW" name="ProtocolBridgingWrapper.h" compile="0" resource="0"
@@ -217,8 +221,6 @@
       <FILE id="g0nbLB" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
       <FILE id="nZnFg0" name="Version.cpp" compile="1" resource="0" file="Source/Version.cpp"/>
       <FILE id="tKd5wL" name="Version.h" compile="0" resource="0" file="Source/Version.h"/>
-      <FILE id="mSMMnq" name="Gui.cpp" compile="1" resource="0" file="Source/Gui.cpp"/>
-      <FILE id="awUO6O" name="Gui.h" compile="0" resource="0" file="Source/Gui.h"/>
       <FILE id="Kqvnes" name="Controller.cpp" compile="1" resource="0" file="Source/Controller.cpp"/>
       <FILE id="dObTPr" name="Controller.h" compile="0" resource="0" file="Source/Controller.h"/>
       <FILE id="c3j7aS" name="SoundscapeBridgeAppCommon.h" compile="0" resource="0"

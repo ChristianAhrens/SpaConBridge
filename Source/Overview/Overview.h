@@ -36,8 +36,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include "../About.h"
-#include "../Gui.h"
 #include "../SoundscapeBridgeAppCommon.h"
+#include "../LookAndFeel.h"
 
 
 namespace SoundscapeBridgeApp
@@ -51,6 +51,65 @@ class CTabbedComponent;
 class OverviewTableContainer;
 class COverviewMultiSurface;
 class CSettingsContainer;
+
+
+/**
+ * class LedButton, a custom ToggleButton
+ */
+class LedButton : public ToggleButton
+{
+public:
+	explicit LedButton()
+		: ToggleButton()
+	{
+
+	}
+	~LedButton() override
+	{
+
+	}
+
+protected:
+	void paintButton(Graphics& g, bool isMouseOverButton, bool isButtonDown) override
+	{
+		Rectangle<int> bounds = getLocalBounds();
+		Rectangle<float> buttonRectF = Rectangle<float>(2.5f, 2.5f, bounds.getWidth() - 4.0f, bounds.getHeight() - 4.0f);
+		bool on = getToggleState();
+		bool enabled = isEnabled();
+
+		auto blueColour = Colours::blue;
+		auto lookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+		if (lookAndFeel)
+			blueColour = lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonBlueColor);
+
+		// Button's main colour
+		if (on)
+		{
+			if (isButtonDown)
+				blueColour = blueColour.brighter(0.1f);
+			else if (isMouseOverButton)
+				blueColour = blueColour.brighter(0.05f);
+			g.setColour(blueColour);
+		}
+		else
+		{
+			Colour col = getLookAndFeel().findColour(TextButton::buttonColourId);
+			if (!enabled)
+				col = getLookAndFeel().findColour(TextEditor::backgroundColourId);
+			else if (isButtonDown)
+				col = blueColour.brighter(0.05f);
+			else if (isMouseOverButton)
+				col = getLookAndFeel().findColour(TextEditor::backgroundColourId).brighter(0.05f);
+			g.setColour(col);
+		}
+
+		g.fillRoundedRectangle(buttonRectF, 10);
+		g.setColour(getLookAndFeel().findColour(TextEditor::outlineColourId));
+		g.drawRoundedRectangle(buttonRectF, 10, 1);
+	}
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LedButton)
+};
 
 
 /**
@@ -77,65 +136,18 @@ private:
 	void timerCallback() override;
 
 private:
-	/**
-	 * App version label
-	 */
-	std::unique_ptr<CLabel>			m_versionLabel;
-
-	/**
-	 * App name
-	 */
-	std::unique_ptr<CLabel>			m_nameLabel;
-
-	/**
-	 * Overview title label
-	 */
-	std::unique_ptr<CLabel>			m_titleLabel;
-
-	/*
-	 * Logo image.
-	 */
-	Image							m_appLogo;
-
-	/**
-	 * Send/receive rate label
-	 */
-	std::unique_ptr<CLabel>			m_rateLabel;
-
-	/**
-	 * Text editor for the OSC send/receive rate in ms.
-	 */
-	std::unique_ptr<CTextEditor>	m_rateTextEdit;
-
-	/**
-	 * Online indicator label
-	 */
-	std::unique_ptr<CLabel>			m_onlineLabel;
-
-	/**
-	 * Button used as Online indicator LED.
-	 */
-	std::unique_ptr<CButton>		m_onlineLed;
-
-	/**
-	 * A container for tabs.
-	 */
-	std::unique_ptr<CTabbedComponent> m_tabbedComponent;
-
-	/**
-	 * The actual table container inside this component.
-	 */
-	std::unique_ptr<OverviewTableContainer> m_tableContainer;
-
-	/**
-	 * Container for multi-slider.
-	 */
-	std::unique_ptr<COverviewMultiSurface> m_multiSliderContainer;
-
-	/**
-	 * Container for settings component.
-	 */
-	std::unique_ptr<CSettingsContainer> m_settingsContainer;
+	std::unique_ptr<Label>					m_versionLabel;			/**> App version label. */
+	std::unique_ptr<Label>					m_nameLabel;			/**> App name. */
+	std::unique_ptr<Label>					m_titleLabel;			/**> Overview title label. */
+	Image									m_appLogo;				/**> Logo image. */
+	std::unique_ptr<Label>					m_rateLabel;			/**> Send/receive rate label. */
+	std::unique_ptr<TextEditor>			m_rateTextEdit;			/**> Text editor for the OSC send/receive rate in ms. */
+	std::unique_ptr<Label>					m_onlineLabel;			/**> Online indicator label. */
+	std::unique_ptr<LedButton>				m_onlineLed;			/**> Button used as Online indicator LED. */
+	std::unique_ptr<CTabbedComponent>		m_tabbedComponent;		/**> A container for tabs. */
+	std::unique_ptr<OverviewTableContainer> m_tableContainer;		/**> The actual table container inside this component. */
+	std::unique_ptr<COverviewMultiSurface>	m_multiSliderContainer;	/**> Container for multi-slider. */
+	std::unique_ptr<CSettingsContainer>		m_settingsContainer;	/**> Container for settings component. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(COverviewComponent)
 };
@@ -185,6 +197,10 @@ class CTabBarButton : public TabBarButton
 public:
 	CTabBarButton(int tabIdx, TabbedButtonBar& ownerBar);
 	~CTabBarButton() override;
+
+	void updateDrawableButtonImageColours();
+
+	void lookAndFeelChanged() override;
 
 protected:
 	void paintButton(Graphics&, bool, bool) override;

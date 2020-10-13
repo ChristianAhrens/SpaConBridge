@@ -73,32 +73,34 @@ static constexpr int GUI_UPDATE_RATE_SLOW = 120;
 COverviewComponent::COverviewComponent()
 {
 	// Online
-	m_onlineLabel = std::make_unique<CLabel>("Online Label", "Online:");
+	m_onlineLabel = std::make_unique<Label>("Online Label", "Online:");
+	m_onlineLabel->setJustificationType(Justification::centred);
 	addAndMakeVisible(m_onlineLabel.get());
-	m_onlineLed = std::make_unique<CButton>("");
+	m_onlineLed = std::make_unique<LedButton>();
 	m_onlineLed->setEnabled(false);
-	m_onlineLed->SetCornerRadius(10);
 	addAndMakeVisible(m_onlineLed.get());
 
 	// Interval
-	m_rateTextEdit = std::make_unique<CTextEditor>("OSC Send Rate");
-	m_rateTextEdit->SetSuffix("ms");
+	m_rateTextEdit = std::make_unique<TextEditor>("OSC Send Rate");
 	m_rateTextEdit->addListener(this);
 	addAndMakeVisible(m_rateTextEdit.get());
-	m_rateLabel = std::make_unique<CLabel>("OSC Send Rate", "Interval:");
+	m_rateLabel = std::make_unique<Label>("OSC Send Rate", "Interval:");
+	m_rateLabel->setJustificationType(Justification::centred);
 	addAndMakeVisible(m_rateLabel.get());
 
 	// d&b logo and Plugin version label
 	m_appLogo = ImageCache::getFromMemory(BinaryData::SoundscapeBridgeApp_png, BinaryData::SoundscapeBridgeApp_pngSize);
-	m_versionLabel = std::make_unique<CLabel>("PluginVersion", String(JUCE_STRINGIFY(JUCE_APP_VERSION)));
+	m_versionLabel = std::make_unique<Label>("PluginVersion", String(JUCE_STRINGIFY(JUCE_APP_VERSION)));
+	m_versionLabel->setJustificationType(Justification::centred);
 	m_versionLabel->setFont(Font(11));
 	addAndMakeVisible(m_versionLabel.get());
-	m_nameLabel = std::make_unique<CLabel>("PluginName", "Version");
+	m_nameLabel = std::make_unique<Label>("PluginName", "Version");
+	m_nameLabel->setJustificationType(Justification::centred);
 	m_nameLabel->setFont(Font(11));
-	m_nameLabel->setColour(Label::textColourId, CDbStyle::GetDbColor(CDbStyle::DarkTextColor));
 	addAndMakeVisible(m_nameLabel.get());
 
-	m_titleLabel = std::make_unique<CLabel>("Title", "");
+	m_titleLabel = std::make_unique<Label>("Title", "");
+	m_titleLabel->setJustificationType(Justification::centred);
 	addAndMakeVisible(m_titleLabel.get());
 
 	// Create the table container.
@@ -115,9 +117,9 @@ COverviewComponent::COverviewComponent()
 
 	// Add the overview tabs.
 	m_tabbedComponent->SetIsHandlingChanges(false);
-	m_tabbedComponent->addTab("Table", CDbStyle::GetDbColor(CDbStyle::DarkColor), m_tableContainer.get(), false);
-	m_tabbedComponent->addTab("Slider", CDbStyle::GetDbColor(CDbStyle::DarkColor), m_multiSliderContainer.get(), false);
-	m_tabbedComponent->addTab("Settings", CDbStyle::GetDbColor(CDbStyle::DarkColor), m_settingsContainer.get(), false);
+	m_tabbedComponent->addTab("Table", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_tableContainer.get(), false);
+	m_tabbedComponent->addTab("Slider", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSliderContainer.get(), false);
+	m_tabbedComponent->addTab("Settings", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_settingsContainer.get(), false);
 	m_tabbedComponent->SetIsHandlingChanges(true);
 
 	// Start GUI-refreshing timer.
@@ -141,15 +143,15 @@ void COverviewComponent::paint(Graphics& g)
 	int h = getLocalBounds().getHeight();	
 
 	// Bars above and below
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::MidColor));
+	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
 	g.fillRect(getLocalBounds());
 
 	// Background
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::DarkColor));
+	g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
 	g.fillRect(Rectangle<int>(0, 43, w, h - 87));
 
 	// Little lines between version and logo
-	g.setColour(CDbStyle::GetDbColor(CDbStyle::ButtonColor));
+	g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
 	g.fillRect(Rectangle<int>(w - 39, 6, 1, 30));
 	g.fillRect(Rectangle<int>(w - 86, 6, 1, 30));
 
@@ -158,7 +160,7 @@ void COverviewComponent::paint(Graphics& g)
 
 	// Draw little line below right and left overlap of tabbedcomponent buttonbar to match with the line which is automatically drawn 
 	// by the CTabbedComponent's CTabBarButton.
-	g.setColour(Colour(108, 113, 115));
+	g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
 	g.drawRect(Rectangle<int>(0, 43, 40, 1), 1);
 	g.drawRect(Rectangle<int>(w - 86, 43, 86, 1), 1);
 }
@@ -206,14 +208,13 @@ void COverviewComponent::resized()
  */
 void COverviewComponent::textEditorFocusLost(TextEditor& textEditor)
 {
-	CTextEditor *myEditor = static_cast<CTextEditor*>(&textEditor);
 	CController* ctrl = CController::GetInstance();
-	if (ctrl && myEditor)
+	if (ctrl)
 	{
 		// OSC message rate has changed
-		if (myEditor == m_rateTextEdit.get())
+		if (&textEditor == m_rateTextEdit.get())
 		{
-			ctrl->SetRate(DCS_Overview, myEditor->getText().getIntValue());
+			ctrl->SetRate(DCS_Overview, textEditor.getText().getIntValue());
 		}
 	}
 }
@@ -251,7 +252,7 @@ void COverviewComponent::UpdateGui(bool init)
 	if (ctrl)
 	{
 		if (ctrl->PopParameterChanged(DCS_Overview, DCT_MessageRate) || init)
-			m_rateTextEdit->setText(String(ctrl->GetRate()), false);
+			m_rateTextEdit->setText(String(ctrl->GetRate()) + " ms", false);
 
 		if (ctrl->PopParameterChanged(DCS_Overview, DCT_Online) || init)
 			m_onlineLed->setToggleState(ctrl->GetOnline(), NotificationType::dontSendNotification);
@@ -394,6 +395,21 @@ CTabBarButton::CTabBarButton(int tabIdx, TabbedButtonBar& ownerBar)
 	: TabBarButton(String(), ownerBar),
 	m_tabIndex(tabIdx)
 {
+	updateDrawableButtonImageColours();
+}
+
+/**
+ * Class destructor.
+ */
+CTabBarButton::~CTabBarButton()
+{
+}
+
+/**
+ * Helper method to update the drawables used for buttons to match the text colour
+ */
+void CTabBarButton::updateDrawableButtonImageColours()
+{
 	String imageName;
 	switch (m_tabIndex)
 	{
@@ -410,7 +426,36 @@ CTabBarButton::CTabBarButton(int tabIdx, TabbedButtonBar& ownerBar)
 		break;
 	}
 
-	JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, m_normalImage, m_overImage, m_downImage, m_disabledImage, m_normalOnImage, m_overOnImage, m_downOnImage, m_disabledOnImage);
+	if (m_normalImage)
+		removeChildComponent(m_normalImage.get());
+	if (m_overImage)
+		removeChildComponent(m_overImage.get());
+	if (m_downImage)
+		removeChildComponent(m_downImage.get());
+	if (m_disabledImage)
+		removeChildComponent(m_disabledImage.get());
+	if (m_normalOnImage)
+		removeChildComponent(m_normalOnImage.get());
+	if (m_overOnImage)
+		removeChildComponent(m_overOnImage.get());
+	if (m_downOnImage)
+		removeChildComponent(m_downOnImage.get());
+	if (m_disabledOnImage)
+		removeChildComponent(m_disabledOnImage.get());
+
+	auto lookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (lookAndFeel)
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, m_normalImage, m_overImage, m_downImage, m_disabledImage, m_normalOnImage, m_overOnImage, m_downOnImage, m_disabledOnImage,
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+	else
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, m_normalImage, m_overImage, m_downImage, m_disabledImage, m_normalOnImage, m_overOnImage, m_downOnImage, m_disabledOnImage);
 
 	addChildComponent(m_normalImage.get());
 	addChildComponent(m_overImage.get());
@@ -423,10 +468,14 @@ CTabBarButton::CTabBarButton(int tabIdx, TabbedButtonBar& ownerBar)
 }
 
 /**
- * Class destructor.
- */
-CTabBarButton::~CTabBarButton()
+* Reimplemented from Component to recreate the button drawables accordingly.
+*/
+void CTabBarButton::lookAndFeelChanged()
 {
+	// update the drawable button images
+	updateDrawableButtonImageColours();
+	// and forward the call to base implementation
+	TabBarButton::lookAndFeelChanged();
 }
 
 /**
@@ -439,9 +488,9 @@ void CTabBarButton::paintButton(Graphics& g, bool isMouseOverButton, bool isButt
 {
 	// The original TabBarButton::paintButton draws a gradient on the buttons which
 	// are inactive. We don't want that, just paint them with the background color.
-	Colour buttonBackground(CDbStyle::GetDbColor(CDbStyle::MidColor));
+	Colour buttonBackground(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
 	if (getToggleState())
-		buttonBackground = CDbStyle::GetDbColor(CDbStyle::DarkColor);
+		buttonBackground = getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker();
 	else if (isButtonDown)
 		buttonBackground = buttonBackground.brighter(0.1f);
 	else if (isMouseOverButton)

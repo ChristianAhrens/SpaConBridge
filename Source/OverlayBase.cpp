@@ -33,52 +33,42 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#pragma once
-
-#include "../About.h"
-#include "../SoundscapeBridgeAppCommon.h"
+#include "OverlayBase.h"
 
 
 namespace SoundscapeBridgeApp
 {
 
 
+/*
+===============================================================================
+ Class OverlayBase
+===============================================================================
+*/
+
 /**
- * Class COverviewMultiSurface is just a component which contains the multi-source slider
- * and the mapping selection control.
+ * Class constructor.
  */
-class COverviewMultiSurface : public OverlayBase,
-	public ComboBox::Listener
+OverlayBase::OverlayBase(OverlayType type)
+	: Component()
 {
-public:
-	COverviewMultiSurface();
-	~COverviewMultiSurface() override;
+	m_overlayType = type;
+}
 
-	void UpdateGui(bool init) override;
+/**
+ * Class destructor.
+ */
+OverlayBase::~OverlayBase()
+{
+}
 
-protected:
-	void paint(Graphics&) override;
-	void resized() override;
-	void comboBoxChanged(ComboBox *comboBox) override;
-
-private:
-	/**
-	 * Multi-source 2D-Slider.
-	 */
-	std::unique_ptr<Component> m_multiSlider;
-
-	/*
-	 * Mapping selector label
-	 */
-	std::unique_ptr<Label>	m_posAreaLabel;
-
-	/**
-	 * ComboBox selector for the coordinate mapping area
-	 */
-	std::unique_ptr<ComboBox>	m_areaSelector;
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(COverviewMultiSurface)
-};
+/**
+ * Get this overlay's type.
+ */
+OverlayBase::OverlayType OverlayBase::GetOverlayType() const
+{
+	return m_overlayType;
+}
 
 
 } // namespace SoundscapeBridgeApp

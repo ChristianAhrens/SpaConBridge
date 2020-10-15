@@ -632,7 +632,7 @@ void CSettingsContainer::resized()
 	auto bounds = getLocalBounds().reduced(5);
 
 	// toggle button for visibility of raw config textfield
-	auto bottomBarControlBounds = bounds.removeFromBottom(20);
+	auto bottomBarControlBounds = bounds.removeFromBottom(25);
 	m_useRawConfigButton->setBounds(bottomBarControlBounds.removeFromRight(25));
 	m_lookAndFeelSelect->setBounds(bottomBarControlBounds.removeFromLeft(210).removeFromRight(110));
 
@@ -655,7 +655,7 @@ void CSettingsContainer::resized()
 	}
 
 	// raw config textfield, etc. - not always visible!
-	m_applyButton->setBounds(bounds.removeFromTop(20));
+	m_applyButton->setBounds(bounds.removeFromTop(25));
 	m_settingsRawEditor->setBounds(bounds);
 }
 

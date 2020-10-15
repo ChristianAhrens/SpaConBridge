@@ -194,20 +194,9 @@ public:
 	void SetRow(int newRow);
 
 private:
-	/**
-	 * Table where this component is contained.
-	 */
-	TableModelComponent&	m_owner;
-
-	/**
-	 * Actual combo box component.
-	 */
-	ComboBox				m_comboBox;
-
-	/**
-	 * Row number where this component is located inside the table.
-	 */
-	int						m_row;
+	TableModelComponent&	m_owner;	/**> Table where this component is contained. */
+	ComboBox				m_comboBox;	/**> Actual combo box component. */
+	int						m_row;		/**< Row number where this component is located inside the table. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ComboBoxContainer)
 };
@@ -302,15 +291,9 @@ public:
 	void SetRow(int newRow);
 
 private:
-	/**
-	 * Table where this component is contained.
-	 */
-	TableModelComponent&	m_owner;
-
-	/**
-	 * Row number where this component is located inside the table.
-	 */
-	int						m_row;
+	
+	TableModelComponent&	m_owner;	/**> Table where this component is contained. */
+	int						m_row;		/**> Row number where this component is located inside the table. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EditableLabelContainer)
 };

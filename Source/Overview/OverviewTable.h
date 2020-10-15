@@ -236,9 +236,12 @@ public:
 	explicit RadioButtonContainer(TableModelComponent& td);
 	~RadioButtonContainer() override;
 
+	void lookAndFeelChanged() override;
+
 	void buttonClicked(Button*) override;
 	void resized() override;
 	void SetRow(int newRow);
+	void updateButtonColours();
 
 private:
 	TableModelComponent&	m_owner;	/**> Table where this component is contained. */
@@ -260,12 +263,13 @@ public:
 	explicit MuteButtonContainer(TableModelComponent& td);
 	~MuteButtonContainer() override;
 
-	void updateBridgingMuteButtons();
-	void updateDrawableButtonImageColours();
-	
+	void lookAndFeelChanged() override;
+
 	void buttonClicked(Button*) override;
 	void resized() override;
 	void SetRow(int newRow);
+	void updateBridgingMuteButtons();
+	void updateDrawableButtonImageColours();
 
 private:
 	TableModelComponent&											m_owner;			/**< Table where this component is contained. */

@@ -94,6 +94,7 @@ public:
 	//==========================================================================
 	ProtocolBridgingType GetActiveProtocolBridging();
 	void SetActiveProtocolBridging(ProtocolBridgingType bridgingType);
+	int GetActiveProtocolBridgingCount();
 	
 	bool GetMuteBridgingSourceId(ProtocolBridgingType bridgingType, juce::int16 sourceId);
 	bool SetMuteBridgingSourceId(ProtocolBridgingType bridgingType, juce::int16 sourceId, bool mute);

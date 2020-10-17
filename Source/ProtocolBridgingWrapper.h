@@ -26,11 +26,14 @@ static const String PROTOCOL_DEFAULT_IP("127.0.0.1");	//< Default IP Address
 static constexpr int RX_PORT_DS100_DEVICE = 50010;		//< UDP port which the DS100 is listening to for OSC
 static constexpr int RX_PORT_DS100_HOST = 50011;		//< UDP port to which the DS100 will send OSC replies
 
-static constexpr int RX_PORT_DIGICO_DEVICE = 50012;		//< UDP port which the DS100 is listening to for OSC
-static constexpr int RX_PORT_DIGICO_HOST = 50013;		//< UDP port to which the DS100 will send OSC replies
+static constexpr int RX_PORT_DIGICO_DEVICE = 50012;		//< UDP port which the DiGiCo console is listening to for OSC
+static constexpr int RX_PORT_DIGICO_HOST = 50013;		//< UDP port to which the DiGiCo console will send OSC replies
 
-static constexpr int RX_PORT_GENERICOSC_DEVICE = 50014;		//< UDP port which the DS100 is listening to for OSC
-static constexpr int RX_PORT_GENERICOSC_HOST = 50015;		//< UDP port to which the DS100 will send OSC replies
+static constexpr int RX_PORT_GENERICOSC_DEVICE = 50014;		//< UDP port which the generic OSC device is listening to for OSC
+static constexpr int RX_PORT_GENERICOSC_HOST = 50015;		//< UDP port to which the generic OSC device will send OSC replies
+
+static constexpr int RX_PORT_RTTRPM_DEVICE = 50016;		//< UDP port which the Blacktrax tracker device is listening to for RTTrPM data
+static constexpr int RX_PORT_RTTRPM_HOST = 50017;		//< UDP port to which the Blacktrax tracker device will send RTTrPM data replies
 
 /**
  * Pre-define processing bridge config values
@@ -38,6 +41,7 @@ static constexpr int RX_PORT_GENERICOSC_HOST = 50015;		//< UDP port to which the
 static constexpr int DEFAULT_PROCNODE_ID = 1;
 static constexpr int DS100_PROCESSINGPROTOCOL_ID = 2;
 static constexpr int DIGICO_PROCESSINGPROTOCOL_ID = 3;
+static constexpr int RTTRPM_PROCESSINGPROTOCOL_ID = 5;
 static constexpr int GENERICOSC_PROCESSINGPROTOCOL_ID = 4;
 
 class ProtocolBridgingWrapper :
@@ -96,6 +100,17 @@ public:
 	bool SetDiGiCoRemotePort(int remotePort, bool dontSendNotification = false);
 
 	//==========================================================================
+	bool GetMuteRTTrPMSourceId(juce::int16 sourceId);
+	bool SetMuteRTTrPMSourceId(juce::int16 sourceId, bool mute = true);
+
+	String GetRTTrPMIpAddress();
+	bool SetRTTrPMIpAddress(String ipAddress, bool dontSendNotification = false);
+	int GetRTTrPMListeningPort();
+	bool SetRTTrPMListeningPort(int listeningPort, bool dontSendNotification = false);
+	int GetRTTrPMRemotePort();
+	bool SetRTTrPMRemotePort(int remotePort, bool dontSendNotification = false);
+
+	//==========================================================================
 	bool GetMuteGenericOSCSourceId(juce::int16 sourceId);
 	bool SetMuteGenericOSCSourceId(juce::int16 sourceId, bool mute = true);
 
@@ -130,6 +145,7 @@ private:
 	//==========================================================================
 	void SetupBridgingNode();
 	std::unique_ptr<XmlElement> SetupDiGiCoBridgingProtocol();
+	std::unique_ptr<XmlElement> SetupRTTrPMBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupGenericOSCBridgingProtocol();
 
 	/**

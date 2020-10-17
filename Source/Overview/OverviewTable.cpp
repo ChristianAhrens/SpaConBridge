@@ -382,10 +382,10 @@ void CustomTableHeaderComponent::updateBridgingTitles()
 	m_activeBridgingTitles.clear();
 	if ((activeBridging & PBT_DiGiCo) == PBT_DiGiCo)
 		m_activeBridgingTitles.push_back("DiGiCo");
-	if ((activeBridging & PBT_GenericOSC) == PBT_GenericOSC)
-		m_activeBridgingTitles.push_back("Generic OSC");
 	if ((activeBridging & PBT_BlacktraxRTTrPM) == PBT_BlacktraxRTTrPM)
-		m_activeBridgingTitles.push_back("Blacktrax RTTrPM");
+		m_activeBridgingTitles.push_back("Blacktrax");
+	if ((activeBridging & PBT_GenericOSC) == PBT_GenericOSC)
+		m_activeBridgingTitles.push_back("gen. OSC");
 	if ((activeBridging & PBT_GenericMIDI) == PBT_GenericMIDI)
 		m_activeBridgingTitles.push_back("MIDI");
 	if ((activeBridging & PBT_YamahaSQ) == PBT_YamahaSQ)

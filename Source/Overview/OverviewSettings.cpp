@@ -321,6 +321,45 @@ CSettingsComponent::CSettingsComponent()
 
 	m_DiGiCoBridgingSettings->resized();
 
+	// BlackTrax RTTrPM settings section
+	m_RTTrPMBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
+	m_RTTrPMBridgingSettings->setHeaderText("BlackTrax RTTrPM Bridging");
+	m_RTTrPMBridgingSettings->setHasActiveToggle(true);
+	m_RTTrPMBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
+	addAndMakeVisible(m_RTTrPMBridgingSettings.get());
+
+	m_RTTrPMIpAddressEdit = std::make_unique<TextEditor>();
+	m_RTTrPMIpAddressEdit->addListener(this);
+	m_RTTrPMIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
+	m_RTTrPMIpAddressLabel = std::make_unique<Label>();
+	m_RTTrPMIpAddressLabel->setJustificationType(Justification::centred);
+	m_RTTrPMIpAddressLabel->setText("IP Address", dontSendNotification);
+	m_RTTrPMIpAddressLabel->attachToComponent(m_RTTrPMIpAddressEdit.get(), true);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMIpAddressLabel.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMIpAddressEdit.get(), true, false);
+
+	m_RTTrPMListeningPortEdit = std::make_unique<TextEditor>();
+	m_RTTrPMListeningPortEdit->addListener(this);
+	m_RTTrPMListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
+	m_RTTrPMListeningPortLabel = std::make_unique<Label>();
+	m_RTTrPMListeningPortLabel->setJustificationType(Justification::centred);
+	m_RTTrPMListeningPortLabel->setText("Listening Port", dontSendNotification);
+	m_RTTrPMListeningPortLabel->attachToComponent(m_RTTrPMListeningPortEdit.get(), true);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMListeningPortLabel.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMListeningPortEdit.get(), true, false);
+
+	m_RTTrPMRemotePortEdit = std::make_unique<TextEditor>();
+	m_RTTrPMRemotePortEdit->addListener(this);
+	m_RTTrPMRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
+	m_RTTrPMRemotePortLabel = std::make_unique<Label>();
+	m_RTTrPMRemotePortLabel->setJustificationType(Justification::centred);
+	m_RTTrPMRemotePortLabel->setText("Remote Port", dontSendNotification);
+	m_RTTrPMRemotePortLabel->attachToComponent(m_RTTrPMRemotePortEdit.get(), true);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMRemotePortLabel.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMRemotePortEdit.get(), true, false);
+
+	m_RTTrPMBridgingSettings->resized();
+
 	// Generic OSC settings section
 	m_GenericOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
 	m_GenericOSCBridgingSettings->setHeaderText("Generic OSC Bridging");
@@ -389,6 +428,7 @@ void CSettingsComponent::resized()
 	auto minWidth = 300;
 	auto minHeight = m_DS100Settings->getHeight()
 		+ m_DiGiCoBridgingSettings->getHeight()
+		+ m_RTTrPMBridgingSettings->getHeight()
 		+ m_GenericOSCBridgingSettings->getHeight()
 		+ (3 * 2 * margin);
 
@@ -412,6 +452,9 @@ void CSettingsComponent::resized()
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
 		FlexItem(*m_DiGiCoBridgingSettings.get())
 			.withHeight(static_cast<float>(m_DiGiCoBridgingSettings->getHeight()))
+			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
+		FlexItem(*m_RTTrPMBridgingSettings.get())
+			.withHeight(static_cast<float>(m_RTTrPMBridgingSettings->getHeight()))
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
 		FlexItem(*m_GenericOSCBridgingSettings.get())
 			.withHeight(static_cast<float>(m_GenericOSCBridgingSettings->getHeight()))
@@ -461,6 +504,14 @@ void CSettingsComponent::textEditorUpdated(TextEditor& editor)
 	if (m_DiGiCoRemotePortEdit && m_DiGiCoRemotePortEdit.get() == &editor)
 		ctrl->SetBridgingRemotePort(PBT_DiGiCo, m_DiGiCoRemotePortEdit->getText().getIntValue());
 
+	// RTTrPM settings section
+	if (m_RTTrPMIpAddressEdit && m_RTTrPMIpAddressEdit.get() == &editor)
+		ctrl->SetBridgingIpAddress(PBT_BlacktraxRTTrPM, m_RTTrPMIpAddressEdit->getText());
+	if (m_RTTrPMListeningPortEdit && m_RTTrPMListeningPortEdit.get() == &editor)
+		ctrl->SetBridgingListeningPort(PBT_BlacktraxRTTrPM, m_RTTrPMListeningPortEdit->getText().getIntValue());
+	if (m_RTTrPMRemotePortEdit && m_RTTrPMRemotePortEdit.get() == &editor)
+		ctrl->SetBridgingRemotePort(PBT_BlacktraxRTTrPM, m_RTTrPMRemotePortEdit->getText().getIntValue());
+
 	// Generic OSC settings section
 	if (m_GenericOSCIpAddressEdit && m_GenericOSCIpAddressEdit.get() == &editor)
 		ctrl->SetBridgingIpAddress(PBT_GenericOSC, m_GenericOSCIpAddressEdit->getText());
@@ -483,6 +534,8 @@ void CSettingsComponent::setSettingsSectionActiveState(HeaderWithElmListComponen
 	ProtocolBridgingType sectionType = PBT_None;
 	if (settingsSection == m_DiGiCoBridgingSettings.get())
 		sectionType = PBT_DiGiCo;
+	else if (settingsSection == m_RTTrPMBridgingSettings.get())
+		sectionType = PBT_BlacktraxRTTrPM;
 	else if (settingsSection == m_GenericOSCBridgingSettings.get())
 		sectionType = PBT_GenericOSC;
 
@@ -517,6 +570,17 @@ void CSettingsComponent::processUpdatedConfig()
 		m_DiGiCoListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_DiGiCo)), false);
 	if (m_DiGiCoRemotePortEdit)
 		m_DiGiCoRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_DiGiCo)), false);
+
+	// RTTrPM settings section
+	auto RTTrPMBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_BlacktraxRTTrPM) == PBT_BlacktraxRTTrPM;
+	if (m_RTTrPMBridgingSettings)
+		m_RTTrPMBridgingSettings->setToggleActiveState(DiGiCoBridgingActive);
+	if (m_RTTrPMIpAddressEdit)
+		m_RTTrPMIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_BlacktraxRTTrPM));
+	if (m_RTTrPMListeningPortEdit)
+		m_RTTrPMListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_BlacktraxRTTrPM)), false);
+	if (m_RTTrPMRemotePortEdit)
+		m_RTTrPMRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_BlacktraxRTTrPM)), false);
 
 	// Generic OSC settings section
 	auto GenericOSCBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_GenericOSC) == PBT_GenericOSC;

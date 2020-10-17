@@ -348,15 +348,15 @@ CustomTableHeaderComponent::CustomTableHeaderComponent()
 {
 	// Add columns to the table header
 	int tableHeaderFlags = (TableHeaderComponent::visible | TableHeaderComponent::sortable);
-	addColumn("", TableModelComponent::OC_TrackID, 15, 15, -1, tableHeaderFlags);
-	addColumn("Input", TableModelComponent::OC_SourceID, 40, 30, -1, tableHeaderFlags);
-	addColumn("Mapping", TableModelComponent::OC_Mapping, 40, 30, -1, tableHeaderFlags);
-	addColumn("Mode", TableModelComponent::OC_ComsMode, 40, 30, -1, tableHeaderFlags);
-	addColumn("", TableModelComponent::OC_BridgingMute, 40, 30, -1, tableHeaderFlags);
+	addColumn("", TableModelComponent::OC_TrackID, 40, 40, -1, tableHeaderFlags);
+	addColumn("Input", TableModelComponent::OC_SourceID, 60, 60, -1, tableHeaderFlags);
+	addColumn("Mapping", TableModelComponent::OC_Mapping, 60, 60, -1, tableHeaderFlags);
+	addColumn("Mode", TableModelComponent::OC_ComsMode, 90, 90, -1, tableHeaderFlags);
+	addColumn("", TableModelComponent::OC_BridgingMute, 90, 90, -1, tableHeaderFlags);
 	setSortColumnId(TableModelComponent::OC_SourceID, true); // sort forwards by the Input number column
-	setStretchToFitActive(true);
 
 	updateBridgingTitles();
+	repaint();
 }
 
 /**
@@ -377,9 +377,9 @@ void CustomTableHeaderComponent::updateBridgingTitles()
 	if (!ctrl)
 		return;
 
-	m_activeBridgingTitles.clear();
-
 	auto activeBridging = ctrl->GetActiveProtocolBridging();
+
+	m_activeBridgingTitles.clear();
 	if ((activeBridging & PBT_DiGiCo) == PBT_DiGiCo)
 		m_activeBridgingTitles.push_back("DiGiCo");
 	if ((activeBridging & PBT_GenericOSC) == PBT_GenericOSC)
@@ -392,6 +392,33 @@ void CustomTableHeaderComponent::updateBridgingTitles()
 		m_activeBridgingTitles.push_back("Yamaha");
 	if ((activeBridging & PBT_HUI) == PBT_HUI)
 		m_activeBridgingTitles.push_back("HUI");
+
+	resized();
+}
+
+/**
+ * Helper method to update the sizing of columns.
+ * This takes the overall available width and distributes it to the columns with a given ratio.
+ */
+void CustomTableHeaderComponent::updateColumnWidths()
+{
+	CController* ctrl = CController::GetInstance();
+	if (!ctrl)
+		return;
+
+	auto activeBridgingCount = ctrl->GetActiveProtocolBridgingCount();
+	auto itemCount = 1			// 1x width for empty track column
+		+ 1.5f						// double width for source id textedit
+		+ 1.5f						// double width for mapping dropdown
+		+ 2						// double width for Rx/Tx radio button
+		+ activeBridgingCount;	// dynamic width depending on active bridging
+	auto itemWidth = 55;
+
+	setColumnWidth(TableModelComponent::OC_TrackID, itemWidth);
+	setColumnWidth(TableModelComponent::OC_SourceID, 1.5f * itemWidth);
+	setColumnWidth(TableModelComponent::OC_Mapping, 1.5f * itemWidth);
+	setColumnWidth(TableModelComponent::OC_ComsMode, 2 * itemWidth);
+	setColumnWidth(TableModelComponent::OC_BridgingMute, activeBridgingCount * itemWidth);
 }
 
 /**
@@ -431,6 +458,16 @@ void CustomTableHeaderComponent::paint(Graphics& g)
 			g.drawText(title, titleRect, Justification::centredLeft);
 		}
 	}
+}
+
+/**
+ * Reimplemented to resize and re-postion controls on the overview window.
+ */
+void CustomTableHeaderComponent::resized()
+{
+	TableHeaderComponent::resized();
+
+	updateColumnWidths();
 }
 
 
@@ -782,15 +819,15 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 		case OC_TrackID:
 		{
 			EditableLabelContainer* label = static_cast<EditableLabelContainer*> (existingComponentToUpdate);
-
+			
 			// If an existing component is being passed-in for updating, we'll re-use it, but
 			// if not, we'll have to create one.
 			if (label == nullptr)
 				label = new EditableLabelContainer(*this);
-
+			
 			// Ensure that the component knows which row number it is located at.
 			label->SetRow(rowNumber);
-
+			
 			// Return a pointer to the component.
 			ret = label;
 		}

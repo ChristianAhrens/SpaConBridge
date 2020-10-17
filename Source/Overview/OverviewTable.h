@@ -103,8 +103,10 @@ public:
 	~CustomTableHeaderComponent() override;
 
 	void paint(Graphics& g) override;
+	void resized() override;
 
 	void updateBridgingTitles();
+	void updateColumnWidths();
 
 private:
 	std::vector<String>	m_activeBridgingTitles;

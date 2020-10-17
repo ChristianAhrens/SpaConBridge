@@ -1588,25 +1588,25 @@ void EditableLabelContainer::mouseDoubleClick(const MouseEvent& event)
 void EditableLabelContainer::SetRow(int newRow)
 {
 	m_row = newRow;
-	String displayName;
-
-	// Find the plugin instance corresponding to the given row number.
-	ProcessorId ProcessorId = m_owner.GetProcessorIdForRow(newRow);
-	CController* ctrl = CController::GetInstance();
-	if (ctrl)
-	{
-		// Set the value of the combobox to the current MappingID of the corresponding plugin.
-		SoundsourceProcessor* plugin = ctrl->GetProcessor(ProcessorId);
-		if (plugin)
-		{
-			displayName = plugin->getProgramName(0);
-			if (displayName.isEmpty())
-				displayName = String("Input ") + String(plugin->GetSourceId());
-
-		}
-	}
-
-	setText(displayName, dontSendNotification);
+	//String displayName;
+	//
+	//// Find the plugin instance corresponding to the given row number.
+	//ProcessorId ProcessorId = m_owner.GetProcessorIdForRow(newRow);
+	//CController* ctrl = CController::GetInstance();
+	//if (ctrl)
+	//{
+	//	// Set the value of the combobox to the current MappingID of the corresponding plugin.
+	//	SoundsourceProcessor* plugin = ctrl->GetProcessor(ProcessorId);
+	//	if (plugin)
+	//	{
+	//		displayName = plugin->getProgramName(0);
+	//		if (displayName.isEmpty())
+	//			displayName = String("Input ") + String(plugin->GetSourceId());
+	//
+	//	}
+	//}
+	//
+	//setText(displayName, dontSendNotification);
 }
 
 

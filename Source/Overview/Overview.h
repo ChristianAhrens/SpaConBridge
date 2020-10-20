@@ -78,9 +78,9 @@ protected:
 		bool enabled = isEnabled();
 
 		auto blueColour = Colours::blue;
-		auto lookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
-		if (lookAndFeel)
-			blueColour = lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonBlueColor);
+		auto customlookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+		if (customlookAndFeel)
+			blueColour = customlookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonBlueColor);
 
 		// Button's main colour
 		if (on)

@@ -443,17 +443,17 @@ void CTabBarButton::updateDrawableButtonImageColours()
 	if (m_disabledOnImage)
 		removeChildComponent(m_disabledOnImage.get());
 
-	auto lookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
-	if (lookAndFeel)
+	auto customlookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (customlookAndFeel)
 		JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, m_normalImage, m_overImage, m_downImage, m_disabledImage, m_normalOnImage, m_overOnImage, m_downOnImage, m_disabledOnImage,
-			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+			customlookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			customlookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			customlookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			customlookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			customlookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			customlookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			customlookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			customlookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
 	else
 		JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, m_normalImage, m_overImage, m_downImage, m_disabledImage, m_normalOnImage, m_overOnImage, m_downOnImage, m_disabledOnImage);
 

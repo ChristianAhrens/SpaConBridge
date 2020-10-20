@@ -659,12 +659,12 @@ bool ProtocolBridgingWrapper::ActivateDS100SourceId(juce::int16 sourceId, juce::
 			{
 				juce::Array<RemoteObject> activeObjects;
 				ProcessingEngineConfig::ReadActiveObjects(activeObjsXmlElement, activeObjects);
-				for (int roi = ROI_SoundObject_Position_XY; roi < ROI_UserMAX; roi++)
+				for (int roi = ROI_CoordinateMapping_SourcePosition_XY; roi < ROI_UserMAX; roi++)
 				{
 					RemoteObject newSourceObject;
 					newSourceObject.Id = static_cast<RemoteObjectIdentifier>(roi);
 					newSourceObject.Addr.first = sourceId;
-					if (roi == ROI_SoundObject_Position_X || roi == ROI_SoundObject_Position_Y || roi == ROI_SoundObject_Position_XY)
+					if (roi == ROI_CoordinateMapping_SourcePosition_X || roi == ROI_CoordinateMapping_SourcePosition_Y || roi == ROI_CoordinateMapping_SourcePosition_XY)
 						newSourceObject.Addr.second = mappingId;
 					else
 						newSourceObject.Addr.second = INVALID_ADDRESS_VALUE;
@@ -710,12 +710,12 @@ bool ProtocolBridgingWrapper::DeactivateDS100SourceId(juce::int16 sourceId, juce
 			{
 				juce::Array<RemoteObject> activeObjects;
 				ProcessingEngineConfig::ReadActiveObjects(activeObjsXmlElement, activeObjects);
-				for (int roi = ROI_SoundObject_Position_XY; roi < ROI_UserMAX; roi++)
+				for (int roi = ROI_CoordinateMapping_SourcePosition_XY; roi < ROI_UserMAX; roi++)
 				{
 					RemoteObject newSourceObject;
 					newSourceObject.Id = static_cast<RemoteObjectIdentifier>(roi);
 					newSourceObject.Addr.first = sourceId;
-					if (roi == ROI_SoundObject_Position_X || roi == ROI_SoundObject_Position_Y || roi == ROI_SoundObject_Position_XY)
+					if (roi == ROI_CoordinateMapping_SourcePosition_X || roi == ROI_CoordinateMapping_SourcePosition_Y || roi == ROI_CoordinateMapping_SourcePosition_XY)
 						newSourceObject.Addr.second = mappingId;
 					else
 						newSourceObject.Addr.second = INVALID_ADDRESS_VALUE;

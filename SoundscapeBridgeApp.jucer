@@ -59,6 +59,18 @@
                     resource="0" file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ObjectDataHandling/ObjectDataHandling_Abstract.h"/>
             </GROUP>
             <GROUP id="{E292F700-4771-1C08-BDE9-01EF568EF5F4}" name="ProtocolProcessor">
+              <GROUP id="{F600D5DB-290B-36B6-BBA2-67CD1223D644}" name="RTTrPMProtocolProcessor">
+                <FILE id="eFyZkE" name="RTTrPM.cpp" compile="1" resource="0" file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/RTTrPMProtocolProcessor/RTTrPM.cpp"/>
+                <FILE id="nUsIbq" name="RTTrPM.h" compile="0" resource="0" file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/RTTrPMProtocolProcessor/RTTrPM.h"/>
+                <FILE id="RCN6WZ" name="RTTrPMConnectionServer.cpp" compile="1" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/RTTrPMProtocolProcessor/RTTrPMConnectionServer.cpp"/>
+                <FILE id="Fm3kFT" name="RTTrPMConnectionServer.h" compile="0" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/RTTrPMProtocolProcessor/RTTrPMConnectionServer.h"/>
+                <FILE id="PRbIhE" name="RTTrPMProtocolProcessor.cpp" compile="1" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/RTTrPMProtocolProcessor/RTTrPMProtocolProcessor.cpp"/>
+                <FILE id="UGlZPu" name="RTTrPMProtocolProcessor.h" compile="0" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/RTTrPMProtocolProcessor/RTTrPMProtocolProcessor.h"/>
+              </GROUP>
               <GROUP id="{4AB99127-F110-E19D-E6B6-E3F0429FB0C0}" name="MIDIProtocolProcessor">
                 <FILE id="FRifrg" name="MIDIProtocolProcessor.cpp" compile="1" resource="0"
                       file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/MIDIProtocolProcessor/MIDIProtocolProcessor.cpp"/>

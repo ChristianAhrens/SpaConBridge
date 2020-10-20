@@ -469,7 +469,7 @@ void CController::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, 
 				int mappingId = 0;
 
 				// Determine which parameter was changed depending on the incoming message's address pattern.
-				if (objectId == RemoteObjectIdentifier::ROI_SoundObject_Position_XY)
+				if (objectId == RemoteObjectIdentifier::ROI_CoordinateMapping_SourcePosition_XY)
 				{
 					// The Mapping ID
 					mappingId = msgData.addrVal.second;
@@ -478,17 +478,17 @@ void CController::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, 
 					pIdx = ParamIdx_X;
 					change = DCT_SourcePosition;
 				}
-				else if (objectId == RemoteObjectIdentifier::ROI_ReverbSendGain)
+				else if (objectId == RemoteObjectIdentifier::ROI_MatrixInput_ReverbSendGain)
 				{
 					pIdx = ParamIdx_ReverbSendGain;
 					change = DCT_ReverbSendGain;
 				}
-				else if (objectId == RemoteObjectIdentifier::ROI_SoundObject_Spread)
+				else if (objectId == RemoteObjectIdentifier::ROI_Positioning_SourceSpread)
 				{
 					pIdx = ParamIdx_SourceSpread;
 					change = DCT_SourceSpread;
 				}
-				else if (objectId == RemoteObjectIdentifier::ROI_SoundObject_DelayMode)
+				else if (objectId == RemoteObjectIdentifier::ROI_Positioning_SourceDelayMode)
 				{
 					pIdx = ParamIdx_DelayMode;
 					change = DCT_DelayMode;
@@ -672,7 +672,7 @@ void CController::timerCallback()
 						// this parameter has been changed since the last timer tick.
 						if (((mode & CM_Tx) == CM_Tx) && pro->GetParameterChanged(DCS_Protocol, DCT_SourcePosition))
 						{
-							msgSent = m_protocolBridge.SendMessage(ROI_SoundObject_Position_XY, newMsgData);
+							msgSent = m_protocolBridge.SendMessage(ROI_CoordinateMapping_SourcePosition_XY, newMsgData);
 							paramSetsInTransit |= DCT_SourcePosition;
 						}
 					}
@@ -696,7 +696,7 @@ void CController::timerCallback()
 						// this parameter has been changed since the last timer tick.
 						if (((mode & CM_Tx) == CM_Tx) && pro->GetParameterChanged(DCS_Protocol, DCT_ReverbSendGain))
 						{
-							msgSent = m_protocolBridge.SendMessage(ROI_ReverbSendGain, newMsgData);
+							msgSent = m_protocolBridge.SendMessage(ROI_MatrixInput_ReverbSendGain, newMsgData);
 							paramSetsInTransit |= DCT_ReverbSendGain;
 						}
 					}
@@ -715,7 +715,7 @@ void CController::timerCallback()
 						// this parameter has been changed since the last timer tick.
 						if (((mode & CM_Tx) == CM_Tx) && pro->GetParameterChanged(DCS_Protocol, DCT_SourceSpread))
 						{
-							msgSent = m_protocolBridge.SendMessage(ROI_SoundObject_Spread, newMsgData);
+							msgSent = m_protocolBridge.SendMessage(ROI_Positioning_SourceSpread, newMsgData);
 							paramSetsInTransit |= DCT_SourceSpread;
 						}
 					}
@@ -734,7 +734,7 @@ void CController::timerCallback()
 						// this parameter has been changed since the last timer tick.
 						if (((mode & CM_Tx) == CM_Tx) && pro->GetParameterChanged(DCS_Protocol, DCT_DelayMode))
 						{
-							msgSent = m_protocolBridge.SendMessage(ROI_SoundObject_DelayMode, newMsgData);
+							msgSent = m_protocolBridge.SendMessage(ROI_Positioning_SourceDelayMode, newMsgData);
 							paramSetsInTransit |= DCT_DelayMode;
 						}
 					}

@@ -723,10 +723,10 @@ bool ProtocolBridgingWrapper::ActivateDS100SourceId(juce::int16 sourceId, juce::
 			{
 				juce::Array<RemoteObject> activeObjects;
 				ProcessingEngineConfig::ReadActiveObjects(activeObjsXmlElement, activeObjects);
-				for (int roi = ROI_CoordinateMapping_SourcePosition_XY; roi < ROI_UserMAX; roi++)
+				for(auto roi : m_activeObjectsPerSource)
 				{
 					RemoteObject newSourceObject;
-					newSourceObject.Id = static_cast<RemoteObjectIdentifier>(roi);
+					newSourceObject.Id = roi;
 					newSourceObject.Addr.first = sourceId;
 					if (roi == ROI_CoordinateMapping_SourcePosition_X || roi == ROI_CoordinateMapping_SourcePosition_Y || roi == ROI_CoordinateMapping_SourcePosition_XY)
 						newSourceObject.Addr.second = mappingId;

@@ -137,9 +137,11 @@ private:
 	 * Depending on the node configuration, there can exist two groups of protocols, A and B, that are handled
 	 * in a specific way to pass incoming and outgoing data to each other and this parent controller instance.
 	 */
-	ProcessingEngineNode	m_processingNode;	/**< The node that encapsulates the protocols that are used to send, receive and bridge data. */
-	XmlElement				m_bridgingXml;		/**< The current xml config for bridging (contains node xml). */
-	std::map<ProtocolBridgingType, XmlElement>	m_bridgingProtocolCacheMap;	/**< Map that holds the xml config elements of bridging elements when currently not active, to be able to reactivate correct previous config on request. */
+	ProcessingEngineNode							m_processingNode;	/**< The node that encapsulates the protocols that are used to send, receive and bridge data. */
+	XmlElement										m_bridgingXml;		/**< The current xml config for bridging (contains node xml). */
+	std::map<ProtocolBridgingType, XmlElement>		m_bridgingProtocolCacheMap;	/**< Map that holds the xml config elements of bridging elements when currently not active, 
+																				 * to be able to reactivate correct previous config on request. */
+	std::vector<RemoteObjectIdentifier>				m_activeObjectsPerSource{ ROI_CoordinateMapping_SourcePosition_XY, ROI_CoordinateMapping_SourcePosition_X, ROI_CoordinateMapping_SourcePosition_Y, ROI_MatrixInput_ReverbSendGain, ROI_Positioning_SourceSpread, ROI_Positioning_SourceDelayMode };
 
 	std::vector<ProtocolBridgingWrapper::Listener*>	m_listeners;		/**< The listner objects, for message data handling callback. */
 

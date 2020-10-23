@@ -33,7 +33,7 @@ static constexpr int RX_PORT_GENERICOSC_DEVICE = 50014;		//< UDP port which the 
 static constexpr int RX_PORT_GENERICOSC_HOST = 50015;		//< UDP port to which the generic OSC device will send OSC replies
 
 static constexpr int RX_PORT_RTTRPM_DEVICE = 50016;		//< UDP port which the Blacktrax tracker device is listening to for RTTrPM data
-static constexpr int RX_PORT_RTTRPM_HOST = 50017;		//< UDP port to which the Blacktrax tracker device will send RTTrPM data replies
+static constexpr int RX_PORT_RTTRPM_HOST = 24100;		//< UDP port to which the Blacktrax tracker device will send RTTrPM data replies
 
 /**
  * Pre-define processing bridge config values

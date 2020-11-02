@@ -37,18 +37,26 @@ MainSoundscapeBridgeAppComponent::MainSoundscapeBridgeAppComponent(std::function
     m_config->addDumper(this);
     m_config->addWatcher(this);
 
+    // check if config creation was able to read a valid config from disk...
     if (!m_config->isValid())
     {
+        // ...and trigger generation of a valid config if not.
         m_config->triggerConfigurationDump();
     }
 
+    // enshure the config is processed and contents forwarded to already existing application components.
+    onConfigUpdated();
     m_config->triggerWatcherUpdate();
 
+    // enshure the controller singleton is created
     auto ctrl = SoundscapeBridgeApp::CController::GetInstance();
     ignoreUnused(ctrl);
+
+    // enshure the overviewmanager singleton is created
     auto ovrMgr = SoundscapeBridgeApp::COverviewManager::GetInstance();
     if (ovrMgr)
     {
+        // get the overview component from manager to use as central element for app ui
         auto overview = ovrMgr->GetOverview();
         addAndMakeVisible(overview);
     }

@@ -574,7 +574,7 @@ void CSettingsComponent::processUpdatedConfig()
 	// RTTrPM settings section
 	auto RTTrPMBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_BlacktraxRTTrPM) == PBT_BlacktraxRTTrPM;
 	if (m_RTTrPMBridgingSettings)
-		m_RTTrPMBridgingSettings->setToggleActiveState(DiGiCoBridgingActive);
+		m_RTTrPMBridgingSettings->setToggleActiveState(RTTrPMBridgingActive);
 	if (m_RTTrPMIpAddressEdit)
 		m_RTTrPMIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_BlacktraxRTTrPM));
 	if (m_RTTrPMListeningPortEdit)

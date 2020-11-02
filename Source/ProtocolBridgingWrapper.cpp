@@ -774,7 +774,7 @@ bool ProtocolBridgingWrapper::DeactivateDS100SourceId(juce::int16 sourceId, juce
 			{
 				juce::Array<RemoteObject> activeObjects;
 				ProcessingEngineConfig::ReadActiveObjects(activeObjsXmlElement, activeObjects);
-				for (int roi = ROI_CoordinateMapping_SourcePosition_XY; roi < ROI_UserMAX; roi++)
+				for (auto roi : m_activeObjectsPerSource)
 				{
 					RemoteObject newSourceObject;
 					newSourceObject.Id = static_cast<RemoteObjectIdentifier>(roi);

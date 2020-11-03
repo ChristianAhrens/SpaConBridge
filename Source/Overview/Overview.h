@@ -126,6 +126,9 @@ public:
 
 	void SetActiveTab(int tabIdx);
 
+	void SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType);
+	DbLookAndFeelBase::LookAndFeelType GetLookAndFeelType();
+
 private:
 	void paint(Graphics&) override;
 	void resized() override;
@@ -141,7 +144,7 @@ private:
 	std::unique_ptr<Label>					m_titleLabel;			/**> Overview title label. */
 	Image									m_appLogo;				/**> Logo image. */
 	std::unique_ptr<Label>					m_rateLabel;			/**> Send/receive rate label. */
-	std::unique_ptr<TextEditor>			m_rateTextEdit;			/**> Text editor for the OSC send/receive rate in ms. */
+	std::unique_ptr<TextEditor>				m_rateTextEdit;			/**> Text editor for the OSC send/receive rate in ms. */
 	std::unique_ptr<Label>					m_onlineLabel;			/**> Online indicator label. */
 	std::unique_ptr<LedButton>				m_onlineLed;			/**> Button used as Online indicator LED. */
 	std::unique_ptr<CTabbedComponent>		m_tabbedComponent;		/**> A container for tabs. */

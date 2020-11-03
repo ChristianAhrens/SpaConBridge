@@ -38,6 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../About.h"
 #include "../SoundscapeBridgeAppCommon.h"
 #include "../AppConfiguration.h"
+#include "../LookAndFeel.h"
 
 #include "../submodules/JUCE-AppBasics/Source/ZeroconfDiscoverComponent.h"
 
@@ -148,8 +149,7 @@ private:
  * CSettingsContainer is a component to hold multiple components that are dedicated to app configuration.
  */
 class CSettingsContainer :	public OverlayBase, 
-							public AppConfiguration::Watcher, 
-							public AppConfiguration::Dumper
+							public AppConfiguration::Watcher // for raw text editing
 {
 public:
 	CSettingsContainer();
@@ -161,10 +161,11 @@ public:
 	void onSelectedLookAndFeelChanged();
 
 	//==========================================================================
-	void UpdateGui(bool init) override;
+	void SetSelectedLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType);
+	DbLookAndFeelBase::LookAndFeelType GetSelectedLookAndFeelType();
 
 	//==========================================================================
-	void performConfigurationDump() override;
+	void UpdateGui(bool init) override;
 
 	//==========================================================================
 	void onConfigUpdated() override;

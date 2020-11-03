@@ -295,6 +295,24 @@ void COverviewComponent::SetActiveTab(int tabIdx)
 	m_tabbedComponent->setCurrentTabIndex(tabIdx, false);
 }
 
+/**
+ * Setter for the currently selected look and feel type.
+ * @param lookAndFeelType	The look and feel type to set as currently selected in dropdown
+ */
+void COverviewComponent::SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType)
+{
+	m_settingsContainer->SetSelectedLookAndFeelType(lookAndFeelType);
+}
+
+/**
+ * Getter for the currently selected look and feel type.
+ * @return	The look and feel type that currently is selected in dropdown
+ */
+DbLookAndFeelBase::LookAndFeelType COverviewComponent::GetLookAndFeelType()
+{
+	return m_settingsContainer->GetSelectedLookAndFeelType();
+}
+
 
 /*
 ===============================================================================

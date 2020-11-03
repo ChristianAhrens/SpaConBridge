@@ -192,6 +192,40 @@ void COverviewManager::SetSelectedMapping(int mapping)
 }
 
 /**
+ * Get the currently selected coordinate mapping used for the multi-slider.
+ * @return The selected mapping area.
+ */
+DbLookAndFeelBase::LookAndFeelType COverviewManager::GetLookAndFeelType() const
+{
+	if (m_overview != nullptr)
+	{
+		return m_overview->GetLookAndFeelType();
+	}
+	else
+	{
+		jassertfalse;
+		return DbLookAndFeelBase::LAFT_InvalidFirst;
+	}
+}
+
+/**
+ * Get the currently selected coordinate mapping used for the multi-slider.
+ * @return The selected mapping area.
+ */
+void COverviewManager::SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType, bool dontSendNotification)
+{
+	if (m_overview != nullptr)
+	{
+		m_overview->SetLookAndFeelType(lookAndFeelType);
+	}
+
+	if (!dontSendNotification)
+	{
+		triggerConfigurationUpdate(false);
+	}
+}
+
+/**
  * Overriden from AppConfiguration::XmlConfigurableElement to set this objects' settings
  * from a XML element structure that passed as argument.
  * @param stateXml	The XML element containing this objects' configuration data
@@ -204,13 +238,41 @@ bool COverviewManager::setStateXml(XmlElement* stateXml)
 
 	auto retVal = true;
 
-	auto tabIdx = stateXml->getIntAttribute(AppConfiguration::getTagName(AppConfiguration::TagID::ACTIVEOVRTAB), -1);
-	if (tabIdx != -1)
+	// Handle the look and feel type from xml first, since this is set as active dropdown index in overview. If we do not do this first, 
+	// the default selected index will we written to config due to update trigger from SetActiveTab
+	auto lookAndFeelXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::LOOKANDFEELTYPE));
+	if (lookAndFeelXmlElement)
 	{
-		SetActiveTab(tabIdx, true);
+		auto lookAndFeelTextElement = lookAndFeelXmlElement->getFirstChildElement();
+		if (lookAndFeelTextElement && lookAndFeelTextElement->isTextElement())
+		{
+			auto lookAndFeelType = static_cast<DbLookAndFeelBase::LookAndFeelType>(lookAndFeelTextElement->getText().getIntValue());
+
+			if (lookAndFeelType > DbLookAndFeelBase::LAFT_InvalidFirst && lookAndFeelType < DbLookAndFeelBase::LAFT_InvalidLast)
+			{
+				SetLookAndFeelType(lookAndFeelType, true);
+			}
+			else
+				retVal = false;
+		}
 	}
-	else
-		retVal = false;
+
+	auto activeTabXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::ACTIVEOVRTAB));
+	if (activeTabXmlElement)
+	{
+		auto activeTabTextElement = activeTabXmlElement->getFirstChildElement();
+		if (activeTabTextElement && activeTabTextElement->isTextElement())
+		{
+			auto tabIdx = activeTabTextElement->getText().getIntValue();
+
+			if (tabIdx != -1)
+			{
+				SetActiveTab(tabIdx, true);
+			}
+			else
+				retVal = false;
+		}
+	}
 
 	return retVal;
 }
@@ -224,7 +286,16 @@ bool COverviewManager::setStateXml(XmlElement* stateXml)
 std::unique_ptr<XmlElement> COverviewManager::createStateXml()
 {
 	auto overviewXmlElement = std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW));
-	overviewXmlElement->setAttribute(AppConfiguration::getTagName(AppConfiguration::TagID::ACTIVEOVRTAB), GetActiveTab());
+	if (overviewXmlElement)
+	{
+		auto activeTabXmlElement = overviewXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::ACTIVEOVRTAB));
+		if (activeTabXmlElement)
+			activeTabXmlElement->addTextElement(String(GetActiveTab()));
+
+		auto lookAndFeelXmlElement = overviewXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::LOOKANDFEELTYPE));
+		if (lookAndFeelXmlElement)
+			lookAndFeelXmlElement->addTextElement(String(GetLookAndFeelType()));
+	}
 
     return overviewXmlElement;
 }

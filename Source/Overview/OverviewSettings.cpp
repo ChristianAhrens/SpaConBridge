@@ -437,8 +437,8 @@ void CSettingsComponent::resized()
 	{
 		if (bounds.getWidth() < minWidth)
 			bounds.setWidth(minWidth);
-		if (bounds.getHeight() < minHeight)
-			bounds.setHeight(minHeight);
+		if (bounds.getHeight() < static_cast<int>(minHeight))
+			bounds.setHeight(static_cast<int>(minHeight));
 
 		setBounds(bounds);
 	}
@@ -666,7 +666,6 @@ CSettingsContainer::CSettingsContainer()
 	if (config)
 	{
 		config->addWatcher(this);
-		config->addDumper(this);
 	}
 }
 
@@ -724,6 +723,35 @@ void CSettingsContainer::resized()
 }
 
 /**
+ * Setter for the currently selected look and feel type in dropdown on ui
+ * @param lookAndfeelType	The type to set as currently selected
+ */
+void CSettingsContainer::SetSelectedLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType)
+{
+	if (m_lookAndFeelSelect)
+		m_lookAndFeelSelect->setSelectedId(lookAndFeelType, dontSendNotification);
+}
+
+/**
+ * Getter for the currently selected look and feel type in dropdown on ui
+ * @return	The currently selected type
+ */
+DbLookAndFeelBase::LookAndFeelType CSettingsContainer::GetSelectedLookAndFeelType()
+{
+	if (m_lookAndFeelSelect)
+	{
+		auto lookAndFeelType = static_cast<DbLookAndFeelBase::LookAndFeelType>(m_lookAndFeelSelect->getSelectedId());
+		jassert(lookAndFeelType > DbLookAndFeelBase::LookAndFeelType::LAFT_InvalidFirst && lookAndFeelType < DbLookAndFeelBase::LookAndFeelType::LAFT_InvalidLast);
+		return lookAndFeelType;
+	}
+	else
+	{
+		jassertfalse;
+		return DbLookAndFeelBase::LAFT_InvalidFirst;
+	}
+}
+
+/**
  * If any relevant parameters have been marked as changed, update the table contents.
  * @param init	True to ignore any changed flags and update the plugin parameters
  *				in the GUI anyway. Good for when opening the Overview for the first time.
@@ -736,24 +764,6 @@ void CSettingsContainer::UpdateGui(bool init)
 /**
  *
  */
-void CSettingsContainer::performConfigurationDump()
-{
-	auto config = AppConfiguration::getInstance();
-	if (config && m_lookAndFeelSelect)
-	{
-		auto lafConfigState = std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::LOOKANDFEEL));
-		auto lafType = static_cast<DbLookAndFeelBase::LookAndFeelType>(m_lookAndFeelSelect->getSelectedId());
-		if (lafConfigState)
-		{
-			lafConfigState->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::LOOKANDFEELTYPE), lafType);
-			config->setConfigState(std::move(lafConfigState));
-		}
-	}
-}
-
-/**
- *
- */
 void CSettingsContainer::onConfigUpdated()
 {
 	auto config = AppConfiguration::getInstance();
@@ -761,18 +771,6 @@ void CSettingsContainer::onConfigUpdated()
 	{
 		// trigger updating the settings visu in general
 		m_settingsComponent->processUpdatedConfig();
-
-		// get current selected lookandfeel to update selection dropdown
-		auto lafConfigState = config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::LOOKANDFEEL));
-		if (lafConfigState)
-		{
-			auto lafAttrName = AppConfiguration::getAttributeName(AppConfiguration::AttributeID::LOOKANDFEELTYPE);
-			auto lafVal = lafConfigState->getIntAttribute(lafAttrName, DbLookAndFeelBase::LookAndFeelType::LAFT_DefaultJUCE);
-			auto lafType = static_cast<DbLookAndFeelBase::LookAndFeelType>(lafVal);
-
-			if (m_lookAndFeelSelect)
-				m_lookAndFeelSelect->setSelectedId(lafType, dontSendNotification);
-		}
 
 		// if the raw config is currently visible, go into updating it as well
 		if (m_useRawConfigButton->getToggleState())

@@ -38,6 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../About.h"
 #include "../SoundscapeBridgeAppCommon.h"
 #include "../AppConfiguration.h"
+#include "../LookAndFeel.h"
 
 
 namespace SoundscapeBridgeApp
@@ -71,29 +72,17 @@ public:
 	int GetSelectedMapping() const;
 	void SetSelectedMapping(int mapping);
 
+	DbLookAndFeelBase::LookAndFeelType GetLookAndFeelType() const;
+	void SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType, bool dontSendNotification);
+
 	std::unique_ptr<XmlElement> createStateXml() override;
 	bool setStateXml(XmlElement* stateXml) override;
 
 protected:
-	/**
-	 * The one and only instance of COverviewManager.
-	 */
-	static COverviewManager		*m_singleton;
-
-	/**
-	 * Pointer to the Overview winodw, if any.
-	 */
-	COverviewComponent			*m_overview;
-
-	/**
-	 * Remember the last active tab.
-	 */
-	int						m_selectedTab = 0;
-
-	/**
-	 * Remember the last selected coordinate mapping for the multi-slider
-	 */
-	int						m_selectedMapping = 1;
+	static COverviewManager	*m_singleton;			/**> The one and only instance of COverviewManager. */
+	COverviewComponent		*m_overview;			/**> Pointer to the Overview winodw, if any. */
+	int						m_selectedTab{ 0 };		/**> Remember the last active tab. */
+	int						m_selectedMapping{ 1 };	/**> Remember the last selected coordinate mapping for the multi-slider. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(COverviewManager)
 };

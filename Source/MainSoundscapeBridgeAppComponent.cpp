@@ -37,18 +37,28 @@ MainSoundscapeBridgeAppComponent::MainSoundscapeBridgeAppComponent(std::function
     m_config->addDumper(this);
     m_config->addWatcher(this);
 
+    // check if config creation was able to read a valid config from disk...
     if (!m_config->isValid())
     {
+        jassertfalse; // stop here when debugging, since invalid configurations often lead to endless debugging sessions until this simple explanation was found...
+
+        // ...and trigger generation of a valid config if not.
         m_config->triggerConfigurationDump();
     }
 
+    // enshure the config is processed and contents forwarded to already existing application components.
+    onConfigUpdated();
     m_config->triggerWatcherUpdate();
 
+    // enshure the controller singleton is created
     auto ctrl = SoundscapeBridgeApp::CController::GetInstance();
     ignoreUnused(ctrl);
+
+    // enshure the overviewmanager singleton is created
     auto ovrMgr = SoundscapeBridgeApp::COverviewManager::GetInstance();
     if (ovrMgr)
     {
+        // get the overview component from manager to use as central element for app ui
         auto overview = ovrMgr->GetOverview();
         addAndMakeVisible(overview);
     }
@@ -125,7 +135,6 @@ void MainSoundscapeBridgeAppComponent::onConfigUpdated()
     // get all the modules' configs first, because the initialization process might already trigger dumping, that would override data
     auto ctrlConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER));
     auto ovrConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW));
-    auto lafConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::LOOKANDFEEL));
 
     // set the controller modules' config
     auto ctrl = SoundscapeBridgeApp::CController::GetInstance();
@@ -138,14 +147,22 @@ void MainSoundscapeBridgeAppComponent::onConfigUpdated()
         ovrMgr->setStateXml(ovrConfigState.get());
 
     // set the lookandfeel config (forwards to MainWindow where the magic happens)
-    if (lafConfigState)
+    if (ovrConfigState)
     {
-        auto lafAttrName = AppConfiguration::getAttributeName(AppConfiguration::AttributeID::LOOKANDFEELTYPE);
-        auto lafVal = lafConfigState->getIntAttribute(lafAttrName, DbLookAndFeelBase::LookAndFeelType::LAFT_DefaultJUCE);
-        auto lafType = static_cast<DbLookAndFeelBase::LookAndFeelType>(lafVal);
+        auto lookAndFeelXmlElement = ovrConfigState->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::LOOKANDFEELTYPE));
+        if (lookAndFeelXmlElement)
+        {
+            auto lookAndFeelTextElement = lookAndFeelXmlElement->getFirstChildElement();
+            if (lookAndFeelTextElement && lookAndFeelTextElement->isTextElement())
+            {
+                auto lookAndFeelType = static_cast<DbLookAndFeelBase::LookAndFeelType>(lookAndFeelTextElement->getText().getIntValue());
+                
+                jassert(lookAndFeelType > DbLookAndFeelBase::LookAndFeelType::LAFT_InvalidFirst && lookAndFeelType < DbLookAndFeelBase::LookAndFeelType::LAFT_InvalidLast);
 
-        if (onUpdateLookAndFeel)
-            onUpdateLookAndFeel(lafType);
+                if (onUpdateLookAndFeel)
+                    onUpdateLookAndFeel(lookAndFeelType);
+            }
+        }
     }
 }
 

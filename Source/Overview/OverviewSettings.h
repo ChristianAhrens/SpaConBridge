@@ -90,7 +90,10 @@ private:
  * that are dedicated to app configuration and itself resides within 
  * a viewport for scrolling functionality.
  */
-class CSettingsComponent : public Component, public TextEditor::Listener
+class CSettingsComponent : 
+	public Component, 
+	public TextEditor::Listener, 
+	public ToggleButton::Listener
 {
 public:
 	CSettingsComponent();
@@ -101,6 +104,9 @@ public:
 	//==========================================================================
 	void paint(Graphics&) override;
 	void resized() override;
+
+	//==========================================================================
+	void buttonClicked(Button*);
 
 	//==========================================================================
 	void textEditorReturnKeyPressed(TextEditor&) override;
@@ -119,29 +125,44 @@ private:
 	// input filters for texteditors
 	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_ipAddressEditFilter;
 	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_portEditFilter;
+	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_mappingEditFilter;
 
 	// DS100 settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_DS100Settings;
-	std::unique_ptr<TextEditor>								m_DS100IpAddressEdit;
+	std::unique_ptr<TextEditor>									m_DS100IpAddressEdit;
 	std::unique_ptr<Label>										m_DS100IpAddressLabel;
 	std::unique_ptr<JUCEAppBasics::ZeroconfDiscoverComponent>	m_DS100ZeroconfDiscovery;
 
 	// DiGiCo settings section
 	std::unique_ptr<HeaderWithElmListComponent>	m_DiGiCoBridgingSettings;
-	std::unique_ptr<TextEditor>				m_DiGiCoIpAddressEdit;
+	std::unique_ptr<TextEditor>					m_DiGiCoIpAddressEdit;
 	std::unique_ptr<Label>						m_DiGiCoIpAddressLabel;
-	std::unique_ptr<TextEditor>				m_DiGiCoListeningPortEdit;
+	std::unique_ptr<TextEditor>					m_DiGiCoListeningPortEdit;
 	std::unique_ptr<Label>						m_DiGiCoListeningPortLabel;
-	std::unique_ptr<TextEditor>				m_DiGiCoRemotePortEdit;
+	std::unique_ptr<TextEditor>					m_DiGiCoRemotePortEdit;
 	std::unique_ptr<Label>						m_DiGiCoRemotePortLabel;
+
+	// RTTrPM settings section
+	std::unique_ptr<HeaderWithElmListComponent>	m_RTTrPMBridgingSettings;
+	std::unique_ptr<TextEditor>					m_RTTrPMIpAddressEdit;
+	std::unique_ptr<Label>						m_RTTrPMIpAddressLabel;
+	std::unique_ptr<TextEditor>					m_RTTrPMListeningPortEdit;
+	std::unique_ptr<Label>						m_RTTrPMListeningPortLabel;
+	std::unique_ptr<TextEditor>					m_RTTrPMRemotePortEdit;
+	std::unique_ptr<Label>						m_RTTrPMRemotePortLabel;
+	std::unique_ptr<ToggleButton>				m_RTTrPMInterpretXYRelativeToggle;
+	std::unique_ptr<Label>						m_RTTrPMInterpretXYRelativeLabel;
+	std::unique_ptr<TextEditor>					m_RTTrPMMappingAreaEdit;
+	std::unique_ptr<Label>						m_RTTrPMMappingAreaLabel;
+	int											m_previousRTTrPMMappingAreaId{ 1 };
 
 	// Generic OSC settings section
 	std::unique_ptr<HeaderWithElmListComponent>	m_GenericOSCBridgingSettings;
-	std::unique_ptr<TextEditor>				m_GenericOSCIpAddressEdit;
+	std::unique_ptr<TextEditor>					m_GenericOSCIpAddressEdit;
 	std::unique_ptr<Label>						m_GenericOSCIpAddressLabel;
-	std::unique_ptr<TextEditor>				m_GenericOSCListeningPortEdit;
+	std::unique_ptr<TextEditor>					m_GenericOSCListeningPortEdit;
 	std::unique_ptr<Label>						m_GenericOSCListeningPortLabel;
-	std::unique_ptr<TextEditor>				m_GenericOSCRemotePortEdit;
+	std::unique_ptr<TextEditor>					m_GenericOSCRemotePortEdit;
 	std::unique_ptr<Label>						m_GenericOSCRemotePortLabel;
 };
 

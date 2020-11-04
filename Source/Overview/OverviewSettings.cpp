@@ -228,7 +228,7 @@ void HeaderWithElmListComponent::resized()
 			fb.items.add(FlexItem(*component.first.get())
 				.withHeight(itemHeight)
 				.withMaxWidth(150)
-				.withMargin(FlexItem::Margin(itemMargin, itemMargin, itemMargin, 110 + itemMargin)));
+				.withMargin(FlexItem::Margin(itemMargin, itemMargin, itemMargin, 130 + itemMargin)));
 			itemCount++;
 		}
 	}
@@ -256,8 +256,9 @@ void HeaderWithElmListComponent::resized()
  */
 CSettingsComponent::CSettingsComponent()
 {
-	m_ipAddressEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(15, "1234567890.");;
+	m_ipAddressEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(15, "1234567890.");
 	m_portEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(5, "1234567890");
+	m_mappingEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(1, "1234");
 
 	// DS100 settings section
 	m_DS100Settings = std::make_unique<HeaderWithElmListComponent>();
@@ -320,6 +321,64 @@ CSettingsComponent::CSettingsComponent()
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoRemotePortEdit.get(), true, false);
 
 	m_DiGiCoBridgingSettings->resized();
+
+	// BlackTrax RTTrPM settings section
+	m_RTTrPMBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
+	m_RTTrPMBridgingSettings->setHeaderText("BlackTrax RTTrPM Bridging");
+	m_RTTrPMBridgingSettings->setHasActiveToggle(true);
+	m_RTTrPMBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
+	addAndMakeVisible(m_RTTrPMBridgingSettings.get());
+
+	m_RTTrPMIpAddressEdit = std::make_unique<TextEditor>();
+	m_RTTrPMIpAddressEdit->addListener(this);
+	m_RTTrPMIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
+	m_RTTrPMIpAddressLabel = std::make_unique<Label>();
+	m_RTTrPMIpAddressLabel->setJustificationType(Justification::centred);
+	m_RTTrPMIpAddressLabel->setText("IP Address", dontSendNotification);
+	m_RTTrPMIpAddressLabel->attachToComponent(m_RTTrPMIpAddressEdit.get(), true);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMIpAddressLabel.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMIpAddressEdit.get(), true, false);
+
+	m_RTTrPMListeningPortEdit = std::make_unique<TextEditor>();
+	m_RTTrPMListeningPortEdit->addListener(this);
+	m_RTTrPMListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
+	m_RTTrPMListeningPortLabel = std::make_unique<Label>();
+	m_RTTrPMListeningPortLabel->setJustificationType(Justification::centred);
+	m_RTTrPMListeningPortLabel->setText("Listening Port", dontSendNotification);
+	m_RTTrPMListeningPortLabel->attachToComponent(m_RTTrPMListeningPortEdit.get(), true);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMListeningPortLabel.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMListeningPortEdit.get(), true, false);
+
+	m_RTTrPMRemotePortEdit = std::make_unique<TextEditor>();
+	m_RTTrPMRemotePortEdit->addListener(this);
+	m_RTTrPMRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
+	m_RTTrPMRemotePortLabel = std::make_unique<Label>();
+	m_RTTrPMRemotePortLabel->setJustificationType(Justification::centred);
+	m_RTTrPMRemotePortLabel->setText("Remote Port", dontSendNotification);
+	m_RTTrPMRemotePortLabel->attachToComponent(m_RTTrPMRemotePortEdit.get(), true);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMRemotePortLabel.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMRemotePortEdit.get(), true, false);
+
+	m_RTTrPMInterpretXYRelativeToggle = std::make_unique<ToggleButton>();
+	m_RTTrPMInterpretXYRelativeToggle->addListener(this);
+	m_RTTrPMInterpretXYRelativeLabel = std::make_unique<Label>();
+	m_RTTrPMInterpretXYRelativeLabel->setJustificationType(Justification::centred);
+	m_RTTrPMInterpretXYRelativeLabel->setText("Interpret XY as relative", dontSendNotification);
+	m_RTTrPMInterpretXYRelativeLabel->attachToComponent(m_RTTrPMInterpretXYRelativeToggle.get(), true);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMInterpretXYRelativeLabel.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMInterpretXYRelativeToggle.get(), true, false);
+
+	m_RTTrPMMappingAreaEdit = std::make_unique<TextEditor>();
+	m_RTTrPMMappingAreaEdit->addListener(this);
+	m_RTTrPMMappingAreaEdit->setInputFilter(m_mappingEditFilter.get(), false);
+	m_RTTrPMMappingAreaLabel = std::make_unique<Label>();
+	m_RTTrPMMappingAreaLabel->setJustificationType(Justification::centred);
+	m_RTTrPMMappingAreaLabel->setText("Mapping Area", dontSendNotification);
+	m_RTTrPMMappingAreaLabel->attachToComponent(m_RTTrPMMappingAreaEdit.get(), true);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingAreaLabel.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingAreaEdit.get(), true, false);
+
+	m_RTTrPMBridgingSettings->resized();
 
 	// Generic OSC settings section
 	m_GenericOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
@@ -389,6 +448,7 @@ void CSettingsComponent::resized()
 	auto minWidth = 300;
 	auto minHeight = m_DS100Settings->getHeight()
 		+ m_DiGiCoBridgingSettings->getHeight()
+		+ m_RTTrPMBridgingSettings->getHeight()
 		+ m_GenericOSCBridgingSettings->getHeight()
 		+ (3 * 2 * margin);
 
@@ -413,10 +473,41 @@ void CSettingsComponent::resized()
 		FlexItem(*m_DiGiCoBridgingSettings.get())
 			.withHeight(static_cast<float>(m_DiGiCoBridgingSettings->getHeight()))
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
+		FlexItem(*m_RTTrPMBridgingSettings.get())
+			.withHeight(static_cast<float>(m_RTTrPMBridgingSettings->getHeight()))
+			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
 		FlexItem(*m_GenericOSCBridgingSettings.get())
 			.withHeight(static_cast<float>(m_GenericOSCBridgingSettings->getHeight()))
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)) });
 	fb.performLayout(bounds);
+}
+
+/**
+ * Reimplemented from ToggleButton Listener.
+ * This just forwards it to private method that handles relevant changes in editor contents in general.
+ * @param editor	The editor component that changes were made in
+ */
+void CSettingsComponent::buttonClicked(Button* button)
+{
+	CController* ctrl = CController::GetInstance();
+	if (!ctrl)
+		return;
+
+	if (m_RTTrPMInterpretXYRelativeToggle && m_RTTrPMInterpretXYRelativeToggle.get() == button)
+	{
+		// If button is toggled off, set the mapping area id to -1 (meaning that the RTTrPM data will be handled as absolute, not relative to a mapping area)
+		if (!m_RTTrPMInterpretXYRelativeToggle->getToggleState())
+		{
+			m_previousRTTrPMMappingAreaId = ctrl->GetBridgingMappingArea(PBT_BlacktraxRTTrPM);
+			ctrl->SetBridgingMappingArea(PBT_BlacktraxRTTrPM, -1);
+		}
+		else
+		{
+			ctrl->SetBridgingMappingArea(PBT_BlacktraxRTTrPM, m_previousRTTrPMMappingAreaId);
+		}
+
+		processUpdatedConfig();
+	}
 }
 
 /**
@@ -461,6 +552,19 @@ void CSettingsComponent::textEditorUpdated(TextEditor& editor)
 	if (m_DiGiCoRemotePortEdit && m_DiGiCoRemotePortEdit.get() == &editor)
 		ctrl->SetBridgingRemotePort(PBT_DiGiCo, m_DiGiCoRemotePortEdit->getText().getIntValue());
 
+	// RTTrPM settings section
+	if (m_RTTrPMIpAddressEdit && m_RTTrPMIpAddressEdit.get() == &editor)
+		ctrl->SetBridgingIpAddress(PBT_BlacktraxRTTrPM, m_RTTrPMIpAddressEdit->getText());
+	if (m_RTTrPMListeningPortEdit && m_RTTrPMListeningPortEdit.get() == &editor)
+		ctrl->SetBridgingListeningPort(PBT_BlacktraxRTTrPM, m_RTTrPMListeningPortEdit->getText().getIntValue());
+	if (m_RTTrPMRemotePortEdit && m_RTTrPMRemotePortEdit.get() == &editor)
+		ctrl->SetBridgingRemotePort(PBT_BlacktraxRTTrPM, m_RTTrPMRemotePortEdit->getText().getIntValue());
+	if (m_RTTrPMMappingAreaEdit && m_RTTrPMMappingAreaEdit.get() == &editor)
+	{
+		ctrl->SetBridgingMappingArea(PBT_BlacktraxRTTrPM, m_RTTrPMMappingAreaEdit->getText().getIntValue());
+		m_previousRTTrPMMappingAreaId = m_RTTrPMMappingAreaEdit->getText().getIntValue();
+	}
+
 	// Generic OSC settings section
 	if (m_GenericOSCIpAddressEdit && m_GenericOSCIpAddressEdit.get() == &editor)
 		ctrl->SetBridgingIpAddress(PBT_GenericOSC, m_GenericOSCIpAddressEdit->getText());
@@ -483,6 +587,8 @@ void CSettingsComponent::setSettingsSectionActiveState(HeaderWithElmListComponen
 	ProtocolBridgingType sectionType = PBT_None;
 	if (settingsSection == m_DiGiCoBridgingSettings.get())
 		sectionType = PBT_DiGiCo;
+	else if (settingsSection == m_RTTrPMBridgingSettings.get())
+		sectionType = PBT_BlacktraxRTTrPM;
 	else if (settingsSection == m_GenericOSCBridgingSettings.get())
 		sectionType = PBT_GenericOSC;
 
@@ -517,6 +623,26 @@ void CSettingsComponent::processUpdatedConfig()
 		m_DiGiCoListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_DiGiCo)), false);
 	if (m_DiGiCoRemotePortEdit)
 		m_DiGiCoRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_DiGiCo)), false);
+
+	// RTTrPM settings section
+	auto RTTrPMBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_BlacktraxRTTrPM) == PBT_BlacktraxRTTrPM;
+	if (m_RTTrPMBridgingSettings)
+		m_RTTrPMBridgingSettings->setToggleActiveState(RTTrPMBridgingActive);
+	if (m_RTTrPMIpAddressEdit)
+		m_RTTrPMIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_BlacktraxRTTrPM));
+	if (m_RTTrPMListeningPortEdit)
+		m_RTTrPMListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_BlacktraxRTTrPM)), false);
+	if (m_RTTrPMRemotePortEdit)
+		m_RTTrPMRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_BlacktraxRTTrPM)), false);
+	if (m_RTTrPMInterpretXYRelativeToggle)
+		m_RTTrPMInterpretXYRelativeToggle->setToggleState((ctrl->GetBridgingMappingArea(PBT_BlacktraxRTTrPM) != -1), dontSendNotification);
+	if (m_RTTrPMMappingAreaEdit)
+	{
+		m_RTTrPMMappingAreaEdit->setText(String(ctrl->GetBridgingMappingArea(PBT_BlacktraxRTTrPM)), false);
+		m_RTTrPMMappingAreaEdit->setEnabled((ctrl->GetBridgingMappingArea(PBT_BlacktraxRTTrPM) != -1));
+	}
+	if (m_RTTrPMMappingAreaLabel)
+		m_RTTrPMMappingAreaLabel->setEnabled((ctrl->GetBridgingMappingArea(PBT_BlacktraxRTTrPM) != -1));
 
 	// Generic OSC settings section
 	auto GenericOSCBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_GenericOSC) == PBT_GenericOSC;

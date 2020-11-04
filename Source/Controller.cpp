@@ -1101,4 +1101,38 @@ bool CController::SetBridgingRemotePort(ProtocolBridgingType bridgingType, int r
 	}
 }
 
+int CController::GetBridgingMappingArea(ProtocolBridgingType bridgingType)
+{
+	switch (bridgingType)
+	{
+	case PBT_BlacktraxRTTrPM:
+		return m_protocolBridge.GetRTTrPMMappingArea();
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_GenericMIDI:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
+bool CController::SetBridgingMappingArea(ProtocolBridgingType bridgingType, int mappingAreaId, bool dontSendNotification)
+{
+	switch (bridgingType)
+	{
+	case PBT_BlacktraxRTTrPM:
+		return m_protocolBridge.SetRTTrPMMappingArea(mappingAreaId, dontSendNotification);
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_GenericMIDI:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
 } // namespace SoundscapeBridgeApp

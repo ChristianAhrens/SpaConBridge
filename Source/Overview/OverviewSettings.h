@@ -90,7 +90,10 @@ private:
  * that are dedicated to app configuration and itself resides within 
  * a viewport for scrolling functionality.
  */
-class CSettingsComponent : public Component, public TextEditor::Listener
+class CSettingsComponent : 
+	public Component, 
+	public TextEditor::Listener, 
+	public ToggleButton::Listener
 {
 public:
 	CSettingsComponent();
@@ -101,6 +104,9 @@ public:
 	//==========================================================================
 	void paint(Graphics&) override;
 	void resized() override;
+
+	//==========================================================================
+	void buttonClicked(Button*);
 
 	//==========================================================================
 	void textEditorReturnKeyPressed(TextEditor&) override;
@@ -119,6 +125,7 @@ private:
 	// input filters for texteditors
 	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_ipAddressEditFilter;
 	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_portEditFilter;
+	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_mappingEditFilter;
 
 	// DS100 settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_DS100Settings;
@@ -143,6 +150,11 @@ private:
 	std::unique_ptr<Label>						m_RTTrPMListeningPortLabel;
 	std::unique_ptr<TextEditor>					m_RTTrPMRemotePortEdit;
 	std::unique_ptr<Label>						m_RTTrPMRemotePortLabel;
+	std::unique_ptr<ToggleButton>				m_RTTrPMInterpretXYRelativeToggle;
+	std::unique_ptr<Label>						m_RTTrPMInterpretXYRelativeLabel;
+	std::unique_ptr<TextEditor>					m_RTTrPMMappingAreaEdit;
+	std::unique_ptr<Label>						m_RTTrPMMappingAreaLabel;
+	int											m_previousRTTrPMMappingAreaId{ 1 };
 
 	// Generic OSC settings section
 	std::unique_ptr<HeaderWithElmListComponent>	m_GenericOSCBridgingSettings;

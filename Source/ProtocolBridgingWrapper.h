@@ -23,14 +23,16 @@ namespace SoundscapeBridgeApp
 
 static const String PROTOCOL_DEFAULT_IP("127.0.0.1");	//< Default IP Address
 
+static constexpr int PROTOCOL_DEFAULT_MAPPINGAREA = 1;	//< Mapping Area Id to use as default
+
 static constexpr int RX_PORT_DS100_DEVICE = 50010;		//< UDP port which the DS100 is listening to for OSC
 static constexpr int RX_PORT_DS100_HOST = 50011;		//< UDP port to which the DS100 will send OSC replies
 
 static constexpr int RX_PORT_DIGICO_DEVICE = 50012;		//< UDP port which the DiGiCo console is listening to for OSC
 static constexpr int RX_PORT_DIGICO_HOST = 50013;		//< UDP port to which the DiGiCo console will send OSC replies
 
-static constexpr int RX_PORT_GENERICOSC_DEVICE = 50014;		//< UDP port which the generic OSC device is listening to for OSC
-static constexpr int RX_PORT_GENERICOSC_HOST = 50015;		//< UDP port to which the generic OSC device will send OSC replies
+static constexpr int RX_PORT_GENERICOSC_DEVICE = 50014;	//< UDP port which the generic OSC device is listening to for OSC
+static constexpr int RX_PORT_GENERICOSC_HOST = 50015;	//< UDP port to which the generic OSC device will send OSC replies
 
 static constexpr int RX_PORT_RTTRPM_DEVICE = 50016;		//< UDP port which the Blacktrax tracker device is listening to for RTTrPM data
 static constexpr int RX_PORT_RTTRPM_HOST = 24100;		//< UDP port to which the Blacktrax tracker device will send RTTrPM data replies
@@ -109,6 +111,8 @@ public:
 	bool SetRTTrPMListeningPort(int listeningPort, bool dontSendNotification = false);
 	int GetRTTrPMRemotePort();
 	bool SetRTTrPMRemotePort(int remotePort, bool dontSendNotification = false);
+	int GetRTTrPMMappingArea();
+	bool SetRTTrPMMappingArea(int mappingAreaId, bool dontSendNotification = false);
 
 	//==========================================================================
 	bool GetMuteGenericOSCSourceId(juce::int16 sourceId);
@@ -141,6 +145,8 @@ private:
 	bool SetProtocolListeningPort(ProtocolId protocolId, int listeningPort, bool dontSendNotification = false);
 	int GetProtocolRemotePort(ProtocolId protocolId);
 	bool SetProtocolRemotePort(ProtocolId protocolId, int remotePort, bool dontSendNotification = false);
+	int GetProtocolMappingArea(ProtocolId protocolId);
+	bool SetProtocolMappingArea(ProtocolId protocolId, int mappingAreaId, bool dontSendNotification = false);
 
 	//==========================================================================
 	void SetupBridgingNode();

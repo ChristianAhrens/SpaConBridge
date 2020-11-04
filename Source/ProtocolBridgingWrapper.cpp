@@ -281,6 +281,10 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupRTTrPMBridgingProtocol
 		if (ipAdressXmlElement)
 			ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
 
+		auto mappingAreaIdXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MAPPINGAREA));
+		if (mappingAreaIdXmlElement)
+			mappingAreaIdXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), PROTOCOL_DEFAULT_MAPPINGAREA);
+
 		protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDCHANNELS));
 	}
 
@@ -588,6 +592,69 @@ bool ProtocolBridgingWrapper::SetProtocolRemotePort(ProtocolId protocolId, int r
 			if (remotePortXmlElement)
 			{
 				remotePortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), remotePort);
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+
+		m_processingNode.setStateXml(nodeXmlElement);
+
+		if (!dontSendNotification)
+			triggerConfigurationUpdate(false);
+
+		return true;
+	}
+	else
+		return false;
+}
+
+/**
+ * Gets the protocol's currently set mapping area id, if available for the given protocol.
+ * @param protocolId The id of the protocol for which to get the currently configured mappingarea id
+ * @return	The mapping area id
+ */
+int ProtocolBridgingWrapper::GetProtocolMappingArea(ProtocolId protocolId)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto mappingAreaIdXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MAPPINGAREA));
+			if (mappingAreaIdXmlElement)
+			{
+				return mappingAreaIdXmlElement->getIntAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID));
+			}
+		}
+	}
+
+	return INVALID_PORT_VALUE;
+}
+
+/**
+ * Sets the given protocol mapping area id.
+ * This method inserts the mapping area id into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param protocolId The id of the protocol for which to set the ip address
+ * @param remotePort	The new port number to send to
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetProtocolMappingArea(ProtocolId protocolId, int mappingAreaId, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto mappingAreaIdXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MAPPINGAREA));
+			if (mappingAreaIdXmlElement)
+			{
+				mappingAreaIdXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), mappingAreaId);
 			}
 			else
 				return false;
@@ -1066,6 +1133,26 @@ bool ProtocolBridgingWrapper::SetRTTrPMRemotePort(int remotePort, bool dontSendN
 	return SetProtocolRemotePort(RTTRPM_PROCESSINGPROTOCOL_ID, remotePort, dontSendNotification);
 }
 
+/**
+ * Gets the desired protocol mapping area id.
+ * This method forwards the call to the generic implementation.
+ * @return	The requested mapping area id 
+ */
+int ProtocolBridgingWrapper::GetRTTrPMMappingArea()
+{
+	return GetProtocolMappingArea(RTTRPM_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol mapping area id.
+ * This method forwards the call to the generic implementation.
+ * @param	mappingAreaId	The protocol mapping area id to set
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetRTTrPMMappingArea(int mappingAreaId, bool dontSendNotification)
+{
+	return SetProtocolMappingArea(RTTRPM_PROCESSINGPROTOCOL_ID, mappingAreaId, dontSendNotification);
+}
 
 /**
  * Gets the mute state of the given source

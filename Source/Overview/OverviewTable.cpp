@@ -379,19 +379,8 @@ void CustomTableHeaderComponent::updateBridgingTitles()
 
 	auto activeBridging = ctrl->GetActiveProtocolBridging();
 
-	m_activeBridgingTitles.clear();
-	if ((activeBridging & PBT_DiGiCo) == PBT_DiGiCo)
-		m_activeBridgingTitles.push_back(GetProtocolBridgingShortName(PBT_DiGiCo));
-	if ((activeBridging & PBT_BlacktraxRTTrPM) == PBT_BlacktraxRTTrPM)
-		m_activeBridgingTitles.push_back(GetProtocolBridgingShortName(PBT_BlacktraxRTTrPM));
-	if ((activeBridging & PBT_GenericOSC) == PBT_GenericOSC)
-		m_activeBridgingTitles.push_back(GetProtocolBridgingShortName(PBT_GenericOSC));
-	if ((activeBridging & PBT_GenericMIDI) == PBT_GenericMIDI)
-		m_activeBridgingTitles.push_back(GetProtocolBridgingShortName(PBT_GenericMIDI));
-	if ((activeBridging & PBT_YamahaSQ) == PBT_YamahaSQ)
-		m_activeBridgingTitles.push_back(GetProtocolBridgingShortName(PBT_YamahaSQ));
-	if ((activeBridging & PBT_HUI) == PBT_HUI)
-		m_activeBridgingTitles.push_back(GetProtocolBridgingShortName(PBT_HUI));
+	for (auto protocolType : ProtocolBridgingTypes)
+		m_bridgingProtocolActive[protocolType] = ((activeBridging & protocolType) == protocolType);
 
 	resized();
 }
@@ -436,7 +425,12 @@ void CustomTableHeaderComponent::paint(Graphics& g)
 	g.setFont(font);
 	g.setColour(getLookAndFeel().findColour(TableHeaderComponent::textColourId));
 
-	if (m_activeBridgingTitles.empty())
+	std::vector<ProtocolBridgingType> activeBridgingProtocols;
+	for (auto protocolActiveKV : m_bridgingProtocolActive)
+		if (protocolActiveKV.second)
+			activeBridgingProtocols.push_back(protocolActiveKV.first);
+
+	if (activeBridgingProtocols.empty())
 	{
 		g.drawText("Bridging", bridgingCellRect, Justification::centredLeft);
 	}
@@ -450,12 +444,15 @@ void CustomTableHeaderComponent::paint(Graphics& g)
 		font.setHeight(fh - 2);
 		g.setFont(font);
 	
-		auto singleTitleWidth = bridgingCellRect.getWidth() / m_activeBridgingTitles.size();
+		auto singleTitleWidth = bridgingCellRect.getWidth() / activeBridgingProtocols.size();
 
-		for (auto title : m_activeBridgingTitles)
+		for (auto protocolActiveKV : m_bridgingProtocolActive)
 		{
-			auto titleRect = bridgingCellRect.removeFromLeft(singleTitleWidth).reduced(2);
-			g.drawText(title, titleRect, Justification::centredLeft);
+			if (protocolActiveKV.second)
+			{
+				auto titleRect = bridgingCellRect.removeFromLeft(singleTitleWidth).reduced(2);
+				g.drawText(GetProtocolBridgingShortName(protocolActiveKV.first), titleRect, Justification::centredLeft);
+			}
 		}
 	}
 }
@@ -1366,7 +1363,7 @@ void MuteButtonContainer::updateBridgingMuteButtons()
 	// determine the right red colour from lookandfeel
 	auto redColour = lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonRedColor);
 
-	for (auto type : m_knowntypes)
+	for (auto type : ProtocolBridgingTypes)
 	{
 		if (((activeBridging & type) == type) && (m_bridgingMutes.count(type) == 0))
 		{
@@ -1420,7 +1417,7 @@ void MuteButtonContainer::updateDrawableButtonImageColours()
 	auto redColour = lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonRedColor);
 
 	// set the images to button
-	for (auto type : m_knowntypes)
+	for (auto type : ProtocolBridgingTypes)
 	{
 		if (m_bridgingMutes.count(type) != 0)
 		{
@@ -1449,7 +1446,7 @@ void MuteButtonContainer::buttonClicked(Button* button)
 	if (!ctrl)
 		return;
 
-	for (auto type : m_knowntypes)
+	for (auto type : ProtocolBridgingTypes)
 	{
 		if ((m_bridgingMutes.count(type) > 0) && (button == m_bridgingMutes.at(type).get()))
 		{
@@ -1510,7 +1507,7 @@ void MuteButtonContainer::SetRow(int newRow)
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
 	{
-		for (auto type : m_knowntypes)
+		for (auto type : ProtocolBridgingTypes)
 		{
 			if (m_bridgingMutes.count(type) > 0)
 			{

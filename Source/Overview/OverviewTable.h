@@ -109,7 +109,7 @@ public:
 	void updateColumnWidths();
 
 private:
-	std::vector<String>	m_activeBridgingTitles;
+	std::map<ProtocolBridgingType, bool>	m_bridgingProtocolActive;
 };
 
 /**
@@ -277,7 +277,6 @@ private:
 	TableModelComponent&											m_owner;			/**< Table where this component is contained. */
 	int																m_row;				/**< Row number where this component is located inside the table. */
 	std::map<ProtocolBridgingType, std::unique_ptr<DrawableButton>>	m_bridgingMutes;	/**< The mute buttons currently in use. */
-	std::vector<ProtocolBridgingType>								m_knowntypes = { PBT_DiGiCo, PBT_BlacktraxRTTrPM, PBT_GenericOSC, PBT_GenericMIDI, PBT_YamahaSQ, PBT_HUI };
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MuteButtonContainer)
 };

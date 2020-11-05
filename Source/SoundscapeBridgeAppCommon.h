@@ -109,11 +109,14 @@ static constexpr DataChangeType DCT_DebugMessage			= 0x00001000; //< There is a 
  */
 static constexpr ProtocolBridgingType PBT_None				= 0x00000000;
 static constexpr ProtocolBridgingType PBT_DiGiCo			= 0x00000001;
-static constexpr ProtocolBridgingType PBT_GenericOSC		= 0x00000002;
-static constexpr ProtocolBridgingType PBT_BlacktraxRTTrPM	= 0x00000004;
+static constexpr ProtocolBridgingType PBT_BlacktraxRTTrPM	= 0x00000002;
+static constexpr ProtocolBridgingType PBT_GenericOSC		= 0x00000004;
 static constexpr ProtocolBridgingType PBT_GenericMIDI		= 0x00000008;
 static constexpr ProtocolBridgingType PBT_YamahaSQ			= 0x00000010;
 static constexpr ProtocolBridgingType PBT_HUI				= 0x00000020;
+
+
+static const std::vector<ProtocolBridgingType> ProtocolBridgingTypes{ PBT_DiGiCo, PBT_BlacktraxRTTrPM, PBT_GenericOSC, PBT_GenericMIDI, PBT_YamahaSQ, PBT_HUI };
 
 /**
  * Helper method to query a user readable short name for a protocol type that can be shown on UI.

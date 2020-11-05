@@ -93,7 +93,6 @@ public:
 	void SetComsMode(DataChangeSource changeSource, ComsMode newMode);
 	void RestoreComsMode(DataChangeSource changeSource);
 	bool GetOnline() const;
-	bool GetBypass() const;
 
 	float GetParameterValue(AutomationParameterIndex paramIdx, bool normalized = false) const;
 	void SetParameterValue(DataChangeSource changeSource, AutomationParameterIndex paramIdx, float newValue);
@@ -121,7 +120,6 @@ public:
 	virtual void getStateInformation(MemoryBlock& destData) override;
 	virtual void setStateInformation(const void* data, int sizeInBytes) override;
 	virtual void updateTrackProperties(const TrackProperties& properties) override;
-	virtual AudioProcessorParameter* getBypassParameter() const override;
 
 	// Overriden functions of class AudioProcessorParameter::Listener
 	virtual void parameterValueChanged(int parameterIndex, float newValue) override;
@@ -173,11 +171,6 @@ protected:
 	 * Sound object delay mode (Off, Tight, Full).
 	 */
 	CAudioParameterChoice*		m_delayMode;
-
-	/**
-	 * Bypass automation parameter: 1 for bypass, 0 for normal.
-	 */
-	CAudioParameterChoice*		m_bypassParam;
 
 	/**
 	 * Current OSC communication mode, sending and/or receiving.

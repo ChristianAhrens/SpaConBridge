@@ -185,7 +185,6 @@ void CController::SetParameterChanged(DataChangeSource changeSource, DataChangeT
 	case DCT_ReverbSendGain:
 	case DCT_SourceSpread:
 	case DCT_DelayMode:
-	case DCT_Bypass:
 	case DCT_AutomationParameters:
 	case DCT_DebugMessage:
 	default:
@@ -623,20 +622,6 @@ void CController::timerCallback()
 		{
 			pro = m_processors[i];
 
-			// If the OscBypass parameter has changed since the last interval, 
-			// update the OSC Rx/Tx mode of each processor accordingly.
-			bool oscBypassed = pro->GetBypass();
-			if (pro->PopParameterChanged(DCS_Protocol, DCT_Bypass))
-			{
-				if (oscBypassed)
-					pro->SetComsMode(DCS_Protocol, CM_Off);
-				else
-					pro->RestoreComsMode(DCS_Protocol);
-
-				// Changing ComsMode also sets the changed flag for Bypass. 
-				// Clear it so we don't come in here again unnecessarily.
-				pro->PopParameterChanged(DCS_Protocol, DCT_Bypass);
-			}
 			mode = pro->GetComsMode();
 
 			// Signal every timer tick to each processor instance. 
@@ -739,11 +724,6 @@ void CController::timerCallback()
 						}
 					}
 					break;
-
-					case ParamIdx_Bypass:
-						// Nothing to do, this is not a parameter which will arrive per remote protocol.
-						continue;
-						break;
 
 					default:
 						jassertfalse;

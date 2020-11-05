@@ -83,12 +83,6 @@ SoundsourceProcessor::SoundsourceProcessor(bool insertToConfig)
 	addParameter(m_sourceSpread);
 	addParameter(m_delayMode);
 
-	// Coms mode parameter (default is 3, which is Tx | Rx)
-	StringArray bypassChoices("OSC On", "OSC Off");
-	m_bypassParam = new CAudioParameterChoice("OSCBypass", "OSCBypass", bypassChoices, 0);
-	m_bypassParam->addListener(this);
-	addParameter(m_bypassParam);
-
 	// Plugin's display name is empty per default.
 	m_pluginDisplayName = String();
 
@@ -237,14 +231,6 @@ float SoundsourceProcessor::GetParameterValue(AutomationParameterIndex paramIdx,
 					ret = m_delayMode->getNormalisableRange().convertTo0to1(ret);
 			}
 			break;
-		case ParamIdx_Bypass:
-			{
-				// AudioParameterChoice::getIndex() maps the internal 0.0f - 1.0f value to the 0 to N-1 range.
-				ret = static_cast<float>(m_bypassParam->getIndex());
-				if (normalized)
-					ret = m_bypassParam->getNormalisableRange().convertTo0to1(ret);
-			}
-			break;
 		default:
 			jassertfalse;
 			break;
@@ -282,9 +268,6 @@ void SoundsourceProcessor::SetParameterValue(DataChangeSource changeSource, Auto
 		break;
 	case ParamIdx_DelayMode:
 		m_delayMode->SetParameterValue(newValue);
-		break;
-	case ParamIdx_Bypass:
-		m_bypassParam->SetParameterValue(newValue);
 		break;
 	default:
 		jassertfalse; // Unknown parameter index!
@@ -325,9 +308,6 @@ void SoundsourceProcessor::Tick()
 			break;
 		case ParamIdx_DelayMode:
 			m_delayMode->Tick();
-			break;
-		case ParamIdx_Bypass:
-			m_bypassParam->Tick();
 			break;
 		default:
 			jassert(false); // missing implementation!
@@ -517,10 +497,6 @@ void SoundsourceProcessor::SetComsMode(DataChangeSource changeSource, ComsMode n
 
 		// Signal change to other modules in the plugin.
 		SetParameterChanged(changeSource, DCT_ComsMode);
-
-		// If either CM_Rx or CM_Tx flags are set, bypass is off.
-		float bypassValue = ((m_comsMode & CM_Sync) == 0) ? 1.0f : 0.0f;
-		SetParameterValue(changeSource, ParamIdx_Bypass, bypassValue);
 
 		// Activate the corresponding soundsource id in controller
 		CController* ctrl = CController::GetInstance();
@@ -729,24 +705,6 @@ void SoundsourceProcessor::updateTrackProperties(const TrackProperties& properti
 	SetParameterChanged(DCS_Host, DCT_SourceID);
 }
 
-/**
- * Returns the parameter that controls the AudioProcessor's bypass state. 
- * @return	The bypass parameter.
- */
-AudioProcessorParameter* SoundsourceProcessor::getBypassParameter() const
-{
-	return m_bypassParam;
-}
-
-/**
- * Getter function for the current bypass status of the plugin.
- * @return	True for bypass (no OSC communication), false for normal OSC operation.
- */
-bool SoundsourceProcessor::GetBypass() const
-{
-	return (m_bypassParam->getIndex() == 1);
-}
-
 #ifdef JUCE_DEBUG
 /**
  * Helper method to append a message onto the debugging buffer. This buffer can then be flushed with FlushDebugMessages().
@@ -825,13 +783,6 @@ void SoundsourceProcessor::parameterValueChanged(int parameterIndex, float newVa
 				int newValueDenorm = static_cast<int>(m_delayMode->getNormalisableRange().convertFrom0to1(newValue));
 				if (newValueDenorm != m_delayMode->GetLastIndex())
 					changed = DCT_DelayMode;
-			}
-			break;
-		case ParamIdx_Bypass:
-			{
-				int newValueDenorm = static_cast<int>(m_bypassParam->getNormalisableRange().convertFrom0to1(newValue));
-				if (newValueDenorm != m_bypassParam->GetLastIndex())
-					changed = DCT_Bypass;
 			}
 			break;
 		default:

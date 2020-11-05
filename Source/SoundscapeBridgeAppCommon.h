@@ -78,7 +78,6 @@ enum AutomationParameterIndex
 	ParamIdx_ReverbSendGain,
 	ParamIdx_SourceSpread,
 	ParamIdx_DelayMode,
-	ParamIdx_Bypass,
 	ParamIdx_MaxIndex
 };
 
@@ -101,8 +100,7 @@ static constexpr DataChangeType DCT_SourcePosition			= 0x00000080; //< The X/Y c
 static constexpr DataChangeType DCT_ReverbSendGain			= 0x00000100; //< The En-Space Gain for this SourceID has changed.
 static constexpr DataChangeType DCT_SourceSpread			= 0x00000200; //< The En-Scene Spread factor for this SourceID has changed.
 static constexpr DataChangeType DCT_DelayMode				= 0x00000400; //< The En-Scene Delay mode (Off/Tight/Full) of this SourceID has changed.
-static constexpr DataChangeType DCT_Bypass					= 0x00000800; //< The OSC Bypass parameter has changed.
-static constexpr DataChangeType DCT_AutomationParameters	= (DCT_SourcePosition | DCT_ReverbSendGain | DCT_SourceSpread | DCT_DelayMode | DCT_Bypass); //< All automation parameters.
+static constexpr DataChangeType DCT_AutomationParameters	= (DCT_SourcePosition | DCT_ReverbSendGain | DCT_SourceSpread | DCT_DelayMode); //< All automation parameters.
 static constexpr DataChangeType DCT_DebugMessage			= 0x00001000; //< There is a new debug message to be displayed on the GUI.
 
 /**

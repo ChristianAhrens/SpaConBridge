@@ -667,9 +667,6 @@ void TableModelComponent::RecreateTableRowIds()
  */
 void TableModelComponent::UpdateTable()
 {
-	// Re-sort table again depending on the currently selected column.
-	sortOrderChanged(m_table.getHeader().getSortColumnId(), m_table.getHeader().isSortedForwards());
-
 	// Refresh table
 	m_table.updateContent();
 

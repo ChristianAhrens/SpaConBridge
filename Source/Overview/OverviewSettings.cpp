@@ -295,7 +295,7 @@ CSettingsComponent::CSettingsComponent()
 
 	// DiGiCo settings section
 	m_DiGiCoBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
-	m_DiGiCoBridgingSettings->setHeaderText("DiGiCo Bridging");
+	m_DiGiCoBridgingSettings->setHeaderText("DiGiCo OSC Bridging");
 	m_DiGiCoBridgingSettings->setHasActiveToggle(true);
 	m_DiGiCoBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_DiGiCoBridgingSettings.get());

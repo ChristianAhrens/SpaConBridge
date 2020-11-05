@@ -769,7 +769,7 @@ void CSettingsContainer::resized()
 	// toggle button for visibility of raw config textfield
 	auto bottomBarControlBounds = bounds.removeFromBottom(25);
 	m_useRawConfigButton->setBounds(bottomBarControlBounds.removeFromRight(25));
-	m_lookAndFeelSelect->setBounds(bottomBarControlBounds.removeFromLeft(210).removeFromRight(110));
+	m_lookAndFeelSelect->setBounds(bottomBarControlBounds.removeFromLeft(170).removeFromRight(70));
 
 	bounds.removeFromBottom(5);
 

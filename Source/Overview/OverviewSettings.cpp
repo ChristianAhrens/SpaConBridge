@@ -201,25 +201,33 @@ void HeaderWithElmListComponent::paint(Graphics& g)
  */
 void HeaderWithElmListComponent::resized()
 {
+	auto activeToggleHeight = 20.0f;
+	auto activeToggleMargin = 2.0f;
 	auto headerHeight = 25.0f;
+	auto headerMargin = 2.0f;
 	auto itemHeight = headerHeight;
 	auto itemMargin = 5.0f;
-	auto headerMargin = 2.0f;
 	auto itemCount = 0;
-
-	FlexBox headerfb;
-	headerfb.flexDirection = FlexBox::Direction::row;
-	headerfb.items.addArray({
-		FlexItem(*m_headerLabel.get()).withFlex(1, 1),
-		FlexItem(*m_activeToggle.get()).withFlex(0, 2, itemHeight)
-		});
 
 	FlexBox fb;
 	fb.flexDirection = FlexBox::Direction::column;
 	fb.justifyContent = FlexBox::JustifyContent::flexStart;
-	fb.items.add(FlexItem(headerfb)
-		.withHeight(headerHeight)
-		.withMargin(FlexItem::Margin(headerMargin, headerMargin, headerMargin, headerMargin)));
+	// Add the enable/disable section toggle, if this section is configured to be toggleable
+	if (m_hasActiveToggle)
+	{
+		fb.items.add(
+			FlexItem(*m_activeToggle.get())
+			.withAlignSelf(FlexItem::AlignSelf::flexEnd)
+			.withWidth(activeToggleHeight + activeToggleMargin)
+			.withHeight(activeToggleHeight)
+			.withMargin(FlexItem::Margin(activeToggleMargin, activeToggleMargin, 0, activeToggleMargin)));
+	}
+	// Add the headline section label
+	fb.items.add(
+		FlexItem(*m_headerLabel.get())
+			.withHeight(headerHeight)
+			.withMargin(FlexItem::Margin(headerMargin, headerMargin, headerMargin, headerMargin)));
+	// Add all the componentes that are flagged to be included in layouting
 	for (auto const& component : m_components)
 	{
 		auto includeInLayout = component.second.first;
@@ -233,10 +241,12 @@ void HeaderWithElmListComponent::resized()
 		}
 	}
 
+	// Set the accumulated required size of the contents as new component size
 	auto bounds = getLocalBounds();
-	bounds.setHeight(((itemHeight + (2 * itemMargin)) * itemCount) + (headerHeight + (2 * headerMargin)) + 5);
+	bounds.setHeight(((itemHeight + (2 * itemMargin)) * itemCount) + (headerHeight + (2 * headerMargin)) + (m_hasActiveToggle ? (activeToggleHeight + (2 * activeToggleMargin)) : 0) + itemMargin);
 	setSize(bounds.getWidth(), bounds.getHeight());
 
+	// Trigger the actual layouting based on the calculated bounds
 	fb.performLayout(bounds);
 
 //#ifdef DEBUG

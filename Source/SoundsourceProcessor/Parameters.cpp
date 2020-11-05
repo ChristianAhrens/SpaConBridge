@@ -49,7 +49,7 @@ static constexpr int GESTURE_LENGTH_IN_TICKS = 8;
 
 /*
 ===============================================================================
- Class CAudioParameterFloat
+ Class GestureManagedAudioParameterFloat
 ===============================================================================
 */
 
@@ -62,7 +62,7 @@ static constexpr int GESTURE_LENGTH_IN_TICKS = 8;
  * @param stepSize		Smallest change amount which signifies an actual value change.
  * @param defaultValue	The parameter's default value when created.
  */
-CAudioParameterFloat::CAudioParameterFloat(String parameterID, String name, float minValue, float maxValue, float stepSize, float defaultValue)
+GestureManagedAudioParameterFloat::GestureManagedAudioParameterFloat(String parameterID, String name, float minValue, float maxValue, float stepSize, float defaultValue)
 	: AudioParameterFloat(parameterID, name, minValue, maxValue, defaultValue)
 {
 	 // A float parameter is considered unchanged if it moves withing this tolerance range.
@@ -76,27 +76,17 @@ CAudioParameterFloat::CAudioParameterFloat(String parameterID, String name, floa
 /**
  * Object destructor.
  */
-CAudioParameterFloat::~CAudioParameterFloat()
+GestureManagedAudioParameterFloat::~GestureManagedAudioParameterFloat()
 {
-}
-
-/**
- * Overriden from AudioParameterFloat. The base class implementation just calls AudioProcessor::getDefaultNumParameterSteps() which
- * returns 0x7fffffff. This results in a "Number of parameter steps exceeds limit" Error when analyzing the Plugin with Avid's
- * AAX-Validator tool DSH. 
- * @return	The number of steps this parameter has between 0.0f and 1.0f.
- */
-int CAudioParameterFloat::getNumSteps() const
-{ 
-	return 0x7ff; 
 }
 
 /**
  * Called by GUI components (such as sliders or rotary knobs) when a drag or turn gesture starts. 
  * This will signal the host that a gesture has started, which is used for example for Touch automation.
  */
-void CAudioParameterFloat::BeginGuiGesture()
+void GestureManagedAudioParameterFloat::BeginGuiGesture()
 {
+	DBG(String(__FUNCTION__));
 	jassert(m_inGuiGesture == false);
 	if (!m_inGuiGesture)
 	{
@@ -109,8 +99,9 @@ void CAudioParameterFloat::BeginGuiGesture()
  * Called by GUI components (such as sliders or rotary knobs) when a drag or turn gesture ends. 
  * This will signal the host that a gesture has ended, which is used for example for Touch automation.
  */
-void CAudioParameterFloat::EndGuiGesture()
+void GestureManagedAudioParameterFloat::EndGuiGesture()
 {
+	DBG(String(__FUNCTION__));
 	jassert(m_inGuiGesture == true);
 	if (m_inGuiGesture)
 	{
@@ -127,7 +118,7 @@ void CAudioParameterFloat::EndGuiGesture()
  * Counts down the number of timer ticks that are considered as the duration of a "gesture", when 
  * modifying a parameter via OSC. This is relevant for Touch automation.
  */
-void CAudioParameterFloat::Tick()
+void GestureManagedAudioParameterFloat::Tick()
 {
 	const ScopedLock lock(m_mutex);
 
@@ -150,7 +141,7 @@ void CAudioParameterFloat::Tick()
  * This reimplementation is used to remember the parameter's previous value.
  * @param newValue	The new value, within the parameter's range (NOT normalized between 0.0f and 1.0f).
  */
-void CAudioParameterFloat::valueChanged(float newValue)
+void GestureManagedAudioParameterFloat::valueChanged(float newValue)
 {
 	m_lastValue[1] = m_lastValue[0];
 	m_lastValue[0] = newValue;
@@ -160,7 +151,7 @@ void CAudioParameterFloat::valueChanged(float newValue)
  * Returns the value which was set before the current one.
  * @return	The previous value, within the parameter's range (NOT normalized between 0.0f and 1.0f).
  */
-float CAudioParameterFloat::GetLastValue() const
+float GestureManagedAudioParameterFloat::GetLastValue() const
 {
 	return m_lastValue[1];
 }
@@ -170,7 +161,7 @@ float CAudioParameterFloat::GetLastValue() const
  * Will also trigger the start of a gesture, if not already in the middle of one.
  * @param newValue	The new value, within the parameter's range (i.e. NOT normalized between 0.0f and 1.0f).
  */
-void CAudioParameterFloat::SetParameterValue(float newValue)
+void GestureManagedAudioParameterFloat::SetParameterValue(float newValue)
 {
 	const ScopedLock lock(m_mutex);
 
@@ -200,7 +191,7 @@ void CAudioParameterFloat::SetParameterValue(float newValue)
 
 /*
 ===============================================================================
- Class CAudioParameterChoice
+ Class GestureManagedAudioParameterChoice
 ===============================================================================
 */
 
@@ -216,7 +207,7 @@ void CAudioParameterFloat::SetParameterValue(float newValue)
  * @param indexFromString		An optional lambda function that parses a string and converts it into a choice index. 
  *								Some hosts use this to allow users to type in parameter values.
  */
-CAudioParameterChoice::CAudioParameterChoice(	const String& parameterID, 
+GestureManagedAudioParameterChoice::GestureManagedAudioParameterChoice(	const String& parameterID, 
 												const String& name,
 												const StringArray& choices,
 												int defaultItemIndex,
@@ -231,7 +222,7 @@ CAudioParameterChoice::CAudioParameterChoice(	const String& parameterID,
 /**
  * Object destructor.
  */
-CAudioParameterChoice::~CAudioParameterChoice()
+GestureManagedAudioParameterChoice::~GestureManagedAudioParameterChoice()
 {
 }
 
@@ -240,7 +231,7 @@ CAudioParameterChoice::~CAudioParameterChoice()
  * This reimplementation is used to remember the parameter's previous value.
  * @param newValue	The new choice index.
  */
-void CAudioParameterChoice::valueChanged(int newValue)
+void GestureManagedAudioParameterChoice::valueChanged(int newValue)
 {
 	m_lastIndex[1] = m_lastIndex[0];
 	m_lastIndex[0] = newValue;
@@ -250,7 +241,7 @@ void CAudioParameterChoice::valueChanged(int newValue)
  * Returns the index which was set before the current one.
  * @return	The previous choice index since the last valueChanged() call.
  */
-int CAudioParameterChoice::GetLastIndex() const
+int GestureManagedAudioParameterChoice::GetLastIndex() const
 {
 	return m_lastIndex[1];
 }
@@ -260,7 +251,7 @@ int CAudioParameterChoice::GetLastIndex() const
  * Counts down the number of timer ticks that are considered as the duration of a "gesture", when 
  * modifying a parameter via OSC. This is relevant for Touch automation.
  */
-void CAudioParameterChoice::Tick()
+void GestureManagedAudioParameterChoice::Tick()
 {
 	const ScopedLock lock(m_mutex);
 
@@ -282,7 +273,7 @@ void CAudioParameterChoice::Tick()
  * Will also trigger the start of a gesture, if not already in the middle of one.
  * @param newValue	The new choice index as a float, from 0.0f, to N-1, where N is the number of choices.
  */
-void CAudioParameterChoice::SetParameterValue(float newValue)
+void GestureManagedAudioParameterChoice::SetParameterValue(float newValue)
 {
 	const ScopedLock lock(m_mutex);
 

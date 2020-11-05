@@ -64,17 +64,17 @@ static constexpr int DEFAULT_COORD_MAPPING = 1;		//< Default coordinate mapping
 SoundsourceProcessor::SoundsourceProcessor(bool insertToConfig)
 {
 	// Automation parameters.
-	m_xPos = new CAudioParameterFloat("x_pos", "x", 0.0f, 1.0f, 0.001f, 0.5f);
-	m_yPos = new CAudioParameterFloat("y_pos", "y", 0.0f, 1.0f, 0.001f, 0.5f);
+	m_xPos = new GestureManagedAudioParameterFloat("x_pos", "x", 0.0f, 1.0f, 0.001f, 0.5f);
+	m_yPos = new GestureManagedAudioParameterFloat("y_pos", "y", 0.0f, 1.0f, 0.001f, 0.5f);
 	m_xPos->addListener(this);
 	m_yPos->addListener(this);
 	addParameter(m_xPos);
 	addParameter(m_yPos);
 
-	m_reverbSendGain = new CAudioParameterFloat("ReverbSendGain", "Reverb", -120.0f, 24.0f, 0.1f, 0.0f);
-	m_sourceSpread = new CAudioParameterFloat("SourceSpread", "Spread", 0.0f, 1.0f, 0.001f, 0.5f);
+	m_reverbSendGain = new GestureManagedAudioParameterFloat("ReverbSendGain", "Reverb", -120.0f, 24.0f, 0.1f, 0.0f);
+	m_sourceSpread = new GestureManagedAudioParameterFloat("SourceSpread", "Spread", 0.0f, 1.0f, 0.001f, 0.5f);
 	StringArray delayModeChoices("Off", "Tight", "Full");
-	m_delayMode = new CAudioParameterChoice("DelayMode", "Delay", delayModeChoices, 1);
+	m_delayMode = new GestureManagedAudioParameterChoice("DelayMode", "Delay", delayModeChoices, 1);
 
 	m_reverbSendGain->addListener(this);
 	m_sourceSpread->addListener(this);
@@ -801,7 +801,7 @@ void SoundsourceProcessor::parameterValueChanged(int parameterIndex, float newVa
 /**
  * REIMPLEMENTED from AudioProcessorParameter::Listener::parameterGestureChanged()
  * Indicates that a parameter change gesture has started / ended. 
- * This reimplementation does nothing. See CAudioParameterFloat::BeginGuiGesture().
+ * This reimplementation does nothing. See GestureManagedAudioParameterFloat::BeginGuiGesture().
  * @param parameterIndex	Index of the plugin parameter being changed.
  * @param gestureIsStarting	True if starting, false if ending.
  */

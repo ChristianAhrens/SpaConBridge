@@ -315,8 +315,8 @@ void OverviewTableContainer::UpdateGui(bool init)
 			// Iterate through all plugin instances and see if anything changed there.
 			for (int pIdx = 0; pIdx < ctrl->GetProcessorCount(); pIdx++)
 			{
-				SoundsourceProcessor* plugin = ctrl->GetProcessor(pIdx);
-				if (plugin && plugin->PopParameterChanged(DCS_Overview, DCT_PluginInstanceConfig))
+				SoundsourceProcessor* processor = ctrl->GetProcessor(pIdx);
+				if (processor && processor->PopParameterChanged(DCS_Overview, DCT_PluginInstanceConfig))
 				{
 					m_overviewTable->UpdateTable();
 				}
@@ -1021,9 +1021,9 @@ void ComboBoxContainer::comboBoxChanged(ComboBox *comboBox)
 		for (std::size_t i = 0; i < ProcessorIds.size(); ++i)
 		{
 			// Set the value of the combobox to the current MappingID of the corresponding plugin.
-			SoundsourceProcessor* plugin = ctrl->GetProcessor(ProcessorIds[i]);
-			if (plugin)
-				plugin->SetMappingId(DCS_Overview, newMapping);
+			SoundsourceProcessor* processor = ctrl->GetProcessor(ProcessorIds[i]);
+			if (processor)
+				processor->SetMappingId(DCS_Overview, newMapping);
 		}
 	}
 }
@@ -1051,9 +1051,9 @@ void ComboBoxContainer::SetRow(int newRow)
 	if (ctrl)
 	{
 		// Set the value of the combobox to the current MappingID of the corresponding plugin.
-		const SoundsourceProcessor* plugin = ctrl->GetProcessor(ProcessorId);
-		if (plugin)
-			m_comboBox.setSelectedId(plugin->GetMappingId(), dontSendNotification);
+		const SoundsourceProcessor* processor = ctrl->GetProcessor(ProcessorId);
+		if (processor)
+			m_comboBox.setSelectedId(processor->GetMappingId(), dontSendNotification);
 	}
 }
 
@@ -1111,9 +1111,9 @@ void TextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
 		for (std::size_t i = 0; i < ProcessorIds.size(); ++i)
 		{
 			// Set the value of the combobox to the current MappingID of the corresponding plugin.
-			SoundsourceProcessor* plugin = ctrl->GetProcessor(ProcessorIds[i]);
-			if (plugin)
-				plugin->SetSourceId(DCS_Overview, newSourceId);
+			SoundsourceProcessor* processor = ctrl->GetProcessor(ProcessorIds[i]);
+			if (processor)
+				processor->SetSourceId(DCS_Overview, newSourceId);
 		}
 	}
 }
@@ -1157,9 +1157,9 @@ void TextEditorContainer::SetRow(int newRow)
 	if (ctrl)
 	{
 		// Set the value of the textEditor to the current SourceID of the corresponding plugin.
-		const SoundsourceProcessor* plugin = ctrl->GetProcessor(ProcessorId);
-		if (plugin)
-			m_editor.setText(String(plugin->GetSourceId()), false);
+		const SoundsourceProcessor* processor = ctrl->GetProcessor(ProcessorId);
+		if (processor)
+			m_editor.setText(String(processor->GetSourceId()), false);
 	}
 }
 
@@ -1227,10 +1227,10 @@ void RadioButtonContainer::buttonClicked(Button *button)
 
 		for (std::size_t i = 0; i < ProcessorIds.size(); ++i)
 		{
-			SoundsourceProcessor* plugin = ctrl->GetProcessor(ProcessorIds[i]);
-			if (plugin)
+			SoundsourceProcessor* processor = ctrl->GetProcessor(ProcessorIds[i]);
+			if (processor)
 			{
-				ComsMode oldMode = plugin->GetComsMode();
+				ComsMode oldMode = processor->GetComsMode();
 				ComsMode newFlag = (button == &m_txButton) ? CM_Tx : CM_Rx;
 
 				if (newToggleState == true)
@@ -1238,7 +1238,7 @@ void RadioButtonContainer::buttonClicked(Button *button)
 				else
 					oldMode &= ~newFlag;
 
-				plugin->SetComsMode(DCS_Overview, oldMode);
+				processor->SetComsMode(DCS_Overview, oldMode);
 			}
 		}
 	}
@@ -1274,14 +1274,14 @@ void RadioButtonContainer::SetRow(int newRow)
 	if (ctrl)
 	{
 		// Toggle the correct radio buttons to the current ComsMode of the corresponding plugin.
-		const SoundsourceProcessor* plugin = ctrl->GetProcessor(ProcessorId);
-		if (plugin)
+		const SoundsourceProcessor* processor = ctrl->GetProcessor(ProcessorId);
+		if (processor)
 		{
-			const Array<AudioProcessorParameter*>& params = plugin->getParameters();
+			const Array<AudioProcessorParameter*>& params = processor->getParameters();
 			AudioParameterChoice* param = dynamic_cast<AudioParameterChoice*>(params[ParamIdx_DelayMode]);
 			if (param)
 			{
-				ComsMode newMode = plugin->GetComsMode();
+				ComsMode newMode = processor->GetComsMode();
 				m_txButton.setToggleState(((newMode & CM_Tx) == CM_Tx), dontSendNotification);
 				m_rxButton.setToggleState(((newMode & CM_Rx) == CM_Rx), dontSendNotification);
 			}

@@ -43,23 +43,22 @@ namespace SoundscapeBridgeApp
 
 
 /**
- * Class CAudioParameterFloat, a custom AudioParameterFloat which provides it's own implementation
- * of getNumSteps(), required for AAX. See this method's description for more info.
+ * Class GestureManagedAudioParameterFloat, a custom.
  *
  * This derivation supports automatic gesture management, which depends on the Tick() method 
  * being called regular intervals.
  */
-class CAudioParameterFloat : public AudioParameterFloat
+class GestureManagedAudioParameterFloat : public AudioParameterFloat
 {
 public:
-	CAudioParameterFloat(	String parameterID, 
+	GestureManagedAudioParameterFloat(	String parameterID, 
 							String name, 
 							float minValue, 
 							float maxValue, 
 							float stepSize,
 							float defaultValue);
 
-	~CAudioParameterFloat() override;
+	~GestureManagedAudioParameterFloat() override;
 
 	void BeginGuiGesture();
 	void EndGuiGesture();
@@ -69,46 +68,30 @@ public:
 	void Tick();
 
 protected:
-	int getNumSteps() const override;
 	void valueChanged(float newValue) override;
 
-	/**
-	 * Number of Tick() calls since the last value change. 
-	 */
-	int m_ticksSinceLastChange;
+	int				m_ticksSinceLastChange;	/**> Number of Tick() calls since the last value change. */
+	bool			m_inGuiGesture;			/**> True if user is currently dragging or turning a GUI control, and thus in the middle of a gesture. */
+	CriticalSection	m_mutex;				/**> SetParameterValue() and Tick() may be called from 2 different threads, so make sure
+											 * m_ticksSinceLastChange is handled in a tread-safe way. */
+	float			m_lastValue[2];			/**> Since AudioParameterFloat::setValue() is unfortunately private, we use this to remember
+											 * the last two values in order to detect actual value changes in AudioProcessorParameter::Listener::parameterValueChanged().
+											 * These values are normalized between 0.0f and 1.0f. */
 
-	/**
-	 * True if user is currently dragging or turning a GUI control, and thus in the middle of a gesture.
-	 */
-	bool m_inGuiGesture;
-
-	/**
-	 * SetParameterValue() and Tick() may be called from 2 different threads, so make sure
-	 * m_ticksSinceLastChange is handled in a tread-safe way.
-	 */
-	CriticalSection			m_mutex;
-
-	/**
-	 * Since AudioParameterFloat::setValue() is unfortunately private, we use this to remember
-	 * the last two values in order to detect actual value changes in AudioProcessorParameter::Listener::parameterValueChanged().
-	 * These values are normalized between 0.0f and 1.0f.
-	 */
-	float m_lastValue[2];
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CAudioParameterFloat)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GestureManagedAudioParameterFloat)
 };
 
 
 /**
- * Class CAudioParameterChoice, a custom AudioParameterChoice.
+ * Class GestureManagedAudioParameterChoice, a custom AudioParameterChoice.
  *
  * This derivation supports automatic gesture management, which depends on the Tick() method
  * being called regular intervals.
  */
-class CAudioParameterChoice : public AudioParameterChoice
+class GestureManagedAudioParameterChoice : public AudioParameterChoice
 {
 public:
-	CAudioParameterChoice(	const String& parameterID,
+	GestureManagedAudioParameterChoice(	const String& parameterID,
 							const String& name,
 							const StringArray& choices,
 							int defaultItemIndex,
@@ -116,7 +99,7 @@ public:
 							std::function<String(int index, int maximumStringLength)> stringFromIndex = nullptr,
 							std::function<int(const String& text)> indexFromString = nullptr);
 
-	~CAudioParameterChoice() override;
+	~GestureManagedAudioParameterChoice() override;
 
 	void SetParameterValue(float);
 	int GetLastIndex() const;
@@ -125,24 +108,13 @@ public:
 protected:
 	void valueChanged(int newValue) override;
 
-	/**
-	 * Number of Tick() calls since the last value change.
-	 */
-	int m_ticksSinceLastChange;
+	int					m_ticksSinceLastChange;	/**> Number of Tick() calls since the last value change. */
+	CriticalSection		m_mutex;				/**> SetParameterValue() and Tick() may be called from 2 different threads, so make sure
+												 * m_ticksSinceLastChange is handled in a tread-safe way. */
+	int					m_lastIndex[2];			/**> Since AudioParameterChoice::setValue() is unfortunately private, we use this to remember
+												 * the last two values in order to detect actual value changes in AudioProcessorParameter::Listener::parameterValueChanged(). */
 
-	/**
-	 * SetParameterValue() and Tick() may be called from 2 different threads, so make sure
-	 * m_ticksSinceLastChange is handled in a tread-safe way.
-	 */
-	CriticalSection			m_mutex;
-
-	/**
-	 * Since AudioParameterChoice::setValue() is unfortunately private, we use this to remember
-	 * the last two values in order to detect actual value changes in AudioProcessorParameter::Listener::parameterValueChanged().
-	 */
-	int m_lastIndex[2];
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CAudioParameterChoice)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GestureManagedAudioParameterChoice)
 };
 
 

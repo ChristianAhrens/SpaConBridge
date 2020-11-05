@@ -184,17 +184,17 @@ SoundsourceProcessorEditor::~SoundsourceProcessorEditor()
  * @param slider	The slider object for which the parameter is desired.
  * @return			The desired plugin parameter.
  */
-CAudioParameterFloat* SoundsourceProcessorEditor::GetParameterForSlider(Slider* slider)
+GestureManagedAudioParameterFloat* SoundsourceProcessorEditor::GetParameterForSlider(Slider* slider)
 {
 	const Array<AudioProcessorParameter*>& params = getAudioProcessor()->getParameters();
 	if (slider == m_xSlider.get())
-		return dynamic_cast<CAudioParameterFloat*> (params[ParamIdx_X]);
+		return dynamic_cast<GestureManagedAudioParameterFloat*> (params[ParamIdx_X]);
 	else if (slider == m_ySlider.get())
-		return dynamic_cast<CAudioParameterFloat*> (params[ParamIdx_Y]);
+		return dynamic_cast<GestureManagedAudioParameterFloat*> (params[ParamIdx_Y]);
 	else if (slider == m_reverbSendGainSlider.get())
-		return dynamic_cast<CAudioParameterFloat*> (params[ParamIdx_ReverbSendGain]);
+		return dynamic_cast<GestureManagedAudioParameterFloat*> (params[ParamIdx_ReverbSendGain]);
 	else if (slider == m_sourceSpreadSlider.get())
-		return dynamic_cast<CAudioParameterFloat*> (params[ParamIdx_SourceSpread]);
+		return dynamic_cast<GestureManagedAudioParameterFloat*> (params[ParamIdx_SourceSpread]);
 
 	// Should not make it this far.
 	jassertfalse;
@@ -234,7 +234,7 @@ void SoundsourceProcessorEditor::sliderValueChanged(Slider* slider)
  */
 void SoundsourceProcessorEditor::sliderDragStarted(Slider* slider)
 {
-	if (CAudioParameterFloat* param = GetParameterForSlider(static_cast<Slider*>(slider)))
+	if (GestureManagedAudioParameterFloat* param = GetParameterForSlider(static_cast<Slider*>(slider)))
 		param->BeginGuiGesture();
 }
 
@@ -244,7 +244,7 @@ void SoundsourceProcessorEditor::sliderDragStarted(Slider* slider)
  */
 void SoundsourceProcessorEditor::sliderDragEnded(Slider* slider)
 {
-	if (CAudioParameterFloat* param = GetParameterForSlider(static_cast<Slider*>(slider)))
+	if (GestureManagedAudioParameterFloat* param = GetParameterForSlider(static_cast<Slider*>(slider)))
 		param->EndGuiGesture();
 }
 

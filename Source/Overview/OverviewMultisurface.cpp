@@ -149,17 +149,17 @@ void COverviewMultiSurface::UpdateGui(bool init)
 		CSurfaceMultiSlider::PositionCache cachedPositions;
 		for (int pIdx = 0; pIdx < ctrl->GetProcessorCount(); pIdx++)
 		{
-			SoundsourceProcessor* plugin = ctrl->GetProcessor(pIdx);
-			if (plugin)
+			SoundsourceProcessor* processor = ctrl->GetProcessor(pIdx);
+			if (processor)
 			{
-				if (plugin->GetMappingId() == selectedMapping)
+				if (processor->GetMappingId() == selectedMapping)
 				{
 					// NOTE: only sources are included, which match the selected viewing mapping.
-					Point<float> p(plugin->GetParameterValue(ParamIdx_X), plugin->GetParameterValue(ParamIdx_Y));
-					cachedPositions.insert(std::make_pair(pIdx, std::make_pair(plugin->GetSourceId(), p)));
+					Point<float> p(processor->GetParameterValue(ParamIdx_X), processor->GetParameterValue(ParamIdx_Y));
+					cachedPositions.insert(std::make_pair(pIdx, std::make_pair(processor->GetSourceId(), p)));
 				}
 
-				if (plugin->PopParameterChanged(DCS_Overview, (DCT_PluginInstanceConfig | DCT_SourcePosition)))
+				if (processor->PopParameterChanged(DCS_Overview, (DCT_PluginInstanceConfig | DCT_SourcePosition)))
 					update = true;
 			}
 		}

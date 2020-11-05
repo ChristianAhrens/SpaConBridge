@@ -58,10 +58,7 @@ public:
 	void mouseUp (const MouseEvent& e) override;
 
 private:
-	/**
-	 * AudioProcessor object to act as parent to this component.
-	 */
-	AudioProcessor*	m_parent = nullptr;
+	AudioProcessor*	m_parent = nullptr; /**> AudioProcessor object to act as parent to this component. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CSurfaceSlider)
 };
@@ -86,19 +83,12 @@ public:
 	void mouseUp (const MouseEvent& e) override;
 
 private:
-	/**
-	 * ProcessorId of the currently selected knob, if any.
-	 */
-	ProcessorId m_selected;
-
-	/**
-	 * To save us from iterating over all Plug-ins at every click, cache the source positions.
-	 * Keys are the PluginIds of each source, while values are pairs of the corresponding 
-	 * input number and position coordinates (0.0 to 1.0). 
-	 */
-	PositionCache m_cachedPositions;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CSurfaceMultiSlider)
+	ProcessorId		m_selected;			/**> ProcessorId of the currently selected knob, if any. */
+	PositionCache	m_cachedPositions;	/**> To save us from iterating over all Plug-ins at every click, cache the source positions.
+										 * Keys are the PluginIds of each source, while values are pairs of the corresponding
+										 * input number and position coordinates (0.0 to 1.0). */
 };
 
 

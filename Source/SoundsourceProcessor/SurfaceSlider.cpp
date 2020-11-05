@@ -126,18 +126,18 @@ void CSurfaceSlider::mouseDown(const MouseEvent& e)
 	float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / w)));
 	float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / h)));
 
-	SoundsourceProcessor* plugin = dynamic_cast<SoundsourceProcessor*>(m_parent);
-	if (plugin)
+	SoundsourceProcessor* processor = dynamic_cast<SoundsourceProcessor*>(m_parent);
+	if (processor)
 	{
 		// Set new X and Y values
-		CAudioParameterFloat* param;
-		param = dynamic_cast<CAudioParameterFloat*>(m_parent->getParameters()[ParamIdx_X]);
+		GestureManagedAudioParameterFloat* param;
+		param = dynamic_cast<GestureManagedAudioParameterFloat*>(m_parent->getParameters()[ParamIdx_X]);
 		param->BeginGuiGesture();
-		plugin->SetParameterValue(DCS_Gui, ParamIdx_X, x);
-
-		param = dynamic_cast<CAudioParameterFloat*>(m_parent->getParameters()[ParamIdx_Y]);
+		processor->SetParameterValue(DCS_Gui, ParamIdx_X, x);
+		
+		param = dynamic_cast<GestureManagedAudioParameterFloat*>(m_parent->getParameters()[ParamIdx_Y]);
 		param->BeginGuiGesture();
-		plugin->SetParameterValue(DCS_Gui, ParamIdx_Y, y);
+		processor->SetParameterValue(DCS_Gui, ParamIdx_Y, y);
 	}
 }
 
@@ -173,11 +173,11 @@ void CSurfaceSlider::mouseUp(const MouseEvent& e)
 {
 	ignoreUnused(e);
 
-	CAudioParameterFloat* param;
-	param = dynamic_cast<CAudioParameterFloat*>(m_parent->getParameters()[ParamIdx_X]);
+	GestureManagedAudioParameterFloat* param;
+	param = dynamic_cast<GestureManagedAudioParameterFloat*>(m_parent->getParameters()[ParamIdx_X]);
 	param->EndGuiGesture();
 
-	param = dynamic_cast<CAudioParameterFloat*>(m_parent->getParameters()[ParamIdx_Y]);
+	param = dynamic_cast<GestureManagedAudioParameterFloat*>(m_parent->getParameters()[ParamIdx_Y]);
 	param->EndGuiGesture();
 }
 
@@ -289,15 +289,15 @@ void CSurfaceMultiSlider::mouseDown(const MouseEvent& e)
 			CController* ctrl = CController::GetInstance();
 			if (ctrl)
 			{
-				SoundsourceProcessor* plugin = ctrl->GetProcessor(m_selected);
-				jassert(plugin);
-				if (plugin)
+				SoundsourceProcessor* processor = ctrl->GetProcessor(m_selected);
+				jassert(processor);
+				if (processor)
 				{
-					CAudioParameterFloat* param;
-					param = dynamic_cast<CAudioParameterFloat*>(plugin->getParameters()[ParamIdx_X]);
+					GestureManagedAudioParameterFloat* param;
+					param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[ParamIdx_X]);
 					param->BeginGuiGesture();
 
-					param = dynamic_cast<CAudioParameterFloat*>(plugin->getParameters()[ParamIdx_Y]);
+					param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[ParamIdx_Y]);
 					param->BeginGuiGesture();
 				}
 			}
@@ -319,16 +319,16 @@ void CSurfaceMultiSlider::mouseDrag(const MouseEvent& e)
 		CController* ctrl = CController::GetInstance();
 		if (ctrl)
 		{
-			SoundsourceProcessor* plugin = ctrl->GetProcessor(m_selected);
-			if (plugin)
+			SoundsourceProcessor* processor = ctrl->GetProcessor(m_selected);
+			if (processor)
 			{
 				// Get mouse pixel-wise position and scale it between 0 and 1.
 				Point<int> pos = e.getPosition();
 				float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / getLocalBounds().getWidth())));
 				float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / getLocalBounds().getHeight())));
 
-				plugin->SetParameterValue(DCS_Overview, ParamIdx_X, x);
-				plugin->SetParameterValue(DCS_Overview, ParamIdx_Y, y);
+				processor->SetParameterValue(DCS_Overview, ParamIdx_X, x);
+				processor->SetParameterValue(DCS_Overview, ParamIdx_Y, y);
 			}
 		}
 	}
@@ -348,19 +348,19 @@ void CSurfaceMultiSlider::mouseUp(const MouseEvent& e)
 		CController* ctrl = CController::GetInstance();
 		if (ctrl)
 		{
-			SoundsourceProcessor* plugin = ctrl->GetProcessor(m_selected);
-			if (plugin)
+			SoundsourceProcessor* processor = ctrl->GetProcessor(m_selected);
+			if (processor)
 			{
-				dynamic_cast<CAudioParameterFloat*>(plugin->getParameters()[ParamIdx_X])->EndGuiGesture();
-				dynamic_cast<CAudioParameterFloat*>(plugin->getParameters()[ParamIdx_Y])->EndGuiGesture();
+				dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[ParamIdx_X])->EndGuiGesture();
+				dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[ParamIdx_Y])->EndGuiGesture();
 
 				// Get mouse pixel-wise position and scale it between 0 and 1.
 				Point<int> pos = e.getPosition();
 				float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / getLocalBounds().getWidth())));
 				float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / getLocalBounds().getHeight())));
 
-				plugin->SetParameterValue(DCS_Overview, ParamIdx_X, x);
-				plugin->SetParameterValue(DCS_Overview, ParamIdx_Y, y);
+				processor->SetParameterValue(DCS_Overview, ParamIdx_X, x);
+				processor->SetParameterValue(DCS_Overview, ParamIdx_Y, y);
 			}
 		}
 

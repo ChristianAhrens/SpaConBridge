@@ -63,7 +63,7 @@ public:
 	void UpdateGui(bool init);
 
 private:
-	CAudioParameterFloat* GetParameterForSlider(Slider* slider);
+	GestureManagedAudioParameterFloat* GetParameterForSlider(Slider* slider);
 	void sliderValueChanged(Slider *slider) override;
 	void sliderDragStarted(Slider* slider) override;
 	void sliderDragEnded(Slider* slider) override;

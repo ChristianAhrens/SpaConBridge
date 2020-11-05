@@ -46,8 +46,8 @@ namespace SoundscapeBridgeApp
 /**
  * Forward declarations.
  */
-class CAudioParameterFloat;
-class CAudioParameterChoice;
+class GestureManagedAudioParameterFloat;
+class GestureManagedAudioParameterChoice;
 
 
 /**
@@ -150,27 +150,27 @@ protected:
 	 * X coordinate in meters.
 	 * NOTE: not using std::unique_ptr here, see addParameter().
 	 */
-	CAudioParameterFloat*		m_xPos;
+	GestureManagedAudioParameterFloat*		m_xPos;
 
 	/**
 	 * Y coordinate in meters.
 	 */
-	CAudioParameterFloat*		m_yPos;
+	GestureManagedAudioParameterFloat*		m_yPos;
 
 	/**
 	 * Matrix input En-Space gain.
 	 */
-	CAudioParameterFloat*		m_reverbSendGain;
+	GestureManagedAudioParameterFloat*		m_reverbSendGain;
 
 	/**
 	 * Sound object spread.
 	 */
-	CAudioParameterFloat*		m_sourceSpread;
+	GestureManagedAudioParameterFloat*		m_sourceSpread;
 
 	/**
 	 * Sound object delay mode (Off, Tight, Full).
 	 */
-	CAudioParameterChoice*		m_delayMode;
+	GestureManagedAudioParameterChoice*		m_delayMode;
 
 	/**
 	 * Current OSC communication mode, sending and/or receiving.

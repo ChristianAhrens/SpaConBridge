@@ -381,17 +381,17 @@ void CustomTableHeaderComponent::updateBridgingTitles()
 
 	m_activeBridgingTitles.clear();
 	if ((activeBridging & PBT_DiGiCo) == PBT_DiGiCo)
-		m_activeBridgingTitles.push_back("DiGiCo");
+		m_activeBridgingTitles.push_back(GetProtocolBridgingShortName(PBT_DiGiCo));
 	if ((activeBridging & PBT_BlacktraxRTTrPM) == PBT_BlacktraxRTTrPM)
-		m_activeBridgingTitles.push_back("Blacktrax");
+		m_activeBridgingTitles.push_back(GetProtocolBridgingShortName(PBT_BlacktraxRTTrPM));
 	if ((activeBridging & PBT_GenericOSC) == PBT_GenericOSC)
-		m_activeBridgingTitles.push_back("gen. OSC");
+		m_activeBridgingTitles.push_back(GetProtocolBridgingShortName(PBT_GenericOSC));
 	if ((activeBridging & PBT_GenericMIDI) == PBT_GenericMIDI)
-		m_activeBridgingTitles.push_back("MIDI");
+		m_activeBridgingTitles.push_back(GetProtocolBridgingShortName(PBT_GenericMIDI));
 	if ((activeBridging & PBT_YamahaSQ) == PBT_YamahaSQ)
-		m_activeBridgingTitles.push_back("Yamaha");
+		m_activeBridgingTitles.push_back(GetProtocolBridgingShortName(PBT_YamahaSQ));
 	if ((activeBridging & PBT_HUI) == PBT_HUI)
-		m_activeBridgingTitles.push_back("HUI");
+		m_activeBridgingTitles.push_back(GetProtocolBridgingShortName(PBT_HUI));
 
 	resized();
 }

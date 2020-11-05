@@ -295,7 +295,7 @@ CSettingsComponent::CSettingsComponent()
 
 	// DiGiCo settings section
 	m_DiGiCoBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
-	m_DiGiCoBridgingSettings->setHeaderText("DiGiCo OSC Bridging");
+	m_DiGiCoBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_DiGiCo) + " Bridging");
 	m_DiGiCoBridgingSettings->setHasActiveToggle(true);
 	m_DiGiCoBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_DiGiCoBridgingSettings.get());
@@ -334,7 +334,7 @@ CSettingsComponent::CSettingsComponent()
 
 	// BlackTrax RTTrPM settings section
 	m_RTTrPMBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
-	m_RTTrPMBridgingSettings->setHeaderText("BlackTrax RTTrPM Bridging");
+	m_RTTrPMBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_BlacktraxRTTrPM) + " Bridging");
 	m_RTTrPMBridgingSettings->setHasActiveToggle(true);
 	m_RTTrPMBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_RTTrPMBridgingSettings.get());
@@ -392,7 +392,7 @@ CSettingsComponent::CSettingsComponent()
 
 	// Generic OSC settings section
 	m_GenericOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
-	m_GenericOSCBridgingSettings->setHeaderText("Generic OSC Bridging");
+	m_GenericOSCBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_GenericOSC) + " Bridging");
 	m_GenericOSCBridgingSettings->setHasActiveToggle(true);
 	m_GenericOSCBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_GenericOSCBridgingSettings.get());

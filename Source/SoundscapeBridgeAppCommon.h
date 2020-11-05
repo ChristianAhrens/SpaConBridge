@@ -115,6 +115,86 @@ static constexpr ProtocolBridgingType PBT_GenericMIDI		= 0x00000008;
 static constexpr ProtocolBridgingType PBT_YamahaSQ			= 0x00000010;
 static constexpr ProtocolBridgingType PBT_HUI				= 0x00000020;
 
+/**
+ * Helper method to query a user readable short name for a protocol type that can be shown on UI.
+ * @param type	The type value to get a short name for.
+ * @return	The short name string
+ */
+static String GetProtocolBridgingShortName(ProtocolBridgingType type)
+{
+	switch (type)
+	{
+		case PBT_DiGiCo:
+			return "DiGiCo";
+		case PBT_GenericOSC:
+			return "OSC";
+		case PBT_BlacktraxRTTrPM:
+			return "Blacktrax";
+		case PBT_GenericMIDI:
+			return "MIDI";
+		case PBT_YamahaSQ:
+			return "YamahaSQ";
+		case PBT_HUI:
+			return "HUI";
+		case PBT_None:
+		default:
+			return "";
+	}
+}
+
+/**
+ * Helper method to query a user readable name for a protocol type that can be shown on UI.
+ * @param type	The type value to get a nice name for.
+ * @return	The nice name string
+ */
+static String GetProtocolBridgingNiceName(ProtocolBridgingType type)
+{
+	switch (type)
+	{
+	case PBT_DiGiCo:
+		return "DiGiCo OSC";
+	case PBT_GenericOSC:
+		return "Generic OSC";
+	case PBT_BlacktraxRTTrPM:
+		return "Blacktrax RTTrPM";
+	case PBT_GenericMIDI:
+		return "Generic MIDI";
+	case PBT_YamahaSQ:
+		return "YamahaSQ";
+	case PBT_HUI:
+		return "Generic HUI";
+	case PBT_None:
+	default:
+		return "";
+	}
+}
+
+/**
+ * Helper method to query a identifying name string for a protocol type that can be used in code or config files.
+ * @param type	The type value to get a string id for.
+ * @return	The system name string
+ */
+static String GetProtocolBridgingSystemName(ProtocolBridgingType type)
+{
+	switch (type)
+	{
+	case PBT_DiGiCo:
+		return "DiGiCoOSC";
+	case PBT_GenericOSC:
+		return "GenericOSC";
+	case PBT_BlacktraxRTTrPM:
+		return "BlacktraxRTTrPM";
+	case PBT_GenericMIDI:
+		return "GenericMIDI";
+	case PBT_YamahaSQ:
+		return "DummyYamahaSQ";
+	case PBT_HUI:
+		return "DummyHUI";
+	case PBT_None:
+	default:
+		return "INVALID";
+	}
+}
 
 /**
  * OSC Communication mode

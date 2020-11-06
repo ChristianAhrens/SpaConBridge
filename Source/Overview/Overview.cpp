@@ -105,7 +105,7 @@ COverviewComponent::COverviewComponent()
 
 	// Create the table container.
 	m_tableContainer = std::make_unique<TablePageComponent>();
-	m_multiSliderContainer = std::make_unique<COverviewMultiSurface>();
+	m_multiSliderContainer = std::make_unique<MultiSurfacePageComponent>();
 	m_settingsContainer = std::make_unique<SettingsPageComponent>();
 
 	// Create a tab container, where the CTablePageComponent will be one of the tabs.

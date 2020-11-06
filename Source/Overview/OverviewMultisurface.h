@@ -44,15 +44,15 @@ namespace SoundscapeBridgeApp
 
 
 /**
- * Class COverviewMultiSurface is just a component which contains the multi-source slider
+ * Class MultiSurfacePageComponent is just a component which contains the multi-source slider
  * and the mapping selection control.
  */
-class COverviewMultiSurface : public PageComponentBase,
-	public ComboBox::Listener
+class MultiSurfacePageComponent :	public PageComponentBase,
+									public ComboBox::Listener
 {
 public:
-	COverviewMultiSurface();
-	~COverviewMultiSurface() override;
+	MultiSurfacePageComponent();
+	~MultiSurfacePageComponent() override;
 
 	void UpdateGui(bool init) override;
 
@@ -62,11 +62,11 @@ protected:
 	void comboBoxChanged(ComboBox *comboBox) override;
 
 private:
-	std::unique_ptr<Component>	m_multiSlider;			/**> Multi-source 2D-Slider. */
+	std::unique_ptr<Component>	m_multiSliderSurface;	/**> Multi-source 2D-Slider. */
 	std::unique_ptr<Label>		m_mappingAreaLabel;		/**> Mapping selector label. */
 	std::unique_ptr<ComboBox>	m_mappingAreaSelect;	/**> ComboBox selector for the coordinate mapping area. */
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(COverviewMultiSurface)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSurfacePageComponent)
 };
 
 

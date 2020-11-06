@@ -49,7 +49,7 @@ namespace SoundscapeBridgeApp
  */
 class CTabbedComponent;
 class TablePageComponent;
-class COverviewMultiSurface;
+class MultiSurfacePageComponent;
 class SettingsPageComponent;
 
 
@@ -149,7 +149,7 @@ private:
 	std::unique_ptr<LedButton>				m_onlineLed;			/**> Button used as Online indicator LED. */
 	std::unique_ptr<CTabbedComponent>		m_tabbedComponent;		/**> A container for tabs. */
 	std::unique_ptr<TablePageComponent> m_tableContainer;		/**> The actual table container inside this component. */
-	std::unique_ptr<COverviewMultiSurface>	m_multiSliderContainer;	/**> Container for multi-slider. */
+	std::unique_ptr<MultiSurfacePageComponent>	m_multiSliderContainer;	/**> Container for multi-slider. */
 	std::unique_ptr<SettingsPageComponent>		m_settingsContainer;	/**> Container for settings component. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(COverviewComponent)

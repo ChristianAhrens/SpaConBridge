@@ -50,20 +50,19 @@ namespace SoundscapeBridgeApp
 
 /*
 ===============================================================================
- Class COverviewMultiSurface
+ Class MultiSurfacePageComponent
 ===============================================================================
 */
 
 /**
  * Class constructor.
  */
-COverviewMultiSurface::COverviewMultiSurface()
+MultiSurfacePageComponent::MultiSurfacePageComponent()
 	: PageComponentBase(PCT_MultiSlide)
 {
 	// Add multi-slider
-	m_multiSlider = std::make_unique<CSurfaceMultiSlider>();
-	addAndMakeVisible(m_multiSlider.get());
-
+	m_multiSliderSurface = std::make_unique<CSurfaceMultiSlider>();
+	addAndMakeVisible(m_multiSliderSurface.get());
 
 	// Mapping selector
 	m_mappingAreaSelect = std::make_unique<ComboBox>("Coordinate mapping");
@@ -84,7 +83,7 @@ COverviewMultiSurface::COverviewMultiSurface()
 /**
  * Class destructor.
  */
-COverviewMultiSurface::~COverviewMultiSurface()
+MultiSurfacePageComponent::~MultiSurfacePageComponent()
 {
 }
 
@@ -92,7 +91,7 @@ COverviewMultiSurface::~COverviewMultiSurface()
  * Reimplemented to paint background.
  * @param g		Graphics context that must be used to do the drawing operations.
  */
-void COverviewMultiSurface::paint(Graphics& g)
+void MultiSurfacePageComponent::paint(Graphics& g)
 {
 	// Paint background to cover the controls behind this overlay.
 	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
@@ -102,7 +101,7 @@ void COverviewMultiSurface::paint(Graphics& g)
 /**
  * Reimplemented to resize and re-postion controls on the overview window.
  */
-void COverviewMultiSurface::resized()
+void MultiSurfacePageComponent::resized()
 {
 	auto bounds = getLocalBounds().reduced(5);
 	
@@ -112,7 +111,7 @@ void COverviewMultiSurface::resized()
 	// set the bounds for the 2D slider area.
 	bounds.removeFromBottom(5);
 	bounds.reduce(5, 5);
-	m_multiSlider->setBounds(bounds);
+	m_multiSliderSurface->setBounds(bounds);
 }
 
 /**
@@ -120,7 +119,7 @@ void COverviewMultiSurface::resized()
  * @param init	True to ignore any changed flags and update the plugin parameters
  *				in the GUI anyway. Good for when opening the Overview for the first time.
  */
-void COverviewMultiSurface::UpdateGui(bool init)
+void MultiSurfacePageComponent::UpdateGui(bool init)
 {
 	// Will be set to true if any changes relevant to the multi-slider are found.
 	bool update = init;
@@ -139,7 +138,7 @@ void COverviewMultiSurface::UpdateGui(bool init)
 	}
 
 	CController* ctrl = CController::GetInstance();
-	if (ctrl && m_multiSlider)
+	if (ctrl && m_multiSliderSurface)
 	{
 		if (ctrl->PopParameterChanged(DCS_Overview, DCT_NumProcessors))
 			update = true;
@@ -164,7 +163,7 @@ void COverviewMultiSurface::UpdateGui(bool init)
 			}
 		}
 
-		CSurfaceMultiSlider* multiSlider = dynamic_cast<CSurfaceMultiSlider*>(m_multiSlider.get());
+		CSurfaceMultiSlider* multiSlider = dynamic_cast<CSurfaceMultiSlider*>(m_multiSliderSurface.get());
 		if (update && multiSlider)
 		{
 			// Update all nipple positions on the 2D-Slider.
@@ -178,7 +177,7 @@ void COverviewMultiSurface::UpdateGui(bool init)
  * Called when a ComboBox has its selected item changed. 
  * @param comboBox	The combo box which has changed.
  */
-void COverviewMultiSurface::comboBoxChanged(ComboBox *comboBox)
+void MultiSurfacePageComponent::comboBoxChanged(ComboBox *comboBox)
 {
 	COverviewManager* ovrMgr = COverviewManager::GetInstance();
 	if (ovrMgr)

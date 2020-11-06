@@ -96,11 +96,19 @@ AboutPageComponent::AboutPageComponent()
 	addAndMakeVisible(m_eulaField.get());
 
 	// JUCE copyright label
-	String juceLabelString = String("Made with JUCE.\nCopyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2017 - ROLI Ltd.");
+	String juceLabelString = String("Made with JUCE.\nCopyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2020 - ROLI Ltd.");
 	m_juceLabel = std::make_unique<Label>("JuceLabel", juceLabelString);
 	m_juceLabel->setJustificationType(Justification::topRight);
 	m_juceLabel->setFont(Font(13.0, Font::plain));
 	addAndMakeVisible(m_juceLabel.get());
+
+	// Plugin version label
+	String formatString = String("Audio Units (AU) Plug-in format. \nThe Audio Units logo is a trademark of Apple Computer, Inc. \nCopyright ") +
+		String(CharPointer_UTF8("\xc2\xa9")) + String(" 2005 Apple Computer, Inc. All rights reserved.");
+	m_formatInfoLabel = std::make_unique<Label>("FormatInfo", formatString);
+	m_formatInfoLabel->setJustificationType(Justification::topLeft);
+	m_formatInfoLabel->setFont(Font(13.0, Font::plain));
+	addAndMakeVisible(m_formatInfoLabel.get());
 }
 
 /**
@@ -127,16 +135,23 @@ void AboutPageComponent::UpdateGui(bool init)
  */
 void AboutPageComponent::paint(Graphics& g)
 {
-	int w = getLocalBounds().getWidth();
-	int h = getLocalBounds().getHeight();
+	// Transparent background overlay
+	g.setColour(Colours::black);
+	g.setOpacity(0.5f);
+	g.fillRect(getLocalBounds());
+	g.setOpacity(1.0f);
+
+	auto bounds = getLocalBounds().reduced(35);
 
 	// Background
-	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
-	g.fillRect(Rectangle<int>(8, 8, w - 16, h - 16));
+	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
+	g.fillRoundedRectangle(bounds.toFloat(), 8.0f);
+	g.setColour(getLookAndFeel().findColour(TextEditor::outlineColourId));
+	g.drawRoundedRectangle(bounds.toFloat(), 8.0f, 3.0f);
 
 	// JUCE logo
 	std::unique_ptr<Drawable> formatLogo = Drawable::createFromImageData(BinaryData::logo_juce_svg, BinaryData::logo_juce_svgSize);
-	formatLogo->drawWithin(g, Rectangle<float>(w - 120.0f, 10.0f, 100.0f, 35.0f), RectanglePlacement::stretchToFit, 1.0f);
+	formatLogo->drawWithin(g, Rectangle<float>(bounds.getWidth() - 120.0f, 45.0f, 100.0f, 35.0f), RectanglePlacement::stretchToFit, 1.0f);
 }
 
 /**
@@ -144,63 +159,32 @@ void AboutPageComponent::paint(Graphics& g)
  */
 void AboutPageComponent::resized()
 {
-	int eulaVPos = 170;
-	int eulaHeight = jmin((getLocalBounds().getHeight() - (eulaVPos + 20)), 270);
+	auto bounds = getLocalBounds().reduced(35);
 
-	m_versionLabel->setBounds(60, 12, 300, 55);
-	m_eulaField->setBounds(20, (eulaVPos), getLocalBounds().getWidth() - 40, eulaHeight);
-	m_dbLink->setBounds(60, 65, 110, 18);
-	m_juceLabel->setBounds(getLocalBounds().getWidth() - 210, 48, 200, 50);
-}
+	int eulaVPos = 205;
+	int eulaHeight = jmin((bounds.getHeight() - (eulaVPos + 20)), 270);
 
-
-/*
-===============================================================================
- Class CAboutPageComponentGeneric
-===============================================================================
-*/
-
-/**
- * Class constructor.
- */
-CAboutPageComponentGeneric::CAboutPageComponentGeneric()
-{
-	// Plugin version label
-	String formatString = String("Audio Units (AU) Plug-in format. \nThe Audio Units logo is a trademark of Apple Computer, Inc. \nCopyright ") +
-		String(CharPointer_UTF8("\xc2\xa9")) + String(" 2005 Apple Computer, Inc. All rights reserved.");
-	m_formatInfoLabel = std::make_unique<Label>("FormatInfo", formatString);
-	m_formatInfoLabel->setJustificationType(Justification::topLeft);
-	m_formatInfoLabel->setFont(Font(13.0, Font::plain));
-	addAndMakeVisible(m_formatInfoLabel.get());
+	m_versionLabel->setBounds(95, 47, 300, 55);
+	m_eulaField->setBounds(55, (eulaVPos), bounds.getWidth() - 40, eulaHeight);
+	m_dbLink->setBounds(95, 100, 110, 18);
+	m_juceLabel->setBounds(bounds.getWidth() - 210, 83, 200, 50);
+	m_formatInfoLabel->setBounds(130, 140, bounds.getWidth() - 135, 70);
 }
 
 /**
- * Class destructor.
+ * Called when the mouse button is released.
+ * Reimplemented just to call EndGuiGesture() to inform the host.
+ * @param e		Details about the position and status of the mouse event, including the source component in which it occurred
  */
-CAboutPageComponentGeneric::~CAboutPageComponentGeneric()
+void AboutPageComponent::mouseUp(const MouseEvent& e)
 {
-}
+	auto clickPos = e.getMouseDownPosition();
+	auto bounds = getLocalBounds().reduced(35);
 
-/**
- * Reimplemented to paint the overlay's background.
- * @param g		Graphics context that must be used to do the drawing operations.
- */
-void CAboutPageComponentGeneric::paint(Graphics& g)
-{
-	// First paint base class
-	AboutPageComponent::paint(g);
-
-}
-
-/**
- * Reimplemented to resize and re-postion controls & labels.
- */
-void CAboutPageComponentGeneric::resized()
-{
-	// First resize base class components
-	AboutPageComponent::resized();
-
-	m_formatInfoLabel->setBounds(95, 105, getLocalBounds().getWidth() - 135, 70);
+	if (!bounds.contains(clickPos) && onCloseClick)
+	{
+		onCloseClick();
+	}
 }
 
 

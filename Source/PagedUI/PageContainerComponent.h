@@ -46,10 +46,11 @@ namespace SoundscapeBridgeApp
 /**
  * Forward declarations
  */
-class CTabbedComponent;
+class CustomButtonTabbedComponent;
 class TablePageComponent;
 class MultiSurfacePageComponent;
 class SettingsPageComponent;
+class AboutPageComponent;
 
 
 /**
@@ -114,42 +115,54 @@ protected:
 /**
  * Class PageContainerComponent is a simple container used to hold the GUI controls.
  */
-class PageContainerComponent : public Component,
-	public TextEditor::Listener,
-	private Timer
+class PageContainerComponent :	public Component,
+								public TextEditor::Listener,
+								public Button::Listener,
+								private Timer
 {
 public:
 	PageContainerComponent();
 	~PageContainerComponent() override;
 	void UpdateGui(bool init);
 
+	//==============================================================================
 	void SetActiveTab(int tabIdx);
 
+	//==============================================================================
 	void SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType);
 	DbLookAndFeelBase::LookAndFeelType GetLookAndFeelType();
 
 private:
+	//==============================================================================
+	void toggleAboutPage();
+
+	//==============================================================================
 	void paint(Graphics&) override;
 	void resized() override;
 
+	//==============================================================================
 	void textEditorFocusLost(TextEditor &) override;
 	void textEditorReturnKeyPressed(TextEditor &) override;
 
+	//==============================================================================
+	void buttonClicked(Button*) override;
+
+	//==============================================================================
 	void timerCallback() override;
 
 private:
-	std::unique_ptr<Label>					m_versionLabel;			/**> App version label. */
-	std::unique_ptr<Label>					m_nameLabel;			/**> App name. */
-	std::unique_ptr<Label>					m_titleLabel;			/**> Overview title label. */
-	Image									m_appLogo;				/**> Logo image. */
-	std::unique_ptr<Label>					m_rateLabel;			/**> Send/receive rate label. */
-	std::unique_ptr<TextEditor>				m_rateTextEdit;			/**> Text editor for the OSC send/receive rate in ms. */
-	std::unique_ptr<Label>					m_onlineLabel;			/**> Online indicator label. */
-	std::unique_ptr<LedButton>				m_onlineLed;			/**> Button used as Online indicator LED. */
-	std::unique_ptr<CTabbedComponent>		m_tabbedComponent;		/**> A container for tabs. */
-	std::unique_ptr<TablePageComponent> m_tableContainer;		/**> The actual table container inside this component. */
-	std::unique_ptr<MultiSurfacePageComponent>	m_multiSliderContainer;	/**> Container for multi-slider. */
-	std::unique_ptr<SettingsPageComponent>		m_settingsContainer;	/**> Container for settings component. */
+	std::unique_ptr<Label>							m_versionLabel;			/**> App version label. */
+	std::unique_ptr<Label>							m_versionStringLabel;	/**> "Version" string. */
+	std::unique_ptr<ImageButton>					m_logoButton;			/**> App logo button triggering about page. */
+	std::unique_ptr<Label>							m_rateLabel;			/**> Send/receive rate label. */
+	std::unique_ptr<TextEditor>						m_rateTextEdit;			/**> Text editor for the OSC send/receive rate in ms. */
+	std::unique_ptr<Label>							m_onlineLabel;			/**> Online indicator label. */
+	std::unique_ptr<LedButton>						m_onlineLed;			/**> Button used as Online indicator LED. */
+	std::unique_ptr<CustomButtonTabbedComponent>	m_tabbedComponent;		/**> A container for tabs. */
+	std::unique_ptr<TablePageComponent>				m_tablePage;			/**> The actual table container inside this component. */
+	std::unique_ptr<MultiSurfacePageComponent>		m_multiSliderPage;		/**> Container for multi-slider. */
+	std::unique_ptr<SettingsPageComponent>			m_settingsPage;			/**> Container for settings component. */
+	std::unique_ptr<AboutPageComponent>				m_aboutPage;			/**> Container for about component. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PageContainerComponent)
 };
@@ -159,7 +172,7 @@ private:
  * Reimplemented TabbedComponent which overrides the createTabButton method in order
  * to provide custom tabBar buttons (See CTabBarButton).
  */
-class CTabbedComponent : public TabbedComponent
+class CustomButtonTabbedComponent : public TabbedComponent
 {
 public:
 
@@ -173,8 +186,8 @@ public:
 		OTI_Settings,
 	};
 
-	CTabbedComponent();
-	~CTabbedComponent() override;
+	CustomButtonTabbedComponent();
+	~CustomButtonTabbedComponent() override;
 
 	bool GetIsHandlingChanges();
 	void SetIsHandlingChanges(bool isHandlingChanges);
@@ -186,7 +199,7 @@ protected:
 
 	bool m_isHandlingChanges{ true };
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CTabbedComponent)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CustomButtonTabbedComponent)
 };
 
 

@@ -39,6 +39,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PageComponents/MultiSurfacePageComponent.h"
 #include "PageComponents/SettingsPageComponent.h"
 #include "PageComponents/TablePageComponent.h"
+#include "PageComponents/AboutPageComponent.h"
 
 #include "../Controller.h"
 #include "../SoundsourceProcessor/SurfaceSlider.h"
@@ -88,28 +89,32 @@ PageContainerComponent::PageContainerComponent()
 	m_rateLabel->setJustificationType(Justification::centred);
 	addAndMakeVisible(m_rateLabel.get());
 
-	// d&b logo and Plugin version label
-	m_appLogo = ImageCache::getFromMemory(BinaryData::SoundscapeBridgeApp_png, BinaryData::SoundscapeBridgeApp_pngSize);
-	m_versionLabel = std::make_unique<Label>("PluginVersion", String(JUCE_STRINGIFY(JUCE_APP_VERSION)));
+	// app logo button and Plugin version label
+	m_logoButton = std::make_unique<ImageButton>("LogoButton");
+	m_logoButton->setImages(false, true, true,
+		ImageCache::getFromMemory(BinaryData::SoundscapeBridgeApp_png, BinaryData::SoundscapeBridgeApp_pngSize), 1.0f, Colours::transparentWhite,
+		Image(), 1.0f, Colours::transparentWhite,
+		Image(), 1.0f, Colours::transparentWhite);
+	m_logoButton->addListener(this);
+	addAndMakeVisible(m_logoButton.get());
+	m_versionLabel = std::make_unique<Label>("Version", String(JUCE_STRINGIFY(JUCE_APP_VERSION)));
 	m_versionLabel->setJustificationType(Justification::centred);
 	m_versionLabel->setFont(Font(11));
 	addAndMakeVisible(m_versionLabel.get());
-	m_nameLabel = std::make_unique<Label>("PluginName", "Version");
-	m_nameLabel->setJustificationType(Justification::centred);
-	m_nameLabel->setFont(Font(11));
-	addAndMakeVisible(m_nameLabel.get());
+	m_versionStringLabel = std::make_unique<Label>("VersionString", "Version");
+	m_versionStringLabel->setJustificationType(Justification::centred);
+	m_versionStringLabel->setFont(Font(11));
+	addAndMakeVisible(m_versionStringLabel.get());
 
-	m_titleLabel = std::make_unique<Label>("Title", "");
-	m_titleLabel->setJustificationType(Justification::centred);
-	addAndMakeVisible(m_titleLabel.get());
-
-	// Create the table container.
-	m_tableContainer = std::make_unique<TablePageComponent>();
-	m_multiSliderContainer = std::make_unique<MultiSurfacePageComponent>();
-	m_settingsContainer = std::make_unique<SettingsPageComponent>();
+	// Create the pages.
+	m_tablePage = std::make_unique<TablePageComponent>();
+	m_multiSliderPage = std::make_unique<MultiSurfacePageComponent>();
+	m_settingsPage = std::make_unique<SettingsPageComponent>();
+	m_aboutPage = std::make_unique<AboutPageComponent>();
+	m_aboutPage->onCloseClick = [=] { toggleAboutPage(); };
 
 	// Create a tab container, where the CTablePageComponent will be one of the tabs.
-	m_tabbedComponent = std::make_unique<CTabbedComponent>();
+	m_tabbedComponent = std::make_unique<CustomButtonTabbedComponent>();
 	m_tabbedComponent->setTabBarDepth(44);
 	m_tabbedComponent->setOutline(0);
 	m_tabbedComponent->setIndent(0);
@@ -117,13 +122,16 @@ PageContainerComponent::PageContainerComponent()
 
 	// Add the overview tabs.
 	m_tabbedComponent->SetIsHandlingChanges(false);
-	m_tabbedComponent->addTab("Table", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_tableContainer.get(), false);
-	m_tabbedComponent->addTab("Slider", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSliderContainer.get(), false);
-	m_tabbedComponent->addTab("Settings", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_settingsContainer.get(), false);
+	m_tabbedComponent->addTab("Table", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_tablePage.get(), false);
+	m_tabbedComponent->addTab("Slider", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSliderPage.get(), false);
+	m_tabbedComponent->addTab("Settings", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_settingsPage.get(), false);
 	m_tabbedComponent->SetIsHandlingChanges(true);
 
 	// Start GUI-refreshing timer.
 	startTimer(GUI_UPDATE_RATE_SLOW);
+
+	// push the logo button to front to overcome issue of overlapping tabbed component grabbing mouse interaction
+	m_logoButton->toFront(false);
 }
 
 /**
@@ -155,11 +163,8 @@ void PageContainerComponent::paint(Graphics& g)
 	g.fillRect(Rectangle<int>(w - 39, 6, 1, 30));
 	g.fillRect(Rectangle<int>(w - 86, 6, 1, 30));
 
-	// Add app logo 
-	g.drawImage(m_appLogo, getLocalBounds().getWidth() - 35, 6, 30, 30, 0, 0, 1024, 1024);
-
 	// Draw little line below right and left overlap of tabbedcomponent buttonbar to match with the line which is automatically drawn 
-	// by the CTabbedComponent's CTabBarButton.
+	// by the CustomButtonTabbedComponent's CTabBarButton.
 	g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
 	g.drawRect(Rectangle<int>(0, 43, 40, 1), 1);
 	g.drawRect(Rectangle<int>(w - 86, 43, 86, 1), 1);
@@ -188,18 +193,28 @@ void PageContainerComponent::resized()
 	bottomBarFB.performLayout(getLocalBounds().removeFromBottom(45));
 
 	// Name and Version label
-	m_nameLabel->setBounds(w - 89, 3, 55, 25);
+	m_versionStringLabel->setBounds(w - 89, 3, 55, 25);
 	m_versionLabel->setBounds(w - 87, 21, 42, 15);
 
+	// logo button (triggers about page)
+	m_logoButton->setBounds(w - 35, 7, 30, 30);
+
 	// Tab container takes up the entire window minus the bottom bar (with the IP etc).
-	// See CTabbedComponent::resized().
+	// See CustomButtonTabbedComponent::resized().
 	m_tabbedComponent->setBounds(Rectangle<int>(0, 0, w, getLocalBounds().getHeight() - 45));
 
 	// Resize overview table container.
 	auto rect = Rectangle<int>(0, 44, w, getLocalBounds().getHeight() - 89);
-	m_tableContainer->setBounds(rect);
-	m_multiSliderContainer->setBounds(rect);
-	m_settingsContainer->setBounds(rect);
+	m_tablePage->setBounds(rect);
+	m_multiSliderPage->setBounds(rect);
+	m_settingsPage->setBounds(rect);
+
+	// finally resize the aboutpage, if visible and therefor on top of everything else at all
+	if (m_aboutPage && m_aboutPage->isVisible())
+	{
+		m_aboutPage->setBounds(getLocalBounds());
+		m_aboutPage->toFront(false);
+	}
 }
 
 /**
@@ -233,6 +248,32 @@ void PageContainerComponent::textEditorReturnKeyPressed(TextEditor& textEditor)
 }
 
 /**
+ * Callback function for button clicks.
+ * @param button	The button object that was clicked.
+ */
+void PageContainerComponent::buttonClicked(Button* button)
+{
+	if (m_logoButton && m_logoButton.get() == button && m_aboutPage)
+	{
+		toggleAboutPage();
+	}
+}
+
+void PageContainerComponent::toggleAboutPage()
+{
+	if (m_aboutPage->isVisible())
+	{
+		m_aboutPage->setVisible(false);
+		removeChildComponent(m_aboutPage.get());
+	}
+	else
+	{
+		addAndMakeVisible(m_aboutPage.get());
+	}
+	resized();
+}
+
+/**
  * Timer callback function, which will be called at regular intervals to update the GUI.
  * Reimplemented from base class Timer.
  */
@@ -259,10 +300,10 @@ void PageContainerComponent::UpdateGui(bool init)
 	}
 
 	// Save some performance: only update the component inside the currently active tab.
-	if (m_tabbedComponent->getCurrentTabIndex() == CTabbedComponent::OTI_Table)
+	if (m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_Table)
 	{
-		if (m_tableContainer)
-			m_tableContainer->UpdateGui(init);
+		if (m_tablePage)
+			m_tablePage->UpdateGui(init);
 
 		// When the overview table is active, no need to refresh GUI very quickly
 		if (getTimerInterval() == GUI_UPDATE_RATE_FAST)
@@ -271,10 +312,10 @@ void PageContainerComponent::UpdateGui(bool init)
 			startTimer(GUI_UPDATE_RATE_SLOW);
 		}
 	}
-	else if (m_tabbedComponent->getCurrentTabIndex() == CTabbedComponent::OTI_MultiSlider)
+	else if (m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_MultiSlider)
 	{
-		if (m_multiSliderContainer)
-			m_multiSliderContainer->UpdateGui(init);
+		if (m_multiSliderPage)
+			m_multiSliderPage->UpdateGui(init);
 
 		// When multi-slider is active, we refresh the GUI faster
 		if (getTimerInterval() == GUI_UPDATE_RATE_SLOW)
@@ -301,7 +342,7 @@ void PageContainerComponent::SetActiveTab(int tabIdx)
  */
 void PageContainerComponent::SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType)
 {
-	m_settingsContainer->SetSelectedLookAndFeelType(lookAndFeelType);
+	m_settingsPage->SetSelectedLookAndFeelType(lookAndFeelType);
 }
 
 /**
@@ -310,20 +351,20 @@ void PageContainerComponent::SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelTy
  */
 DbLookAndFeelBase::LookAndFeelType PageContainerComponent::GetLookAndFeelType()
 {
-	return m_settingsContainer->GetSelectedLookAndFeelType();
+	return m_settingsPage->GetSelectedLookAndFeelType();
 }
 
 
 /*
 ===============================================================================
- Class CTabbedComponent
+ Class CustomButtonTabbedComponent
 ===============================================================================
 */
 
 /**
  * Class constructor.
  */
-CTabbedComponent::CTabbedComponent()
+CustomButtonTabbedComponent::CustomButtonTabbedComponent()
 	: TabbedComponent(TabbedButtonBar::TabsAtTop)
 {
 }
@@ -331,7 +372,7 @@ CTabbedComponent::CTabbedComponent()
 /**
  * Class destructor.
  */
-CTabbedComponent::~CTabbedComponent()
+CustomButtonTabbedComponent::~CustomButtonTabbedComponent()
 {
 }
 
@@ -341,7 +382,7 @@ CTabbedComponent::~CTabbedComponent()
  * @param tabIndex	Index of the tab from left to right, starting at 0.
  * @return	Pointer to a CTabBarButton.
  */
-TabBarButton* CTabbedComponent::createTabButton(const String& tabName, int tabIndex)
+TabBarButton* CustomButtonTabbedComponent::createTabButton(const String& tabName, int tabIndex)
 {
 	ignoreUnused(tabName);
 	return new CTabBarButton(tabIndex, getTabbedButtonBar());
@@ -354,7 +395,7 @@ TabBarButton* CTabbedComponent::createTabButton(const String& tabName, int tabIn
  * @param newCurrentTabName		Name of the tab.
  * @return	Pointer to a CTabBarButton.
  */
-void CTabbedComponent::currentTabChanged(int newCurrentTabIndex, const String& newCurrentTabName)
+void CustomButtonTabbedComponent::currentTabChanged(int newCurrentTabIndex, const String& newCurrentTabName)
 {
 	ignoreUnused(newCurrentTabName);
 
@@ -373,7 +414,7 @@ void CTabbedComponent::currentTabChanged(int newCurrentTabIndex, const String& n
 /**
  * Reimplemented to re-postion the tabBar so make the tab buttons start further to the right.
  */
-void CTabbedComponent::resized()
+void CustomButtonTabbedComponent::resized()
 {
 	int w = getLocalBounds().getWidth();
 	getTabbedButtonBar().setBounds(Rectangle<int>(40, 0, w - (40 + 86), 44));
@@ -383,7 +424,7 @@ void CTabbedComponent::resized()
  * Getter for the bool flag that indicates if tab changes should be broadcasted
  * @return True if changes are currently handled (broadcasted), false if not
  */
-bool CTabbedComponent::GetIsHandlingChanges()
+bool CustomButtonTabbedComponent::GetIsHandlingChanges()
 {
 	return m_isHandlingChanges;
 }
@@ -392,7 +433,7 @@ bool CTabbedComponent::GetIsHandlingChanges()
  * Setter for the bool flag that indicates if tab changes should be broadcasted
  * @param isHandlingChanges		The new value to be set as the new internal bool flag state
  */
-void CTabbedComponent::SetIsHandlingChanges(bool isHandlingChanges)
+void CustomButtonTabbedComponent::SetIsHandlingChanges(bool isHandlingChanges)
 {
 	m_isHandlingChanges = isHandlingChanges;
 }
@@ -431,13 +472,13 @@ void CTabBarButton::updateDrawableButtonImageColours()
 	String imageName;
 	switch (m_tabIndex)
 	{
-	case CTabbedComponent::OTI_Table:
+	case CustomButtonTabbedComponent::OTI_Table:
 		imageName = BinaryData::vertical_split24px_svg;
 		break;
-	case CTabbedComponent::OTI_MultiSlider:
+	case CustomButtonTabbedComponent::OTI_MultiSlider:
 		imageName = BinaryData::grain24px_svg;
 		break;
-	case CTabbedComponent::OTI_Settings:
+	case CustomButtonTabbedComponent::OTI_Settings:
 		imageName = BinaryData::settings24px_svg;
 		break;
 	default:

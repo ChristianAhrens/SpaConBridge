@@ -52,58 +52,28 @@ public:
 	AboutPageComponent();
 	~AboutPageComponent() override;
 
+	//==============================================================================
 	void UpdateGui(bool init) override;
 
+	//==============================================================================
+	std::function<void()> onCloseClick;
+
 protected:
+	//==============================================================================
 	void paint(Graphics&) override;
 	void resized() override;
 
+	//==============================================================================
+	void mouseUp(const MouseEvent& e) override;
+
 private:
-	/**
-	 * App version label
-	 */
-	std::unique_ptr<Label>	m_versionLabel;
-
-	/**
-	 * Hyperlink to dbaudio.com
-	 */
-	std::unique_ptr<HyperlinkButton> m_dbLink;
-
-	/**
-	 * JUCE copyright label
-	 */
-	std::unique_ptr<Label>	m_juceLabel;
-
-	/**
-	 * Text field containing the d&b EULA.
-	 */
-	std::unique_ptr<TextEditor>	m_eulaField;
+	std::unique_ptr<Label>				m_versionLabel;		/**> App version label. */
+	std::unique_ptr<HyperlinkButton>	m_dbLink;			/**> Hyperlink to dbaudio.com. */
+	std::unique_ptr<Label>				m_juceLabel;		/**> JUCE copyright label. */
+	std::unique_ptr<TextEditor>			m_eulaField;		/**> Text field containing the d&b EULA. */
+	std::unique_ptr<Label>				m_formatInfoLabel;	/**> Host format license info. */
 	
-
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AboutPageComponent)
-};
-
-
-/**
- * Class CAboutPageComponentGeneric is a GUI overlay which provides .
- */
-class CAboutPageComponentGeneric : public AboutPageComponent
-{
-public:
-	CAboutPageComponentGeneric();
-	~CAboutPageComponentGeneric() override;
-
-protected:
-	void paint(Graphics&) override;
-	void resized() override;
-
-private:
-	/**
-	 * Host format license into
-	 */
-	std::unique_ptr<Label>	m_formatInfoLabel;
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CAboutPageComponentGeneric)
 };
 
 

@@ -82,7 +82,7 @@ protected:
 	void resized() override;
 
 private:
-	std::unique_ptr<TableModelComponent>		m_overviewTable;					/**> The actual table model / component inside this component. */
+	std::unique_ptr<TableModelComponent>		m_pageContainerTable;					/**> The actual table model / component inside this component. */
 	std::unique_ptr<SoundsourceProcessorEditor> m_selectedProcessorInstanceEditor;	/**> The processor editor component corresponding to the selected row */
 	std::unique_ptr<TextButton>					m_addInstance;						/**> Button to add a processor instance */
 	std::unique_ptr<TextButton>					m_removeInstance;					/**> Button to remove the selected processor instance */

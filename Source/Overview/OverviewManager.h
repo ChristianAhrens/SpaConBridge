@@ -49,22 +49,22 @@ namespace SoundscapeBridgeApp
  * Forward declarations
  */
 class COverview;
-class COverviewComponent;
+class PageContainerComponent;
 
 
 /**
- * Class COverviewManager which takes care of opening and closing the overview window.
+ * Class PageComponentManager which takes care of opening and closing the overview window.
  */
-class COverviewManager : public AppConfiguration::XmlConfigurableElement
+class PageComponentManager : public AppConfiguration::XmlConfigurableElement
 {
 public:
-	COverviewManager();
-	virtual ~COverviewManager();
-	static COverviewManager* GetInstance();
+	PageComponentManager();
+	virtual ~PageComponentManager();
+	static PageComponentManager* GetInstance();
 
-	void OpenOverview();
-	COverviewComponent* GetOverview();
-	void CloseOverview(bool destroy);
+	void OpenPageContainer();
+	PageContainerComponent* GetPageContainer();
+	void ClosePageContainer(bool destroy);
 
 	int GetActiveTab() const;
 	void SetActiveTab(int tabIdx, bool dontSendNotification);
@@ -79,12 +79,12 @@ public:
 	bool setStateXml(XmlElement* stateXml) override;
 
 protected:
-	static COverviewManager	*m_singleton;			/**> The one and only instance of COverviewManager. */
-	COverviewComponent		*m_overview;			/**> Pointer to the Overview winodw, if any. */
-	int						m_selectedTab{ 0 };		/**> Remember the last active tab. */
-	int						m_selectedMapping{ 1 };	/**> Remember the last selected coordinate mapping for the multi-slider. */
+	static PageComponentManager	*m_singleton;			/**> The one and only instance of PageComponentManager. */
+	PageContainerComponent		*m_pageContainer;		/**> Pointer to the Overview winodw, if any. */
+	int							m_selectedTab{ 0 };		/**> Remember the last active tab. */
+	int							m_selectedMapping{ 1 };	/**> Remember the last selected coordinate mapping for the multi-slider. */
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(COverviewManager)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PageComponentManager)
 };
 
 

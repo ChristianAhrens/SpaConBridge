@@ -50,94 +50,94 @@ namespace SoundscapeBridgeApp
 
 /*
 ===============================================================================
- Class COverviewManager
+ Class PageComponentManager
 ===============================================================================
 */
 
 /**
- * The one and only instance of COverviewManager.
+ * The one and only instance of PageComponentManager.
  */
-COverviewManager* COverviewManager::m_singleton = nullptr;
+PageComponentManager* PageComponentManager::m_singleton = nullptr;
 
 /**
  * Class constructor.
  */
-COverviewManager::COverviewManager()
+PageComponentManager::PageComponentManager()
 {
 	jassert(!m_singleton);	// only one instnce allowed!!
 	m_singleton = this;
 
-	//Default overview window properties.
-	m_overview = nullptr;
+	// Default overview window properties.
+	m_pageContainer = nullptr;
 }
 
 /**
- * Destroys the COverviewManager.
+ * Destroys the PageComponentManager.
  */
-COverviewManager::~COverviewManager()
+PageComponentManager::~PageComponentManager()
 {
-	jassert(m_overview == nullptr);
+	jassert(m_pageContainer == nullptr);
 
 	m_singleton = nullptr;
 }
 
 /**
- * Returns the one and only instance of COverviewManager.
- * @return A COverviewManager object or 0.
- * @sa m_singleton, COverviewManager
+ * Returns the one and only instance of PageComponentManager.
+ * @return A PageComponentManager object or 0.
+ * @sa m_singleton, PageComponentManager
  */
-COverviewManager* COverviewManager::GetInstance()
+PageComponentManager* PageComponentManager::GetInstance()
 {
 	if (m_singleton == nullptr)
 	{
-		m_singleton = new COverviewManager();
+		m_singleton = new PageComponentManager();
 	}
 	return m_singleton;
 }
 
 /**
- * Function called when the "Overview" button on the GUI is clicked.
+ * Method to trigger creation of page container component if not existing already.
  */
-void COverviewManager::OpenOverview()
+void PageComponentManager::OpenPageContainer()
 {
 	// Overview window is not currently open -> create it.
-	if (m_overview == nullptr)
+	if (m_pageContainer == nullptr)
 	{
-		m_overview = new COverviewComponent();
+		m_pageContainer = new PageContainerComponent();
 	}
 
 	// Overview window already exists -> bring it to the front.
 	else
 	{
-		m_overview->toFront(true);
+		m_pageContainer->toFront(true);
 	}
 }
 
 /**
- * Getter for the overview component.
+ * Getter for the PageContainer component.
  * This is required to be able to embed the overview in a main component,
  * were the original d&b Soundscape Plugin displayed the overview as a window of its own.
  * @return The overview component.
  */
-COverviewComponent* COverviewManager::GetOverview()
+PageContainerComponent* PageComponentManager::GetPageContainer()
 {
-	if (m_overview == nullptr)
-		OpenOverview();
+	if (m_pageContainer == nullptr)
+		OpenPageContainer();
 
-	return m_overview;
+	return m_pageContainer;
 }
 
 /**
- * Function called by COverview's destructor to set the local pointer to zero.
- * @param destroy	True to also destroy the COverviewManager itself.
+ * Function called by PageContainerComponents's destructor to set the local pointer to zero.
+ * @param destroy	True to also destroy the PageComponentManager itself.
  */
-void COverviewManager::CloseOverview(bool destroy)
+void PageComponentManager::ClosePageContainer(bool destroy)
 {
-	if (m_overview != nullptr)
+	if (m_pageContainer != nullptr)
 	{
 		// Close the overview window.
-		delete m_overview;
-		m_overview = nullptr;
+		delete m_pageContainer;
+		m_pageContainer = nullptr;
 	}
 
 	// Closed overview, so manager no longer needed.
@@ -149,7 +149,7 @@ void COverviewManager::CloseOverview(bool destroy)
  * Get the currently active tab within the overview window.
  * @return The currently active tab.
  */
-int COverviewManager::GetActiveTab() const
+int PageComponentManager::GetActiveTab() const
 {
 	return m_selectedTab;
 }
@@ -158,13 +158,13 @@ int COverviewManager::GetActiveTab() const
  * Set the currently active tab within the overview window.
  * @param tabIdx	The currently active tab index.
  */
-void COverviewManager::SetActiveTab(int tabIdx, bool dontSendNotification)
+void PageComponentManager::SetActiveTab(int tabIdx, bool dontSendNotification)
 {
 	m_selectedTab = tabIdx;
 
-	if (m_overview != nullptr)
+	if (m_pageContainer != nullptr)
 	{
-		m_overview->SetActiveTab(tabIdx);
+		m_pageContainer->SetActiveTab(tabIdx);
 	}
 
 	if (!dontSendNotification)
@@ -177,7 +177,7 @@ void COverviewManager::SetActiveTab(int tabIdx, bool dontSendNotification)
  * Get the currently selected coordinate mapping used for the multi-slider.
  * @return The selected mapping area.
  */
-int COverviewManager::GetSelectedMapping() const
+int PageComponentManager::GetSelectedMapping() const
 {
 	return m_selectedMapping;
 }
@@ -186,7 +186,7 @@ int COverviewManager::GetSelectedMapping() const
  * Set the currently selected coordinate mapping used for the multi-slider.
  * @param mapping	The new selected mapping area.
  */
-void COverviewManager::SetSelectedMapping(int mapping)
+void PageComponentManager::SetSelectedMapping(int mapping)
 {
 	m_selectedMapping = mapping;
 }
@@ -195,11 +195,11 @@ void COverviewManager::SetSelectedMapping(int mapping)
  * Get the currently selected coordinate mapping used for the multi-slider.
  * @return The selected mapping area.
  */
-DbLookAndFeelBase::LookAndFeelType COverviewManager::GetLookAndFeelType() const
+DbLookAndFeelBase::LookAndFeelType PageComponentManager::GetLookAndFeelType() const
 {
-	if (m_overview != nullptr)
+	if (m_pageContainer != nullptr)
 	{
-		return m_overview->GetLookAndFeelType();
+		return m_pageContainer->GetLookAndFeelType();
 	}
 	else
 	{
@@ -212,11 +212,11 @@ DbLookAndFeelBase::LookAndFeelType COverviewManager::GetLookAndFeelType() const
  * Get the currently selected coordinate mapping used for the multi-slider.
  * @return The selected mapping area.
  */
-void COverviewManager::SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType, bool dontSendNotification)
+void PageComponentManager::SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType, bool dontSendNotification)
 {
-	if (m_overview != nullptr)
+	if (m_pageContainer != nullptr)
 	{
-		m_overview->SetLookAndFeelType(lookAndFeelType);
+		m_pageContainer->SetLookAndFeelType(lookAndFeelType);
 	}
 
 	if (!dontSendNotification)
@@ -231,7 +231,7 @@ void COverviewManager::SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType loo
  * @param stateXml	The XML element containing this objects' configuration data
  * @return	True if the data was read and handled successfuly, false if not.
  */
-bool COverviewManager::setStateXml(XmlElement* stateXml)
+bool PageComponentManager::setStateXml(XmlElement* stateXml)
 {
 	if (!stateXml || (stateXml->getTagName() != AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW)))
 		return false;
@@ -283,7 +283,7 @@ bool COverviewManager::setStateXml(XmlElement* stateXml)
  * singleton AppConfiguration class implementation.
  * @return	The XML element data that was created.
  */
-std::unique_ptr<XmlElement> COverviewManager::createStateXml()
+std::unique_ptr<XmlElement> PageComponentManager::createStateXml()
 {
 	auto overviewXmlElement = std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW));
 	if (overviewXmlElement)

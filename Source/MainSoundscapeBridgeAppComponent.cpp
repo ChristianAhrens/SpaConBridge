@@ -55,12 +55,12 @@ MainSoundscapeBridgeAppComponent::MainSoundscapeBridgeAppComponent(std::function
     ignoreUnused(ctrl);
 
     // enshure the overviewmanager singleton is created
-    auto ovrMgr = SoundscapeBridgeApp::COverviewManager::GetInstance();
-    if (ovrMgr)
+    auto pageMgr = SoundscapeBridgeApp::PageComponentManager::GetInstance();
+    if (pageMgr)
     {
         // get the overview component from manager to use as central element for app ui
-        auto overview = ovrMgr->GetOverview();
-        addAndMakeVisible(overview);
+        auto pageContainer = pageMgr->GetPageContainer();
+        addAndMakeVisible(pageContainer);
     }
 
     setSize(896, 414);
@@ -74,12 +74,12 @@ MainSoundscapeBridgeAppComponent::~MainSoundscapeBridgeAppComponent()
         m_config->clearWatchers();
     }
 
-    auto ovrMgr = SoundscapeBridgeApp::COverviewManager::GetInstance();
-    if (ovrMgr)
+    auto pageMgr = SoundscapeBridgeApp::PageComponentManager::GetInstance();
+    if (pageMgr)
     {
-        auto overview = ovrMgr->GetOverview();
-        removeChildComponent(overview);
-        ovrMgr->CloseOverview(true);
+        auto pageContainer = pageMgr->GetPageContainer();
+        removeChildComponent(pageContainer);
+        pageMgr->ClosePageContainer(true);
     }
 
     auto ctrl = SoundscapeBridgeApp::CController::GetInstance();
@@ -110,12 +110,12 @@ void MainSoundscapeBridgeAppComponent::resized()
     safeBounds.removeFromLeft(safety._left);
     safeBounds.removeFromRight(safety._right);
 
-    auto ovrMgr = SoundscapeBridgeApp::COverviewManager::GetInstance();
-    if (ovrMgr)
+    auto pageMgr = SoundscapeBridgeApp::PageComponentManager::GetInstance();
+    if (pageMgr)
     {
-        auto overview = ovrMgr->GetOverview();
-        if (overview)
-            overview->setBounds(safeBounds);
+        auto pageContainer = pageMgr->GetPageContainer();
+        if (pageContainer)
+            pageContainer->setBounds(safeBounds);
     }
 }
 
@@ -125,9 +125,9 @@ void MainSoundscapeBridgeAppComponent::performConfigurationDump()
     if (ctrl)
         m_config->setConfigState(ctrl->createStateXml());
 
-    auto ovrMgr = SoundscapeBridgeApp::COverviewManager::GetInstance();
-    if (ovrMgr)
-        m_config->setConfigState(ovrMgr->createStateXml());
+    auto pageMgr = SoundscapeBridgeApp::PageComponentManager::GetInstance();
+    if (pageMgr)
+        m_config->setConfigState(pageMgr->createStateXml());
 }
 
 void MainSoundscapeBridgeAppComponent::onConfigUpdated()
@@ -142,9 +142,9 @@ void MainSoundscapeBridgeAppComponent::onConfigUpdated()
         ctrl->setStateXml(ctrlConfigState.get());
 
     // set the overview manager modules' config
-    auto ovrMgr = SoundscapeBridgeApp::COverviewManager::GetInstance();
-    if (ovrMgr)
-        ovrMgr->setStateXml(ovrConfigState.get());
+    auto pageMgr = SoundscapeBridgeApp::PageComponentManager::GetInstance();
+    if (pageMgr)
+        pageMgr->setStateXml(ovrConfigState.get());
 
     // set the lookandfeel config (forwards to MainWindow where the magic happens)
     if (ovrConfigState)

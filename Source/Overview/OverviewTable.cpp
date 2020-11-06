@@ -62,9 +62,9 @@ TablePageComponent::TablePageComponent()
 	: PageComponentBase(PCT_Overview)
 {
 	// Create the table model/component.
-	m_overviewTable = std::make_unique<TableModelComponent>();
-	m_overviewTable->currentSelectedProcessorChanged = [=](ProcessorId id) { this->onCurrentSelectedProcessorChanged(id); };
-	addAndMakeVisible(m_overviewTable.get());
+	m_pageContainerTable = std::make_unique<TableModelComponent>();
+	m_pageContainerTable->currentSelectedProcessorChanged = [=](ProcessorId id) { this->onCurrentSelectedProcessorChanged(id); };
+	addAndMakeVisible(m_pageContainerTable.get());
 
 	// Add/Remove Buttons
 	m_addInstance = std::make_unique<TextButton>();
@@ -170,11 +170,11 @@ void TablePageComponent::resized()
 
 	if (m_selectedProcessorInstanceEditor)
 	{
-		tableAndEditorFlex.items.add(FlexItem(*m_overviewTable).withFlex(1).withMargin(tableMargin));
+		tableAndEditorFlex.items.add(FlexItem(*m_pageContainerTable).withFlex(1).withMargin(tableMargin));
 		tableAndEditorFlex.items.add(FlexItem(*m_selectedProcessorInstanceEditor.get()).withFlex(1).withMargin(editorMargin));
 	}
 	else
-		tableAndEditorFlex.items.add(FlexItem(*m_overviewTable).withFlex(1).withMargin(tableMargin));
+		tableAndEditorFlex.items.add(FlexItem(*m_pageContainerTable).withFlex(1).withMargin(tableMargin));
 	
 	// flexbox for bottom buttons
 	FlexBox bottomBarFlex;
@@ -209,7 +209,7 @@ void TablePageComponent::buttonClicked(Button *button)
 	if ((button == m_selectAll.get()) || (button == m_selectNone.get()))
 	{
 		// Send true to select all rows, false to deselect all.
-		m_overviewTable->SelectAllRows(button == m_selectAll.get());
+		m_pageContainerTable->SelectAllRows(button == m_selectAll.get());
 
 		// Un-toggle button.			
 		button->setToggleState(false, NotificationType::dontSendNotification);
@@ -227,7 +227,7 @@ void TablePageComponent::buttonClicked(Button *button)
 			}
 			else
 			{
-				auto const& selectedProcessorIds = m_overviewTable->GetSelectedRows();
+				auto const& selectedProcessorIds = m_pageContainerTable->GetSelectedRows();
 
 				if (ctrl->GetProcessorCount() <= selectedProcessorIds.size())
 					onCurrentSelectedProcessorChanged(INVALID_PROCESSOR_ID);
@@ -237,7 +237,7 @@ void TablePageComponent::buttonClicked(Button *button)
 					auto currentLastProcessorId = processorCount - 1;
 					auto selectedProcessorsToRemoveCount = selectedProcessorIds.size();
 					auto nextStillExistingId = static_cast<ProcessorId>(currentLastProcessorId - selectedProcessorsToRemoveCount);
-					m_overviewTable->selectedRowsChanged(nextStillExistingId);
+					m_pageContainerTable->selectedRowsChanged(nextStillExistingId);
 				}
 
 				for (auto processorId : selectedProcessorIds)
@@ -302,12 +302,12 @@ void TablePageComponent::onCurrentSelectedProcessorChanged(ProcessorId selectedP
 void TablePageComponent::UpdateGui(bool init)
 {
 	CController* ctrl = CController::GetInstance();
-	if (ctrl && m_overviewTable)
+	if (ctrl && m_pageContainerTable)
 	{
 		if (ctrl->PopParameterChanged(DCS_Overview, DCT_NumProcessors) || init)
 		{
-			m_overviewTable->RecreateTableRowIds();
-			m_overviewTable->UpdateTable();
+			m_pageContainerTable->RecreateTableRowIds();
+			m_pageContainerTable->UpdateTable();
 		}
 
 		else
@@ -318,7 +318,7 @@ void TablePageComponent::UpdateGui(bool init)
 				SoundsourceProcessor* processor = ctrl->GetProcessor(pIdx);
 				if (processor && processor->PopParameterChanged(DCS_Overview, DCT_PluginInstanceConfig))
 				{
-					m_overviewTable->UpdateTable();
+					m_pageContainerTable->UpdateTable();
 				}
 			}
 		}

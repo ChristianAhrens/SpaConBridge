@@ -126,10 +126,10 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 
 	// Update the selected mapping area.
 	int selectedMapping = 0;
-	COverviewManager* ovrMgr = COverviewManager::GetInstance();
-	if (ovrMgr)
+	PageComponentManager* pageMgr = PageComponentManager::GetInstance();
+	if (pageMgr)
 	{
-		selectedMapping = ovrMgr->GetSelectedMapping();
+		selectedMapping = pageMgr->GetSelectedMapping();
 		if (selectedMapping != m_mappingAreaSelect->getSelectedId())
 		{
 			m_mappingAreaSelect->setSelectedId(selectedMapping, dontSendNotification);
@@ -179,12 +179,12 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
  */
 void MultiSurfacePageComponent::comboBoxChanged(ComboBox *comboBox)
 {
-	COverviewManager* ovrMgr = COverviewManager::GetInstance();
-	if (ovrMgr)
+	PageComponentManager* pageMgr = PageComponentManager::GetInstance();
+	if (pageMgr)
 	{
-		if (ovrMgr->GetSelectedMapping() != comboBox->getSelectedId())
+		if (pageMgr->GetSelectedMapping() != comboBox->getSelectedId())
 		{
-			ovrMgr->SetSelectedMapping(comboBox->getSelectedId());
+			pageMgr->SetSelectedMapping(comboBox->getSelectedId());
 
 			// Trigger an update on the multi-slider, so that only sources with the
 			// selected mapping are visible.

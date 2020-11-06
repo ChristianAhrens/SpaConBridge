@@ -63,14 +63,14 @@ static constexpr int GUI_UPDATE_RATE_SLOW = 120;
 
 /*
 ===============================================================================
- Class COverviewComponent
+ Class PageContainerComponent
 ===============================================================================
 */
 
 /**
  * Class constructor.
  */
-COverviewComponent::COverviewComponent()
+PageContainerComponent::PageContainerComponent()
 {
 	// Online
 	m_onlineLabel = std::make_unique<Label>("Online Label", "Online:");
@@ -129,7 +129,7 @@ COverviewComponent::COverviewComponent()
 /**
  * Class destructor.
  */
-COverviewComponent::~COverviewComponent()
+PageContainerComponent::~PageContainerComponent()
 {
 }
 
@@ -137,7 +137,7 @@ COverviewComponent::~COverviewComponent()
  * Reimplemented to paint background and logo.
  * @param g		Graphics context that must be used to do the drawing operations.
  */
-void COverviewComponent::paint(Graphics& g)
+void PageContainerComponent::paint(Graphics& g)
 {
 	int w = getLocalBounds().getWidth();
 	int h = getLocalBounds().getHeight();	
@@ -168,7 +168,7 @@ void COverviewComponent::paint(Graphics& g)
 /**
  * Reimplemented to resize and re-postion controls on the overview window.
  */
-void COverviewComponent::resized()
+void PageContainerComponent::resized()
 {
 	int w = getLocalBounds().getWidth();
 
@@ -206,7 +206,7 @@ void COverviewComponent::resized()
  * Callback function for changes to our textEditors.
  * @param textEditor	The TextEditor object whose content has just changed.
  */
-void COverviewComponent::textEditorFocusLost(TextEditor& textEditor)
+void PageContainerComponent::textEditorFocusLost(TextEditor& textEditor)
 {
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
@@ -223,7 +223,7 @@ void COverviewComponent::textEditorFocusLost(TextEditor& textEditor)
  * Callback function for Enter key presses on textEditors.
  * @param textEditor	The TextEditor object whose where enter key was pressed.
  */
-void COverviewComponent::textEditorReturnKeyPressed(TextEditor& textEditor)
+void PageContainerComponent::textEditorReturnKeyPressed(TextEditor& textEditor)
 {
 	ignoreUnused(textEditor);
 
@@ -236,7 +236,7 @@ void COverviewComponent::textEditorReturnKeyPressed(TextEditor& textEditor)
  * Timer callback function, which will be called at regular intervals to update the GUI.
  * Reimplemented from base class Timer.
  */
-void COverviewComponent::timerCallback()
+void PageContainerComponent::timerCallback()
 {
 	UpdateGui(false);
 }
@@ -246,7 +246,7 @@ void COverviewComponent::timerCallback()
  * @param init	True to ignore any changed flags and update the OSC config parameters 
  *				in the GUI anyway. Good for when opening the Overview for the first time.
  */
-void COverviewComponent::UpdateGui(bool init)
+void PageContainerComponent::UpdateGui(bool init)
 {
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
@@ -267,7 +267,7 @@ void COverviewComponent::UpdateGui(bool init)
 		// When the overview table is active, no need to refresh GUI very quickly
 		if (getTimerInterval() == GUI_UPDATE_RATE_FAST)
 		{
-			//DBG("COverviewComponent::timerCallback(): Switching to GUI_UPDATE_RATE_SLOW");
+			//DBG("PageContainerComponent::timerCallback(): Switching to GUI_UPDATE_RATE_SLOW");
 			startTimer(GUI_UPDATE_RATE_SLOW);
 		}
 	}
@@ -279,7 +279,7 @@ void COverviewComponent::UpdateGui(bool init)
 		// When multi-slider is active, we refresh the GUI faster
 		if (getTimerInterval() == GUI_UPDATE_RATE_SLOW)
 		{
-			//DBG("COverviewComponent::timerCallback: Switching to GUI_UPDATE_RATE_FAST");
+			//DBG("PageContainerComponent::timerCallback: Switching to GUI_UPDATE_RATE_FAST");
 			startTimer(GUI_UPDATE_RATE_FAST);
 		}
 	}
@@ -290,7 +290,7 @@ void COverviewComponent::UpdateGui(bool init)
  * This is used to restore the current active tab from config file on app start.
  * @param tabIdx	The tab index to set active
  */
-void COverviewComponent::SetActiveTab(int tabIdx)
+void PageContainerComponent::SetActiveTab(int tabIdx)
 {
 	m_tabbedComponent->setCurrentTabIndex(tabIdx, false);
 }
@@ -299,7 +299,7 @@ void COverviewComponent::SetActiveTab(int tabIdx)
  * Setter for the currently selected look and feel type.
  * @param lookAndFeelType	The look and feel type to set as currently selected in dropdown
  */
-void COverviewComponent::SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType)
+void PageContainerComponent::SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType)
 {
 	m_settingsContainer->SetSelectedLookAndFeelType(lookAndFeelType);
 }
@@ -308,7 +308,7 @@ void COverviewComponent::SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType l
  * Getter for the currently selected look and feel type.
  * @return	The look and feel type that currently is selected in dropdown
  */
-DbLookAndFeelBase::LookAndFeelType COverviewComponent::GetLookAndFeelType()
+DbLookAndFeelBase::LookAndFeelType PageContainerComponent::GetLookAndFeelType()
 {
 	return m_settingsContainer->GetSelectedLookAndFeelType();
 }
@@ -361,11 +361,11 @@ void CTabbedComponent::currentTabChanged(int newCurrentTabIndex, const String& n
 	if (!GetIsHandlingChanges())
 		return;
 
-	COverviewManager* ovrMgr = COverviewManager::GetInstance();
-	if (ovrMgr)
-		ovrMgr->SetActiveTab(newCurrentTabIndex, false);
+	PageComponentManager* pageMgr = PageComponentManager::GetInstance();
+	if (pageMgr)
+		pageMgr->SetActiveTab(newCurrentTabIndex, false);
 
-	COverviewComponent* parent = dynamic_cast<COverviewComponent*>(getParentComponent());
+	PageContainerComponent* parent = dynamic_cast<PageContainerComponent*>(getParentComponent());
 	if (parent)
 		parent->UpdateGui(true);
 }

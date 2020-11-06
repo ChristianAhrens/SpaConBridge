@@ -39,7 +39,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Parameters.h"
 
 #include "../Controller.h"		//<USE CController
-#include "../Overview/OverviewManager.h"		//<USE COverviewManager
+#include "../Overview/OverviewManager.h"		//<USE PageComponentManager
 #include "../SoundscapeBridgeAppCommon.h"
 #include "../Version.h"		//<USE CVersion
 
@@ -339,13 +339,13 @@ bool SoundsourceProcessor::IsParamInTransit(DataChangeType paramsChanged) const
  */
 void SoundsourceProcessor::OnOverviewButtonClicked()
 {
-	COverviewManager* ovrMgr = COverviewManager::GetInstance();
-	if (ovrMgr)
+	PageComponentManager* pageMgr = PageComponentManager::GetInstance();
+	if (pageMgr)
 	{
-		ovrMgr->OpenOverview();
+		pageMgr->OpenPageContainer();
 
 		// Set the selected coordinate mapping on the Overview slider to this Plug-in's setting.
-		ovrMgr->SetSelectedMapping(GetMappingId());
+		pageMgr->SetSelectedMapping(GetMappingId());
 	}
 }
 

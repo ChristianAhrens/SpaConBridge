@@ -113,15 +113,15 @@ protected:
 
 
 /**
- * Class COverviewComponent is a simple container used to hold the GUI controls.
+ * Class PageContainerComponent is a simple container used to hold the GUI controls.
  */
-class COverviewComponent : public Component,
+class PageContainerComponent : public Component,
 	public TextEditor::Listener,
 	private Timer
 {
 public:
-	COverviewComponent();
-	~COverviewComponent() override;
+	PageContainerComponent();
+	~PageContainerComponent() override;
 	void UpdateGui(bool init);
 
 	void SetActiveTab(int tabIdx);
@@ -152,7 +152,7 @@ private:
 	std::unique_ptr<MultiSurfacePageComponent>	m_multiSliderContainer;	/**> Container for multi-slider. */
 	std::unique_ptr<SettingsPageComponent>		m_settingsContainer;	/**> Container for settings component. */
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(COverviewComponent)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PageContainerComponent)
 };
 
 

@@ -112,9 +112,9 @@ CController::~CController()
 	Disconnect();
 
 	// Destroy overView window and overView Manager
-	COverviewManager* ovrMgr = COverviewManager::GetInstance();
-	if (ovrMgr)
-		ovrMgr->CloseOverview(true);
+	PageComponentManager* pageMgr = PageComponentManager::GetInstance();
+	if (pageMgr)
+		pageMgr->ClosePageContainer(true);
 
 	const ScopedLock lock(m_mutex);
 	m_processors.clearQuick();
@@ -807,12 +807,12 @@ bool CController::setStateXml(XmlElement* stateXml)
 			}
 		}
 
-		auto ovrMgr = COverviewManager::GetInstance();
-		if (ovrMgr)
+		auto pageMgr = PageComponentManager::GetInstance();
+		if (pageMgr)
 		{
-			auto overview = ovrMgr->GetOverview();
-			if (overview)
-				overview->UpdateGui(false);
+			auto pageContainer = pageMgr->GetPageContainer();
+			if (pageContainer)
+				pageContainer->UpdateGui(false);
 		}
 	}
 	else

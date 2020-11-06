@@ -38,7 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SoundsourceProcessor.h"
 #include "Parameters.h"
 
-#include "../Overview/PageContainerComponent.h"
+#include "../PagedUI/PageContainerComponent.h"
 
 
 namespace SoundscapeBridgeApp

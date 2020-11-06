@@ -12,8 +12,8 @@
 
 #include "Controller.h"
 
-#include "Overview/PageContainerComponent.h"
-#include "Overview/PageComponentManager.h"
+#include "PagedUI/PageContainerComponent.h"
+#include "PagedUI/PageComponentManager.h"
 
 #include "SoundsourceProcessor/SoundsourceProcessor.h"
 

@@ -35,8 +35,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Controller.h"
 
-#include "Overview/PageComponentManager.h"
-#include "Overview/PageContainerComponent.h"
+#include "PagedUI/PageComponentManager.h"
+#include "PagedUI/PageContainerComponent.h"
 #include "SoundsourceProcessor/SoundsourceProcessor.h"
 
 

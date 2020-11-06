@@ -33,8 +33,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#include "About.h"
-#include "SoundscapeBridgeAppCommon.h"
+#include "AboutPageComponent.h"
+
+#include "../../SoundscapeBridgeAppCommon.h"
 
 
 namespace SoundscapeBridgeApp
@@ -43,14 +44,14 @@ namespace SoundscapeBridgeApp
 
 /*
 ===============================================================================
- Class AboutOverlay
+ Class AboutPageComponent
 ===============================================================================
 */
 
 /**
  * Class constructor.
  */
-AboutOverlay::AboutOverlay()
+AboutPageComponent::AboutPageComponent()
 	: PageComponentBase(PCT_About)
 {
 	// Plugin version label
@@ -105,7 +106,7 @@ AboutOverlay::AboutOverlay()
 /**
  * Class destructor.
  */
-AboutOverlay::~AboutOverlay()
+AboutPageComponent::~AboutPageComponent()
 {
 }
 
@@ -115,7 +116,7 @@ AboutOverlay::~AboutOverlay()
  * @param init	True to ignore any changed flags and update the plugin parameters
  *				in the GUI anyway. Good for when opening the Overview for the first time.
  */
-void AboutOverlay::UpdateGui(bool init)
+void AboutPageComponent::UpdateGui(bool init)
 {
 	ignoreUnused(init);
 }
@@ -124,7 +125,7 @@ void AboutOverlay::UpdateGui(bool init)
  * Reimplemented to paint the overlay's background.
  * @param g		Graphics context that must be used to do the drawing operations.
  */
-void AboutOverlay::paint(Graphics& g)
+void AboutPageComponent::paint(Graphics& g)
 {
 	int w = getLocalBounds().getWidth();
 	int h = getLocalBounds().getHeight();
@@ -141,7 +142,7 @@ void AboutOverlay::paint(Graphics& g)
 /**
  * Reimplemented to resize and re-postion controls & labels.
  */
-void AboutOverlay::resized()
+void AboutPageComponent::resized()
 {
 	int eulaVPos = 170;
 	int eulaHeight = jmin((getLocalBounds().getHeight() - (eulaVPos + 20)), 270);
@@ -155,14 +156,14 @@ void AboutOverlay::resized()
 
 /*
 ===============================================================================
- Class CAboutOverlayGeneric
+ Class CAboutPageComponentGeneric
 ===============================================================================
 */
 
 /**
  * Class constructor.
  */
-CAboutOverlayGeneric::CAboutOverlayGeneric()
+CAboutPageComponentGeneric::CAboutPageComponentGeneric()
 {
 	// Plugin version label
 	String formatString = String("Audio Units (AU) Plug-in format. \nThe Audio Units logo is a trademark of Apple Computer, Inc. \nCopyright ") +
@@ -176,7 +177,7 @@ CAboutOverlayGeneric::CAboutOverlayGeneric()
 /**
  * Class destructor.
  */
-CAboutOverlayGeneric::~CAboutOverlayGeneric()
+CAboutPageComponentGeneric::~CAboutPageComponentGeneric()
 {
 }
 
@@ -184,20 +185,20 @@ CAboutOverlayGeneric::~CAboutOverlayGeneric()
  * Reimplemented to paint the overlay's background.
  * @param g		Graphics context that must be used to do the drawing operations.
  */
-void CAboutOverlayGeneric::paint(Graphics& g)
+void CAboutPageComponentGeneric::paint(Graphics& g)
 {
 	// First paint base class
-	AboutOverlay::paint(g);
+	AboutPageComponent::paint(g);
 
 }
 
 /**
  * Reimplemented to resize and re-postion controls & labels.
  */
-void CAboutOverlayGeneric::resized()
+void CAboutPageComponentGeneric::resized()
 {
 	// First resize base class components
-	AboutOverlay::resized();
+	AboutPageComponent::resized();
 
 	m_formatInfoLabel->setBounds(95, 105, getLocalBounds().getWidth() - 135, 70);
 }

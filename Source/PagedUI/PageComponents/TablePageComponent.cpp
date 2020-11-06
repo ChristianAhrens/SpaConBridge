@@ -35,12 +35,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "TablePageComponent.h"
 
-#include "../SoundsourceProcessor/SoundsourceProcessor.h"
-#include "../SoundsourceProcessor/SoundsourceProcessorEditor.h"
-#include "../SoundsourceProcessor/SurfaceSlider.h"
+#include "../../SoundsourceProcessor/SoundsourceProcessor.h"
+#include "../../SoundsourceProcessor/SoundsourceProcessorEditor.h"
+#include "../../SoundsourceProcessor/SurfaceSlider.h"
 
-#include "../Controller.h"
-#include "../LookAndFeel.h"
+#include "../../Controller.h"
+#include "../../LookAndFeel.h"
 
 #include <Image_utils.hpp>
 

@@ -36,7 +36,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include "PageComponentBase.h"	//<USE PageComponentBase
-#include <utility>			//<USE std::unique_ptr
 
 
 namespace SoundscapeBridgeApp
@@ -44,14 +43,14 @@ namespace SoundscapeBridgeApp
 
 
 /**
- * Class AboutOverlay is a GUI overlay which provides copyright and licensing info.
+ * Class AboutPageComponent is a GUI overlay which provides copyright and licensing info.
  * This is the base class for a generic "about" overlay, and must be subclassed for each host format (VST, AAX, etc).
  */
-class AboutOverlay : public PageComponentBase
+class AboutPageComponent : public PageComponentBase
 {
 public:
-	AboutOverlay();
-	~AboutOverlay() override;
+	AboutPageComponent();
+	~AboutPageComponent() override;
 
 	void UpdateGui(bool init) override;
 
@@ -81,18 +80,18 @@ private:
 	std::unique_ptr<TextEditor>	m_eulaField;
 	
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AboutOverlay)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AboutPageComponent)
 };
 
 
 /**
- * Class CAboutOverlayGeneric is a GUI overlay which provides .
+ * Class CAboutPageComponentGeneric is a GUI overlay which provides .
  */
-class CAboutOverlayGeneric : public AboutOverlay
+class CAboutPageComponentGeneric : public AboutPageComponent
 {
 public:
-	CAboutOverlayGeneric();
-	~CAboutOverlayGeneric() override;
+	CAboutPageComponentGeneric();
+	~CAboutPageComponentGeneric() override;
 
 protected:
 	void paint(Graphics&) override;
@@ -104,7 +103,7 @@ private:
 	 */
 	std::unique_ptr<Label>	m_formatInfoLabel;
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CAboutOverlayGeneric)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CAboutPageComponentGeneric)
 };
 
 

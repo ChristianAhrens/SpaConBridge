@@ -35,11 +35,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "MultiSurfacePageComponent.h"
 
-#include "PageComponentManager.h"
+#include "../PageComponentManager.h"
 
-#include "../SoundsourceProcessor/SoundsourceProcessor.h"
-#include "../Controller.h"
-#include "../SoundsourceProcessor/SurfaceSlider.h"
+#include "../../SoundsourceProcessor/SoundsourceProcessor.h"
+#include "../../Controller.h"
+#include "../../SoundsourceProcessor/SurfaceSlider.h"
 
 #include <Image_utils.hpp>
 

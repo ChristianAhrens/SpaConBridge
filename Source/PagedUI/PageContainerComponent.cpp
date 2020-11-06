@@ -36,9 +36,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PageContainerComponent.h"
 
 #include "PageComponentManager.h"
-#include "MultiSurfacePageComponent.h"
-#include "SettingsPageComponent.h"
-#include "TablePageComponent.h"
+#include "PageComponents/MultiSurfacePageComponent.h"
+#include "PageComponents/SettingsPageComponent.h"
+#include "PageComponents/TablePageComponent.h"
 
 #include "../Controller.h"
 #include "../SoundsourceProcessor/SurfaceSlider.h"

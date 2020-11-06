@@ -35,8 +35,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "SettingsPageComponent.h"
 
-#include "../Controller.h"
-#include "../LookAndFeel.h"
+#include "../../Controller.h"
+#include "../../LookAndFeel.h"
 
 
 namespace SoundscapeBridgeApp

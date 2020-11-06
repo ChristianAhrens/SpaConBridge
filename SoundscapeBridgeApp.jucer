@@ -223,10 +223,6 @@
     <GROUP id="{2B9DD386-1093-ADF5-E47F-5954774132B5}" name="Source">
       <FILE id="YNojdV" name="LookAndFeel.cpp" compile="1" resource="0" file="Source/LookAndFeel.cpp"/>
       <FILE id="DEBTf5" name="LookAndFeel.h" compile="0" resource="0" file="Source/LookAndFeel.h"/>
-      <FILE id="ZB5BUF" name="PageComponentBase.cpp" compile="1" resource="0"
-            file="Source/PageComponentBase.cpp"/>
-      <FILE id="CbGt31" name="PageComponentBase.h" compile="0" resource="0"
-            file="Source/PageComponentBase.h"/>
       <FILE id="vQ5W43" name="ProtocolBridgingWrapper.cpp" compile="1" resource="0"
             file="Source/ProtocolBridgingWrapper.cpp"/>
       <FILE id="HbiWnW" name="ProtocolBridgingWrapper.h" compile="0" resource="0"
@@ -251,10 +247,28 @@
         <FILE id="iNu0u2" name="SurfaceSlider.h" compile="0" resource="0" file="Source/SoundsourceProcessor/SurfaceSlider.h"/>
       </GROUP>
       <GROUP id="{ABC3680A-0C49-EE16-E766-E6ED89078A7C}" name="PagedUI">
-        <FILE id="HwxbKe" name="MultisurfacePageComponent.cpp" compile="1"
-              resource="0" file="Source/PagedUI/MultisurfacePageComponent.cpp"/>
-        <FILE id="ZkMR1h" name="MultisurfacePageComponent.h" compile="0" resource="0"
-              file="Source/PagedUI/MultisurfacePageComponent.h"/>
+        <GROUP id="{4680382C-A46A-B4C1-0D87-F92C4050063D}" name="PageComponents">
+          <FILE id="HhvbAy" name="AboutPageComponent.cpp" compile="1" resource="0"
+                file="Source/PagedUI/PageComponents/AboutPageComponent.cpp"/>
+          <FILE id="swNf0J" name="AboutPageComponent.h" compile="0" resource="0"
+                file="Source/PagedUI/PageComponents/AboutPageComponent.h"/>
+          <FILE id="bcX4Ju" name="MultisurfacePageComponent.cpp" compile="1"
+                resource="0" file="Source/PagedUI/PageComponents/MultisurfacePageComponent.cpp"/>
+          <FILE id="GPUSzO" name="MultisurfacePageComponent.h" compile="0" resource="0"
+                file="Source/PagedUI/PageComponents/MultisurfacePageComponent.h"/>
+          <FILE id="n5XHjT" name="PageComponentBase.cpp" compile="1" resource="0"
+                file="Source/PagedUI/PageComponents/PageComponentBase.cpp"/>
+          <FILE id="oNGL8i" name="PageComponentBase.h" compile="0" resource="0"
+                file="Source/PagedUI/PageComponents/PageComponentBase.h"/>
+          <FILE id="xOisB1" name="SettingsPageComponent.cpp" compile="1" resource="0"
+                file="Source/PagedUI/PageComponents/SettingsPageComponent.cpp"/>
+          <FILE id="xe3MKR" name="SettingsPageComponent.h" compile="0" resource="0"
+                file="Source/PagedUI/PageComponents/SettingsPageComponent.h"/>
+          <FILE id="fOhomW" name="TablePageComponent.cpp" compile="1" resource="0"
+                file="Source/PagedUI/PageComponents/TablePageComponent.cpp"/>
+          <FILE id="oQheIw" name="TablePageComponent.h" compile="0" resource="0"
+                file="Source/PagedUI/PageComponents/TablePageComponent.h"/>
+        </GROUP>
         <FILE id="mIIIv5" name="PageComponentManager.cpp" compile="1" resource="0"
               file="Source/PagedUI/PageComponentManager.cpp"/>
         <FILE id="GIC4xp" name="PageComponentManager.h" compile="0" resource="0"
@@ -263,21 +277,11 @@
               file="Source/PagedUI/PageContainerComponent.cpp"/>
         <FILE id="H1EAfS" name="PageContainerComponent.h" compile="0" resource="0"
               file="Source/PagedUI/PageContainerComponent.h"/>
-        <FILE id="wbqKTF" name="SettingsPageComponent.cpp" compile="1" resource="0"
-              file="Source/PagedUI/SettingsPageComponent.cpp"/>
-        <FILE id="wbUxTG" name="SettingsPageComponent.h" compile="0" resource="0"
-              file="Source/PagedUI/SettingsPageComponent.h"/>
-        <FILE id="jfUFje" name="TablePageComponent.cpp" compile="1" resource="0"
-              file="Source/PagedUI/TablePageComponent.cpp"/>
-        <FILE id="jC49f2" name="TablePageComponent.h" compile="0" resource="0"
-              file="Source/PagedUI/TablePageComponent.h"/>
       </GROUP>
       <FILE id="SKhSnW" name="MainSoundscapeBridgeAppComponent.cpp" compile="1"
             resource="0" file="Source/MainSoundscapeBridgeAppComponent.cpp"/>
       <FILE id="Z0i2A2" name="MainSoundscapeBridgeAppComponent.h" compile="0"
             resource="0" file="Source/MainSoundscapeBridgeAppComponent.h"/>
-      <FILE id="wvD6A5" name="About.cpp" compile="1" resource="0" file="Source/About.cpp"/>
-      <FILE id="fYpzuk" name="About.h" compile="0" resource="0" file="Source/About.h"/>
       <FILE id="g0nbLB" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
       <FILE id="nZnFg0" name="Version.cpp" compile="1" resource="0" file="Source/Version.cpp"/>
       <FILE id="tKd5wL" name="Version.h" compile="0" resource="0" file="Source/Version.h"/>

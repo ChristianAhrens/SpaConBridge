@@ -35,12 +35,13 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "../About.h"
-#include "../SoundscapeBridgeAppCommon.h"
-#include "../AppConfiguration.h"
-#include "../LookAndFeel.h"
+#include "PageComponentBase.h"
 
-#include "../submodules/JUCE-AppBasics/Source/ZeroconfDiscoverComponent.h"
+#include "../../SoundscapeBridgeAppCommon.h"
+#include "../../AppConfiguration.h"
+#include "../../LookAndFeel.h"
+
+#include "../../../submodules/JUCE-AppBasics/Source/ZeroconfDiscoverComponent.h"
 
 
 namespace SoundscapeBridgeApp

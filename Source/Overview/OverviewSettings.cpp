@@ -698,14 +698,16 @@ void CSettingsComponent::handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDisco
 CSettingsContainer::CSettingsContainer()
 	: OverlayBase(OT_Settings)
 {
+	// Apply button for when raw config is visible
 	m_applyButton = std::make_unique<TextButton>("Apply");
 	m_applyButton->onClick = [this] { onApplyClicked(); };
 	addAndMakeVisible(m_applyButton.get());
-
+	// Text editor for when raw config is visible
 	m_settingsRawEditor = std::make_unique<TextEditor>();
 	m_settingsRawEditor->setMultiLine(true, false);
 	addAndMakeVisible(m_settingsRawEditor.get());
 
+	// Select combobox for look and feel selection
 	m_lookAndFeelSelect = std::make_unique<ComboBox>();
 	//for (auto t = static_cast<int>(DbLookAndFeelBase::LAFT_InvalidFirst + 1); t < static_cast<int>(DbLookAndFeelBase::LAFT_InvalidLast); ++t)
 	//	m_lookAndFeelSelect->addItem(DbLookAndFeelBase::getLookAndFeelName(static_cast<DbLookAndFeelBase::LookAndFeelType>(t)), t);
@@ -713,22 +715,25 @@ CSettingsContainer::CSettingsContainer()
 	m_lookAndFeelSelect->addItem(DbLookAndFeelBase::getLookAndFeelName(DbLookAndFeelBase::LAFT_Light), DbLookAndFeelBase::LAFT_Light);
 	m_lookAndFeelSelect->onChange = [this] { onSelectedLookAndFeelChanged(); };
 	addAndMakeVisible(m_lookAndFeelSelect.get());
+	// Label for look and feel selection
 	m_lookAndFeelLabel = std::make_unique<Label>("LookAndFeelSelect", "Look and feel:");
 	m_lookAndFeelLabel->setJustificationType(Justification::centred);
 	m_lookAndFeelLabel->attachToComponent(m_lookAndFeelSelect.get(), true);
 	addAndMakeVisible(m_lookAndFeelLabel.get());
 
+	// Toggle button for showing/hiding raw config
 	m_useRawConfigButton = std::make_unique<ToggleButton>();
 	m_useRawConfigButton->onClick = [this] { onToggleRawConfigVisible(); };
 	addAndMakeVisible(m_useRawConfigButton.get());
+	// label for showing/hiding raw config
 	m_useRawConfigLabel = std::make_unique<Label>("RAW CFG", "Show raw config");
 	m_useRawConfigLabel->setJustificationType(Justification::centred);
 	m_useRawConfigLabel->attachToComponent(m_useRawConfigButton.get(), true);
 	addAndMakeVisible(m_useRawConfigLabel.get());
 	onToggleRawConfigVisible();
 
+	// The component containing configuration sections, etc. to be shown in a viewport for scrolling capabilities
 	m_settingsComponent = std::make_unique<CSettingsComponent>();
-
 	m_settingsViewport = std::make_unique<Viewport>();
 	m_settingsViewport->setViewedComponent(m_settingsComponent.get(), false);
 	addAndMakeVisible(m_settingsViewport.get());

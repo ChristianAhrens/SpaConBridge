@@ -62,9 +62,9 @@ protected:
 	void comboBoxChanged(ComboBox *comboBox) override;
 
 private:
-	std::unique_ptr<Component>	m_multiSlider;	/**> Multi-source 2D-Slider. */
-	std::unique_ptr<Label>		m_posAreaLabel;	/**> Mapping selector label. */
-	std::unique_ptr<ComboBox>	m_areaSelector;	/**> ComboBox selector for the coordinate mapping area. */
+	std::unique_ptr<Component>	m_multiSlider;			/**> Multi-source 2D-Slider. */
+	std::unique_ptr<Label>		m_mappingAreaLabel;		/**> Mapping selector label. */
+	std::unique_ptr<ComboBox>	m_mappingAreaSelect;	/**> ComboBox selector for the coordinate mapping area. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(COverviewMultiSurface)
 };

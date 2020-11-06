@@ -64,20 +64,21 @@ COverviewMultiSurface::COverviewMultiSurface()
 	m_multiSlider = std::make_unique<CSurfaceMultiSlider>();
 	addAndMakeVisible(m_multiSlider.get());
 
-	// Add mapping label
-	m_posAreaLabel = std::make_unique<Label>("Coordinate mapping label", "View mapping:");
-	m_posAreaLabel->setJustificationType(Justification::centred);
-	addAndMakeVisible(m_posAreaLabel.get());
 
-	// Add mapping selector
-	m_areaSelector = std::make_unique<ComboBox>("Coordinate mapping");
-	m_areaSelector->setEditableText(false);
-	m_areaSelector->addItem("1", 1);
-	m_areaSelector->addItem("2", 2);
-	m_areaSelector->addItem("3", 3);
-	m_areaSelector->addItem("4", 4);
-	m_areaSelector->addListener(this);
-	addAndMakeVisible(m_areaSelector.get());
+	// Mapping selector
+	m_mappingAreaSelect = std::make_unique<ComboBox>("Coordinate mapping");
+	m_mappingAreaSelect->setEditableText(false);
+	m_mappingAreaSelect->addItem("1", 1);
+	m_mappingAreaSelect->addItem("2", 2);
+	m_mappingAreaSelect->addItem("3", 3);
+	m_mappingAreaSelect->addItem("4", 4);
+	m_mappingAreaSelect->addListener(this);
+	addAndMakeVisible(m_mappingAreaSelect.get());
+	// Mapping label
+	m_mappingAreaLabel = std::make_unique<Label>("Coordinate mapping label", "View mapping:");
+	m_mappingAreaLabel->setJustificationType(Justification::centred);
+	m_mappingAreaLabel->attachToComponent(m_mappingAreaSelect.get(), true);
+	addAndMakeVisible(m_mappingAreaLabel.get());
 }
 
 /**
@@ -103,16 +104,15 @@ void COverviewMultiSurface::paint(Graphics& g)
  */
 void COverviewMultiSurface::resized()
 {
-	// Resize multi-slider.
-	CController* ctrl = CController::GetInstance();
-	if (ctrl)
-	{
-		m_multiSlider->setBounds(Rectangle<int>(20, 10, getLocalBounds().getWidth() - 40, getLocalBounds().getHeight() - 52));
-	}
-
-	// Mapping selector
-	m_posAreaLabel->setBounds(Rectangle<int>(70, getLocalBounds().getHeight() - 32, 100, 25));
-	m_areaSelector->setBounds(Rectangle<int>(170, getLocalBounds().getHeight() - 32, 50, 25));
+	auto bounds = getLocalBounds().reduced(5);
+	
+	// set the bounds for dropdown select by onthefly modifying 'bounds' dimensions - this leaves 'bounds' as rect with 25 removed from bottom
+	m_mappingAreaSelect->setBounds(bounds.removeFromBottom(25).removeFromLeft(170).removeFromRight(70));
+	
+	// set the bounds for the 2D slider area.
+	bounds.removeFromBottom(5);
+	bounds.reduce(5, 5);
+	m_multiSlider->setBounds(bounds);
 }
 
 /**
@@ -131,9 +131,9 @@ void COverviewMultiSurface::UpdateGui(bool init)
 	if (ovrMgr)
 	{
 		selectedMapping = ovrMgr->GetSelectedMapping();
-		if (selectedMapping != m_areaSelector->getSelectedId())
+		if (selectedMapping != m_mappingAreaSelect->getSelectedId())
 		{
-			m_areaSelector->setSelectedId(selectedMapping, dontSendNotification);
+			m_mappingAreaSelect->setSelectedId(selectedMapping, dontSendNotification);
 			update = true;
 		}
 	}

@@ -33,7 +33,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#include "OverviewSettings.h"
+#include "SettingsPageComponent.h"
 
 #include "../Controller.h"
 #include "../LookAndFeel.h"

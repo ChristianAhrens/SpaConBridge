@@ -33,9 +33,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#include "OverviewMultisurface.h"
+#include "MultiSurfacePageComponent.h"
 
-#include "OverviewManager.h"
+#include "PageComponentManager.h"
 
 #include "../SoundsourceProcessor/SoundsourceProcessor.h"
 #include "../Controller.h"

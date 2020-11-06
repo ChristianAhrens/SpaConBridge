@@ -33,12 +33,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#include "Overview.h"
+#include "PageContainerComponent.h"
 
-#include "OverviewManager.h"
-#include "OverviewMultisurface.h"
-#include "OverviewSettings.h"
-#include "OverviewTable.h"
+#include "PageComponentManager.h"
+#include "MultiSurfacePageComponent.h"
+#include "SettingsPageComponent.h"
+#include "TablePageComponent.h"
 
 #include "../Controller.h"
 #include "../SoundsourceProcessor/SurfaceSlider.h"

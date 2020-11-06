@@ -12,8 +12,8 @@
 
 #include "Controller.h"
 
-#include "Overview/Overview.h"
-#include "Overview/OverviewManager.h"
+#include "Overview/PageContainerComponent.h"
+#include "Overview/PageComponentManager.h"
 
 #include "SoundsourceProcessor/SoundsourceProcessor.h"
 

@@ -39,7 +39,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "Parameters.h"
 
 #include "../Controller.h"		//<USE CController
-#include "../Overview/OverviewManager.h"		//<USE PageComponentManager
+#include "../Overview/PageComponentManager.h"		//<USE PageComponentManager
 #include "../SoundscapeBridgeAppCommon.h"
 #include "../Version.h"		//<USE CVersion
 

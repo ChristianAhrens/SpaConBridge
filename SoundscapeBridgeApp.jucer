@@ -251,23 +251,26 @@
         <FILE id="iNu0u2" name="SurfaceSlider.h" compile="0" resource="0" file="Source/SoundsourceProcessor/SurfaceSlider.h"/>
       </GROUP>
       <GROUP id="{ABC3680A-0C49-EE16-E766-E6ED89078A7C}" name="Overview">
-        <FILE id="p3mOuB" name="Overview.cpp" compile="1" resource="0" file="Source/Overview/Overview.cpp"/>
-        <FILE id="u3W6Eh" name="Overview.h" compile="0" resource="0" file="Source/Overview/Overview.h"/>
-        <FILE id="zhFbhV" name="OverviewManager.cpp" compile="1" resource="0"
-              file="Source/Overview/OverviewManager.cpp"/>
-        <FILE id="XfbgRx" name="OverviewManager.h" compile="0" resource="0"
-              file="Source/Overview/OverviewManager.h"/>
-        <FILE id="I9Fdgh" name="OverviewMultisurface.cpp" compile="1" resource="0"
-              file="Source/Overview/OverviewMultisurface.cpp"/>
-        <FILE id="tMcT6V" name="OverviewMultisurface.h" compile="0" resource="0"
-              file="Source/Overview/OverviewMultisurface.h"/>
-        <FILE id="O1chzp" name="OverviewSettings.cpp" compile="1" resource="0"
-              file="Source/Overview/OverviewSettings.cpp"/>
-        <FILE id="H6YJnD" name="OverviewSettings.h" compile="0" resource="0"
-              file="Source/Overview/OverviewSettings.h"/>
-        <FILE id="hrDqFs" name="OverviewTable.cpp" compile="1" resource="0"
-              file="Source/Overview/OverviewTable.cpp"/>
-        <FILE id="aZ8lrk" name="OverviewTable.h" compile="0" resource="0" file="Source/Overview/OverviewTable.h"/>
+        <FILE id="p3mOuB" name="PageContainerComponent.cpp" compile="1" resource="0"
+              file="Source/Overview/PageContainerComponent.cpp"/>
+        <FILE id="u3W6Eh" name="PageContainerComponent.h" compile="0" resource="0"
+              file="Source/Overview/PageContainerComponent.h"/>
+        <FILE id="zhFbhV" name="PageComponentManager.cpp" compile="1" resource="0"
+              file="Source/Overview/PageComponentManager.cpp"/>
+        <FILE id="XfbgRx" name="PageComponentManager.h" compile="0" resource="0"
+              file="Source/Overview/PageComponentManager.h"/>
+        <FILE id="I9Fdgh" name="MultisurfacePageComponent.cpp" compile="1"
+              resource="0" file="Source/Overview/MultisurfacePageComponent.cpp"/>
+        <FILE id="tMcT6V" name="MultisurfacePageComponent.h" compile="0" resource="0"
+              file="Source/Overview/MultisurfacePageComponent.h"/>
+        <FILE id="O1chzp" name="SettingsPageComponent.cpp" compile="1" resource="0"
+              file="Source/Overview/SettingsPageComponent.cpp"/>
+        <FILE id="H6YJnD" name="SettingsPageComponent.h" compile="0" resource="0"
+              file="Source/Overview/SettingsPageComponent.h"/>
+        <FILE id="hrDqFs" name="TablePageComponent.cpp" compile="1" resource="0"
+              file="Source/Overview/TablePageComponent.cpp"/>
+        <FILE id="aZ8lrk" name="TablePageComponent.h" compile="0" resource="0"
+              file="Source/Overview/TablePageComponent.h"/>
       </GROUP>
       <FILE id="SKhSnW" name="MainSoundscapeBridgeAppComponent.cpp" compile="1"
             resource="0" file="Source/MainSoundscapeBridgeAppComponent.cpp"/>

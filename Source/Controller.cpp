@@ -35,8 +35,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Controller.h"
 
-#include "Overview/OverviewManager.h"
-#include "Overview/Overview.h"
+#include "Overview/PageComponentManager.h"
+#include "Overview/PageContainerComponent.h"
 #include "SoundsourceProcessor/SoundsourceProcessor.h"
 
 

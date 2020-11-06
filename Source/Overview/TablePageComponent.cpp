@@ -33,7 +33,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#include "OverviewTable.h"
+#include "TablePageComponent.h"
 
 #include "../SoundsourceProcessor/SoundsourceProcessor.h"
 #include "../SoundsourceProcessor/SoundsourceProcessorEditor.h"

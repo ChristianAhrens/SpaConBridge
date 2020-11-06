@@ -59,7 +59,7 @@ namespace SoundscapeBridgeApp
  * Class constructor.
  */
 OverviewTableContainer::OverviewTableContainer()
-	: OverlayBase(OT_Overview)
+	: PageComponentBase(PCT_Overview)
 {
 	// Create the table model/component.
 	m_overviewTable = std::make_unique<TableModelComponent>();

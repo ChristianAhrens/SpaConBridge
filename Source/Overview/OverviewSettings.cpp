@@ -696,7 +696,7 @@ void CSettingsComponent::handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDisco
  * Class constructor.
  */
 CSettingsContainer::CSettingsContainer()
-	: OverlayBase(OT_Settings)
+	: PageComponentBase(PCT_Settings)
 {
 	// Apply button for when raw config is visible
 	m_applyButton = std::make_unique<TextButton>("Apply");

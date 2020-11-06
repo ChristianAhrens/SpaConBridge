@@ -223,8 +223,10 @@
     <GROUP id="{2B9DD386-1093-ADF5-E47F-5954774132B5}" name="Source">
       <FILE id="YNojdV" name="LookAndFeel.cpp" compile="1" resource="0" file="Source/LookAndFeel.cpp"/>
       <FILE id="DEBTf5" name="LookAndFeel.h" compile="0" resource="0" file="Source/LookAndFeel.h"/>
-      <FILE id="ZB5BUF" name="OverlayBase.cpp" compile="1" resource="0" file="Source/OverlayBase.cpp"/>
-      <FILE id="CbGt31" name="OverlayBase.h" compile="0" resource="0" file="Source/OverlayBase.h"/>
+      <FILE id="ZB5BUF" name="PageComponentBase.cpp" compile="1" resource="0"
+            file="Source/PageComponentBase.cpp"/>
+      <FILE id="CbGt31" name="PageComponentBase.h" compile="0" resource="0"
+            file="Source/PageComponentBase.h"/>
       <FILE id="vQ5W43" name="ProtocolBridgingWrapper.cpp" compile="1" resource="0"
             file="Source/ProtocolBridgingWrapper.cpp"/>
       <FILE id="HbiWnW" name="ProtocolBridgingWrapper.h" compile="0" resource="0"

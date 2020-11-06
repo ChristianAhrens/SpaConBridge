@@ -35,7 +35,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "OverlayBase.h"	//<USE OverlayBase
+#include "PageComponentBase.h"	//<USE PageComponentBase
 #include <utility>			//<USE std::unique_ptr
 
 
@@ -47,7 +47,7 @@ namespace SoundscapeBridgeApp
  * Class AboutOverlay is a GUI overlay which provides copyright and licensing info.
  * This is the base class for a generic "about" overlay, and must be subclassed for each host format (VST, AAX, etc).
  */
-class AboutOverlay : public OverlayBase
+class AboutOverlay : public PageComponentBase
 {
 public:
 	AboutOverlay();

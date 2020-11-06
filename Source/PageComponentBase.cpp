@@ -33,7 +33,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#include "OverlayBase.h"
+#include "PageComponentBase.h"
 
 
 namespace SoundscapeBridgeApp
@@ -42,32 +42,32 @@ namespace SoundscapeBridgeApp
 
 /*
 ===============================================================================
- Class OverlayBase
+ Class PageComponentBase
 ===============================================================================
 */
 
 /**
  * Class constructor.
  */
-OverlayBase::OverlayBase(OverlayType type)
+PageComponentBase::PageComponentBase(PageComponentType type)
 	: Component()
 {
-	m_overlayType = type;
+	m_pageComponentType = type;
 }
 
 /**
  * Class destructor.
  */
-OverlayBase::~OverlayBase()
+PageComponentBase::~PageComponentBase()
 {
 }
 
 /**
- * Get this overlay's type.
+ * Get this PageComponent's type.
  */
-OverlayBase::OverlayType OverlayBase::GetOverlayType() const
+PageComponentBase::PageComponentType PageComponentBase::GetPageComponentType() const
 {
-	return m_overlayType;
+	return m_pageComponentType;
 }
 
 

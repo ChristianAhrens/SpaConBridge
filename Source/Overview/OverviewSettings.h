@@ -169,7 +169,7 @@ private:
 /**
  * CSettingsContainer is a component to hold multiple components that are dedicated to app configuration.
  */
-class CSettingsContainer :	public OverlayBase, 
+class CSettingsContainer :	public PageComponentBase, 
 							public AppConfiguration::Watcher // for raw text editing
 {
 public:

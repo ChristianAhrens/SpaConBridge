@@ -43,38 +43,36 @@ namespace SoundscapeBridgeApp
 
 
 /**
- * Abstract class OverlayBase.
- * Must be reimplemented to provide a GUI overlay.
+ * Abstract class PageComponentBase.
+ * Must be reimplemented to provide a component for an app page.
  */
-class OverlayBase : public Component
+class PageComponentBase : public Component
 {
 public:
 
 	/**
 	 * Overlay types. There can only be one active at the time.
 	 */
-	enum OverlayType
+	enum PageComponentType
 	{
-		OT_Unknown = 0,
-		OT_Overview,
-		OT_MultiSlide,
-		OT_Settings,
-		OT_About
+		PCT_Unknown = 0,
+		PCT_Overview,
+		PCT_MultiSlide,
+		PCT_Settings,
+		PCT_Statistics,
+		PCT_About
 	};
 
-	explicit OverlayBase(OverlayType type);
-	~OverlayBase() override;
+	explicit PageComponentBase(PageComponentType type);
+	~PageComponentBase() override;
 
-	OverlayType GetOverlayType() const;
+	PageComponentType GetPageComponentType() const;
 	virtual void UpdateGui(bool init) = 0;
 
 private:
-	/**
-	 * Type of overlay as specified by the OverlayType enum.
-	 */
-	OverlayType	m_overlayType;
+	PageComponentType	m_pageComponentType;	/**> Type of page as specified by the PageComponentType enum. */
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OverlayBase)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PageComponentBase)
 };
 
 

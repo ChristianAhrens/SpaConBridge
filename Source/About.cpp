@@ -51,7 +51,7 @@ namespace SoundscapeBridgeApp
  * Class constructor.
  */
 AboutOverlay::AboutOverlay()
-	: OverlayBase(OT_About)
+	: PageComponentBase(PCT_About)
 {
 	// Plugin version label
 	String versionString = String("Soundscape Plug-in V") + String(JUCE_STRINGIFY(JUCE_APP_VERSION));

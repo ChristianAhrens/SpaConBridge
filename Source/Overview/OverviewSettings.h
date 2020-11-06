@@ -86,18 +86,18 @@ private:
 };
 
 /**
- * CSettingsComponent is the component to hold multiple components 
+ * SettingsSectionsComponent is the component to hold multiple components 
  * that are dedicated to app configuration and itself resides within 
  * a viewport for scrolling functionality.
  */
-class CSettingsComponent : 
+class SettingsSectionsComponent : 
 	public Component, 
 	public TextEditor::Listener, 
 	public ToggleButton::Listener
 {
 public:
-	CSettingsComponent();
-	~CSettingsComponent() override;
+	SettingsSectionsComponent();
+	~SettingsSectionsComponent() override;
 
 	void processUpdatedConfig();
 
@@ -167,14 +167,14 @@ private:
 };
 
 /**
- * CSettingsContainer is a component to hold multiple components that are dedicated to app configuration.
+ * SettingsPageComponent is a component to hold multiple components that are dedicated to app configuration.
  */
-class CSettingsContainer :	public PageComponentBase, 
-							public AppConfiguration::Watcher // for raw text editing
+class SettingsPageComponent :	public PageComponentBase, 
+								public AppConfiguration::Watcher // for raw text editing
 {
 public:
-	CSettingsContainer();
-	~CSettingsContainer() override;
+	SettingsPageComponent();
+	~SettingsPageComponent() override;
 
 	//==========================================================================
 	void onApplyClicked();
@@ -196,7 +196,7 @@ public:
 	void resized() override;
 
 private:
-	std::unique_ptr<CSettingsComponent>			m_settingsComponent;
+	std::unique_ptr<SettingsSectionsComponent>	m_settingsComponent;
 	std::unique_ptr<Viewport>					m_settingsViewport;
 
 	std::unique_ptr<TextButton>		m_applyButton;
@@ -206,7 +206,7 @@ private:
 	std::unique_ptr<ToggleButton>	m_useRawConfigButton;
 	std::unique_ptr<Label>			m_useRawConfigLabel;
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CSettingsContainer)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SettingsPageComponent)
 };
 
 

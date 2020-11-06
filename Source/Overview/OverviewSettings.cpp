@@ -257,14 +257,14 @@ void HeaderWithElmListComponent::resized()
 
 /*
 ===============================================================================
- Class CSettingsComponent
+ Class SettingsSectionsComponent
 ===============================================================================
 */
 
 /**
  * Class constructor.
  */
-CSettingsComponent::CSettingsComponent()
+SettingsSectionsComponent::SettingsSectionsComponent()
 {
 	m_ipAddressEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(15, "1234567890.");
 	m_portEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(5, "1234567890");
@@ -433,7 +433,7 @@ CSettingsComponent::CSettingsComponent()
 /**
  * Class destructor.
  */
-CSettingsComponent::~CSettingsComponent()
+SettingsSectionsComponent::~SettingsSectionsComponent()
 {
 }
 
@@ -441,7 +441,7 @@ CSettingsComponent::~CSettingsComponent()
  * Reimplemented to paint background.
  * @param g		Graphics context that must be used to do the drawing operations.
  */
-void CSettingsComponent::paint(Graphics& g)
+void SettingsSectionsComponent::paint(Graphics& g)
 {
 	// Paint background to cover the controls behind this overlay.
 	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
@@ -451,7 +451,7 @@ void CSettingsComponent::paint(Graphics& g)
 /**
  * Reimplemented to resize and re-postion controls on the overview window.
  */
-void CSettingsComponent::resized()
+void SettingsSectionsComponent::resized()
 {
 	auto margin = 3.0f;
 
@@ -497,7 +497,7 @@ void CSettingsComponent::resized()
  * This just forwards it to private method that handles relevant changes in editor contents in general.
  * @param editor	The editor component that changes were made in
  */
-void CSettingsComponent::buttonClicked(Button* button)
+void SettingsSectionsComponent::buttonClicked(Button* button)
 {
 	CController* ctrl = CController::GetInstance();
 	if (!ctrl)
@@ -525,7 +525,7 @@ void CSettingsComponent::buttonClicked(Button* button)
  * This just forwards it to private method that handles relevant changes in editor contents in general.
  * @param editor	The editor component that changes were made in
  */
-void CSettingsComponent::textEditorReturnKeyPressed(TextEditor& editor)
+void SettingsSectionsComponent::textEditorReturnKeyPressed(TextEditor& editor)
 {
 	textEditorUpdated(editor);
 }
@@ -535,7 +535,7 @@ void CSettingsComponent::textEditorReturnKeyPressed(TextEditor& editor)
  * This just forwards it to private method that handles relevant changes in editor contents in general.
  * @param editor	The editor component that changes were made in
  */
-void CSettingsComponent::textEditorFocusLost(TextEditor& editor)
+void SettingsSectionsComponent::textEditorFocusLost(TextEditor& editor)
 {
 	textEditorUpdated(editor);
 }
@@ -544,7 +544,7 @@ void CSettingsComponent::textEditorFocusLost(TextEditor& editor)
  * Method to handle relevant changes in text editors by processing them and inserting into config through controller interface
  * @param editor	The editor component that changes were made in
  */
-void CSettingsComponent::textEditorUpdated(TextEditor& editor)
+void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 {
 	CController* ctrl = CController::GetInstance();
 	if (!ctrl)
@@ -588,7 +588,7 @@ void CSettingsComponent::textEditorUpdated(TextEditor& editor)
  * Proxy method to activate a single bridging protocol in controller.
  * @param sectionType	The protocolType to be active from now on.
  */
-void CSettingsComponent::setSettingsSectionActiveState(HeaderWithElmListComponent* settingsSection, bool activeState)
+void SettingsSectionsComponent::setSettingsSectionActiveState(HeaderWithElmListComponent* settingsSection, bool activeState)
 {
 	CController* ctrl = CController::GetInstance();
 	if (!ctrl)
@@ -613,7 +613,7 @@ void CSettingsComponent::setSettingsSectionActiveState(HeaderWithElmListComponen
  * This is called by parent container component when it receives
  * onConfigUpdated call (it's a config listener and subscribed to changes)
  */
-void CSettingsComponent::processUpdatedConfig()
+void SettingsSectionsComponent::processUpdatedConfig()
 {
 	CController* ctrl = CController::GetInstance();
 	if (!ctrl)
@@ -671,7 +671,7 @@ void CSettingsComponent::processUpdatedConfig()
  * @param type	The service type that was selected
  * @param info	The detailed info on the service that was selected
  */
-void CSettingsComponent::handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info)
+void SettingsSectionsComponent::handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info)
 {
 	ignoreUnused(type);
 
@@ -688,14 +688,14 @@ void CSettingsComponent::handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDisco
 
 /*
 ===============================================================================
- Class CSettingsContainer
+ Class SettingsPageComponent
 ===============================================================================
 */
 
 /**
  * Class constructor.
  */
-CSettingsContainer::CSettingsContainer()
+SettingsPageComponent::SettingsPageComponent()
 	: PageComponentBase(PCT_Settings)
 {
 	// Apply button for when raw config is visible
@@ -733,7 +733,7 @@ CSettingsContainer::CSettingsContainer()
 	onToggleRawConfigVisible();
 
 	// The component containing configuration sections, etc. to be shown in a viewport for scrolling capabilities
-	m_settingsComponent = std::make_unique<CSettingsComponent>();
+	m_settingsComponent = std::make_unique<SettingsSectionsComponent>();
 	m_settingsViewport = std::make_unique<Viewport>();
 	m_settingsViewport->setViewedComponent(m_settingsComponent.get(), false);
 	addAndMakeVisible(m_settingsViewport.get());
@@ -749,7 +749,7 @@ CSettingsContainer::CSettingsContainer()
 /**
  * Class destructor.
  */
-CSettingsContainer::~CSettingsContainer()
+SettingsPageComponent::~SettingsPageComponent()
 {
 }
 
@@ -757,7 +757,7 @@ CSettingsContainer::~CSettingsContainer()
  * Reimplemented to paint background.
  * @param g		Graphics context that must be used to do the drawing operations.
  */
-void CSettingsContainer::paint(Graphics& g)
+void SettingsPageComponent::paint(Graphics& g)
 {
 	// Paint background to cover the controls behind this overlay.
 	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
@@ -767,7 +767,7 @@ void CSettingsContainer::paint(Graphics& g)
 /**
  * Reimplemented to resize and re-postion controls on the overview window.
  */
-void CSettingsContainer::resized()
+void SettingsPageComponent::resized()
 {
 	auto bounds = getLocalBounds().reduced(5);
 
@@ -803,7 +803,7 @@ void CSettingsContainer::resized()
  * Setter for the currently selected look and feel type in dropdown on ui
  * @param lookAndfeelType	The type to set as currently selected
  */
-void CSettingsContainer::SetSelectedLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType)
+void SettingsPageComponent::SetSelectedLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType)
 {
 	if (m_lookAndFeelSelect)
 		m_lookAndFeelSelect->setSelectedId(lookAndFeelType, dontSendNotification);
@@ -813,7 +813,7 @@ void CSettingsContainer::SetSelectedLookAndFeelType(DbLookAndFeelBase::LookAndFe
  * Getter for the currently selected look and feel type in dropdown on ui
  * @return	The currently selected type
  */
-DbLookAndFeelBase::LookAndFeelType CSettingsContainer::GetSelectedLookAndFeelType()
+DbLookAndFeelBase::LookAndFeelType SettingsPageComponent::GetSelectedLookAndFeelType()
 {
 	if (m_lookAndFeelSelect)
 	{
@@ -833,7 +833,7 @@ DbLookAndFeelBase::LookAndFeelType CSettingsContainer::GetSelectedLookAndFeelTyp
  * @param init	True to ignore any changed flags and update the plugin parameters
  *				in the GUI anyway. Good for when opening the Overview for the first time.
  */
-void CSettingsContainer::UpdateGui(bool init)
+void SettingsPageComponent::UpdateGui(bool init)
 {
 	ignoreUnused(init);
 }
@@ -841,7 +841,7 @@ void CSettingsContainer::UpdateGui(bool init)
 /**
  *
  */
-void CSettingsContainer::onConfigUpdated()
+void SettingsPageComponent::onConfigUpdated()
 {
 	auto config = AppConfiguration::getInstance();
 	if (config)
@@ -863,7 +863,7 @@ void CSettingsContainer::onConfigUpdated()
 /**
  *
  */
-void CSettingsContainer::onApplyClicked()
+void SettingsPageComponent::onApplyClicked()
 {
 	auto config = AppConfiguration::getInstance();
 	if (config != nullptr)
@@ -888,7 +888,7 @@ void CSettingsContainer::onApplyClicked()
 /**
  *
  */
-void CSettingsContainer::onToggleRawConfigVisible()
+void SettingsPageComponent::onToggleRawConfigVisible()
 {
 	if (m_useRawConfigButton->getToggleState())
 	{
@@ -910,7 +910,7 @@ void CSettingsContainer::onToggleRawConfigVisible()
 /**
  *
  */
-void CSettingsContainer::onSelectedLookAndFeelChanged()
+void SettingsPageComponent::onSelectedLookAndFeelChanged()
 {
 	auto config = AppConfiguration::getInstance();
 	if (config)

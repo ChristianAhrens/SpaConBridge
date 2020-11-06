@@ -104,11 +104,11 @@ COverviewComponent::COverviewComponent()
 	addAndMakeVisible(m_titleLabel.get());
 
 	// Create the table container.
-	m_tableContainer = std::make_unique<OverviewTableContainer>();
+	m_tableContainer = std::make_unique<TablePageComponent>();
 	m_multiSliderContainer = std::make_unique<COverviewMultiSurface>();
 	m_settingsContainer = std::make_unique<CSettingsContainer>();
 
-	// Create a tab container, where the COverviewTableContainer will be one of the tabs.
+	// Create a tab container, where the CTablePageComponent will be one of the tabs.
 	m_tabbedComponent = std::make_unique<CTabbedComponent>();
 	m_tabbedComponent->setTabBarDepth(44);
 	m_tabbedComponent->setOutline(0);

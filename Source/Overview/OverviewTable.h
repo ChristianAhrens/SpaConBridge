@@ -47,7 +47,7 @@ namespace SoundscapeBridgeApp
 /**
  * Forward declarations
  */
-class OverviewTableContainer;
+class TablePageComponent;
 class CustomTableHeaderComponent;
 class TableModelComponent;
 class ComboBoxContainer;
@@ -58,16 +58,16 @@ class SoundsourceProcessorEditor;
 
 
 /**
- * Class OverviewTableContainer is just a component which contains the overview table 
+ * Class TablePageComponent is just a component which contains the overview table 
  * and it's quick selection buttons.
  */
-class OverviewTableContainer :	public PageComponentBase,
+class TablePageComponent :	public PageComponentBase,
 								public Button::Listener,
 								public AppConfiguration::Watcher
 {
 public:
-	OverviewTableContainer();
-	~OverviewTableContainer() override;
+	TablePageComponent();
+	~TablePageComponent() override;
 
 	void UpdateGui(bool init) override;
 	void buttonClicked(Button*) override;
@@ -90,7 +90,7 @@ private:
 	std::unique_ptr<TextButton>					m_selectAll;						/**> Select all rows button. */
 	std::unique_ptr<TextButton>					m_selectNone;						/**> Select no rows button. */
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OverviewTableContainer)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TablePageComponent)
 };
 
 /**

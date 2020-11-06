@@ -51,14 +51,14 @@ namespace SoundscapeBridgeApp
 
 /*
 ===============================================================================
- Class OverviewTableContainer
+ Class TablePageComponent
 ===============================================================================
 */
 
 /**
  * Class constructor.
  */
-OverviewTableContainer::OverviewTableContainer()
+TablePageComponent::TablePageComponent()
 	: PageComponentBase(PCT_Overview)
 {
 	// Create the table model/component.
@@ -107,7 +107,7 @@ OverviewTableContainer::OverviewTableContainer()
 /**
  * Class destructor.
  */
-OverviewTableContainer::~OverviewTableContainer()
+TablePageComponent::~TablePageComponent()
 {
 }
 
@@ -115,7 +115,7 @@ OverviewTableContainer::~OverviewTableContainer()
  * Reimplemented to paint background and frame.
  * @param g		Graphics context that must be used to do the drawing operations.
  */
-void OverviewTableContainer::paint(Graphics& g)
+void TablePageComponent::paint(Graphics& g)
 {
 	int w = getLocalBounds().getWidth();
 	int h = getLocalBounds().getHeight();	
@@ -136,7 +136,7 @@ void OverviewTableContainer::paint(Graphics& g)
 /**
  * Reimplemented to resize and re-postion controls on the overview window.
  */
-void OverviewTableContainer::resized()
+void TablePageComponent::resized()
 {
 	// flexbox for table and editor as column or row layout depending on aspect ratio
 	FlexBox tableAndEditorFlex;
@@ -204,7 +204,7 @@ void OverviewTableContainer::resized()
  * Reimplemented from Button::Listener, gets called whenever the buttons are clicked.
  * @param button	The button which has been clicked.
  */
-void OverviewTableContainer::buttonClicked(Button *button)
+void TablePageComponent::buttonClicked(Button *button)
 {
 	if ((button == m_selectAll.get()) || (button == m_selectNone.get()))
 	{
@@ -253,7 +253,7 @@ void OverviewTableContainer::buttonClicked(Button *button)
 /**
  * Function to be called from model when the current selection has changed
  */
-void OverviewTableContainer::onCurrentSelectedProcessorChanged(ProcessorId selectedProcessorId)
+void TablePageComponent::onCurrentSelectedProcessorChanged(ProcessorId selectedProcessorId)
 {
 	if (selectedProcessorId == INVALID_PROCESSOR_ID)
 	{
@@ -299,7 +299,7 @@ void OverviewTableContainer::onCurrentSelectedProcessorChanged(ProcessorId selec
  * @param init	True to ignore any changed flags and update the plugin parameters
  *				in the GUI anyway. Good for when opening the Overview for the first time.
  */
-void OverviewTableContainer::UpdateGui(bool init)
+void TablePageComponent::UpdateGui(bool init)
 {
 	CController* ctrl = CController::GetInstance();
 	if (ctrl && m_overviewTable)
@@ -329,7 +329,7 @@ void OverviewTableContainer::UpdateGui(bool init)
  * Overridden from AppConfiguration Watcher to be able
  * to live react on config changes and update the table contents.
  */
-void OverviewTableContainer::onConfigUpdated()
+void TablePageComponent::onConfigUpdated()
 {
 	UpdateGui(false);
 }

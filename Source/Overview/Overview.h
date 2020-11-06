@@ -48,7 +48,7 @@ namespace SoundscapeBridgeApp
  * Forward declarations
  */
 class CTabbedComponent;
-class OverviewTableContainer;
+class TablePageComponent;
 class COverviewMultiSurface;
 class CSettingsContainer;
 
@@ -148,7 +148,7 @@ private:
 	std::unique_ptr<Label>					m_onlineLabel;			/**> Online indicator label. */
 	std::unique_ptr<LedButton>				m_onlineLed;			/**> Button used as Online indicator LED. */
 	std::unique_ptr<CTabbedComponent>		m_tabbedComponent;		/**> A container for tabs. */
-	std::unique_ptr<OverviewTableContainer> m_tableContainer;		/**> The actual table container inside this component. */
+	std::unique_ptr<TablePageComponent> m_tableContainer;		/**> The actual table container inside this component. */
 	std::unique_ptr<COverviewMultiSurface>	m_multiSliderContainer;	/**> Container for multi-slider. */
 	std::unique_ptr<CSettingsContainer>		m_settingsContainer;	/**> Container for settings component. */
 

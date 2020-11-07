@@ -55,6 +55,8 @@ public:
 	//==============================================================================
 	void UpdateGui(bool init) override;
 
+	void lookAndFeelChanged() override;
+
 	//==============================================================================
 	std::function<void()> onCloseClick;
 
@@ -67,11 +69,11 @@ protected:
 	void mouseUp(const MouseEvent& e) override;
 
 private:
+	std::unique_ptr<DrawableButton>		m_closeButton;		/**< Button to close the about page. */
 	std::unique_ptr<Label>				m_versionLabel;		/**> App version label. */
-	std::unique_ptr<HyperlinkButton>	m_dbLink;			/**> Hyperlink to dbaudio.com. */
+	std::unique_ptr<HyperlinkButton>	m_githubLink;			/**> Hyperlink to app home on github. */
 	std::unique_ptr<Label>				m_juceLabel;		/**> JUCE copyright label. */
-	std::unique_ptr<TextEditor>			m_eulaField;		/**> Text field containing the d&b EULA. */
-	std::unique_ptr<Label>				m_formatInfoLabel;	/**> Host format license info. */
+	std::unique_ptr<TextEditor>			m_eulaField;		/**> Text field containing the EULA. */
 	
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AboutPageComponent)
 };

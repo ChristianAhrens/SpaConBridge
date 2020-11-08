@@ -164,7 +164,7 @@ void PageContainerComponent::paint(Graphics& g)
 	g.fillRect(Rectangle<int>(w - 86, 6, 1, 30));
 
 	// Draw little line below right and left overlap of tabbedcomponent buttonbar to match with the line which is automatically drawn 
-	// by the CustomButtonTabbedComponent's CTabBarButton.
+	// by the CustomButtonTabbedComponent's CustomDrawableTabBarButton.
 	g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
 	g.drawRect(Rectangle<int>(0, 43, 40, 1), 1);
 	g.drawRect(Rectangle<int>(w - 86, 43, 86, 1), 1);
@@ -380,12 +380,12 @@ CustomButtonTabbedComponent::~CustomButtonTabbedComponent()
  * Reimplemented to create and return custom tab bar buttons.
  * @param tabName	Text on the tab button. Not used in this implementation.
  * @param tabIndex	Index of the tab from left to right, starting at 0.
- * @return	Pointer to a CTabBarButton.
+ * @return	Pointer to a CustomDrawableTabBarButton.
  */
 TabBarButton* CustomButtonTabbedComponent::createTabButton(const String& tabName, int tabIndex)
 {
 	ignoreUnused(tabName);
-	return new CTabBarButton(tabIndex, getTabbedButtonBar());
+	return new CustomDrawableTabBarButton(tabIndex, getTabbedButtonBar());
 }
 
 /**
@@ -393,7 +393,7 @@ TabBarButton* CustomButtonTabbedComponent::createTabButton(const String& tabName
  * Reimplemented to trigger a GUI update on the newly active tab.
  * @param newCurrentTabIndex	Index of the tab from left to right, starting at 0.
  * @param newCurrentTabName		Name of the tab.
- * @return	Pointer to a CTabBarButton.
+ * @return	Pointer to a CustomDrawableTabBarButton.
  */
 void CustomButtonTabbedComponent::currentTabChanged(int newCurrentTabIndex, const String& newCurrentTabName)
 {
@@ -441,7 +441,7 @@ void CustomButtonTabbedComponent::SetIsHandlingChanges(bool isHandlingChanges)
 
 /*
 ===============================================================================
- Class CTabBarButton
+ Class CustomDrawableTabBarButton
 ===============================================================================
 */
 
@@ -450,7 +450,7 @@ void CustomButtonTabbedComponent::SetIsHandlingChanges(bool isHandlingChanges)
  * @param tabIdx	Tab index starting at 0.
  * @param ownerBar	TabbedButtonBar object which contains this button.
  */
-CTabBarButton::CTabBarButton(int tabIdx, TabbedButtonBar& ownerBar)
+CustomDrawableTabBarButton::CustomDrawableTabBarButton(int tabIdx, TabbedButtonBar& ownerBar)
 	: TabBarButton(String(), ownerBar),
 	m_tabIndex(tabIdx)
 {
@@ -460,14 +460,14 @@ CTabBarButton::CTabBarButton(int tabIdx, TabbedButtonBar& ownerBar)
 /**
  * Class destructor.
  */
-CTabBarButton::~CTabBarButton()
+CustomDrawableTabBarButton::~CustomDrawableTabBarButton()
 {
 }
 
 /**
  * Helper method to update the drawables used for buttons to match the text colour
  */
-void CTabBarButton::updateDrawableButtonImageColours()
+void CustomDrawableTabBarButton::updateDrawableButtonImageColours()
 {
 	String imageName;
 	switch (m_tabIndex)
@@ -529,7 +529,7 @@ void CTabBarButton::updateDrawableButtonImageColours()
 /**
 * Reimplemented from Component to recreate the button drawables accordingly.
 */
-void CTabBarButton::lookAndFeelChanged()
+void CustomDrawableTabBarButton::lookAndFeelChanged()
 {
 	// update the drawable button images
 	updateDrawableButtonImageColours();
@@ -543,7 +543,7 @@ void CTabBarButton::lookAndFeelChanged()
  * @param isMouseOverButton	True if the mouse is over the button.
  * @param isButtonDown		True if the button is being pressed.
  */
-void CTabBarButton::paintButton(Graphics& g, bool isMouseOverButton, bool isButtonDown)
+void CustomDrawableTabBarButton::paintButton(Graphics& g, bool isMouseOverButton, bool isButtonDown)
 {
 	// The original TabBarButton::paintButton draws a gradient on the buttons which
 	// are inactive. We don't want that, just paint them with the background color.
@@ -573,7 +573,7 @@ void CTabBarButton::paintButton(Graphics& g, bool isMouseOverButton, bool isButt
 /**
  * Reimplemented to resize and re-postion controls on the tabbarbutton.
  */
-void CTabBarButton::resized()
+void CustomDrawableTabBarButton::resized()
 {
 	auto iconBounds = Rectangle<int>(0, 0, 25, 25);
 	auto activeArea = getActiveArea();
@@ -596,7 +596,7 @@ void CTabBarButton::resized()
  * @param visibleDrawable The drawable to become visible
  * @return True if the drawable was made visible, false if it already was visible or the given pointer is invalid
  */
-bool CTabBarButton::setVisibleDrawable(Drawable* visibleDrawable)
+bool CustomDrawableTabBarButton::setVisibleDrawable(Drawable* visibleDrawable)
 {
 	// if the drawable is already visible -> return false to indicate that nothing was changed
 	if (!visibleDrawable || visibleDrawable->isVisible())

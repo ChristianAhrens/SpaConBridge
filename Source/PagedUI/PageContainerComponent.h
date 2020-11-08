@@ -170,7 +170,7 @@ private:
 
 /**
  * Reimplemented TabbedComponent which overrides the createTabButton method in order
- * to provide custom tabBar buttons (See CTabBarButton).
+ * to provide custom tabBar buttons (See CustomDrawableTabBarButton).
  */
 class CustomButtonTabbedComponent : public TabbedComponent
 {
@@ -207,11 +207,11 @@ protected:
  * Reimplemented TabBarButton which overrides the paintButton method
  * to show an icon instead of the standard tab name text.
  */
-class CTabBarButton : public TabBarButton
+class CustomDrawableTabBarButton : public TabBarButton
 {
 public:
-	CTabBarButton(int tabIdx, TabbedButtonBar& ownerBar);
-	~CTabBarButton() override;
+	CustomDrawableTabBarButton(int tabIdx, TabbedButtonBar& ownerBar);
+	~CustomDrawableTabBarButton() override;
 
 	void updateDrawableButtonImageColours();
 
@@ -227,7 +227,7 @@ private:
 	int m_tabIndex;
 	std::unique_ptr<juce::Drawable> m_normalImage, m_overImage, m_downImage, m_disabledImage, m_normalOnImage, m_overOnImage, m_downOnImage, m_disabledOnImage;
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CTabBarButton)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CustomDrawableTabBarButton)
 };
 
 

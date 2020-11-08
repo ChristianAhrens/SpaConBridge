@@ -95,7 +95,7 @@ CController::CController()
 		m_parametersChanged[cs] = DCT_None;
 
 	// CController derives from ProcessingEngineNode::Listener
-	m_protocolBridge.AddListener(this);
+	AddProtocolBridgingWrapperListener(this);
 
 	// Default OSC server settings. These might become overwritten 
 	// by setStateInformation()
@@ -424,7 +424,7 @@ void CController::InitGlobalSettings(DataChangeSource changeSource, String ipAdd
 }
 
 /**
- * Called when the OSCReceiver receives a new OSC message, since CController inherits from OSCReceiver::Listener.
+ * Reimplemented callback for bridging wrapper callback to process incoming protocol data.
  * It forwards the message to all registered Processor objects.
  * @param nodeId	The bridging node that the message data was received on (only a single default id node supported currently).
  * @param senderProtocolId	The protocol that the message data was received on and was sent to controller from.
@@ -879,6 +879,15 @@ void CController::DeactivateSoundSourceId(SourceId sourceId, MappingId mappingId
 }
 
 /**
+ * Adds a given listener object to this controller instance's bridging wrapper object.
+ * @param listener	The listener object to add to bridging wrapper.
+ */
+void CController::AddProtocolBridgingWrapperListener(ProtocolBridgingWrapper::Listener* listener)
+{
+	m_protocolBridge.AddListener(listener);
+}
+
+/**
  * Getter for the active protocol bridging types (active protocols RoleB - those are used for bridging to DS100 running as RoleA, see RemoteProtocolBridge for details)
  * @return The bitfield containing all active bridging types
  */
@@ -887,7 +896,10 @@ ProtocolBridgingType CController::GetActiveProtocolBridging()
 	return m_protocolBridge.GetActiveBridgingProtocols();
 }
 
-
+/**
+ * Getter for currently active bridging protocols count.
+ * @return The number of currently active bridging protocols.
+ */
 int CController::GetActiveProtocolBridgingCount()
 {
 	auto activeProtocolBridgingCount = 0;

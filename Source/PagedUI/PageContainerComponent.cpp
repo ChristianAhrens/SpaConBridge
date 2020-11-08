@@ -115,19 +115,19 @@ PageContainerComponent::PageContainerComponent()
 	m_aboutPage = std::make_unique<AboutPageComponent>();
 	m_aboutPage->onCloseClick = [=] { toggleAboutPage(); };
 
-	// Create a tab container, where the CTablePageComponent will be one of the tabs.
+	// Create the tab component
 	m_tabbedComponent = std::make_unique<CustomButtonTabbedComponent>();
 	m_tabbedComponent->setTabBarDepth(44);
 	m_tabbedComponent->setOutline(0);
 	m_tabbedComponent->setIndent(0);
 	addAndMakeVisible(m_tabbedComponent.get());
 
-	// Add the overview tabs.
+	// Add the page tabs.
 	m_tabbedComponent->SetIsHandlingChanges(false);
-	m_tabbedComponent->addTab("Table", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_tablePage.get(), false);
-	m_tabbedComponent->addTab("Slider", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSliderPage.get(), false);
-	m_tabbedComponent->addTab("Settings", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_settingsPage.get(), false);
-	m_tabbedComponent->addTab("Statistics", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_statisticsPage.get(), false);
+	m_tabbedComponent->addTab("Table", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_tablePage.get(), false, CustomButtonTabbedComponent::OTI_Table);
+	m_tabbedComponent->addTab("Slider", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSliderPage.get(), false, CustomButtonTabbedComponent::OTI_MultiSlider);
+	m_tabbedComponent->addTab("Statistics", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_statisticsPage.get(), false, CustomButtonTabbedComponent::OTI_Statistics);
+	m_tabbedComponent->addTab("Settings", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_settingsPage.get(), false, CustomButtonTabbedComponent::OTI_Settings);
 	m_tabbedComponent->SetIsHandlingChanges(true);
 
 	// Start GUI-refreshing timer.

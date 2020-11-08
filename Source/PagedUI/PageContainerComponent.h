@@ -180,14 +180,14 @@ class CustomButtonTabbedComponent : public TabbedComponent
 public:
 
 	/**
-	 * Overview tab indeces
+	 * Overview tab indices
 	 */
 	enum OverviewTabIndex
 	{
 		OTI_Table = 0,
 		OTI_MultiSlider,
+		OTI_Statistics,
 		OTI_Settings,
-		OTI_Statistics
 	};
 
 	CustomButtonTabbedComponent();

@@ -36,9 +36,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PageContainerComponent.h"
 
 #include "PageComponentManager.h"
+#include "PageComponents/TablePageComponent.h"
 #include "PageComponents/MultiSurfacePageComponent.h"
 #include "PageComponents/SettingsPageComponent.h"
-#include "PageComponents/TablePageComponent.h"
+#include "PageComponents/StatisticsPageComponent.h"
 #include "PageComponents/AboutPageComponent.h"
 
 #include "../Controller.h"
@@ -110,6 +111,7 @@ PageContainerComponent::PageContainerComponent()
 	m_tablePage = std::make_unique<TablePageComponent>();
 	m_multiSliderPage = std::make_unique<MultiSurfacePageComponent>();
 	m_settingsPage = std::make_unique<SettingsPageComponent>();
+	m_statisticsPage = std::make_unique<StatisticsPageComponent>();
 	m_aboutPage = std::make_unique<AboutPageComponent>();
 	m_aboutPage->onCloseClick = [=] { toggleAboutPage(); };
 
@@ -125,6 +127,7 @@ PageContainerComponent::PageContainerComponent()
 	m_tabbedComponent->addTab("Table", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_tablePage.get(), false);
 	m_tabbedComponent->addTab("Slider", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSliderPage.get(), false);
 	m_tabbedComponent->addTab("Settings", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_settingsPage.get(), false);
+	m_tabbedComponent->addTab("Statistics", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_statisticsPage.get(), false);
 	m_tabbedComponent->SetIsHandlingChanges(true);
 
 	// Start GUI-refreshing timer.
@@ -208,6 +211,7 @@ void PageContainerComponent::resized()
 	m_tablePage->setBounds(rect);
 	m_multiSliderPage->setBounds(rect);
 	m_settingsPage->setBounds(rect);
+	m_statisticsPage->setBounds(rect);
 
 	// finally resize the aboutpage, if visible and therefor on top of everything else at all
 	if (m_aboutPage && m_aboutPage->isVisible())
@@ -480,6 +484,9 @@ void CTabBarButton::updateDrawableButtonImageColours()
 		break;
 	case CustomButtonTabbedComponent::OTI_Settings:
 		imageName = BinaryData::settings24px_svg;
+		break;
+	case CustomButtonTabbedComponent::OTI_Statistics:
+		imageName = BinaryData::show_chart24px_svg;
 		break;
 	default:
 		break;

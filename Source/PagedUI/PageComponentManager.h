@@ -61,23 +61,29 @@ public:
 	virtual ~PageComponentManager();
 	static PageComponentManager* GetInstance();
 
+	//==============================================================================
 	void OpenPageContainer();
 	PageContainerComponent* GetPageContainer();
 	void ClosePageContainer(bool destroy);
 
+	//==============================================================================
 	int GetActiveTab() const;
 	void SetActiveTab(int tabIdx, bool dontSendNotification);
 
+	//==============================================================================
 	int GetSelectedMapping() const;
 	void SetSelectedMapping(int mapping);
 
+	//==============================================================================
 	DbLookAndFeelBase::LookAndFeelType GetLookAndFeelType() const;
 	void SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType, bool dontSendNotification);
 
+	//==============================================================================
 	std::unique_ptr<XmlElement> createStateXml() override;
 	bool setStateXml(XmlElement* stateXml) override;
 
 protected:
+	//==============================================================================
 	static PageComponentManager	*m_singleton;			/**> The one and only instance of PageComponentManager. */
 	PageContainerComponent		*m_pageContainer;		/**> Pointer to the Overview winodw, if any. */
 	int							m_selectedTab{ 0 };		/**> Remember the last active tab. */

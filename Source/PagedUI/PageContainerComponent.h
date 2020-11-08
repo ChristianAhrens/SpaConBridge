@@ -50,6 +50,7 @@ class CustomButtonTabbedComponent;
 class TablePageComponent;
 class MultiSurfacePageComponent;
 class SettingsPageComponent;
+class StatisticsPageComponent;
 class AboutPageComponent;
 
 
@@ -151,6 +152,7 @@ private:
 	void timerCallback() override;
 
 private:
+	//==============================================================================
 	std::unique_ptr<Label>							m_versionLabel;			/**> App version label. */
 	std::unique_ptr<Label>							m_versionStringLabel;	/**> "Version" string. */
 	std::unique_ptr<ImageButton>					m_logoButton;			/**> App logo button triggering about page. */
@@ -162,6 +164,7 @@ private:
 	std::unique_ptr<TablePageComponent>				m_tablePage;			/**> The actual table container inside this component. */
 	std::unique_ptr<MultiSurfacePageComponent>		m_multiSliderPage;		/**> Container for multi-slider. */
 	std::unique_ptr<SettingsPageComponent>			m_settingsPage;			/**> Container for settings component. */
+	std::unique_ptr<StatisticsPageComponent>		m_statisticsPage;		/**> Container for statistics component. */
 	std::unique_ptr<AboutPageComponent>				m_aboutPage;			/**> Container for about component. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PageContainerComponent)
@@ -184,6 +187,7 @@ public:
 		OTI_Table = 0,
 		OTI_MultiSlider,
 		OTI_Settings,
+		OTI_Statistics
 	};
 
 	CustomButtonTabbedComponent();

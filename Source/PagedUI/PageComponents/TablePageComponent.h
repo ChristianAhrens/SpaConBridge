@@ -70,15 +70,20 @@ public:
 	TablePageComponent();
 	~TablePageComponent() override;
 
+	//==============================================================================
 	void UpdateGui(bool init) override;
+
+	//==============================================================================
 	void buttonClicked(Button*) override;
 
+	//==============================================================================
 	void onCurrentSelectedProcessorChanged(ProcessorId selectedProcessorId);
 
 	//==========================================================================
 	void onConfigUpdated() override;
 
 protected:
+	//==============================================================================
 	void paint(Graphics&) override;
 	void resized() override;
 

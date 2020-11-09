@@ -50,10 +50,8 @@ private:
 private:
 	juce::Array<ProtocolBridgingType> m_plottedBridgingTypes{ PBT_DiGiCo, PBT_BlacktraxRTTrPM, PBT_GenericOSC };
 
-	int	m_hRange;		/**< Horizontal max plot value (value range) in ms. We use the range from left (0) to right (m_hRange) to plot data. */
-	int	m_hStepping;	/**< Horizontal step width in ms. */
-	int	m_vRange;		/**< Vertical max plot value (value range). We use the range from bottom (0) to top (m_vRange) where m_vRange
-						 *	is dynamically adjusted regarding incoming data to plot. */
+	int	m_horStepMs;		/**< Horizontal step width in ms. */
+	int	m_vertValueRange;	/**< Vertical max plot value (value range). */
 	std::map<ProtocolBridgingType, int>					m_currentMsgPerProtocol;	/**< Map to help counting messages per protocol in current interval. This is processed every timer callback to update plot data. */
 	std::map<ProtocolBridgingType, std::vector<float>>	m_plotData;					/**< Data for plotting. Primitive vector of floats that represents the msg count per hor. step width. */
 	std::map<ProtocolBridgingType, Colour>				m_plotColours;				/** Individual colour for each protocol plot. */

@@ -200,6 +200,31 @@ static String GetProtocolBridgingSystemName(ProtocolBridgingType type)
 }
 
 /**
+ * Helper method to query a identifying name string for a protocol type that can be used in code or config files.
+ * @param type	The type value to get a string id for.
+ * @return	The system name string
+ */
+static const Colour GetProtocolBridgingColour(ProtocolBridgingType type)
+{
+	switch (type)
+	{
+	case PBT_DiGiCo:
+		return Colour(140, 46, 52);
+	case PBT_GenericOSC:
+		return Colour(255, 217, 115);
+	case PBT_BlacktraxRTTrPM:
+		return Colour(0, 174, 239);
+	case PBT_GenericMIDI:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	case PBT_None:
+	default:
+		return Colours::white;
+	}
+}
+
+
+/**
  * OSC Communication mode
  */
 static constexpr ComsMode CM_Off =			0x0000; //< OSC communication is inactive.

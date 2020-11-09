@@ -739,7 +739,7 @@ SettingsPageComponent::SettingsPageComponent()
 	addAndMakeVisible(m_settingsViewport.get());
 
 	// register this object as config watcher
-	auto config = AppConfiguration::getInstance();
+	auto config = SoundscapeBridgeApp::AppConfiguration::getInstance();
 	if (config)
 	{
 		config->addWatcher(this);
@@ -839,7 +839,8 @@ void SettingsPageComponent::UpdateGui(bool init)
 }
 
 /**
- *
+ * Overridden from AppConfiguration Watcher to be able
+ * to live react on config changes and update the table contents.
  */
 void SettingsPageComponent::onConfigUpdated()
 {
@@ -865,7 +866,7 @@ void SettingsPageComponent::onConfigUpdated()
  */
 void SettingsPageComponent::onApplyClicked()
 {
-	auto config = AppConfiguration::getInstance();
+	auto config = SoundscapeBridgeApp::AppConfiguration::getInstance();
 	if (config != nullptr)
 	{
 		XmlDocument configXmlDocument(m_settingsRawEditor->getText());
@@ -912,7 +913,7 @@ void SettingsPageComponent::onToggleRawConfigVisible()
  */
 void SettingsPageComponent::onSelectedLookAndFeelChanged()
 {
-	auto config = AppConfiguration::getInstance();
+	auto config = SoundscapeBridgeApp::AppConfiguration::getInstance();
 	if (config)
 		config->triggerConfigurationDump(true);
 }

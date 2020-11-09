@@ -173,15 +173,8 @@ public:
 	std::function<void(ProcessorId)>	currentSelectedProcessorChanged;
 
 private:
-	/**
-	 * The table component itself.
-	 */
-	TableListBox	m_table;
-
-	/**
-	 * Local list of Plug-in instance IDs, one for each row in the table.
-	 */
-	std::vector<ProcessorId> m_ids;
+	TableListBox				m_table;	/**> The table component itself. */
+	std::vector<ProcessorId>	m_ids;		/**> Local list of Plug-in instance IDs, one for each row in the table. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TableModelComponent)
 };

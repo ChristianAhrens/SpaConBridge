@@ -34,25 +34,11 @@ namespace SoundscapeBridgeApp
  */
 StatisticsPlot::StatisticsPlot()
 {
-	m_horStepMs = PC_HOR_DEFAULTSTEPPING;
 	m_vertValueRange = PC_VERT_RANGE;
 
-	for (auto bridgingProtocol : m_plottedBridgingTypes)
-	{
-		m_plotData[bridgingProtocol].resize(PC_HOR_RANGE / m_horStepMs);
+	ResetStatisticsPlot();
 
-		/*fill plotdata with default zero*/
-		for (int i = 0; i < (PC_HOR_RANGE / m_horStepMs); ++i)
-			m_plotData[bridgingProtocol].at(i) = 0;
-
-		float r = float(rand()) / float(RAND_MAX);
-		float g = float(rand()) / float(RAND_MAX);
-		float b = float(rand()) / float(RAND_MAX);
-		float a = 170.0f;
-		m_plotColours[bridgingProtocol] = Colour::fromFloatRGBA(r, g, b, a);
-	}
-
-	startTimer(m_horStepMs);
+	startTimer(PC_HOR_DEFAULTSTEPPING);
 }
 
 /**
@@ -101,32 +87,31 @@ void StatisticsPlot::paint(Graphics& g)
 	g.drawDashedLine(Line<float>(plotBounds.getX(), plotBounds.getY() + h * 0.75f, plotBounds.getX() + w, plotBounds.getY() + h * 0.75f), dashLengths, 2, gridLineThickness);
 	
 	// msg rate text
-	float msgRate = float(m_vertValueRange) * (float(PC_HOR_USERVISUSTEPPING) / float(m_horStepMs));
+	float msgRate = float(m_vertValueRange) * (float(PC_HOR_USERVISUSTEPPING) / float(PC_HOR_DEFAULTSTEPPING));
 	g.drawText(String(msgRate) + " msg/s", plotBounds.reduced(2), Justification::topLeft, true);
 
 	// Plot graph parameters
-	auto plotDataCount = m_plotData.begin()->second.size();
+	auto plotDataCount = (m_plotData.empty() ? 0 : m_plotData.begin()->second.size());
 	auto plotStepWidthPx = float(plotBounds.getWidth() - 1) / float((plotDataCount > 0 ? plotDataCount : 1) - 1);
 	auto newPointX = 0.0f;
 	auto newPointY = 0.0f;
 	auto vFactor = float(plotBounds.getHeight() - 1) / float(m_vertValueRange > 0 ? m_vertValueRange : 1);
 	auto plotOrigX = plotBounds.getBottomLeft().getX();
 	auto plotOrigY = plotBounds.getBottomLeft().getY() - 1;
-	auto legendColWidth = std::min(0.8f * (legendBounds.getWidth() / (m_plotData.empty() ? 1 : m_plotData.size())), 110.0f);
+	auto legendColWidth = std::min(legendBounds.getWidth() / (m_plotData.empty() ? 1 : m_plotData.size()), 90.0f);
 
 	Path path;
 	for (auto const& dataEntryKV : m_plotData)
 	{
-		// draw legend
+		// draw legend items
 		auto legendItemBounds = legendBounds.removeFromLeft(legendColWidth).reduced(5);
+		auto legendIndicator = legendItemBounds.removeFromLeft(legendItemBounds.getHeight());
 
-		// legend text
 		g.setColour(getLookAndFeel().findColour(TableListBox::textColourId));
-		g.drawFittedText(GetProtocolBridgingNiceName(dataEntryKV.first), legendItemBounds.reduced(3).toNearestInt(), Justification::centred, 1);
+		g.drawFittedText(GetProtocolBridgingShortName(dataEntryKV.first), legendItemBounds.reduced(3).toNearestInt(), Justification::centredLeft, 1);
 
-		// legend text and graph curve colour for individual protocols
-		g.setColour(m_plotColours.at(dataEntryKV.first));
-		g.drawRoundedRectangle(legendItemBounds, 4.0f, 1);
+		g.setColour(GetProtocolBridgingColour(dataEntryKV.first));
+		g.fillRoundedRectangle(legendIndicator.reduced(5), 4.0f);
 
 		// draw graph
 		path.startNewSubPath(Point<float>(plotOrigX, plotOrigY - (m_plotData[dataEntryKV.first].front()) * vFactor));
@@ -173,6 +158,36 @@ void StatisticsPlot::IncreaseCount(ProtocolBridgingType bridgingProtocol)
 }
 
 /**
+ * Method to reset internal data based on what map of currently plotted bridging types contains.
+ */
+void StatisticsPlot::ResetStatisticsPlot()
+{
+	m_plotData.clear();
+	m_plottedBridgingTypes.clear();
+
+	auto ctrl = SoundscapeBridgeApp::CController::GetInstance();
+	if (!ctrl)
+		return;
+
+	auto bridgingTypes = ctrl->GetActiveProtocolBridging();
+	if ((bridgingTypes & PBT_DiGiCo) == PBT_DiGiCo)
+		m_plottedBridgingTypes.add(PBT_DiGiCo);
+	if ((bridgingTypes & PBT_BlacktraxRTTrPM) == PBT_BlacktraxRTTrPM)
+		m_plottedBridgingTypes.add(PBT_BlacktraxRTTrPM);
+	if ((bridgingTypes & PBT_GenericOSC) == PBT_GenericOSC)
+		m_plottedBridgingTypes.add(PBT_GenericOSC);
+
+	for (auto bridgingProtocol : m_plottedBridgingTypes)
+	{
+		m_plotData[bridgingProtocol].resize(PC_HOR_RANGE / PC_HOR_DEFAULTSTEPPING);
+
+		/*fill plotdata with default zero*/
+		for (int i = 0; i < (PC_HOR_RANGE / PC_HOR_DEFAULTSTEPPING); ++i)
+			m_plotData[bridgingProtocol].at(i) = 0;
+	}
+}
+
+/**
  * Reimplemented from Timer - called every timeout timer
  * We do the processing of count of messages per node during last interval into our plot data for next paint here.
  */
@@ -213,8 +228,20 @@ void StatisticsPlot::timerCallback()
  */
 StatisticsLog::StatisticsLog()
 {
-	m_textBox = std::make_unique<CodeEditorComponent>(m_doc, nullptr);
-	addAndMakeVisible(m_textBox.get());
+	m_table = std::make_unique<TableListBox>();
+	m_table->setModel(this);
+	m_table->setRowHeight(25);
+	m_table->setOutlineThickness(1);
+	m_table->setClickingTogglesRowSelection(false);
+	m_table->setMultipleSelectionEnabled(true);
+	addAndMakeVisible(m_table.get());
+
+	int tableHeaderFlags = (TableHeaderComponent::visible);
+	m_table->getHeader().addColumn("", SLC_Number, 60, 60, -1, tableHeaderFlags);
+	m_table->getHeader().addColumn("Remote Object", SLC_ObjectName, 110, 110, -1, tableHeaderFlags);
+	m_table->getHeader().addColumn("Ch.", SLC_SourceId, 35, 35, -1, tableHeaderFlags);
+	m_table->getHeader().addColumn("Value", SLC_Value, 70, 70, -1, tableHeaderFlags);
+	m_table->getHeader().addColumn("Type", SLC_BridgingName, 60, 60, -1, tableHeaderFlags);
 
 	startTimer(PC_HOR_DEFAULTSTEPPING);
 }
@@ -227,30 +254,11 @@ StatisticsLog::~StatisticsLog()
 }
 
 /**
- * Reimplemented to paint background.
- * @param g		Graphics context that must be used to do the drawing operations.
- */
-void StatisticsLog::paint(Graphics& g)
-{
-	auto bounds = getLocalBounds().toFloat();
-
-	// Background of logging area
-	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
-	g.fillRect(bounds);
-
-	// Frame of logging area
-	g.setColour(getLookAndFeel().findColour(TableListBox::outlineColourId));
-	g.drawRect(bounds);
-}
-
-/**
  * Reimplemented to resize and re-postion controls.
  */
 void StatisticsLog::resized()
 {
-	auto bounds = getLocalBounds().reduced(1);
-
-	m_textBox->setBounds(bounds);
+	m_table->setBounds(getLocalBounds());
 }
 
 /**
@@ -261,14 +269,7 @@ void StatisticsLog::resized()
  */
 void StatisticsLog::timerCallback()
 {
-	m_textBox->moveCaretToEnd(false);
-	for (auto const& message : m_loggingQueue)
-	{
-		m_textBox->insertTextAtCaret(message);
-		m_textBox->insertTextAtCaret("\n");
-	}
-
-	m_loggingQueue.clear();
+	m_table->repaint();
 }
 
 /**
@@ -279,22 +280,16 @@ void StatisticsLog::timerCallback()
  */
 void StatisticsLog::AddMessageData(ProtocolBridgingType bridgingType, RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData)
 {
-	String messageString =
-		GetProtocolBridgingShortName(bridgingType)
-		+ String(" | ") + ProcessingEngineConfig::GetObjectDescription(Id).paddedRight(' ', 31)
-		+ String(" | ") + String(msgData.addrVal.first);
-
+	String valueString;
 	if (msgData.payload != 0)
 	{
-		messageString += " |";
-
 		if (msgData.valType == ROVT_FLOAT)
 		{
 			float fvalue;
 			for (int i = 0; i < msgData.valCount; ++i)
 			{
 				fvalue = ((float*)msgData.payload)[i];
-				messageString += String::formatted(" %f", fvalue);
+				valueString += String(fvalue, 2) + ",";
 			}
 		}
 		else if (msgData.valType == ROVT_INT)
@@ -303,12 +298,123 @@ void StatisticsLog::AddMessageData(ProtocolBridgingType bridgingType, RemoteObje
 			for (int i = 0; i < msgData.valCount; ++i)
 			{
 				ivalue = ((int*)msgData.payload)[i];
-				messageString += String::formatted(" %d", ivalue);
+				valueString += String(ivalue) + ",";
 			}
 		}
 	}
 
-	m_loggingQueue.push_back(messageString);
+	m_logEntryCounter++;
+	auto mapIdx = m_logEntryCounter % m_logCount;
+	m_logEntries[mapIdx][SLC_Number] = String(m_logEntryCounter);
+	m_logEntries[mapIdx][SLC_ObjectName] = ProcessingEngineConfig::GetObjectShortDescription(Id);
+	m_logEntries[mapIdx][SLC_SourceId] = String(msgData.addrVal.first);
+	m_logEntries[mapIdx][SLC_Value] = valueString;
+	m_logEntries[mapIdx][SLC_BridgingName] = GetProtocolBridgingShortName(bridgingType);
+	m_logEntries[mapIdx][SLC_BridgingType] = String(bridgingType);
+}
+
+/**
+ * This can be overridden to react to the user double-clicking on a part of the list where there are no rows.
+ * @param event	Contains position and status information about a mouse event.
+ */
+void StatisticsLog::backgroundClicked(const MouseEvent& event)
+{
+	// Clear selection
+	m_table->deselectAllRows();
+
+	// Base class implementation.
+	TableListBoxModel::backgroundClicked(event);
+}
+
+/**
+ * This is overloaded from TableListBoxModel, and must return the total number of rows in our table.
+ * @return	Number of rows on the table, equal to number of plugin instances.
+ */
+int StatisticsLog::getNumRows()
+{
+	return m_logCount;
+}
+
+/**
+ * This is overloaded from TableListBoxModel, and should fill in the background of the whole row.
+ * @param g					Graphics context that must be used to do the drawing operations.
+ * @param rowNumber			Number of row to paint.
+ * @param width				Width of area to paint.
+ * @param height			Height of area to paint.
+ * @param rowIsSelected		True if row is currently selected.
+ */
+void StatisticsLog::paintRowBackground(Graphics& g, int rowNumber, int width, int height, bool rowIsSelected)
+{
+	ignoreUnused(rowNumber);
+
+	// Selected rows have a different background color.
+	if (rowIsSelected)
+		g.setColour(getLookAndFeel().findColour(TableHeaderComponent::highlightColourId));
+	else
+		g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId));
+	g.fillRect(0, 0, width, height - 1);
+
+	// Line between rows.
+	g.setColour(getLookAndFeel().findColour(ListBox::outlineColourId));
+	g.fillRect(0, height - 1, width, height - 1);
+}
+
+/**
+ * This is overloaded from TableListBoxModel, and must paint any cells that aren't using custom components.
+ * This reimplementation does nothing (all cells use custom components).
+ * @param g					Graphics context that must be used to do the drawing operations.
+ * @param rowNumber			Number of row to paint (starts at 0)
+ * @param columnId			Number of column to paint (starts at 1).
+ * @param width				Width of area to paint.
+ * @param height			Height of area to paint.
+ * @param rowIsSelected		True if row is currently selected.
+ */
+void StatisticsLog::paintCell(Graphics& g, int rowNumber, int columnId, int width, int height, bool rowIsSelected)
+{
+	ignoreUnused(rowIsSelected);
+	ignoreUnused(rowIsSelected);
+
+	auto cellRect = Rectangle<int>(width, height);
+
+	auto mapIdx = ((m_logEntryCounter % m_logCount) - rowNumber) % m_logCount;
+
+	if (columnId == SLC_Number)
+	{
+		auto bridgingProtocol = static_cast<ProtocolBridgingType>(m_logEntries[mapIdx][SLC_BridgingType].getIntValue());
+		g.setColour(GetProtocolBridgingColour(bridgingProtocol));
+		g.drawFittedText(m_logEntries[mapIdx][columnId], cellRect, Justification::centredRight, 1);
+	}
+	else
+	{
+		g.setColour(getLookAndFeel().findColour(TableListBox::textColourId));
+		g.drawFittedText(m_logEntries[mapIdx][columnId], cellRect, Justification::centred, 1);
+	}
+}
+
+/**
+ * This is overloaded from TableListBoxModel, and should choose the best width for the specified column.
+ * @param columnId	Desired column ID.
+ * @return	Width to be used for the desired column.
+ */
+int StatisticsLog::getColumnAutoSizeWidth(int columnId)
+{
+	switch (columnId)
+	{
+	case SLC_Number:
+		return 60;
+	case SLC_ObjectName:
+		return 110;
+	case SLC_SourceId:
+		return 40;
+	case SLC_Value:
+		return 60;
+	case SLC_BridgingName:
+		return 60;
+	default:
+		break;
+	}
+
+	return 0;
 }
 
 
@@ -333,6 +439,10 @@ StatisticsPageComponent::StatisticsPageComponent()
 	auto ctrl = SoundscapeBridgeApp::CController::GetInstance();
 	if (ctrl)
 		ctrl->AddProtocolBridgingWrapperListener(this);
+
+	auto config = SoundscapeBridgeApp::AppConfiguration::getInstance();
+	if (config)
+		config->addWatcher(this);
 }
 
 /**
@@ -388,8 +498,16 @@ void StatisticsPageComponent::resized()
  */
 void StatisticsPageComponent::UpdateGui(bool init)
 {
-	// Will be set to true if any changes relevant to the multi-slider are found.
-	bool update = init;
+	ignoreUnused(init);
+}
+
+/**
+ * Overridden from AppConfiguration Watcher to be able
+ * to live react on config changes and update the table contents.
+ */
+void StatisticsPageComponent::onConfigUpdated()
+{
+	m_plotComponent->ResetStatisticsPlot();
 }
 
 /**

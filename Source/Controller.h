@@ -52,8 +52,8 @@ class SoundsourceProcessor;
 
 
 /**
- * Class CController which takes care of OSC communication, including connection establishment
- * and sending/receiving of OSC messages over the network.
+ * Class CController which takes care of protocol communication through protocolbridging wrapper, including connection establishment
+ * and sending/receiving of messages over the network.
  * NOTE: This is a singleton class, i.e. there is only one instance.
  */
 class CController :

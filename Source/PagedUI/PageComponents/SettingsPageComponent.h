@@ -56,6 +56,7 @@ public:
 	HeaderWithElmListComponent(const String& componentName = String());
 	~HeaderWithElmListComponent() override;
 
+	//==============================================================================
 	void setHasActiveToggle(bool hasActiveToggle);
 	void setHeaderText(String headerText);
 	void addComponent(Component* compo, bool includeInLayout = true, bool takeOwnership = true);
@@ -100,6 +101,7 @@ public:
 	SettingsSectionsComponent();
 	~SettingsSectionsComponent() override;
 
+	//==============================================================================
 	void processUpdatedConfig();
 
 	//==========================================================================
@@ -197,6 +199,7 @@ public:
 	void resized() override;
 
 private:
+	//==============================================================================
 	std::unique_ptr<SettingsSectionsComponent>	m_settingsComponent;
 	std::unique_ptr<Viewport>					m_settingsViewport;
 

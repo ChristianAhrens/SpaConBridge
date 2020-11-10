@@ -212,8 +212,8 @@ CSurfaceMultiSlider::~CSurfaceMultiSlider()
  */
 void CSurfaceMultiSlider::paint(Graphics& g)
 {
-	float w = static_cast<float>(getLocalBounds().getWidth());
-	float h = static_cast<float>(getLocalBounds().getHeight());
+	auto w = getLocalBounds().toFloat().getWidth();
+	auto h = getLocalBounds().toFloat().getHeight();
 
 	// Surface background area
 	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));

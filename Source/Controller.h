@@ -121,6 +121,9 @@ public:
 	bool setStateXml(XmlElement* stateXml) override;
 
 	//==========================================================================
+	void AddProtocolBridgingWrapperListener(ProtocolBridgingWrapper::Listener* listener);
+
+	//==========================================================================
 	void HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData) override;
 
 private:

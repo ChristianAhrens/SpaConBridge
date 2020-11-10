@@ -66,7 +66,10 @@ public:
 	explicit PageComponentBase(PageComponentType type);
 	~PageComponentBase() override;
 
+	//==============================================================================
 	PageComponentType GetPageComponentType() const;
+
+	//==============================================================================
 	virtual void UpdateGui(bool init) = 0;
 
 private:

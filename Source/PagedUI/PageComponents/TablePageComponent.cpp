@@ -99,7 +99,7 @@ TablePageComponent::TablePageComponent()
 	addAndMakeVisible(m_selectNone.get());
 
 	// register this object as config watcher
-	auto config = AppConfiguration::getInstance();
+	auto config = SoundscapeBridgeApp::AppConfiguration::getInstance();
 	if (config)
 		config->addWatcher(this);
 }

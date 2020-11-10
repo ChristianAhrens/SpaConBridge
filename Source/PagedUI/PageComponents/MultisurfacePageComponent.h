@@ -55,11 +55,15 @@ public:
 	MultiSurfacePageComponent();
 	~MultiSurfacePageComponent() override;
 
+	//==============================================================================
 	void UpdateGui(bool init) override;
 
 protected:
+	//==============================================================================
 	void paint(Graphics&) override;
 	void resized() override;
+
+	//==============================================================================
 	void comboBoxChanged(ComboBox *comboBox) override;
 
 private:

@@ -114,9 +114,9 @@ static constexpr ProtocolBridgingType PBT_GenericOSC		= 0x00000004;
 static constexpr ProtocolBridgingType PBT_GenericMIDI		= 0x00000008;
 static constexpr ProtocolBridgingType PBT_YamahaSQ			= 0x00000010;
 static constexpr ProtocolBridgingType PBT_HUI				= 0x00000020;
+static constexpr ProtocolBridgingType PBT_DS100				= 0x10000000;
 
-
-static const std::vector<ProtocolBridgingType> ProtocolBridgingTypes{ PBT_DiGiCo, PBT_BlacktraxRTTrPM, PBT_GenericOSC, PBT_GenericMIDI, PBT_YamahaSQ, PBT_HUI };
+static const std::vector<ProtocolBridgingType> ProtocolBridgingTypes{ PBT_DiGiCo, PBT_BlacktraxRTTrPM, PBT_GenericOSC, PBT_GenericMIDI, PBT_YamahaSQ, PBT_HUI, PBT_DS100 };
 
 /**
  * Helper method to query a user readable short name for a protocol type that can be shown on UI.
@@ -139,6 +139,8 @@ static String GetProtocolBridgingShortName(ProtocolBridgingType type)
 			return "YamahaSQ";
 		case PBT_HUI:
 			return "HUI";
+		case PBT_DS100:
+			return "DS100";
 		case PBT_None:
 		default:
 			return "";
@@ -166,6 +168,8 @@ static String GetProtocolBridgingNiceName(ProtocolBridgingType type)
 		return "YamahaSQ";
 	case PBT_HUI:
 		return "Generic HUI";
+	case PBT_DS100:
+		return "DS100";
 	case PBT_None:
 	default:
 		return "";
@@ -193,6 +197,8 @@ static String GetProtocolBridgingSystemName(ProtocolBridgingType type)
 		return "DummyYamahaSQ";
 	case PBT_HUI:
 		return "DummyHUI";
+	case PBT_DS100:
+		return "DS100OSCPolling";
 	case PBT_None:
 	default:
 		return "INVALID";
@@ -214,12 +220,13 @@ static const Colour GetProtocolBridgingColour(ProtocolBridgingType type)
 		return Colour(255, 217, 115);
 	case PBT_BlacktraxRTTrPM:
 		return Colour(0, 174, 239);
+	case PBT_DS100:
 	case PBT_GenericMIDI:
 	case PBT_YamahaSQ:
 	case PBT_HUI:
 	case PBT_None:
 	default:
-		return Colours::white;
+		return Colour();
 	}
 }
 

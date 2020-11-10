@@ -110,21 +110,31 @@ void StatisticsPlot::paint(Graphics& g)
 		g.setColour(getLookAndFeel().findColour(TableListBox::textColourId));
 		g.drawFittedText(GetProtocolBridgingShortName(dataEntryKV.first), legendItemBounds.reduced(3).toNearestInt(), Justification::centredLeft, 1);
 
-		g.setColour(GetProtocolBridgingColour(dataEntryKV.first));
-		g.fillRoundedRectangle(legendIndicator.reduced(5), 4.0f);
+		auto colour = GetProtocolBridgingColour(dataEntryKV.first);
+		if (colour.isTransparent())
+			g.setColour(getLookAndFeel().findColour(TableListBox::textColourId));
+		else
+			g.setColour(colour);
 
-		// draw graph
-		path.startNewSubPath(Point<float>(plotOrigX, plotOrigY - (m_plotData[dataEntryKV.first].front()) * vFactor));
-		for (int i = 1; i < m_plotData[dataEntryKV.first].size(); ++i)
+		if (dataEntryKV.first == PBT_DS100 && !m_showDS100Traffic)
+			g.drawRoundedRectangle(legendIndicator.reduced(5), 4.0f, 1);
+		else
 		{
-			newPointX = plotOrigX + float(i) * plotStepWidthPx;
-			newPointY = plotOrigY - (m_plotData[dataEntryKV.first].at(i) * vFactor);
-		
-			path.lineTo(Point<float>(newPointX, newPointY));
+			g.fillRoundedRectangle(legendIndicator.reduced(5), 4.0f);
+
+			// draw graph
+			path.startNewSubPath(Point<float>(plotOrigX, plotOrigY - (m_plotData[dataEntryKV.first].front()) * vFactor));
+			for (int i = 1; i < m_plotData[dataEntryKV.first].size(); ++i)
+			{
+				newPointX = plotOrigX + float(i) * plotStepWidthPx;
+				newPointY = plotOrigY - (m_plotData[dataEntryKV.first].at(i) * vFactor);
+
+				path.lineTo(Point<float>(newPointX, newPointY));
+			}
+			g.strokePath(path, PathStrokeType(2));
+			path.closeSubPath();
+			path.clear();
 		}
-		g.strokePath(path, PathStrokeType(2));
-		path.closeSubPath();
-		path.clear();
 	}
 
 	// Plot legend markings
@@ -169,13 +179,15 @@ void StatisticsPlot::ResetStatisticsPlot()
 	if (!ctrl)
 		return;
 
-	auto bridgingTypes = ctrl->GetActiveProtocolBridging();
+	auto bridgingTypes = ctrl->GetActiveProtocolBridging() | PBT_DS100; // DS100 is not a bridging protocol, even though it is part of the enum PBT. Needs special handling therefor.
 	if ((bridgingTypes & PBT_DiGiCo) == PBT_DiGiCo)
 		m_plottedBridgingTypes.add(PBT_DiGiCo);
 	if ((bridgingTypes & PBT_BlacktraxRTTrPM) == PBT_BlacktraxRTTrPM)
 		m_plottedBridgingTypes.add(PBT_BlacktraxRTTrPM);
 	if ((bridgingTypes & PBT_GenericOSC) == PBT_GenericOSC)
 		m_plottedBridgingTypes.add(PBT_GenericOSC);
+	if ((bridgingTypes & PBT_DS100) == PBT_DS100)
+		m_plottedBridgingTypes.add(PBT_DS100);
 
 	for (auto bridgingProtocol : m_plottedBridgingTypes)
 	{
@@ -200,6 +212,12 @@ void StatisticsPlot::timerCallback()
 		if (!m_plottedBridgingTypes.contains(msgCountKV.first))
 			continue;
 
+		if (msgCountKV.first == PBT_DS100 && !m_showDS100Traffic)
+		{
+			m_currentMsgPerProtocol[msgCountKV.first] = 0;
+			continue;
+		}
+
 		std::vector<float> shiftedVector(m_plotData[msgCountKV.first].begin() + 1, m_plotData[msgCountKV.first].end());
 		m_plotData[msgCountKV.first].swap(shiftedVector);
 		m_plotData[msgCountKV.first].push_back(float(msgCountKV.second));
@@ -214,6 +232,34 @@ void StatisticsPlot::timerCallback()
 
 	if (isVisible())
 		repaint();
+}
+
+/**
+ * Called when the mouse button is released.
+ * Reimplemented just to call EndGuiGesture() to inform the host.
+ * @param e		Details about the position and status of the mouse event, including the source component in which it occurred
+ */
+void StatisticsPlot::mouseUp(const MouseEvent& e)
+{
+	auto clickPos = e.getMouseDownPosition();
+
+	auto bounds = getLocalBounds();
+	auto contentBounds = getLocalBounds().reduced(1);
+	auto legendBounds = contentBounds.removeFromBottom(30);
+	auto legendColWidth = std::min(int(legendBounds.getWidth() / (m_plotData.empty() ? 1 : m_plotData.size())), 90);
+
+	for (auto const& dataEntryKV : m_plotData)
+	{
+		auto legendItemBounds = legendBounds.removeFromLeft(legendColWidth).reduced(5);
+
+		if (dataEntryKV.first == PBT_DS100 && legendItemBounds.contains(clickPos))
+		{
+			m_showDS100Traffic = !m_showDS100Traffic;
+
+			if (toggleShowDS100Traffic)
+				toggleShowDS100Traffic(m_showDS100Traffic);
+		}
+	}
 }
 
 
@@ -238,7 +284,7 @@ StatisticsLog::StatisticsLog()
 
 	int tableHeaderFlags = (TableHeaderComponent::visible);
 	m_table->getHeader().addColumn("", SLC_Number, 60, 60, -1, tableHeaderFlags);
-	m_table->getHeader().addColumn("Remote Object", SLC_ObjectName, 110, 110, -1, tableHeaderFlags);
+	m_table->getHeader().addColumn("Remote Object", SLC_ObjectName, 120, 120, -1, tableHeaderFlags);
 	m_table->getHeader().addColumn("Ch.", SLC_SourceId, 35, 35, -1, tableHeaderFlags);
 	m_table->getHeader().addColumn("Value", SLC_Value, 70, 70, -1, tableHeaderFlags);
 	m_table->getHeader().addColumn("Type", SLC_BridgingName, 60, 60, -1, tableHeaderFlags);
@@ -287,6 +333,9 @@ void StatisticsLog::timerCallback()
  */
 void StatisticsLog::AddMessageData(ProtocolBridgingType bridgingType, RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData)
 {
+	if (!m_showDS100Traffic && bridgingType == PBT_DS100)
+		return;
+
 	String valueString;
 	if (msgData.payload != 0)
 	{
@@ -398,7 +447,12 @@ void StatisticsLog::paintCell(Graphics& g, int rowNumber, int columnId, int widt
 	if (columnId == SLC_Number)
 	{
 		auto bridgingProtocol = static_cast<ProtocolBridgingType>(m_logEntries[mapIdx][SLC_BridgingType].getIntValue());
-		g.setColour(GetProtocolBridgingColour(bridgingProtocol));
+		auto colour = GetProtocolBridgingColour(bridgingProtocol);
+		if (colour.isTransparent())
+			g.setColour(getLookAndFeel().findColour(TableListBox::textColourId));
+		else
+			g.setColour(colour);
+		cellRect.removeFromRight(5);
 		g.drawFittedText(m_logEntries[mapIdx][columnId], cellRect, Justification::centredRight, 1);
 	}
 	else
@@ -420,7 +474,7 @@ int StatisticsLog::getColumnAutoSizeWidth(int columnId)
 	case SLC_Number:
 		return 60;
 	case SLC_ObjectName:
-		return 110;
+		return 120;
 	case SLC_SourceId:
 		return 40;
 	case SLC_Value:
@@ -432,6 +486,15 @@ int StatisticsLog::getColumnAutoSizeWidth(int columnId)
 	}
 
 	return 0;
+}
+
+/**
+ * Setter for 'showDS100Traffic' member variable.
+ * @param show	The value to set to member variable.
+ */
+void StatisticsLog::SetShowDS100Traffic(bool show)
+{
+	m_showDS100Traffic = show;
 }
 
 
@@ -452,6 +515,8 @@ StatisticsPageComponent::StatisticsPageComponent()
 
 	m_logComponent = std::make_unique<StatisticsLog>();
 	addAndMakeVisible(m_logComponent.get());
+
+	m_plotComponent->toggleShowDS100Traffic = [=](bool show) { m_logComponent->SetShowDS100Traffic(show); };
 
 	auto ctrl = SoundscapeBridgeApp::CController::GetInstance();
 	if (ctrl)
@@ -552,6 +617,9 @@ void StatisticsPageComponent::HandleMessageData(NodeId nodeId, ProtocolId sender
 		break;
 	case GENERICOSC_PROCESSINGPROTOCOL_ID:
 		bridgingProtocol = PBT_GenericOSC;
+		break;
+	case DS100_PROCESSINGPROTOCOL_ID:
+		bridgingProtocol = PBT_DS100;
 		break;
 	default:
 		return;

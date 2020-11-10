@@ -42,6 +42,12 @@ public:
 	void IncreaseCount(ProtocolBridgingType bridgingProtocol);
 	void ResetStatisticsPlot();
 
+	//==============================================================================
+	void mouseUp(const MouseEvent& e) override;
+
+	//==========================================================================
+	std::function<void(bool)>	toggleShowDS100Traffic;
+
 protected:
 	//==============================================================================
 	void paint(Graphics& g) override;
@@ -53,6 +59,7 @@ private:
 private:
 	juce::Array<ProtocolBridgingType> m_plottedBridgingTypes;
 
+	bool m_showDS100Traffic{ false };
 	int	m_vertValueRange;	/**< Vertical max plot value (value range). */
 	std::map<ProtocolBridgingType, int>					m_currentMsgPerProtocol;	/**< Map to help counting messages per protocol in current interval. This is processed every timer callback to update plot data. */
 	std::map<ProtocolBridgingType, std::vector<float>>	m_plotData;					/**< Data for plotting. Primitive vector of floats that represents the msg count per hor. step width. */
@@ -95,6 +102,9 @@ public:
 	void paintCell(Graphics& g, int rowNumber, int columnId, int width, int height, bool rowIsSelected) override;
 	int getColumnAutoSizeWidth(int columnId) override;
 
+	//==========================================================================
+	void SetShowDS100Traffic(bool show);
+
 protected:
 	//==============================================================================
 	void resized() override;
@@ -109,6 +119,7 @@ private:
 	const int								m_logCount{ 200 };
 	int										m_logEntryCounter{ 0 };
 	bool									m_dataChanged{ false };
+	bool									m_showDS100Traffic{ false };
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StatisticsLog)
 };

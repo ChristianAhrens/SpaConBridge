@@ -917,6 +917,8 @@ int CController::GetActiveProtocolBridgingCount()
 		activeProtocolBridgingCount++;
 	if ((activeBridging & PBT_HUI) == PBT_HUI)
 		activeProtocolBridgingCount++;
+	if ((activeBridging & PBT_DS100) == PBT_DS100)
+		activeProtocolBridgingCount++;
 
 	return activeProtocolBridgingCount;
 }
@@ -948,6 +950,7 @@ bool CController::GetMuteBridgingSourceId(ProtocolBridgingType bridgingType, juc
 	case PBT_GenericMIDI:
 	case PBT_YamahaSQ:
 	case PBT_HUI:
+	case PBT_DS100:
 	default:
 		jassertfalse;
 		return false;
@@ -973,6 +976,7 @@ bool CController::SetMuteBridgingSourceId(ProtocolBridgingType bridgingType, juc
 	case PBT_GenericMIDI:
 	case PBT_YamahaSQ:
 	case PBT_HUI:
+	case PBT_DS100:
 	default:
 		jassertfalse;
 		return false;
@@ -989,6 +993,8 @@ String CController::GetBridgingIpAddress(ProtocolBridgingType bridgingType)
 		return m_protocolBridge.GetGenericOSCIpAddress();
 	case PBT_BlacktraxRTTrPM:
 		return m_protocolBridge.GetRTTrPMIpAddress();
+	case PBT_DS100:
+		return m_protocolBridge.GetDS100IpAddress();
 	case PBT_GenericMIDI:
 	case PBT_YamahaSQ:
 	case PBT_HUI:
@@ -1008,6 +1014,8 @@ bool CController::SetBridgingIpAddress(ProtocolBridgingType bridgingType, String
 		return m_protocolBridge.SetGenericOSCIpAddress(ipAddress, dontSendNotification);
 	case PBT_BlacktraxRTTrPM:
 		return m_protocolBridge.SetRTTrPMIpAddress(ipAddress, dontSendNotification);
+	case PBT_DS100:
+		return m_protocolBridge.SetDS100IpAddress(ipAddress, dontSendNotification);
 	case PBT_GenericMIDI:
 	case PBT_YamahaSQ:
 	case PBT_HUI:
@@ -1030,6 +1038,7 @@ int CController::GetBridgingListeningPort(ProtocolBridgingType bridgingType)
 	case PBT_GenericMIDI:
 	case PBT_YamahaSQ:
 	case PBT_HUI:
+	case PBT_DS100:
 	default:
 		jassertfalse;
 		return false;
@@ -1049,6 +1058,7 @@ bool CController::SetBridgingListeningPort(ProtocolBridgingType bridgingType, in
 	case PBT_GenericMIDI:
 	case PBT_YamahaSQ:
 	case PBT_HUI:
+	case PBT_DS100:
 	default:
 		jassertfalse;
 		return false;
@@ -1068,6 +1078,7 @@ int CController::GetBridgingRemotePort(ProtocolBridgingType bridgingType)
 	case PBT_GenericMIDI:
 	case PBT_YamahaSQ:
 	case PBT_HUI:
+	case PBT_DS100:
 	default:
 		jassertfalse;
 		return false;
@@ -1087,6 +1098,7 @@ bool CController::SetBridgingRemotePort(ProtocolBridgingType bridgingType, int r
 	case PBT_GenericMIDI:
 	case PBT_YamahaSQ:
 	case PBT_HUI:
+	case PBT_DS100:
 	default:
 		jassertfalse;
 		return false;
@@ -1104,6 +1116,7 @@ int CController::GetBridgingMappingArea(ProtocolBridgingType bridgingType)
 	case PBT_GenericMIDI:
 	case PBT_YamahaSQ:
 	case PBT_HUI:
+	case PBT_DS100:
 	default:
 		jassertfalse;
 		return false;
@@ -1121,6 +1134,7 @@ bool CController::SetBridgingMappingArea(ProtocolBridgingType bridgingType, int 
 	case PBT_GenericMIDI:
 	case PBT_YamahaSQ:
 	case PBT_HUI:
+	case PBT_DS100:
 	default:
 		jassertfalse;
 		return false;

@@ -104,7 +104,11 @@ void StatisticsPlot::paint(Graphics& g)
 	for (auto const& dataEntryKV : m_plotData)
 	{
 		// draw legend items
-		auto legendItemBounds = legendBounds.removeFromLeft(legendColWidth).reduced(5);
+		Rectangle<float> legendItemBounds;
+		if (dataEntryKV.first != PBT_DS100)
+			legendItemBounds = legendBounds.removeFromLeft(legendColWidth).reduced(5);
+		else
+			legendItemBounds = legendBounds.removeFromRight(legendColWidth).reduced(5);
 		auto legendIndicator = legendItemBounds.removeFromLeft(legendItemBounds.getHeight());
 
 		g.setColour(getLookAndFeel().findColour(TableListBox::textColourId));
@@ -250,7 +254,11 @@ void StatisticsPlot::mouseUp(const MouseEvent& e)
 
 	for (auto const& dataEntryKV : m_plotData)
 	{
-		auto legendItemBounds = legendBounds.removeFromLeft(legendColWidth).reduced(5);
+		Rectangle<int> legendItemBounds;
+		if (dataEntryKV.first != PBT_DS100)
+			legendItemBounds = legendBounds.removeFromLeft(legendColWidth).reduced(5);
+		else
+			legendItemBounds = legendBounds.removeFromRight(legendColWidth).reduced(5);
 
 		if (dataEntryKV.first == PBT_DS100 && legendItemBounds.contains(clickPos))
 		{

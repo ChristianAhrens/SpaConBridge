@@ -246,4 +246,9 @@ static constexpr ComsMode CM_Sync =			(CM_Rx | CM_Tx); //< The Plug-in sends SET
  */
 static constexpr ProcessorId INVALID_PROCESSOR_ID = 0xFFFFFFFF;
 
+/**
+ * Channelcount of a DS100 device
+ */
+static constexpr int DS100_CHANNELCOUNT = 64;
+
 } // namespace SoundscapeBridgeApp

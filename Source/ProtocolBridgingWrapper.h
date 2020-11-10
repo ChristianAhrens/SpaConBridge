@@ -41,10 +41,11 @@ static constexpr int RX_PORT_RTTRPM_HOST = 24100;		//< UDP port to which the Bla
  * Pre-define processing bridge config values
  */
 static constexpr int DEFAULT_PROCNODE_ID = 1;
-static constexpr int DS100_PROCESSINGPROTOCOL_ID = 2;
+static constexpr int DS100_1_PROCESSINGPROTOCOL_ID = 2;
 static constexpr int DIGICO_PROCESSINGPROTOCOL_ID = 3;
 static constexpr int RTTRPM_PROCESSINGPROTOCOL_ID = 5;
 static constexpr int GENERICOSC_PROCESSINGPROTOCOL_ID = 4;
+static constexpr int DS100_2_PROCESSINGPROTOCOL_ID = 6;
 
 class ProtocolBridgingWrapper :
 	public ProcessingEngineNode::NodeListener,
@@ -89,6 +90,9 @@ public:
 
 	int GetDS100MsgRate();
 	bool SetDS100MsgRate(int msgRate, bool dontSendNotification = false);
+
+	String GetCascadeDS100IpAddress();
+	bool SetCascadeDS100IpAddress(String ipAddress, bool dontSendNotification = false);
 
 	//==========================================================================
 	bool GetMuteDiGiCoSourceId(juce::int16 sourceId);

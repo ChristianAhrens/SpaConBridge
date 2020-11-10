@@ -100,7 +100,7 @@ CController::CController()
 	// Default OSC server settings. These might become overwritten 
 	// by setStateInformation()
 	SetRate(DCS_Init, PROTOCOL_INTERVAL_DEF, true);
-	SetIpAddress(DCS_Init, PROTOCOL_DEFAULT_IP, true);
+	SetDS100IpAddress(DCS_Init, PROTOCOL_DEFAULT_IP, true);
 }
 
 /**
@@ -313,16 +313,16 @@ SoundsourceProcessor* CController::GetProcessor(ProcessorId idx) const
  * Getter function for the IP address to which m_oscSender and m_oscReceiver are connected.
  * @return	Current IP address.
  */
-String CController::GetIpAddress() const
+String CController::GetDS100IpAddress() const
 {
-	return m_ipAddress;
+	return m_DS100IpAddress;
 }
 
 /**
  * Static methiod which returns the default IP address.
  * @return	IP address to use as default.
  */
-String CController::GetDefaultIpAddress()
+String CController::GetDefaultDS100IpAddress()
 {
 	return PROTOCOL_DEFAULT_IP;
 }
@@ -334,15 +334,52 @@ String CController::GetDefaultIpAddress()
  * @param ipAddress		New IP address.
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  */
-void CController::SetIpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification)
+void CController::SetDS100IpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification)
 {
-	if (m_ipAddress != ipAddress)
+	if (m_DS100IpAddress != ipAddress)
 	{
 		const ScopedLock lock(m_mutex);
 
-		m_ipAddress = ipAddress;
+		m_DS100IpAddress = ipAddress;
 
 		m_protocolBridge.SetDS100IpAddress(ipAddress, dontSendNotification);
+
+		// Start "offline" after changing IP address
+		m_heartBeatsRx = MAX_HEARTBEAT_COUNT;
+		m_heartBeatsTx = 0;
+
+		// Signal the change to all Processors. 
+		SetParameterChanged(changeSource, (DCT_IPAddress | DCT_Online));
+
+		Reconnect();
+	}
+}
+
+/**
+ * Getter function for the IP address to which m_oscSender and m_oscReceiver are connected.
+ * @return	Current IP address.
+ */
+String CController::GetCascadeDS100IpAddress() const
+{
+	return m_CascadeDS100IpAddress;
+}
+
+/**
+ * Setter function for the IP address to which m_oscSender and m_oscReceiver are connected.
+ * NOTE: changing ip address will disconnect m_oscSender and m_oscReceiver.
+ * @param changeSource	The application module which is causing the property change.
+ * @param ipAddress		New IP address.
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ */
+void CController::SetCascadeDS100IpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification)
+{
+	if (m_CascadeDS100IpAddress != ipAddress)
+	{
+		const ScopedLock lock(m_mutex);
+
+		m_CascadeDS100IpAddress = ipAddress;
+
+		m_protocolBridge.SetCascadeDS100IpAddress(ipAddress, dontSendNotification);
 
 		// Start "offline" after changing IP address
 		m_heartBeatsRx = MAX_HEARTBEAT_COUNT;
@@ -419,7 +456,7 @@ std::pair<int, int> CController::GetSupportedRateRange()
  */
 void CController::InitGlobalSettings(DataChangeSource changeSource, String ipAddress, int rate)
 {
-	SetIpAddress(changeSource, ipAddress);
+	SetDS100IpAddress(changeSource, ipAddress);
 	SetRate(changeSource, rate);
 }
 
@@ -441,7 +478,7 @@ void CController::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, 
 	// from DS100 - any data that was sent by 3rd party devices 
 	// is bridged to DS100 and returned by it 
 	// so we can handle the data in the end as well
-	if (senderProtocolId != DS100_PROCESSINGPROTOCOL_ID)
+	if (senderProtocolId != DS100_1_PROCESSINGPROTOCOL_ID && senderProtocolId != DS100_2_PROCESSINGPROTOCOL_ID)
 		return;
 
 	const ScopedLock lock(m_mutex);
@@ -463,6 +500,9 @@ void CController::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, 
 			jassert(sourceId > 0);
 			if (sourceId > 0)
 			{
+				if (senderProtocolId == DS100_2_PROCESSINGPROTOCOL_ID)
+					sourceId += DS100_CHANNELCOUNT;
+
 				AutomationParameterIndex pIdx = ParamIdx_MaxIndex;
 				DataChangeType change = DCT_None;
 				int mappingId = 0;
@@ -823,7 +863,7 @@ bool CController::setStateXml(XmlElement* stateXml)
 	{
 		if (m_protocolBridge.setStateXml(bridgingXmlElement))
 		{
-			SetIpAddress(DataChangeSource::DCS_Init, m_protocolBridge.GetDS100IpAddress(), true);
+			SetDS100IpAddress(DataChangeSource::DCS_Init, m_protocolBridge.GetDS100IpAddress(), true);
 			SetRate(DataChangeSource::DCS_Init, m_protocolBridge.GetDS100MsgRate(), true);
 		}
 	}

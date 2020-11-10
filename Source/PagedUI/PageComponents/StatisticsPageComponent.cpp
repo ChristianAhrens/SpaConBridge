@@ -626,7 +626,8 @@ void StatisticsPageComponent::HandleMessageData(NodeId nodeId, ProtocolId sender
 	case GENERICOSC_PROCESSINGPROTOCOL_ID:
 		bridgingProtocol = PBT_GenericOSC;
 		break;
-	case DS100_PROCESSINGPROTOCOL_ID:
+	case DS100_1_PROCESSINGPROTOCOL_ID:
+	case DS100_2_PROCESSINGPROTOCOL_ID:
 		bridgingProtocol = PBT_DS100;
 		break;
 	default:

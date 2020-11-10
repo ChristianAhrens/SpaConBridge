@@ -53,7 +53,10 @@ void ProtocolBridgingWrapper::AddListener(ProtocolBridgingWrapper::Listener* lis
  */
 bool ProtocolBridgingWrapper::SendMessage(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData)
 {
-	return m_processingNode.SendMessageTo(DS100_PROCESSINGPROTOCOL_ID, Id, msgData);
+	if (msgData.addrVal.first > DS100_CHANNELCOUNT)
+		return m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData);
+	else
+		return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
 }
 
 /**
@@ -162,7 +165,7 @@ void ProtocolBridgingWrapper::SetupBridgingNode()
 	auto protocolAXmlElement = nodeXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLA));
 	if (protocolAXmlElement)
 	{
-		protocolAXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), DS100_PROCESSINGPROTOCOL_ID);
+		protocolAXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), DS100_1_PROCESSINGPROTOCOL_ID);
 
 		protocolAXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), ProcessingEngineConfig::ProtocolTypeToString(PT_OSCProtocol));
 		protocolAXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::USESACTIVEOBJ), 1);
@@ -782,7 +785,10 @@ bool ProtocolBridgingWrapper::ActivateDS100SourceId(juce::int16 sourceId, juce::
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
 	{
-		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_PROCESSINGPROTOCOL_ID));
+		auto mappedSourceId = sourceId % DS100_CHANNELCOUNT;
+		auto DS100ProtocolId = ((sourceId > DS100_CHANNELCOUNT) ? DS100_2_PROCESSINGPROTOCOL_ID : DS100_1_PROCESSINGPROTOCOL_ID);
+
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100ProtocolId));
 		if (protocolXmlElement)
 		{
 			auto activeObjsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ACTIVEOBJECTS));
@@ -794,7 +800,7 @@ bool ProtocolBridgingWrapper::ActivateDS100SourceId(juce::int16 sourceId, juce::
 				{
 					RemoteObject newSourceObject;
 					newSourceObject.Id = roi;
-					newSourceObject.Addr.first = sourceId;
+					newSourceObject.Addr.first = mappedSourceId;
 					if (roi == ROI_CoordinateMapping_SourcePosition_X || roi == ROI_CoordinateMapping_SourcePosition_Y || roi == ROI_CoordinateMapping_SourcePosition_XY)
 						newSourceObject.Addr.second = mappingId;
 					else
@@ -833,7 +839,10 @@ bool ProtocolBridgingWrapper::DeactivateDS100SourceId(juce::int16 sourceId, juce
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
 	{
-		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_PROCESSINGPROTOCOL_ID));
+		auto mappedSourceId = sourceId % DS100_CHANNELCOUNT;
+		auto DS100ProtocolId = ((sourceId > DS100_CHANNELCOUNT) ? DS100_2_PROCESSINGPROTOCOL_ID : DS100_1_PROCESSINGPROTOCOL_ID);
+
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100ProtocolId));
 		if (protocolXmlElement)
 		{
 			auto activeObjsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ACTIVEOBJECTS));
@@ -845,7 +854,7 @@ bool ProtocolBridgingWrapper::DeactivateDS100SourceId(juce::int16 sourceId, juce
 				{
 					RemoteObject newSourceObject;
 					newSourceObject.Id = static_cast<RemoteObjectIdentifier>(roi);
-					newSourceObject.Addr.first = sourceId;
+					newSourceObject.Addr.first = mappedSourceId;
 					if (roi == ROI_CoordinateMapping_SourcePosition_X || roi == ROI_CoordinateMapping_SourcePosition_Y || roi == ROI_CoordinateMapping_SourcePosition_XY)
 						newSourceObject.Addr.second = mappingId;
 					else
@@ -881,7 +890,7 @@ bool ProtocolBridgingWrapper::DeactivateDS100SourceId(juce::int16 sourceId, juce
  */
 String ProtocolBridgingWrapper::GetDS100IpAddress()
 {
-	return GetProtocolIpAddress(DS100_PROCESSINGPROTOCOL_ID);
+	return GetProtocolIpAddress(DS100_1_PROCESSINGPROTOCOL_ID);
 }
 
 /**
@@ -893,7 +902,29 @@ String ProtocolBridgingWrapper::GetDS100IpAddress()
  */
 bool ProtocolBridgingWrapper::SetDS100IpAddress(String ipAddress, bool dontSendNotification)
 {
-	return SetProtocolIpAddress(DS100_PROCESSINGPROTOCOL_ID, ipAddress, dontSendNotification);
+	return SetProtocolIpAddress(DS100_1_PROCESSINGPROTOCOL_ID, ipAddress, dontSendNotification);
+}
+
+/**
+ * Gets the currently set cascade DS100 client ip address.
+ * This method forwards the call to the generic implementation.
+ * @return	The ip address string
+ */
+String ProtocolBridgingWrapper::GetCascadeDS100IpAddress()
+{
+	return GetProtocolIpAddress(DS100_2_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired cascade DS100 client ip address.
+ * This method forwards the call to the generic implementation.
+ * @param ipAddress	The new ip address string
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetCascadeDS100IpAddress(String ipAddress, bool dontSendNotification)
+{
+	return SetProtocolIpAddress(DS100_2_PROCESSINGPROTOCOL_ID, ipAddress, dontSendNotification);
 }
 
 /**
@@ -905,7 +936,7 @@ int ProtocolBridgingWrapper::GetDS100MsgRate()
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
 	{
-		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_PROCESSINGPROTOCOL_ID));
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
 		if (protocolXmlElement)
 		{
 			auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
@@ -932,7 +963,21 @@ bool ProtocolBridgingWrapper::SetDS100MsgRate(int msgRate, bool dontSendNotifica
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
 	{
-		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_PROCESSINGPROTOCOL_ID));
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+		{
+			auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
+			if (pollingIntervalXmlElement)
+			{
+				pollingIntervalXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::INTERVAL), msgRate);
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+
+		protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_2_PROCESSINGPROTOCOL_ID));
 		if (protocolXmlElement)
 		{
 			auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));

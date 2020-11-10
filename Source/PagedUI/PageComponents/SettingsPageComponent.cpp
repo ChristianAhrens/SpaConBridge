@@ -276,6 +276,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_DS100Settings->setHasActiveToggle(false);
 	addAndMakeVisible(m_DS100Settings.get());
 
+	//first DS100 - ch. 1-64
 	m_DS100IpAddressEdit = std::make_unique<TextEditor>();
 	m_DS100IpAddressEdit->addListener(this);
 	m_DS100IpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
@@ -290,6 +291,32 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_DS100Settings->addComponent(m_DS100IpAddressLabel.get(), false, false);
 	m_DS100Settings->addComponent(m_DS100IpAddressEdit.get(), true, false);
 	m_DS100Settings->addComponent(m_DS100ZeroconfDiscovery.get(), true, false);
+
+	m_EnableCascadeDS100Toggle = std::make_unique<ToggleButton>();
+	m_EnableCascadeDS100Toggle->addListener(this);
+	m_EnableCascadeDS100Label = std::make_unique<Label>();
+	m_EnableCascadeDS100Label->setJustificationType(Justification::centred);
+	m_EnableCascadeDS100Label->setText("Use 2nd DS100", dontSendNotification);
+	m_EnableCascadeDS100Label->attachToComponent(m_EnableCascadeDS100Toggle.get(), true);
+	m_DS100Settings->addComponent(m_EnableCascadeDS100Label.get(), false, false);
+	m_DS100Settings->addComponent(m_EnableCascadeDS100Toggle.get(), true, false);
+
+	//first DS100 - ch. 65-128
+	m_CascadeDS100IpAddressEdit = std::make_unique<TextEditor>();
+	m_CascadeDS100IpAddressEdit->addListener(this);
+	m_CascadeDS100IpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
+	m_CascadeDS100IpAddressLabel = std::make_unique<Label>();
+	m_CascadeDS100IpAddressLabel->setJustificationType(Justification::centred);
+	m_CascadeDS100IpAddressLabel->setText("IP Address", dontSendNotification);
+	m_CascadeDS100IpAddressLabel->attachToComponent(m_CascadeDS100IpAddressEdit.get(), true);
+	m_CascadeDS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>(false, false);
+	m_CascadeDS100ZeroconfDiscovery->onServiceSelected = [=](JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info) { handleCascadeDS100ServiceSelected(type, info); };
+	m_CascadeDS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC, RX_PORT_DS100_HOST);
+	m_CascadeDS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OCA);
+	m_DS100Settings->addComponent(m_CascadeDS100IpAddressLabel.get(), false, false);
+	m_DS100Settings->addComponent(m_CascadeDS100IpAddressEdit.get(), true, false);
+	m_DS100Settings->addComponent(m_CascadeDS100ZeroconfDiscovery.get(), true, false);
+
 
 	m_DS100Settings->resized();
 
@@ -552,7 +579,9 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 
 	// DS100 settings section
 	if (m_DS100IpAddressEdit && m_DS100IpAddressEdit.get() == &editor)
-		ctrl->SetIpAddress(DCS_Gui, m_DS100IpAddressEdit->getText());
+		ctrl->SetDS100IpAddress(DCS_Gui, m_DS100IpAddressEdit->getText());
+	if (m_CascadeDS100IpAddressEdit && m_CascadeDS100IpAddressEdit.get() == &editor)
+		ctrl->SetCascadeDS100IpAddress(DCS_Gui, m_CascadeDS100IpAddressEdit->getText());
 
 	// DiGiCo settings section
 	if (m_DiGiCoIpAddressEdit && m_DiGiCoIpAddressEdit.get() == &editor)
@@ -621,7 +650,9 @@ void SettingsSectionsComponent::processUpdatedConfig()
 
 	// DS100 settings section
 	if (m_DS100IpAddressEdit)
-		m_DS100IpAddressEdit->setText(ctrl->GetIpAddress());
+		m_DS100IpAddressEdit->setText(ctrl->GetDS100IpAddress());
+	if (m_CascadeDS100IpAddressEdit)
+		m_CascadeDS100IpAddressEdit->setText(ctrl->GetCascadeDS100IpAddress());
 
 	// DiGiCo settings section
 	auto DiGiCoBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_DiGiCo) == PBT_DiGiCo;
@@ -681,7 +712,26 @@ void SettingsSectionsComponent::handleDS100ServiceSelected(JUCEAppBasics::Zeroco
         
         CController* ctrl = CController::GetInstance();
         if (ctrl)
-            ctrl->SetIpAddress(DCS_Gui, info->ip);
+            ctrl->SetDS100IpAddress(DCS_Gui, info->ip);
+	}
+}
+
+/**
+ * Callback method to be registered with ZeroconfDiscoveryComponent to handle user input regarding service selection.
+ * @param type	The service type that was selected
+ * @param info	The detailed info on the service that was selected
+ */
+void SettingsSectionsComponent::handleCascadeDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info)
+{
+	ignoreUnused(type);
+
+	if (info)
+	{
+		m_CascadeDS100IpAddressEdit->setText(info->ip, true);
+
+		CController* ctrl = CController::GetInstance();
+		if (ctrl)
+			ctrl->SetCascadeDS100IpAddress(DCS_Gui, info->ip);
 	}
 }
 

@@ -108,6 +108,7 @@ private:
 	std::map<int, std::map<int, String>>	m_logEntries;			/**< Map of log entry # and map of column and its cell string contents. */
 	const int								m_logCount{ 200 };
 	int										m_logEntryCounter{ 0 };
+	bool									m_dataChanged{ false };
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StatisticsLog)
 };

@@ -269,7 +269,14 @@ void StatisticsLog::resized()
  */
 void StatisticsLog::timerCallback()
 {
-	m_table->repaint();
+	// check if new data is ready to be visualized
+	if (!m_dataChanged)
+		return;
+	else
+	{
+		m_dataChanged = false;
+		m_table->repaint();
+	}
 }
 
 /**
@@ -304,13 +311,19 @@ void StatisticsLog::AddMessageData(ProtocolBridgingType bridgingType, RemoteObje
 	}
 
 	m_logEntryCounter++;
-	auto mapIdx = m_logEntryCounter % m_logCount;
+	// We do not want to modify the entire container for every dataset that is added - 
+	// therefor the index into the map is changed regarding where the first entry is expected. 
+	// This is of course regarded both where the data is inserted (here) and where it is extracted (::paintCell).
+	auto mapIdx = m_logEntryCounter % m_logCount; 
+	jassert(mapIdx >= 0);
 	m_logEntries[mapIdx][SLC_Number] = String(m_logEntryCounter);
 	m_logEntries[mapIdx][SLC_ObjectName] = ProcessingEngineConfig::GetObjectShortDescription(Id);
 	m_logEntries[mapIdx][SLC_SourceId] = String(msgData.addrVal.first);
 	m_logEntries[mapIdx][SLC_Value] = valueString;
 	m_logEntries[mapIdx][SLC_BridgingName] = GetProtocolBridgingShortName(bridgingType);
 	m_logEntries[mapIdx][SLC_BridgingType] = String(bridgingType);
+
+	m_dataChanged = true;
 }
 
 /**
@@ -374,9 +387,13 @@ void StatisticsLog::paintCell(Graphics& g, int rowNumber, int columnId, int widt
 	ignoreUnused(rowIsSelected);
 	ignoreUnused(rowIsSelected);
 
-	auto cellRect = Rectangle<int>(width, height);
+	// Reconstruct the index into the map
+	auto mapIdx = ((m_logEntryCounter - rowNumber) % m_logCount);
+	// sanity check for index into data map - while table is not fully populated, invalid indices must be caught here.
+	if (mapIdx < 0)
+		return;
 
-	auto mapIdx = ((m_logEntryCounter % m_logCount) - rowNumber) % m_logCount;
+	auto cellRect = Rectangle<int>(width, height);
 
 	if (columnId == SLC_Number)
 	{

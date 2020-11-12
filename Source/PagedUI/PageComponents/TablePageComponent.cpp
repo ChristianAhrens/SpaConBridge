@@ -1167,23 +1167,22 @@ void TextEditorContainer::SetRow(int newRow)
 /**
  * Class constructor.
  */
-RadioButtonContainer::RadioButtonContainer(TableModelComponent& td)
-	: m_owner(td)
+RadioButtonContainer::RadioButtonContainer(TableModelComponent& td): m_owner(td), 
+	m_txButton("Tx", DrawableButton::ButtonStyle::ImageOnButtonBackground), 
+	m_rxButton("Rx", DrawableButton::ButtonStyle::ImageOnButtonBackground)
 {
 	// Create and configure button components inside this container.
-	m_txButton.setButtonText("Tx");
 	m_txButton.setClickingTogglesState(true);
 	m_txButton.setEnabled(true);
 	m_txButton.addListener(this);
 	addAndMakeVisible(m_txButton);
 
-	m_rxButton.setButtonText("Rx");
 	m_rxButton.setClickingTogglesState(true);
 	m_rxButton.setEnabled(true);
 	m_rxButton.addListener(this);
 	addAndMakeVisible(m_rxButton);
 
-	updateButtonColours();
+	updateButtons();
 }
 
 /**
@@ -1286,16 +1285,44 @@ void RadioButtonContainer::SetRow(int newRow)
 /**
  * 
  */
-void RadioButtonContainer::updateButtonColours()
+void RadioButtonContainer::updateButtons()
 {
 	auto lookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
 	if (!lookAndFeel)
 		return;
 
 	auto blueColour = lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonBlueColor);
+	String txImageName = BinaryData::call_made24px_svg;
+	String rxImageName = BinaryData::call_received24px_svg;
+	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
+
+	// create the required button drawable images based on lookandfeel colours
+	JUCEAppBasics::Image_utils::getDrawableButtonImages(txImageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
 
 	m_txButton.setColour(TextButton::ColourIds::buttonOnColourId, blueColour.brighter(0.05f));
+	m_txButton.setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+
+	// create the required button drawable images based on lookandfeel colours
+	JUCEAppBasics::Image_utils::getDrawableButtonImages(rxImageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+
 	m_rxButton.setColour(TextButton::ColourIds::buttonOnColourId, blueColour.brighter(0.05f));
+	m_rxButton.setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
 }
 
 /**
@@ -1304,7 +1331,7 @@ void RadioButtonContainer::updateButtonColours()
 void RadioButtonContainer::lookAndFeelChanged()
 {
 	Component::lookAndFeelChanged();
-	updateButtonColours();
+	updateButtons();
 }
 
 

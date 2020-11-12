@@ -84,14 +84,14 @@ void DbLookAndFeelBase::InitColours()
 	setColour(CodeEditorComponent::lineNumberTextId, GetDbColor(DbColor::DarkTextColor));
 
 	setColour(Slider::backgroundColourId, GetDbColor(DbColor::DarkColor));
-	setColour(Slider::rotarySliderFillColourId, GetDbColor(DbColor::DarkColor));
+	setColour(Slider::rotarySliderFillColourId, GetDbColor(DbColor::ButtonColor));
 	setColour(Slider::rotarySliderOutlineColourId, GetDbColor(DbColor::DarkLineColor));
 	setColour(Slider::textBoxBackgroundColourId, GetDbColor(DbColor::DarkColor));
 	setColour(Slider::textBoxHighlightColourId, GetDbColor(DbColor::HighlightColor));
 	setColour(Slider::textBoxOutlineColourId, GetDbColor(DbColor::WindowColor));
 	setColour(Slider::textBoxTextColourId, GetDbColor(DbColor::TextColor));
-	setColour(Slider::thumbColourId, GetDbColor(DbColor::ButtonColor));
-	setColour(Slider::trackColourId, GetDbColor(DbColor::MidColor));
+	setColour(Slider::thumbColourId, GetDbColor(DbColor::HighlightColor));
+	setColour(Slider::trackColourId, GetDbColor(DbColor::ButtonColor));
 
 	setColour(Label::textColourId, GetDbColor(DbColor::TextColor));
 	setColour(Label::textWhenEditingColourId, GetDbColor(DbColor::TextColor));

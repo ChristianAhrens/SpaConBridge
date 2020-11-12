@@ -46,7 +46,7 @@ namespace SoundscapeBridgeApp
 
 static constexpr int PROTOCOL_INTERVAL_MIN = 20;		//< Minimum supported OSC messaging rate in milliseconds
 static constexpr int PROTOCOL_INTERVAL_MAX = 5000;	//< Maximum supported OSC messaging rate in milliseconds
-static constexpr int PROTOCOL_INTERVAL_DEF = 50;		//< Default OSC messaging rate in milliseconds
+static constexpr int PROTOCOL_INTERVAL_DEF = 100;		//< Default OSC messaging rate in milliseconds
 
 static constexpr int KEEPALIVE_TIMEOUT = 5000;	//< Milliseconds without response after which we consider processor "Offline"
 static constexpr int KEEPALIVE_INTERVAL = 1500;	//< Interval at which keepalive (ping) messages are sent, in milliseconds

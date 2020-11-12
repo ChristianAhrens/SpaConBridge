@@ -266,9 +266,10 @@ void HeaderWithElmListComponent::resized()
  */
 SettingsSectionsComponent::SettingsSectionsComponent()
 {
-	m_ipAddressEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(15, "1234567890.");
-	m_portEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(5, "1234567890");
-	m_mappingEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(1, "1234");
+	m_intervalEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890"); // 7 digits: "9999 ms"
+	m_ipAddressEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(15, "1234567890."); // 15 digits: "255.255.255.255"
+	m_portEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(5, "1234567890"); // 5 digits: "65535"
+	m_mappingEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(1, "1234"); // 1 digit: "4"
 
 	// DS100 settings section
 	m_DS100Settings = std::make_unique<HeaderWithElmListComponent>();
@@ -276,7 +277,16 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_DS100Settings->setHasActiveToggle(false);
 	addAndMakeVisible(m_DS100Settings.get());
 
-	//first DS100 - ch. 1-64
+	m_DS100IntervalEdit = std::make_unique<TextEditor>();
+	m_DS100IntervalEdit->addListener(this);
+	m_DS100IntervalEdit->setInputFilter(m_intervalEditFilter.get(), false);
+	m_DS100IntervalLabel = std::make_unique<Label>();
+	m_DS100IntervalLabel->setJustificationType(Justification::centred);
+	m_DS100IntervalLabel->setText("Interval", dontSendNotification);
+	m_DS100IntervalLabel->attachToComponent(m_DS100IntervalEdit.get(), true);
+	m_DS100Settings->addComponent(m_DS100IntervalLabel.get(), false, false);
+	m_DS100Settings->addComponent(m_DS100IntervalEdit.get(), true, false);
+
 	m_DS100IpAddressEdit = std::make_unique<TextEditor>();
 	m_DS100IpAddressEdit->addListener(this);
 	m_DS100IpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
@@ -284,12 +294,13 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_DS100IpAddressLabel->setJustificationType(Justification::centred);
 	m_DS100IpAddressLabel->setText("IP Address", dontSendNotification);
 	m_DS100IpAddressLabel->attachToComponent(m_DS100IpAddressEdit.get(), true);
+	m_DS100Settings->addComponent(m_DS100IpAddressLabel.get(), false, false);
+	m_DS100Settings->addComponent(m_DS100IpAddressEdit.get(), true, false);
+
 	m_DS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>(false, false);
 	m_DS100ZeroconfDiscovery->onServiceSelected = [=](JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info) { handleDS100ServiceSelected(type, info); };
 	m_DS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC, RX_PORT_DS100_HOST);
 	m_DS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OCA);
-	m_DS100Settings->addComponent(m_DS100IpAddressLabel.get(), false, false);
-	m_DS100Settings->addComponent(m_DS100IpAddressEdit.get(), true, false);
 	m_DS100Settings->addComponent(m_DS100ZeroconfDiscovery.get(), true, false);
 
 	m_EnableCascadeDS100Toggle = std::make_unique<ToggleButton>();
@@ -578,6 +589,8 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 		return;
 
 	// DS100 settings section
+	if (m_DS100IntervalEdit && m_DS100IntervalEdit.get() == &editor)
+		ctrl->SetRate(DCS_Gui, m_DS100IntervalEdit->getText().getIntValue());
 	if (m_DS100IpAddressEdit && m_DS100IpAddressEdit.get() == &editor)
 		ctrl->SetDS100IpAddress(DCS_Gui, m_DS100IpAddressEdit->getText());
 	if (m_CascadeDS100IpAddressEdit && m_CascadeDS100IpAddressEdit.get() == &editor)
@@ -649,6 +662,8 @@ void SettingsSectionsComponent::processUpdatedConfig()
 		return;
 
 	// DS100 settings section
+	if (m_DS100IntervalEdit)
+		m_DS100IntervalEdit->setText(String(ctrl->GetRate()) + UNIT_MILLISECOND);
 	if (m_DS100IpAddressEdit)
 		m_DS100IpAddressEdit->setText(ctrl->GetDS100IpAddress());
 	if (m_CascadeDS100IpAddressEdit)

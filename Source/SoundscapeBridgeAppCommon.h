@@ -247,6 +247,15 @@ static constexpr ComsMode CM_Sync =			(CM_Rx | CM_Tx); //< The Plug-in sends SET
 static constexpr ProcessorId INVALID_PROCESSOR_ID = 0xFFFFFFFF;
 
 /**
+ * Static string definition for value units that are used in TextEditors
+ */
+static const std::string UNIT_MILLISECOND = " ms";
+static const std::string UNIT_SECOND = " s";
+static const std::string UNIT_MINUTE = " min";
+static const std::string UNIT_HOUR = " h";
+static const std::string UNIT_DECIBEL = " dB";
+
+/**
  * Channelcount of a DS100 device
  */
 static constexpr int DS100_CHANNELCOUNT = 64;

@@ -42,10 +42,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../../LookAndFeel.h"
 
 #include "../../../submodules/JUCE-AppBasics/Source/ZeroconfDiscoverComponent.h"
+#include "../../../submodules/JUCE-AppBasics/Source/SplitButtonComponent.h"
 
 
 namespace SoundscapeBridgeApp
 {
+
 
 /**
  * HeaderWithElmListComponent is a component to hold a header component with multiple other components in a specific layout.
@@ -94,8 +96,8 @@ private:
  */
 class SettingsSectionsComponent : 
 	public Component, 
-	public TextEditor::Listener, 
-	public ToggleButton::Listener
+	public TextEditor::Listener,
+	public JUCEAppBasics::SplitButtonComponent::Listener
 {
 public:
 	SettingsSectionsComponent();
@@ -109,7 +111,7 @@ public:
 	void resized() override;
 
 	//==========================================================================
-	void buttonClicked(Button*);
+	void buttonClicked(JUCEAppBasics::SplitButtonComponent* button, uint64 buttonId) override;
 
 	//==========================================================================
 	void textEditorReturnKeyPressed(TextEditor&) override;
@@ -124,6 +126,7 @@ private:
 
 	//==============================================================================
 	void handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info);
+	void handleSecondDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info);
 
 	// input filters for texteditors
 	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_intervalEditFilter;
@@ -138,6 +141,14 @@ private:
 	std::unique_ptr<TextEditor>									m_DS100IpAddressEdit;
 	std::unique_ptr<Label>										m_DS100IpAddressLabel;
 	std::unique_ptr<JUCEAppBasics::ZeroconfDiscoverComponent>	m_DS100ZeroconfDiscovery;
+	std::unique_ptr<JUCEAppBasics::SplitButtonComponent>		m_SecondDS100ModeButton;
+	std::unique_ptr<Label>										m_SecondDS100ModeLabel;
+	const std::vector<std::string>								m_SecondDS100Modes{ "Off", "Extend", "Mirror" };
+	std::map<std::string, uint64>								m_SecondDS100ModeButtonIds;
+
+	std::unique_ptr<TextEditor>									m_SecondDS100IpAddressEdit;
+	std::unique_ptr<Label>										m_SecondDS100IpAddressLabel;
+	std::unique_ptr<JUCEAppBasics::ZeroconfDiscoverComponent>	m_SecondDS100ZeroconfDiscovery;
 
 	// DiGiCo settings section
 	std::unique_ptr<HeaderWithElmListComponent>	m_DiGiCoBridgingSettings;
@@ -149,18 +160,20 @@ private:
 	std::unique_ptr<Label>						m_DiGiCoRemotePortLabel;
 
 	// RTTrPM settings section
-	std::unique_ptr<HeaderWithElmListComponent>	m_RTTrPMBridgingSettings;
-	std::unique_ptr<TextEditor>					m_RTTrPMIpAddressEdit;
-	std::unique_ptr<Label>						m_RTTrPMIpAddressLabel;
-	std::unique_ptr<TextEditor>					m_RTTrPMListeningPortEdit;
-	std::unique_ptr<Label>						m_RTTrPMListeningPortLabel;
-	std::unique_ptr<TextEditor>					m_RTTrPMRemotePortEdit;
-	std::unique_ptr<Label>						m_RTTrPMRemotePortLabel;
-	std::unique_ptr<ToggleButton>				m_RTTrPMInterpretXYRelativeToggle;
-	std::unique_ptr<Label>						m_RTTrPMInterpretXYRelativeLabel;
-	std::unique_ptr<TextEditor>					m_RTTrPMMappingAreaEdit;
-	std::unique_ptr<Label>						m_RTTrPMMappingAreaLabel;
-	int											m_previousRTTrPMMappingAreaId{ 1 };
+	std::unique_ptr<HeaderWithElmListComponent>				m_RTTrPMBridgingSettings;
+	std::unique_ptr<TextEditor>								m_RTTrPMIpAddressEdit;
+	std::unique_ptr<Label>									m_RTTrPMIpAddressLabel;
+	std::unique_ptr<TextEditor>								m_RTTrPMListeningPortEdit;
+	std::unique_ptr<Label>									m_RTTrPMListeningPortLabel;
+	std::unique_ptr<TextEditor>								m_RTTrPMRemotePortEdit;
+	std::unique_ptr<Label>									m_RTTrPMRemotePortLabel;
+	std::unique_ptr<JUCEAppBasics::SplitButtonComponent>	m_RTTrPMInterpretXYRelativeButton;
+	std::unique_ptr<Label>									m_RTTrPMInterpretXYRelativeLabel;
+	const std::vector<std::string>							m_RTTrPMInterpretXYRelativeModes{ "Absolute", "Relative" };
+	std::map<std::string, uint64>							m_RTTrPMInterpretXYRelativeButtonIds;
+	std::unique_ptr<TextEditor>								m_RTTrPMMappingAreaEdit;
+	std::unique_ptr<Label>									m_RTTrPMMappingAreaLabel;
+	int														m_previousRTTrPMMappingAreaId{ 1 };
 
 	// Generic OSC settings section
 	std::unique_ptr<HeaderWithElmListComponent>	m_GenericOSCBridgingSettings;

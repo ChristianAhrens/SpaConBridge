@@ -53,7 +53,10 @@ void ProtocolBridgingWrapper::AddListener(ProtocolBridgingWrapper::Listener* lis
  */
 bool ProtocolBridgingWrapper::SendMessage(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData)
 {
-	return m_processingNode.SendMessageTo(DS100_PROCESSINGPROTOCOL_ID, Id, msgData);
+	if (msgData.addrVal.first > DS100_CHANNELCOUNT)
+		return m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData);
+	else
+		return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
 }
 
 /**
@@ -162,7 +165,7 @@ void ProtocolBridgingWrapper::SetupBridgingNode()
 	auto protocolAXmlElement = nodeXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLA));
 	if (protocolAXmlElement)
 	{
-		protocolAXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), DS100_PROCESSINGPROTOCOL_ID);
+		protocolAXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), DS100_1_PROCESSINGPROTOCOL_ID);
 
 		protocolAXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), ProcessingEngineConfig::ProtocolTypeToString(PT_OSCProtocol));
 		protocolAXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::USESACTIVEOBJ), 1);
@@ -782,7 +785,16 @@ bool ProtocolBridgingWrapper::ActivateDS100SourceId(juce::int16 sourceId, juce::
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
 	{
-		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_PROCESSINGPROTOCOL_ID));
+		auto mappedSourceId = sourceId;
+		auto DS100ProtocolId = DS100_1_PROCESSINGPROTOCOL_ID;
+
+		if (sourceId > DS100_CHANNELCOUNT)
+		{
+			mappedSourceId = sourceId - DS100_CHANNELCOUNT;
+			DS100ProtocolId = DS100_2_PROCESSINGPROTOCOL_ID;
+		}
+
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100ProtocolId));
 		if (protocolXmlElement)
 		{
 			auto activeObjsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ACTIVEOBJECTS));
@@ -794,7 +806,7 @@ bool ProtocolBridgingWrapper::ActivateDS100SourceId(juce::int16 sourceId, juce::
 				{
 					RemoteObject newSourceObject;
 					newSourceObject.Id = roi;
-					newSourceObject.Addr.first = sourceId;
+					newSourceObject.Addr.first = mappedSourceId;
 					if (roi == ROI_CoordinateMapping_SourcePosition_X || roi == ROI_CoordinateMapping_SourcePosition_Y || roi == ROI_CoordinateMapping_SourcePosition_XY)
 						newSourceObject.Addr.second = mappingId;
 					else
@@ -833,7 +845,16 @@ bool ProtocolBridgingWrapper::DeactivateDS100SourceId(juce::int16 sourceId, juce
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
 	{
-		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_PROCESSINGPROTOCOL_ID));
+		auto mappedSourceId = sourceId;
+		auto DS100ProtocolId = DS100_1_PROCESSINGPROTOCOL_ID;
+
+		if (sourceId > DS100_CHANNELCOUNT)
+		{
+			mappedSourceId = sourceId - DS100_CHANNELCOUNT;
+			DS100ProtocolId = DS100_2_PROCESSINGPROTOCOL_ID;
+		}
+
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100ProtocolId));
 		if (protocolXmlElement)
 		{
 			auto activeObjsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ACTIVEOBJECTS));
@@ -845,7 +866,7 @@ bool ProtocolBridgingWrapper::DeactivateDS100SourceId(juce::int16 sourceId, juce
 				{
 					RemoteObject newSourceObject;
 					newSourceObject.Id = static_cast<RemoteObjectIdentifier>(roi);
-					newSourceObject.Addr.first = sourceId;
+					newSourceObject.Addr.first = mappedSourceId;
 					if (roi == ROI_CoordinateMapping_SourcePosition_X || roi == ROI_CoordinateMapping_SourcePosition_Y || roi == ROI_CoordinateMapping_SourcePosition_XY)
 						newSourceObject.Addr.second = mappingId;
 					else
@@ -881,7 +902,7 @@ bool ProtocolBridgingWrapper::DeactivateDS100SourceId(juce::int16 sourceId, juce
  */
 String ProtocolBridgingWrapper::GetDS100IpAddress()
 {
-	return GetProtocolIpAddress(DS100_PROCESSINGPROTOCOL_ID);
+	return GetProtocolIpAddress(DS100_1_PROCESSINGPROTOCOL_ID);
 }
 
 /**
@@ -893,7 +914,29 @@ String ProtocolBridgingWrapper::GetDS100IpAddress()
  */
 bool ProtocolBridgingWrapper::SetDS100IpAddress(String ipAddress, bool dontSendNotification)
 {
-	return SetProtocolIpAddress(DS100_PROCESSINGPROTOCOL_ID, ipAddress, dontSendNotification);
+	return SetProtocolIpAddress(DS100_1_PROCESSINGPROTOCOL_ID, ipAddress, dontSendNotification);
+}
+
+/**
+ * Gets the currently set cascade DS100 client ip address.
+ * This method forwards the call to the generic implementation.
+ * @return	The ip address string
+ */
+String ProtocolBridgingWrapper::GetSecondDS100IpAddress()
+{
+	return GetProtocolIpAddress(DS100_2_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired cascade DS100 client ip address.
+ * This method forwards the call to the generic implementation.
+ * @param ipAddress	The new ip address string
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetSecondDS100IpAddress(String ipAddress, bool dontSendNotification)
+{
+	return SetProtocolIpAddress(DS100_2_PROCESSINGPROTOCOL_ID, ipAddress, dontSendNotification);
 }
 
 /**
@@ -905,7 +948,7 @@ int ProtocolBridgingWrapper::GetDS100MsgRate()
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
 	{
-		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_PROCESSINGPROTOCOL_ID));
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
 		if (protocolXmlElement)
 		{
 			auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
@@ -932,7 +975,21 @@ bool ProtocolBridgingWrapper::SetDS100MsgRate(int msgRate, bool dontSendNotifica
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
 	{
-		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_PROCESSINGPROTOCOL_ID));
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+		{
+			auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
+			if (pollingIntervalXmlElement)
+			{
+				pollingIntervalXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::INTERVAL), msgRate);
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+
+		protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_2_PROCESSINGPROTOCOL_ID));
 		if (protocolXmlElement)
 		{
 			auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
@@ -955,6 +1012,150 @@ bool ProtocolBridgingWrapper::SetDS100MsgRate(int msgRate, bool dontSendNotifica
 	}
 	else
 		return false;
+}
+
+/**
+ * Getter method for the active DS100 extension mode.
+ * This does not return a member variable value but contains logic to derive the mode from internal cached xml element configuration.
+ * @return The DS100 extension mode value as results from cached xml config.
+ */
+ExtensionMode ProtocolBridgingWrapper::GetDS100ExtensionMode()
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto objectHandlingXmlElement = nodeXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OBJECTHANDLING));
+		if (objectHandlingXmlElement)
+		{
+			auto objectHandlingMode = ProcessingEngineConfig::ObjectHandlingModeFromString(objectHandlingXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE)));
+			switch (objectHandlingMode)
+			{
+			case OHM_Mux_nA_to_mB:
+				return EM_Extend;
+			case OHM_Bypass:
+				return EM_Off;
+			case OHM_Invalid:
+			case OHM_Remap_A_X_Y_to_B_XY:
+			case OHM_Forward_only_valueChanges:
+			case OHM_DS100_DeviceSimulation:
+			case OHM_Forward_A_to_B_only:
+			case OHM_Reverse_B_to_A_only:
+			case OHM_UserMAX:
+			default:
+				jassertfalse;
+				return EM_Off;
+			}
+		}
+	}
+
+	return EM_Off;
+}
+
+/**
+ * Setter method for DS100 Extension Mode.
+ * This does not set a member variable but contains logic to reconfigure the cached xml element according to the given mode value.
+ * @param mode	The mode to activate
+ * @param dontSendNotification	-Ignored-
+ * @return	True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool dontSendNotification)
+{
+	ignoreUnused(dontSendNotification);
+
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto objectHandlingXmlElement = nodeXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OBJECTHANDLING));
+		if (objectHandlingXmlElement)
+		{
+			switch (mode)
+			{
+			case EM_Off:
+			{
+				// EM_Off refers to Bypass object handling mode without any channelcount parameter attributes
+				objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Bypass));
+				auto protocolAChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
+				if (protocolAChCntXmlElement)
+					objectHandlingXmlElement->removeChildElement(protocolAChCntXmlElement, true);
+				auto protocolBChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLBCHCNT));
+				if (protocolBChCntXmlElement)
+					objectHandlingXmlElement->removeChildElement(protocolBChCntXmlElement, true);
+			}
+			break;
+			case EM_Extend:
+			{
+				// EM_Extend refers to Multiplex nA to mB object handling mode with channel A and B parameter attributes
+				objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Mux_nA_to_mB));
+				auto protocolAChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
+				if (!protocolAChCntXmlElement)
+					protocolAChCntXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
+				protocolAChCntXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::COUNT), DS100_CHANNELCOUNT);
+				auto protocolBChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLBCHCNT));
+				if (!protocolBChCntXmlElement)
+					protocolBChCntXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLBCHCNT));
+				protocolBChCntXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::COUNT), DS100_EXTMODE_CHANNELCOUNT);
+			}
+			break;
+			case EM_Mirror:
+			default:
+				break;
+			}
+		}
+		else
+			return false;
+
+		auto protocolA1XmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
+		auto protocolA2XmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_2_PROCESSINGPROTOCOL_ID));
+
+		if (protocolA1XmlElement) // primary DS100 must always be existing, otherwise something in the config is broken
+		{
+			switch (mode)
+			{
+			case EM_Off:
+			{
+				// EM_Off requires the second DS100 protocol to not be present
+				if (protocolA2XmlElement)
+					nodeXmlElement->removeChildElement(protocolA2XmlElement, true);
+			}
+			break;
+			case EM_Extend:
+			{
+				// EM_Extend requires the second DS100 protocol to be present
+				if (!protocolA2XmlElement)
+				{
+					protocolA2XmlElement = std::make_unique<XmlElement>(*protocolA1XmlElement).release();
+					protocolA2XmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_2_PROCESSINGPROTOCOL_ID));
+					auto ipAddressXmlElement = protocolA2XmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
+					if (ipAddressXmlElement)
+					{
+						ipAddressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT2_IP);
+					}
+					else
+						return false;
+
+					nodeXmlElement->addChildElement(protocolA2XmlElement);
+				}
+			}
+			break;
+			case EM_Mirror:
+			default:
+				break;
+			}
+		}
+		else
+			return false;
+
+		m_processingNode.setStateXml(nodeXmlElement);
+
+		if (!dontSendNotification)
+			triggerConfigurationUpdate(false);
+
+		return true;
+	}
+	else
+		return false;
+
+	return true;
 }
 
 /**

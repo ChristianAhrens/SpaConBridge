@@ -78,14 +78,20 @@ public:
 	SoundsourceProcessor* GetProcessor(ProcessorId idx) const;
 
 	//==========================================================================
-	String GetIpAddress() const;
-	static String GetDefaultIpAddress();
-	void SetIpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification = false);
+	static String GetDefaultDS100IpAddress();
+	String GetDS100IpAddress() const;
+	void SetDS100IpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification = false);
+	String GetSecondDS100IpAddress() const;
+	void SetSecondDS100IpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification = false);
 
 	//==========================================================================
 	int GetRate() const;
 	void SetRate(DataChangeSource changeSource, int rate, bool dontSendNotification = false);
 	static std::pair<int, int> GetSupportedRateRange();
+
+	//==========================================================================
+	ExtensionMode GetExtensionMode() const;
+	void SetExtensionMode(DataChangeSource changeSource, ExtensionMode mode, bool dontSendNotification = false);
 
 	//==========================================================================
 	void ActivateSoundSourceId(SourceId sourceId, MappingId mappingId);
@@ -131,21 +137,23 @@ private:
 
 protected:
 	
-	static Controller				*m_singleton;		/**< The one and only instance of Controller. */
-	Array<SoundsourceProcessor*>	m_processors;		/**< List of registered Plug-in processor instances.
-														 * Incoming OSC messages will be forwarded to all processors on the list.
-														 * When adding Plug-in instances to a project (i.e. one for each DAW track), this list will grow.
-														 * When removing Plug-in instances from a project, this list will shrink. When the list becomes empty,
-														 * The Controller singleton object is no longer necessary and will destruct itself.
-														 */
-	ProtocolBridgingWrapper			m_protocolBridge;	/**< The wrapper for protocol bridging node, allowing to easily interface with it. */
-	String							m_ipAddress;		/**< IP Address where OSC messages will be sent to / received from. */
-	int								m_oscMsgRate;		/**< Interval at which OSC messages are sent to the host, in ms. */
+	static CController				*m_singleton;			/**< The one and only instance of CController. */
+	Array<SoundsourceProcessor*>	m_processors;			/**< List of registered Plug-in processor instances.
+															 * Incoming OSC messages will be forwarded to all processors on the list.
+															 * When adding Plug-in instances to a project (i.e. one for each DAW track), this list will grow.
+															 * When removing Plug-in instances from a project, this list will shrink. When the list becomes empty,
+															 * The CController singleton object is no longer necessary and will destruct itself.
+															 */
+	ProtocolBridgingWrapper			m_protocolBridge;		/**< The wrapper for protocol bridging node, allowing to easily interface with it. */
+	String							m_DS100IpAddress;		/**< IP Address where OSC messages will be sent to / received from. */
+	ExtensionMode					m_DS100ExtensionMode;	/**< Current extension mode. This has impact on if second DS100 is active or not. */
+	String							m_SecondDS100IpAddress;	/**< IP Address where OSC messages will be sent to / received from. */
+	int								m_oscMsgRate;			/**< Interval at which OSC messages are sent to the host, in ms. */
 	DataChangeType					m_parametersChanged[DCS_Max];	/**< Keep track of which OSC parameters have changed recently.
 																	 * The array has one entry for each application module (see enum DataChangeSource). */
-	int								m_heartBeatsRx;		/**< Number of timer intervals since the last successful OSC message was received. */
-	int								m_heartBeatsTx;		/**< Number of timer intervals since the last OSC message was sent out. */
-	CriticalSection					m_mutex;			/**< A re-entrant mutex. Safety first. */
+	int								m_heartBeatsRx;			/**< Number of timer intervals since the last successful OSC message was received. */
+	int								m_heartBeatsTx;			/**< Number of timer intervals since the last OSC message was sent out. */
+	CriticalSection					m_mutex;				/**< A re-entrant mutex. Safety first. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Controller)
 };

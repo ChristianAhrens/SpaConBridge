@@ -49,7 +49,7 @@ namespace SoundscapeBridgeApp
 
 
 static constexpr SourceId SOURCE_ID_MIN = 1;		//< Minimum maxtrix input number / SourceId
-static constexpr SourceId SOURCE_ID_MAX = 64;		//< Highest maxtrix input number / SourceId
+static constexpr SourceId SOURCE_ID_MAX = 128;		//< Highest maxtrix input number / SourceId
 static constexpr int DEFAULT_COORD_MAPPING = 1;		//< Default coordinate mapping
 
 /*
@@ -396,7 +396,6 @@ void SoundsourceProcessor::getStateInformation(MemoryBlock& destData)
 {
 	MemoryOutputStream stream(destData, true);
 
-	String ip = GetIpAddress();
 	CVersion version(String(JUCE_STRINGIFY(JUCE_APP_VERSION)));
 	jassert(version.IsValid());
 	stream.writeInt(version.ToInt());
@@ -404,7 +403,6 @@ void SoundsourceProcessor::getStateInformation(MemoryBlock& destData)
 	stream.writeFloat(*m_yPos);
 	stream.writeInt(GetSourceId());
 	stream.writeInt(GetMappingId());
-	stream.writeString(ip);
 	stream.writeInt(GetMessageRate());
 	stream.writeInt(static_cast<int>(GetComsMode()));
 	stream.writeFloat(m_reverbSendGain->get());
@@ -599,31 +597,31 @@ SourceId SoundsourceProcessor::GetSourceId() const
 	return m_sourceId;
 }
 
-/**
- * Setter function for the IP address for outgoing OSC comnmunication.
- * @param changeSource	The application module which is causing the property change.
- * @param ipAddress	The new IP address as a string
- */
-void SoundsourceProcessor::SetIpAddress(DataChangeSource changeSource, String ipAddress)
-{
-	Controller* ctrl = Controller::GetInstance();
-	if (ctrl)
-		ctrl->SetIpAddress(changeSource, ipAddress);
-}
-
-/**
-* Getter function for the IP address
-* @return	The current IP address as a string
-*/
-String SoundsourceProcessor::GetIpAddress() const
-{
-	String ipAddress;
-	Controller* ctrl = Controller::GetInstance();
-	if (ctrl)
-		ipAddress = ctrl->GetIpAddress();
-
-	return ipAddress;
-}
+///**
+// * Setter function for the IP address for outgoing OSC comnmunication.
+// * @param changeSource	The application module which is causing the property change.
+// * @param ipAddress	The new IP address as a string
+// */
+//void SoundsourceProcessor::SetIpAddress(DataChangeSource changeSource, String ipAddress)
+//{
+//	CController* ctrl = CController::GetInstance();
+//	if (ctrl)
+//		ctrl->SetIpAddress(changeSource, ipAddress);
+//}
+//
+///**
+//* Getter function for the IP address
+//* @return	The current IP address as a string
+//*/
+//String SoundsourceProcessor::GetIpAddress() const
+//{
+//	String ipAddress;
+//	CController* ctrl = CController::GetInstance();
+//	if (ctrl)
+//		ipAddress = ctrl->GetIpAddress();
+//
+//	return ipAddress;
+//}
 
 /**
  * Setter function for the send rate used in the outgoing OSC messages.
@@ -682,12 +680,6 @@ void SoundsourceProcessor::InitializeSettings(int sourceId, int mappingId, Strin
 		jassert(mappingId > 4);
 		SetMappingId(DCS_Init, static_cast<MappingId>(mappingId));
 		SetComsMode(DCS_Init, newMode);
-
-		// Only overwite the current IP settings if they haven't been changed from the defaults.
-		if (GetIpAddress() == ctrl->GetDefaultIpAddress())
-		{
-			ctrl->InitGlobalSettings(DCS_Init, ipAddress, oscMsgRate);
-		}
 	}
 }
 

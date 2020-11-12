@@ -100,7 +100,8 @@ Controller::Controller()
 	// Default OSC server settings. These might become overwritten 
 	// by setStateInformation()
 	SetRate(DCS_Init, PROTOCOL_INTERVAL_DEF, true);
-	SetIpAddress(DCS_Init, PROTOCOL_DEFAULT_IP, true);
+	SetDS100IpAddress(DCS_Init, PROTOCOL_DEFAULT_IP, true);
+	SetExtensionMode(DCS_Init, EM_Off, true);
 }
 
 /**
@@ -315,7 +316,7 @@ SoundsourceProcessor* Controller::GetProcessor(ProcessorId idx) const
  */
 String Controller::GetIpAddress() const
 {
-	return m_ipAddress;
+	return m_DS100IpAddress;
 }
 
 /**
@@ -336,13 +337,50 @@ String Controller::GetDefaultIpAddress()
  */
 void Controller::SetIpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification)
 {
-	if (m_ipAddress != ipAddress)
+	if (m_DS100IpAddress != ipAddress)
 	{
 		const ScopedLock lock(m_mutex);
 
-		m_ipAddress = ipAddress;
+		m_DS100IpAddress = ipAddress;
 
 		m_protocolBridge.SetDS100IpAddress(ipAddress, dontSendNotification);
+
+		// Start "offline" after changing IP address
+		m_heartBeatsRx = MAX_HEARTBEAT_COUNT;
+		m_heartBeatsTx = 0;
+
+		// Signal the change to all Processors. 
+		SetParameterChanged(changeSource, (DCT_IPAddress | DCT_Online));
+
+		Reconnect();
+	}
+}
+
+/**
+ * Getter function for the IP address to which m_oscSender and m_oscReceiver are connected.
+ * @return	Current IP address.
+ */
+String CController::GetSecondDS100IpAddress() const
+{
+	return m_SecondDS100IpAddress;
+}
+
+/**
+ * Setter function for the IP address to which m_oscSender and m_oscReceiver are connected.
+ * NOTE: changing ip address will disconnect m_oscSender and m_oscReceiver.
+ * @param changeSource	The application module which is causing the property change.
+ * @param ipAddress		New IP address.
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ */
+void CController::SetSecondDS100IpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification)
+{
+	if (m_SecondDS100IpAddress != ipAddress)
+	{
+		const ScopedLock lock(m_mutex);
+
+		m_SecondDS100IpAddress = ipAddress;
+
+		m_protocolBridge.SetSecondDS100IpAddress(ipAddress, dontSendNotification);
 
 		// Start "offline" after changing IP address
 		m_heartBeatsRx = MAX_HEARTBEAT_COUNT;
@@ -412,6 +450,43 @@ std::pair<int, int> Controller::GetSupportedRateRange()
 }
 
 /**
+ * Getter function for the IP address to which m_oscSender and m_oscReceiver are connected.
+ * @return	Current IP address.
+ */
+ExtensionMode CController::GetExtensionMode() const
+{
+	return m_DS100ExtensionMode;
+}
+
+/**
+ * Setter function for the IP address to which m_oscSender and m_oscReceiver are connected.
+ * NOTE: changing ip address will disconnect m_oscSender and m_oscReceiver.
+ * @param changeSource	The application module which is causing the property change.
+ * @param ipAddress		New IP address.
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ */
+void CController::SetExtensionMode(DataChangeSource changeSource, ExtensionMode mode, bool dontSendNotification)
+{
+	if (m_DS100ExtensionMode != mode)
+	{
+		const ScopedLock lock(m_mutex);
+
+		m_DS100ExtensionMode = mode;
+
+		m_protocolBridge.SetDS100ExtensionMode(mode, dontSendNotification);
+
+		// Start "offline" after changing mode
+		m_heartBeatsRx = MAX_HEARTBEAT_COUNT;
+		m_heartBeatsTx = 0;
+
+		// Signal the change to all Processors. 
+		SetParameterChanged(changeSource, (DCT_ExtensionMode | DCT_Online));
+
+		Reconnect();
+	}
+}
+
+/**
  * Method to initialize IP address and polling rate.
  * @param changeSource	The application module which is causing the property change.
  * @param ipAddress		New IP address.
@@ -419,7 +494,7 @@ std::pair<int, int> Controller::GetSupportedRateRange()
  */
 void Controller::InitGlobalSettings(DataChangeSource changeSource, String ipAddress, int rate)
 {
-	SetIpAddress(changeSource, ipAddress);
+	SetDS100IpAddress(changeSource, ipAddress);
 	SetRate(changeSource, rate);
 }
 
@@ -441,7 +516,7 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 	// from DS100 - any data that was sent by 3rd party devices 
 	// is bridged to DS100 and returned by it 
 	// so we can handle the data in the end as well
-	if (senderProtocolId != DS100_PROCESSINGPROTOCOL_ID)
+	if (senderProtocolId != DS100_1_PROCESSINGPROTOCOL_ID && senderProtocolId != DS100_2_PROCESSINGPROTOCOL_ID)
 		return;
 
 	const ScopedLock lock(m_mutex);
@@ -463,6 +538,9 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 			jassert(sourceId > 0);
 			if (sourceId > 0)
 			{
+				if (senderProtocolId == DS100_2_PROCESSINGPROTOCOL_ID)
+					sourceId += DS100_CHANNELCOUNT;
+
 				AutomationParameterIndex pIdx = ParamIdx_MaxIndex;
 				DataChangeType change = DCT_None;
 				int mappingId = 0;
@@ -823,7 +901,9 @@ bool Controller::setStateXml(XmlElement* stateXml)
 	{
 		if (m_protocolBridge.setStateXml(bridgingXmlElement))
 		{
-			SetIpAddress(DataChangeSource::DCS_Init, m_protocolBridge.GetDS100IpAddress(), true);
+			SetExtensionMode(DataChangeSource::DCS_Init, m_protocolBridge.GetDS100ExtensionMode(), true);
+			SetDS100IpAddress(DataChangeSource::DCS_Init, m_protocolBridge.GetDS100IpAddress(), true);
+			SetSecondDS100IpAddress(DataChangeSource::DCS_Init, m_protocolBridge.GetSecondDS100IpAddress(), true);
 			SetRate(DataChangeSource::DCS_Init, m_protocolBridge.GetDS100MsgRate(), true);
 		}
 	}

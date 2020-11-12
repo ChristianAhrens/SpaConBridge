@@ -22,6 +22,7 @@ namespace SoundscapeBridgeApp
 {
 
 static const String PROTOCOL_DEFAULT_IP("127.0.0.1");	//< Default IP Address
+static const String PROTOCOL_DEFAULT2_IP("127.0.0.2");	//< Default IP Address
 
 static constexpr int PROTOCOL_DEFAULT_MAPPINGAREA = 1;	//< Mapping Area Id to use as default
 
@@ -41,10 +42,11 @@ static constexpr int RX_PORT_RTTRPM_HOST = 24100;		//< UDP port to which the Bla
  * Pre-define processing bridge config values
  */
 static constexpr int DEFAULT_PROCNODE_ID = 1;
-static constexpr int DS100_PROCESSINGPROTOCOL_ID = 2;
+static constexpr int DS100_1_PROCESSINGPROTOCOL_ID = 2;
 static constexpr int DIGICO_PROCESSINGPROTOCOL_ID = 3;
 static constexpr int RTTRPM_PROCESSINGPROTOCOL_ID = 5;
 static constexpr int GENERICOSC_PROCESSINGPROTOCOL_ID = 4;
+static constexpr int DS100_2_PROCESSINGPROTOCOL_ID = 6;
 
 class ProtocolBridgingWrapper :
 	public ProcessingEngineNode::NodeListener,
@@ -89,6 +91,12 @@ public:
 
 	int GetDS100MsgRate();
 	bool SetDS100MsgRate(int msgRate, bool dontSendNotification = false);
+
+	String GetSecondDS100IpAddress();
+	bool SetSecondDS100IpAddress(String ipAddress, bool dontSendNotification = false);
+
+	ExtensionMode GetDS100ExtensionMode();
+	bool SetDS100ExtensionMode(ExtensionMode mode, bool dontSendNotification = false);
 
 	//==========================================================================
 	bool GetMuteDiGiCoSourceId(juce::int16 sourceId);

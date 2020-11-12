@@ -1002,6 +1002,16 @@ bool ProtocolBridgingWrapper::SetDS100MsgRate(int msgRate, bool dontSendNotifica
 		return false;
 }
 
+ExtensionMode ProtocolBridgingWrapper::GetDS100ExtensionMode()
+{
+	return EM_Off;
+}
+
+bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool dontSendNotification)
+{
+	return true;
+}
+
 /**
  * Gets the mute state of the given source
  * @param sourceId The id of the source for which the mute state shall be returned

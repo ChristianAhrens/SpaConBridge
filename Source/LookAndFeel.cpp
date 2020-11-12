@@ -47,7 +47,7 @@ void DbLookAndFeelBase::InitColours()
 	setColour(PopupMenu::highlightedTextColourId, GetDbColor(DbColor::TextColor));
 
 	setColour(TextButton::buttonColourId, GetDbColor(DbColor::ButtonColor)); // this applies for DrawableButton as well
-	setColour(TextButton::buttonOnColourId, GetDbColor(DbColor::ButtonColor).brighter()); // this applies for DrawableButton as well
+	setColour(TextButton::buttonOnColourId, GetDbColor(DbColor::HighlightColor)); // this applies for DrawableButton as well
 	setColour(TextButton::textColourOffId, GetDbColor(DbColor::TextColor));
 	setColour(TextButton::textColourOnId, GetDbColor(DbColor::TextColor));
 

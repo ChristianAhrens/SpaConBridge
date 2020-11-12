@@ -52,7 +52,6 @@ typedef juce::uint64 DataChangeType;
 typedef juce::uint32 ProtocolBridgingType;
 typedef juce::uint8 ComsMode;
 
-
 /**
  * Data Change Source
  * Enum used to define where a parameter or property change has originated.
@@ -66,7 +65,6 @@ enum DataChangeSource
 	DCS_Init,			//< Change was caused by Application initialization process (defaults)
 	DCS_Max				//< Number of change cources.
 };
-
 
 /**
  * Automation parameter indeces
@@ -94,11 +92,12 @@ static constexpr DataChangeType DCT_Online					= 0x00000008; //< The Plug-in's O
 static constexpr DataChangeType DCT_OscConfig				= (DCT_IPAddress | DCT_MessageRate | DCT_Online); //< IP address, rate, and Online status.
 static constexpr DataChangeType DCT_SourceID				= 0x00000010; //< The SourceID / Matrix input number of this Plug-in instance has been changed.
 static constexpr DataChangeType DCT_MappingID				= 0x00000020; //< The user has selected a different coordinate mapping for this Plug-in.
-static constexpr DataChangeType DCT_ComsMode				= 0x00000040; //< The Rx / Tx mode of this Plug-in has been changed.
+static constexpr DataChangeType DCT_ComsMode				= 0x00000040; //< The Rx / Tx mode of a soundobject channel has been changed.
+static constexpr DataChangeType DCT_ExtensionMode			= 0x00000080; //< The extensionmode of bridging module has changed.
 static constexpr DataChangeType DCT_PluginInstanceConfig	= (DCT_SourceID | DCT_MappingID | DCT_ComsMode); //< SourceID, MappingID, and Rx/Tx.
-static constexpr DataChangeType DCT_SourcePosition			= 0x00000080; //< The X/Y coordinates of this SourceID have changed.
-static constexpr DataChangeType DCT_ReverbSendGain			= 0x00000100; //< The En-Space Gain for this SourceID has changed.
-static constexpr DataChangeType DCT_SourceSpread			= 0x00000200; //< The En-Scene Spread factor for this SourceID has changed.
+static constexpr DataChangeType DCT_SourcePosition			= 0x00000100; //< The X/Y coordinates of this SourceID have changed.
+static constexpr DataChangeType DCT_ReverbSendGain			= 0x00000200; //< The En-Space Gain for this SourceID has changed.
+static constexpr DataChangeType DCT_SourceSpread			= 0x00000300; //< The En-Scene Spread factor for this SourceID has changed.
 static constexpr DataChangeType DCT_DelayMode				= 0x00000400; //< The En-Scene Delay mode (Off/Tight/Full) of this SourceID has changed.
 static constexpr DataChangeType DCT_AutomationParameters	= (DCT_SourcePosition | DCT_ReverbSendGain | DCT_SourceSpread | DCT_DelayMode); //< All automation parameters.
 static constexpr DataChangeType DCT_DebugMessage			= 0x00001000; //< There is a new debug message to be displayed on the GUI.
@@ -230,7 +229,6 @@ static const Colour GetProtocolBridgingColour(ProtocolBridgingType type)
 	}
 }
 
-
 /**
  * OSC Communication mode
  */
@@ -239,7 +237,6 @@ static constexpr ComsMode CM_Rx =			0x0001; //< The Plug-in sends only requests,
 static constexpr ComsMode CM_Tx =			0x0002; //< The Plug-in sends SET commands when necessary. It sends no requests, and ignores all responses.
 static constexpr ComsMode CM_PollOnce =		0x0004; //< The X/Y coordinates have been requested once after a MappingID change. This flag is removed once the response is received.
 static constexpr ComsMode CM_Sync =			(CM_Rx | CM_Tx); //< The Plug-in sends SET commands when necessary, else sends requests, and accepts all responses.
-
 
 /**
  * Invalid ProcessorId used to signal when selection in CSurfaceMultiSlider is empty etc..
@@ -259,5 +256,15 @@ static const std::string UNIT_DECIBEL = " dB";
  * Channelcount of a DS100 device
  */
 static constexpr int DS100_CHANNELCOUNT = 64;
+
+/**
+ * DS100 extension modes
+ */
+enum ExtensionMode
+{
+	EM_Off = 0,
+	EM_Extend,
+	EM_Mirror
+};
 
 } // namespace SoundscapeBridgeApp

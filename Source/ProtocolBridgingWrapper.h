@@ -94,6 +94,9 @@ public:
 	String GetSecondDS100IpAddress();
 	bool SetSecondDS100IpAddress(String ipAddress, bool dontSendNotification = false);
 
+	ExtensionMode GetDS100ExtensionMode();
+	bool SetDS100ExtensionMode(ExtensionMode mode, bool dontSendNotification = false);
+
 	//==========================================================================
 	bool GetMuteDiGiCoSourceId(juce::int16 sourceId);
 	bool SetMuteDiGiCoSourceId(juce::int16 sourceId, bool mute = true);

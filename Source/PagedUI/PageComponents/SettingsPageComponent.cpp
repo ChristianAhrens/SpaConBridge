@@ -287,6 +287,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_DS100Settings->addComponent(m_DS100IntervalLabel.get(), false, false);
 	m_DS100Settings->addComponent(m_DS100IntervalEdit.get(), true, false);
 
+	//first DS100 - ch. 1-64
 	m_DS100IpAddressEdit = std::make_unique<TextEditor>();
 	m_DS100IpAddressEdit->addListener(this);
 	m_DS100IpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
@@ -303,16 +304,21 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_DS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OCA);
 	m_DS100Settings->addComponent(m_DS100ZeroconfDiscovery.get(), true, false);
 
-	m_EnableSecondDS100Toggle = std::make_unique<ToggleButton>();
-	m_EnableSecondDS100Toggle->addListener(this);
-	m_EnableSecondDS100Label = std::make_unique<Label>();
-	m_EnableSecondDS100Label->setJustificationType(Justification::centred);
-	m_EnableSecondDS100Label->setText("Use 2nd DS100", dontSendNotification);
-	m_EnableSecondDS100Label->attachToComponent(m_EnableSecondDS100Toggle.get(), true);
-	m_DS100Settings->addComponent(m_EnableSecondDS100Label.get(), false, false);
-	m_DS100Settings->addComponent(m_EnableSecondDS100Toggle.get(), true, false);
+	m_SecondDS100ModeButton = std::make_unique<JUCEAppBasics::SplitButtonComponent>();
+	m_SecondDS100ModeButton->addListener(this);
+	m_SecondDS100ModeButtonIds[m_SecondDS100Modes[0]] = m_SecondDS100ModeButton->addButton(m_SecondDS100Modes[0]);
+	m_SecondDS100ModeButtonIds[m_SecondDS100Modes[1]] = m_SecondDS100ModeButton->addButton(m_SecondDS100Modes[1]);
+	m_SecondDS100ModeButtonIds[m_SecondDS100Modes[2]] = m_SecondDS100ModeButton->addButton(m_SecondDS100Modes[2]);
+	m_SecondDS100ModeButton->setButtonDown(m_SecondDS100ModeButtonIds[m_SecondDS100Modes[0]]);
+	m_SecondDS100ModeButton->setButtonEnabled(m_SecondDS100ModeButtonIds[m_SecondDS100Modes[2]], false);
+	m_SecondDS100ModeLabel = std::make_unique<Label>();
+	m_SecondDS100ModeLabel->setJustificationType(Justification::centred);
+	m_SecondDS100ModeLabel->setText("2nd DS100", dontSendNotification);
+	m_SecondDS100ModeLabel->attachToComponent(m_SecondDS100ModeButton.get(), true);
+	m_DS100Settings->addComponent(m_SecondDS100ModeLabel.get(), false, false);
+	m_DS100Settings->addComponent(m_SecondDS100ModeButton.get(), true, false);
 
-	//first DS100 - ch. 65-128
+	//second DS100 - ch. 65-128
 	m_SecondDS100IpAddressEdit = std::make_unique<TextEditor>();
 	m_SecondDS100IpAddressEdit->addListener(this);
 	m_SecondDS100IpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
@@ -407,14 +413,17 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMRemotePortLabel.get(), false, false);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMRemotePortEdit.get(), true, false);
 
-	m_RTTrPMInterpretXYRelativeToggle = std::make_unique<ToggleButton>();
-	m_RTTrPMInterpretXYRelativeToggle->addListener(this);
+	m_RTTrPMInterpretXYRelativeButton = std::make_unique<JUCEAppBasics::SplitButtonComponent>();
+	m_RTTrPMInterpretXYRelativeButton->addListener(this);
+	m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[0]] = m_RTTrPMInterpretXYRelativeButton->addButton(m_RTTrPMInterpretXYRelativeModes[0]);
+	m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[1]] = m_RTTrPMInterpretXYRelativeButton->addButton(m_RTTrPMInterpretXYRelativeModes[1]);
+	m_RTTrPMInterpretXYRelativeButton->setButtonDown(m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[0]]);
 	m_RTTrPMInterpretXYRelativeLabel = std::make_unique<Label>();
 	m_RTTrPMInterpretXYRelativeLabel->setJustificationType(Justification::centred);
-	m_RTTrPMInterpretXYRelativeLabel->setText("Interpret XY as relative", dontSendNotification);
-	m_RTTrPMInterpretXYRelativeLabel->attachToComponent(m_RTTrPMInterpretXYRelativeToggle.get(), true);
+	m_RTTrPMInterpretXYRelativeLabel->setText("XY interpret mode", dontSendNotification);
+	m_RTTrPMInterpretXYRelativeLabel->attachToComponent(m_RTTrPMInterpretXYRelativeButton.get(), true);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMInterpretXYRelativeLabel.get(), false, false);
-	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMInterpretXYRelativeToggle.get(), true, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMInterpretXYRelativeButton.get(), true, false);
 
 	m_RTTrPMMappingAreaEdit = std::make_unique<TextEditor>();
 	m_RTTrPMMappingAreaEdit->addListener(this);
@@ -531,25 +540,41 @@ void SettingsSectionsComponent::resized()
 }
 
 /**
- * Reimplemented from ToggleButton Listener.
- * This just forwards it to private method that handles relevant changes in editor contents in general.
- * @param editor	The editor component that changes were made in
+ * Reimplemented from SplitButtonComponent Listener.
+ * @param buttonId	The uid of a button element of the splitbutton component
  */
-void SettingsSectionsComponent::buttonClicked(Button* button)
+void SettingsSectionsComponent::buttonClicked(JUCEAppBasics::SplitButtonComponent* button, uint64 buttonId)
 {
 	CController* ctrl = CController::GetInstance();
 	if (!ctrl)
 		return;
 
-	if (m_RTTrPMInterpretXYRelativeToggle && m_RTTrPMInterpretXYRelativeToggle.get() == button)
+	if (m_SecondDS100ModeButton && m_SecondDS100ModeButton.get() == button)
 	{
-		// If button is toggled off, set the mapping area id to -1 (meaning that the RTTrPM data will be handled as absolute, not relative to a mapping area)
-		if (!m_RTTrPMInterpretXYRelativeToggle->getToggleState())
+		if (m_SecondDS100ModeButtonIds[m_SecondDS100Modes[0]] == buttonId) // Off
+		{
+			ctrl->SetExtensionMode(DCS_Gui, EM_Off);
+		}
+		else if (m_SecondDS100ModeButtonIds[m_SecondDS100Modes[1]] == buttonId) // Extend
+		{
+			ctrl->SetExtensionMode(DCS_Gui, EM_Extend);
+		}
+		else if (m_SecondDS100ModeButtonIds[m_SecondDS100Modes[2]] == buttonId) // Mirror
+		{
+			ctrl->SetExtensionMode(DCS_Gui, EM_Mirror);
+		}
+
+		processUpdatedConfig();
+	}
+	else if (m_RTTrPMInterpretXYRelativeButton && m_RTTrPMInterpretXYRelativeButton.get() == button)
+	{
+		// If button is set to absolute, set the mapping area id to -1 (meaning that the RTTrPM data will be handled as absolute, not relative to a mapping area)
+		if (m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[0]] == buttonId) // Absolute
 		{
 			m_previousRTTrPMMappingAreaId = ctrl->GetBridgingMappingArea(PBT_BlacktraxRTTrPM);
 			ctrl->SetBridgingMappingArea(PBT_BlacktraxRTTrPM, -1);
 		}
-		else
+		else if(m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[1]] == buttonId) // Relative
 		{
 			ctrl->SetBridgingMappingArea(PBT_BlacktraxRTTrPM, m_previousRTTrPMMappingAreaId);
 		}
@@ -666,8 +691,24 @@ void SettingsSectionsComponent::processUpdatedConfig()
 		m_DS100IntervalEdit->setText(String(ctrl->GetRate()) + UNIT_MILLISECOND);
 	if (m_DS100IpAddressEdit)
 		m_DS100IpAddressEdit->setText(ctrl->GetDS100IpAddress());
+	if (m_SecondDS100ModeButton)
+	{
+		auto newActiveButtonId = m_SecondDS100ModeButtonIds[m_SecondDS100Modes[0]];
+		if (ctrl->GetExtensionMode() == EM_Extend)
+			newActiveButtonId = m_SecondDS100ModeButtonIds[m_SecondDS100Modes[1]];
+		else if (ctrl->GetExtensionMode() == EM_Mirror)
+			newActiveButtonId = m_SecondDS100ModeButtonIds[m_SecondDS100Modes[2]];
+		m_SecondDS100ModeButton->setButtonDown(newActiveButtonId);
+	}
 	if (m_SecondDS100IpAddressEdit)
+	{
 		m_SecondDS100IpAddressEdit->setText(ctrl->GetSecondDS100IpAddress());
+		m_SecondDS100IpAddressEdit->setEnabled(ctrl->GetExtensionMode() != EM_Off);
+	}
+	if (m_SecondDS100IpAddressLabel)
+		m_SecondDS100IpAddressLabel->setEnabled(ctrl->GetExtensionMode() != EM_Off);
+	if (m_SecondDS100ZeroconfDiscovery)
+		m_SecondDS100ZeroconfDiscovery->setEnabled(ctrl->GetExtensionMode() != EM_Off);
 
 	// DiGiCo settings section
 	auto DiGiCoBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_DiGiCo) == PBT_DiGiCo;
@@ -690,8 +731,11 @@ void SettingsSectionsComponent::processUpdatedConfig()
 		m_RTTrPMListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_BlacktraxRTTrPM)), false);
 	if (m_RTTrPMRemotePortEdit)
 		m_RTTrPMRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_BlacktraxRTTrPM)), false);
-	if (m_RTTrPMInterpretXYRelativeToggle)
-		m_RTTrPMInterpretXYRelativeToggle->setToggleState((ctrl->GetBridgingMappingArea(PBT_BlacktraxRTTrPM) != -1), dontSendNotification);
+	if (m_RTTrPMInterpretXYRelativeButton)
+	{
+		auto newActiveButtonId = m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[(ctrl->GetBridgingMappingArea(PBT_BlacktraxRTTrPM) == -1) ? 0 : 1]];
+		m_RTTrPMInterpretXYRelativeButton->setButtonDown(newActiveButtonId);
+	}
 	if (m_RTTrPMMappingAreaEdit)
 	{
 		m_RTTrPMMappingAreaEdit->setText(String(ctrl->GetBridgingMappingArea(PBT_BlacktraxRTTrPM)), false);

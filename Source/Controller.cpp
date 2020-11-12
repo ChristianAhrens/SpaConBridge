@@ -101,6 +101,7 @@ CController::CController()
 	// by setStateInformation()
 	SetRate(DCS_Init, PROTOCOL_INTERVAL_DEF, true);
 	SetDS100IpAddress(DCS_Init, PROTOCOL_DEFAULT_IP, true);
+	SetExtensionMode(DCS_Init, EM_Off, true);
 }
 
 /**
@@ -446,6 +447,43 @@ void CController::SetRate(DataChangeSource changeSource, int rate, bool dontSend
 std::pair<int, int> CController::GetSupportedRateRange()
 {
 	return std::pair<int, int>(PROTOCOL_INTERVAL_MIN, PROTOCOL_INTERVAL_MAX);
+}
+
+/**
+ * Getter function for the IP address to which m_oscSender and m_oscReceiver are connected.
+ * @return	Current IP address.
+ */
+ExtensionMode CController::GetExtensionMode() const
+{
+	return m_DS100ExtensionMode;
+}
+
+/**
+ * Setter function for the IP address to which m_oscSender and m_oscReceiver are connected.
+ * NOTE: changing ip address will disconnect m_oscSender and m_oscReceiver.
+ * @param changeSource	The application module which is causing the property change.
+ * @param ipAddress		New IP address.
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ */
+void CController::SetExtensionMode(DataChangeSource changeSource, ExtensionMode mode, bool dontSendNotification)
+{
+	if (m_DS100ExtensionMode != mode)
+	{
+		const ScopedLock lock(m_mutex);
+
+		m_DS100ExtensionMode = mode;
+
+		m_protocolBridge.SetDS100ExtensionMode(mode, dontSendNotification);
+
+		// Start "offline" after changing mode
+		m_heartBeatsRx = MAX_HEARTBEAT_COUNT;
+		m_heartBeatsTx = 0;
+
+		// Signal the change to all Processors. 
+		SetParameterChanged(changeSource, (DCT_ExtensionMode | DCT_Online));
+
+		Reconnect();
+	}
 }
 
 /**

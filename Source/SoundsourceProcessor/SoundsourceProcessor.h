@@ -194,7 +194,7 @@ protected:
 
 	/**
 	 * Unique ID of this Processor instance. 
-	 * This is also this Processor's index within the CController::m_processors array.
+	 * This is also this Processor's index within the Controller::m_processors array.
 	 */
 	ProcessorId					m_processorId;
 

@@ -41,7 +41,7 @@ namespace SoundscapeBridgeApp
 
 
 /**
- * Number of CController::timerCallback() calls that are considered as the duration of a "gesture", when 
+ * Number of Controller::timerCallback() calls that are considered as the duration of a "gesture", when 
  * modifying a parameter via OSC. This is relevant for Touch automation.
  */
 static constexpr int GESTURE_LENGTH_IN_TICKS = 8;
@@ -108,13 +108,13 @@ void GestureManagedAudioParameterFloat::EndGuiGesture()
 		endChangeGesture();
 		m_inGuiGesture = false;
 
-		// Ensure that the next CController::timerCallback() call does not trigger a endChangeGesture() call.
+		// Ensure that the next Controller::timerCallback() call does not trigger a endChangeGesture() call.
 		m_ticksSinceLastChange = GESTURE_LENGTH_IN_TICKS + 1;
 	}
 }
 
 /**
- * Called at every CController::timerCallback() call. 
+ * Called at every Controller::timerCallback() call. 
  * Counts down the number of timer ticks that are considered as the duration of a "gesture", when 
  * modifying a parameter via OSC. This is relevant for Touch automation.
  */
@@ -247,7 +247,7 @@ int GestureManagedAudioParameterChoice::GetLastIndex() const
 }
 
 /**
- * Called at every CController::timerCallback() call. 
+ * Called at every Controller::timerCallback() call. 
  * Counts down the number of timer ticks that are considered as the duration of a "gesture", when 
  * modifying a parameter via OSC. This is relevant for Touch automation.
  */

@@ -511,7 +511,7 @@ void SettingsSectionsComponent::resized()
  */
 void SettingsSectionsComponent::buttonClicked(Button* button)
 {
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return;
 
@@ -558,7 +558,7 @@ void SettingsSectionsComponent::textEditorFocusLost(TextEditor& editor)
  */
 void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 {
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return;
 
@@ -604,7 +604,7 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
  */
 void SettingsSectionsComponent::setSettingsSectionActiveState(HeaderWithElmListComponent* settingsSection, bool activeState)
 {
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return;
 
@@ -629,7 +629,7 @@ void SettingsSectionsComponent::setSettingsSectionActiveState(HeaderWithElmListC
  */
 void SettingsSectionsComponent::processUpdatedConfig()
 {
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return;
 
@@ -695,7 +695,7 @@ void SettingsSectionsComponent::handleDS100ServiceSelected(JUCEAppBasics::Zeroco
 	{
 		m_DS100IpAddressEdit->setText(info->ip, true);
         
-        CController* ctrl = CController::GetInstance();
+        Controller* ctrl = Controller::GetInstance();
         if (ctrl)
             ctrl->SetIpAddress(DCS_Gui, info->ip);
 	}

@@ -218,7 +218,7 @@ void TablePageComponent::buttonClicked(Button *button)
 	{
 		auto addInstance = (button == m_addInstance.get());
 
-		CController* ctrl = CController::GetInstance();
+		Controller* ctrl = Controller::GetInstance();
 		if (ctrl)
 		{
 			if (addInstance)
@@ -269,7 +269,7 @@ void TablePageComponent::onCurrentSelectedProcessorChanged(ProcessorId selectedP
 	}
 	else
 	{
-		CController* ctrl = CController::GetInstance();
+		Controller* ctrl = Controller::GetInstance();
 		if (ctrl)
 		{
 			auto processor = ctrl->GetProcessor(selectedProcessorId);
@@ -301,7 +301,7 @@ void TablePageComponent::onCurrentSelectedProcessorChanged(ProcessorId selectedP
  */
 void TablePageComponent::UpdateGui(bool init)
 {
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (ctrl && m_pageContainerTable)
 	{
 		if (ctrl->PopParameterChanged(DCS_Overview, DCT_NumProcessors) || init)
@@ -373,7 +373,7 @@ CustomTableHeaderComponent::~CustomTableHeaderComponent()
  */
 void CustomTableHeaderComponent::updateBridgingTitles()
 {
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return;
 
@@ -391,7 +391,7 @@ void CustomTableHeaderComponent::updateBridgingTitles()
  */
 void CustomTableHeaderComponent::updateColumnWidths()
 {
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return;
 
@@ -566,7 +566,7 @@ void TableModelComponent::SelectAllRows(bool all)
  */
 bool TableModelComponent::LessThanSourceId(ProcessorId pId1, ProcessorId pId2)
 {
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
 		if ((pId1 < (ProcessorId)ctrl->GetProcessorCount()) && (pId2 < (ProcessorId)ctrl->GetProcessorCount()))
@@ -585,7 +585,7 @@ bool TableModelComponent::LessThanSourceId(ProcessorId pId1, ProcessorId pId2)
  */
 bool TableModelComponent::LessThanMapping(ProcessorId pId1, ProcessorId pId2)
 {
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
 		if ((pId1 < (ProcessorId)ctrl->GetProcessorCount()) && (pId2 < (ProcessorId)ctrl->GetProcessorCount()))
@@ -604,7 +604,7 @@ bool TableModelComponent::LessThanMapping(ProcessorId pId1, ProcessorId pId2)
  */
 bool TableModelComponent::LessThanComsMode(ProcessorId pId1, ProcessorId pId2)
 {
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
 		if ((pId1 < (ProcessorId)ctrl->GetProcessorCount()) && (pId2 < (ProcessorId)ctrl->GetProcessorCount()))
@@ -626,7 +626,7 @@ bool TableModelComponent::LessThanBridgingMute(ProcessorId pId1, ProcessorId pId
 	ignoreUnused(pId1);
 	ignoreUnused(pId2);
 
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
 		return true;
@@ -642,7 +642,7 @@ bool TableModelComponent::LessThanBridgingMute(ProcessorId pId1, ProcessorId pId
 void TableModelComponent::RecreateTableRowIds()
 {
 	m_ids.clear();
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
 		m_ids.reserve(ctrl->GetProcessorCount());
@@ -694,7 +694,7 @@ int TableModelComponent::getNumRows()
 {
 	int ret = 0;
 
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 		ret = ctrl->GetProcessorCount();
 
@@ -1007,7 +1007,7 @@ void ComboBoxContainer::comboBoxChanged(ComboBox *comboBox)
 	// Get the IDs of the plugins on the selected rows.
 	std::vector<ProcessorId> ProcessorIds = m_owner.GetProcessorIdsForRows(selectedRows);
 
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
 		// New MappingID which should be applied to all plugins in the selected rows.
@@ -1041,7 +1041,7 @@ void ComboBoxContainer::SetRow(int newRow)
 
 	// Find the plugin instance corresponding to the given row number.
 	ProcessorId ProcessorId = m_owner.GetProcessorIdForRow(newRow);
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
 		// Set the value of the combobox to the current MappingID of the corresponding plugin.
@@ -1096,7 +1096,7 @@ void TextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
 	// Get the IDs of the plugins on the selected rows.
 	std::vector<ProcessorId> ProcessorIds = m_owner.GetProcessorIdsForRows(selectedRows);
 
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
 		// New SourceID which should be applied to all plugins in the selected rows.
@@ -1147,7 +1147,7 @@ void TextEditorContainer::SetRow(int newRow)
 
 	// Find the plugin instance corresponding to the given row number.
 	ProcessorId ProcessorId = m_owner.GetProcessorIdForRow(newRow);
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
 		// Set the value of the textEditor to the current SourceID of the corresponding plugin.
@@ -1199,7 +1199,7 @@ RadioButtonContainer::~RadioButtonContainer()
  */
 void RadioButtonContainer::buttonClicked(Button *button)
 {
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (ctrl && 
 		((button == &m_txButton) || (button == &m_rxButton))) 
 	{
@@ -1264,7 +1264,7 @@ void RadioButtonContainer::SetRow(int newRow)
 
 	// Find the plugin instance corresponding to the given row number.
 	ProcessorId ProcessorId = m_owner.GetProcessorIdForRow(newRow);
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
 		// Toggle the correct radio buttons to the current ComsMode of the corresponding plugin.
@@ -1336,7 +1336,7 @@ MuteButtonContainer::~MuteButtonContainer()
  */
 void MuteButtonContainer::updateBridgingMuteButtons()
 {
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return;
 
@@ -1389,7 +1389,7 @@ void MuteButtonContainer::updateBridgingMuteButtons()
  */
 void MuteButtonContainer::updateDrawableButtonImageColours()
 {
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return;
 
@@ -1442,7 +1442,7 @@ void MuteButtonContainer::lookAndFeelChanged()
  */
 void MuteButtonContainer::buttonClicked(Button* button)
 {
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return;
 
@@ -1506,7 +1506,7 @@ void MuteButtonContainer::SetRow(int newRow)
 
 	// Find the plugin instance corresponding to the given row number.
 	ProcessorId processorId = m_owner.GetProcessorIdForRow(newRow);
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
 		for (auto type : ProtocolBridgingTypes)
@@ -1588,7 +1588,7 @@ void EditableLabelContainer::SetRow(int newRow)
 	//
 	//// Find the plugin instance corresponding to the given row number.
 	//ProcessorId ProcessorId = m_owner.GetProcessorIdForRow(newRow);
-	//CController* ctrl = CController::GetInstance();
+	//Controller* ctrl = Controller::GetInstance();
 	//if (ctrl)
 	//{
 	//	// Set the value of the combobox to the current MappingID of the corresponding plugin.

@@ -286,7 +286,7 @@ void CSurfaceMultiSlider::mouseDown(const MouseEvent& e)
 			// Set this source as "selected" and begin a drag gesture.
 			m_selected = (*iter).first;
 
-			CController* ctrl = CController::GetInstance();
+			Controller* ctrl = Controller::GetInstance();
 			if (ctrl)
 			{
 				SoundsourceProcessor* processor = ctrl->GetProcessor(m_selected);
@@ -316,7 +316,7 @@ void CSurfaceMultiSlider::mouseDrag(const MouseEvent& e)
 {
 	if (m_selected != INVALID_PROCESSOR_ID)
 	{
-		CController* ctrl = CController::GetInstance();
+		Controller* ctrl = Controller::GetInstance();
 		if (ctrl)
 		{
 			SoundsourceProcessor* processor = ctrl->GetProcessor(m_selected);
@@ -345,7 +345,7 @@ void CSurfaceMultiSlider::mouseUp(const MouseEvent& e)
 
 	if (m_selected != INVALID_PROCESSOR_ID)
 	{
-		CController* ctrl = CController::GetInstance();
+		Controller* ctrl = Controller::GetInstance();
 		if (ctrl)
 		{
 			SoundsourceProcessor* processor = ctrl->GetProcessor(m_selected);

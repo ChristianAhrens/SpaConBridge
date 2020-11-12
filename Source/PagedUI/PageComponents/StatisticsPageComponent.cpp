@@ -179,7 +179,7 @@ void StatisticsPlot::ResetStatisticsPlot()
 	m_plotData.clear();
 	m_plottedBridgingTypes.clear();
 
-	auto ctrl = SoundscapeBridgeApp::CController::GetInstance();
+	auto ctrl = SoundscapeBridgeApp::Controller::GetInstance();
 	if (!ctrl)
 		return;
 
@@ -526,7 +526,7 @@ StatisticsPageComponent::StatisticsPageComponent()
 
 	m_plotComponent->toggleShowDS100Traffic = [=](bool show) { m_logComponent->SetShowDS100Traffic(show); };
 
-	auto ctrl = SoundscapeBridgeApp::CController::GetInstance();
+	auto ctrl = SoundscapeBridgeApp::Controller::GetInstance();
 	if (ctrl)
 		ctrl->AddProtocolBridgingWrapperListener(this);
 

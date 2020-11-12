@@ -21,7 +21,7 @@ ProtocolBridgingWrapper::ProtocolBridgingWrapper()
 	: m_bridgingXml(AppConfiguration::getTagName(AppConfiguration::TagID::BRIDGING))
 {
 
-	// CController derives from ProcessingEngineNode::Listener
+	// Controller derives from ProcessingEngineNode::Listener
 	m_processingNode.AddListener(this);
 
 	SetupBridgingNode();
@@ -57,7 +57,7 @@ bool ProtocolBridgingWrapper::SendMessage(RemoteObjectIdentifier Id, RemoteObjec
 }
 
 /**
- * Called when the OSCReceiver receives a new OSC message, since CController inherits from OSCReceiver::Listener.
+ * Called when the OSCReceiver receives a new OSC message, since Controller inherits from OSCReceiver::Listener.
  * It forwards the message to all registered Processor objects.
  * @param nodeId	The bridging node that the message data was received on (only a single default id node supported currently).
  * @param senderProtocolId	The protocol that the message data was received on and was sent to controller from.

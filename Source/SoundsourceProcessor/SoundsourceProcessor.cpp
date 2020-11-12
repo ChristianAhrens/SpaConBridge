@@ -38,7 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SoundsourceProcessorEditor.h"			//<USE SoundsourceProcessorEditor
 #include "Parameters.h"
 
-#include "../Controller.h"						//<USE CController
+#include "../Controller.h"						//<USE Controller
 #include "../PagedUI/PageComponentManager.h"	//<USE PageComponentManager
 #include "../SoundscapeBridgeAppCommon.h"
 #include "../Version.h"							//<USE CVersion
@@ -99,8 +99,8 @@ SoundsourceProcessor::SoundsourceProcessor(bool insertToConfig)
 	for (int cs = 0; cs < DCS_Max; cs++)
 		m_parametersChanged[cs] = DCT_None;
 
-	// Register this new plugin instance to the singleton CController object's internal list.
-	CController* ctrl = CController::GetInstance();
+	// Register this new plugin instance to the singleton Controller object's internal list.
+	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 		m_processorId = ctrl->AddProcessor(insertToConfig ? DCS_Host : DCS_Init, this);
 }
@@ -110,8 +110,8 @@ SoundsourceProcessor::SoundsourceProcessor(bool insertToConfig)
  */
 SoundsourceProcessor::~SoundsourceProcessor()
 {
-	// Erase this new plugin instance from the singleton CController object's internal list.
-	CController* ctrl = CController::GetInstance();
+	// Erase this new plugin instance from the singleton Controller object's internal list.
+	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 		ctrl->RemoveProcessor(this);
 }
@@ -281,13 +281,13 @@ void SoundsourceProcessor::SetParameterValue(DataChangeSource changeSource, Auto
 }
 
 /**
- * This method should be called once every timer callback tick of the CController. 
+ * This method should be called once every timer callback tick of the Controller. 
  * The signal is passed on to all automation parameters. This is used to trigger gestures for touch automation.
  */
 void SoundsourceProcessor::Tick()
 {
 	// Reset the flags indicating when a parameter's SET command is out on the network. 
-	// These flags are set during CController::timerCallback() and queried in CController::oscMessageReceived()
+	// These flags are set during Controller::timerCallback() and queried in Controller::oscMessageReceived()
 	m_paramSetCommandsInTransit = DCT_None;
 
 	for (int pIdx = 0; pIdx < ParamIdx_MaxIndex; pIdx++)
@@ -499,7 +499,7 @@ void SoundsourceProcessor::SetComsMode(DataChangeSource changeSource, ComsMode n
 		SetParameterChanged(changeSource, DCT_ComsMode);
 
 		// Activate the corresponding soundsource id in controller
-		CController* ctrl = CController::GetInstance();
+		Controller* ctrl = Controller::GetInstance();
 		if (ctrl && (changeSource != DCS_Init))
 		{
 			if (m_comsMode & CM_Rx)
@@ -606,7 +606,7 @@ SourceId SoundsourceProcessor::GetSourceId() const
  */
 void SoundsourceProcessor::SetIpAddress(DataChangeSource changeSource, String ipAddress)
 {
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 		ctrl->SetIpAddress(changeSource, ipAddress);
 }
@@ -618,7 +618,7 @@ void SoundsourceProcessor::SetIpAddress(DataChangeSource changeSource, String ip
 String SoundsourceProcessor::GetIpAddress() const
 {
 	String ipAddress;
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 		ipAddress = ctrl->GetIpAddress();
 
@@ -632,7 +632,7 @@ String SoundsourceProcessor::GetIpAddress() const
  */
 void SoundsourceProcessor::SetMessageRate(DataChangeSource changeSource, int oscMsgRate)
 {
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 		ctrl->SetRate(changeSource, oscMsgRate);
 }
@@ -644,7 +644,7 @@ void SoundsourceProcessor::SetMessageRate(DataChangeSource changeSource, int osc
 int SoundsourceProcessor::GetMessageRate() const
 {
 	int rate = 0;
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 		rate = ctrl->GetRate();
 
@@ -657,7 +657,7 @@ int SoundsourceProcessor::GetMessageRate() const
  */
 bool SoundsourceProcessor::GetOnline() const
 {
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 		return ctrl->GetOnline();
 
@@ -674,7 +674,7 @@ bool SoundsourceProcessor::GetOnline() const
  */
 void SoundsourceProcessor::InitializeSettings(int sourceId, int mappingId, String ipAddress, int oscMsgRate, ComsMode newMode)
 {
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
 		jassert(sourceId > 128);

@@ -71,21 +71,21 @@ static const String kOscResponseString_source_delaymode("/dbaudio1/positioning/s
 
 /*
 ===============================================================================
- Class CController
+ Class Controller
 ===============================================================================
 */
 
 /**
- * The one and only instance of CController.
+ * The one and only instance of Controller.
  */
-CController* CController::m_singleton = nullptr;
+Controller* Controller::m_singleton = nullptr;
 
 /**
- * Constructs an CController object.
+ * Constructs an Controller object.
  * There can be only one instance of this class, see m_singleton. This is so that network traffic
  * is managed from a central point and only one UDP port is opened for all OSC communication.
  */
-CController::CController()
+Controller::Controller()
 {
 	jassert(!m_singleton);	// only one instnce allowed!!
 	m_singleton = this;
@@ -94,7 +94,7 @@ CController::CController()
 	for (int cs = 0; cs < DCS_Max; cs++)
 		m_parametersChanged[cs] = DCT_None;
 
-	// CController derives from ProcessingEngineNode::Listener
+	// Controller derives from ProcessingEngineNode::Listener
 	AddProtocolBridgingWrapperListener(this);
 
 	// Default OSC server settings. These might become overwritten 
@@ -104,9 +104,9 @@ CController::CController()
 }
 
 /**
- * Destroys the CController.
+ * Destroys the Controller.
  */
-CController::~CController()
+Controller::~Controller()
 {
 	stopTimer();
 	Disconnect();
@@ -123,23 +123,23 @@ CController::~CController()
 }
 
 /**
- * Returns the one and only instance of CController. If it doesn't exist yet, it is created.
- * @return The CController singleton object.
- * @sa m_singleton, CController
+ * Returns the one and only instance of Controller. If it doesn't exist yet, it is created.
+ * @return The Controller singleton object.
+ * @sa m_singleton, Controller
  */
-CController* CController::GetInstance()
+Controller* Controller::GetInstance()
 {
 	if (m_singleton == nullptr)
 	{
-		m_singleton = new CController();
+		m_singleton = new Controller();
 	}
 	return m_singleton;
 }
 
 /**
- * Triggers destruction of CController singleton object
+ * Triggers destruction of Controller singleton object
  */
-void CController::DestroyInstance()
+void Controller::DestroyInstance()
 {
 	delete m_singleton;
 }
@@ -149,7 +149,7 @@ void CController::DestroyInstance()
  * @param changeSource	The application module which is causing the property change.
  * @param changeTypes	Defines which parameter or property has been changed.
  */
-void CController::SetParameterChanged(DataChangeSource changeSource, DataChangeType changeTypes)
+void Controller::SetParameterChanged(DataChangeSource changeSource, DataChangeType changeTypes)
 {
 	const ScopedLock lock(m_mutex);
 
@@ -199,7 +199,7 @@ void CController::SetParameterChanged(DataChangeSource changeSource, DataChangeT
  * @return	True if any of the given parameters has changed it's value 
  *			since the last time PopParameterChanged() was called.
  */
-bool CController::GetParameterChanged(DataChangeSource changeSource, DataChangeType change)
+bool Controller::GetParameterChanged(DataChangeSource changeSource, DataChangeType change)
 {
 	const ScopedLock lock(m_mutex);
 	return ((m_parametersChanged[changeSource] & change) != 0);
@@ -212,7 +212,7 @@ bool CController::GetParameterChanged(DataChangeSource changeSource, DataChangeT
  * @param change		The desired parameter (or parameters).
  * @return	The state of the flag before the resetting.
  */
-bool CController::PopParameterChanged(DataChangeSource changeSource, DataChangeType change)
+bool Controller::PopParameterChanged(DataChangeSource changeSource, DataChangeType change)
 {
 	const ScopedLock lock(m_mutex);
 	bool ret((m_parametersChanged[changeSource] & change) != 0);
@@ -224,7 +224,7 @@ bool CController::PopParameterChanged(DataChangeSource changeSource, DataChangeT
  * Helper method to create a new processor incl. implicit triggering of
  * inserting it into xml config (by setting constructor bool flag to insertToConfig=true)
  */
-void CController::createNewProcessor()
+void Controller::createNewProcessor()
 {
 	auto processor = std::make_unique<SoundscapeBridgeApp::SoundsourceProcessor>(true);
 	processor.release(); // let go of the instance here, we do not want to destroy it, since it lives as member of CCOntroller when constructed
@@ -236,7 +236,7 @@ void CController::createNewProcessor()
  * @param p				Pointer to newly crated processor processor object.
  * @return				The ProcessorId of the newly added processor.
  */
-ProcessorId CController::AddProcessor(DataChangeSource changeSource, SoundsourceProcessor* p)
+ProcessorId Controller::AddProcessor(DataChangeSource changeSource, SoundsourceProcessor* p)
 {
 	const ScopedLock lock(m_mutex);
 
@@ -255,7 +255,7 @@ ProcessorId CController::AddProcessor(DataChangeSource changeSource, Soundsource
 	p->SetProcessorId(changeSource, newProcessorId);
 	
 #ifdef JUCE_DEBUG
-	p->PushDebugMessage("CController::AddProcessor: #" + String(newProcessorId));
+	p->PushDebugMessage("Controller::AddProcessor: #" + String(newProcessorId));
 #endif
 	SetParameterChanged(changeSource, DCT_NumProcessors);
 
@@ -269,7 +269,7 @@ ProcessorId CController::AddProcessor(DataChangeSource changeSource, Soundsource
  * Remove a Processor instance from the local list of processors.
  * @param p		Pointer to Processor object which should be removed.
  */
-void CController::RemoveProcessor(SoundsourceProcessor* p)
+void Controller::RemoveProcessor(SoundsourceProcessor* p)
 {
 	DeactivateSoundSourceId(p->GetSourceId(), p->GetMappingId());
 
@@ -288,7 +288,7 @@ void CController::RemoveProcessor(SoundsourceProcessor* p)
  * Number of registered Processor instances.
  * @return	Number of registered Processor instances.
  */
-int CController::GetProcessorCount() const
+int Controller::GetProcessorCount() const
 {
 	const ScopedLock lock(m_mutex);
 	return m_processors.size();
@@ -299,7 +299,7 @@ int CController::GetProcessorCount() const
  * @param idx	The index of the desired processor.
  * @return	The pointer to the desired processor.
  */
-SoundsourceProcessor* CController::GetProcessor(ProcessorId idx) const
+SoundsourceProcessor* Controller::GetProcessor(ProcessorId idx) const
 {
 	const ScopedLock lock(m_mutex);
 	if ((idx >= 0) && (idx < m_processors.size()))
@@ -313,7 +313,7 @@ SoundsourceProcessor* CController::GetProcessor(ProcessorId idx) const
  * Getter function for the IP address to which m_oscSender and m_oscReceiver are connected.
  * @return	Current IP address.
  */
-String CController::GetIpAddress() const
+String Controller::GetIpAddress() const
 {
 	return m_ipAddress;
 }
@@ -322,7 +322,7 @@ String CController::GetIpAddress() const
  * Static methiod which returns the default IP address.
  * @return	IP address to use as default.
  */
-String CController::GetDefaultIpAddress()
+String Controller::GetDefaultIpAddress()
 {
 	return PROTOCOL_DEFAULT_IP;
 }
@@ -334,7 +334,7 @@ String CController::GetDefaultIpAddress()
  * @param ipAddress		New IP address.
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  */
-void CController::SetIpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification)
+void Controller::SetIpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification)
 {
 	if (m_ipAddress != ipAddress)
 	{
@@ -360,7 +360,7 @@ void CController::SetIpAddress(DataChangeSource changeSource, String ipAddress, 
  * @return		True if a valid OSC message was received and successfully processed recently.
  *				False if no response was received for longer than the timeout threshold.
  */
-bool CController::GetOnline() const
+bool Controller::GetOnline() const
 {
 	return ((m_heartBeatsRx * m_oscMsgRate) < KEEPALIVE_TIMEOUT);
 }
@@ -369,7 +369,7 @@ bool CController::GetOnline() const
  * Getter for the rate at which OSC messages are being sent out.
  * @return	Messaging rate, in milliseconds.
  */
-int CController::GetRate() const
+int Controller::GetRate() const
 {
 	return m_oscMsgRate;
 }
@@ -380,7 +380,7 @@ int CController::GetRate() const
  * @param rate	New messaging rate, in milliseconds.
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  */
-void CController::SetRate(DataChangeSource changeSource, int rate, bool dontSendNotification)
+void Controller::SetRate(DataChangeSource changeSource, int rate, bool dontSendNotification)
 {
 	if (rate != m_oscMsgRate)
 	{
@@ -406,7 +406,7 @@ void CController::SetRate(DataChangeSource changeSource, int rate, bool dontSend
  * @return	Returns a std::pair<int, int> where the first number is the minimum supported rate, 
  *			and the second number is the maximum.
  */
-std::pair<int, int> CController::GetSupportedRateRange()
+std::pair<int, int> Controller::GetSupportedRateRange()
 {
 	return std::pair<int, int>(PROTOCOL_INTERVAL_MIN, PROTOCOL_INTERVAL_MAX);
 }
@@ -417,7 +417,7 @@ std::pair<int, int> CController::GetSupportedRateRange()
  * @param ipAddress		New IP address.
  * @param rate			New messaging rate, in milliseconds.
  */
-void CController::InitGlobalSettings(DataChangeSource changeSource, String ipAddress, int rate)
+void Controller::InitGlobalSettings(DataChangeSource changeSource, String ipAddress, int rate)
 {
 	SetIpAddress(changeSource, ipAddress);
 	SetRate(changeSource, rate);
@@ -431,7 +431,7 @@ void CController::InitGlobalSettings(DataChangeSource changeSource, String ipAdd
  * @param objectId	The remote object id of the object that was received
  * @param msgData	The actual message data that was received
  */
-void CController::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier objectId, RemoteObjectMessageData& msgData)
+void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier objectId, RemoteObjectMessageData& msgData)
 {
 	jassert(nodeId == DEFAULT_PROCNODE_ID);
 	if (nodeId != DEFAULT_PROCNODE_ID)
@@ -522,7 +522,7 @@ void CController::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, 
 										processor->SetParameterValue(DCS_Protocol, ParamIdx_X, static_cast<float*>(msgData.payload)[0]);
 										processor->SetParameterValue(DCS_Protocol, ParamIdx_Y, static_cast<float*>(msgData.payload)[1]);
 
-										// A request was sent to the DS100 by the CController because this processor was in CM_PollOnce mode.
+										// A request was sent to the DS100 by the Controller because this processor was in CM_PollOnce mode.
 										// Since the response was now processed, set the processor back into it's original mode.
 										if ((mode & CM_PollOnce) == CM_PollOnce)
 										{
@@ -586,7 +586,7 @@ void CController::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, 
 /**
  * Disconnect the active bridging nodes' protocols.
  */
-void CController::Disconnect()
+void Controller::Disconnect()
 {
 	m_protocolBridge.Disconnect();
 }
@@ -594,7 +594,7 @@ void CController::Disconnect()
 /**
  * Disconnect and re-connect the OSCSender to a host specified by the current ip settings.
  */
-void CController::Reconnect()
+void Controller::Reconnect()
 {
 	m_protocolBridge.Reconnect();
 }
@@ -604,7 +604,7 @@ void CController::Reconnect()
  * send out OSC messages.
  * Reimplemented from base class Timer.
  */
-void CController::timerCallback()
+void Controller::timerCallback()
 {
 	const ScopedLock lock(m_mutex);
 	if (m_processors.size() > 0)
@@ -775,7 +775,7 @@ void CController::timerCallback()
  * @param stateXml	The XML element containing this objects' configuration data
  * @return	True if the data was read and handled successfuly, false if not.
  */
-bool CController::setStateXml(XmlElement* stateXml)
+bool Controller::setStateXml(XmlElement* stateXml)
 {
 	if (!stateXml || (stateXml->getTagName() != AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER)))
 		return false;
@@ -837,7 +837,7 @@ bool CController::setStateXml(XmlElement* stateXml)
  * singleton AppConfiguration class implementation.
  * @return	The XML element data that was created.
  */
-std::unique_ptr<XmlElement> CController::createStateXml()
+std::unique_ptr<XmlElement> Controller::createStateXml()
 {
 	auto controllerXmlElement = std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER));
 
@@ -863,7 +863,7 @@ std::unique_ptr<XmlElement> CController::createStateXml()
  * @param sourceId	The soundsource object id to activate
  * @param mappingId	The soundsource mapping id to activate
  */
-void CController::ActivateSoundSourceId(SourceId sourceId, MappingId mappingId)
+void Controller::ActivateSoundSourceId(SourceId sourceId, MappingId mappingId)
 {
 	m_protocolBridge.ActivateDS100SourceId(static_cast<juce::int16>(sourceId), static_cast<juce::int16>(mappingId));
 }
@@ -873,7 +873,7 @@ void CController::ActivateSoundSourceId(SourceId sourceId, MappingId mappingId)
  * @param sourceId	The soundsource object id to activate
  * @param mappingId	The soundsource mapping id to activate
  */
-void CController::DeactivateSoundSourceId(SourceId sourceId, MappingId mappingId)
+void Controller::DeactivateSoundSourceId(SourceId sourceId, MappingId mappingId)
 {
 	m_protocolBridge.DeactivateDS100SourceId(static_cast<juce::int16>(sourceId), static_cast<juce::int16>(mappingId));
 }
@@ -882,7 +882,7 @@ void CController::DeactivateSoundSourceId(SourceId sourceId, MappingId mappingId
  * Adds a given listener object to this controller instance's bridging wrapper object.
  * @param listener	The listener object to add to bridging wrapper.
  */
-void CController::AddProtocolBridgingWrapperListener(ProtocolBridgingWrapper::Listener* listener)
+void Controller::AddProtocolBridgingWrapperListener(ProtocolBridgingWrapper::Listener* listener)
 {
 	m_protocolBridge.AddListener(listener);
 }
@@ -891,7 +891,7 @@ void CController::AddProtocolBridgingWrapperListener(ProtocolBridgingWrapper::Li
  * Getter for the active protocol bridging types (active protocols RoleB - those are used for bridging to DS100 running as RoleA, see RemoteProtocolBridge for details)
  * @return The bitfield containing all active bridging types
  */
-ProtocolBridgingType CController::GetActiveProtocolBridging()
+ProtocolBridgingType Controller::GetActiveProtocolBridging()
 {
 	return m_protocolBridge.GetActiveBridgingProtocols();
 }
@@ -900,7 +900,7 @@ ProtocolBridgingType CController::GetActiveProtocolBridging()
  * Getter for currently active bridging protocols count.
  * @return The number of currently active bridging protocols.
  */
-int CController::GetActiveProtocolBridgingCount()
+int Controller::GetActiveProtocolBridgingCount()
 {
 	auto activeProtocolBridgingCount = 0;
 	auto activeBridging = GetActiveProtocolBridging();
@@ -927,7 +927,7 @@ int CController::GetActiveProtocolBridgingCount()
  * Setter for protocol bridging types that shall be active.
  * @param	bridgingTypes	Bitfield containing all types that are to be active.
  */
-void CController::SetActiveProtocolBridging(ProtocolBridgingType bridgingTypes)
+void Controller::SetActiveProtocolBridging(ProtocolBridgingType bridgingTypes)
 {
 	m_protocolBridge.SetActiveBridgingProtocols(bridgingTypes);
 }
@@ -937,7 +937,7 @@ void CController::SetActiveProtocolBridging(ProtocolBridgingType bridgingTypes)
  * @param sourceId The id of the source for which the mute state shall be returned
  * @return The mute state
  */
-bool CController::GetMuteBridgingSourceId(ProtocolBridgingType bridgingType, SourceId sourceId)
+bool Controller::GetMuteBridgingSourceId(ProtocolBridgingType bridgingType, SourceId sourceId)
 {
 	switch (bridgingType)
 	{
@@ -963,7 +963,7 @@ bool CController::GetMuteBridgingSourceId(ProtocolBridgingType bridgingType, Sou
  * @param mute Set to true for mute and false for unmute
  * @return True on success, false on failure
  */
-bool CController::SetMuteBridgingSourceId(ProtocolBridgingType bridgingType, SourceId sourceId, bool mute)
+bool Controller::SetMuteBridgingSourceId(ProtocolBridgingType bridgingType, SourceId sourceId, bool mute)
 {
 	switch (bridgingType)
 	{
@@ -983,7 +983,7 @@ bool CController::SetMuteBridgingSourceId(ProtocolBridgingType bridgingType, Sou
 	}
 }
 
-String CController::GetBridgingIpAddress(ProtocolBridgingType bridgingType)
+String Controller::GetBridgingIpAddress(ProtocolBridgingType bridgingType)
 {
 	switch (bridgingType)
 	{
@@ -1004,7 +1004,7 @@ String CController::GetBridgingIpAddress(ProtocolBridgingType bridgingType)
 	}
 }
 
-bool CController::SetBridgingIpAddress(ProtocolBridgingType bridgingType, String ipAddress, bool dontSendNotification)
+bool Controller::SetBridgingIpAddress(ProtocolBridgingType bridgingType, String ipAddress, bool dontSendNotification)
 {
 	switch (bridgingType)
 	{
@@ -1025,7 +1025,7 @@ bool CController::SetBridgingIpAddress(ProtocolBridgingType bridgingType, String
 	}
 }
 
-int CController::GetBridgingListeningPort(ProtocolBridgingType bridgingType)
+int Controller::GetBridgingListeningPort(ProtocolBridgingType bridgingType)
 {
 	switch (bridgingType)
 	{
@@ -1045,7 +1045,7 @@ int CController::GetBridgingListeningPort(ProtocolBridgingType bridgingType)
 	}
 }
 
-bool CController::SetBridgingListeningPort(ProtocolBridgingType bridgingType, int listeningPort, bool dontSendNotification)
+bool Controller::SetBridgingListeningPort(ProtocolBridgingType bridgingType, int listeningPort, bool dontSendNotification)
 {
 	switch (bridgingType)
 	{
@@ -1065,7 +1065,7 @@ bool CController::SetBridgingListeningPort(ProtocolBridgingType bridgingType, in
 	}
 }
 
-int CController::GetBridgingRemotePort(ProtocolBridgingType bridgingType)
+int Controller::GetBridgingRemotePort(ProtocolBridgingType bridgingType)
 {
 	switch (bridgingType)
 	{
@@ -1085,7 +1085,7 @@ int CController::GetBridgingRemotePort(ProtocolBridgingType bridgingType)
 	}
 }
 
-bool CController::SetBridgingRemotePort(ProtocolBridgingType bridgingType, int remotePort, bool dontSendNotification)
+bool Controller::SetBridgingRemotePort(ProtocolBridgingType bridgingType, int remotePort, bool dontSendNotification)
 {
 	switch (bridgingType)
 	{
@@ -1105,7 +1105,7 @@ bool CController::SetBridgingRemotePort(ProtocolBridgingType bridgingType, int r
 	}
 }
 
-int CController::GetBridgingMappingArea(ProtocolBridgingType bridgingType)
+int Controller::GetBridgingMappingArea(ProtocolBridgingType bridgingType)
 {
 	switch (bridgingType)
 	{
@@ -1123,7 +1123,7 @@ int CController::GetBridgingMappingArea(ProtocolBridgingType bridgingType)
 	}
 }
 
-bool CController::SetBridgingMappingArea(ProtocolBridgingType bridgingType, int mappingAreaId, bool dontSendNotification)
+bool Controller::SetBridgingMappingArea(ProtocolBridgingType bridgingType, int mappingAreaId, bool dontSendNotification)
 {
 	switch (bridgingType)
 	{

@@ -137,7 +137,7 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 		}
 	}
 
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (ctrl && m_multiSliderSurface)
 	{
 		if (ctrl->PopParameterChanged(DCS_Overview, DCT_NumProcessors))

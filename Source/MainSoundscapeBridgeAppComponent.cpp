@@ -51,7 +51,7 @@ MainSoundscapeBridgeAppComponent::MainSoundscapeBridgeAppComponent(std::function
     m_config->triggerWatcherUpdate();
 
     // enshure the controller singleton is created
-    auto ctrl = SoundscapeBridgeApp::CController::GetInstance();
+    auto ctrl = SoundscapeBridgeApp::Controller::GetInstance();
     ignoreUnused(ctrl);
 
     // enshure the overviewmanager singleton is created
@@ -82,12 +82,12 @@ MainSoundscapeBridgeAppComponent::~MainSoundscapeBridgeAppComponent()
         pageMgr->ClosePageContainer(true);
     }
 
-    auto ctrl = SoundscapeBridgeApp::CController::GetInstance();
+    auto ctrl = SoundscapeBridgeApp::Controller::GetInstance();
     if (ctrl)
     {
         // Delete the processor instances held in controller externally,
-        // since we otherwise would run into a loop ~CController -> CController::RemoveProcessor -> 
-        // ~SoundsourceProcessor -> CController::RemoveProcessor
+        // since we otherwise would run into a loop ~Controller -> Controller::RemoveProcessor -> 
+        // ~SoundsourceProcessor -> Controller::RemoveProcessor
         while(ctrl->GetProcessorCount() > 0)
             delete ctrl->GetProcessor(0);
 
@@ -121,7 +121,7 @@ void MainSoundscapeBridgeAppComponent::resized()
 
 void MainSoundscapeBridgeAppComponent::performConfigurationDump()
 {
-    auto ctrl = SoundscapeBridgeApp::CController::GetInstance();
+    auto ctrl = SoundscapeBridgeApp::Controller::GetInstance();
     if (ctrl)
         m_config->setConfigState(ctrl->createStateXml());
 
@@ -137,7 +137,7 @@ void MainSoundscapeBridgeAppComponent::onConfigUpdated()
     auto ovrConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW));
 
     // set the controller modules' config
-    auto ctrl = SoundscapeBridgeApp::CController::GetInstance();
+    auto ctrl = SoundscapeBridgeApp::Controller::GetInstance();
     if (ctrl)
         ctrl->setStateXml(ctrlConfigState.get());
 

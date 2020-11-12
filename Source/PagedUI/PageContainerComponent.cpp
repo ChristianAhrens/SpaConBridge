@@ -254,7 +254,7 @@ void PageContainerComponent::timerCallback()
  */
 void PageContainerComponent::UpdateGui(bool init)
 {
-	CController* ctrl = CController::GetInstance();
+	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
 		if (ctrl->PopParameterChanged(DCS_Overview, DCT_Online) || init)

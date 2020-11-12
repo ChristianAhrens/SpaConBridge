@@ -1468,7 +1468,9 @@ void MuteButtonContainer::buttonClicked(Button* button)
 
 			for (auto processorId : ProcessorIds)
 			{
-				ctrl->SetMuteBridgingSourceId(type, static_cast<juce::int16>(processorId), newToggleState);
+				auto processor = ctrl->GetProcessor(processorId);
+				if (processor)
+					ctrl->SetMuteBridgingSourceId(type, processor->GetSourceId(), newToggleState);
 			}
 		}
 	}

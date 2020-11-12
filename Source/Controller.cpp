@@ -937,7 +937,7 @@ void CController::SetActiveProtocolBridging(ProtocolBridgingType bridgingTypes)
  * @param sourceId The id of the source for which the mute state shall be returned
  * @return The mute state
  */
-bool CController::GetMuteBridgingSourceId(ProtocolBridgingType bridgingType, juce::int16 sourceId)
+bool CController::GetMuteBridgingSourceId(ProtocolBridgingType bridgingType, SourceId sourceId)
 {
 	switch (bridgingType)
 	{
@@ -963,7 +963,7 @@ bool CController::GetMuteBridgingSourceId(ProtocolBridgingType bridgingType, juc
  * @param mute Set to true for mute and false for unmute
  * @return True on success, false on failure
  */
-bool CController::SetMuteBridgingSourceId(ProtocolBridgingType bridgingType, juce::int16 sourceId, bool mute)
+bool CController::SetMuteBridgingSourceId(ProtocolBridgingType bridgingType, SourceId sourceId, bool mute)
 {
 	switch (bridgingType)
 	{

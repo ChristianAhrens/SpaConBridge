@@ -96,8 +96,8 @@ public:
 	void SetActiveProtocolBridging(ProtocolBridgingType bridgingType);
 	int GetActiveProtocolBridgingCount();
 	
-	bool GetMuteBridgingSourceId(ProtocolBridgingType bridgingType, juce::int16 sourceId);
-	bool SetMuteBridgingSourceId(ProtocolBridgingType bridgingType, juce::int16 sourceId, bool mute);
+	bool GetMuteBridgingSourceId(ProtocolBridgingType bridgingType, SourceId sourceId);
+	bool SetMuteBridgingSourceId(ProtocolBridgingType bridgingType, SourceId sourceId, bool mute);
 
 	String GetBridgingIpAddress(ProtocolBridgingType bridgingType);
 	bool SetBridgingIpAddress(ProtocolBridgingType bridgingType, String ipAddress, bool dontSendNotification = false);

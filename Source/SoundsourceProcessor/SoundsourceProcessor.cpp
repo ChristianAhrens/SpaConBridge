@@ -597,32 +597,6 @@ SourceId SoundsourceProcessor::GetSourceId() const
 	return m_sourceId;
 }
 
-///**
-// * Setter function for the IP address for outgoing OSC comnmunication.
-// * @param changeSource	The application module which is causing the property change.
-// * @param ipAddress	The new IP address as a string
-// */
-//void SoundsourceProcessor::SetIpAddress(DataChangeSource changeSource, String ipAddress)
-//{
-//	CController* ctrl = CController::GetInstance();
-//	if (ctrl)
-//		ctrl->SetIpAddress(changeSource, ipAddress);
-//}
-//
-///**
-//* Getter function for the IP address
-//* @return	The current IP address as a string
-//*/
-//String SoundsourceProcessor::GetIpAddress() const
-//{
-//	String ipAddress;
-//	CController* ctrl = CController::GetInstance();
-//	if (ctrl)
-//		ipAddress = ctrl->GetIpAddress();
-//
-//	return ipAddress;
-//}
-
 /**
  * Setter function for the send rate used in the outgoing OSC messages.
  * @param changeSource	The application module which is causing the property change.

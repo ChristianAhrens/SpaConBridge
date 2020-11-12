@@ -788,7 +788,7 @@ void SettingsSectionsComponent::handleSecondDS100ServiceSelected(JUCEAppBasics::
 	{
 		m_SecondDS100IpAddressEdit->setText(info->ip, true);
 
-		CController* ctrl = CController::GetInstance();
+		Controller* ctrl = Controller::GetInstance();
 		if (ctrl)
 			ctrl->SetSecondDS100IpAddress(DCS_Gui, info->ip);
 	}

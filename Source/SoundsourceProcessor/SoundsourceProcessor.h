@@ -83,9 +83,6 @@ public:
 	MappingId GetMappingId() const;
 	void SetMappingId(DataChangeSource changeSource, MappingId mappingId);
 
-	//String GetIpAddress() const;
-	//void SetIpAddress(DataChangeSource changeSource, String ipAddress);
-
 	int GetMessageRate() const;
 	void SetMessageRate(DataChangeSource changeSource, int oscMsgRate);
 

@@ -137,12 +137,12 @@ private:
 
 protected:
 	
-	static CController				*m_singleton;			/**< The one and only instance of CController. */
+	static Controller				*m_singleton;			/**< The one and only instance of CController. */
 	Array<SoundsourceProcessor*>	m_processors;			/**< List of registered Plug-in processor instances.
 															 * Incoming OSC messages will be forwarded to all processors on the list.
 															 * When adding Plug-in instances to a project (i.e. one for each DAW track), this list will grow.
 															 * When removing Plug-in instances from a project, this list will shrink. When the list becomes empty,
-															 * The CController singleton object is no longer necessary and will destruct itself.
+															 * The Controller singleton object is no longer necessary and will destruct itself.
 															 */
 	ProtocolBridgingWrapper			m_protocolBridge;		/**< The wrapper for protocol bridging node, allowing to easily interface with it. */
 	String							m_DS100IpAddress;		/**< IP Address where OSC messages will be sent to / received from. */

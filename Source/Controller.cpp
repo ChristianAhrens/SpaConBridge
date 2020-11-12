@@ -314,7 +314,7 @@ SoundsourceProcessor* Controller::GetProcessor(ProcessorId idx) const
  * Getter function for the IP address to which m_oscSender and m_oscReceiver are connected.
  * @return	Current IP address.
  */
-String Controller::GetIpAddress() const
+String Controller::GetDS100IpAddress() const
 {
 	return m_DS100IpAddress;
 }
@@ -323,7 +323,7 @@ String Controller::GetIpAddress() const
  * Static methiod which returns the default IP address.
  * @return	IP address to use as default.
  */
-String Controller::GetDefaultIpAddress()
+String Controller::GetDefaultDS100IpAddress()
 {
 	return PROTOCOL_DEFAULT_IP;
 }
@@ -335,7 +335,7 @@ String Controller::GetDefaultIpAddress()
  * @param ipAddress		New IP address.
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  */
-void Controller::SetIpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification)
+void Controller::SetDS100IpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification)
 {
 	if (m_DS100IpAddress != ipAddress)
 	{
@@ -360,7 +360,7 @@ void Controller::SetIpAddress(DataChangeSource changeSource, String ipAddress, b
  * Getter function for the IP address to which m_oscSender and m_oscReceiver are connected.
  * @return	Current IP address.
  */
-String CController::GetSecondDS100IpAddress() const
+String Controller::GetSecondDS100IpAddress() const
 {
 	return m_SecondDS100IpAddress;
 }
@@ -372,7 +372,7 @@ String CController::GetSecondDS100IpAddress() const
  * @param ipAddress		New IP address.
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  */
-void CController::SetSecondDS100IpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification)
+void Controller::SetSecondDS100IpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification)
 {
 	if (m_SecondDS100IpAddress != ipAddress)
 	{
@@ -453,7 +453,7 @@ std::pair<int, int> Controller::GetSupportedRateRange()
  * Getter function for the IP address to which m_oscSender and m_oscReceiver are connected.
  * @return	Current IP address.
  */
-ExtensionMode CController::GetExtensionMode() const
+ExtensionMode Controller::GetExtensionMode() const
 {
 	return m_DS100ExtensionMode;
 }
@@ -465,7 +465,7 @@ ExtensionMode CController::GetExtensionMode() const
  * @param ipAddress		New IP address.
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  */
-void CController::SetExtensionMode(DataChangeSource changeSource, ExtensionMode mode, bool dontSendNotification)
+void Controller::SetExtensionMode(DataChangeSource changeSource, ExtensionMode mode, bool dontSendNotification)
 {
 	if (m_DS100ExtensionMode != mode)
 	{

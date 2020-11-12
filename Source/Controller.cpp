@@ -359,9 +359,9 @@ void CController::SetDS100IpAddress(DataChangeSource changeSource, String ipAddr
  * Getter function for the IP address to which m_oscSender and m_oscReceiver are connected.
  * @return	Current IP address.
  */
-String CController::GetCascadeDS100IpAddress() const
+String CController::GetSecondDS100IpAddress() const
 {
-	return m_CascadeDS100IpAddress;
+	return m_SecondDS100IpAddress;
 }
 
 /**
@@ -371,15 +371,15 @@ String CController::GetCascadeDS100IpAddress() const
  * @param ipAddress		New IP address.
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  */
-void CController::SetCascadeDS100IpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification)
+void CController::SetSecondDS100IpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification)
 {
-	if (m_CascadeDS100IpAddress != ipAddress)
+	if (m_SecondDS100IpAddress != ipAddress)
 	{
 		const ScopedLock lock(m_mutex);
 
-		m_CascadeDS100IpAddress = ipAddress;
+		m_SecondDS100IpAddress = ipAddress;
 
-		m_protocolBridge.SetCascadeDS100IpAddress(ipAddress, dontSendNotification);
+		m_protocolBridge.SetSecondDS100IpAddress(ipAddress, dontSendNotification);
 
 		// Start "offline" after changing IP address
 		m_heartBeatsRx = MAX_HEARTBEAT_COUNT;

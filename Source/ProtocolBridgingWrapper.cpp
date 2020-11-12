@@ -910,7 +910,7 @@ bool ProtocolBridgingWrapper::SetDS100IpAddress(String ipAddress, bool dontSendN
  * This method forwards the call to the generic implementation.
  * @return	The ip address string
  */
-String ProtocolBridgingWrapper::GetCascadeDS100IpAddress()
+String ProtocolBridgingWrapper::GetSecondDS100IpAddress()
 {
 	return GetProtocolIpAddress(DS100_2_PROCESSINGPROTOCOL_ID);
 }
@@ -922,7 +922,7 @@ String ProtocolBridgingWrapper::GetCascadeDS100IpAddress()
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  * @return	True on succes, false if failure
  */
-bool ProtocolBridgingWrapper::SetCascadeDS100IpAddress(String ipAddress, bool dontSendNotification)
+bool ProtocolBridgingWrapper::SetSecondDS100IpAddress(String ipAddress, bool dontSendNotification)
 {
 	return SetProtocolIpAddress(DS100_2_PROCESSINGPROTOCOL_ID, ipAddress, dontSendNotification);
 }

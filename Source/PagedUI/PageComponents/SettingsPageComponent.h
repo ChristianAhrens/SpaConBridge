@@ -124,7 +124,7 @@ private:
 
 	//==============================================================================
 	void handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info);
-	void handleCascadeDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info);
+	void handleSecondDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info);
 
 	// input filters for texteditors
 	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_intervalEditFilter;
@@ -139,11 +139,11 @@ private:
 	std::unique_ptr<TextEditor>									m_DS100IpAddressEdit;
 	std::unique_ptr<Label>										m_DS100IpAddressLabel;
 	std::unique_ptr<JUCEAppBasics::ZeroconfDiscoverComponent>	m_DS100ZeroconfDiscovery;
-	std::unique_ptr<ToggleButton>								m_EnableCascadeDS100Toggle;
-	std::unique_ptr<Label>										m_EnableCascadeDS100Label;
-	std::unique_ptr<TextEditor>									m_CascadeDS100IpAddressEdit;
-	std::unique_ptr<Label>										m_CascadeDS100IpAddressLabel;
-	std::unique_ptr<JUCEAppBasics::ZeroconfDiscoverComponent>	m_CascadeDS100ZeroconfDiscovery;
+	std::unique_ptr<ToggleButton>								m_EnableSecondDS100Toggle;
+	std::unique_ptr<Label>										m_EnableSecondDS100Label;
+	std::unique_ptr<TextEditor>									m_SecondDS100IpAddressEdit;
+	std::unique_ptr<Label>										m_SecondDS100IpAddressLabel;
+	std::unique_ptr<JUCEAppBasics::ZeroconfDiscoverComponent>	m_SecondDS100ZeroconfDiscovery;
 
 	// DiGiCo settings section
 	std::unique_ptr<HeaderWithElmListComponent>	m_DiGiCoBridgingSettings;

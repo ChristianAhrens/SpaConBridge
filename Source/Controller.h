@@ -81,8 +81,8 @@ public:
 	String GetDS100IpAddress() const;
 	static String GetDefaultDS100IpAddress();
 	void SetDS100IpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification = false);
-	String GetCascadeDS100IpAddress() const;
-	void SetCascadeDS100IpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification = false);
+	String GetSecondDS100IpAddress() const;
+	void SetSecondDS100IpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification = false);
 
 	//==========================================================================
 	int GetRate() const;
@@ -142,7 +142,7 @@ protected:
 														 */
 	ProtocolBridgingWrapper			m_protocolBridge;	/**< The wrapper for protocol bridging node, allowing to easily interface with it. */
 	String							m_DS100IpAddress;		/**< IP Address where OSC messages will be sent to / received from. */
-	String							m_CascadeDS100IpAddress;		/**< IP Address where OSC messages will be sent to / received from. */
+	String							m_SecondDS100IpAddress;		/**< IP Address where OSC messages will be sent to / received from. */
 	int								m_oscMsgRate;		/**< Interval at which OSC messages are sent to the host, in ms. */
 	DataChangeType					m_parametersChanged[DCS_Max];	/**< Keep track of which OSC parameters have changed recently.
 																	 * The array has one entry for each application module (see enum DataChangeSource). */

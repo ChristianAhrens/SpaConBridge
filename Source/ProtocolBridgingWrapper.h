@@ -91,8 +91,8 @@ public:
 	int GetDS100MsgRate();
 	bool SetDS100MsgRate(int msgRate, bool dontSendNotification = false);
 
-	String GetCascadeDS100IpAddress();
-	bool SetCascadeDS100IpAddress(String ipAddress, bool dontSendNotification = false);
+	String GetSecondDS100IpAddress();
+	bool SetSecondDS100IpAddress(String ipAddress, bool dontSendNotification = false);
 
 	//==========================================================================
 	bool GetMuteDiGiCoSourceId(juce::int16 sourceId);

@@ -785,8 +785,14 @@ bool ProtocolBridgingWrapper::ActivateDS100SourceId(juce::int16 sourceId, juce::
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
 	{
-		auto mappedSourceId = sourceId % DS100_CHANNELCOUNT;
-		auto DS100ProtocolId = ((sourceId > DS100_CHANNELCOUNT) ? DS100_2_PROCESSINGPROTOCOL_ID : DS100_1_PROCESSINGPROTOCOL_ID);
+		auto mappedSourceId = sourceId;
+		auto DS100ProtocolId = DS100_1_PROCESSINGPROTOCOL_ID;
+
+		if (sourceId > DS100_CHANNELCOUNT)
+		{
+			mappedSourceId = sourceId - DS100_CHANNELCOUNT;
+			DS100ProtocolId = DS100_2_PROCESSINGPROTOCOL_ID;
+		}
 
 		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100ProtocolId));
 		if (protocolXmlElement)
@@ -839,8 +845,14 @@ bool ProtocolBridgingWrapper::DeactivateDS100SourceId(juce::int16 sourceId, juce
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
 	{
-		auto mappedSourceId = sourceId % DS100_CHANNELCOUNT;
-		auto DS100ProtocolId = ((sourceId > DS100_CHANNELCOUNT) ? DS100_2_PROCESSINGPROTOCOL_ID : DS100_1_PROCESSINGPROTOCOL_ID);
+		auto mappedSourceId = sourceId;
+		auto DS100ProtocolId = DS100_1_PROCESSINGPROTOCOL_ID;
+
+		if (sourceId > DS100_CHANNELCOUNT)
+		{
+			mappedSourceId = sourceId - DS100_CHANNELCOUNT;
+			DS100ProtocolId = DS100_2_PROCESSINGPROTOCOL_ID;
+		}
 
 		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100ProtocolId));
 		if (protocolXmlElement)

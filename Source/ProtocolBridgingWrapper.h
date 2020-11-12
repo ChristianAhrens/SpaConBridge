@@ -22,6 +22,7 @@ namespace SoundscapeBridgeApp
 {
 
 static const String PROTOCOL_DEFAULT_IP("127.0.0.1");	//< Default IP Address
+static const String PROTOCOL_DEFAULT2_IP("127.0.0.2");	//< Default IP Address
 
 static constexpr int PROTOCOL_DEFAULT_MAPPINGAREA = 1;	//< Mapping Area Id to use as default
 

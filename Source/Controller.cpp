@@ -901,7 +901,9 @@ bool CController::setStateXml(XmlElement* stateXml)
 	{
 		if (m_protocolBridge.setStateXml(bridgingXmlElement))
 		{
+			SetExtensionMode(DataChangeSource::DCS_Init, m_protocolBridge.GetDS100ExtensionMode(), true);
 			SetDS100IpAddress(DataChangeSource::DCS_Init, m_protocolBridge.GetDS100IpAddress(), true);
+			SetSecondDS100IpAddress(DataChangeSource::DCS_Init, m_protocolBridge.GetSecondDS100IpAddress(), true);
 			SetRate(DataChangeSource::DCS_Init, m_protocolBridge.GetDS100MsgRate(), true);
 		}
 	}

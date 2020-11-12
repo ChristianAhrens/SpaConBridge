@@ -1002,13 +1002,147 @@ bool ProtocolBridgingWrapper::SetDS100MsgRate(int msgRate, bool dontSendNotifica
 		return false;
 }
 
+/**
+ * Getter method for the active DS100 extension mode.
+ * This does not return a member variable value but contains logic to derive the mode from internal cached xml element configuration.
+ * @return The DS100 extension mode value as results from cached xml config.
+ */
 ExtensionMode ProtocolBridgingWrapper::GetDS100ExtensionMode()
 {
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto objectHandlingXmlElement = nodeXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OBJECTHANDLING));
+		if (objectHandlingXmlElement)
+		{
+			auto objectHandlingMode = ProcessingEngineConfig::ObjectHandlingModeFromString(objectHandlingXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE)));
+			switch (objectHandlingMode)
+			{
+			case OHM_Mux_nA_to_mB:
+				return EM_Extend;
+			case OHM_Bypass:
+				return EM_Off;
+			case OHM_Invalid:
+			case OHM_Remap_A_X_Y_to_B_XY:
+			case OHM_Forward_only_valueChanges:
+			case OHM_DS100_DeviceSimulation:
+			case OHM_Forward_A_to_B_only:
+			case OHM_Reverse_B_to_A_only:
+			case OHM_UserMAX:
+			default:
+				jassertfalse;
+				return EM_Off;
+			}
+		}
+	}
+
 	return EM_Off;
 }
 
+/**
+ * Setter method for DS100 Extension Mode.
+ * This does not set a member variable but contains logic to reconfigure the cached xml element according to the given mode value.
+ * @param mode	The mode to activate
+ * @param dontSendNotification	-Ignored-
+ * @return	True on success, false on failure
+ */
 bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool dontSendNotification)
 {
+	ignoreUnused(dontSendNotification);
+
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto objectHandlingXmlElement = nodeXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OBJECTHANDLING));
+		if (objectHandlingXmlElement)
+		{
+			switch (mode)
+			{
+			case EM_Off:
+			{
+				// EM_Off refers to Bypass object handling mode without any channelcount parameter attributes
+				objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Bypass));
+				auto protocolAChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
+				if (protocolAChCntXmlElement)
+					objectHandlingXmlElement->removeChildElement(protocolAChCntXmlElement, true);
+				auto protocolBChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLBCHCNT));
+				if (protocolBChCntXmlElement)
+					objectHandlingXmlElement->removeChildElement(protocolBChCntXmlElement, true);
+			}
+			break;
+			case EM_Extend:
+			{
+				// EM_Extend refers to Multiplex nA to mB object handling mode with channel A and B parameter attributes
+				objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Mux_nA_to_mB));
+				auto protocolAChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
+				if (!protocolAChCntXmlElement)
+					protocolAChCntXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
+				protocolAChCntXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::COUNT), DS100_CHANNELCOUNT);
+				auto protocolBChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLBCHCNT));
+				if (!protocolBChCntXmlElement)
+					protocolBChCntXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLBCHCNT));
+				protocolBChCntXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::COUNT), DS100_EXTMODE_CHANNELCOUNT);
+			}
+			break;
+			case EM_Mirror:
+			default:
+				break;
+			}
+		}
+		else
+			return false;
+
+		auto protocolA1XmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
+		auto protocolA2XmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_2_PROCESSINGPROTOCOL_ID));
+
+		if (protocolA1XmlElement) // primary DS100 must always be existing, otherwise something in the config is broken
+		{
+			switch (mode)
+			{
+			case EM_Off:
+			{
+				// EM_Off requires the second DS100 protocol to not be present
+				if (protocolA2XmlElement)
+					nodeXmlElement->removeChildElement(protocolA2XmlElement, true);
+			}
+			break;
+			case EM_Extend:
+			{
+				// EM_Extend requires the second DS100 protocol to be present
+				if (!protocolA2XmlElement)
+				{
+					protocolA2XmlElement = std::make_unique<XmlElement>(*protocolA1XmlElement).release();
+					protocolA2XmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_2_PROCESSINGPROTOCOL_ID));
+					auto ipAddressXmlElement = protocolA2XmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
+					if (ipAddressXmlElement)
+					{
+						ipAddressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT2_IP);
+					}
+					else
+						return false;
+
+					nodeXmlElement->addChildElement(protocolA2XmlElement);
+				}
+			}
+			break;
+			case EM_Mirror:
+			default:
+				break;
+			}
+		}
+		else
+			return false;
+
+		m_processingNode.setStateXml(nodeXmlElement);
+
+		if (!dontSendNotification)
+			triggerConfigurationUpdate(false);
+
+		return true;
+	}
+	else
+		return false;
+
 	return true;
 }
 

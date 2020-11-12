@@ -256,6 +256,7 @@ static const std::string UNIT_DECIBEL = " dB";
  * Channelcount of a DS100 device
  */
 static constexpr int DS100_CHANNELCOUNT = 64;
+static constexpr int DS100_EXTMODE_CHANNELCOUNT = 2 * DS100_CHANNELCOUNT;
 
 /**
  * DS100 extension modes

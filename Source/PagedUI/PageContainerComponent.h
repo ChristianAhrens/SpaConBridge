@@ -117,7 +117,6 @@ protected:
  * Class PageContainerComponent is a simple container used to hold the GUI controls.
  */
 class PageContainerComponent :	public Component,
-								public TextEditor::Listener,
 								public Button::Listener,
 								private Timer
 {
@@ -142,10 +141,6 @@ private:
 	void resized() override;
 
 	//==============================================================================
-	void textEditorFocusLost(TextEditor &) override;
-	void textEditorReturnKeyPressed(TextEditor &) override;
-
-	//==============================================================================
 	void buttonClicked(Button*) override;
 
 	//==============================================================================
@@ -156,8 +151,6 @@ private:
 	std::unique_ptr<Label>							m_versionLabel;			/**> App version label. */
 	std::unique_ptr<Label>							m_versionStringLabel;	/**> "Version" string. */
 	std::unique_ptr<ImageButton>					m_logoButton;			/**> App logo button triggering about page. */
-	std::unique_ptr<Label>							m_rateLabel;			/**> Send/receive rate label. */
-	std::unique_ptr<TextEditor>						m_rateTextEdit;			/**> Text editor for the OSC send/receive rate in ms. */
 	std::unique_ptr<Label>							m_onlineLabel;			/**> Online indicator label. */
 	std::unique_ptr<LedButton>						m_onlineLed;			/**> Button used as Online indicator LED. */
 	std::unique_ptr<CustomButtonTabbedComponent>	m_tabbedComponent;		/**> A container for tabs. */

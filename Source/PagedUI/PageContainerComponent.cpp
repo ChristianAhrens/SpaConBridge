@@ -82,14 +82,6 @@ PageContainerComponent::PageContainerComponent()
 	m_onlineLed->setEnabled(false);
 	addAndMakeVisible(m_onlineLed.get());
 
-	// Interval
-	m_rateTextEdit = std::make_unique<TextEditor>("OSC Send Rate");
-	m_rateTextEdit->addListener(this);
-	addAndMakeVisible(m_rateTextEdit.get());
-	m_rateLabel = std::make_unique<Label>("OSC Send Rate", "Interval:");
-	m_rateLabel->setJustificationType(Justification::centred);
-	addAndMakeVisible(m_rateLabel.get());
-
 	// app logo button and Plugin version label
 	m_logoButton = std::make_unique<ImageButton>("LogoButton");
 	m_logoButton->setImages(false, true, true,
@@ -180,14 +172,13 @@ void PageContainerComponent::resized()
 {
 	int w = getLocalBounds().getWidth();
 
+	// bottom bar with online label and led
 	FlexBox bottomBarFB;
 	bottomBarFB.flexDirection = FlexBox::Direction::row;
 	bottomBarFB.justifyContent = FlexBox::JustifyContent::center;
 	bottomBarFB.alignContent = FlexBox::AlignContent::center;
 	bottomBarFB.items.addArray({
-		// Rate
-		FlexItem(*m_rateLabel.get()).withWidth(65).withHeight(25).withMargin(FlexItem::Margin(5, 0, 5, 10)),
-		FlexItem(*m_rateTextEdit.get()).withHeight(25).withFlex(1).withMargin(FlexItem::Margin(5, 0, 5, 0)),
+		// Spacing
 		FlexItem().withFlex(1),
 		// Online
 		FlexItem(*m_onlineLabel.get()).withWidth(65).withHeight(25).withMargin(FlexItem::Margin(5, 0, 5, 0)),
@@ -219,36 +210,6 @@ void PageContainerComponent::resized()
 		m_aboutPage->setBounds(getLocalBounds());
 		m_aboutPage->toFront(false);
 	}
-}
-
-/**
- * Callback function for changes to our textEditors.
- * @param textEditor	The TextEditor object whose content has just changed.
- */
-void PageContainerComponent::textEditorFocusLost(TextEditor& textEditor)
-{
-	CController* ctrl = CController::GetInstance();
-	if (ctrl)
-	{
-		// OSC message rate has changed
-		if (&textEditor == m_rateTextEdit.get())
-		{
-			ctrl->SetRate(DCS_Overview, textEditor.getText().getIntValue());
-		}
-	}
-}
-
-/**
- * Callback function for Enter key presses on textEditors.
- * @param textEditor	The TextEditor object whose where enter key was pressed.
- */
-void PageContainerComponent::textEditorReturnKeyPressed(TextEditor& textEditor)
-{
-	ignoreUnused(textEditor);
-
-	// Remove keyboard focus from this editor.
-	// Function textEditorFocusLost will then take care of setting values.
-	getParentComponent()->grabKeyboardFocus();
 }
 
 /**
@@ -296,9 +257,6 @@ void PageContainerComponent::UpdateGui(bool init)
 	CController* ctrl = CController::GetInstance();
 	if (ctrl)
 	{
-		if (ctrl->PopParameterChanged(DCS_Overview, DCT_MessageRate) || init)
-			m_rateTextEdit->setText(String(ctrl->GetRate()) + " ms", false);
-
 		if (ctrl->PopParameterChanged(DCS_Overview, DCT_Online) || init)
 			m_onlineLed->setToggleState(ctrl->GetOnline(), NotificationType::dontSendNotification);
 	}

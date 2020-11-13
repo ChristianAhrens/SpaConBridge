@@ -53,9 +53,10 @@ public:
 	{
 		WindowColor,	
 		DarkLineColor,	
-		DarkColor,		
-		MidColor,		
-		ButtonColor,	
+		DarkColor,
+		MidColor,
+		ButtonColor,
+		ThumbColor,
 		LightColor,		
 		TextColor,		
 		DarkTextColor,	

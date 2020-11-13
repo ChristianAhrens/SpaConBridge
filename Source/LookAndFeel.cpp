@@ -90,7 +90,7 @@ void DbLookAndFeelBase::InitColours()
 	setColour(Slider::textBoxHighlightColourId, GetDbColor(DbColor::HighlightColor));
 	setColour(Slider::textBoxOutlineColourId, GetDbColor(DbColor::WindowColor));
 	setColour(Slider::textBoxTextColourId, GetDbColor(DbColor::TextColor));
-	setColour(Slider::thumbColourId, GetDbColor(DbColor::ButtonColor));
+	setColour(Slider::thumbColourId, GetDbColor(DbColor::ThumbColor));
 	setColour(Slider::trackColourId, GetDbColor(DbColor::MidColor));
 
 	setColour(Label::textColourId, GetDbColor(DbColor::TextColor));
@@ -168,6 +168,8 @@ Colour DarkDbLookAndFeel::GetDbColor(DbColor color)
 		return Colour(83, 83, 83);
 	case ButtonColor:
 		return Colour(125, 125, 125);
+	case ThumbColor:
+		return Colour(135, 135, 135);
 	case LightColor:
 		return Colour(201, 201, 201);
 	case TextColor:
@@ -214,6 +216,8 @@ Colour LightDbLookAndFeel::GetDbColor(DbColor color)
 		return Colour(230, 230, 230);
 	case ButtonColor:
 		return Colour(197, 197, 197);
+	case ThumbColor:
+		return Colour(187, 187, 187);
 	case LightColor:
 		return Colour(49, 49, 49);
 	case TextColor:

@@ -104,6 +104,7 @@ public:
 	
 	bool GetMuteBridgingSourceId(ProtocolBridgingType bridgingType, SourceId sourceId);
 	bool SetMuteBridgingSourceId(ProtocolBridgingType bridgingType, SourceId sourceId, bool mute);
+	bool SetMuteBridgingSourceIds(ProtocolBridgingType bridgingType, const std::vector<SourceId>& sourceIds, bool mute);
 
 	String GetBridgingIpAddress(ProtocolBridgingType bridgingType);
 	bool SetBridgingIpAddress(ProtocolBridgingType bridgingType, String ipAddress, bool dontSendNotification = false);

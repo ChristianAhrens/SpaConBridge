@@ -754,7 +754,7 @@ void TableModelComponent::paintCell(Graphics& g, int rowNumber, int columnId, in
 void TableModelComponent::sortOrderChanged(int newSortColumnId, bool isForwards)
 {
 	// Remember row selection so it can be restored after sorting.
-	std::vector<ProcessorId> selectedPlugins = GetProcessorIdsForRows(GetSelectedRows());
+	std::vector<ProcessorId> selectedProcessors = GetProcessorIdsForRows(GetSelectedRows());
 	m_table.deselectAllRows();
 
 	// Use a different helper sorting function depending on which column is selected for sorting.
@@ -786,8 +786,8 @@ void TableModelComponent::sortOrderChanged(int newSortColumnId, bool isForwards)
 	m_table.updateContent();
 
 	// Restore row selection after sorting order has been changed, BUT make sure that
-	// it is the same Plugins which are selected after the sorting, NOT the same rows.
-	for (ProcessorId pId : selectedPlugins)
+	// it is the same Processors which are selected after the sorting, NOT the same rows.
+	for (ProcessorId pId : selectedProcessors)
 	{
 		int rowNo = static_cast<int>(std::find(m_ids.begin(), m_ids.end(), pId) - m_ids.begin());
 		m_table.selectRow(rowNo, true /* don't scroll */, false /* do not deselect other rows*/);
@@ -1490,15 +1490,19 @@ void MuteButtonContainer::buttonClicked(Button* button)
 				selectedRows.push_back(m_row);
 			}
 
-			// Get the IDs of the plugins on the selected rows.
+			// Get the IDs of the processors on the selected rows.
 			std::vector<ProcessorId> ProcessorIds = m_owner.GetProcessorIdsForRows(selectedRows);
-
+			std::vector<SourceId> SourceIds;
 			for (auto processorId : ProcessorIds)
 			{
 				auto processor = ctrl->GetProcessor(processorId);
 				if (processor)
-					ctrl->SetMuteBridgingSourceId(type, processor->GetSourceId(), newToggleState);
+					SourceIds.push_back(processor->GetSourceId());
 			}
+
+			ctrl->SetMuteBridgingSourceIds(type, SourceIds, newToggleState);
+
+			m_owner.UpdateTable();
 		}
 	}
 }
@@ -1607,7 +1611,7 @@ void EditableLabelContainer::mouseDoubleClick(const MouseEvent& event)
 
 /**
  * Saves the row number where this component is located inside the overview table.
- * It also updates the text to the current plugins name.
+ * It also updates the text to the current processors name.
  * @param newRow	The new row number.
  */
 void EditableLabelContainer::SetRow(int newRow)

@@ -83,8 +83,8 @@ public:
 	void SetActiveBridgingProtocols(ProtocolBridgingType desiredActiveBridgingTypes);
 
 	//==========================================================================
-	bool ActivateDS100SourceId(juce::int16 sourceId, juce::int16 mappingId);
-	bool DeactivateDS100SourceId(juce::int16 sourceId, juce::int16 mappingId);
+	bool ActivateDS100SourceId(SourceId sourceId, juce::int16 mappingId);
+	bool DeactivateDS100SourceId(SourceId sourceId, juce::int16 mappingId);
 
 	String GetDS100IpAddress();
 	bool SetDS100IpAddress(String ipAddress, bool dontSendNotification = false);
@@ -99,8 +99,9 @@ public:
 	bool SetDS100ExtensionMode(ExtensionMode mode, bool dontSendNotification = false);
 
 	//==========================================================================
-	bool GetMuteDiGiCoSourceId(juce::int16 sourceId);
-	bool SetMuteDiGiCoSourceId(juce::int16 sourceId, bool mute = true);
+	bool GetMuteDiGiCoSourceId(SourceId sourceId);
+	bool SetMuteDiGiCoSourceId(SourceId sourceId, bool mute = true);
+	bool SetMuteDiGiCoSourceIds(const std::vector<SourceId>& sourceIds, bool mute = true);
 
 	String GetDiGiCoIpAddress();
 	bool SetDiGiCoIpAddress(String ipAddress, bool dontSendNotification = false);
@@ -110,8 +111,9 @@ public:
 	bool SetDiGiCoRemotePort(int remotePort, bool dontSendNotification = false);
 
 	//==========================================================================
-	bool GetMuteRTTrPMSourceId(juce::int16 sourceId);
-	bool SetMuteRTTrPMSourceId(juce::int16 sourceId, bool mute = true);
+	bool GetMuteRTTrPMSourceId(SourceId sourceId);
+	bool SetMuteRTTrPMSourceId(SourceId sourceId, bool mute = true);
+	bool SetMuteRTTrPMSourceIds(const std::vector<SourceId>& sourceIds, bool mute = true);
 
 	String GetRTTrPMIpAddress();
 	bool SetRTTrPMIpAddress(String ipAddress, bool dontSendNotification = false);
@@ -123,8 +125,9 @@ public:
 	bool SetRTTrPMMappingArea(int mappingAreaId, bool dontSendNotification = false);
 
 	//==========================================================================
-	bool GetMuteGenericOSCSourceId(juce::int16 sourceId);
-	bool SetMuteGenericOSCSourceId(juce::int16 sourceId, bool mute = true);
+	bool GetMuteGenericOSCSourceId(SourceId sourceId);
+	bool SetMuteGenericOSCSourceId(SourceId sourceId, bool mute = true);
+	bool SetMuteGenericOSCSourceIds(const std::vector<SourceId>& sourceIds, bool mute = true);
 
 	String GetGenericOSCIpAddress();
 	bool SetGenericOSCIpAddress(String ipAddress, bool dontSendNotification = false);
@@ -143,9 +146,11 @@ public:
 
 private:
 	//==========================================================================
-	bool GetMuteProtocolSourceId(ProtocolId protocolId, juce::int16 sourceId);
-	bool SetMuteProtocolSourceId(ProtocolId protocolId, juce::int16 sourceId);
-	bool SetUnmuteProtocolSourceId(ProtocolId protocolId, juce::int16 sourceId);
+	bool GetMuteProtocolSourceId(ProtocolId protocolId, SourceId sourceId);
+	bool SetMuteProtocolSourceId(ProtocolId protocolId, SourceId sourceId);
+	bool SetMuteProtocolSourceIds(ProtocolId protocolId, const std::vector<SourceId>& sourceIds);
+	bool SetUnmuteProtocolSourceId(ProtocolId protocolId, SourceId sourceId);
+	bool SetUnmuteProtocolSourceIds(ProtocolId protocolId, const std::vector<SourceId>& sourceIds);
 
 	String GetProtocolIpAddress(ProtocolId protocolId);
 	bool SetProtocolIpAddress(ProtocolId protocolId, String ipAddress, bool dontSendNotification = false);

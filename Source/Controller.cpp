@@ -1063,6 +1063,32 @@ bool Controller::SetMuteBridgingSourceId(ProtocolBridgingType bridgingType, Sour
 	}
 }
 
+/**
+ * Sets the given sources to be (un-)muted in DiGiCo protocol via proxy bridge object
+ * @param sourceIds The ids of the sources that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool Controller::SetMuteBridgingSourceIds(ProtocolBridgingType bridgingType, const std::vector<SourceId>& sourceIds, bool mute)
+{
+	switch (bridgingType)
+	{
+	case PBT_DiGiCo:
+		return m_protocolBridge.SetMuteDiGiCoSourceIds(sourceIds, mute);
+	case PBT_GenericOSC:
+		return m_protocolBridge.SetMuteGenericOSCSourceIds(sourceIds, mute);
+	case PBT_BlacktraxRTTrPM:
+		return m_protocolBridge.SetMuteRTTrPMSourceIds(sourceIds, mute);
+	case PBT_GenericMIDI:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
 String Controller::GetBridgingIpAddress(ProtocolBridgingType bridgingType)
 {
 	switch (bridgingType)

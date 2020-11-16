@@ -229,6 +229,8 @@
         <FILE id="bSDxmA" name="logo_juce.svg" compile="0" resource="1" file="Resources/Images/logo_juce.svg"/>
         <FILE id="ZgXgfh" name="SoundscapeBridgeApp.png" compile="0" resource="1"
               file="Resources/Images/SoundscapeBridgeApp.png" xcodeResource="1"/>
+        <FILE id="qJTuNs" name="SoundscapeBridgeAppRect.png" compile="0" resource="1"
+              file="Resources/Images/SoundscapeBridgeAppRect.png"/>
       </GROUP>
     </GROUP>
     <GROUP id="{2B9DD386-1093-ADF5-E47F-5954774132B5}" name="Source">
@@ -307,7 +309,7 @@
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <VS2019 targetFolder="Builds/VisualStudio2019" smallIcon="ZgXgfh" bigIcon="ZgXgfh">
+    <VS2019 targetFolder="Builds/VisualStudio2019" smallIcon="qJTuNs" bigIcon="qJTuNs">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" headerPath="../../submodules/JUCE-AppBasics/Source/"/>
         <CONFIGURATION isDebug="0" name="Release" headerPath="../../submodules/JUCE-AppBasics/Source/"/>
@@ -325,7 +327,7 @@
         <MODULEPATH id="juce_audio_basics"/>
       </MODULEPATHS>
     </VS2019>
-    <XCODE_MAC targetFolder="Builds/MacOSX" smallIcon="ZgXgfh" bigIcon="ZgXgfh">
+    <XCODE_MAC targetFolder="Builds/MacOSX" smallIcon="qJTuNs" bigIcon="qJTuNs">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" headerPath="../../submodules/JUCE-AppBasics/Source/"/>
         <CONFIGURATION isDebug="0" name="Release" headerPath="../../submodules/JUCE-AppBasics/Source/"/>

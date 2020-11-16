@@ -1540,7 +1540,9 @@ void MuteButtonContainer::SetRow(int newRow)
 		{
 			if (m_bridgingMutes.count(type) > 0)
 			{
-				m_bridgingMutes.at(type)->setToggleState(ctrl->GetMuteBridgingSourceId(type, static_cast<uint16>(processorId)), dontSendNotification);
+				auto processor = ctrl->GetProcessor(processorId);
+				if (processor)
+					m_bridgingMutes.at(type)->setToggleState(ctrl->GetMuteBridgingSourceId(type, processor->GetSourceId()), dontSendNotification);
 			}
 		}
 	}

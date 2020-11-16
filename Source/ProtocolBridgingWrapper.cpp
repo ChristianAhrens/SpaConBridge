@@ -341,7 +341,7 @@ bool ProtocolBridgingWrapper::GetMuteProtocolSourceId(ProtocolId protocolId, juc
 		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
 		if (protocolXmlElement)
 		{
-			auto channel = sourceId + 1;
+			auto channel = sourceId;
 
 			auto mutedObjChsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDCHANNELS));
 			Array<int> mutedChannels;
@@ -368,7 +368,7 @@ bool ProtocolBridgingWrapper::SetMuteProtocolSourceId(ProtocolId protocolId, juc
 		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
 		if (protocolXmlElement)
 		{
-			auto channel = sourceId + 1;
+			auto channel = sourceId;
 
 			auto mutedObjChsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDCHANNELS));
 			Array<int> mutedChannels;

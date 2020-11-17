@@ -232,6 +232,9 @@
         <FILE id="qJTuNs" name="SoundscapeBridgeAppRect.png" compile="0" resource="1"
               file="Resources/Images/SoundscapeBridgeAppRect.png"/>
       </GROUP>
+      <FILE id="AbV85r" name="EULA" compile="0" resource="1" file="EULA"/>
+      <FILE id="lSghkA" name="LICENSE" compile="0" resource="1" file="LICENSE"/>
+      <FILE id="Q7vthe" name="README.md" compile="0" resource="1" file="README.md"/>
     </GROUP>
     <GROUP id="{2B9DD386-1093-ADF5-E47F-5954774132B5}" name="Source">
       <FILE id="YNojdV" name="LookAndFeel.cpp" compile="1" resource="0" file="Source/LookAndFeel.cpp"/>

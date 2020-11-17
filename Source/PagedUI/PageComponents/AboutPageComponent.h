@@ -70,11 +70,15 @@ protected:
 
 private:
 	std::unique_ptr<DrawableButton>		m_closeButton;		/**< Button to close the about page. */
-	std::unique_ptr<Label>				m_versionLabel;		/**> App version label. */
-	std::unique_ptr<HyperlinkButton>	m_githubLink;			/**> Hyperlink to app home on github. */
+    std::unique_ptr<Drawable>           m_appIconDrawable;  /**> App icon drawable. */
+	std::unique_ptr<Label>				m_appInfoLabel;		/**> App version label. */
+	std::unique_ptr<HyperlinkButton>	m_githubLink;		/**> Hyperlink to app home on github. */
+    std::unique_ptr<Drawable>           m_juceIconDrawable; /**> JUCE icon drawable. */
 	std::unique_ptr<Label>				m_juceLabel;		/**> JUCE copyright label. */
+    
 	std::unique_ptr<TextEditor>			m_eulaField;		/**> Text field containing the EULA. */
-	
+    std::unique_ptr<TextEditor>         m_gplField;         /**> Text field containing the GPLv3. */
+
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AboutPageComponent)
 };
 

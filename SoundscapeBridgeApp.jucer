@@ -229,6 +229,8 @@
         <FILE id="bSDxmA" name="logo_juce.svg" compile="0" resource="1" file="Resources/Images/logo_juce.svg"/>
         <FILE id="ZgXgfh" name="SoundscapeBridgeApp.png" compile="0" resource="1"
               file="Resources/Images/SoundscapeBridgeApp.png" xcodeResource="1"/>
+        <FILE id="ljOsyU" name="SoundscapeBridgeAppCanvas.png" compile="0"
+              resource="1" file="Resources/Images/SoundscapeBridgeAppCanvas.png"/>
         <FILE id="qJTuNs" name="SoundscapeBridgeAppRect.png" compile="0" resource="1"
               file="Resources/Images/SoundscapeBridgeAppRect.png"/>
       </GROUP>
@@ -348,7 +350,7 @@
         <MODULEPATH id="juce_audio_basics"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <XCODE_IPHONE targetFolder="Builds/iOS" smallIcon="ZgXgfh" bigIcon="ZgXgfh"
+    <XCODE_IPHONE targetFolder="Builds/iOS" smallIcon="ljOsyU" bigIcon="ljOsyU"
                   UISupportsDocumentBrowser="1" iosDevelopmentTeamID="SB7Q3PP4FQ"
                   iosScreenOrientation="UIInterfaceOrientationLandscapeLeft,UIInterfaceOrientationLandscapeRight,UIInterfaceOrientationPortrait"
                   iPadScreenOrientation="UIInterfaceOrientationLandscapeLeft,UIInterfaceOrientationLandscapeRight,UIInterfaceOrientationPortrait"

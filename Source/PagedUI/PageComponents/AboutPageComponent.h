@@ -43,8 +43,33 @@ namespace SoundscapeBridgeApp
 
 
 /**
- * Class AboutPageComponent is a GUI overlay which provides copyright and licensing info.
- * This is the base class for a generic "about" overlay, and must be subclassed for each host format (VST, AAX, etc).
+ * Class AboutPageContentComponent provides copyright and licensing info.
+ */
+class AboutPageContentComponent : public Component
+{
+public:
+	AboutPageContentComponent();
+	~AboutPageContentComponent() override;
+
+protected:
+	//==============================================================================
+	void resized() override;
+
+private:
+	std::unique_ptr<Drawable>           m_appIconDrawable;  /**> App icon drawable. */
+	std::unique_ptr<Label>				m_appInfoLabel;		/**> App version label. */
+	std::unique_ptr<HyperlinkButton>	m_githubLink;		/**> Hyperlink to app home on github. */
+	std::unique_ptr<Drawable>           m_juceIconDrawable; /**> JUCE icon drawable. */
+	std::unique_ptr<Label>				m_juceLabel;		/**> JUCE copyright label. */
+
+	std::unique_ptr<TextEditor>			m_eulaField;		/**> Text field containing the EULA. */
+	std::unique_ptr<TextEditor>         m_gplField;         /**> Text field containing the GPLv3. */
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AboutPageContentComponent)
+};
+
+/**
+ * Class AboutPageComponent provides copyright and licensing info.
  */
 class AboutPageComponent : public PageComponentBase
 {
@@ -69,15 +94,9 @@ protected:
 	void mouseUp(const MouseEvent& e) override;
 
 private:
-	std::unique_ptr<DrawableButton>		m_closeButton;		/**< Button to close the about page. */
-    std::unique_ptr<Drawable>           m_appIconDrawable;  /**> App icon drawable. */
-	std::unique_ptr<Label>				m_appInfoLabel;		/**> App version label. */
-	std::unique_ptr<HyperlinkButton>	m_githubLink;		/**> Hyperlink to app home on github. */
-    std::unique_ptr<Drawable>           m_juceIconDrawable; /**> JUCE icon drawable. */
-	std::unique_ptr<Label>				m_juceLabel;		/**> JUCE copyright label. */
-    
-	std::unique_ptr<TextEditor>			m_eulaField;		/**> Text field containing the EULA. */
-    std::unique_ptr<TextEditor>         m_gplField;         /**> Text field containing the GPLv3. */
+	std::unique_ptr<DrawableButton>				m_closeButton;		/**< Button to close the about page. */
+	std::unique_ptr<AboutPageContentComponent>	m_aboutContents;	/**< Component that holds actual contents. */
+	std::unique_ptr<Viewport>					m_aboutViewport;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AboutPageComponent)
 };

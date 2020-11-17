@@ -207,7 +207,7 @@ void AboutPageComponent::resized()
 	m_appInfoLabel->setBounds(infoLabelBounds);
     
 	// github link below app info
-	auto githubLinkBounds = bounds.removeFromTop(18).removeFromLeft(290).removeFromRight(220);
+    auto githubLinkBounds = bounds.removeFromTop(18).removeFromLeft(270);
 	m_githubLink->setBounds(githubLinkBounds);
 
     auto textBoxesBounds = bounds.reduced(15);

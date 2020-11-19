@@ -294,7 +294,7 @@ std::unique_ptr<XmlElement> PageComponentManager::createStateXml()
 
 		auto lookAndFeelXmlElement = overviewXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::LOOKANDFEELTYPE));
 		if (lookAndFeelXmlElement)
-			lookAndFeelXmlElement->addTextElement(String(GetLookAndFeelType()));
+			lookAndFeelXmlElement->addTextElement(String((GetLookAndFeelType() == DbLookAndFeelBase::LAFT_InvalidFirst) ? DbLookAndFeelBase::LAFT_Dark : GetLookAndFeelType()));
 	}
 
     return overviewXmlElement;

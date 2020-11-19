@@ -56,17 +56,6 @@ namespace SoundscapeBridgeApp
  */
 AboutPageContentComponent::AboutPageContentComponent()
 {
-
-	// JUCE icon drawable
-	m_juceIconDrawable = Drawable::createFromImageData(BinaryData::logo_juce_svg, BinaryData::logo_juce_svgSize);
-	addAndMakeVisible(m_juceIconDrawable.get());
-	// JUCE copyright label
-	String juceLabelString = String("Made with JUCE.\nCopyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2020 - ROLI Ltd.");
-	m_juceLabel = std::make_unique<Label>("JuceLabel", juceLabelString);
-	m_juceLabel->setJustificationType(Justification::topRight);
-	m_juceLabel->setFont(Font(13.0, Font::plain));
-	addAndMakeVisible(m_juceLabel.get());
-
 	// App icon drawable
 	m_appIconDrawable = Drawable::createFromImageData(BinaryData::SoundscapeBridgeApp_png, BinaryData::SoundscapeBridgeApp_pngSize);
 	addAndMakeVisible(m_appIconDrawable.get());
@@ -83,27 +72,86 @@ AboutPageContentComponent::AboutPageContentComponent()
 	m_githubLink->setFont(Font(13.0, Font::plain), false /* do not resize */);
 	addAndMakeVisible(m_githubLink.get());
 
-	// Enduser License Agreement
-	String eula(BinaryData::EULA, BinaryData::EULASize);
-	m_eulaField = std::make_unique<TextEditor>("eula");
-	m_eulaField->setReadOnly(true);
-	m_eulaField->setFont(Font(13.0, Font::plain));
-	m_eulaField->setCaretVisible(false);
-	m_eulaField->setMultiLine(true, false /* no wrapping */);
-	m_eulaField->setScrollbarsShown(true);
-	m_eulaField->setText(eula, false);
-	addAndMakeVisible(m_eulaField.get());
+	// JUCE icon drawable
+	m_juceIconDrawable = Drawable::createFromImageData(BinaryData::logo_juce_svg, BinaryData::logo_juce_svgSize);
+	addAndMakeVisible(m_juceIconDrawable.get());
+	// JUCE copyright label
+	String juceLabelString = String("Made with JUCE.\nCopyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2020 - ROLI Ltd.\nJUCE is using GPLv3");
+	m_juceLabel = std::make_unique<Label>("JuceLabel", juceLabelString);
+	m_juceLabel->setJustificationType(Justification::topRight);
+	m_juceLabel->setFont(Font(13.0, Font::plain));
+	addAndMakeVisible(m_juceLabel.get());
+	// JUCE link
+	m_juceLink = std::make_unique<HyperlinkButton>("JUCE.com", URL("https://juce.com/"));
+	m_juceLink->setFont(Font(13.0, Font::plain), false /* do not resize */);
+	m_juceLink->setJustificationType(Justification::centredLeft);
+	addAndMakeVisible(m_juceLink.get());
 
-	// GPLv3
-	String GPLv3(BinaryData::LICENSE, BinaryData::LICENSESize);
-	m_gplField = std::make_unique<TextEditor>("GPLv3");
-	m_gplField->setReadOnly(true);
-	m_gplField->setFont(Font(13.0, Font::plain));
-	m_gplField->setCaretVisible(false);
-	m_gplField->setMultiLine(true, false /* no wrapping */);
-	m_gplField->setScrollbarsShown(true);
-	m_gplField->setText(GPLv3, false);
-	addAndMakeVisible(m_gplField.get());
+	// MATERIAL.IO icon drawable
+	m_materialIconDrawable = Drawable::createFromImageData(BinaryData::MaterialDesignLogo_png, BinaryData::MaterialDesignLogo_pngSize);
+	addAndMakeVisible(m_materialIconDrawable.get());
+	// MATERIAL.IO copyright label
+	String materialLabelString = String("Material.io Icon Theme.\nCopyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2020 - Google, Inc.\nMaterial Icons is using Apache License v2.0");
+	m_materialLabel = std::make_unique<Label>("MaterialLabel", materialLabelString);
+	m_materialLabel->setJustificationType(Justification::topRight);
+	m_materialLabel->setFont(Font(13.0, Font::plain));
+	addAndMakeVisible(m_materialLabel.get());
+	// MATERIAL.IO link
+	m_materialLink = std::make_unique<HyperlinkButton>("material.io", URL("https://material.io"));
+	m_materialLink->setFont(Font(13.0, Font::plain), false /* do not resize */);
+	m_materialLink->setJustificationType(Justification::centredLeft);
+	addAndMakeVisible(m_materialLink.get());
+
+	// HBP (Servus) icon drawable
+	m_servusIconDrawable = Drawable::createFromImageData(BinaryData::HumanBrainProjectLogo_png, BinaryData::HumanBrainProjectLogo_pngSize);
+	addAndMakeVisible(m_servusIconDrawable.get());
+	// HBP (Servus) copyright label
+	String servusLabelString = String("Servus Zeroconf API.\nCopyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2014 - 2015, Human Brain Project\nServus is using LGPLv3");
+	m_servusLabel = std::make_unique<Label>("ServusLabel", servusLabelString);
+	m_servusLabel->setJustificationType(Justification::topRight);
+	m_servusLabel->setFont(Font(13.0, Font::plain));
+	addAndMakeVisible(m_servusLabel.get());
+	// HBP (Servus) github link
+	m_servusLink = std::make_unique<HyperlinkButton>("Servus on GitHub", URL("https://github.com/HBPVIS/Servus"));
+	m_servusLink->setFont(Font(13.0, Font::plain), false /* do not resize */);
+	m_servusLink->setJustificationType(Justification::centredLeft);
+	addAndMakeVisible(m_servusLink.get());
+
+	// GPLv3 License
+	String LicenseGPLv3(BinaryData::COPYING, BinaryData::COPYINGSize);
+	m_licenseGPLv3Field = std::make_unique<TextEditor>("GPLv3License");
+	m_licenseGPLv3Field->setReadOnly(true);
+	m_licenseGPLv3Field->setPopupMenuEnabled(false);
+	m_licenseGPLv3Field->setFont(Font(13.0, Font::plain));
+	m_licenseGPLv3Field->setCaretVisible(false);
+	m_licenseGPLv3Field->setMultiLine(true, false /* no wrapping */);
+	m_licenseGPLv3Field->setScrollbarsShown(true);
+	m_licenseGPLv3Field->setText(LicenseGPLv3, false);
+	addAndMakeVisible(m_licenseGPLv3Field.get());
+
+	// Apache License v2
+	String LicenseApachev2(BinaryData::COPYING_apachev2, BinaryData::COPYING_apachev2Size);
+	m_licenseAPACHEv2Field = std::make_unique<TextEditor>("APACHEv2License");
+	m_licenseAPACHEv2Field->setReadOnly(true);
+	m_licenseAPACHEv2Field->setPopupMenuEnabled(false);
+	m_licenseAPACHEv2Field->setFont(Font(13.0, Font::plain));
+	m_licenseAPACHEv2Field->setCaretVisible(false);
+	m_licenseAPACHEv2Field->setMultiLine(true, false /* no wrapping */);
+	m_licenseAPACHEv2Field->setScrollbarsShown(true);
+	m_licenseAPACHEv2Field->setText(LicenseApachev2, false);
+	addAndMakeVisible(m_licenseAPACHEv2Field.get());
+
+	// LGPLv3 License
+	String LicenseLGPLv3(BinaryData::COPYING_LESSER, BinaryData::COPYING_LESSERSize);
+	m_licenseLGPLv3Field = std::make_unique<TextEditor>("LGPLv3License");
+	m_licenseLGPLv3Field->setReadOnly(true);
+	m_licenseLGPLv3Field->setPopupMenuEnabled(false);
+	m_licenseLGPLv3Field->setFont(Font(13.0, Font::plain));
+	m_licenseLGPLv3Field->setCaretVisible(false);
+	m_licenseLGPLv3Field->setMultiLine(true, false /* no wrapping */);
+	m_licenseLGPLv3Field->setScrollbarsShown(true);
+	m_licenseLGPLv3Field->setText(LicenseLGPLv3, false);
+	addAndMakeVisible(m_licenseLGPLv3Field.get());
 }
 
 /**
@@ -114,48 +162,104 @@ AboutPageContentComponent::~AboutPageContentComponent()
 }
 
 /**
+ * Reimplemented to draw horizontal layout lines
+ */
+void AboutPageContentComponent::paint(Graphics& g)
+{
+	auto headlineLineOffset = 55 + 18 + 15;
+
+	g.setColour(getLookAndFeel().findColour(TextEditor::outlineColourId));
+	g.drawLine(Line<float>(15, headlineLineOffset, getWidth() - 15, headlineLineOffset));
+}
+
+/**
  * Reimplemented to resize and re-postion controls & labels.
  */
 void AboutPageContentComponent::resized()
 {
-	auto juceInfoHeight = 70;
 	auto appInfoHeight = 55;
 	auto gitHubLinkHeight = 18;
-	auto eulaHeight = 305;
-	auto gplHeight = 8850;
-	auto totalHeight = juceInfoHeight + appInfoHeight + gitHubLinkHeight + 15 + eulaHeight + 15 + gplHeight;
+
+	auto spacing = 15;
+	auto infoSpacing = spacing + 5;
+	auto juceInfoHeight = 70;
+	auto juceDrawableHeight = 35;
+	auto materialInfoHeight = 80;
+	auto materialDrawableHeight = 52;
+	auto servusInfoHeight = 80;
+	auto servusDrawableHeight = 48;
+
+	auto GPLv3LicenseHeight = 8800;
+	auto APACHEv2LicenseHeight = 2680;
+	auto LGPLv3LicenseHeight = 2200;
+
+	auto totalHeight =  appInfoHeight + gitHubLinkHeight + spacing + juceInfoHeight + materialInfoHeight + servusInfoHeight + infoSpacing + GPLv3LicenseHeight + spacing + APACHEv2LicenseHeight + spacing + LGPLv3LicenseHeight;
 	setBounds(Rectangle<int>(getLocalBounds().getWidth(), totalHeight));
 
 	auto bounds = getLocalBounds();
 
-	// juce copyright text under the logo
-	auto juceInfoBounds = bounds.removeFromTop(juceInfoHeight);
-	auto juceDrawableBounds = juceInfoBounds;
-	juceDrawableBounds = juceDrawableBounds.removeFromRight(175).removeFromLeft(100).removeFromTop(35);
-	m_juceIconDrawable->setTransformToFit(juceDrawableBounds.toFloat(), RectanglePlacement(RectanglePlacement::stretchToFit));
-	auto juceLabelBounds = juceInfoBounds.removeFromBottom(40).removeFromRight(210).removeFromLeft(200);
-	m_juceLabel->setBounds(juceLabelBounds);
-
 	// app info text right of app logo
 	auto appInfoBounds = bounds.removeFromTop(appInfoHeight);
-	auto appDrawableBounds = appInfoBounds.removeFromLeft(70).removeFromRight(55);
+	auto appInfoXPos = 0.5f * (bounds.getWidth() - 100);
+	auto appDrawableBounds = appInfoBounds.removeFromLeft(appInfoXPos).removeFromRight(55);
 	m_appIconDrawable->setTransformToFit(appDrawableBounds.toFloat(), RectanglePlacement(RectanglePlacement::stretchToFit));
 	auto infoLabelBounds = appInfoBounds;
 	m_appInfoLabel->setBounds(infoLabelBounds);
-
 	// github link below app info
-	auto githubLinkBounds = bounds.removeFromTop(gitHubLinkHeight).removeFromLeft(270);
+	auto githubLinkBounds = bounds.removeFromTop(gitHubLinkHeight).removeFromRight(0.5f * bounds.getWidth() + appInfoXPos + 35);
 	m_githubLink->setBounds(githubLinkBounds);
 
-	auto textBoxesBounds = bounds.reduced(15);
+	bounds.reduce(spacing, spacing);
+	bounds.removeFromTop(spacing);
 
-	auto eulaBounds = textBoxesBounds.removeFromTop(eulaHeight);
-	m_eulaField->setBounds(eulaBounds);
+	// juce copyright text right of the logo
+	auto juceInfoBounds = bounds.removeFromTop(juceInfoHeight).removeFromLeft(370);
+	auto juceDrawableBounds = juceInfoBounds.removeFromLeft(100);
+	auto juceLinkBounds = juceDrawableBounds;
+	juceDrawableBounds = juceDrawableBounds.removeFromTop(juceDrawableHeight);
+	m_juceIconDrawable->setTransformToFit(juceDrawableBounds.toFloat(), RectanglePlacement(RectanglePlacement::stretchToFit));
+	auto juceLabelBounds = juceInfoBounds.removeFromRight(270);
+	m_juceLabel->setBounds(juceLabelBounds);
+	// juce link below info
+	m_juceLink->setBounds(juceLinkBounds.removeFromBottom(juceLinkBounds.getHeight() - juceDrawableHeight + 10));
 
-	textBoxesBounds.removeFromTop(15);
+	// material copyright text right of the logo
+	auto materialInfoBounds = bounds.removeFromTop(materialInfoHeight).removeFromLeft(370);
+	auto materialDrawableBounds = materialInfoBounds.removeFromLeft(100);
+	auto materialLinkBounds = materialDrawableBounds;
+	materialDrawableBounds = materialDrawableBounds.removeFromTop(materialDrawableHeight);
+	m_materialIconDrawable->setTransformToFit(materialDrawableBounds.toFloat(), RectanglePlacement(RectanglePlacement::stretchToFit));
+	auto materialLabelBounds = materialInfoBounds.removeFromRight(270);
+	m_materialLabel->setBounds(materialLabelBounds);
+	// material link below info
+	m_materialLink->setBounds(materialLinkBounds.removeFromBottom(materialLinkBounds.getHeight() - materialDrawableHeight + 10));
 
-	auto gplBounds = textBoxesBounds;
-	m_gplField->setBounds(gplBounds);
+	// servus copyright text right of the logo
+	auto servusInfoBounds = bounds.removeFromTop(servusInfoHeight).removeFromLeft(370);
+	auto servusDrawableBounds = servusInfoBounds.removeFromLeft(100);
+	auto servusLinkBounds = servusDrawableBounds;
+	servusDrawableBounds = servusDrawableBounds.removeFromTop(servusDrawableHeight);
+	m_servusIconDrawable->setTransformToFit(servusDrawableBounds.removeFromLeft(servusDrawableHeight).toFloat(), RectanglePlacement(RectanglePlacement::stretchToFit));
+	auto servusLabelBounds = servusInfoBounds.removeFromRight(270);
+	m_servusLabel->setBounds(servusLabelBounds);
+	// servus link below info
+	m_servusLink->setBounds(servusLinkBounds.removeFromBottom(servusLinkBounds.getHeight() - servusDrawableHeight + 10));
+
+	// GPLv3 Textfield
+	auto GPLv3Bounds = bounds.removeFromTop(GPLv3LicenseHeight);
+	m_licenseGPLv3Field->setBounds(GPLv3Bounds);
+
+	bounds.removeFromTop(spacing);
+
+	// Apachev2 Textfield
+	auto APACHEv2Bounds = bounds.removeFromTop(APACHEv2LicenseHeight);
+	m_licenseAPACHEv2Field->setBounds(APACHEv2Bounds);
+
+	bounds.removeFromTop(spacing);
+
+	// LGPLv3 Textfield
+	auto LGPLv3Bounds = bounds.removeFromTop(LGPLv3LicenseHeight);
+	m_licenseLGPLv3Field->setBounds(LGPLv3Bounds);
 }
 
 

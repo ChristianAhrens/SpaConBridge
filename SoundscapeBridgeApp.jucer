@@ -226,7 +226,11 @@
     </GROUP>
     <GROUP id="{DA3507CD-D9BE-4153-5873-D44DBA9EAF0C}" name="Resources">
       <GROUP id="{5FBD4EDA-A4BE-1C72-49FC-FCB143B5F140}" name="Images">
+        <FILE id="ZpU8yN" name="HumanBrainProjectLogo.png" compile="0" resource="1"
+              file="Resources/Images/HumanBrainProjectLogo.png"/>
         <FILE id="bSDxmA" name="logo_juce.svg" compile="0" resource="1" file="Resources/Images/logo_juce.svg"/>
+        <FILE id="vQJzrZ" name="MaterialDesignLogo.png" compile="0" resource="1"
+              file="Resources/Images/MaterialDesignLogo.png"/>
         <FILE id="ZgXgfh" name="SoundscapeBridgeApp.png" compile="0" resource="1"
               file="Resources/Images/SoundscapeBridgeApp.png" xcodeResource="1"/>
         <FILE id="ljOsyU" name="SoundscapeBridgeAppCanvas.png" compile="0"
@@ -234,8 +238,11 @@
         <FILE id="qJTuNs" name="SoundscapeBridgeAppRect.png" compile="0" resource="1"
               file="Resources/Images/SoundscapeBridgeAppRect.png"/>
       </GROUP>
-      <FILE id="AbV85r" name="EULA" compile="0" resource="1" file="EULA"/>
-      <FILE id="lSghkA" name="LICENSE" compile="0" resource="1" file="LICENSE"/>
+      <FILE id="YgUWvM" name="COPYING" compile="0" resource="1" file="COPYING"/>
+      <FILE id="txUcgc" name="COPYING.apachev2" compile="0" resource="1"
+            file="COPYING.apachev2"/>
+      <FILE id="qV60Cc" name="COPYING.LESSER" compile="0" resource="1" file="COPYING.LESSER"/>
+      <FILE id="kQ4YKb" name="LICENSE" compile="0" resource="1" file="LICENSE"/>
       <FILE id="Q7vthe" name="README.md" compile="0" resource="1" file="README.md"/>
     </GROUP>
     <GROUP id="{2B9DD386-1093-ADF5-E47F-5954774132B5}" name="Source">

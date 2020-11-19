@@ -53,17 +53,29 @@ public:
 
 protected:
 	//==============================================================================
+	void paint(Graphics&) override;
 	void resized() override;
 
 private:
-	std::unique_ptr<Drawable>           m_appIconDrawable;  /**> App icon drawable. */
-	std::unique_ptr<Label>				m_appInfoLabel;		/**> App version label. */
-	std::unique_ptr<HyperlinkButton>	m_githubLink;		/**> Hyperlink to app home on github. */
-	std::unique_ptr<Drawable>           m_juceIconDrawable; /**> JUCE icon drawable. */
-	std::unique_ptr<Label>				m_juceLabel;		/**> JUCE copyright label. */
+	std::unique_ptr<Drawable>           m_appIconDrawable;		/**> App icon drawable. */
+	std::unique_ptr<Label>				m_appInfoLabel;			/**> App version label. */
+	std::unique_ptr<HyperlinkButton>	m_githubLink;			/**> Hyperlink to app home on github. */
 
-	std::unique_ptr<TextEditor>			m_eulaField;		/**> Text field containing the EULA. */
-	std::unique_ptr<TextEditor>         m_gplField;         /**> Text field containing the GPLv3. */
+	std::unique_ptr<Drawable>           m_juceIconDrawable;		/**> JUCE icon drawable. */
+	std::unique_ptr<Label>				m_juceLabel;			/**> JUCE copyright label. */
+	std::unique_ptr<HyperlinkButton>	m_juceLink;				/**> Hyperlink to juce. */
+
+	std::unique_ptr<Drawable>           m_materialIconDrawable;	/**> MATERIAL.IO icon drawable. */
+	std::unique_ptr<Label>				m_materialLabel;		/**> MATERIAL.IO copyright label. */
+	std::unique_ptr<HyperlinkButton>	m_materialLink;			/**> Hyperlink to material.io. */
+
+	std::unique_ptr<Drawable>           m_servusIconDrawable;	/**> HBP (Servus) icon drawable. */
+	std::unique_ptr<Label>				m_servusLabel;			/**> HBP (Servus) copyright label. */
+	std::unique_ptr<HyperlinkButton>	m_servusLink;			/**> Hyperlink to HBP Servus on github. */
+
+	std::unique_ptr<TextEditor>         m_licenseGPLv3Field;	/**> Text field containing Licensing info. */
+	std::unique_ptr<TextEditor>         m_licenseAPACHEv2Field;	/**> Text field containing Licensing info. */
+	std::unique_ptr<TextEditor>         m_licenseLGPLv3Field;	/**> Text field containing Licensing info. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AboutPageContentComponent)
 };

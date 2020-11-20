@@ -211,6 +211,7 @@ void StatisticsPlot::timerCallback()
 {
 	// accumulate all protocol msgs as well as handle individual protocol msg counts
 	int msgCount = 0;
+	auto maxCurrentValueOfProtocols = static_cast<float>(PC_VERT_RANGE);
 	for (auto const& msgCountKV : m_currentMsgPerProtocol)
 	{
 		if (!m_plottedBridgingTypes.contains(msgCountKV.first))
@@ -231,8 +232,11 @@ void StatisticsPlot::timerCallback()
 		m_currentMsgPerProtocol[msgCountKV.first] = 0;
 
 		// Adjust our vertical plotting range to have better visu when large peaks would get out of scope
-		m_vertValueRange = static_cast<int>(round(std::max(float(PC_VERT_RANGE), *std::max_element(m_plotData[msgCountKV.first].begin(), m_plotData[msgCountKV.first].end()))));
+		auto maxCurrentValueOfThisProtocol = *std::max_element(m_plotData[msgCountKV.first].begin(), m_plotData[msgCountKV.first].end());
+		maxCurrentValueOfProtocols = std::max(maxCurrentValueOfProtocols, maxCurrentValueOfThisProtocol);
 	}
+
+	m_vertValueRange = static_cast<int>(round(maxCurrentValueOfProtocols));
 
 	if (isVisible())
 		repaint();

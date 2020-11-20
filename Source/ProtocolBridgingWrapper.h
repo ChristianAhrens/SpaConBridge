@@ -35,8 +35,7 @@ static constexpr int RX_PORT_DIGICO_HOST = 50013;		//< UDP port to which the DiG
 static constexpr int RX_PORT_GENERICOSC_DEVICE = 50014;	//< UDP port which the generic OSC device is listening to for OSC
 static constexpr int RX_PORT_GENERICOSC_HOST = 50015;	//< UDP port to which the generic OSC device will send OSC replies
 
-static constexpr int RX_PORT_RTTRPM_DEVICE = 50016;		//< UDP port which the Blacktrax tracker device is listening to for RTTrPM data
-static constexpr int RX_PORT_RTTRPM_HOST = 24100;		//< UDP port to which the Blacktrax tracker device will send RTTrPM data replies
+static constexpr int RX_PORT_RTTRPM_HOST = 24100;		//< UDP port to which the Blacktrax tracker device will send RTTrPM data replies to (us)
 
 /**
  * Pre-define processing bridge config values

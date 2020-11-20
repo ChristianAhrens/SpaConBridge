@@ -1,35 +1,11 @@
 /*
-===============================================================================
+  ==============================================================================
 
-Copyright (C) 2019 d&b audiotechnik GmbH & Co. KG. All Rights Reserved.
+	SettingsPageComponent.cpp
+	Created: 28 July 2020 17:48:55pm
+	Author:  Christian Ahrens
 
-This file is part of the Soundscape VST, AU, and AAX Plug-in.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice,
-this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
-
-3. The name of the author may not be used to endorse or promote products
-derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY d&b audiotechnik GmbH & Co. KG "AS IS" AND ANY
-EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-===============================================================================
+  ==============================================================================
 */
 
 
@@ -383,16 +359,6 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_RTTrPMBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_RTTrPMBridgingSettings.get());
 
-	m_RTTrPMIpAddressEdit = std::make_unique<TextEditor>();
-	m_RTTrPMIpAddressEdit->addListener(this);
-	m_RTTrPMIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
-	m_RTTrPMIpAddressLabel = std::make_unique<Label>();
-	m_RTTrPMIpAddressLabel->setJustificationType(Justification::centred);
-	m_RTTrPMIpAddressLabel->setText("IP Address", dontSendNotification);
-	m_RTTrPMIpAddressLabel->attachToComponent(m_RTTrPMIpAddressEdit.get(), true);
-	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMIpAddressLabel.get(), false, false);
-	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMIpAddressEdit.get(), true, false);
-
 	m_RTTrPMListeningPortEdit = std::make_unique<TextEditor>();
 	m_RTTrPMListeningPortEdit->addListener(this);
 	m_RTTrPMListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
@@ -402,16 +368,6 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_RTTrPMListeningPortLabel->attachToComponent(m_RTTrPMListeningPortEdit.get(), true);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMListeningPortLabel.get(), false, false);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMListeningPortEdit.get(), true, false);
-
-	m_RTTrPMRemotePortEdit = std::make_unique<TextEditor>();
-	m_RTTrPMRemotePortEdit->addListener(this);
-	m_RTTrPMRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
-	m_RTTrPMRemotePortLabel = std::make_unique<Label>();
-	m_RTTrPMRemotePortLabel->setJustificationType(Justification::centred);
-	m_RTTrPMRemotePortLabel->setText("Remote Port", dontSendNotification);
-	m_RTTrPMRemotePortLabel->attachToComponent(m_RTTrPMRemotePortEdit.get(), true);
-	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMRemotePortLabel.get(), false, false);
-	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMRemotePortEdit.get(), true, false);
 
 	m_RTTrPMInterpretXYRelativeButton = std::make_unique<JUCEAppBasics::SplitButtonComponent>();
 	m_RTTrPMInterpretXYRelativeButton->addListener(this);
@@ -630,12 +586,8 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 		ctrl->SetBridgingRemotePort(PBT_DiGiCo, m_DiGiCoRemotePortEdit->getText().getIntValue());
 
 	// RTTrPM settings section
-	if (m_RTTrPMIpAddressEdit && m_RTTrPMIpAddressEdit.get() == &editor)
-		ctrl->SetBridgingIpAddress(PBT_BlacktraxRTTrPM, m_RTTrPMIpAddressEdit->getText());
 	if (m_RTTrPMListeningPortEdit && m_RTTrPMListeningPortEdit.get() == &editor)
 		ctrl->SetBridgingListeningPort(PBT_BlacktraxRTTrPM, m_RTTrPMListeningPortEdit->getText().getIntValue());
-	if (m_RTTrPMRemotePortEdit && m_RTTrPMRemotePortEdit.get() == &editor)
-		ctrl->SetBridgingRemotePort(PBT_BlacktraxRTTrPM, m_RTTrPMRemotePortEdit->getText().getIntValue());
 	if (m_RTTrPMMappingAreaEdit && m_RTTrPMMappingAreaEdit.get() == &editor)
 	{
 		ctrl->SetBridgingMappingArea(PBT_BlacktraxRTTrPM, m_RTTrPMMappingAreaEdit->getText().getIntValue());
@@ -725,12 +677,8 @@ void SettingsSectionsComponent::processUpdatedConfig()
 	auto RTTrPMBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_BlacktraxRTTrPM) == PBT_BlacktraxRTTrPM;
 	if (m_RTTrPMBridgingSettings)
 		m_RTTrPMBridgingSettings->setToggleActiveState(RTTrPMBridgingActive);
-	if (m_RTTrPMIpAddressEdit)
-		m_RTTrPMIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_BlacktraxRTTrPM));
 	if (m_RTTrPMListeningPortEdit)
 		m_RTTrPMListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_BlacktraxRTTrPM)), false);
-	if (m_RTTrPMRemotePortEdit)
-		m_RTTrPMRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_BlacktraxRTTrPM)), false);
 	if (m_RTTrPMInterpretXYRelativeButton)
 	{
 		auto newActiveButtonId = m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[(ctrl->GetBridgingMappingArea(PBT_BlacktraxRTTrPM) == -1) ? 0 : 1]];

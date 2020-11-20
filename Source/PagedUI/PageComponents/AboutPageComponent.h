@@ -59,7 +59,7 @@ protected:
 private:
 	std::unique_ptr<Drawable>           m_appIconDrawable;		/**> App icon drawable. */
 	std::unique_ptr<Label>				m_appInfoLabel;			/**> App version label. */
-	std::unique_ptr<HyperlinkButton>	m_githubLink;			/**> Hyperlink to app home on github. */
+	std::unique_ptr<HyperlinkButton>	m_appInfoLink;			/**> Hyperlink to app home on github. */
 
 	std::unique_ptr<Drawable>           m_juceIconDrawable;		/**> JUCE icon drawable. */
 	std::unique_ptr<Label>				m_juceLabel;			/**> JUCE copyright label. */

@@ -60,23 +60,25 @@ AboutPageContentComponent::AboutPageContentComponent()
 	m_appIconDrawable = Drawable::createFromImageData(BinaryData::SoundscapeBridgeApp_png, BinaryData::SoundscapeBridgeApp_pngSize);
 	addAndMakeVisible(m_appIconDrawable.get());
 	// App info label
-	String infoString = String("SoundscapeBridgeApp V") + String(JUCE_STRINGIFY(JUCE_APP_VERSION));
-	infoString += String("\nCopyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2020\nChristian Ahrens,\nall rights reserved.");
+	String infoString = JUCEApplication::getInstance()->getApplicationName() + String(" V") + String(JUCE_STRINGIFY(JUCE_APP_VERSION)) + String("\n")
+                    + String("Copyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2020 - Christian Ahrens,\n")
+                    + JUCEApplication::getInstance()->getApplicationName() + String(" uses GPLv3");
 	m_appInfoLabel = std::make_unique<Label>("Version", infoString);
 	m_appInfoLabel->setJustificationType(Justification::topLeft);
 	m_appInfoLabel->setFont(Font(13.0, Font::plain));
 	addAndMakeVisible(m_appInfoLabel.get());
 
 	// Hyperlink to dbaudio.com
-	m_githubLink = std::make_unique<HyperlinkButton>(JUCEApplication::getInstance()->getApplicationName() + String(" home on GitHub"), URL("https://www.github.com/ChristianAhrens/SoundscapeBridgeApp"));
-	m_githubLink->setFont(Font(13.0, Font::plain), false /* do not resize */);
-	addAndMakeVisible(m_githubLink.get());
+	m_appInfoLink = std::make_unique<HyperlinkButton>(JUCEApplication::getInstance()->getApplicationName() + String(" on GitHub"), URL("https://www.github.com/ChristianAhrens/SoundscapeBridgeApp"));
+	m_appInfoLink->setFont(Font(13.0, Font::plain), false /* do not resize */);
+    m_appInfoLink->setJustificationType(Justification::centredLeft);
+	addAndMakeVisible(m_appInfoLink.get());
 
 	// JUCE icon drawable
 	m_juceIconDrawable = Drawable::createFromImageData(BinaryData::logo_juce_svg, BinaryData::logo_juce_svgSize);
 	addAndMakeVisible(m_juceIconDrawable.get());
 	// JUCE copyright label
-	String juceLabelString = String("Made with JUCE.\nCopyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2020 - ROLI Ltd.\nJUCE is using GPLv3");
+	String juceLabelString = String("Made with JUCE.\nCopyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2020 - ROLI Ltd.\nJUCE uses GPLv3");
 	m_juceLabel = std::make_unique<Label>("JuceLabel", juceLabelString);
 	m_juceLabel->setJustificationType(Justification::topRight);
 	m_juceLabel->setFont(Font(13.0, Font::plain));
@@ -91,7 +93,7 @@ AboutPageContentComponent::AboutPageContentComponent()
 	m_materialIconDrawable = Drawable::createFromImageData(BinaryData::MaterialDesignLogo_png, BinaryData::MaterialDesignLogo_pngSize);
 	addAndMakeVisible(m_materialIconDrawable.get());
 	// MATERIAL.IO copyright label
-	String materialLabelString = String("Material.io Icon Theme.\nCopyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2020 - Google, Inc.\nMaterial Icons is using Apache License v2.0");
+	String materialLabelString = String("Material.io Icon Theme.\nCopyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2020 - Google, Inc.\nMaterial Icons uses Apache License v2.0");
 	m_materialLabel = std::make_unique<Label>("MaterialLabel", materialLabelString);
 	m_materialLabel->setJustificationType(Justification::topRight);
 	m_materialLabel->setFont(Font(13.0, Font::plain));
@@ -106,7 +108,7 @@ AboutPageContentComponent::AboutPageContentComponent()
 	m_servusIconDrawable = Drawable::createFromImageData(BinaryData::HumanBrainProjectLogo_png, BinaryData::HumanBrainProjectLogo_pngSize);
 	addAndMakeVisible(m_servusIconDrawable.get());
 	// HBP (Servus) copyright label
-	String servusLabelString = String("Servus Zeroconf API.\nCopyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2014 - 2015, Human Brain Project\nServus is using LGPLv3");
+	String servusLabelString = String("Servus Zeroconf API.\nCopyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2014 - 2015, Human Brain Project\nServus uses LGPLv3");
 	m_servusLabel = std::make_unique<Label>("ServusLabel", servusLabelString);
 	m_servusLabel->setJustificationType(Justification::topRight);
 	m_servusLabel->setFont(Font(13.0, Font::plain));
@@ -177,8 +179,9 @@ void AboutPageContentComponent::paint(Graphics& g)
  */
 void AboutPageContentComponent::resized()
 {
+    auto appInfoWidth = 295;
 	auto appInfoHeight = 55;
-	auto gitHubLinkHeight = 18;
+	auto appInfoLinkHeight = 18;
 
 	auto spacing = 15;
 	auto infoSpacing = spacing + 5;
@@ -189,27 +192,28 @@ void AboutPageContentComponent::resized()
 	auto servusInfoHeight = 80;
 	auto servusDrawableHeight = 48;
 
-	auto GPLv3LicenseHeight = 8800;
+	auto GPLv3LicenseHeight = 8810;
 	auto APACHEv2LicenseHeight = 2680;
 	auto LGPLv3LicenseHeight = 2200;
 
-	auto totalHeight =  appInfoHeight + gitHubLinkHeight + spacing + juceInfoHeight + materialInfoHeight + servusInfoHeight + infoSpacing + GPLv3LicenseHeight + spacing + APACHEv2LicenseHeight + spacing + LGPLv3LicenseHeight;
+	auto totalHeight =  appInfoHeight + appInfoLinkHeight + spacing + juceInfoHeight + materialInfoHeight + servusInfoHeight + infoSpacing + GPLv3LicenseHeight + spacing + APACHEv2LicenseHeight + spacing + LGPLv3LicenseHeight;
 	setBounds(Rectangle<int>(getLocalBounds().getWidth(), totalHeight));
 
-	auto bounds = getLocalBounds();
+	auto bounds = getLocalBounds().reduced(spacing, spacing);
 
 	// app info text right of app logo
-	auto appInfoBounds = bounds.removeFromTop(appInfoHeight);
-	auto appInfoXPos = 0.5f * (bounds.getWidth() - 100);
-	auto appDrawableBounds = appInfoBounds.removeFromLeft(appInfoXPos).removeFromRight(55);
+    auto appInfoBounds = bounds.removeFromTop(appInfoHeight + appInfoLinkHeight);
+    auto appInfoLeftPadding = 0.5f * (bounds.getWidth() - appInfoWidth);
+    appInfoBounds.removeFromLeft(appInfoLeftPadding > 0 ? appInfoLeftPadding : 0);
+    auto appInfoLinkBounds = appInfoBounds;
+	auto appDrawableBounds = appInfoBounds.removeFromLeft(appInfoHeight).removeFromTop(appInfoHeight);
 	m_appIconDrawable->setTransformToFit(appDrawableBounds.toFloat(), RectanglePlacement(RectanglePlacement::stretchToFit));
-	auto infoLabelBounds = appInfoBounds;
-	m_appInfoLabel->setBounds(infoLabelBounds);
-	// github link below app info
-	auto githubLinkBounds = bounds.removeFromTop(gitHubLinkHeight).removeFromRight(0.5f * bounds.getWidth() + appInfoXPos + 35);
-	m_githubLink->setBounds(githubLinkBounds);
+	auto appInfoLabelBounds = appInfoBounds;
+	m_appInfoLabel->setBounds(appInfoLabelBounds);
+	// app link below app info
+    appInfoLinkBounds.removeFromLeft(appInfoHeight + 3);
+	m_appInfoLink->setBounds(appInfoLinkBounds.removeFromTop(appInfoHeight + 3).removeFromBottom(appInfoLinkHeight));
 
-	bounds.reduce(spacing, spacing);
 	bounds.removeFromTop(spacing);
 
 	// juce copyright text right of the logo

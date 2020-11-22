@@ -1,22 +1,100 @@
-
 ![Showreel.001.png](Resources/Documentation/Showreel/Showreel.001.png "SoundscapeBridgeApp Headline Icons")
 
 SoundscapeBridgeApp is a project inspired by d&b audiotechnik GmbH & Co. KG's "Soundscape DAW Plugin" made publicly available at https://github.com/dbaudio-soundscape/db-Soundscape-DAW-Plugins and d&b audiotechnik GmbH & Co. KG's "Soundscape Control with DiGiCo SD consoles" made publicly available at https://github.com/dbaudio-soundscape/db-Soundscape-control-with-DiGiCo-SD-Consoles.
 
 The idea is to have a multi-platform application with a user interface that allows viewing and editing of Sound Object parameters of a d&b audiotechnik Soundscape system based on DS100 signal bridge, while also integrating the capability of third party control translation to d&b audiotechnik OSC protocol to externally control Sound Object parameters.
 
+* [Features overview](#featurebrief)
+* [Sound Object Table page](#soundobjecttable)
+  * [Selective Sound Object muting](#soundobjectmuting)
+  * [Sound Object Parameter editing](#soundobjectparameterediting)
+* [2D Position Slider page](#twodimensionalpositionslider)
+* [Protocol Bridging traffic logging and plotting page](#protocolbridgingtrafficloggingandplotting)
+* [App Settings page](#appsettings)
+  * [DS100 communication](#ds100settings)
+  * [DiGiCo bridging](#digicosettings)
+  * [Blacktrax bridging](#blacktraxsettings)
+  * [Generic OSC bridging](#genericoscsettings)
+  * [UI LookAndFeel](#lookandfeelsettings)
+* [Supported Sound Object parameters on UI](#uiparameters)
+* [Supported Sound Object parameters for protocol bridging](#bridgingparameters)
+
+
+<a name="featurebrief" />
 
 ## Features 
 
-- Monitoring of Soundscape Sound Object parameters
-- Protocol bridging from 3rd party devices/applications to d&b DS100 signal bridge
-- Monitoring of protocol bridging performance in graphical and textual representation
-- Tab based user interface containing tabs for
--- Active Sound Objects in tabular form with dedicated controls for an object's parameters following table selection (#sound-object-table)
--- Comprehensive two dimensional slider surface for viewing and controlling of all active Sound Objects (#two-dimensional-position-slider)
--- Bridging traffic logging and plotting for active bridging protocols (#protocol-bridging-traffic-logging-and-plotting)
--- Application settings (#app-settings)
-- Support for iOS/iPadOS/MacOS/Windows plattforms through using JUCE Framework
+* Monitoring of Soundscape Sound Object parameters
+* Protocol bridging from 3rd party devices/applications to d&b DS100 signal bridge
+* Monitoring of protocol bridging performance in graphical and textual representation
+* Tab based user interface containing tabs for
+  * Active Sound Objects in tabular form with dedicated controls for an object's parameters following table selection 
+  * Comprehensive two dimensional slider surface for viewing and controlling of all active Sound Objects 
+  * Bridging traffic logging and plotting for active bridging protocols
+  * Application settings
+* Support for iOS/iPadOS/MacOS/Windows plattforms through using JUCE Framework
+
+<a name="soundobjecttable" />
+
+## Sound Object Table
+
+![Showreel.002.png](Resources/Documentation/Showreel/Showreel.002.png "Sound Object Table Overview")
+
+<a name="soundobjectmuting" />
+
+![Showreel.003.png](Resources/Documentation/Showreel/Showreel.003.png "Sound Object Table Bridging Mutes")
+
+<a name="soundobjectparameterediting" />
+
+![Showreel.004.png](Resources/Documentation/Showreel/Showreel.004.png "Sound Object Table Selection")
+
+<a name="twodimensionalpositionslider" />
+
+## Two Dimensional position slider
+
+![Showreel.005.png](Resources/Documentation/Showreel/Showreel.005.png "Multislider")
+
+<a name="protocolbridgingtrafficloggingandplotting" />
+
+## Protocol Bridging traffic logging and plotting
+
+![Showreel.006.png](Resources/Documentation/Showreel/Showreel.006.png "Protocol Bridging Statistics")
+
+<a name="appsettings" />
+
+## App settings
+
+<a name="ds100settings" />
+
+### DS100 settings
+
+![Showreel.007.png](Resources/Documentation/Showreel/Showreel.007.png "DS100 Settings")
+
+<a name="digicosettings" />
+
+### DiGiCo bridging settings
+
+![Showreel.008.png](Resources/Documentation/Showreel/Showreel.008.png "DiGiCo Bridging Settings")
+
+<a name="blacktraxsettings" />
+
+### Blacktrax RTTrPM bridging settings
+
+![Showreel.009.png](Resources/Documentation/Showreel/Showreel.009.png "Blacktrax Bridging Settings")
+
+<a name="genericoscsettings" />
+
+### Generic OSC bridging settings
+
+![Showreel.010.png](Resources/Documentation/Showreel/Showreel.010.png "Generic OSC Bridging Settings")
+
+<a name="lookandfeelsettings" />
+
+### App LookAndFeel settings
+
+![Showreel.011.png](Resources/Documentation/Showreel/Showreel.011.png "Light LookAndFeel")
+
+<a name="uiparameters" />
 
 ### Supported Soundscape parameters on UI
 
@@ -24,6 +102,8 @@ The idea is to have a multi-platform application with a user interface that allo
 - Matrix Input ReverbSendGain
 - Sound Object Spread
 - Sound Object Delay Mode
+
+<a name="bridgingparameters" />
 
 ### Supported Soundscape parameters for protocol bridging
 
@@ -79,25 +159,3 @@ The idea is to have a multi-platform application with a user interface that allo
 - Scene SceneIndex
 - Scene SceneName
 - Scene SceneComment
-
-## Sound Object Table
-
-![Showreel.002.png](Resources/Documentation/Showreel/Showreel.002.png "Sound Object Table Overview")
-![Showreel.003.png](Resources/Documentation/Showreel/Showreel.003.png "Sound Object Table Bridging Mutes")
-![Showreel.004.png](Resources/Documentation/Showreel/Showreel.004.png "Sound Object Table Selection")
-
-## Two Dimensional position slider
-
-![Showreel.005.png](Resources/Documentation/Showreel/Showreel.005.png "Multislider")
-
-## Protocol Bridging traffic logging and plotting
-
-![Showreel.006.png](Resources/Documentation/Showreel/Showreel.006.png "Protocol Bridging Statistics")
-
-## App settings
-
-![Showreel.007.png](Resources/Documentation/Showreel/Showreel.007.png "DS100 Settings")
-![Showreel.008.png](Resources/Documentation/Showreel/Showreel.008.png "DiGiCo Bridging Settings")
-![Showreel.009.png](Resources/Documentation/Showreel/Showreel.009.png "Blacktrax Bridging Settings")
-![Showreel.010.png](Resources/Documentation/Showreel/Showreel.010.png "Generic OSC Bridging Settings")
-![Showreel.011.png](Resources/Documentation/Showreel/Showreel.011.png "Light LookAndFeel")

@@ -300,6 +300,22 @@ void SoundsourceProcessorEditor::paint(Graphics& g)
 	// Frame
 	g.setColour(getLookAndFeel().findColour(TableListBox::outlineColourId));
 	g.drawRect(getLocalBounds().toFloat());
+    
+    // processor id (object #) in upper left corner
+    SoundsourceProcessor* pro = dynamic_cast<SoundsourceProcessor*>(getAudioProcessor());
+    if (pro)
+    {
+        auto surfaceSliderLabelVisible = true;
+        if (twoDSurfaceArea.getWidth() < 250 || twoDSurfaceArea.getHeight() < 250)
+            surfaceSliderLabelVisible = false;
+        
+        auto objNumTitleText = (surfaceSliderLabelVisible ? String("Object #") : String("#")) + String(pro->GetSourceId());
+        auto titleTextWidth = surfaceSliderLabelVisible ? 73 : 33;
+        auto objNumTitleRect = twoDSurfaceArea.removeFromBottom(25).removeFromLeft(titleTextWidth + 7).removeFromRight(titleTextWidth);
+        
+        g.setColour(getLookAndFeel().findColour(TableListBox::textColourId));
+        g.drawText(objNumTitleText, objNumTitleRect, Justification::centredLeft);
+    }
 }
 
 /**

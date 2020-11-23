@@ -123,7 +123,11 @@ class PageContainerComponent :	public Component,
 public:
 	PageContainerComponent();
 	~PageContainerComponent() override;
+
 	void UpdateGui(bool init);
+
+	//==============================================================================
+	void lookAndFeelChanged() override;
 
 	//==============================================================================
 	void SetActiveTab(int tabIdx);
@@ -151,6 +155,7 @@ private:
 	std::unique_ptr<Label>							m_versionLabel;			/**> App version label. */
 	std::unique_ptr<Label>							m_versionStringLabel;	/**> "Version" string. */
 	std::unique_ptr<ImageButton>					m_logoButton;			/**> App logo button triggering about page. */
+	std::unique_ptr<DrawableButton>					m_helpButton;			/**< Button to open the github readme url. */
 	std::unique_ptr<Label>							m_onlineLabel;			/**> Online indicator label. */
 	std::unique_ptr<LedButton>						m_onlineLed;			/**> Button used as Online indicator LED. */
 	std::unique_ptr<CustomButtonTabbedComponent>	m_tabbedComponent;		/**> A container for tabs. */

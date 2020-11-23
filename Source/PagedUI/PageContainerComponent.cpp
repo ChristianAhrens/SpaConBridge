@@ -74,6 +74,12 @@ static constexpr int GUI_UPDATE_RATE_SLOW = 120;
  */
 PageContainerComponent::PageContainerComponent()
 {
+	// Help button
+	m_helpButton = std::make_unique<DrawableButton>("Help", DrawableButton::ButtonStyle::ImageFitted);
+	m_helpButton->addListener(this);
+	addAndMakeVisible(m_helpButton.get());
+	lookAndFeelChanged();
+
 	// Online
 	m_onlineLabel = std::make_unique<Label>("Online Label", "Online:");
 	m_onlineLabel->setJustificationType(Justification::centred);
@@ -178,6 +184,8 @@ void PageContainerComponent::resized()
 	bottomBarFB.justifyContent = FlexBox::JustifyContent::center;
 	bottomBarFB.alignContent = FlexBox::AlignContent::center;
 	bottomBarFB.items.addArray({
+		// Help button
+		FlexItem(*m_helpButton.get()).withWidth(27).withHeight(27).withMargin(FlexItem::Margin(5, 0, 5, 10)),
 		// Spacing
 		FlexItem().withFlex(1),
 		// Online
@@ -222,8 +230,20 @@ void PageContainerComponent::buttonClicked(Button* button)
 	{
 		toggleAboutPage();
 	}
+	if (m_helpButton && m_helpButton.get() == button)
+	{
+		auto githubURL = String("https://www.github.com");
+		auto companyName = String("ChristianAhrens");
+		auto appName = JUCEApplication::getInstance()->getApplicationName();
+		auto helpResourceName = String("blob/master/README.md");
+		auto helpURLString = githubURL + "/" + companyName + "/" + appName + "/" + helpResourceName;
+		URL(helpURLString).launchInDefaultBrowser();
+	}
 }
 
+/**
+ * Helper method to open about overlay page if not currently open or close it, if it currently is displayed.
+ */
 void PageContainerComponent::toggleAboutPage()
 {
 	if (m_aboutPage->isVisible())
@@ -314,6 +334,35 @@ void PageContainerComponent::SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelTy
 DbLookAndFeelBase::LookAndFeelType PageContainerComponent::GetLookAndFeelType()
 {
 	return m_settingsPage->GetSelectedLookAndFeelType();
+}
+
+/**
+ * Reimplemented method to handle changed look and feel data.
+ * This makes shure the help buttons' svg images are colored correctly.
+ */
+void PageContainerComponent::lookAndFeelChanged()
+{
+	// first forward the call to base implementation
+	Component::lookAndFeelChanged();
+
+	// create the required button drawable images based on lookandfeel colours
+	String imageName = BinaryData::help24px_svg;
+	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
+	auto lookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (lookAndFeel)
+	{
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+
+		m_helpButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+	}
 }
 
 

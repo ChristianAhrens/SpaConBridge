@@ -349,7 +349,7 @@ CustomTableHeaderComponent::CustomTableHeaderComponent()
 	// Add columns to the table header
 	int tableHeaderFlags = (TableHeaderComponent::visible | TableHeaderComponent::sortable);
 	addColumn("", TableModelComponent::OC_TrackID, 40, 40, -1, tableHeaderFlags);
-	addColumn("Input", TableModelComponent::OC_SourceID, 60, 60, -1, tableHeaderFlags);
+	addColumn("Object #", TableModelComponent::OC_SourceID, 60, 60, -1, tableHeaderFlags);
 	addColumn("Mapping", TableModelComponent::OC_Mapping, 60, 60, -1, tableHeaderFlags);
 	addColumn("Mode", TableModelComponent::OC_ComsMode, 90, 90, -1, tableHeaderFlags);
 	addColumn("", TableModelComponent::OC_BridgingMute, 90, 90, -1, tableHeaderFlags);

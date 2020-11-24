@@ -33,7 +33,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#include "MultiSurfacePageComponent.h"
+#include "MultisurfacePageComponent.h"
 
 #include "../PageComponentManager.h"
 

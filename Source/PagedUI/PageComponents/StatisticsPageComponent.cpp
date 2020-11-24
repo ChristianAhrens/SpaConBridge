@@ -251,7 +251,6 @@ void StatisticsPlot::mouseUp(const MouseEvent& e)
 {
 	auto clickPos = e.getMouseDownPosition();
 
-	auto bounds = getLocalBounds();
 	auto contentBounds = getLocalBounds().reduced(1);
 	auto legendBounds = contentBounds.removeFromBottom(30);
 	auto legendColWidth = std::min(int(legendBounds.getWidth() / (m_plotData.empty() ? 1 : m_plotData.size())), 90);

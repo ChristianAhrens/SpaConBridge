@@ -37,7 +37,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "PageComponentManager.h"
 #include "PageComponents/TablePageComponent.h"
-#include "PageComponents/MultiSurfacePageComponent.h"
+#include "PageComponents/MultisurfacePageComponent.h"
 #include "PageComponents/SettingsPageComponent.h"
 #include "PageComponents/StatisticsPageComponent.h"
 #include "PageComponents/AboutPageComponent.h"

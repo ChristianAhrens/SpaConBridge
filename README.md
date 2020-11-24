@@ -1,5 +1,8 @@
 ![Showreel.001.png](Resources/Documentation/Showreel/Showreel.001.png "SoundscapeBridgeApp Headline Icons")
 
+SoundscapeBridgeApp is currently in **BETA** development. Many things may still change until first production release.
+See [LATEST RELEASE](../../releases/latest) for available binary packages.
+
 SoundscapeBridgeApp is a project inspired by d&b audiotechnik GmbH & Co. KG's "Soundscape DAW Plugin" made publicly available at https://github.com/dbaudio-soundscape/db-Soundscape-DAW-Plugins and d&b audiotechnik GmbH & Co. KG's "Soundscape Control with DiGiCo SD consoles" made publicly available at https://github.com/dbaudio-soundscape/db-Soundscape-control-with-DiGiCo-SD-Consoles.
 
 The idea is to have a multi-platform application with a user interface that allows viewing and editing of Sound Object parameters of a d&b audiotechnik Soundscape system based on DS100 signal bridge, while also integrating the capability of third party control translation to d&b audiotechnik OSC protocol to externally control Sound Object parameters.

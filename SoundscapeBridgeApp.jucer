@@ -313,8 +313,6 @@
       <FILE id="Z0i2A2" name="MainSoundscapeBridgeAppComponent.h" compile="0"
             resource="0" file="Source/MainSoundscapeBridgeAppComponent.h"/>
       <FILE id="g0nbLB" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
-      <FILE id="nZnFg0" name="Version.cpp" compile="1" resource="0" file="Source/Version.cpp"/>
-      <FILE id="tKd5wL" name="Version.h" compile="0" resource="0" file="Source/Version.h"/>
       <FILE id="Kqvnes" name="Controller.cpp" compile="1" resource="0" file="Source/Controller.cpp"/>
       <FILE id="dObTPr" name="Controller.h" compile="0" resource="0" file="Source/Controller.h"/>
       <FILE id="c3j7aS" name="SoundscapeBridgeAppCommon.h" compile="0" resource="0"

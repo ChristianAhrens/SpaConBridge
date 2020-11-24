@@ -41,7 +41,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../Controller.h"						//<USE Controller
 #include "../PagedUI/PageComponentManager.h"	//<USE PageComponentManager
 #include "../SoundscapeBridgeAppCommon.h"
-#include "../Version.h"							//<USE CVersion
 
 
 namespace SoundscapeBridgeApp

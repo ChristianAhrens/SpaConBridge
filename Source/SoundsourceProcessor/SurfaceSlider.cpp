@@ -84,7 +84,7 @@ void CSurfaceSlider::paint(Graphics& g)
 
 	// Surface frame
 	g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
-	g.drawRect(Rectangle<float>(0.0f, 0.0f, w, h), 1.5f);
+	g.drawRect(Rectangle<int>(0, 0, w, h), 2);
 
 	// X knob posiiton
 	Path knobOutline;

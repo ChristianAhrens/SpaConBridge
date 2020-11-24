@@ -82,8 +82,8 @@ public:
 	void SetActiveBridgingProtocols(ProtocolBridgingType desiredActiveBridgingTypes);
 
 	//==========================================================================
-	bool ActivateDS100SourceId(SourceId sourceId, juce::int16 mappingId);
-	bool DeactivateDS100SourceId(SourceId sourceId, juce::int16 mappingId);
+	bool ActivateDS100SourceId(SourceId sourceId, MappingId mappingId);
+	bool DeactivateDS100SourceId(SourceId sourceId, MappingId mappingId);
 
 	String GetDS100IpAddress();
 	bool SetDS100IpAddress(String ipAddress, bool dontSendNotification = false);

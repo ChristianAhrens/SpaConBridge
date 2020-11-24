@@ -75,7 +75,7 @@ public:
 	int GetProcessorId() const;
 	void SetProcessorId(DataChangeSource changeSource, int processorId);
 
-	void InitializeSettings(SourceId sourceId, int mappingId, String ipAddress, int oscMsgRate, ComsMode newMode);
+	void InitializeSettings(SourceId sourceId, int mappingId, String ipAddress, ComsMode newMode);
 
 	SourceId GetSourceId() const;
 	void SetSourceId(DataChangeSource changeSource, SourceId sourceId);
@@ -116,8 +116,6 @@ public:
 	// Overriden functions of class AudioProcessor
 	virtual void getStateInformation(MemoryBlock& destData) override;
 	virtual void setStateInformation(const void* data, int sizeInBytes) override;
-	virtual void updateTrackProperties(const TrackProperties& properties) override;
-
 	// Overriden functions of class AudioProcessorParameter::Listener
 	virtual void parameterValueChanged(int parameterIndex, float newValue) override;
 	virtual void parameterGestureChanged(int parameterIndex, bool gestureIsStarting) override;

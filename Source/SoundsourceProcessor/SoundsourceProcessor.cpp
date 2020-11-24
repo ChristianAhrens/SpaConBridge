@@ -394,25 +394,7 @@ bool SoundsourceProcessor::setStateXml(XmlElement* stateXml)
  */
 void SoundsourceProcessor::getStateInformation(MemoryBlock& destData)
 {
-	MemoryOutputStream stream(destData, true);
-
-	CVersion version(String(JUCE_STRINGIFY(JUCE_APP_VERSION)));
-	jassert(version.IsValid());
-	stream.writeInt(version.ToInt());
-	stream.writeFloat(*m_xPos);
-	stream.writeFloat(*m_yPos);
-	stream.writeInt(GetSourceId());
-	stream.writeInt(GetMappingId());
-	stream.writeInt(GetMessageRate());
-	stream.writeInt(static_cast<int>(GetComsMode()));
-	stream.writeFloat(m_reverbSendGain->get());
-	stream.writeFloat(m_sourceSpread->get());
-	stream.writeFloat(static_cast<float>(m_delayMode->getIndex()));
-	stream.writeInt(m_processorId);
-
-#ifdef JUCE_DEBUG
-	PushDebugMessage("SoundsourceProcessor::getStateInformation");
-#endif
+	ignoreUnused(destData);
 }
 
 /**
@@ -425,54 +407,8 @@ void SoundsourceProcessor::getStateInformation(MemoryBlock& destData)
  */
 void SoundsourceProcessor::setStateInformation(const void* data, int sizeInBytes)
 {
-#ifdef JUCE_DEBUG
-	PushDebugMessage("SoundsourceProcessor::setStateInformation");
-#endif
-
-	MemoryInputStream stream(data, static_cast<size_t> (sizeInBytes), false);
-
-	// Only binary data from Plugin V2.0 onwards is supported.
-	CVersion version(stream.readInt());
-	CVersion minVersion(2, 0);
-	if (version >= minVersion)
-	{
-		float xPos = stream.readFloat();
-		float yPos = stream.readFloat();
-		int sourceId = stream.readInt();
-		int mapId =	stream.readInt();
-		String ipAddress = stream.readString();
-		int msgRate = stream.readInt();
-		ComsMode newComMode = static_cast<ComsMode>(stream.readInt());
-		float reverb = stream.readFloat();
-		float spread = stream.readFloat();
-		float delaym = stream.readFloat();
-		Rectangle<int> overviewBounds;
-		overviewBounds.setX(stream.readInt());
-		overviewBounds.setY(stream.readInt());
-		overviewBounds.setWidth(stream.readInt());
-		overviewBounds.setHeight(stream.readInt());
-
-		// PluginId was added in V2.8.0
-		ProcessorId processorId = INVALID_PROCESSOR_ID;
-		if (version >= CVersion(2, 8))
-		{
-			processorId = stream.readInt();
-		}
-
-		// Only apply the de-serialized data if the stored PluginID matches our own.
-		// When loading projects and when adding new plugin instances, Pro Tools likes to call setStateInformation 
-		// with data which does not necessarily belong to the correct instance, and which will overwrite the correct settings.
-		if ((processorId == m_processorId) || (processorId == INVALID_PROCESSOR_ID))
-		{
-			InitializeSettings(sourceId, mapId, ipAddress, msgRate, newComMode);
-
-			SetParameterValue(DCS_Host, ParamIdx_X, xPos);
-			SetParameterValue(DCS_Host, ParamIdx_Y, yPos);
-			SetParameterValue(DCS_Host, ParamIdx_ReverbSendGain, reverb);
-			SetParameterValue(DCS_Host, ParamIdx_SourceSpread, spread);
-			SetParameterValue(DCS_Host, ParamIdx_DelayMode, delaym);
-		}
-	}
+	ignoreUnused(data);
+	ignoreUnused(sizeInBytes);
 }
 
 /**
@@ -641,10 +577,9 @@ bool SoundsourceProcessor::GetOnline() const
  * @param sourceId		New SourceID or matrix input number to use for this plugin instance.
  * @param mappingId		New coordinate mapping to use for this plugin instance.
  * @param ipAddress		New IP address of the DS100 device.
- * @param oscMsgRate	New interval for OSC messages, in milliseconds.
  * @param newMode		New OSC communication mode (Rx/Tx).
  */
-void SoundsourceProcessor::InitializeSettings(int sourceId, int mappingId, String ipAddress, int oscMsgRate, ComsMode newMode)
+void SoundsourceProcessor::InitializeSettings(int sourceId, int mappingId, String ipAddress, ComsMode newMode)
 {
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
@@ -655,20 +590,6 @@ void SoundsourceProcessor::InitializeSettings(int sourceId, int mappingId, Strin
 		SetMappingId(DCS_Init, static_cast<MappingId>(mappingId));
 		SetComsMode(DCS_Init, newMode);
 	}
-}
-
-/**
- * Informs the AudioProcessor that track properties such as the track's name or colour has been changed.
- * It's entirely up to the host when and how often this callback will be called.
- * The default implementation of this callback will do nothing.
- * @param properties	A struct containing information about the DAW track inside which your AudioProcessor is loaded.
- */
-void SoundsourceProcessor::updateTrackProperties(const TrackProperties& properties)
-{
-	m_pluginDisplayName = properties.name;
-
-	// Signal change to other modules in the plugin.
-	SetParameterChanged(DCS_Host, DCT_SourceID);
 }
 
 #ifdef JUCE_DEBUG

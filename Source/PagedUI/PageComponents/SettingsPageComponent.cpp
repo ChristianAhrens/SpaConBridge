@@ -219,7 +219,10 @@ void HeaderWithElmListComponent::resized()
 
 	// Set the accumulated required size of the contents as new component size
 	auto bounds = getLocalBounds();
-	bounds.setHeight(((itemHeight + (2 * itemMargin)) * itemCount) + (headerHeight + (2 * headerMargin)) + (m_hasActiveToggle ? (activeToggleHeight + (2 * activeToggleMargin)) : 0) + itemMargin);
+	auto totalActiveToggleHeight = static_cast<int>(m_hasActiveToggle ? (activeToggleHeight + (2 * activeToggleMargin)) : 0);
+	auto totalHeaderHeight = static_cast<int>(headerHeight + (2 * headerMargin));
+	auto totalItemsHeight = static_cast<int>((itemHeight + (2 * itemMargin)) * itemCount);
+	bounds.setHeight(totalActiveToggleHeight + totalHeaderHeight + totalItemsHeight + static_cast<int>(itemMargin));
 	setSize(bounds.getWidth(), bounds.getHeight());
 
 	// Trigger the actual layouting based on the calculated bounds

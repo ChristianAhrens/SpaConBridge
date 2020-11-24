@@ -405,7 +405,7 @@ void SoundsourceProcessorEditor::resized()
 	if (isPortrait)
 	{
 		auto parameterEditsWidth = 260;
-		auto hPos = 0.5f * (parameterEditArea.getWidth() - parameterEditsWidth);
+		auto hPos = (parameterEditArea.getWidth() - parameterEditsWidth) / 2;
 		auto vPos = (getLocalBounds().getHeight() - (labelHeight + sliderHeight));
 
 		// ReverbSendGain Slider
@@ -429,7 +429,7 @@ void SoundsourceProcessorEditor::resized()
 	{
 		auto parameterEditsHeight = paramSliderLabelVisible ? 250 : 190;
 		auto hPos = getLocalBounds().getWidth() - 80;
-		auto vPos = 0.5f *(getLocalBounds().getHeight() - parameterEditsHeight);
+		auto vPos = (getLocalBounds().getHeight() - parameterEditsHeight) / 2;
 	
 		// ReverbSendGain Slider
 		m_reverbSendGainLabel->setBounds(Rectangle<int>(hPos, vPos, labelSliderWidth, labelHeight));

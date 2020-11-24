@@ -798,7 +798,7 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
  * @param mappingId The mapping id that is to be activated for the soundsource object
  * @return	True on succes, false if failure
  */
-bool ProtocolBridgingWrapper::ActivateDS100SourceId(SourceId sourceId, juce::int16 mappingId)
+bool ProtocolBridgingWrapper::ActivateDS100SourceId(SourceId sourceId, MappingId mappingId)
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
@@ -858,7 +858,7 @@ bool ProtocolBridgingWrapper::ActivateDS100SourceId(SourceId sourceId, juce::int
  * @param mappingId The mapping id that is to be deactivated for the soundsource object
  * @return	True on succes, false if failure
  */
-bool ProtocolBridgingWrapper::DeactivateDS100SourceId(SourceId sourceId, juce::int16 mappingId)
+bool ProtocolBridgingWrapper::DeactivateDS100SourceId(SourceId sourceId, MappingId mappingId)
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
@@ -1172,8 +1172,6 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 	}
 	else
 		return false;
-
-	return true;
 }
 
 /**

@@ -396,16 +396,11 @@ void CustomTableHeaderComponent::updateColumnWidths()
 		return;
 
 	auto activeBridgingCount = ctrl->GetActiveProtocolBridgingCount();
-	auto itemCount = 1			// 1x width for empty track column
-		+ 1.5f						// double width for source id textedit
-		+ 1.5f						// double width for mapping dropdown
-		+ 2						// double width for Rx/Tx radio button
-		+ activeBridgingCount;	// dynamic width depending on active bridging
 	auto itemWidth = 55;
 
 	setColumnWidth(TableModelComponent::OC_TrackID, itemWidth);
-	setColumnWidth(TableModelComponent::OC_SourceID, 1.5f * itemWidth);
-	setColumnWidth(TableModelComponent::OC_Mapping, 1.5f * itemWidth);
+	setColumnWidth(TableModelComponent::OC_SourceID, static_cast<int>(1.5f * itemWidth));
+	setColumnWidth(TableModelComponent::OC_Mapping, static_cast<int>(1.5f * itemWidth));
 	setColumnWidth(TableModelComponent::OC_ComsMode, 2 * itemWidth);
 	setColumnWidth(TableModelComponent::OC_BridgingMute, activeBridgingCount * itemWidth);
 }
@@ -444,7 +439,7 @@ void CustomTableHeaderComponent::paint(Graphics& g)
 		font.setHeight(fh - 2);
 		g.setFont(font);
 	
-		auto singleTitleWidth = bridgingCellRect.getWidth() / activeBridgingProtocols.size();
+		auto singleTitleWidth = static_cast<int>(bridgingCellRect.getWidth() / activeBridgingProtocols.size());
 
 		for (auto protocolActiveKV : m_bridgingProtocolActive)
 		{
@@ -1244,7 +1239,7 @@ void RadioButtonContainer::resized()
 {
 	auto bounds = getLocalBounds();
 	bounds.removeFromBottom(1);
-	auto singleButtonWidth = 0.5f * bounds.getWidth();
+	auto singleButtonWidth = bounds.getWidth() / 2;
 
 	auto buttonRect = bounds.removeFromLeft(singleButtonWidth).reduced(4);
 	m_txButton.setBounds(buttonRect);
@@ -1287,39 +1282,39 @@ void RadioButtonContainer::SetRow(int newRow)
  */
 void RadioButtonContainer::updateButtons()
 {
-	auto lookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
-	if (!lookAndFeel)
+	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (!dblookAndFeel)
 		return;
 
-	auto blueColour = lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonBlueColor);
+	auto blueColour = dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonBlueColor);
 	String txImageName = BinaryData::call_made24px_svg;
 	String rxImageName = BinaryData::call_received24px_svg;
 	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
 
 	// create the required button drawable images based on lookandfeel colours
 	JUCEAppBasics::Image_utils::getDrawableButtonImages(txImageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
 
 	m_txButton.setColour(TextButton::ColourIds::buttonOnColourId, blueColour.brighter(0.05f));
 	m_txButton.setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
 
 	// create the required button drawable images based on lookandfeel colours
 	JUCEAppBasics::Image_utils::getDrawableButtonImages(rxImageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
 
 	m_rxButton.setColour(TextButton::ColourIds::buttonOnColourId, blueColour.brighter(0.05f));
 	m_rxButton.setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
@@ -1367,28 +1362,28 @@ void MuteButtonContainer::updateBridgingMuteButtons()
 	if (!ctrl)
 		return;
 
-	auto lookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
-	if (!lookAndFeel)
+	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (!dblookAndFeel)
 		return;
 
 	// create the required button drawable images based on lookandfeel colours
 	String imageName = BinaryData::volume_off24px_svg;
 	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
 	JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
 
 	// collect what bridging modules are active
 	auto activeBridging = ctrl->GetActiveProtocolBridging();
 
 	// determine the right red colour from lookandfeel
-	auto redColour = lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonRedColor);
+	auto redColour = dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonRedColor);
 
 	for (auto type : ProtocolBridgingTypes)
 	{
@@ -1420,28 +1415,25 @@ void MuteButtonContainer::updateDrawableButtonImageColours()
 	if (!ctrl)
 		return;
 
-	auto lookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
-	if (!lookAndFeel)
+	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (!dblookAndFeel)
 		return;
 
 	// create the required button drawable images based on lookandfeel colours
 	String imageName = BinaryData::volume_off24px_svg;
 	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
 	JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-
-	// collect what bridging modules are active
-	auto activeBridging = ctrl->GetActiveProtocolBridging();
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
 
 	// determine the right red colour from lookandfeel
-	auto redColour = lookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonRedColor);
+	auto redColour = dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonRedColor);
 
 	// set the images to button
 	for (auto type : ProtocolBridgingTypes)
@@ -1517,7 +1509,7 @@ void MuteButtonContainer::resized()
 
 	auto bounds = getLocalBounds();
 	bounds.removeFromBottom(1);
-	auto singleButtonWidth = bounds.getWidth() / m_bridgingMutes.size();
+	auto singleButtonWidth = static_cast<int>(bounds.getWidth() / m_bridgingMutes.size());
 
 	for (auto& buttonKV : m_bridgingMutes)
 	{

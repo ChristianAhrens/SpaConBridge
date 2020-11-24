@@ -17,7 +17,7 @@
 
 #include "SoundsourceProcessor/SoundsourceProcessor.h"
 
-#include <iOS_utils.hpp>
+#include <iOS_utils.h>
 
 #include <JuceHeader.h>
 

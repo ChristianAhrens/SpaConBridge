@@ -38,7 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../../LookAndFeel.h"
 #include "../../SoundscapeBridgeAppCommon.h"
 
-#include "../submodules/JUCE-AppBasics/Source/Image_utils.hpp"
+#include <Image_utils.h>
 
 
 namespace SoundscapeBridgeApp

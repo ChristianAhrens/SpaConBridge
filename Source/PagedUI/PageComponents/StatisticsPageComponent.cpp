@@ -16,7 +16,7 @@
 #include "../../Controller.h"
 #include "../../SoundsourceProcessor/SurfaceSlider.h"
 
-#include <Image_utils.hpp>
+#include <Image_utils.h>
 
 
 namespace SoundscapeBridgeApp

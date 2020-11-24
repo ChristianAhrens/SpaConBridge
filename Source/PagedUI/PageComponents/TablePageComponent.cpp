@@ -42,7 +42,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../../Controller.h"
 #include "../../LookAndFeel.h"
 
-#include <Image_utils.hpp>
+#include <Image_utils.h>
 
 
 namespace SoundscapeBridgeApp

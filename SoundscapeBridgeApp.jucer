@@ -191,8 +191,10 @@
                 file="submodules/JUCE-AppBasics/Source/AppConfigurationBase.cpp"/>
           <FILE id="YDW7K8" name="AppConfigurationBase.h" compile="0" resource="0"
                 file="submodules/JUCE-AppBasics/Source/AppConfigurationBase.h"/>
-          <FILE id="GDtXdS" name="Image_utils.hpp" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Image_utils.hpp"/>
-          <FILE id="yq1Bqf" name="iOS_utils.hpp" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/iOS_utils.hpp"/>
+          <FILE id="VBLrne" name="Image_utils.cpp" compile="1" resource="0" file="submodules/JUCE-AppBasics/Source/Image_utils.cpp"/>
+          <FILE id="xYgjGr" name="Image_utils.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Image_utils.h"/>
+          <FILE id="T2SQR9" name="iOS_utils.cpp" compile="1" resource="0" file="submodules/JUCE-AppBasics/Source/iOS_utils.cpp"/>
+          <FILE id="CUIT3f" name="iOS_utils.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/iOS_utils.h"/>
           <FILE id="olDhXN" name="SplitButtonComponent.cpp" compile="1" resource="0"
                 file="submodules/JUCE-AppBasics/Source/SplitButtonComponent.cpp"/>
           <FILE id="nn1bO4" name="SplitButtonComponent.h" compile="0" resource="0"
@@ -315,6 +317,8 @@
       <FILE id="g0nbLB" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
       <FILE id="Kqvnes" name="Controller.cpp" compile="1" resource="0" file="Source/Controller.cpp"/>
       <FILE id="dObTPr" name="Controller.h" compile="0" resource="0" file="Source/Controller.h"/>
+      <FILE id="rfsqrd" name="SoundscapeBridgeAppCommon.cpp" compile="1"
+            resource="0" file="Source/SoundscapeBridgeAppCommon.cpp"/>
       <FILE id="c3j7aS" name="SoundscapeBridgeAppCommon.h" compile="0" resource="0"
             file="Source/SoundscapeBridgeAppCommon.h"/>
     </GROUP>

@@ -280,7 +280,6 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_DS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>(false, false);
 	m_DS100ZeroconfDiscovery->onServiceSelected = [=](JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info) { handleDS100ServiceSelected(type, info); };
 	m_DS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC, RX_PORT_DS100_HOST);
-	m_DS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OCA);
 	m_DS100Settings->addComponent(m_DS100ZeroconfDiscovery.get(), true, false);
 
 	m_SecondDS100ModeButton = std::make_unique<JUCEAppBasics::SplitButtonComponent>();
@@ -308,7 +307,6 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_SecondDS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>(false, false);
 	m_SecondDS100ZeroconfDiscovery->onServiceSelected = [=](JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info) { handleSecondDS100ServiceSelected(type, info); };
 	m_SecondDS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC, RX_PORT_DS100_HOST);
-	m_SecondDS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OCA);
 	m_DS100Settings->addComponent(m_SecondDS100IpAddressLabel.get(), false, false);
 	m_DS100Settings->addComponent(m_SecondDS100IpAddressEdit.get(), true, false);
 	m_DS100Settings->addComponent(m_SecondDS100ZeroconfDiscovery.get(), true, false);

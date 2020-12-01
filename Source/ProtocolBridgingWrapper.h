@@ -26,6 +26,8 @@ static const String PROTOCOL_DEFAULT2_IP("127.0.0.2");	//< Default IP Address
 
 static constexpr int PROTOCOL_DEFAULT_MAPPINGAREA = 1;	//< Mapping Area Id to use as default
 
+static constexpr int PROTOCOL_DEFAULT_INPUTDEVICEINDEX = 0;	//< Input Device Index to use as default
+
 static constexpr int RX_PORT_DS100_DEVICE = 50010;		//< UDP port which the DS100 is listening to for OSC
 static constexpr int RX_PORT_DS100_HOST = 50011;		//< UDP port to which the DS100 will send OSC replies
 
@@ -46,6 +48,7 @@ static constexpr int DIGICO_PROCESSINGPROTOCOL_ID = 3;
 static constexpr int RTTRPM_PROCESSINGPROTOCOL_ID = 5;
 static constexpr int GENERICOSC_PROCESSINGPROTOCOL_ID = 4;
 static constexpr int DS100_2_PROCESSINGPROTOCOL_ID = 6;
+static constexpr int GENERICMIDI_PROCESSINGPROTOCOL_ID = 7;
 
 class ProtocolBridgingWrapper :
 	public ProcessingEngineNode::NodeListener,
@@ -136,6 +139,14 @@ public:
 	bool SetGenericOSCRemotePort(int remotePort, bool dontSendNotification = false);
 
 	//==========================================================================
+	bool GetMuteGenericMIDISourceId(SourceId sourceId);
+	bool SetMuteGenericMIDISourceId(SourceId sourceId, bool mute = true);
+	bool SetMuteGenericMIDISourceIds(const std::vector<SourceId>& sourceIds, bool mute = true);
+
+	int GetGenericMIDIInputDeviceIndex();
+	bool SetGenericMIDIInputDeviceIndex(int MIDIInputDeviceIndex, bool dontSendNotification = false);
+
+	//==========================================================================
 	std::unique_ptr<XmlElement> createStateXml() override;
 	bool setStateXml(XmlElement* stateXml) override;
 
@@ -159,12 +170,15 @@ private:
 	bool SetProtocolRemotePort(ProtocolId protocolId, int remotePort, bool dontSendNotification = false);
 	int GetProtocolMappingArea(ProtocolId protocolId);
 	bool SetProtocolMappingArea(ProtocolId protocolId, int mappingAreaId, bool dontSendNotification = false);
+	int GetProtocolInputDeviceIndex(ProtocolId protocolId);
+	bool SetProtocolInputDeviceIndex(ProtocolId protocolId, int inputDeviceIndex, bool dontSendNotification = false);
 
 	//==========================================================================
 	void SetupBridgingNode();
 	std::unique_ptr<XmlElement> SetupDiGiCoBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupRTTrPMBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupGenericOSCBridgingProtocol();
+	std::unique_ptr<XmlElement> SetupGenericMIDIBridgingProtocol();
 
 	/**
 	 * A processing engine node can send data to and receive data from multiple protocols that is encapsulates.

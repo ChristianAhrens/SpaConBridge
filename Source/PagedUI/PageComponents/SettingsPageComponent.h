@@ -155,6 +155,11 @@ private:
 	std::unique_ptr<Label>						m_GenericOSCListeningPortLabel;
 	std::unique_ptr<TextEditor>					m_GenericOSCRemotePortEdit;
 	std::unique_ptr<Label>						m_GenericOSCRemotePortLabel;
+
+	// Generic MIDI settings section
+	std::unique_ptr<HeaderWithElmListComponent>	m_GenericMIDIBridgingSettings;
+	std::unique_ptr<ComboBox>					m_GenericMIDIInputDeviceSelect;
+	std::unique_ptr<Label>						m_GenericMIDIInputDeviceSelectLabel;
 };
 
 /**

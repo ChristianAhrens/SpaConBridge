@@ -1028,6 +1028,7 @@ bool Controller::GetMuteBridgingSourceId(ProtocolBridgingType bridgingType, Sour
 	case PBT_BlacktraxRTTrPM:
 		return m_protocolBridge.GetMuteRTTrPMSourceId(sourceId);
 	case PBT_GenericMIDI:
+		return m_protocolBridge.GetMuteGenericMIDISourceId(sourceId);
 	case PBT_YamahaSQ:
 	case PBT_HUI:
 	case PBT_DS100:
@@ -1054,6 +1055,7 @@ bool Controller::SetMuteBridgingSourceId(ProtocolBridgingType bridgingType, Sour
 	case PBT_BlacktraxRTTrPM:
 		return m_protocolBridge.SetMuteRTTrPMSourceId(sourceId, mute);
 	case PBT_GenericMIDI:
+		return m_protocolBridge.SetMuteGenericMIDISourceId(sourceId, mute);
 	case PBT_YamahaSQ:
 	case PBT_HUI:
 	case PBT_DS100:
@@ -1080,6 +1082,7 @@ bool Controller::SetMuteBridgingSourceIds(ProtocolBridgingType bridgingType, con
 	case PBT_BlacktraxRTTrPM:
 		return m_protocolBridge.SetMuteRTTrPMSourceIds(sourceIds, mute);
 	case PBT_GenericMIDI:
+		return m_protocolBridge.SetMuteGenericMIDISourceIds(sourceIds, mute);
 	case PBT_YamahaSQ:
 	case PBT_HUI:
 	case PBT_DS100:
@@ -1238,6 +1241,42 @@ bool Controller::SetBridgingMappingArea(ProtocolBridgingType bridgingType, int m
 	case PBT_DiGiCo:
 	case PBT_GenericOSC:
 	case PBT_GenericMIDI:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
+int Controller::GetBridgingInputDeviceIndex(ProtocolBridgingType bridgingType)
+{
+	switch (bridgingType)
+	{
+	case PBT_GenericMIDI:
+		return m_protocolBridge.GetGenericMIDIInputDeviceIndex();
+	case PBT_BlacktraxRTTrPM:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
+bool Controller::SetBridgingInputDeviceIndex(ProtocolBridgingType bridgingType, int inputDeviceIndex, bool dontSendNotification)
+{
+	switch (bridgingType)
+	{
+	case PBT_GenericMIDI:
+		return m_protocolBridge.SetGenericMIDIInputDeviceIndex(inputDeviceIndex, dontSendNotification);
+	case PBT_BlacktraxRTTrPM:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
 	case PBT_YamahaSQ:
 	case PBT_HUI:
 	case PBT_DS100:

@@ -432,6 +432,32 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCRemotePortEdit.get(), true, false);
 
 	m_GenericOSCBridgingSettings->resized();
+
+	// Generic MIDI settings section
+	m_GenericMIDIBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
+	m_GenericMIDIBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_GenericMIDI) + " Bridging");
+	m_GenericMIDIBridgingSettings->setHasActiveToggle(true);
+	m_GenericMIDIBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
+	addAndMakeVisible(m_GenericMIDIBridgingSettings.get());
+
+	// collect available devices to populate our dropdown
+	auto midiInputs = juce::MidiInput::getAvailableDevices();
+	juce::StringArray midiInputNames;
+	for (auto input : midiInputs)
+		midiInputNames.add(input.name);
+
+	m_GenericMIDIInputDeviceSelect = std::make_unique<ComboBox>();
+	m_GenericMIDIInputDeviceSelect->setTextWhenNoChoicesAvailable("No MIDI Inputs Enabled");
+	m_GenericMIDIInputDeviceSelect->addItemList(midiInputNames, 1);
+	//m_GenericMIDIInputDeviceSelect->onChange = [this] { setMidiInput(m_midiInputList->getSelectedItemIndex()); };
+	m_GenericMIDIInputDeviceSelectLabel = std::make_unique<Label>();
+	m_GenericMIDIInputDeviceSelectLabel->setJustificationType(Justification::centred);
+	m_GenericMIDIInputDeviceSelectLabel->setText("MIDI Input", dontSendNotification);
+	m_GenericMIDIInputDeviceSelectLabel->attachToComponent(m_GenericMIDIInputDeviceSelect.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIInputDeviceSelectLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIInputDeviceSelect.get(), true, false);
+
+	m_GenericMIDIBridgingSettings->resized();
 }
 
 /**
@@ -464,6 +490,7 @@ void SettingsSectionsComponent::resized()
 		+ m_DiGiCoBridgingSettings->getHeight()
 		+ m_RTTrPMBridgingSettings->getHeight()
 		+ m_GenericOSCBridgingSettings->getHeight()
+		+ m_GenericMIDIBridgingSettings->getHeight()
 		+ (3 * 2 * margin);
 
 	auto bounds = getLocalBounds();
@@ -492,6 +519,9 @@ void SettingsSectionsComponent::resized()
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
 		FlexItem(*m_GenericOSCBridgingSettings.get())
 			.withHeight(static_cast<float>(m_GenericOSCBridgingSettings->getHeight()))
+			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
+		FlexItem(*m_GenericMIDIBridgingSettings.get())
+			.withHeight(static_cast<float>(m_GenericMIDIBridgingSettings->getHeight()))
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)) });
 	fb.performLayout(bounds);
 }
@@ -621,6 +651,8 @@ void SettingsSectionsComponent::setSettingsSectionActiveState(HeaderWithElmListC
 		sectionType = PBT_BlacktraxRTTrPM;
 	else if (settingsSection == m_GenericOSCBridgingSettings.get())
 		sectionType = PBT_GenericOSC;
+	else if (settingsSection == m_GenericMIDIBridgingSettings.get())
+		sectionType = PBT_GenericMIDI;
 
 	if (activeState)
 		ctrl->SetActiveProtocolBridging(ctrl->GetActiveProtocolBridging() | sectionType);
@@ -703,6 +735,13 @@ void SettingsSectionsComponent::processUpdatedConfig()
 		m_GenericOSCListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_GenericOSC)), false);
 	if (m_GenericOSCRemotePortEdit)
 		m_GenericOSCRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_GenericOSC)), false);
+
+	// Generic MIDI settings section
+	auto GenericMIDIBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_GenericMIDI) == PBT_GenericMIDI;
+	if (m_GenericMIDIBridgingSettings)
+		m_GenericMIDIBridgingSettings->setToggleActiveState(GenericMIDIBridgingActive);
+	if (m_GenericMIDIInputDeviceSelect)
+		m_GenericMIDIInputDeviceSelect->setSelectedId(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI), false);
 }
 
 /**

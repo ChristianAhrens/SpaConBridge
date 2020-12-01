@@ -365,7 +365,8 @@
                   UISupportsDocumentBrowser="1" iosDevelopmentTeamID="SB7Q3PP4FQ"
                   iosScreenOrientation="UIInterfaceOrientationLandscapeLeft,UIInterfaceOrientationLandscapeRight,UIInterfaceOrientationPortrait"
                   iPadScreenOrientation="UIInterfaceOrientationLandscapeLeft,UIInterfaceOrientationLandscapeRight,UIInterfaceOrientationPortrait"
-                  customLaunchStoryboard="Resources/Deployment/iOS/Launchscreen.storyboard">
+                  customLaunchStoryboard="Resources/Deployment/iOS/Launchscreen.storyboard"
+                  customPList="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&#10;&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;&#10;&lt;plist&gt;&#10;  &lt;dict&gt;&#10;    &lt;key&gt;NSLocalNetworkUsageDescription&lt;/key&gt;&#10;    &lt;string&gt;SoundscapeBridgeApp uses bonjour to discover IP Addresses of relevant devices on the network. uses bonjour to discover IP Addresses&lt;/string&gt;&#10;    &lt;key&gt;NSBonjourServices&lt;/key&gt;&#10;    &lt;array&gt;&#10;&#9;  &lt;string&gt;_osc._udp&lt;/string&gt;&#10;    &lt;/array&gt;&#10;  &lt;/dict&gt;&#10;&lt;/plist&gt;">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" headerPath="../../submodules/JUCE-AppBasics/Source/"/>
         <CONFIGURATION isDebug="0" name="Release" headerPath="../../submodules/JUCE-AppBasics/Source/"/>

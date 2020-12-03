@@ -73,6 +73,7 @@ private:
 class SettingsSectionsComponent : 
 	public Component, 
 	public TextEditor::Listener,
+	public ComboBox::Listener,
 	public JUCEAppBasics::SplitButtonComponent::Listener
 {
 public:
@@ -94,9 +95,14 @@ public:
 	void textEditorFocusLost(TextEditor&) override;
 
 	//==========================================================================
+	void comboBoxChanged(ComboBox* comboBoxThatHasChanged) override;
+
+	//==========================================================================
 	void setSettingsSectionActiveState(HeaderWithElmListComponent* settingsSection, bool activeState);
 
 private:
+	void updateAvailableMidiInputDevices();
+
 	//==========================================================================
 	void textEditorUpdated(TextEditor&);
 

@@ -59,6 +59,14 @@
                     resource="0" file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ObjectDataHandling/ObjectDataHandling_Abstract.h"/>
             </GROUP>
             <GROUP id="{E292F700-4771-1C08-BDE9-01EF568EF5F4}" name="ProtocolProcessor">
+              <FILE id="audzDs" name="NetworkProtocolProcessorBase.cpp" compile="1"
+                    resource="0" file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/NetworkProtocolProcessorBase.cpp"/>
+              <FILE id="VkRZoi" name="NetworkProtocolProcessorBase.h" compile="0"
+                    resource="0" file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/NetworkProtocolProcessorBase.h"/>
+              <FILE id="TEN9tx" name="ProtocolProcessorBase.cpp" compile="1" resource="0"
+                    file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/ProtocolProcessorBase.cpp"/>
+              <FILE id="gxRmMM" name="ProtocolProcessorBase.h" compile="0" resource="0"
+                    file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/ProtocolProcessorBase.h"/>
               <GROUP id="{F600D5DB-290B-36B6-BBA2-67CD1223D644}" name="RTTrPMProtocolProcessor">
                 <GROUP id="{872E9033-424C-A01D-073D-163BA3EDD827}" name="RTTrPMReceiver">
                   <GROUP id="{FC51B1FE-2F84-7698-E957-B13078E44B5C}" name="Modules">
@@ -134,10 +142,6 @@
                 <FILE id="H3sAQf" name="SenderAwareOSCReceiver.h" compile="0" resource="0"
                       file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/OSCProtocolProcessor/SenderAwareOSCReceiver.h"/>
               </GROUP>
-              <FILE id="i3TpwC" name="ProtocolProcessor_Abstract.cpp" compile="1"
-                    resource="0" file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/ProtocolProcessor_Abstract.cpp"/>
-              <FILE id="RVmY7H" name="ProtocolProcessor_Abstract.h" compile="0" resource="0"
-                    file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/ProtocolProcessor_Abstract.h"/>
             </GROUP>
             <FILE id="B0REQz" name="ProcessingEngineConfig.cpp" compile="1" resource="0"
                   file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProcessingEngineConfig.cpp"/>

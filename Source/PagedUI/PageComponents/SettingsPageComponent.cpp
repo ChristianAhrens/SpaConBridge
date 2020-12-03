@@ -245,6 +245,8 @@ void HeaderWithElmListComponent::resized()
  */
 SettingsSectionsComponent::SettingsSectionsComponent()
 {
+
+	// TextEditor input filters to be used for different editors
 	m_intervalEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890"); // 7 digits: "9999 ms"
 	m_ipAddressEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(15, "1234567890."); // 15 digits: "255.255.255.255"
 	m_portEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(5, "1234567890"); // 5 digits: "65535"
@@ -440,16 +442,10 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_GenericMIDIBridgingSettings.get());
 
-	// collect available devices to populate our dropdown
-	auto midiInputs = juce::MidiInput::getAvailableDevices();
-	juce::StringArray midiInputNames;
-	for (auto input : midiInputs)
-		midiInputNames.add(input.name);
-
 	m_GenericMIDIInputDeviceSelect = std::make_unique<ComboBox>();
 	m_GenericMIDIInputDeviceSelect->setTextWhenNoChoicesAvailable("No MIDI Inputs Enabled");
-	m_GenericMIDIInputDeviceSelect->addItemList(midiInputNames, 1);
-	//m_GenericMIDIInputDeviceSelect->onChange = [this] { setMidiInput(m_midiInputList->getSelectedItemIndex()); };
+	updateAvailableMidiInputDevices();
+	m_GenericMIDIInputDeviceSelect->addListener(this);
 	m_GenericMIDIInputDeviceSelectLabel = std::make_unique<Label>();
 	m_GenericMIDIInputDeviceSelectLabel->setJustificationType(Justification::centred);
 	m_GenericMIDIInputDeviceSelectLabel->setText("MIDI Input", dontSendNotification);
@@ -635,6 +631,21 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 }
 
 /**
+ * Reimplemented method to handle combobox changes
+ * @param comboBox	The comboBox component that changes were made in
+ */
+void SettingsSectionsComponent::comboBoxChanged(ComboBox* comboBox)
+{
+	Controller* ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
+	// Generic MIDI settings section
+	if (m_GenericMIDIInputDeviceSelect && m_GenericMIDIInputDeviceSelect.get() == comboBox)
+		ctrl->SetBridgingInputDeviceIndex(PBT_GenericMIDI, m_GenericMIDIInputDeviceSelect->getSelectedId() - 1);
+}
+
+/**
  * Proxy method to activate a single bridging protocol in controller.
  * @param sectionType	The protocolType to be active from now on.
  */
@@ -658,6 +669,23 @@ void SettingsSectionsComponent::setSettingsSectionActiveState(HeaderWithElmListC
 		ctrl->SetActiveProtocolBridging(ctrl->GetActiveProtocolBridging() | sectionType);
 	else
 		ctrl->SetActiveProtocolBridging(ctrl->GetActiveProtocolBridging() & ~sectionType);
+}
+
+/**
+ * Private helper method to update midi input device selection dropdown contents.
+ */
+void SettingsSectionsComponent::updateAvailableMidiInputDevices()
+{
+	if (!m_GenericMIDIInputDeviceSelect)
+		return;
+
+	// collect available devices to populate our dropdown
+	auto midiInputs = juce::MidiInput::getAvailableDevices();
+	juce::StringArray midiInputNames;
+	for (auto input : midiInputs)
+		midiInputNames.add(input.name);
+
+	m_GenericMIDIInputDeviceSelect->addItemList(midiInputNames, 1);
 }
 
 /**
@@ -741,7 +769,7 @@ void SettingsSectionsComponent::processUpdatedConfig()
 	if (m_GenericMIDIBridgingSettings)
 		m_GenericMIDIBridgingSettings->setToggleActiveState(GenericMIDIBridgingActive);
 	if (m_GenericMIDIInputDeviceSelect)
-		m_GenericMIDIInputDeviceSelect->setSelectedId(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI), false);
+		m_GenericMIDIInputDeviceSelect->setSelectedId(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI) + 1, dontSendNotification);
 }
 
 /**

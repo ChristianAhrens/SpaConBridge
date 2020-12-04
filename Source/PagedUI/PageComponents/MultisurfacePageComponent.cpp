@@ -61,7 +61,7 @@ MultiSurfacePageComponent::MultiSurfacePageComponent()
 	: PageComponentBase(PCT_MultiSlide)
 {
 	// Add multi-slider
-	m_multiSliderSurface = std::make_unique<CSurfaceMultiSlider>();
+	m_multiSliderSurface = std::make_unique<SurfaceMultiSlider>();
 	addAndMakeVisible(m_multiSliderSurface.get());
 
 	// Mapping selector
@@ -126,7 +126,7 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 
 	// Update the selected mapping area.
 	int selectedMapping = 0;
-	PageComponentManager* pageMgr = PageComponentManager::GetInstance();
+	auto pageMgr = PageComponentManager::GetInstance();
 	if (pageMgr)
 	{
 		selectedMapping = pageMgr->GetSelectedMapping();
@@ -137,7 +137,7 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 		}
 	}
 
-	Controller* ctrl = Controller::GetInstance();
+	auto ctrl = Controller::GetInstance();
 	if (ctrl && m_multiSliderSurface)
 	{
 		if (ctrl->PopParameterChanged(DCS_Overview, DCT_NumProcessors))
@@ -145,17 +145,18 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 		
 		// Iterate through all plugin instances and see if anything changed there.
 		// At the same time collect all sources positions for updating.
-		CSurfaceMultiSlider::PositionCache cachedPositions;
-		for (int pIdx = 0; pIdx < ctrl->GetProcessorCount(); pIdx++)
+		SurfaceMultiSlider::PositionCache cachedPositions;
+		for (auto const& processorId : ctrl->GetProcessorIds())
 		{
-			SoundsourceProcessor* processor = ctrl->GetProcessor(pIdx);
+			auto processor = ctrl->GetProcessor(processorId);
 			if (processor)
 			{
+				auto sourceId = processor->GetSourceId();
 				if (processor->GetMappingId() == selectedMapping)
 				{
 					// NOTE: only sources are included, which match the selected viewing mapping.
 					Point<float> p(processor->GetParameterValue(ParamIdx_X), processor->GetParameterValue(ParamIdx_Y));
-					cachedPositions.insert(std::make_pair(pIdx, std::make_pair(processor->GetSourceId(), p)));
+					cachedPositions.insert(std::make_pair(processorId, SurfaceMultiSlider::SourcePosition(sourceId, p, ctrl->IsSoundSourceIdSelected(sourceId))));
 				}
 
 				if (processor->PopParameterChanged(DCS_Overview, (DCT_PluginInstanceConfig | DCT_SourcePosition)))
@@ -163,7 +164,7 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 			}
 		}
 
-		CSurfaceMultiSlider* multiSlider = dynamic_cast<CSurfaceMultiSlider*>(m_multiSliderSurface.get());
+		SurfaceMultiSlider* multiSlider = dynamic_cast<SurfaceMultiSlider*>(m_multiSliderSurface.get());
 		if (update && multiSlider)
 		{
 			// Update all nipple positions on the 2D-Slider.
@@ -179,7 +180,7 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
  */
 void MultiSurfacePageComponent::comboBoxChanged(ComboBox *comboBox)
 {
-	PageComponentManager* pageMgr = PageComponentManager::GetInstance();
+	auto pageMgr = PageComponentManager::GetInstance();
 	if (pageMgr)
 	{
 		if (pageMgr->GetSelectedMapping() != comboBox->getSelectedId())

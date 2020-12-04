@@ -82,7 +82,7 @@ private:
 	std::unique_ptr<Label>			m_reverbSendGainLabel;		/**> ReverbSendGain slider label */
 	std::unique_ptr<Label>			m_sourceSpreadLabel;		/**> SourceSpread slider label */
 	std::unique_ptr<Label>			m_delayModeLabel;			/**> DelayMode ComboBox label */
-	std::unique_ptr<CSurfaceSlider> m_surfaceSlider;			/**> 2D Slider component. */
+	std::unique_ptr<SurfaceSlider>	m_surfaceSlider;			/**> 2D Slider component. */
 	std::unique_ptr<Label>			m_displayNameLabel;			/**> Plug-in display name label. On the hosts which support updateTrackProperties
 																 * or changeProgramName, this will show the track's name where this Plug-in
 																 * is located. */

@@ -98,6 +98,24 @@ void ProtocolBridgingWrapper::Reconnect()
 }
 
 /**
+ * Static helper method to query if the given ROI is not one of those marked for processing in application and only to be bridged to DS100.
+ * @param id	The object id to be checked regarding relevance for handling in application.
+ * @return	True if the object shall be only bridged to DS100, false if it is also relevant for application
+ */
+bool ProtocolBridgingWrapper::IsBridgingObjectOnly(RemoteObjectIdentifier id)
+{
+	switch (id)
+	{
+	case ROI_MatrixInput_Select:
+	case ROI_RemoteProtocolBridge_SoundObjectSelect:
+	case ROI_RemoteProtocolBridge_UIElementIndexSelect:
+		return false;
+	default:
+		return true;
+	}
+}
+
+/**
  * Overriden from AppConfiguration::XmlConfigurableElement to dump this objects' settings
  * to a XML element structure that is returned and written to config file by the
  * singleton AppConfiguration class implementation.

@@ -79,7 +79,6 @@ enum AutomationParameterIndex
 	ParamIdx_MaxIndex
 };
 
-
 /**
  * Data Change Type
  * Bitfields used to flag parameter changes.
@@ -101,6 +100,8 @@ static constexpr DataChangeType DCT_SourceSpread			= 0x00000300; //< The En-Scen
 static constexpr DataChangeType DCT_DelayMode				= 0x00000400; //< The En-Scene Delay mode (Off/Tight/Full) of this SourceID has changed.
 static constexpr DataChangeType DCT_AutomationParameters	= (DCT_SourcePosition | DCT_ReverbSendGain | DCT_SourceSpread | DCT_DelayMode); //< All automation parameters.
 static constexpr DataChangeType DCT_DebugMessage			= 0x00001000; //< There is a new debug message to be displayed on the GUI.
+static constexpr DataChangeType DCT_ProcessorSelection		= 0x00002000; //< The currently selected SourceID has changed.
+static constexpr DataChangeType DCT_TabPageSelection		= 0x00004000; //< The currently selected Tab Index has changed.
 
 /**
  * Protocol Bridging Type

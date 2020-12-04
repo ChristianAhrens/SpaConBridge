@@ -46,7 +46,7 @@ namespace SoundscapeBridgeApp
 
 /*
 ===============================================================================
- Class CSurfaceSlider
+ Class SurfaceSlider
 ===============================================================================
 */
 
@@ -54,7 +54,7 @@ namespace SoundscapeBridgeApp
  * Object constructor.
  * @param parent	The audio processor object to act as parent.
  */
-CSurfaceSlider::CSurfaceSlider(AudioProcessor* parent)
+SurfaceSlider::SurfaceSlider(AudioProcessor* parent)
 {
 	m_parent = parent;
 }
@@ -62,7 +62,7 @@ CSurfaceSlider::CSurfaceSlider(AudioProcessor* parent)
 /**
  * Object destructor.
  */
-CSurfaceSlider::~CSurfaceSlider()
+SurfaceSlider::~SurfaceSlider()
 {
 }
 
@@ -73,7 +73,7 @@ CSurfaceSlider::~CSurfaceSlider()
  * been called, or because something has happened on the screen that means a section of a window needs to be redrawn.
  * @param g		The graphics context that must be used to do the drawing operations. 
  */
-void CSurfaceSlider::paint(Graphics& g)
+void SurfaceSlider::paint(Graphics& g)
 {
 	auto w = getLocalBounds().getWidth();
 	auto h = getLocalBounds().getHeight();
@@ -116,7 +116,7 @@ void CSurfaceSlider::paint(Graphics& g)
  * Called when a mouse button is pressed. 
  * @param e		Details about the position and status of the mouse event, including the source component in which it occurred 
  */
-void CSurfaceSlider::mouseDown(const MouseEvent& e)
+void SurfaceSlider::mouseDown(const MouseEvent& e)
 {
 	float w = static_cast<float>(getLocalBounds().getWidth());
 	float h = static_cast<float>(getLocalBounds().getHeight());
@@ -145,7 +145,7 @@ void CSurfaceSlider::mouseDown(const MouseEvent& e)
  * Called when the mouse is moved while a button is held down. 
  * @param e		Details about the position and status of the mouse event, including the source component in which it occurred
  */
-void CSurfaceSlider::mouseDrag(const MouseEvent& e)
+void SurfaceSlider::mouseDrag(const MouseEvent& e)
 {
 	float w = static_cast<float>(getLocalBounds().getWidth());
 	float h = static_cast<float>(getLocalBounds().getHeight());
@@ -169,7 +169,7 @@ void CSurfaceSlider::mouseDrag(const MouseEvent& e)
  * Reimplemented just to call EndGuiGesture() to inform the host.
  * @param e		Details about the position and status of the mouse event, including the source component in which it occurred
  */
-void CSurfaceSlider::mouseUp(const MouseEvent& e)
+void SurfaceSlider::mouseUp(const MouseEvent& e)
 {
 	ignoreUnused(e);
 
@@ -184,22 +184,22 @@ void CSurfaceSlider::mouseUp(const MouseEvent& e)
 
 /*
 ===============================================================================
- Class CSurfaceMultiSlider
+ Class SurfaceMultiSlider
 ===============================================================================
 */
 
 /**
  * Object constructor.
  */
-CSurfaceMultiSlider::CSurfaceMultiSlider()
+SurfaceMultiSlider::SurfaceMultiSlider()
 {
-	m_selected = INVALID_PROCESSOR_ID;
+	m_currentlyDraggedId = INVALID_PROCESSOR_ID;
 }
 
 /**
  * Object destructor.
  */
-CSurfaceMultiSlider::~CSurfaceMultiSlider()
+SurfaceMultiSlider::~SurfaceMultiSlider()
 {
 }
 
@@ -210,7 +210,7 @@ CSurfaceMultiSlider::~CSurfaceMultiSlider()
  * been called, or because something has happened on the screen that means a section of a window needs to be redrawn.
  * @param g		The graphics context that must be used to do the drawing operations. 
  */
-void CSurfaceMultiSlider::paint(Graphics& g)
+void SurfaceMultiSlider::paint(Graphics& g)
 {
 	auto w = getLocalBounds().toFloat().getWidth();
 	auto h = getLocalBounds().toFloat().getHeight();
@@ -235,12 +235,14 @@ void CSurfaceMultiSlider::paint(Graphics& g)
 	g.drawRect(Rectangle<float>(0.0f, 0.0f, w, h), 1.5f);
 
 	float knobSize = 10.0f;
-	for (auto iter = m_cachedPositions.cbegin(); iter != m_cachedPositions.cend(); ++iter)
+	float highlightedKnobSize = 2 * knobSize;
+
+	for (auto const& posKV : m_cachedPositions)
 	{
-		int inputNo((*iter).second.first);
+		int inputNo(posKV.second._id);
 
 		// Map the x/y coordinates to the pixel-wise dimensions of the surface area.
-		Point<float> pt((*iter).second.second);
+		Point<float> pt(posKV.second._pos);
 		float x = pt.x * w;
 		float y = h - (pt.y * h);
 
@@ -249,11 +251,22 @@ void CSurfaceMultiSlider::paint(Graphics& g)
 		g.setColour(getLookAndFeel().findColour(Slider::thumbColourId).interpolatedWith(shade, 0.3f));
 
 		// Paint knob
-		g.drawEllipse(Rectangle<float>(x - (knobSize / 2.0f), y - (knobSize / 2.0f), knobSize, knobSize), 3.0f);
+		if (posKV.second._selected)
+		{
+			g.drawEllipse(Rectangle<float>(x - (highlightedKnobSize / 2.0f), y - (highlightedKnobSize / 2.0f), highlightedKnobSize, highlightedKnobSize), 6.0f);
 
-		// Input number label
-		g.setFont(Font(11.0, Font::plain));
-		g.drawText(String(inputNo), Rectangle<float>(x - knobSize, y + 3, knobSize * 2.0f, knobSize * 2.0f), Justification::centred, true);
+			// Input number label
+			g.setFont(Font(11.0, Font::plain));
+			g.drawText(String(inputNo), Rectangle<float>(x - highlightedKnobSize, y + 3, highlightedKnobSize * 2.0f, highlightedKnobSize * 2.0f), Justification::centred, true);
+		}
+		else
+		{
+			g.drawEllipse(Rectangle<float>(x - (knobSize / 2.0f), y - (knobSize / 2.0f), knobSize, knobSize), 3.0f);
+
+			// Input number label
+			g.setFont(Font(11.0, Font::plain));
+			g.drawText(String(inputNo), Rectangle<float>(x - knobSize, y + 3, knobSize * 2.0f, knobSize * 2.0f), Justification::centred, true);
+		}
 	}
 }
 
@@ -261,7 +274,7 @@ void CSurfaceMultiSlider::paint(Graphics& g)
  * Called when a mouse button is pressed. 
  * @param e		Details about the position and status of the mouse event, including the source component in which it occurred 
  */
-void CSurfaceMultiSlider::mouseDown(const MouseEvent& e)
+void SurfaceMultiSlider::mouseDown(const MouseEvent& e)
 {
 	float w = static_cast<float>(getLocalBounds().getWidth());
 	float h = static_cast<float>(getLocalBounds().getHeight());
@@ -269,27 +282,31 @@ void CSurfaceMultiSlider::mouseDown(const MouseEvent& e)
 	// Mouse click position (in pixel units)
 	Point<float> mousePos(static_cast<float>(e.getMouseDownPosition().x), static_cast<float>(e.getMouseDownPosition().y));
 	float knobSize = 15.0f;
+	float highlightedKnobSize = 2 * knobSize;
 
-	for (auto iter = m_cachedPositions.cbegin(); iter != m_cachedPositions.cend(); ++iter)
+	for (auto const& posKV : m_cachedPositions)
 	{
 		// Map the x/y coordinates to the pixel-wise dimensions of the surface area.
-		Point<float> pt((*iter).second.second);
+		Point<float> pt(posKV.second._pos);
 		float x = pt.x * w;
 		float y = h - (pt.y * h);
 
 		Path knobPath;
-		knobPath.addEllipse(Rectangle<float>(x - (knobSize / 2.0f), y - (knobSize / 2.0f), knobSize, knobSize));
+		if (posKV.second._selected)
+			knobPath.addEllipse(Rectangle<float>(x - (highlightedKnobSize / 2.0f), y - (highlightedKnobSize / 2.0f), highlightedKnobSize, highlightedKnobSize));
+		else
+			knobPath.addEllipse(Rectangle<float>(x - (knobSize / 2.0f), y - (knobSize / 2.0f), knobSize, knobSize));
 
 		// Check if the mouse click landed inside any of the knobs.
 		if (knobPath.contains(mousePos))
 		{
 			// Set this source as "selected" and begin a drag gesture.
-			m_selected = (*iter).first;
+			m_currentlyDraggedId = posKV.first;
 
-			Controller* ctrl = Controller::GetInstance();
+			auto ctrl = Controller::GetInstance();
 			if (ctrl)
 			{
-				SoundsourceProcessor* processor = ctrl->GetProcessor(m_selected);
+				auto processor = ctrl->GetProcessor(m_currentlyDraggedId);
 				jassert(processor);
 				if (processor)
 				{
@@ -312,14 +329,14 @@ void CSurfaceMultiSlider::mouseDown(const MouseEvent& e)
  * Called when the mouse is moved while a button is held down. 
  * @param e		Details about the position and status of the mouse event, including the source component in which it occurred
  */
-void CSurfaceMultiSlider::mouseDrag(const MouseEvent& e)
+void SurfaceMultiSlider::mouseDrag(const MouseEvent& e)
 {
-	if (m_selected != INVALID_PROCESSOR_ID)
+	if (m_currentlyDraggedId != INVALID_PROCESSOR_ID)
 	{
-		Controller* ctrl = Controller::GetInstance();
+		auto ctrl = Controller::GetInstance();
 		if (ctrl)
 		{
-			SoundsourceProcessor* processor = ctrl->GetProcessor(m_selected);
+			auto processor = ctrl->GetProcessor(m_currentlyDraggedId);
 			if (processor)
 			{
 				// Get mouse pixel-wise position and scale it between 0 and 1.
@@ -339,16 +356,16 @@ void CSurfaceMultiSlider::mouseDrag(const MouseEvent& e)
  * Reimplemented just to call EndGuiGesture() to inform the host.
  * @param e		Details about the position and status of the mouse event, including the source component in which it occurred
  */
-void CSurfaceMultiSlider::mouseUp(const MouseEvent& e)
+void SurfaceMultiSlider::mouseUp(const MouseEvent& e)
 {
 	ignoreUnused(e);
 
-	if (m_selected != INVALID_PROCESSOR_ID)
+	if (m_currentlyDraggedId != INVALID_PROCESSOR_ID)
 	{
-		Controller* ctrl = Controller::GetInstance();
+		auto ctrl = Controller::GetInstance();
 		if (ctrl)
 		{
-			SoundsourceProcessor* processor = ctrl->GetProcessor(m_selected);
+			auto processor = ctrl->GetProcessor(m_currentlyDraggedId);
 			if (processor)
 			{
 				dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[ParamIdx_X])->EndGuiGesture();
@@ -365,7 +382,7 @@ void CSurfaceMultiSlider::mouseUp(const MouseEvent& e)
 		}
 
 		// De-select knob.
-		m_selected = INVALID_PROCESSOR_ID;
+		m_currentlyDraggedId = INVALID_PROCESSOR_ID;
 	}
 }
 
@@ -374,7 +391,7 @@ void CSurfaceMultiSlider::mouseUp(const MouseEvent& e)
  * @param positions	Map where the keys are the PluginIds of each source, while values are pairs of the corresponding 
  *					input number and position coordinates (0.0 to 1.0). 
  */
-void CSurfaceMultiSlider::UpdatePositions(PositionCache positions)
+void SurfaceMultiSlider::UpdatePositions(PositionCache positions)
 {
 	m_cachedPositions = positions;
 }

@@ -113,7 +113,7 @@ Controller::~Controller()
 	Disconnect();
 
 	// Destroy overView window and overView Manager
-	PageComponentManager* pageMgr = PageComponentManager::GetInstance();
+	auto pageMgr = PageComponentManager::GetInstance();
 	if (pageMgr)
 		pageMgr->ClosePageContainer(true);
 
@@ -297,17 +297,31 @@ int Controller::GetProcessorCount() const
 
 /**
  * Get a pointer to a specified processor.
- * @param idx	The index of the desired processor.
+ * @param processorId	The id of the desired processor.
  * @return	The pointer to the desired processor.
  */
-SoundsourceProcessor* Controller::GetProcessor(ProcessorId idx) const
+SoundsourceProcessor* Controller::GetProcessor(ProcessorId processorId) const
 {
 	const ScopedLock lock(m_mutex);
-	if ((idx >= 0) && (idx < m_processors.size()))
-		return m_processors[idx];
+	for (auto processor : m_processors)
+		if (processor->GetProcessorId() == processorId)
+			return processor;
 
-	jassertfalse; // Index out of range!
+	jassertfalse; // id not existing!
 	return nullptr;
+}
+
+/**
+ * Getter for all currently active processor's processorIds
+ * @return	The vector of active processorids
+ */
+std::vector<ProcessorId> Controller::GetProcessorIds() const
+{
+	std::vector<ProcessorId> processorIds;
+	processorIds.reserve(m_processors.size());
+	for (auto const& p : m_processors)
+		processorIds.push_back(p->GetProcessorId());
+	return processorIds;
 }
 
 /**
@@ -512,12 +526,15 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 	if (nodeId != DEFAULT_PROCNODE_ID)
 		return;
 
-	// Do not handle any protocol data except what is received
-	// from DS100 - any data that was sent by 3rd party devices 
-	// is bridged to DS100 and returned by it 
-	// so we can handle the data in the end as well
-	if (senderProtocolId != DS100_1_PROCESSINGPROTOCOL_ID && senderProtocolId != DS100_2_PROCESSINGPROTOCOL_ID)
-		return;
+	if (ProtocolBridgingWrapper::IsBridgingObjectOnly(objectId))
+	{
+		// Do not handle any protocol data except what is received
+		// from DS100 - any data that was sent by 3rd party devices 
+		// is bridged to DS100 and returned by it 
+		// so we can handle the data in the end as well
+		if (senderProtocolId != DS100_1_PROCESSINGPROTOCOL_ID && senderProtocolId != DS100_2_PROCESSINGPROTOCOL_ID)
+			return;
+	}
 
 	const ScopedLock lock(m_mutex);
 
@@ -533,21 +550,19 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 		// Check if the incoming message contains parameters.
 		else
 		{
-			// Parse the Source ID
-			SourceId sourceId = msgData.addrVal.first;
-			jassert(sourceId > 0);
-			if (sourceId > 0)
+			AutomationParameterIndex pIdx = ParamIdx_MaxIndex;
+			DataChangeType change = DCT_None;
+			SourceId sourceId = INVALID_ADDRESS_VALUE;
+			MappingId mappingId = INVALID_ADDRESS_VALUE;
+
+			// Determine which parameter was changed depending on the incoming message's address pattern.
+			switch (objectId)
 			{
-				if (senderProtocolId == DS100_2_PROCESSINGPROTOCOL_ID)
-					sourceId += DS100_CHANNELCOUNT;
-
-				AutomationParameterIndex pIdx = ParamIdx_MaxIndex;
-				DataChangeType change = DCT_None;
-				int mappingId = 0;
-
-				// Determine which parameter was changed depending on the incoming message's address pattern.
-				if (objectId == RemoteObjectIdentifier::ROI_CoordinateMapping_SourcePosition_XY)
+			case RemoteObjectIdentifier::ROI_CoordinateMapping_SourcePosition_XY:
 				{
+					// The Source ID
+					sourceId = msgData.addrVal.first;
+					jassert(sourceId > 0);
 					// The Mapping ID
 					mappingId = msgData.addrVal.second;
 					jassert(mappingId > 0);
@@ -555,92 +570,161 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 					pIdx = ParamIdx_X;
 					change = DCT_SourcePosition;
 				}
-				else if (objectId == RemoteObjectIdentifier::ROI_MatrixInput_ReverbSendGain)
+				break;
+			case RemoteObjectIdentifier::ROI_MatrixInput_ReverbSendGain:
 				{
+					// The Source ID
+					sourceId = msgData.addrVal.first;
+					jassert(sourceId > 0);
+
 					pIdx = ParamIdx_ReverbSendGain;
 					change = DCT_ReverbSendGain;
 				}
-				else if (objectId == RemoteObjectIdentifier::ROI_Positioning_SourceSpread)
+				break;
+			case RemoteObjectIdentifier::ROI_Positioning_SourceSpread:
 				{
+					// The Source ID
+					sourceId = msgData.addrVal.first;
+					jassert(sourceId > 0);
+
 					pIdx = ParamIdx_SourceSpread;
 					change = DCT_SourceSpread;
 				}
-				else if (objectId == RemoteObjectIdentifier::ROI_Positioning_SourceDelayMode)
+				break;
+			case RemoteObjectIdentifier::ROI_Positioning_SourceDelayMode:
 				{
+					// The Source ID
+					sourceId = msgData.addrVal.first;
+					jassert(sourceId > 0);
+
 					pIdx = ParamIdx_DelayMode;
 					change = DCT_DelayMode;
 				}
-
-				// Continue if the message's address pattern was recognized 
-				if (change != DCT_None)
+				break;
+			case RemoteObjectIdentifier::ROI_RemoteProtocolBridge_SoundObjectSelect:
+			case RemoteObjectIdentifier::ROI_MatrixInput_Select:
 				{
-					// Check all Processor instances to see if any of them want the new coordinates.
-					for (i = 0; i < m_processors.size(); ++i)
+					// The Source ID
+					sourceId = msgData.addrVal.first;
+					jassert(sourceId > 0);
+
+					jassert(msgData.valCount == 1 && msgData.valType == RemoteObjectValueType::ROVT_INT);
+
+					change = DCT_ProcessorSelection;
+				}
+				break;
+			case RemoteObjectIdentifier::ROI_RemoteProtocolBridge_UIElementIndexSelect:
+				{
+					jassert(msgData.valCount == 1 && msgData.valType == RemoteObjectValueType::ROVT_INT);
+
+					change = DCT_TabPageSelection;
+				}
+				break;
+			default:
+				break;
+			}
+
+			// If source id is present, it needs to be checked regarding special DS100 extension mode
+			if (sourceId > 0)
+			{
+				if (senderProtocolId == DS100_2_PROCESSINGPROTOCOL_ID)
+					sourceId += DS100_CHANNELCOUNT;
+			}
+
+			// now process what changes were detected to be neccessary to perform
+			if (change == DCT_ProcessorSelection)
+			{
+				if (msgData.valCount == 1 && msgData.valType == RemoteObjectValueType::ROVT_INT)
+				{
+					auto newSelectState = (static_cast<int*>(msgData.payload)[0] == 1);
+					if (IsSoundSourceIdSelected(sourceId) != newSelectState)
 					{
-						// Check for matching Input number.
-						SoundsourceProcessor* processor = m_processors[i];
-						if (sourceId == processor->GetSourceId())
+						SetSoundSourceIdSelectState(sourceId, newSelectState);
+						SetParameterChanged(DCS_Protocol, DCT_ProcessorSelection);
+					}
+				}
+			}
+			else if (change == DCT_TabPageSelection)
+			{
+				if (msgData.valCount == 1 && msgData.valType == RemoteObjectValueType::ROVT_INT)
+				{
+					auto pageMgr = PageComponentManager::GetInstance();
+					if (pageMgr)
+					{
+						auto tabIndex = static_cast<int*>(msgData.payload)[0];
+						pageMgr->SetActiveTab(tabIndex, dontSendNotification);
+					}
+				}
+			}
+			// Continue if the message's address pattern was recognized 
+			else if (change != DCT_None)
+			{
+				// Check all Processor instances to see if any of them want the new coordinates.
+				for (i = 0; i < m_processors.size(); ++i)
+				{
+					// Check for matching Input number.
+					SoundsourceProcessor* processor = m_processors[i];
+					if (sourceId == processor->GetSourceId())
+					{
+						// Check if a SET command was recently sent out and might currently be on transit to the device.
+						// If so, ignore the incoming message so that our local data does not jump back to a now outdated value.
+						bool ignoreResponse = processor->IsParamInTransit(change);
+						ComsMode mode = processor->GetComsMode();
+
+						// Only pass on new positions to processors that are in RX mode.
+						// Also, ignore all incoming messages for properties which this processor wants to send a set command.
+						if (!ignoreResponse && ((mode & (CM_Rx | CM_PollOnce)) != 0) && (processor->GetParameterChanged(DCS_Protocol, change) == false))
 						{
-							// Check if a SET command was recently sent out and might currently be on transit to the device.
-							// If so, ignore the incoming message so that our local data does not jump back to a now outdated value.
-							bool ignoreResponse = processor->IsParamInTransit(change);
-							ComsMode mode = processor->GetComsMode();
-
-							// Only pass on new positions to processors that are in RX mode.
-							// Also, ignore all incoming messages for properties which this processor wants to send a set command.
-							if (!ignoreResponse && ((mode & (CM_Rx | CM_PollOnce)) != 0) && (processor->GetParameterChanged(DCS_Protocol, change) == false))
+							// Special handling for X/Y position, since message contains two parameters and MappingID needs to match too.
+							if (pIdx == ParamIdx_X)
 							{
-								// Special handling for X/Y position, since message contains two parameters and MappingID needs to match too.
-								if (pIdx == ParamIdx_X)
+								if (mappingId == processor->GetMappingId())
 								{
-									if (mappingId == processor->GetMappingId())
-									{
-										jassert(msgData.valCount == 2 && msgData.valType == RemoteObjectValueType::ROVT_FLOAT);
-										// Set the processor's new position.
-										processor->SetParameterValue(DCS_Protocol, ParamIdx_X, static_cast<float*>(msgData.payload)[0]);
-										processor->SetParameterValue(DCS_Protocol, ParamIdx_Y, static_cast<float*>(msgData.payload)[1]);
+									jassert(msgData.valCount == 2 && msgData.valType == RemoteObjectValueType::ROVT_FLOAT);
+									// Set the processor's new position.
+									processor->SetParameterValue(DCS_Protocol, ParamIdx_X, static_cast<float*>(msgData.payload)[0]);
+									processor->SetParameterValue(DCS_Protocol, ParamIdx_Y, static_cast<float*>(msgData.payload)[1]);
 
-										// A request was sent to the DS100 by the Controller because this processor was in CM_PollOnce mode.
-										// Since the response was now processed, set the processor back into it's original mode.
-										if ((mode & CM_PollOnce) == CM_PollOnce)
-										{
-											mode &= ~CM_PollOnce;
-											processor->SetComsMode(DCS_Protocol, mode);
-										}
+									// A request was sent to the DS100 by the Controller because this processor was in CM_PollOnce mode.
+									// Since the response was now processed, set the processor back into it's original mode.
+									if ((mode & CM_PollOnce) == CM_PollOnce)
+									{
+										mode &= ~CM_PollOnce;
+										processor->SetComsMode(DCS_Protocol, mode);
 									}
 								}
+							}
 
-								// All other automation parameters.
-								else
+							// All other automation parameters.
+							else
+							{
+								float newValue;
+								switch (msgData.valType)
 								{
-									float newValue;
-									switch (msgData.valType)
-									{
-									case RemoteObjectValueType::ROVT_INT:
-										newValue = static_cast<float>(static_cast<int*>(msgData.payload)[0]);
-										break;
-									case RemoteObjectValueType::ROVT_FLOAT:
-										newValue = static_cast<float*>(msgData.payload)[0];
-										break;
-									case RemoteObjectValueType::ROVT_STRING:
-										newValue = std::stof(std::string(static_cast<char*>(msgData.payload)));
-										break;
-									case RemoteObjectValueType::ROVT_NONE:
-									default:
-										newValue = 0.0f;
-										break;
-									}
-
-									processor->SetParameterValue(DCS_Protocol, pIdx, newValue);
+								case RemoteObjectValueType::ROVT_INT:
+									newValue = static_cast<float>(static_cast<int*>(msgData.payload)[0]);
+									break;
+								case RemoteObjectValueType::ROVT_FLOAT:
+									newValue = static_cast<float*>(msgData.payload)[0];
+									break;
+								case RemoteObjectValueType::ROVT_STRING:
+									newValue = std::stof(std::string(static_cast<char*>(msgData.payload)));
+									break;
+								case RemoteObjectValueType::ROVT_NONE:
+								default:
+									newValue = 0.0f;
+									break;
 								}
+
+								processor->SetParameterValue(DCS_Protocol, pIdx, newValue);
 							}
 						}
 					}
-
-					// Since pIdx was set, we know the received OSC message has valid format.
-					// -> Signal to reset the number of heartbeats since last response.
-					resetHeartbeat = true;
 				}
+
+				// Since pIdx was set, we know the received OSC message has valid format.
+				// -> Signal to reset the number of heartbeats since last response.
+				resetHeartbeat = true;
 			}
 		}
 
@@ -956,6 +1040,83 @@ void Controller::ActivateSoundSourceId(SourceId sourceId, MappingId mappingId)
 void Controller::DeactivateSoundSourceId(SourceId sourceId, MappingId mappingId)
 {
 	m_protocolBridge.DeactivateDS100SourceId(static_cast<juce::int16>(sourceId), static_cast<juce::int16>(mappingId));
+}
+
+/**
+ * Method to set a list of soundsource ids to be selected, based on given list of processorIds.
+ * This affects the internal map of soundsource select states and triggers setting/updating table/multislider pages.
+ * The additional bool is used to indicate if the current selection shall be extended or cleared and be replaced by new selection.
+ * @param processorIds	The list of processorIds to use to set internal map of soundsourceids selected state
+ * @param clearPrevSelection	Use to indicate if previously active selection shall be replaced or extended.
+ */
+void Controller::SetSelectedProcessorIds(const std::vector<ProcessorId>& processorIds, bool clearPrevSelection)
+{
+	if (clearPrevSelection)
+	{
+		// clear all selected soundobject ids
+		m_soundObjectSelection.clear();
+
+		// iterate through all processors and set each selected state based on given selection list
+		for (auto const& processorId : GetProcessorIds())
+		{
+			auto processor = GetProcessor(processorId);
+			if (processor)
+				SetSoundSourceIdSelectState(processor->GetSourceId(), std::find(processorIds.begin(), processorIds.end(), processorId) != processorIds.end());
+		}
+	}
+	else
+	{
+		// iterate through selection list and set all contained processor ids to selected
+		for (auto const& processorId : processorIds)
+		{
+			auto processor = GetProcessor(processorId);
+			if (processor)
+				SetSoundSourceIdSelectState(processor->GetSourceId(), true);
+		}
+	}
+}
+
+/**
+ * Method to get the list of currently selected processors.
+ * This internally accesses the list of processors and selected soundsourceids and combines the info in new list.
+ * @return The list of currently selected processors.
+ */
+const std::vector<ProcessorId> Controller::GetSelectedProcessorIds()
+{
+	std::vector<ProcessorId> processorIds;
+	processorIds.reserve(m_soundObjectSelection.size());
+	for (auto const& processor : m_processors)
+	{
+		auto sourceId = processor->GetSourceId();
+		if ((m_soundObjectSelection.count(sourceId) > 0) && m_soundObjectSelection.at(sourceId))
+			processorIds.push_back(processor->GetProcessorId());
+	}
+
+	return processorIds;
+}
+
+/**
+ * Method to set a soundsource to be selected. This affects the internal map of soundsource select states
+ * and triggers setting/updating table/multislider pages.
+ * @param sourceId	The sourceId to modify regarding selected state
+ * @param selected	The selected state to set.
+ */
+void Controller::SetSoundSourceIdSelectState(SourceId sourceId, bool selected)
+{
+	m_soundObjectSelection[sourceId] = selected;
+}
+
+/**
+ * Method to get a soundsource id selected state.
+ * @param sourceId	The sourceId to modify regarding selected state
+ * @param selected	The selected state to set.
+ */
+bool Controller::IsSoundSourceIdSelected(SourceId sourceId)
+{
+	if (m_soundObjectSelection.count(sourceId) > 0)
+		return m_soundObjectSelection[sourceId];
+	else
+		return false;
 }
 
 /**

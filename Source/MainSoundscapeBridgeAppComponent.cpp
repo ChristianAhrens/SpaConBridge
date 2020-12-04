@@ -88,8 +88,8 @@ MainSoundscapeBridgeAppComponent::~MainSoundscapeBridgeAppComponent()
         // Delete the processor instances held in controller externally,
         // since we otherwise would run into a loop ~Controller -> Controller::RemoveProcessor -> 
         // ~SoundsourceProcessor -> Controller::RemoveProcessor
-        while(ctrl->GetProcessorCount() > 0)
-            delete ctrl->GetProcessor(0);
+        for (auto const& processorId : ctrl->GetProcessorIds())
+            delete ctrl->GetProcessor(processorId);
 
         ctrl->DestroyInstance();
     }

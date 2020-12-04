@@ -75,7 +75,8 @@ public:
 	ProcessorId AddProcessor(DataChangeSource changeSource, SoundsourceProcessor* p);
 	void RemoveProcessor(SoundsourceProcessor* p);
 	int GetProcessorCount() const;
-	SoundsourceProcessor* GetProcessor(ProcessorId idx) const;
+	SoundsourceProcessor* GetProcessor(ProcessorId processorId) const;
+	std::vector<ProcessorId> GetProcessorIds() const;
 
 	//==========================================================================
 	static String GetDefaultDS100IpAddress();
@@ -96,6 +97,12 @@ public:
 	//==========================================================================
 	void ActivateSoundSourceId(SourceId sourceId, MappingId mappingId);
 	void DeactivateSoundSourceId(SourceId sourceId, MappingId mappingId);
+
+	//==========================================================================
+	void SetSelectedProcessorIds(const std::vector<ProcessorId>& processorIds, bool clearPrevSelection);
+	const std::vector<ProcessorId> GetSelectedProcessorIds();
+	void SetSoundSourceIdSelectState(SourceId sourceId, bool selected);
+	bool IsSoundSourceIdSelected(SourceId sourceId);
 
 	//==========================================================================
 	ProtocolBridgingType GetActiveProtocolBridging();
@@ -157,6 +164,7 @@ protected:
 	int								m_heartBeatsRx;			/**< Number of timer intervals since the last successful OSC message was received. */
 	int								m_heartBeatsTx;			/**< Number of timer intervals since the last OSC message was sent out. */
 	CriticalSection					m_mutex;				/**< A re-entrant mutex. Safety first. */
+	std::map<SourceId, bool>		m_soundObjectSelection;	/**< The current select state of sound objects. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Controller)
 };

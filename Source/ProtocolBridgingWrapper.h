@@ -75,8 +75,10 @@ public:
 	ProtocolBridgingWrapper();
 	~ProtocolBridgingWrapper();
 
+	//==========================================================================
 	void AddListener(ProtocolBridgingWrapper::Listener* listener);
 
+	//==========================================================================
 	void HandleNodeData(NodeId nodeId, ProtocolId senderProtocolId, ProtocolType senderProtocolType, RemoteObjectIdentifier objectId, RemoteObjectMessageData& msgData) override;
 	bool SendMessage(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData);
 
@@ -153,6 +155,9 @@ public:
 	//==========================================================================
 	void Disconnect();
 	void Reconnect();
+
+	//==========================================================================
+	static bool IsBridgingObjectOnly(RemoteObjectIdentifier id);
 
 private:
 	//==========================================================================

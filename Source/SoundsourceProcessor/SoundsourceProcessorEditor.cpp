@@ -76,7 +76,7 @@ static constexpr int GUI_UPDATE_DELAY_TICKS = 15;
 SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& parent)
 	: AudioProcessorEditor(&parent)
 {
-	m_surfaceSlider = std::make_unique<CSurfaceSlider>(&parent);
+	m_surfaceSlider = std::make_unique<SurfaceSlider>(&parent);
 	m_surfaceSlider->setWantsKeyboardFocus(true);
 	addAndMakeVisible(m_surfaceSlider.get());
 

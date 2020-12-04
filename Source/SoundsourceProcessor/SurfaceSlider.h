@@ -46,11 +46,11 @@ namespace SoundscapeBridgeApp
 /**
  * SurfaceSlider class provides a 2D-Slider or "X/Y controller".
  */
-class CSurfaceSlider  : public Component
+class SurfaceSlider  : public Component
 {
 public:
-	CSurfaceSlider(AudioProcessor* parent);
-	~CSurfaceSlider() override;
+	SurfaceSlider(AudioProcessor* parent);
+	~SurfaceSlider() override;
 
 	void paint (Graphics& g) override;
 	void mouseDown (const MouseEvent& e) override;
@@ -60,20 +60,29 @@ public:
 private:
 	AudioProcessor*	m_parent = nullptr; /**> AudioProcessor object to act as parent to this component. */
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CSurfaceSlider)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SurfaceSlider)
 };
 
 
 /**
  * SurfaceSlider for displaying and controlling multiple sources.
  */
-class CSurfaceMultiSlider  : public Component
+class SurfaceMultiSlider  : public Component
 {
 public:
-	typedef std::map<ProcessorId, std::pair<int, Point<float>>> PositionCache;
+	struct SourcePosition
+	{
+		SourcePosition() : _id(-1), _pos(Point<float>(0.0f, 0.0f)), _selected(false) {};
+		SourcePosition(SourceId id, const Point<float>& pos, bool selected) : _id(id), _pos(pos), _selected(selected) {};
 
-	CSurfaceMultiSlider();
-	~CSurfaceMultiSlider() override;
+		SourceId		_id;
+		Point<float>	_pos;
+		bool			_selected;
+	};
+	typedef std::map<ProcessorId, SourcePosition> PositionCache;
+
+	SurfaceMultiSlider();
+	~SurfaceMultiSlider() override;
 
 	void UpdatePositions(PositionCache positions);
 
@@ -84,11 +93,12 @@ public:
 
 private:
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CSurfaceMultiSlider)
-	ProcessorId		m_selected;			/**> ProcessorId of the currently selected knob, if any. */
-	PositionCache	m_cachedPositions;	/**> To save us from iterating over all Plug-ins at every click, cache the source positions.
-										 * Keys are the PluginIds of each source, while values are pairs of the corresponding
-										 * input number and position coordinates (0.0 to 1.0). */
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SurfaceMultiSlider)
+	ProcessorId				m_currentlyDraggedId;	/**> ProcessorId of the currently selected knob, if any. */
+	std::vector<SourceId>	m_highlightedIds;		/**> SourceIds of the currently highlighted knobs, if any. */
+	PositionCache			m_cachedPositions;		/**> To save us from iterating over all Plug-ins at every click, cache the source positions.
+													 * Keys are the PluginIds of each source, while values are pairs of the corresponding
+													 * input number and position coordinates (0.0 to 1.0). */
 };
 
 

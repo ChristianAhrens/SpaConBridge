@@ -148,13 +148,18 @@ public:
 	static bool LessThanComsMode(ProcessorId pId1, ProcessorId pId2);
 	static bool LessThanBridgingMute(ProcessorId pId1, ProcessorId pId2);
 
-	ProcessorId GetProcessorIdForRow(int rowNumber);
-	std::vector<ProcessorId> GetProcessorIdsForRows(std::vector<int> rowNumbers);
-	std::vector<int> GetSelectedRows() const;
-	void SelectAllRows(bool all);
+	ProcessorId GetProcessorIdForRow(int rowNumber) const;
+	std::vector<ProcessorId> GetProcessorIdsForRows(const std::vector<int>& rowNumbers) const;
+	int GetRowForProcessorId(ProcessorId processorId) const;
+	std::vector<int> GetRowsForProcessorIds(const std::vector<ProcessorId>& processorIds) const;
+
 	void RecreateTableRowIds();
 	void UpdateTable();
 	TableListBox& GetTable() { return m_table; }
+
+	std::vector<int> GetSelectedRows() const;
+	void SetSelectedRows(const std::vector<int>& rows);
+	void SelectAllRows(bool all);
 
 	//==========================================================================
 	void backgroundClicked(const MouseEvent &) override;
@@ -173,8 +178,8 @@ public:
 	std::function<void(ProcessorId)>	currentSelectedProcessorChanged;
 
 private:
-	TableListBox				m_table;	/**> The table component itself. */
-	std::vector<ProcessorId>	m_ids;		/**> Local list of Plug-in instance IDs, one for each row in the table. */
+	TableListBox				m_table;			/**> The table component itself. */
+	std::vector<ProcessorId>	m_processorIds;		/**> Local list of Plug-in instance IDs, one for each row in the table. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TableModelComponent)
 };

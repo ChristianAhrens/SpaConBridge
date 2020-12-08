@@ -73,6 +73,7 @@ private:
 class SettingsSectionsComponent : 
 	public Component, 
 	public TextEditor::Listener,
+	public ComboBox::Listener,
 	public JUCEAppBasics::SplitButtonComponent::Listener
 {
 public:
@@ -94,9 +95,14 @@ public:
 	void textEditorFocusLost(TextEditor&) override;
 
 	//==========================================================================
+	void comboBoxChanged(ComboBox* comboBoxThatHasChanged) override;
+
+	//==========================================================================
 	void setSettingsSectionActiveState(HeaderWithElmListComponent* settingsSection, bool activeState);
 
 private:
+	void updateAvailableMidiInputDevices();
+
 	//==========================================================================
 	void textEditorUpdated(TextEditor&);
 
@@ -155,6 +161,18 @@ private:
 	std::unique_ptr<Label>						m_GenericOSCListeningPortLabel;
 	std::unique_ptr<TextEditor>					m_GenericOSCRemotePortEdit;
 	std::unique_ptr<Label>						m_GenericOSCRemotePortLabel;
+
+	// Generic MIDI settings section
+	std::unique_ptr<HeaderWithElmListComponent>	m_GenericMIDIBridgingSettings;
+	std::unique_ptr<ComboBox>					m_GenericMIDIInputDeviceSelect;
+	std::unique_ptr<Label>						m_GenericMIDIInputDeviceSelectLabel;
+	std::unique_ptr<Label>						m_GenericMIDIHardcodedWarningLabel;
+	std::unique_ptr<Label>						m_GenericMIDIHardcodedMatrixInputSelectLabel;
+	std::unique_ptr<Label>						m_GenericMIDIHardcodedXValueLabel;
+	std::unique_ptr<Label>						m_GenericMIDIHardcodedYValueLabel;
+	std::unique_ptr<Label>						m_GenericMIDIHardcodedReverbSendGainLabel;
+	std::unique_ptr<Label>						m_GenericMIDIHardcodedSourceSpreadLabel;
+	std::unique_ptr<Label>						m_GenericMIDIHardcodedDelayModeLabel;
 };
 
 /**

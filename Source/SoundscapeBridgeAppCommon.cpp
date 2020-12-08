@@ -119,8 +119,9 @@ const Colour GetProtocolBridgingColour(ProtocolBridgingType type)
 		return Colour(255, 217, 115);
 	case PBT_BlacktraxRTTrPM:
 		return Colour(0, 174, 239);
-	case PBT_DS100:
 	case PBT_GenericMIDI:
+		return Colour(110, 152, 196);
+	case PBT_DS100:
 	case PBT_YamahaSQ:
 	case PBT_HUI:
 	case PBT_None:

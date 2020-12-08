@@ -151,6 +151,9 @@ bool ProtocolBridgingWrapper::setStateXml(XmlElement* stateXml)
 			auto genericOSCProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(GENERICOSC_PROCESSINGPROTOCOL_ID));
 			if (genericOSCProtocolXmlElement)
 				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericOSC, *genericOSCProtocolXmlElement));
+			auto genericMIDIProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(GENERICMIDI_PROCESSINGPROTOCOL_ID));
+			if (genericMIDIProtocolXmlElement)
+				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericMIDI, *genericMIDIProtocolXmlElement));
 
 			return m_processingNode.setStateXml(nodeXmlElement);
 		}
@@ -235,6 +238,14 @@ void ProtocolBridgingWrapper::SetupBridgingNode()
 	{
 		m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericOSC, *genericOSCBridgingXmlElement));
 		nodeXmlElement->addChildElement(genericOSCBridgingXmlElement.release());
+	}
+
+	// GenericMIDI protocol - RoleB
+	auto genericMIDIBridgingXmlElement = SetupGenericMIDIBridgingProtocol();
+	if (genericMIDIBridgingXmlElement)
+	{
+		m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericMIDI, *genericMIDIBridgingXmlElement));
+		nodeXmlElement->addChildElement(genericMIDIBridgingXmlElement.release());
 	}
 
 	m_processingNode.setStateXml(nodeXmlElement.get());
@@ -330,6 +341,31 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupGenericOSCBridgingProt
 		auto ipAdressXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
 		if (ipAdressXmlElement)
 			ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
+
+		protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDCHANNELS));
+	}
+
+	return protocolBXmlElement;
+}
+
+/**
+ * Method to create the default generic MIDI bridging protocol xml element.
+ * @return	The protocol xml element that was created
+ */
+std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupGenericMIDIBridgingProtocol()
+{
+	// GenericOSC protocol - RoleB
+	auto protocolBXmlElement = std::make_unique<XmlElement>(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLB));
+	if (protocolBXmlElement)
+	{
+		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), GENERICMIDI_PROCESSINGPROTOCOL_ID);
+
+		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), ProcessingEngineConfig::ProtocolTypeToString(PT_MidiProtocol));
+		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::USESACTIVEOBJ), 0);
+
+		auto inputDeviceIndexXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::INPUTDEVICE));
+		if (inputDeviceIndexXmlElement)
+			inputDeviceIndexXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::DEVICEINDEX), PROTOCOL_DEFAULT_INPUTDEVICEINDEX);
 
 		protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDCHANNELS));
 	}
@@ -713,6 +749,69 @@ bool ProtocolBridgingWrapper::SetProtocolMappingArea(ProtocolId protocolId, int 
 }
 
 /**
+ * Gets the protocol's currently set input device index, if available for the given protocol.
+ * @param protocolId The id of the protocol for which to get the currently configured inputdevice index
+ * @return	The input device index
+ */
+int ProtocolBridgingWrapper::GetProtocolInputDeviceIndex(ProtocolId protocolId)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto inputDeviceIndexXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::INPUTDEVICE));
+			if (inputDeviceIndexXmlElement)
+			{
+				return inputDeviceIndexXmlElement->getIntAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::DEVICEINDEX));
+			}
+		}
+	}
+
+	return INVALID_PORT_VALUE;
+}
+
+/**
+ * Sets the given protocol mapping area id.
+ * This method inserts the mapping area id into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param protocolId The id of the protocol for which to set the ip address
+ * @param inputDeviceIndex	The new device index to set as input device
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetProtocolInputDeviceIndex(ProtocolId protocolId, int inputDeviceIndex, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto inputDeviceIndexXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::INPUTDEVICE));
+			if (inputDeviceIndexXmlElement)
+			{
+				inputDeviceIndexXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::DEVICEINDEX), inputDeviceIndex);
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+
+		m_processingNode.setStateXml(nodeXmlElement);
+
+		if (!dontSendNotification)
+			triggerConfigurationUpdate(false);
+
+		return true;
+	}
+	else
+		return false;
+}
+
+/**
  * Getter for the active protocol bridging types (active protocols RoleB - those are used for bridging to DS100 running as RoleA, see RemoteProtocolBridge for details)
  * @return The bitfield containing all active bridging types
  */
@@ -734,6 +833,10 @@ ProtocolBridgingType ProtocolBridgingWrapper::GetActiveBridgingProtocols()
 		protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(GENERICOSC_PROCESSINGPROTOCOL_ID));
 		if (protocolXmlElement)
 			activeBridgingTypes |= PBT_GenericOSC;
+
+		protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(GENERICMIDI_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+			activeBridgingTypes |= PBT_GenericMIDI;
 	}
 
 	return activeBridgingTypes;
@@ -756,6 +859,8 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 		auto removeRTTrPMBridging = (!(desiredActiveBridgingTypes & PBT_BlacktraxRTTrPM) && (currentlyActiveBridgingTypes & PBT_BlacktraxRTTrPM));
 		auto addGenericOSCBridging = ((desiredActiveBridgingTypes & PBT_GenericOSC) && !(currentlyActiveBridgingTypes & PBT_GenericOSC));
 		auto removeGenericOSCBridging = (!(desiredActiveBridgingTypes & PBT_GenericOSC) && (currentlyActiveBridgingTypes & PBT_GenericOSC));
+		auto addGenericMIDIBridging = ((desiredActiveBridgingTypes & PBT_GenericMIDI) && !(currentlyActiveBridgingTypes & PBT_GenericMIDI));
+		auto removeGenericMIDIBridging = (!(desiredActiveBridgingTypes & PBT_GenericMIDI) && (currentlyActiveBridgingTypes & PBT_GenericMIDI));
 
 		auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 		if (nodeXmlElement)
@@ -798,6 +903,20 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 				if (protocolXmlElement)
 				{
 					m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericOSC, *protocolXmlElement));
+					nodeXmlElement->removeChildElement(protocolXmlElement, true);
+				}
+			}
+
+			if (addGenericMIDIBridging)
+			{
+				nodeXmlElement->addChildElement(std::make_unique<XmlElement>(m_bridgingProtocolCacheMap.at(PBT_GenericMIDI)).release());
+			}
+			else if (removeGenericMIDIBridging)
+			{
+				auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(GENERICMIDI_PROCESSINGPROTOCOL_ID));
+				if (protocolXmlElement)
+				{
+					m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericMIDI, *protocolXmlElement));
 					nodeXmlElement->removeChildElement(protocolXmlElement, true);
 				}
 			}
@@ -1517,6 +1636,65 @@ int ProtocolBridgingWrapper::GetGenericOSCRemotePort()
 bool ProtocolBridgingWrapper::SetGenericOSCRemotePort(int remotePort, bool dontSendNotification)
 {
 	return SetProtocolRemotePort(GENERICOSC_PROCESSINGPROTOCOL_ID, remotePort, dontSendNotification);
+}
+
+/**
+ * Gets the mute state of the given source
+ * @param sourceId The id of the source for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteGenericMIDISourceId(SourceId sourceId)
+{
+	return GetMuteProtocolSourceId(GENERICMIDI_PROCESSINGPROTOCOL_ID, sourceId);
+}
+
+/**
+ * Sets the given source to be (un-)muted
+ * @param sourceId The id of the source that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteGenericMIDISourceId(SourceId sourceId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolSourceId(GENERICMIDI_PROCESSINGPROTOCOL_ID, sourceId);
+	else
+		return SetUnmuteProtocolSourceId(GENERICMIDI_PROCESSINGPROTOCOL_ID, sourceId);
+}
+
+/**
+ * Sets the given sources to be (un-)muted
+ * @param sourceIds The ids of the sources that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteGenericMIDISourceIds(const std::vector<SourceId>& sourceIds, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolSourceIds(GENERICMIDI_PROCESSINGPROTOCOL_ID, sourceIds);
+	else
+		return SetUnmuteProtocolSourceIds(GENERICMIDI_PROCESSINGPROTOCOL_ID, sourceIds);
+}
+
+/**
+ * Gets the desired protocol input device index.
+ * This method forwards the call to the generic implementation.
+ * @return	The requested input device index
+ */
+int ProtocolBridgingWrapper::GetGenericMIDIInputDeviceIndex()
+{
+	return GetProtocolInputDeviceIndex(GENERICMIDI_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol input device index.
+ * This method forwards the call to the generic implementation.
+ * @param	inputDeviceIndex	The protocol input device index to set
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetGenericMIDIInputDeviceIndex(int inputDeviceIndex, bool dontSendNotification)
+{
+	return SetProtocolInputDeviceIndex(GENERICMIDI_PROCESSINGPROTOCOL_ID, inputDeviceIndex, dontSendNotification);
 }
 
 }

@@ -245,6 +245,8 @@ void HeaderWithElmListComponent::resized()
  */
 SettingsSectionsComponent::SettingsSectionsComponent()
 {
+
+	// TextEditor input filters to be used for different editors
 	m_intervalEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890"); // 7 digits: "9999 ms"
 	m_ipAddressEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(15, "1234567890."); // 15 digits: "255.255.255.255"
 	m_portEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(5, "1234567890"); // 5 digits: "65535"
@@ -432,6 +434,56 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCRemotePortEdit.get(), true, false);
 
 	m_GenericOSCBridgingSettings->resized();
+
+	// Generic MIDI settings section
+	m_GenericMIDIBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
+	m_GenericMIDIBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_GenericMIDI) + " Bridging");
+	m_GenericMIDIBridgingSettings->setHasActiveToggle(true);
+	m_GenericMIDIBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
+	addAndMakeVisible(m_GenericMIDIBridgingSettings.get());
+
+	m_GenericMIDIInputDeviceSelect = std::make_unique<ComboBox>();
+	m_GenericMIDIInputDeviceSelect->setTextWhenNoChoicesAvailable("No MIDI Inputs Enabled");
+	updateAvailableMidiInputDevices();
+	m_GenericMIDIInputDeviceSelect->addListener(this);
+	m_GenericMIDIInputDeviceSelectLabel = std::make_unique<Label>();
+	m_GenericMIDIInputDeviceSelectLabel->setJustificationType(Justification::centred);
+	m_GenericMIDIInputDeviceSelectLabel->setText("MIDI Input", dontSendNotification);
+	m_GenericMIDIInputDeviceSelectLabel->attachToComponent(m_GenericMIDIInputDeviceSelect.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIInputDeviceSelectLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIInputDeviceSelect.get(), true, false);
+
+	m_GenericMIDIHardcodedMatrixInputSelectLabel = std::make_unique<Label>();
+	m_GenericMIDIHardcodedMatrixInputSelectLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIHardcodedMatrixInputSelectLabel->setText("Object (De-)Select: Note 48...", dontSendNotification);
+	m_GenericMIDIHardcodedXValueLabel = std::make_unique<Label>();
+	m_GenericMIDIHardcodedXValueLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIHardcodedXValueLabel->setText("Pos. X: Pitchwheel", dontSendNotification);
+	m_GenericMIDIHardcodedYValueLabel = std::make_unique<Label>();
+	m_GenericMIDIHardcodedYValueLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIHardcodedYValueLabel->setText("Pos. Y: Ctrl 1", dontSendNotification);
+	m_GenericMIDIHardcodedReverbSendGainLabel = std::make_unique<Label>();
+	m_GenericMIDIHardcodedReverbSendGainLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIHardcodedReverbSendGainLabel->setText("Rvb Snd Gain: Ctrl 5", dontSendNotification);
+	m_GenericMIDIHardcodedSourceSpreadLabel = std::make_unique<Label>();
+	m_GenericMIDIHardcodedSourceSpreadLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIHardcodedSourceSpreadLabel->setText("Object Spread: Ctrl 6", dontSendNotification);
+	m_GenericMIDIHardcodedDelayModeLabel = std::make_unique<Label>();
+	m_GenericMIDIHardcodedDelayModeLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIHardcodedDelayModeLabel->setText("Object DlyMode: Ctrl 7", dontSendNotification);
+	m_GenericMIDIHardcodedWarningLabel = std::make_unique<Label>();
+	m_GenericMIDIHardcodedWarningLabel->setJustificationType(Justification::centred);
+	m_GenericMIDIHardcodedWarningLabel->setText("Currently hardcoded:", dontSendNotification);
+	m_GenericMIDIHardcodedWarningLabel->attachToComponent(m_GenericMIDIHardcodedMatrixInputSelectLabel.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedWarningLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedMatrixInputSelectLabel.get(), true, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedXValueLabel.get(), true, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedYValueLabel.get(), true, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedReverbSendGainLabel.get(), true, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedSourceSpreadLabel.get(), true, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedDelayModeLabel.get(), true, false);
+
+	m_GenericMIDIBridgingSettings->resized();
 }
 
 /**
@@ -464,6 +516,7 @@ void SettingsSectionsComponent::resized()
 		+ m_DiGiCoBridgingSettings->getHeight()
 		+ m_RTTrPMBridgingSettings->getHeight()
 		+ m_GenericOSCBridgingSettings->getHeight()
+		+ m_GenericMIDIBridgingSettings->getHeight()
 		+ (3 * 2 * margin);
 
 	auto bounds = getLocalBounds();
@@ -492,6 +545,9 @@ void SettingsSectionsComponent::resized()
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
 		FlexItem(*m_GenericOSCBridgingSettings.get())
 			.withHeight(static_cast<float>(m_GenericOSCBridgingSettings->getHeight()))
+			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
+		FlexItem(*m_GenericMIDIBridgingSettings.get())
+			.withHeight(static_cast<float>(m_GenericMIDIBridgingSettings->getHeight()))
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)) });
 	fb.performLayout(bounds);
 }
@@ -605,6 +661,21 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 }
 
 /**
+ * Reimplemented method to handle combobox changes
+ * @param comboBox	The comboBox component that changes were made in
+ */
+void SettingsSectionsComponent::comboBoxChanged(ComboBox* comboBox)
+{
+	Controller* ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
+	// Generic MIDI settings section
+	if (m_GenericMIDIInputDeviceSelect && m_GenericMIDIInputDeviceSelect.get() == comboBox)
+		ctrl->SetBridgingInputDeviceIndex(PBT_GenericMIDI, m_GenericMIDIInputDeviceSelect->getSelectedId() - 1);
+}
+
+/**
  * Proxy method to activate a single bridging protocol in controller.
  * @param sectionType	The protocolType to be active from now on.
  */
@@ -621,11 +692,30 @@ void SettingsSectionsComponent::setSettingsSectionActiveState(HeaderWithElmListC
 		sectionType = PBT_BlacktraxRTTrPM;
 	else if (settingsSection == m_GenericOSCBridgingSettings.get())
 		sectionType = PBT_GenericOSC;
+	else if (settingsSection == m_GenericMIDIBridgingSettings.get())
+		sectionType = PBT_GenericMIDI;
 
 	if (activeState)
 		ctrl->SetActiveProtocolBridging(ctrl->GetActiveProtocolBridging() | sectionType);
 	else
 		ctrl->SetActiveProtocolBridging(ctrl->GetActiveProtocolBridging() & ~sectionType);
+}
+
+/**
+ * Private helper method to update midi input device selection dropdown contents.
+ */
+void SettingsSectionsComponent::updateAvailableMidiInputDevices()
+{
+	if (!m_GenericMIDIInputDeviceSelect)
+		return;
+
+	// collect available devices to populate our dropdown
+	auto midiInputs = juce::MidiInput::getAvailableDevices();
+	juce::StringArray midiInputNames;
+	for (auto input : midiInputs)
+		midiInputNames.add(input.name);
+
+	m_GenericMIDIInputDeviceSelect->addItemList(midiInputNames, 1);
 }
 
 /**
@@ -703,6 +793,13 @@ void SettingsSectionsComponent::processUpdatedConfig()
 		m_GenericOSCListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_GenericOSC)), false);
 	if (m_GenericOSCRemotePortEdit)
 		m_GenericOSCRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_GenericOSC)), false);
+
+	// Generic MIDI settings section
+	auto GenericMIDIBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_GenericMIDI) == PBT_GenericMIDI;
+	if (m_GenericMIDIBridgingSettings)
+		m_GenericMIDIBridgingSettings->setToggleActiveState(GenericMIDIBridgingActive);
+	if (m_GenericMIDIInputDeviceSelect)
+		m_GenericMIDIInputDeviceSelect->setSelectedId(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI) + 1, dontSendNotification);
 }
 
 /**

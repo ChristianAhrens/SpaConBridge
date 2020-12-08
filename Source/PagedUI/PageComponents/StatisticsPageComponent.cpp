@@ -190,6 +190,8 @@ void StatisticsPlot::ResetStatisticsPlot()
 		m_plottedBridgingTypes.add(PBT_BlacktraxRTTrPM);
 	if ((bridgingTypes & PBT_GenericOSC) == PBT_GenericOSC)
 		m_plottedBridgingTypes.add(PBT_GenericOSC);
+	if ((bridgingTypes & PBT_GenericMIDI) == PBT_GenericMIDI)
+		m_plottedBridgingTypes.add(PBT_GenericMIDI);
 	if ((bridgingTypes & PBT_DS100) == PBT_DS100)
 		m_plottedBridgingTypes.add(PBT_DS100);
 
@@ -632,6 +634,9 @@ void StatisticsPageComponent::HandleMessageData(NodeId nodeId, ProtocolId sender
 	case DS100_1_PROCESSINGPROTOCOL_ID:
 	case DS100_2_PROCESSINGPROTOCOL_ID:
 		bridgingProtocol = PBT_DS100;
+		break;
+	case GENERICMIDI_PROCESSINGPROTOCOL_ID:
+		bridgingProtocol = PBT_GenericMIDI;
 		break;
 	default:
 		return;

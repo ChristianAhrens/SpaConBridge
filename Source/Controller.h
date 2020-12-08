@@ -121,6 +121,8 @@ public:
 	bool SetBridgingRemotePort(ProtocolBridgingType bridgingType, int remotePort, bool dontSendNotification = false);
 	int GetBridgingMappingArea(ProtocolBridgingType bridgingType);
 	bool SetBridgingMappingArea(ProtocolBridgingType bridgingType, int mappingAreaId, bool dontSendNotification = false);
+	int GetBridgingInputDeviceIndex(ProtocolBridgingType bridgingType);
+	bool SetBridgingInputDeviceIndex(ProtocolBridgingType bridgingType, int inputDeviceIndex, bool dontSendNotification = false);
 
 	//==========================================================================
 	void InitGlobalSettings(DataChangeSource changeSource, String ipAddress, int rate);

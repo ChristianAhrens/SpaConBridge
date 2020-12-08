@@ -419,7 +419,7 @@ void CustomButtonTabbedComponent::currentTabChanged(int newCurrentTabIndex, cons
 
 	PageContainerComponent* parent = dynamic_cast<PageContainerComponent*>(getParentComponent());
 	if (parent)
-		parent->UpdateGui(true);
+		parent->UpdateGui(false);
 }
 
 /**

@@ -453,6 +453,36 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIInputDeviceSelectLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIInputDeviceSelect.get(), true, false);
 
+	m_GenericMIDIHardcodedMatrixInputSelectLabel = std::make_unique<Label>();
+	m_GenericMIDIHardcodedMatrixInputSelectLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIHardcodedMatrixInputSelectLabel->setText("Object (De-)Select: Note 48...", dontSendNotification);
+	m_GenericMIDIHardcodedXValueLabel = std::make_unique<Label>();
+	m_GenericMIDIHardcodedXValueLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIHardcodedXValueLabel->setText("Pos. X: Pitchwheel", dontSendNotification);
+	m_GenericMIDIHardcodedYValueLabel = std::make_unique<Label>();
+	m_GenericMIDIHardcodedYValueLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIHardcodedYValueLabel->setText("Pos. Y: Ctrl 1", dontSendNotification);
+	m_GenericMIDIHardcodedReverbSendGainLabel = std::make_unique<Label>();
+	m_GenericMIDIHardcodedReverbSendGainLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIHardcodedReverbSendGainLabel->setText("Rvb Snd Gain: Ctrl 5", dontSendNotification);
+	m_GenericMIDIHardcodedSourceSpreadLabel = std::make_unique<Label>();
+	m_GenericMIDIHardcodedSourceSpreadLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIHardcodedSourceSpreadLabel->setText("Object Spread: Ctrl 6", dontSendNotification);
+	m_GenericMIDIHardcodedDelayModeLabel = std::make_unique<Label>();
+	m_GenericMIDIHardcodedDelayModeLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIHardcodedDelayModeLabel->setText("Object DlyMode: Ctrl 7", dontSendNotification);
+	m_GenericMIDIHardcodedWarningLabel = std::make_unique<Label>();
+	m_GenericMIDIHardcodedWarningLabel->setJustificationType(Justification::centred);
+	m_GenericMIDIHardcodedWarningLabel->setText("Currently hardcoded:", dontSendNotification);
+	m_GenericMIDIHardcodedWarningLabel->attachToComponent(m_GenericMIDIHardcodedMatrixInputSelectLabel.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedWarningLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedMatrixInputSelectLabel.get(), true, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedXValueLabel.get(), true, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedYValueLabel.get(), true, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedReverbSendGainLabel.get(), true, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedSourceSpreadLabel.get(), true, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedDelayModeLabel.get(), true, false);
+
 	m_GenericMIDIBridgingSettings->resized();
 }
 

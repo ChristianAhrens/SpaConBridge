@@ -166,6 +166,13 @@ private:
 	std::unique_ptr<HeaderWithElmListComponent>	m_GenericMIDIBridgingSettings;
 	std::unique_ptr<ComboBox>					m_GenericMIDIInputDeviceSelect;
 	std::unique_ptr<Label>						m_GenericMIDIInputDeviceSelectLabel;
+	std::unique_ptr<Label>						m_GenericMIDIHardcodedWarningLabel;
+	std::unique_ptr<Label>						m_GenericMIDIHardcodedMatrixInputSelectLabel;
+	std::unique_ptr<Label>						m_GenericMIDIHardcodedXValueLabel;
+	std::unique_ptr<Label>						m_GenericMIDIHardcodedYValueLabel;
+	std::unique_ptr<Label>						m_GenericMIDIHardcodedReverbSendGainLabel;
+	std::unique_ptr<Label>						m_GenericMIDIHardcodedSourceSpreadLabel;
+	std::unique_ptr<Label>						m_GenericMIDIHardcodedDelayModeLabel;
 };
 
 /**

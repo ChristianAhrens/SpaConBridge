@@ -300,7 +300,7 @@ StatisticsLog::StatisticsLog()
 	m_table->getHeader().addColumn("Remote Object", SLC_ObjectName, 120, 120, -1, tableHeaderFlags);
 	m_table->getHeader().addColumn("Ch.", SLC_SourceId, 35, 35, -1, tableHeaderFlags);
 	m_table->getHeader().addColumn("Value", SLC_Value, 70, 70, -1, tableHeaderFlags);
-	m_table->getHeader().addColumn("Type", SLC_BridgingName, 60, 60, -1, tableHeaderFlags);
+	m_table->getHeader().addColumn("Type", SLC_LogSourceName, 60, 60, -1, tableHeaderFlags);
 
 	startTimer(PC_HOR_DEFAULTSTEPPING);
 }
@@ -340,13 +340,13 @@ void StatisticsLog::timerCallback()
 
 /**
  * Method to add the received message data for given receiving bridging type.
- * @param bridgingType	The type of the bridging protocol that received the data
+ * @param logSourceType	The type of the bridging protocol that received the data
  * @param Id			The remote object id that was received
  * @param msgData		The actual message data that shall be logged
  */
-void StatisticsLog::AddMessageData(ProtocolBridgingType bridgingType, RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData)
+void StatisticsLog::AddMessageData(StatisticsLogSource logSourceType, RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData)
 {
-	if (!m_showDS100Traffic && bridgingType == PBT_DS100)
+	if (!m_showDS100Traffic && (logSourceType == SLS_DS100 || logSourceType == SLS_DS100_ext || logSourceType == SLS_DS100_mrr))
 		return;
 
 	String valueString;
@@ -382,8 +382,8 @@ void StatisticsLog::AddMessageData(ProtocolBridgingType bridgingType, RemoteObje
 	m_logEntries[mapIdx][SLC_ObjectName] = ProcessingEngineConfig::GetObjectShortDescription(Id);
 	m_logEntries[mapIdx][SLC_SourceId] = String(msgData.addrVal.first);
 	m_logEntries[mapIdx][SLC_Value] = valueString;
-	m_logEntries[mapIdx][SLC_BridgingName] = GetProtocolBridgingShortName(bridgingType);
-	m_logEntries[mapIdx][SLC_BridgingType] = String(bridgingType);
+	m_logEntries[mapIdx][SLC_LogSourceName] = GetLogSourceName(logSourceType);
+	m_logEntries[mapIdx][SLC_LogSourceType] = String(logSourceType);
 
 	m_dataChanged = true;
 }
@@ -459,7 +459,7 @@ void StatisticsLog::paintCell(Graphics& g, int rowNumber, int columnId, int widt
 
 	if (columnId == SLC_Number)
 	{
-		auto bridgingProtocol = static_cast<ProtocolBridgingType>(m_logEntries[mapIdx][SLC_BridgingType].getIntValue());
+		auto bridgingProtocol = static_cast<ProtocolBridgingType>(m_logEntries[mapIdx][SLC_LogSourceType].getIntValue());
 		auto colour = GetProtocolBridgingColour(bridgingProtocol);
 		if (colour.isTransparent())
 			g.setColour(getLookAndFeel().findColour(TableListBox::textColourId));
@@ -492,7 +492,7 @@ int StatisticsLog::getColumnAutoSizeWidth(int columnId)
 		return 40;
 	case SLC_Value:
 		return 60;
-	case SLC_BridgingName:
+	case SLC_LogSourceName:
 		return 60;
 	default:
 		break;
@@ -508,6 +508,40 @@ int StatisticsLog::getColumnAutoSizeWidth(int columnId)
 void StatisticsLog::SetShowDS100Traffic(bool show)
 {
 	m_showDS100Traffic = show;
+}
+
+/**
+ * Helper method to get a user displayable/readable string representation for the log source.
+ * This gets the generic protocol names and applies some logic regarding what log source is what protocol.
+ * @param logSourceType	The type to get a string representation for.
+ * @retun	The requested string representation.
+ */
+String StatisticsLog::GetLogSourceName(StatisticsLogSource logSourceType)
+{
+	switch (logSourceType)
+	{
+	case SLS_DiGiCo:
+		return GetProtocolBridgingShortName(PBT_DiGiCo);
+	case SLS_BlacktraxRTTrPM:
+		return GetProtocolBridgingShortName(PBT_BlacktraxRTTrPM);
+	case SLS_GenericOSC:
+		return GetProtocolBridgingShortName(PBT_GenericOSC);
+	case SLS_GenericMIDI:
+		return GetProtocolBridgingShortName(PBT_GenericMIDI);
+	case SLS_YamahaSQ:
+		return GetProtocolBridgingShortName(PBT_YamahaSQ);
+	case SLS_HUI:
+		return GetProtocolBridgingShortName(PBT_HUI);
+	case SLS_DS100:
+		return GetProtocolBridgingShortName(PBT_DS100);
+	case SLS_DS100_ext:
+		return GetProtocolBridgingShortName(PBT_DS100) + "(ext.)";
+	case SLS_DS100_mrr:
+		return GetProtocolBridgingShortName(PBT_DS100) + "(mirror)";
+	default:
+		return GetProtocolBridgingShortName(PBT_None);
+	}
+
 }
 
 
@@ -620,23 +654,32 @@ void StatisticsPageComponent::HandleMessageData(NodeId nodeId, ProtocolId sender
 
 	// derive the bridging protocol type from given protocol that received the data
 	auto bridgingProtocol = PBT_None;
+	auto logSource = StatisticsLog::StatisticsLogSource::SLS_None;
 	switch (senderProtocolId)
 	{
 	case DIGICO_PROCESSINGPROTOCOL_ID:
 		bridgingProtocol = PBT_DiGiCo;
+		logSource = StatisticsLog::StatisticsLogSource::SLS_DiGiCo;
 		break;
 	case RTTRPM_PROCESSINGPROTOCOL_ID:
 		bridgingProtocol = PBT_BlacktraxRTTrPM;
+		logSource = StatisticsLog::StatisticsLogSource::SLS_BlacktraxRTTrPM;
 		break;
 	case GENERICOSC_PROCESSINGPROTOCOL_ID:
 		bridgingProtocol = PBT_GenericOSC;
+		logSource = StatisticsLog::StatisticsLogSource::SLS_GenericOSC;
 		break;
 	case DS100_1_PROCESSINGPROTOCOL_ID:
+		bridgingProtocol = PBT_DS100;
+		logSource = StatisticsLog::StatisticsLogSource::SLS_DS100;
+		break;
 	case DS100_2_PROCESSINGPROTOCOL_ID:
 		bridgingProtocol = PBT_DS100;
+		logSource = StatisticsLog::StatisticsLogSource::SLS_DS100_ext;
 		break;
 	case GENERICMIDI_PROCESSINGPROTOCOL_ID:
 		bridgingProtocol = PBT_GenericMIDI;
+		logSource = StatisticsLog::StatisticsLogSource::SLS_GenericMIDI;
 		break;
 	default:
 		return;
@@ -646,7 +689,7 @@ void StatisticsPageComponent::HandleMessageData(NodeId nodeId, ProtocolId sender
 	m_plotComponent->IncreaseCount(bridgingProtocol);
 	
 	// add message data to logging component
-	m_logComponent->AddMessageData(bridgingProtocol, Id, msgData);
+	m_logComponent->AddMessageData(logSource, Id, msgData);
 }
 
 

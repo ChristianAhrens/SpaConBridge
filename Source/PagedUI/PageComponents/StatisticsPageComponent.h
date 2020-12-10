@@ -76,15 +76,34 @@ class StatisticsLog :	public Component,
 						public TableListBoxModel
 {
 public:
+	/**
+	 * Enum to define where a log entry originates from.
+	 * This is used to e.g. differentiate between different DS100 in log,
+	 * but show only a single DS100 category in plot.
+	 */
+	enum StatisticsLogSource
+	{
+		SLS_None,
+		SLS_DiGiCo,
+		SLS_BlacktraxRTTrPM,
+		SLS_GenericOSC,
+		SLS_GenericMIDI,
+		SLS_YamahaSQ,
+		SLS_HUI,
+		SLS_DS100,
+		SLS_DS100_ext,
+		SLS_DS100_mrr,
+	};
+
 	enum StatisticsLogColumn
 	{
 		SLC_None = 0,		//< Juce column IDs start at 1
 		SLC_Number,
-		SLC_BridgingName,
+		SLC_LogSourceName,
 		SLC_ObjectName,
 		SLC_SourceId,
 		SLC_Value,
-		SLC_BridgingType,
+		SLC_LogSourceType,
 		SLC_MAX_COLUMNS
 	};
 
@@ -93,7 +112,7 @@ public:
 	~StatisticsLog() override;
 
 	//==============================================================================
-	void AddMessageData(ProtocolBridgingType bridgingType, RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData);
+	void AddMessageData(StatisticsLogSource logSourceType, RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData);
 
 	//==========================================================================
 	void backgroundClicked(const MouseEvent&) override;
@@ -110,11 +129,13 @@ protected:
 	void resized() override;
 
 private:
+	String GetLogSourceName(StatisticsLogSource logSourceType);
+
 	//==============================================================================
 	void timerCallback() override;
 
 private:
-	std::unique_ptr<TableListBox>			m_table;				/**> The table component itself. */
+	std::unique_ptr<TableListBox>			m_table;				/**< The table component itself. */
 	std::map<int, std::map<int, String>>	m_logEntries;			/**< Map of log entry # and map of column and its cell string contents. */
 	const int								m_logCount{ 200 };
 	int										m_logEntryCounter{ 0 };

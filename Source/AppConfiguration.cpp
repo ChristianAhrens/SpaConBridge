@@ -15,10 +15,15 @@ AppConfiguration::~AppConfiguration()
 
 bool AppConfiguration::isValid()
 {
-	if (!JUCEAppBasics::AppConfigurationBase::isValid())
+	return isValid(m_xml);
+}
+
+bool AppConfiguration::isValid(const std::unique_ptr<XmlElement>& xmlConfig)
+{
+	if (!JUCEAppBasics::AppConfigurationBase::isValid(xmlConfig))
 		return false;
 
-	auto ovrSectionElement = m_xml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW));
+	auto ovrSectionElement = xmlConfig->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW));
 	if (ovrSectionElement)
 	{
 		auto activeTabXmlElement = ovrSectionElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::ACTIVEOVRTAB));
@@ -45,7 +50,7 @@ bool AppConfiguration::isValid()
 	else
 		return false;
 
-	auto ctrlSectionElement = m_xml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER));
+	auto ctrlSectionElement = xmlConfig->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER));
 	if (ctrlSectionElement)
 	{
 		auto soundSourceProcessorsSectionElement = ctrlSectionElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDSOURCEPROCESSORS));

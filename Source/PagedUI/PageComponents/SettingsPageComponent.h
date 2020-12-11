@@ -187,12 +187,17 @@ public:
 
 	//==========================================================================
 	void onApplyClicked();
+	void onLoadConfigClicked();
+	void onSaveConfigClicked();
 	void onToggleRawConfigVisible();
 	void onSelectedLookAndFeelChanged();
 
 	//==========================================================================
 	void SetSelectedLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType);
 	DbLookAndFeelBase::LookAndFeelType GetSelectedLookAndFeelType();
+
+	//==========================================================================
+	void lookAndFeelChanged() override;
 
 	//==========================================================================
 	void UpdateGui(bool init) override;
@@ -209,10 +214,14 @@ private:
 	std::unique_ptr<SettingsSectionsComponent>	m_settingsComponent;
 	std::unique_ptr<Viewport>					m_settingsViewport;
 
-	std::unique_ptr<TextButton>		m_applyButton;
+	std::unique_ptr<TextButton>		m_settingsRawApplyButton;
 	std::unique_ptr<TextEditor>		m_settingsRawEditor;
 	std::unique_ptr<ComboBox>		m_lookAndFeelSelect;
 	std::unique_ptr<Label>			m_lookAndFeelLabel;
+	std::unique_ptr<Label>			m_loadConfigLabel;
+	std::unique_ptr<DrawableButton>	m_loadConfigButton;
+	std::unique_ptr<Label>			m_saveConfigLabel;
+	std::unique_ptr<DrawableButton>	m_saveConfigButton;
 	std::unique_ptr<ToggleButton>	m_useRawConfigButton;
 	std::unique_ptr<Label>			m_useRawConfigLabel;
 

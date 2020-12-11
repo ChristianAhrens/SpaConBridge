@@ -70,6 +70,7 @@ public:
 	~AppConfiguration() override;
 
 	bool isValid() override;
+    static bool isValid(const std::unique_ptr<XmlElement>& xmlConfig);
 
 private:
 

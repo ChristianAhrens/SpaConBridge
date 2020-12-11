@@ -14,6 +14,8 @@
 #include "../../Controller.h"
 #include "../../LookAndFeel.h"
 
+#include <Image_utils.h>
+
 
 namespace SoundscapeBridgeApp
 {
@@ -854,9 +856,9 @@ SettingsPageComponent::SettingsPageComponent()
 	: PageComponentBase(PCT_Settings)
 {
 	// Apply button for when raw config is visible
-	m_applyButton = std::make_unique<TextButton>("Apply");
-	m_applyButton->onClick = [this] { onApplyClicked(); };
-	addAndMakeVisible(m_applyButton.get());
+	m_settingsRawApplyButton = std::make_unique<TextButton>("Apply");
+	m_settingsRawApplyButton->onClick = [this] { onApplyClicked(); };
+	addAndMakeVisible(m_settingsRawApplyButton.get());
 	// Text editor for when raw config is visible
 	m_settingsRawEditor = std::make_unique<TextEditor>();
 	m_settingsRawEditor->setMultiLine(true, false);
@@ -864,8 +866,6 @@ SettingsPageComponent::SettingsPageComponent()
 
 	// Select combobox for look and feel selection
 	m_lookAndFeelSelect = std::make_unique<ComboBox>();
-	//for (auto t = static_cast<int>(DbLookAndFeelBase::LAFT_InvalidFirst + 1); t < static_cast<int>(DbLookAndFeelBase::LAFT_InvalidLast); ++t)
-	//	m_lookAndFeelSelect->addItem(DbLookAndFeelBase::getLookAndFeelName(static_cast<DbLookAndFeelBase::LookAndFeelType>(t)), t);
 	m_lookAndFeelSelect->addItem(DbLookAndFeelBase::getLookAndFeelName(DbLookAndFeelBase::LAFT_Dark), DbLookAndFeelBase::LAFT_Dark);
 	m_lookAndFeelSelect->addItem(DbLookAndFeelBase::getLookAndFeelName(DbLookAndFeelBase::LAFT_Light), DbLookAndFeelBase::LAFT_Light);
 	m_lookAndFeelSelect->onChange = [this] { onSelectedLookAndFeelChanged(); };
@@ -876,12 +876,30 @@ SettingsPageComponent::SettingsPageComponent()
 	m_lookAndFeelLabel->attachToComponent(m_lookAndFeelSelect.get(), true);
 	addAndMakeVisible(m_lookAndFeelLabel.get());
 
+	// load/save config buttons
+	m_loadConfigButton = std::make_unique<DrawableButton>("Load config", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	m_loadConfigButton->onClick = [this] { onLoadConfigClicked(); };
+	addAndMakeVisible(m_loadConfigButton.get());
+	m_loadConfigLabel = std::make_unique<Label>("LoadConfig", "Load cfg:");
+	m_loadConfigLabel->setJustificationType(Justification::centred);
+	m_loadConfigLabel->attachToComponent(m_loadConfigButton.get(), true);
+	addAndMakeVisible(m_loadConfigLabel.get());
+	m_saveConfigButton = std::make_unique<DrawableButton>("Save config", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	m_saveConfigButton->onClick = [this] { onSaveConfigClicked(); };
+	addAndMakeVisible(m_saveConfigButton.get());
+	m_saveConfigLabel = std::make_unique<Label>("SaveConfig", "Save cfg:");
+	m_saveConfigLabel->setJustificationType(Justification::centred);
+	m_saveConfigLabel->attachToComponent(m_saveConfigButton.get(), true);
+	addAndMakeVisible(m_saveConfigLabel.get());
+	// trigger look and feel change to initially set the corresp. drawable images
+	lookAndFeelChanged();
+
 	// Toggle button for showing/hiding raw config
 	m_useRawConfigButton = std::make_unique<ToggleButton>();
 	m_useRawConfigButton->onClick = [this] { onToggleRawConfigVisible(); };
 	addAndMakeVisible(m_useRawConfigButton.get());
 	// label for showing/hiding raw config
-	m_useRawConfigLabel = std::make_unique<Label>("RAW CFG", "Show raw config");
+	m_useRawConfigLabel = std::make_unique<Label>("RAW CFG", "Show raw cfg:");
 	m_useRawConfigLabel->setJustificationType(Justification::centred);
 	m_useRawConfigLabel->attachToComponent(m_useRawConfigButton.get(), true);
 	addAndMakeVisible(m_useRawConfigLabel.get());
@@ -928,29 +946,58 @@ void SettingsPageComponent::resized()
 
 	// toggle button for visibility of raw config textfield
 	auto bottomBarControlBounds = bounds.removeFromBottom(25);
-	m_useRawConfigButton->setBounds(bottomBarControlBounds.removeFromRight(25));
-	m_lookAndFeelSelect->setBounds(bottomBarControlBounds.removeFromLeft(170).removeFromRight(70));
+	auto bottomBarWidth = bottomBarControlBounds.getWidth();
+	if (m_lookAndFeelSelect && m_loadConfigButton && m_saveConfigButton && m_lookAndFeelSelect)
+	{
+		if (bottomBarWidth >= 495)
+		{
+			m_useRawConfigButton->setVisible(true);
+			m_useRawConfigButton->setBounds(bottomBarControlBounds.removeFromRight(25));
+			bottomBarControlBounds.removeFromRight(110);
+		}
+		else
+			m_useRawConfigButton->setVisible(false);
+
+		if (bottomBarWidth >= 360)
+		{
+			m_loadConfigButton->setVisible(true);
+			m_loadConfigButton->setBounds(bottomBarControlBounds.removeFromRight(25));
+			bottomBarControlBounds.removeFromRight(70);
+			m_saveConfigButton->setVisible(true);
+			m_saveConfigButton->setBounds(bottomBarControlBounds.removeFromRight(25));
+		}
+		else
+		{
+			m_loadConfigButton->setVisible(false);
+			m_saveConfigButton->setVisible(false);
+		}
+
+		m_lookAndFeelSelect->setBounds(bottomBarControlBounds.removeFromLeft(170).removeFromRight(70));
+	}
 
 	bounds.removeFromBottom(5);
 
-	m_settingsComponent->setBounds(bounds);
-	m_settingsViewport->setBounds(bounds);
-
-	if (m_settingsViewport->isVerticalScrollBarShown() || m_settingsViewport->isHorizontalScrollBarShown())
+	if (m_settingsComponent && m_settingsViewport)
 	{
-		auto boundsWithoutScrollbars = bounds;
+		m_settingsComponent->setBounds(bounds);
+		m_settingsViewport->setBounds(bounds);
 
-		if (m_settingsViewport->isVerticalScrollBarShown())
-			boundsWithoutScrollbars.setWidth(bounds.getWidth() - m_settingsViewport->getVerticalScrollBar().getWidth());
+		if (m_settingsViewport->isVerticalScrollBarShown() || m_settingsViewport->isHorizontalScrollBarShown())
+		{
+			auto boundsWithoutScrollbars = bounds;
 
-		if (m_settingsViewport->isHorizontalScrollBarShown())
-			boundsWithoutScrollbars.setHeight(bounds.getHeight() - m_settingsViewport->getHorizontalScrollBar().getHeight());
+			if (m_settingsViewport->isVerticalScrollBarShown())
+				boundsWithoutScrollbars.setWidth(bounds.getWidth() - m_settingsViewport->getVerticalScrollBar().getWidth());
 
-		m_settingsComponent->setBounds(boundsWithoutScrollbars);
+			if (m_settingsViewport->isHorizontalScrollBarShown())
+				boundsWithoutScrollbars.setHeight(bounds.getHeight() - m_settingsViewport->getHorizontalScrollBar().getHeight());
+
+			m_settingsComponent->setBounds(boundsWithoutScrollbars);
+		}
 	}
 
 	// raw config textfield, etc. - not always visible!
-	m_applyButton->setBounds(bounds.removeFromTop(25));
+	m_settingsRawApplyButton->setBounds(bounds.removeFromTop(25));
 	m_settingsRawEditor->setBounds(bounds);
 }
 
@@ -980,6 +1027,48 @@ DbLookAndFeelBase::LookAndFeelType SettingsPageComponent::GetSelectedLookAndFeel
 	{
 		jassertfalse;
 		return DbLookAndFeelBase::LAFT_InvalidFirst;
+	}
+}
+
+/**
+ * Reimplemented from component to change drawablebutton icon data.
+ */
+void SettingsPageComponent::lookAndFeelChanged()
+{
+	Component::lookAndFeelChanged();
+
+	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (!dblookAndFeel)
+		return;
+
+	if (m_loadConfigButton)
+	{
+		std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(String(BinaryData::folder_open24px_svg), NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+		m_loadConfigButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+	}
+
+	if (m_saveConfigButton)
+	{
+		std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(String(BinaryData::save24px_svg), NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+		m_saveConfigButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
 	}
 }
 
@@ -1042,24 +1131,77 @@ void SettingsPageComponent::onApplyClicked()
 }
 
 /**
+ * Method to be used as callback for load button click reaction.
+ */
+void SettingsPageComponent::onLoadConfigClicked()
+{
+	FileChooser chooser("Select an " + JUCEApplication::getInstance()->getApplicationName() + " config file to load...",
+		File::getSpecialLocation(File::userHomeDirectory), "*.config");
+
+	if (chooser.browseForFileToOpen())
+	{
+		auto file = chooser.getResult();
+
+		auto xmlConfig = juce::parseXML(file);
+		if (!xmlConfig)
+			AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Invalid config", "Loading failed du to invalid selected config file.");
+
+		auto config = SoundscapeBridgeApp::AppConfiguration::getInstance();
+		if (config)
+		{
+			if (!SoundscapeBridgeApp::AppConfiguration::isValid(xmlConfig))
+				AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Invalid config", "Loading failed du to invalid config file contents.");
+
+			if (!config->resetConfigState(std::move(xmlConfig)))
+				AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed du to internal loading error.");
+		}
+	}
+}
+
+/**
+ * Method to be used as callback for save button click reaction.
+ */
+void SettingsPageComponent::onSaveConfigClicked()
+{
+	FileChooser chooser("Save current " + JUCEApplication::getInstance()->getApplicationName() + " config file as...",
+		File::getSpecialLocation(File::userHomeDirectory), "*.config");
+
+	if (chooser.browseForFileToSave(true))
+	{
+		auto file = chooser.getResult();
+
+		auto config = SoundscapeBridgeApp::AppConfiguration::getInstance();
+		if (config)
+		{
+			auto xmlConfig = config->getConfigState();
+			if (!xmlConfig || !xmlConfig->writeTo(file))
+				AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Saving failed", (xmlConfig ? "Saving failed due to insufficient write access rights." : "Saving failed due to invalid internal config:"));
+		}
+	}
+}
+
+/**
  *
  */
 void SettingsPageComponent::onToggleRawConfigVisible()
 {
-	if (m_useRawConfigButton->getToggleState())
+	if (m_settingsRawApplyButton && m_settingsRawEditor)
 	{
-		m_applyButton->setVisible(true);
-		m_applyButton->toFront(true);
-		m_settingsRawEditor->setVisible(true);
-		m_settingsRawEditor->toFront(true);
+		if (m_useRawConfigButton->getToggleState())
+		{
+			m_settingsRawApplyButton->setVisible(true);
+			m_settingsRawApplyButton->toFront(true);
+			m_settingsRawEditor->setVisible(true);
+			m_settingsRawEditor->toFront(true);
 
-		// manually trigger config refresh, since we did not process config changes while raw settings editor was invisible
-		onConfigUpdated();
-	}
-	else
-	{
-		m_applyButton->setVisible(false);
-		m_settingsRawEditor->setVisible(false);
+			// manually trigger config refresh, since we did not process config changes while raw settings editor was invisible
+			onConfigUpdated();
+		}
+		else
+		{
+			m_settingsRawApplyButton->setVisible(false);
+			m_settingsRawEditor->setVisible(false);
+		}
 	}
 }
 

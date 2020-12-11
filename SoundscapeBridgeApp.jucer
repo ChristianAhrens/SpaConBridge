@@ -217,8 +217,11 @@
             <FILE id="q7WeR0" name="cancel-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/cancel-24px.svg"/>
             <FILE id="oihE0b" name="find_replace-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/find_replace-24px.svg"/>
+            <FILE id="A3cgD8" name="folder_open-24px.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/folder_open-24px.svg"/>
             <FILE id="N9NqBe" name="grain-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/grain-24px.svg"/>
             <FILE id="rlRTHW" name="help-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/help-24px.svg"/>
+            <FILE id="f9cDvj" name="save-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/save-24px.svg"/>
             <FILE id="vVMBfg" name="settings-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/settings-24px.svg"/>
             <FILE id="N7oVfc" name="show_chart-24px.svg" compile="0" resource="1"

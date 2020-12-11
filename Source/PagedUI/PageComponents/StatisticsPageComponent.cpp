@@ -459,8 +459,8 @@ void StatisticsLog::paintCell(Graphics& g, int rowNumber, int columnId, int widt
 
 	if (columnId == SLC_Number)
 	{
-		auto bridgingProtocol = static_cast<ProtocolBridgingType>(m_logEntries[mapIdx][SLC_LogSourceType].getIntValue());
-		auto colour = GetProtocolBridgingColour(bridgingProtocol);
+		auto logSource = static_cast<StatisticsLogSource>(m_logEntries[mapIdx][SLC_LogSourceType].getIntValue());
+		auto colour = GetLogSourceColour(logSource);
 		if (colour.isTransparent())
 			g.setColour(getLookAndFeel().findColour(TableListBox::textColourId));
 		else
@@ -541,7 +541,37 @@ String StatisticsLog::GetLogSourceName(StatisticsLogSource logSourceType)
 	default:
 		return GetProtocolBridgingShortName(PBT_None);
 	}
+}
 
+/**
+ * Helper method to get a colour representation for the log source.
+ * This uses the generic colour getter for a ProtocolBridgingType.
+ * @param logSourceType	The type to get a colour representation for.
+ * @retun	The requested colour.
+ */
+const Colour StatisticsLog::GetLogSourceColour(StatisticsLogSource logSourceType)
+{
+	switch (logSourceType)
+	{
+	case SLS_DiGiCo:
+		return GetProtocolBridgingColour(PBT_DiGiCo);
+	case SLS_BlacktraxRTTrPM:
+		return GetProtocolBridgingColour(PBT_BlacktraxRTTrPM);
+	case SLS_GenericOSC:
+		return GetProtocolBridgingColour(PBT_GenericOSC);
+	case SLS_GenericMIDI:
+		return GetProtocolBridgingColour(PBT_GenericMIDI);
+	case SLS_YamahaSQ:
+		return GetProtocolBridgingColour(PBT_YamahaSQ);
+	case SLS_HUI:
+		return GetProtocolBridgingColour(PBT_HUI);
+	case SLS_DS100:
+	case SLS_DS100_ext:
+	case SLS_DS100_mrr:
+		return GetProtocolBridgingColour(PBT_DS100);
+	default:
+		return GetProtocolBridgingColour(PBT_None);
+	}
 }
 
 

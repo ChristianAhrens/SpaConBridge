@@ -130,6 +130,7 @@ protected:
 
 private:
 	String GetLogSourceName(StatisticsLogSource logSourceType);
+	const Colour GetLogSourceColour(StatisticsLogSource logSourceType);
 
 	//==============================================================================
 	void timerCallback() override;

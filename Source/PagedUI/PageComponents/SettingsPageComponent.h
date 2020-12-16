@@ -19,6 +19,7 @@
 
 #include "../../../submodules/JUCE-AppBasics/Source/ZeroconfDiscoverComponent.h"
 #include "../../../submodules/JUCE-AppBasics/Source/SplitButtonComponent.h"
+#include "../../../submodules/JUCE-AppBasics/Source/TextWithImageButton.h"
 
 
 namespace SoundscapeBridgeApp
@@ -218,12 +219,10 @@ private:
 	std::unique_ptr<TextEditor>		m_settingsRawEditor;
 	std::unique_ptr<ComboBox>		m_lookAndFeelSelect;
 	std::unique_ptr<Label>			m_lookAndFeelLabel;
-	std::unique_ptr<Label>			m_loadConfigLabel;
-	std::unique_ptr<DrawableButton>	m_loadConfigButton;
-	std::unique_ptr<Label>			m_saveConfigLabel;
-	std::unique_ptr<DrawableButton>	m_saveConfigButton;
-	std::unique_ptr<ToggleButton>	m_useRawConfigButton;
-	std::unique_ptr<Label>			m_useRawConfigLabel;
+
+	std::unique_ptr<JUCEAppBasics::TextWithImageButton>	m_loadConfigButton;
+	std::unique_ptr<JUCEAppBasics::TextWithImageButton>	m_saveConfigButton;
+	std::unique_ptr<TextButton>							m_useRawConfigButton;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SettingsPageComponent)
 };

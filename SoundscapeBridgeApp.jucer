@@ -197,6 +197,10 @@
                 file="submodules/JUCE-AppBasics/Source/AppConfigurationBase.h"/>
           <FILE id="VBLrne" name="Image_utils.cpp" compile="1" resource="0" file="submodules/JUCE-AppBasics/Source/Image_utils.cpp"/>
           <FILE id="xYgjGr" name="Image_utils.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Image_utils.h"/>
+          <FILE id="MTDOrq" name="TextWithImageButton.cpp" compile="1" resource="0"
+                file="submodules/JUCE-AppBasics/Source/TextWithImageButton.cpp"/>
+          <FILE id="FqqUss" name="TextWithImageButton.h" compile="0" resource="0"
+                file="submodules/JUCE-AppBasics/Source/TextWithImageButton.h"/>
           <FILE id="T2SQR9" name="iOS_utils.cpp" compile="1" resource="0" file="submodules/JUCE-AppBasics/Source/iOS_utils.cpp"/>
           <FILE id="CUIT3f" name="iOS_utils.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/iOS_utils.h"/>
           <FILE id="olDhXN" name="SplitButtonComponent.cpp" compile="1" resource="0"

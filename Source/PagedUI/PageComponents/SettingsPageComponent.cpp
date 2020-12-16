@@ -871,38 +871,26 @@ SettingsPageComponent::SettingsPageComponent()
 	m_lookAndFeelSelect->onChange = [this] { onSelectedLookAndFeelChanged(); };
 	addAndMakeVisible(m_lookAndFeelSelect.get());
 	// Label for look and feel selection
-	m_lookAndFeelLabel = std::make_unique<Label>("LookAndFeelSelect", "Look and feel:");
+	m_lookAndFeelLabel = std::make_unique<Label>("LookAndFeelSelect", "Look and feel");
 	m_lookAndFeelLabel->setJustificationType(Justification::centred);
 	m_lookAndFeelLabel->attachToComponent(m_lookAndFeelSelect.get(), true);
 	addAndMakeVisible(m_lookAndFeelLabel.get());
 
 	// load/save config buttons
-	m_loadConfigButton = std::make_unique<DrawableButton>("Load config", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	m_loadConfigButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Load config");
+	m_loadConfigButton->setImagePosition(Justification::centredLeft);
 	m_loadConfigButton->onClick = [this] { onLoadConfigClicked(); };
 	addAndMakeVisible(m_loadConfigButton.get());
-	m_loadConfigLabel = std::make_unique<Label>("LoadConfig", "Load cfg:");
-	m_loadConfigLabel->setJustificationType(Justification::centred);
-	m_loadConfigLabel->attachToComponent(m_loadConfigButton.get(), true);
-	addAndMakeVisible(m_loadConfigLabel.get());
-	m_saveConfigButton = std::make_unique<DrawableButton>("Save config", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	m_saveConfigButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Save config");
+	m_saveConfigButton->setImagePosition(Justification::centredLeft);
 	m_saveConfigButton->onClick = [this] { onSaveConfigClicked(); };
 	addAndMakeVisible(m_saveConfigButton.get());
-	m_saveConfigLabel = std::make_unique<Label>("SaveConfig", "Save cfg:");
-	m_saveConfigLabel->setJustificationType(Justification::centred);
-	m_saveConfigLabel->attachToComponent(m_saveConfigButton.get(), true);
-	addAndMakeVisible(m_saveConfigLabel.get());
-	// trigger look and feel change to initially set the corresp. drawable images
-	lookAndFeelChanged();
 
 	// Toggle button for showing/hiding raw config
-	m_useRawConfigButton = std::make_unique<ToggleButton>();
+	m_useRawConfigButton = std::make_unique<TextButton>("Show raw config", "RAW CFG");
+	m_useRawConfigButton->setClickingTogglesState(true);
 	m_useRawConfigButton->onClick = [this] { onToggleRawConfigVisible(); };
 	addAndMakeVisible(m_useRawConfigButton.get());
-	// label for showing/hiding raw config
-	m_useRawConfigLabel = std::make_unique<Label>("RAW CFG", "Show raw cfg:");
-	m_useRawConfigLabel->setJustificationType(Justification::centred);
-	m_useRawConfigLabel->attachToComponent(m_useRawConfigButton.get(), true);
-	addAndMakeVisible(m_useRawConfigLabel.get());
 	onToggleRawConfigVisible();
 
 	// The component containing configuration sections, etc. to be shown in a viewport for scrolling capabilities
@@ -949,22 +937,22 @@ void SettingsPageComponent::resized()
 	auto bottomBarWidth = bottomBarControlBounds.getWidth();
 	if (m_lookAndFeelSelect && m_loadConfigButton && m_saveConfigButton && m_lookAndFeelSelect)
 	{
-		if (bottomBarWidth >= 495)
+		if (bottomBarWidth >= 505)
 		{
 			m_useRawConfigButton->setVisible(true);
-			m_useRawConfigButton->setBounds(bottomBarControlBounds.removeFromRight(25));
-			bottomBarControlBounds.removeFromRight(110);
+			m_useRawConfigButton->setBounds(bottomBarControlBounds.removeFromRight(110));
+			bottomBarControlBounds.removeFromRight(5);
 		}
 		else
 			m_useRawConfigButton->setVisible(false);
 
-		if (bottomBarWidth >= 360)
+		if (bottomBarWidth >= 390)
 		{
 			m_loadConfigButton->setVisible(true);
-			m_loadConfigButton->setBounds(bottomBarControlBounds.removeFromRight(25));
-			bottomBarControlBounds.removeFromRight(70);
+			m_loadConfigButton->setBounds(bottomBarControlBounds.removeFromRight(105));
+			bottomBarControlBounds.removeFromRight(5);
 			m_saveConfigButton->setVisible(true);
-			m_saveConfigButton->setBounds(bottomBarControlBounds.removeFromRight(25));
+			m_saveConfigButton->setBounds(bottomBarControlBounds.removeFromRight(105));
 		}
 		else
 		{

@@ -153,6 +153,11 @@ static constexpr int DS100_CHANNELCOUNT = 64;
 static constexpr int DS100_EXTMODE_CHANNELCOUNT = 2 * DS100_CHANNELCOUNT;
 
 /**
+ * Bridging ObjectHandlingMode parameters
+ */
+static constexpr float DS100_VALUCHANGE_SENSITIVITY = 0.001f;
+
+/**
  * DS100 extension modes
  */
 enum ExtensionMode

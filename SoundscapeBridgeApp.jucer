@@ -12,6 +12,12 @@
         <GROUP id="{101B7526-C17E-A526-9CCF-9B16385E1D4F}" name="Source">
           <GROUP id="{7BEDE2E7-D445-0646-3278-7EE2B5985D06}" name="ProcessingEngine">
             <GROUP id="{E942E9CB-791F-AAD7-FE92-FD5DE9A476C6}" name="ObjectDataHandling">
+              <GROUP id="{753633E4-5A11-196B-BDBB-17F37BC8F24F}" name="Mux_nA_to_mB_withValFilter">
+                <FILE id="mliqRv" name="Mux_nA_to_mB_withValFilter.cpp" compile="1"
+                      resource="0" file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ObjectDataHandling/Mux_nA_to_mB_withValFilter/Mux_nA_to_mB_withValFilter.cpp"/>
+                <FILE id="WQd6uH" name="Mux_nA_to_mB_withValFilter.h" compile="0" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ObjectDataHandling/Mux_nA_to_mB_withValFilter/Mux_nA_to_mB_withValFilter.h"/>
+              </GROUP>
               <GROUP id="{87A64548-B49E-C1F3-7B13-1C5ADEB22427}" name="Reverse_B_to_A_only">
                 <FILE id="aLJDUz" name="Reverse_B_to_A_only.cpp" compile="1" resource="0"
                       file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ObjectDataHandling/Reverse_B_to_A_only/Reverse_B_to_A_only.cpp"/>

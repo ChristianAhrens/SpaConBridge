@@ -1185,13 +1185,14 @@ ExtensionMode ProtocolBridgingWrapper::GetDS100ExtensionMode()
 			auto objectHandlingMode = ProcessingEngineConfig::ObjectHandlingModeFromString(objectHandlingXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE)));
 			switch (objectHandlingMode)
 			{
-			case OHM_Mux_nA_to_mB:
+			case OHM_Mux_nA_to_mB_withValFilter:
 				return EM_Extend;
-			case OHM_Bypass:
-				return EM_Off;
-			case OHM_Invalid:
-			case OHM_Remap_A_X_Y_to_B_XY:
 			case OHM_Forward_only_valueChanges:
+				return EM_Off;
+			case OHM_Bypass:
+			case OHM_Invalid:
+			case OHM_Mux_nA_to_mB:
+			case OHM_Remap_A_X_Y_to_B_XY:
 			case OHM_DS100_DeviceSimulation:
 			case OHM_Forward_A_to_B_only:
 			case OHM_Reverse_B_to_A_only:
@@ -1228,27 +1229,60 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 			case EM_Off:
 			{
 				// EM_Off refers to Bypass object handling mode without any channelcount parameter attributes
-				objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Bypass));
+				objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Forward_only_valueChanges));
+				// remove elements that are not used by this ohm
 				auto protocolAChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
 				if (protocolAChCntXmlElement)
 					objectHandlingXmlElement->removeChildElement(protocolAChCntXmlElement, true);
 				auto protocolBChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLBCHCNT));
 				if (protocolBChCntXmlElement)
 					objectHandlingXmlElement->removeChildElement(protocolBChCntXmlElement, true);
+
+				// update precision element
+				auto precisionXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
+				if (!precisionXmlElement)
+					precisionXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
+				auto precisionTextXmlElement = precisionXmlElement->getFirstChildElement();
+				if (precisionTextXmlElement && precisionTextXmlElement->isTextElement())
+					precisionTextXmlElement->setText(String(DS100_VALUCHANGE_SENSITIVITY));
+				else
+					precisionXmlElement->addTextElement(String(DS100_VALUCHANGE_SENSITIVITY));
 			}
 			break;
 			case EM_Extend:
 			{
 				// EM_Extend refers to Multiplex nA to mB object handling mode with channel A and B parameter attributes
-				objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Mux_nA_to_mB));
+				objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Mux_nA_to_mB_withValFilter));
+				
+				// update first DS100 channel count elements
 				auto protocolAChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
 				if (!protocolAChCntXmlElement)
 					protocolAChCntXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
-				protocolAChCntXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::COUNT), DS100_CHANNELCOUNT);
+				auto protocolAChCntTextXmlElement = protocolAChCntXmlElement->getFirstChildElement();
+				if (protocolAChCntTextXmlElement && protocolAChCntTextXmlElement->isTextElement())
+					protocolAChCntTextXmlElement->setText(String(DS100_CHANNELCOUNT));
+				else
+					protocolAChCntXmlElement->addTextElement(String(DS100_CHANNELCOUNT));
+
+				// update first DS100 channel count elements
 				auto protocolBChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLBCHCNT));
 				if (!protocolBChCntXmlElement)
 					protocolBChCntXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLBCHCNT));
-				protocolBChCntXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::COUNT), DS100_EXTMODE_CHANNELCOUNT);
+				auto protocolBChCntTextXmlElement = protocolBChCntXmlElement->getFirstChildElement();
+				if (protocolBChCntTextXmlElement && protocolBChCntTextXmlElement->isTextElement())
+					protocolBChCntTextXmlElement->setText(String(DS100_EXTMODE_CHANNELCOUNT));
+				else
+					protocolBChCntXmlElement->addTextElement(String(DS100_EXTMODE_CHANNELCOUNT));
+
+				// update precision element
+				auto precisionXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
+				if (!precisionXmlElement)
+					precisionXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
+				auto precisionTextXmlElement = precisionXmlElement->getFirstChildElement();
+				if (precisionTextXmlElement && precisionTextXmlElement->isTextElement())
+					precisionTextXmlElement->setText(String(DS100_VALUCHANGE_SENSITIVITY));
+				else
+					precisionXmlElement->addTextElement(String(DS100_VALUCHANGE_SENSITIVITY));
 			}
 			break;
 			case EM_Mirror:

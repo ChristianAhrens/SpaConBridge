@@ -105,6 +105,7 @@ static constexpr DataChangeType DCT_BridgingConfig			= (DCT_ExtensionMode | DCT_
 static constexpr DataChangeType DCT_DebugMessage			= 0x00010000; //< There is a new debug message to be displayed on the GUI.
 static constexpr DataChangeType DCT_ProcessorSelection		= 0x00020000; //< The currently selected SourceID has changed.
 static constexpr DataChangeType DCT_TabPageSelection		= 0x00040000; //< The currently selected Tab Index has changed.
+static constexpr DataChangeType DCT_AllConfigParameters		= (DCT_IPAddress | DCT_MessageRate | DCT_SourceID | DCT_MappingID | DCT_ComsMode | DCT_ExtensionMode | DCT_MuteState | DCT_NumBridgingModules); // < All app configuration related parameters.
 
 /**
  * Protocol Bridging Type

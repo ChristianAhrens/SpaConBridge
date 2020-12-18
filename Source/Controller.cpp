@@ -1456,4 +1456,55 @@ bool Controller::SetBridgingInputDeviceIndex(ProtocolBridgingType bridgingType, 
 	}
 }
 
+/**
+ * Method to load a given input file as the new application configuration.
+ * This tries to handle possible errors and shows a popup to the user in case an error was detected.
+ * @param fileToLoadFrom	The input file to load the new app config from.
+ * @return	True on succes, false on failure
+ */
+bool Controller::LoadConfigurationFile(const File& fileToLoadFrom)
+{
+	auto config = SoundscapeBridgeApp::AppConfiguration::getInstance();
+	auto xmlConfig = juce::parseXML(fileToLoadFrom);
+
+	if (!config)
+		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Error", "Loading failed du to internal error.");
+	else if (!xmlConfig)
+		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Invalid config", "Loading failed du to invalid selected configuration file.");
+	else if (!SoundscapeBridgeApp::AppConfiguration::isValid(xmlConfig))
+		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed du to invalid configuration file contents.");
+	else if (!config->resetConfigState(std::move(xmlConfig)))
+		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed du to internal loading error.");
+	else
+	{
+		SetParameterChanged(DCS_Init, DCT_AllConfigParameters);
+		return true;
+	}
+
+	return false;
+}
+
+/**
+ * Method to save the current application configuration to a given input file.
+ * This tries to handle possible errors and shows a popup to the user in case an error was detected.
+ * @param fileToSaveTo	The output file to save the current config to.
+ * @return	True on succes, false on failure
+ */
+bool Controller::SaveConfigurationFile(const File& fileToSaveTo)
+{
+	auto config = SoundscapeBridgeApp::AppConfiguration::getInstance();
+	auto xmlConfig = config->getConfigState();
+
+	if (!config)
+		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Error", "Saving failed du to internal error.");
+	else if (!xmlConfig)
+		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Invalid", "Loading failed du to invalid internal configuration.");
+	else if (!xmlConfig->writeTo(fileToSaveTo))
+		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Saving failed", "Saving failed due to insufficient write access rights.");
+	else
+		return true;
+
+	return false;
+}
+
 } // namespace SoundscapeBridgeApp

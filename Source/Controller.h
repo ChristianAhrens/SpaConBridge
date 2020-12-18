@@ -133,11 +133,15 @@ public:
 	bool GetOnline() const;
 
 	//==========================================================================
-	std::unique_ptr<XmlElement> createStateXml() override;
-	bool setStateXml(XmlElement* stateXml) override;
+	bool LoadConfigurationFile(const File& fileToLoadFrom);
+	bool SaveConfigurationFile(const File& fileToSaveTo);
 
 	//==========================================================================
 	void AddProtocolBridgingWrapperListener(ProtocolBridgingWrapper::Listener* listener);
+
+	//==========================================================================
+	std::unique_ptr<XmlElement> createStateXml() override;
+	bool setStateXml(XmlElement* stateXml) override;
 
 	//==========================================================================
 	void HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData) override;

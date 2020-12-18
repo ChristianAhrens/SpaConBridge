@@ -1123,26 +1123,16 @@ void SettingsPageComponent::onApplyClicked()
  */
 void SettingsPageComponent::onLoadConfigClicked()
 {
-	FileChooser chooser("Select an " + JUCEApplication::getInstance()->getApplicationName() + " config file to load...",
+	FileChooser chooser("Select a " + JUCEApplication::getInstance()->getApplicationName() + " config file to load...",
 		File::getSpecialLocation(File::userHomeDirectory), "*.config");
 
 	if (chooser.browseForFileToOpen())
 	{
 		auto file = chooser.getResult();
 
-		auto xmlConfig = juce::parseXML(file);
-		if (!xmlConfig)
-			AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Invalid config", "Loading failed du to invalid selected config file.");
-
-		auto config = SoundscapeBridgeApp::AppConfiguration::getInstance();
-		if (config)
-		{
-			if (!SoundscapeBridgeApp::AppConfiguration::isValid(xmlConfig))
-				AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Invalid config", "Loading failed du to invalid config file contents.");
-
-			if (!config->resetConfigState(std::move(xmlConfig)))
-				AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed du to internal loading error.");
-		}
+		Controller* ctrl = Controller::GetInstance();
+		if (ctrl)
+			ctrl->LoadConfigurationFile(file);
 	}
 }
 
@@ -1158,13 +1148,9 @@ void SettingsPageComponent::onSaveConfigClicked()
 	{
 		auto file = chooser.getResult();
 
-		auto config = SoundscapeBridgeApp::AppConfiguration::getInstance();
-		if (config)
-		{
-			auto xmlConfig = config->getConfigState();
-			if (!xmlConfig || !xmlConfig->writeTo(file))
-				AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Saving failed", (xmlConfig ? "Saving failed due to insufficient write access rights." : "Saving failed due to invalid internal config:"));
-		}
+		Controller* ctrl = Controller::GetInstance();
+		if (ctrl)
+			ctrl->SaveConfigurationFile(file);
 	}
 }
 

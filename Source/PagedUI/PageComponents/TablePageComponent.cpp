@@ -315,7 +315,8 @@ void TablePageComponent::UpdateGui(bool init)
 			m_pageContainerTable->RecreateTableRowIds();
 			m_pageContainerTable->UpdateTable();
 		}
-		else if (ctrl->PopParameterChanged(DCS_Protocol, DCT_ProcessorSelection))
+		else if (ctrl->PopParameterChanged(DCS_Protocol, DCT_ProcessorSelection) ||
+			ctrl->PopParameterChanged(DCS_Host, DCT_BridgingConfig))
 		{
 			m_pageContainerTable->UpdateTable();
 		}

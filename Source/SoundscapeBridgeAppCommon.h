@@ -92,16 +92,19 @@ static constexpr DataChangeType DCT_OscConfig				= (DCT_IPAddress | DCT_MessageR
 static constexpr DataChangeType DCT_SourceID				= 0x00000010; //< The SourceID / Matrix input number of this Plug-in instance has been changed.
 static constexpr DataChangeType DCT_MappingID				= 0x00000020; //< The user has selected a different coordinate mapping for this Plug-in.
 static constexpr DataChangeType DCT_ComsMode				= 0x00000040; //< The Rx / Tx mode of a soundobject channel has been changed.
-static constexpr DataChangeType DCT_ExtensionMode			= 0x00000080; //< The extensionmode of bridging module has changed.
 static constexpr DataChangeType DCT_PluginInstanceConfig	= (DCT_SourceID | DCT_MappingID | DCT_ComsMode); //< SourceID, MappingID, and Rx/Tx.
 static constexpr DataChangeType DCT_SourcePosition			= 0x00000100; //< The X/Y coordinates of this SourceID have changed.
 static constexpr DataChangeType DCT_ReverbSendGain			= 0x00000200; //< The En-Space Gain for this SourceID has changed.
 static constexpr DataChangeType DCT_SourceSpread			= 0x00000400; //< The En-Scene Spread factor for this SourceID has changed.
 static constexpr DataChangeType DCT_DelayMode				= 0x00000800; //< The En-Scene Delay mode (Off/Tight/Full) of this SourceID has changed.
 static constexpr DataChangeType DCT_AutomationParameters	= (DCT_SourcePosition | DCT_ReverbSendGain | DCT_SourceSpread | DCT_DelayMode); //< All automation parameters.
-static constexpr DataChangeType DCT_DebugMessage			= 0x00001000; //< There is a new debug message to be displayed on the GUI.
-static constexpr DataChangeType DCT_ProcessorSelection		= 0x00002000; //< The currently selected SourceID has changed.
-static constexpr DataChangeType DCT_TabPageSelection		= 0x00004000; //< The currently selected Tab Index has changed.
+static constexpr DataChangeType DCT_ExtensionMode			= 0x00001000; //< The extensionmode of bridging module has changed.
+static constexpr DataChangeType DCT_MuteState				= 0x00002000; //< The mute state for a channel of a bridging protocol has changed. */
+static constexpr DataChangeType DCT_NumBridgingModules		= 0x00004000; //< The count of active bridging protocols has changed. */
+static constexpr DataChangeType DCT_BridgingConfig			= (DCT_ExtensionMode | DCT_MuteState | DCT_NumBridgingModules); // < All bridging related parameters.
+static constexpr DataChangeType DCT_DebugMessage			= 0x00010000; //< There is a new debug message to be displayed on the GUI.
+static constexpr DataChangeType DCT_ProcessorSelection		= 0x00020000; //< The currently selected SourceID has changed.
+static constexpr DataChangeType DCT_TabPageSelection		= 0x00040000; //< The currently selected Tab Index has changed.
 
 /**
  * Protocol Bridging Type

@@ -181,6 +181,15 @@ void Controller::SetParameterChanged(DataChangeSource changeSource, DataChangeTy
 		if (changeSource != DCS_Init)
 			triggerConfigurationUpdate(true);
 		break;
+	case DCT_BridgingConfig:
+	case DCT_MuteState:
+		if (changeSource != DCS_Init)
+			triggerConfigurationUpdate(false);
+		break;
+	case DCT_NumBridgingModules:
+		if (changeSource != DCS_Init)
+			triggerConfigurationUpdate(true);
+		break;
 	case DCT_Online:
 	case DCT_SourcePosition:
 	case DCT_ReverbSendGain:

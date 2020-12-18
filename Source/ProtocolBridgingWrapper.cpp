@@ -10,6 +10,8 @@
 
 #include "ProtocolBridgingWrapper.h"
 
+#include "Controller.h"
+
 
 namespace SoundscapeBridgeApp
 {
@@ -485,7 +487,10 @@ bool ProtocolBridgingWrapper::SetMuteProtocolSourceIds(ProtocolId protocolId, co
 				ProcessingEngineConfig::WriteMutedObjectChannels(mutedObjChsXmlElement, mutedChannels);
 
 				m_processingNode.setStateXml(nodeXmlElement);
-				triggerConfigurationUpdate(false);
+
+				Controller* ctrl = Controller::GetInstance();
+				if (ctrl)
+					ctrl->SetParameterChanged(DCS_Host, DCT_MuteState);
 
 				return true;
 			}
@@ -534,7 +539,10 @@ bool ProtocolBridgingWrapper::SetUnmuteProtocolSourceIds(ProtocolId protocolId, 
 				ProcessingEngineConfig::WriteMutedObjectChannels(mutedObjChsXmlElement, mutedChannels);
 
 				m_processingNode.setStateXml(nodeXmlElement);
-				triggerConfigurationUpdate(false);
+
+				Controller* ctrl = Controller::GetInstance();
+				if (ctrl)
+					ctrl->SetParameterChanged(DCS_Host, DCT_MuteState);
 
 				return true;
 			}
@@ -599,7 +607,11 @@ bool ProtocolBridgingWrapper::SetProtocolIpAddress(ProtocolId protocolId, String
 		m_processingNode.setStateXml(nodeXmlElement);
 
 		if (!dontSendNotification)
-			triggerConfigurationUpdate(false);
+		{
+			Controller* ctrl = Controller::GetInstance();
+			if (ctrl)
+				ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
+		}
 
 		return true;
 	}
@@ -662,7 +674,11 @@ bool ProtocolBridgingWrapper::SetProtocolListeningPort(ProtocolId protocolId, in
 		m_processingNode.setStateXml(nodeXmlElement);
 
 		if (!dontSendNotification)
-			triggerConfigurationUpdate(false);
+		{
+			Controller* ctrl = Controller::GetInstance();
+			if (ctrl)
+				ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
+		}
 
 		return true;
 	}
@@ -725,7 +741,11 @@ bool ProtocolBridgingWrapper::SetProtocolRemotePort(ProtocolId protocolId, int r
 		m_processingNode.setStateXml(nodeXmlElement);
 
 		if (!dontSendNotification)
-			triggerConfigurationUpdate(false);
+		{
+			Controller* ctrl = Controller::GetInstance();
+			if (ctrl)
+				ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
+		}
 
 		return true;
 	}
@@ -788,7 +808,11 @@ bool ProtocolBridgingWrapper::SetProtocolMappingArea(ProtocolId protocolId, int 
 		m_processingNode.setStateXml(nodeXmlElement);
 
 		if (!dontSendNotification)
-			triggerConfigurationUpdate(false);
+		{
+			Controller* ctrl = Controller::GetInstance();
+			if (ctrl)
+				ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
+		}
 
 		return true;
 	}
@@ -851,7 +875,11 @@ bool ProtocolBridgingWrapper::SetProtocolInputDeviceIndex(ProtocolId protocolId,
 		m_processingNode.setStateXml(nodeXmlElement);
 
 		if (!dontSendNotification)
-			triggerConfigurationUpdate(false);
+		{
+			Controller* ctrl = Controller::GetInstance();
+			if (ctrl)
+				ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
+		}
 
 		return true;
 	}
@@ -990,7 +1018,10 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 			}
 
 			m_processingNode.setStateXml(nodeXmlElement);
-			triggerConfigurationUpdate(true);
+
+			Controller* ctrl = Controller::GetInstance();
+			if (ctrl)
+				ctrl->SetParameterChanged(DCS_Host, DCT_NumBridgingModules);
 		}
 	}
 }
@@ -1047,7 +1078,10 @@ bool ProtocolBridgingWrapper::ActivateDS100SourceId(SourceId sourceId, MappingId
 			return false;
 
 		m_processingNode.setStateXml(nodeXmlElement);
-		triggerConfigurationUpdate(false);
+
+		Controller* ctrl = Controller::GetInstance();
+		if (ctrl)
+			ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
 
 		return true;
 	}
@@ -1110,7 +1144,10 @@ bool ProtocolBridgingWrapper::DeactivateDS100SourceId(SourceId sourceId, Mapping
 			return false;
 
 		m_processingNode.setStateXml(nodeXmlElement);
-		triggerConfigurationUpdate(false);
+
+		Controller* ctrl = Controller::GetInstance();
+		if (ctrl)
+			ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
 
 		return true;
 	}
@@ -1229,7 +1266,11 @@ bool ProtocolBridgingWrapper::SetDS100MsgRate(int msgRate, bool dontSendNotifica
 		m_processingNode.setStateXml(nodeXmlElement);
 
 		if (!dontSendNotification)
-			triggerConfigurationUpdate(false);
+		{
+			Controller* ctrl = Controller::GetInstance();
+			if (ctrl)
+				ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
+		}
 
 		return true;
 	}
@@ -1405,7 +1446,11 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 		m_processingNode.setStateXml(nodeXmlElement);
 
 		if (!dontSendNotification)
-			triggerConfigurationUpdate(false);
+		{
+			Controller* ctrl = Controller::GetInstance();
+			if (ctrl)
+				ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
+		}
 
 		return true;
 	}

@@ -154,6 +154,9 @@ bool ProtocolBridgingWrapper::setStateXml(XmlElement* stateXml)
 			auto genericMIDIProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(GENERICMIDI_PROCESSINGPROTOCOL_ID));
 			if (genericMIDIProtocolXmlElement)
 				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericMIDI, *genericMIDIProtocolXmlElement));
+			auto yamahaOSCProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(YAMAHAOSC_PROCESSINGPROTOCOL_ID));
+			if (yamahaOSCProtocolXmlElement)
+				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_YamahaOSC, *yamahaOSCProtocolXmlElement));
 
 			return m_processingNode.setStateXml(nodeXmlElement);
 		}
@@ -246,6 +249,14 @@ void ProtocolBridgingWrapper::SetupBridgingNode()
 	{
 		m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericMIDI, *genericMIDIBridgingXmlElement));
 		nodeXmlElement->addChildElement(genericMIDIBridgingXmlElement.release());
+	}
+
+	// Yamaha OSC protocol - RoleB
+	auto yamahaOSCBridgingXmlElement = SetupYamahaOSCBridgingProtocol();
+	if (yamahaOSCBridgingXmlElement)
+	{
+		m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_YamahaOSC, *yamahaOSCBridgingXmlElement));
+		nodeXmlElement->addChildElement(yamahaOSCBridgingXmlElement.release());
 	}
 
 	m_processingNode.setStateXml(nodeXmlElement.get());
@@ -366,6 +377,43 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupGenericMIDIBridgingPro
 		auto inputDeviceIndexXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::INPUTDEVICE));
 		if (inputDeviceIndexXmlElement)
 			inputDeviceIndexXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::DEVICEINDEX), PROTOCOL_DEFAULT_INPUTDEVICEINDEX);
+
+		protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDCHANNELS));
+	}
+
+	return protocolBXmlElement;
+}
+
+/**
+ * Method to create the default Yamaha OSC bridging protocol xml element.
+ * @return	The protocol xml element that was created
+ */
+std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupYamahaOSCBridgingProtocol()
+{
+	// Yamaha OSC protocol - RoleB
+	auto protocolBXmlElement = std::make_unique<XmlElement>(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLB));
+	if (protocolBXmlElement)
+	{
+		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), YAMAHAOSC_PROCESSINGPROTOCOL_ID);
+
+		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), ProcessingEngineConfig::ProtocolTypeToString(PT_YamahaOSCProtocol));
+		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::USESACTIVEOBJ), 0);
+
+		auto clientPortXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+		if (clientPortXmlElement)
+			clientPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_YAMAHAOSC_DEVICE);
+
+		auto hostPortXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
+		if (hostPortXmlElement)
+			hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_YAMAHAOSC_HOST);
+
+		auto ipAdressXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
+		if (ipAdressXmlElement)
+			ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
+
+		auto mappingAreaIdXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MAPPINGAREA));
+		if (mappingAreaIdXmlElement)
+			mappingAreaIdXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), PROTOCOL_DEFAULT_MAPPINGAREA);
 
 		protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDCHANNELS));
 	}
@@ -837,6 +885,10 @@ ProtocolBridgingType ProtocolBridgingWrapper::GetActiveBridgingProtocols()
 		protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(GENERICMIDI_PROCESSINGPROTOCOL_ID));
 		if (protocolXmlElement)
 			activeBridgingTypes |= PBT_GenericMIDI;
+
+		protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(YAMAHAOSC_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+			activeBridgingTypes |= PBT_YamahaOSC;
 	}
 
 	return activeBridgingTypes;
@@ -861,6 +913,8 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 		auto removeGenericOSCBridging = (!(desiredActiveBridgingTypes & PBT_GenericOSC) && (currentlyActiveBridgingTypes & PBT_GenericOSC));
 		auto addGenericMIDIBridging = ((desiredActiveBridgingTypes & PBT_GenericMIDI) && !(currentlyActiveBridgingTypes & PBT_GenericMIDI));
 		auto removeGenericMIDIBridging = (!(desiredActiveBridgingTypes & PBT_GenericMIDI) && (currentlyActiveBridgingTypes & PBT_GenericMIDI));
+		auto addYamahaOSCBridging = ((desiredActiveBridgingTypes & PBT_YamahaOSC) && !(currentlyActiveBridgingTypes & PBT_YamahaOSC));
+		auto removeYamahaOSCBridging = (!(desiredActiveBridgingTypes & PBT_YamahaOSC) && (currentlyActiveBridgingTypes & PBT_YamahaOSC));
 
 		auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 		if (nodeXmlElement)
@@ -917,6 +971,20 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 				if (protocolXmlElement)
 				{
 					m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericMIDI, *protocolXmlElement));
+					nodeXmlElement->removeChildElement(protocolXmlElement, true);
+				}
+			}
+
+			if (addYamahaOSCBridging)
+			{
+				nodeXmlElement->addChildElement(std::make_unique<XmlElement>(m_bridgingProtocolCacheMap.at(PBT_YamahaOSC)).release());
+			}
+			else if (removeYamahaOSCBridging)
+			{
+				auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(YAMAHAOSC_PROCESSINGPROTOCOL_ID));
+				if (protocolXmlElement)
+				{
+					m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_YamahaOSC, *protocolXmlElement));
 					nodeXmlElement->removeChildElement(protocolXmlElement, true);
 				}
 			}
@@ -1729,6 +1797,129 @@ int ProtocolBridgingWrapper::GetGenericMIDIInputDeviceIndex()
 bool ProtocolBridgingWrapper::SetGenericMIDIInputDeviceIndex(int inputDeviceIndex, bool dontSendNotification)
 {
 	return SetProtocolInputDeviceIndex(GENERICMIDI_PROCESSINGPROTOCOL_ID, inputDeviceIndex, dontSendNotification);
+}
+
+/**
+ * Gets the mute state of the given source
+ * @param sourceId The id of the source for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteYamahaOSCSourceId(SourceId sourceId)
+{
+	return GetMuteProtocolSourceId(YAMAHAOSC_PROCESSINGPROTOCOL_ID, sourceId);
+}
+
+/**
+ * Sets the given source to be (un-)muted
+ * @param sourceId The id of the source that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteYamahaOSCSourceId(SourceId sourceId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolSourceId(YAMAHAOSC_PROCESSINGPROTOCOL_ID, sourceId);
+	else
+		return SetUnmuteProtocolSourceId(YAMAHAOSC_PROCESSINGPROTOCOL_ID, sourceId);
+}
+
+/**
+ * Sets the given sources to be (un-)muted
+ * @param sourceIds The ids of the sources that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteYamahaOSCSourceIds(const std::vector<SourceId>& sourceIds, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolSourceIds(YAMAHAOSC_PROCESSINGPROTOCOL_ID, sourceIds);
+	else
+		return SetUnmuteProtocolSourceIds(YAMAHAOSC_PROCESSINGPROTOCOL_ID, sourceIds);
+}
+
+/**
+ * Gets the currently set DiGiCo client ip address.
+ * This method forwards the call to the generic implementation.
+ * @return	The ip address string
+ */
+String ProtocolBridgingWrapper::GetYamahaOSCIpAddress()
+{
+	return GetProtocolIpAddress(YAMAHAOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol client ip address.
+ * This method forwards the call to the generic implementation.
+ * @param ipAddress	The new ip address string
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetYamahaOSCIpAddress(String ipAddress, bool dontSendNotification)
+{
+	return SetProtocolIpAddress(YAMAHAOSC_PROCESSINGPROTOCOL_ID, ipAddress, dontSendNotification);
+}
+
+/**
+ * Gets the desired protocol listening port.
+ * This method forwards the call to the generic implementation.
+ * @return	The requested listening port
+ */
+int ProtocolBridgingWrapper::GetYamahaOSCListeningPort()
+{
+	return GetProtocolListeningPort(YAMAHAOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol listening port.
+ * This method forwards the call to the generic implementation.
+ * @param	listeningPort	The protocol port to set as listening port
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetYamahaOSCListeningPort(int listeningPort, bool dontSendNotification)
+{
+	return SetProtocolListeningPort(YAMAHAOSC_PROCESSINGPROTOCOL_ID, listeningPort, dontSendNotification);
+}
+
+/**
+ * Gets the desired protocol remote (target client) port.
+ * This method forwards the call to the generic implementation.
+ * @return	The requested remote port
+ */
+int ProtocolBridgingWrapper::GetYamahaOSCRemotePort()
+{
+	return GetProtocolRemotePort(YAMAHAOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol remote port.
+ * This method forwards the call to the generic implementation.
+ * @param	remotePort	The protocol port to set as remote port
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetYamahaOSCRemotePort(int remotePort, bool dontSendNotification)
+{
+	return SetProtocolRemotePort(YAMAHAOSC_PROCESSINGPROTOCOL_ID, remotePort, dontSendNotification);
+}
+
+/**
+ * Gets the desired protocol mapping area id.
+ * This method forwards the call to the generic implementation.
+ * @return	The requested mapping area id
+ */
+int ProtocolBridgingWrapper::GetYamahaOSCMappingArea()
+{
+	return GetProtocolMappingArea(YAMAHAOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol mapping area id.
+ * This method forwards the call to the generic implementation.
+ * @param	mappingAreaId	The protocol mapping area id to set
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetYamahaOSCMappingArea(int mappingAreaId, bool dontSendNotification)
+{
+	return SetProtocolMappingArea(YAMAHAOSC_PROCESSINGPROTOCOL_ID, mappingAreaId, dontSendNotification);
 }
 
 }

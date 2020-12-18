@@ -1160,6 +1160,8 @@ int Controller::GetActiveProtocolBridgingCount()
 		activeProtocolBridgingCount++;
 	if ((activeBridging & PBT_DS100) == PBT_DS100)
 		activeProtocolBridgingCount++;
+	if ((activeBridging & PBT_YamahaOSC) == PBT_YamahaOSC)
+		activeProtocolBridgingCount++;
 
 	return activeProtocolBridgingCount;
 }
@@ -1190,6 +1192,8 @@ bool Controller::GetMuteBridgingSourceId(ProtocolBridgingType bridgingType, Sour
 		return m_protocolBridge.GetMuteRTTrPMSourceId(sourceId);
 	case PBT_GenericMIDI:
 		return m_protocolBridge.GetMuteGenericMIDISourceId(sourceId);
+	case PBT_YamahaOSC:
+		return m_protocolBridge.GetMuteYamahaOSCSourceId(sourceId);
 	case PBT_YamahaSQ:
 	case PBT_HUI:
 	case PBT_DS100:
@@ -1217,6 +1221,8 @@ bool Controller::SetMuteBridgingSourceId(ProtocolBridgingType bridgingType, Sour
 		return m_protocolBridge.SetMuteRTTrPMSourceId(sourceId, mute);
 	case PBT_GenericMIDI:
 		return m_protocolBridge.SetMuteGenericMIDISourceId(sourceId, mute);
+	case PBT_YamahaOSC:
+		return m_protocolBridge.SetMuteYamahaOSCSourceId(sourceId, mute);
 	case PBT_YamahaSQ:
 	case PBT_HUI:
 	case PBT_DS100:
@@ -1244,6 +1250,8 @@ bool Controller::SetMuteBridgingSourceIds(ProtocolBridgingType bridgingType, con
 		return m_protocolBridge.SetMuteRTTrPMSourceIds(sourceIds, mute);
 	case PBT_GenericMIDI:
 		return m_protocolBridge.SetMuteGenericMIDISourceIds(sourceIds, mute);
+	case PBT_YamahaOSC:
+		return m_protocolBridge.SetMuteYamahaOSCSourceIds(sourceIds, mute);
 	case PBT_YamahaSQ:
 	case PBT_HUI:
 	case PBT_DS100:
@@ -1265,6 +1273,8 @@ String Controller::GetBridgingIpAddress(ProtocolBridgingType bridgingType)
 		return m_protocolBridge.GetRTTrPMIpAddress();
 	case PBT_DS100:
 		return m_protocolBridge.GetDS100IpAddress();
+	case PBT_YamahaOSC:
+		return m_protocolBridge.GetYamahaOSCIpAddress();
 	case PBT_GenericMIDI:
 	case PBT_YamahaSQ:
 	case PBT_HUI:
@@ -1286,6 +1296,8 @@ bool Controller::SetBridgingIpAddress(ProtocolBridgingType bridgingType, String 
 		return m_protocolBridge.SetRTTrPMIpAddress(ipAddress, dontSendNotification);
 	case PBT_DS100:
 		return m_protocolBridge.SetDS100IpAddress(ipAddress, dontSendNotification);
+	case PBT_YamahaOSC:
+		return m_protocolBridge.SetYamahaOSCIpAddress(ipAddress, dontSendNotification);
 	case PBT_GenericMIDI:
 	case PBT_YamahaSQ:
 	case PBT_HUI:
@@ -1305,6 +1317,8 @@ int Controller::GetBridgingListeningPort(ProtocolBridgingType bridgingType)
 		return m_protocolBridge.GetGenericOSCListeningPort();
 	case PBT_BlacktraxRTTrPM:
 		return m_protocolBridge.GetRTTrPMListeningPort();
+	case PBT_YamahaOSC:
+		return m_protocolBridge.GetYamahaOSCListeningPort();
 	case PBT_GenericMIDI:
 	case PBT_YamahaSQ:
 	case PBT_HUI:
@@ -1325,6 +1339,8 @@ bool Controller::SetBridgingListeningPort(ProtocolBridgingType bridgingType, int
 		return m_protocolBridge.SetGenericOSCListeningPort(listeningPort, dontSendNotification);
 	case PBT_BlacktraxRTTrPM:
 		return m_protocolBridge.SetRTTrPMListeningPort(listeningPort, dontSendNotification);
+	case PBT_YamahaOSC:
+		return m_protocolBridge.SetYamahaOSCListeningPort(listeningPort, dontSendNotification);
 	case PBT_GenericMIDI:
 	case PBT_YamahaSQ:
 	case PBT_HUI:
@@ -1345,6 +1361,8 @@ int Controller::GetBridgingRemotePort(ProtocolBridgingType bridgingType)
 		return m_protocolBridge.GetGenericOSCRemotePort();
 	case PBT_BlacktraxRTTrPM:
 		return m_protocolBridge.GetRTTrPMRemotePort();
+	case PBT_YamahaOSC:
+		return m_protocolBridge.GetYamahaOSCRemotePort();
 	case PBT_GenericMIDI:
 	case PBT_YamahaSQ:
 	case PBT_HUI:
@@ -1365,6 +1383,8 @@ bool Controller::SetBridgingRemotePort(ProtocolBridgingType bridgingType, int re
 		return m_protocolBridge.SetGenericOSCRemotePort(remotePort, dontSendNotification);
 	case PBT_BlacktraxRTTrPM:
 		return m_protocolBridge.SetRTTrPMRemotePort(remotePort, dontSendNotification);
+	case PBT_YamahaOSC:
+		return m_protocolBridge.SetYamahaOSCRemotePort(remotePort, dontSendNotification);
 	case PBT_GenericMIDI:
 	case PBT_YamahaSQ:
 	case PBT_HUI:
@@ -1381,6 +1401,8 @@ int Controller::GetBridgingMappingArea(ProtocolBridgingType bridgingType)
 	{
 	case PBT_BlacktraxRTTrPM:
 		return m_protocolBridge.GetRTTrPMMappingArea();
+	case PBT_YamahaOSC:
+		return m_protocolBridge.GetYamahaOSCMappingArea();
 	case PBT_DiGiCo:
 	case PBT_GenericOSC:
 	case PBT_GenericMIDI:
@@ -1398,7 +1420,9 @@ bool Controller::SetBridgingMappingArea(ProtocolBridgingType bridgingType, int m
 	switch (bridgingType)
 	{
 	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.SetRTTrPMMappingArea(mappingAreaId, dontSendNotification);
+		return m_protocolBridge.SetYamahaOSCMappingArea(mappingAreaId, dontSendNotification);
+	case PBT_YamahaOSC:
+		return m_protocolBridge.SetYamahaOSCMappingArea(mappingAreaId, dontSendNotification);
 	case PBT_DiGiCo:
 	case PBT_GenericOSC:
 	case PBT_GenericMIDI:
@@ -1417,6 +1441,7 @@ int Controller::GetBridgingInputDeviceIndex(ProtocolBridgingType bridgingType)
 	{
 	case PBT_GenericMIDI:
 		return m_protocolBridge.GetGenericMIDIInputDeviceIndex();
+	case PBT_YamahaOSC:
 	case PBT_BlacktraxRTTrPM:
 	case PBT_DiGiCo:
 	case PBT_GenericOSC:

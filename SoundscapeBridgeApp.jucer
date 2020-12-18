@@ -147,6 +147,10 @@
                       file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/OSCProtocolProcessor/SenderAwareOSCReceiver.cpp"/>
                 <FILE id="H3sAQf" name="SenderAwareOSCReceiver.h" compile="0" resource="0"
                       file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/OSCProtocolProcessor/SenderAwareOSCReceiver.h"/>
+                <FILE id="B01NgG" name="YmhOSCProtocolProcessor.cpp" compile="1" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/OSCProtocolProcessor/YmhOSCProtocolProcessor.cpp"/>
+                <FILE id="wkMUTl" name="YmhOSCProtocolProcessor.h" compile="0" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/OSCProtocolProcessor/YmhOSCProtocolProcessor.h"/>
               </GROUP>
             </GROUP>
             <FILE id="B0REQz" name="ProcessingEngineConfig.cpp" compile="1" resource="0"

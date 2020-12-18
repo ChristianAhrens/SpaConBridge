@@ -315,7 +315,6 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_DS100Settings->addComponent(m_SecondDS100IpAddressEdit.get(), true, false);
 	m_DS100Settings->addComponent(m_SecondDS100ZeroconfDiscovery.get(), true, false);
 
-
 	m_DS100Settings->resized();
 
 	// DiGiCo settings section
@@ -486,6 +485,55 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedDelayModeLabel.get(), true, false);
 
 	m_GenericMIDIBridgingSettings->resized();
+
+	// YamahaOSC settings section
+	m_YamahaOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
+	m_YamahaOSCBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_YamahaOSC) + " Bridging");
+	m_YamahaOSCBridgingSettings->setHasActiveToggle(true);
+	m_YamahaOSCBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
+	addAndMakeVisible(m_YamahaOSCBridgingSettings.get());
+
+	m_YamahaOSCIpAddressEdit = std::make_unique<TextEditor>();
+	m_YamahaOSCIpAddressEdit->addListener(this);
+	m_YamahaOSCIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
+	m_YamahaOSCIpAddressLabel = std::make_unique<Label>();
+	m_YamahaOSCIpAddressLabel->setJustificationType(Justification::centred);
+	m_YamahaOSCIpAddressLabel->setText("IP Address", dontSendNotification);
+	m_YamahaOSCIpAddressLabel->attachToComponent(m_YamahaOSCIpAddressEdit.get(), true);
+	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCIpAddressLabel.get(), false, false);
+	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCIpAddressEdit.get(), true, false);
+
+	m_YamahaOSCListeningPortEdit = std::make_unique<TextEditor>();
+	m_YamahaOSCListeningPortEdit->addListener(this);
+	m_YamahaOSCListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
+	m_YamahaOSCListeningPortLabel = std::make_unique<Label>();
+	m_YamahaOSCListeningPortLabel->setJustificationType(Justification::centred);
+	m_YamahaOSCListeningPortLabel->setText("Listening Port", dontSendNotification);
+	m_YamahaOSCListeningPortLabel->attachToComponent(m_YamahaOSCListeningPortEdit.get(), true);
+	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCListeningPortLabel.get(), false, false);
+	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCListeningPortEdit.get(), true, false);
+
+	m_YamahaOSCRemotePortEdit = std::make_unique<TextEditor>();
+	m_YamahaOSCRemotePortEdit->addListener(this);
+	m_YamahaOSCRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
+	m_YamahaOSCRemotePortLabel = std::make_unique<Label>();
+	m_YamahaOSCRemotePortLabel->setJustificationType(Justification::centred);
+	m_YamahaOSCRemotePortLabel->setText("Remote Port", dontSendNotification);
+	m_YamahaOSCRemotePortLabel->attachToComponent(m_YamahaOSCRemotePortEdit.get(), true);
+	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCRemotePortLabel.get(), false, false);
+	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCRemotePortEdit.get(), true, false);
+
+	m_YamahaOSCMappingAreaEdit = std::make_unique<TextEditor>();
+	m_YamahaOSCMappingAreaEdit->addListener(this);
+	m_YamahaOSCMappingAreaEdit->setInputFilter(m_mappingEditFilter.get(), false);
+	m_YamahaOSCMappingAreaLabel = std::make_unique<Label>();
+	m_YamahaOSCMappingAreaLabel->setJustificationType(Justification::centred);
+	m_YamahaOSCMappingAreaLabel->setText("Mapping Area", dontSendNotification);
+	m_YamahaOSCMappingAreaLabel->attachToComponent(m_YamahaOSCMappingAreaEdit.get(), true);
+	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCMappingAreaLabel.get(), false, false);
+	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCMappingAreaEdit.get(), true, false);
+
+	m_YamahaOSCBridgingSettings->resized();
 }
 
 /**
@@ -519,6 +567,7 @@ void SettingsSectionsComponent::resized()
 		+ m_RTTrPMBridgingSettings->getHeight()
 		+ m_GenericOSCBridgingSettings->getHeight()
 		+ m_GenericMIDIBridgingSettings->getHeight()
+		+ m_YamahaOSCBridgingSettings->getHeight()
 		+ (3 * 2 * margin);
 
 	auto bounds = getLocalBounds();
@@ -550,6 +599,9 @@ void SettingsSectionsComponent::resized()
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
 		FlexItem(*m_GenericMIDIBridgingSettings.get())
 			.withHeight(static_cast<float>(m_GenericMIDIBridgingSettings->getHeight()))
+			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
+		FlexItem(*m_YamahaOSCBridgingSettings.get())
+			.withHeight(static_cast<float>(m_YamahaOSCBridgingSettings->getHeight()))
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)) });
 	fb.performLayout(bounds);
 }
@@ -660,6 +712,21 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 		ctrl->SetBridgingListeningPort(PBT_GenericOSC, m_GenericOSCListeningPortEdit->getText().getIntValue());
 	if (m_GenericOSCRemotePortEdit && m_GenericOSCRemotePortEdit.get() == &editor)
 		ctrl->SetBridgingRemotePort(PBT_GenericOSC, m_GenericOSCRemotePortEdit->getText().getIntValue());
+
+	// Yamaha OSC settings section
+	if (m_YamahaOSCIpAddressEdit && m_YamahaOSCIpAddressEdit.get() == &editor)
+		ctrl->SetBridgingIpAddress(PBT_YamahaOSC, m_YamahaOSCIpAddressEdit->getText());
+	if (m_YamahaOSCListeningPortEdit && m_YamahaOSCListeningPortEdit.get() == &editor)
+		ctrl->SetBridgingListeningPort(PBT_YamahaOSC, m_YamahaOSCListeningPortEdit->getText().getIntValue());
+	if (m_YamahaOSCRemotePortEdit && m_YamahaOSCRemotePortEdit.get() == &editor)
+		ctrl->SetBridgingRemotePort(PBT_YamahaOSC, m_YamahaOSCRemotePortEdit->getText().getIntValue());
+	if (m_YamahaOSCListeningPortEdit && m_YamahaOSCListeningPortEdit.get() == &editor)
+		ctrl->SetBridgingListeningPort(PBT_YamahaOSC, m_YamahaOSCListeningPortEdit->getText().getIntValue());
+	if (m_YamahaOSCMappingAreaEdit && m_YamahaOSCMappingAreaEdit.get() == &editor)
+	{
+		ctrl->SetBridgingMappingArea(PBT_YamahaOSC, m_YamahaOSCMappingAreaEdit->getText().getIntValue());
+		m_previousRTTrPMMappingAreaId = m_YamahaOSCMappingAreaEdit->getText().getIntValue();
+	}
 }
 
 /**
@@ -696,6 +763,8 @@ void SettingsSectionsComponent::setSettingsSectionActiveState(HeaderWithElmListC
 		sectionType = PBT_GenericOSC;
 	else if (settingsSection == m_GenericMIDIBridgingSettings.get())
 		sectionType = PBT_GenericMIDI;
+	else if (settingsSection == m_YamahaOSCBridgingSettings.get())
+		sectionType = PBT_YamahaOSC;
 
 	if (activeState)
 		ctrl->SetActiveProtocolBridging(ctrl->GetActiveProtocolBridging() | sectionType);
@@ -802,6 +871,24 @@ void SettingsSectionsComponent::processUpdatedConfig()
 		m_GenericMIDIBridgingSettings->setToggleActiveState(GenericMIDIBridgingActive);
 	if (m_GenericMIDIInputDeviceSelect)
 		m_GenericMIDIInputDeviceSelect->setSelectedId(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI) + 1, dontSendNotification);
+
+	// Yamaha OSC settings section
+	auto YamahaOSCBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_YamahaOSC) == PBT_YamahaOSC;
+	if (m_YamahaOSCBridgingSettings)
+		m_YamahaOSCBridgingSettings->setToggleActiveState(YamahaOSCBridgingActive);
+	if (m_YamahaOSCIpAddressEdit)
+		m_YamahaOSCIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_YamahaOSC));
+	if (m_YamahaOSCListeningPortEdit)
+		m_YamahaOSCListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_YamahaOSC)), false);
+	if (m_YamahaOSCRemotePortEdit)
+		m_YamahaOSCRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_YamahaOSC)), false);
+	if (m_YamahaOSCMappingAreaEdit)
+	{
+		m_YamahaOSCMappingAreaEdit->setText(String(ctrl->GetBridgingMappingArea(PBT_YamahaOSC)), false);
+		m_YamahaOSCMappingAreaEdit->setEnabled((ctrl->GetBridgingMappingArea(PBT_YamahaOSC) != -1));
+	}
+	if (m_YamahaOSCMappingAreaLabel)
+		m_YamahaOSCMappingAreaLabel->setEnabled((ctrl->GetBridgingMappingArea(PBT_YamahaOSC) != -1));
 }
 
 /**

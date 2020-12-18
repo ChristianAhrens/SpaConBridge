@@ -89,6 +89,7 @@ public:
 		SLS_GenericOSC,
 		SLS_GenericMIDI,
 		SLS_YamahaSQ,
+		SLS_YamahaOSC,
 		SLS_HUI,
 		SLS_DS100,
 		SLS_DS100_ext,

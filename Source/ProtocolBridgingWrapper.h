@@ -68,7 +68,7 @@ public:
 		 * Method to be overloaded by ancestors to act as an interface
 		 * for handling of received message data
 		 */
-		virtual void HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData) = 0;
+		virtual void HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier Id, const RemoteObjectMessageData& msgData) = 0;
 	};
 
 public:
@@ -79,7 +79,7 @@ public:
 	void AddListener(ProtocolBridgingWrapper::Listener* listener);
 
 	//==========================================================================
-	void HandleNodeData(NodeId nodeId, ProtocolId senderProtocolId, ProtocolType senderProtocolType, RemoteObjectIdentifier objectId, RemoteObjectMessageData& msgData) override;
+	void HandleNodeData(const ProcessingEngineNode::NodeCallbackMessage* callbackMessage) override;
 	bool SendMessage(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData);
 
 	//==========================================================================

@@ -55,7 +55,7 @@ void ProtocolBridgingWrapper::AddListener(ProtocolBridgingWrapper::Listener* lis
  */
 bool ProtocolBridgingWrapper::SendMessage(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData)
 {
-	if (msgData.addrVal.first > DS100_CHANNELCOUNT)
+	if (msgData._addrVal._first > DS100_CHANNELCOUNT)
 		return m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData);
 	else
 		return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
@@ -64,18 +64,15 @@ bool ProtocolBridgingWrapper::SendMessage(RemoteObjectIdentifier Id, RemoteObjec
 /**
  * Called when the OSCReceiver receives a new OSC message, since Controller inherits from OSCReceiver::Listener.
  * It forwards the message to all registered Processor objects.
- * @param nodeId	The bridging node that the message data was received on (only a single default id node supported currently).
- * @param senderProtocolId	The protocol that the message data was received on and was sent to controller from.
- * @param senderProtocolType	The protocol type that received the data and forwarded it to us.
- * @param objectId	The remote object id of the object that was received
- * @param msgData	The actual message data that was received
+ * @param callbackMessage	The node data to handle encapsulated in a calbackmsg struct..
  */
-void ProtocolBridgingWrapper::HandleNodeData(NodeId nodeId, ProtocolId senderProtocolId, ProtocolType senderProtocolType, RemoteObjectIdentifier objectId, RemoteObjectMessageData& msgData)
+void ProtocolBridgingWrapper::HandleNodeData(const ProcessingEngineNode::NodeCallbackMessage* callbackMessage)
 {
-	ignoreUnused(senderProtocolType);
-
+    if (!callbackMessage)
+        return;
+    
 	for (auto l : m_listeners)
-		l->HandleMessageData(nodeId, senderProtocolId, objectId, msgData);
+        l->HandleMessageData(callbackMessage->_protocolMessage._nodeId, callbackMessage->_protocolMessage._senderProtocolId, callbackMessage->_protocolMessage._Id, callbackMessage->_protocolMessage._msgData);
 }
 
 /**
@@ -991,12 +988,12 @@ bool ProtocolBridgingWrapper::ActivateDS100SourceId(SourceId sourceId, MappingId
 				for(auto roi : m_activeObjectsPerSource)
 				{
 					RemoteObject newSourceObject;
-					newSourceObject.Id = roi;
-					newSourceObject.Addr.first = mappedSourceId;
+					newSourceObject._Id = roi;
+					newSourceObject._Addr._first = mappedSourceId;
 					if (roi == ROI_CoordinateMapping_SourcePosition_X || roi == ROI_CoordinateMapping_SourcePosition_Y || roi == ROI_CoordinateMapping_SourcePosition_XY)
-						newSourceObject.Addr.second = mappingId;
+						newSourceObject._Addr._second = mappingId;
 					else
-						newSourceObject.Addr.second = INVALID_ADDRESS_VALUE;
+						newSourceObject._Addr._second = INVALID_ADDRESS_VALUE;
 			
 					if (!activeObjects.contains(newSourceObject))
 						activeObjects.add(newSourceObject);
@@ -1054,12 +1051,12 @@ bool ProtocolBridgingWrapper::DeactivateDS100SourceId(SourceId sourceId, Mapping
 				for (auto roi : m_activeObjectsPerSource)
 				{
 					RemoteObject newSourceObject;
-					newSourceObject.Id = static_cast<RemoteObjectIdentifier>(roi);
-					newSourceObject.Addr.first = mappedSourceId;
+					newSourceObject._Id = static_cast<RemoteObjectIdentifier>(roi);
+					newSourceObject._Addr._first = mappedSourceId;
 					if (roi == ROI_CoordinateMapping_SourcePosition_X || roi == ROI_CoordinateMapping_SourcePosition_Y || roi == ROI_CoordinateMapping_SourcePosition_XY)
-						newSourceObject.Addr.second = mappingId;
+						newSourceObject._Addr._second = mappingId;
 					else
-						newSourceObject.Addr.second = INVALID_ADDRESS_VALUE;
+						newSourceObject._Addr._second = INVALID_ADDRESS_VALUE;
 
 					if (activeObjects.contains(newSourceObject))
 					{

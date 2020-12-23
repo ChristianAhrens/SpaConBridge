@@ -157,6 +157,10 @@
                   file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProcessingEngineNode.cpp"/>
             <FILE id="J8arXS" name="ProcessingEngineNode.h" compile="0" resource="0"
                   file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProcessingEngineNode.h"/>
+            <FILE id="tFXC1Y" name="TimerThreadBase.cpp" compile="1" resource="0"
+                  file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/TimerThreadBase.cpp"/>
+            <FILE id="agKWo8" name="TimerThreadBase.h" compile="0" resource="0"
+                  file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/TimerThreadBase.h"/>
           </GROUP>
           <FILE id="TePn3T" name="RemoteProtocolBridgeCommon.h" compile="0" resource="0"
                 file="submodules/RemoteProtocolBridge/Source/RemoteProtocolBridgeCommon.h"/>

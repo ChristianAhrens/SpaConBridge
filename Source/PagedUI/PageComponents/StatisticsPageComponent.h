@@ -112,7 +112,7 @@ public:
 	~StatisticsLog() override;
 
 	//==============================================================================
-	void AddMessageData(StatisticsLogSource logSourceType, RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData);
+	void AddMessageData(StatisticsLogSource logSourceType, RemoteObjectIdentifier Id, const RemoteObjectMessageData& msgData);
 
 	//==========================================================================
 	void backgroundClicked(const MouseEvent&) override;
@@ -171,7 +171,7 @@ protected:
 	void resized() override;
 
 	//==========================================================================
-	void HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData) override;
+	void HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier Id, const RemoteObjectMessageData& msgData) override;
 
 private:
 	std::unique_ptr<StatisticsPlot>	m_plotComponent;	/**> Plotting component. */

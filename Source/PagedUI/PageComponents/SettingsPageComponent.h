@@ -182,6 +182,17 @@ private:
 	std::unique_ptr<Label>						m_GenericMIDIHardcodedReverbSendGainLabel;
 	std::unique_ptr<Label>						m_GenericMIDIHardcodedSourceSpreadLabel;
 	std::unique_ptr<Label>						m_GenericMIDIHardcodedDelayModeLabel;
+
+	// Yamaha OSC settings section
+	std::unique_ptr<HeaderWithElmListComponent>	m_YamahaOSCBridgingSettings;
+	std::unique_ptr<TextEditor>					m_YamahaOSCIpAddressEdit;
+	std::unique_ptr<Label>						m_YamahaOSCIpAddressLabel;
+	std::unique_ptr<TextEditor>					m_YamahaOSCListeningPortEdit;
+	std::unique_ptr<Label>						m_YamahaOSCListeningPortLabel;
+	std::unique_ptr<TextEditor>					m_YamahaOSCRemotePortEdit;
+	std::unique_ptr<Label>						m_YamahaOSCRemotePortLabel;
+	std::unique_ptr<TextEditor>					m_YamahaOSCMappingAreaEdit;
+	std::unique_ptr<Label>						m_YamahaOSCMappingAreaLabel;
 };
 
 /**

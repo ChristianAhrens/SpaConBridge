@@ -38,6 +38,8 @@ String GetProtocolBridgingShortName(ProtocolBridgingType type)
 			return "YamahaSQ";
 		case PBT_HUI:
 			return "HUI";
+		case PBT_YamahaOSC:
+			return "Yamaha";
 		case PBT_DS100:
 			return "DS100";
 		case PBT_None:
@@ -64,9 +66,11 @@ String GetProtocolBridgingNiceName(ProtocolBridgingType type)
 	case PBT_GenericMIDI:
 		return "Generic MIDI";
 	case PBT_YamahaSQ:
-		return "YamahaSQ";
+		return "Yamaha SQ";
 	case PBT_HUI:
 		return "Generic HUI";
+	case PBT_YamahaOSC:
+		return "Yamaha OSC";
 	case PBT_DS100:
 		return "DS100";
 	case PBT_None:
@@ -96,6 +100,8 @@ String GetProtocolBridgingSystemName(ProtocolBridgingType type)
 		return "DummyYamahaSQ";
 	case PBT_HUI:
 		return "DummyHUI";
+	case PBT_YamahaOSC:
+		return "YamahaOSC";
 	case PBT_DS100:
 		return "DS100OSCPolling";
 	case PBT_None:
@@ -121,8 +127,10 @@ const Colour GetProtocolBridgingColour(ProtocolBridgingType type)
 		return Colour(0, 174, 239);
 	case PBT_GenericMIDI:
 		return Colour(110, 152, 196);
-	case PBT_DS100:
+	case PBT_YamahaOSC:
+		return Colour(72, 33, 122);
 	case PBT_YamahaSQ:
+	case PBT_DS100:
 	case PBT_HUI:
 	case PBT_None:
 	default:

@@ -118,9 +118,10 @@ static constexpr ProtocolBridgingType PBT_GenericOSC		= 0x00000004;
 static constexpr ProtocolBridgingType PBT_GenericMIDI		= 0x00000008;
 static constexpr ProtocolBridgingType PBT_YamahaSQ			= 0x00000010;
 static constexpr ProtocolBridgingType PBT_HUI				= 0x00000020;
+static constexpr ProtocolBridgingType PBT_YamahaOSC			= 0x00000040;
 static constexpr ProtocolBridgingType PBT_DS100				= 0x10000000;
 
-static const std::vector<ProtocolBridgingType> ProtocolBridgingTypes{ PBT_DiGiCo, PBT_BlacktraxRTTrPM, PBT_GenericOSC, PBT_GenericMIDI, PBT_YamahaSQ, PBT_HUI, PBT_DS100 };
+static const std::vector<ProtocolBridgingType> ProtocolBridgingTypes{ PBT_DiGiCo, PBT_BlacktraxRTTrPM, PBT_GenericOSC, PBT_GenericMIDI, PBT_YamahaSQ, PBT_HUI, PBT_YamahaOSC, PBT_DS100 };
 
 String GetProtocolBridgingShortName(ProtocolBridgingType type);
 String GetProtocolBridgingNiceName(ProtocolBridgingType type);

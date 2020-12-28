@@ -39,6 +39,9 @@ static constexpr int RX_PORT_GENERICOSC_HOST = 50015;	//< UDP port to which the 
 
 static constexpr int RX_PORT_RTTRPM_HOST = 24100;		//< UDP port to which the Blacktrax tracker device will send RTTrPM data replies to (us)
 
+static constexpr int RX_PORT_YAMAHAOSC_DEVICE = 50016;	//< UDP port which the Yamaha Rivage console is listening to for OSC
+static constexpr int RX_PORT_YAMAHAOSC_HOST = 50017;	//< UDP port to which the Yamaha Rivage console will send OSC replies
+
 /**
  * Pre-define processing bridge config values
  */
@@ -49,6 +52,7 @@ static constexpr int RTTRPM_PROCESSINGPROTOCOL_ID = 5;
 static constexpr int GENERICOSC_PROCESSINGPROTOCOL_ID = 4;
 static constexpr int DS100_2_PROCESSINGPROTOCOL_ID = 6;
 static constexpr int GENERICMIDI_PROCESSINGPROTOCOL_ID = 7;
+static constexpr int YAMAHAOSC_PROCESSINGPROTOCOL_ID = 8;
 
 class ProtocolBridgingWrapper :
 	public ProcessingEngineNode::NodeListener,
@@ -149,6 +153,20 @@ public:
 	bool SetGenericMIDIInputDeviceIndex(int MIDIInputDeviceIndex, bool dontSendNotification = false);
 
 	//==========================================================================
+	bool GetMuteYamahaOSCSourceId(SourceId sourceId);
+	bool SetMuteYamahaOSCSourceId(SourceId sourceId, bool mute = true);
+	bool SetMuteYamahaOSCSourceIds(const std::vector<SourceId>& sourceIds, bool mute = true);
+
+	String GetYamahaOSCIpAddress();
+	bool SetYamahaOSCIpAddress(String ipAddress, bool dontSendNotification = false);
+	int GetYamahaOSCListeningPort();
+	bool SetYamahaOSCListeningPort(int listeningPort, bool dontSendNotification = false);
+	int GetYamahaOSCRemotePort();
+	bool SetYamahaOSCRemotePort(int remotePort, bool dontSendNotification = false);
+	int GetYamahaOSCMappingArea();
+	bool SetYamahaOSCMappingArea(int mappingAreaId, bool dontSendNotification = false);
+
+	//==========================================================================
 	std::unique_ptr<XmlElement> createStateXml() override;
 	bool setStateXml(XmlElement* stateXml) override;
 
@@ -184,6 +202,7 @@ private:
 	std::unique_ptr<XmlElement> SetupRTTrPMBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupGenericOSCBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupGenericMIDIBridgingProtocol();
+	std::unique_ptr<XmlElement> SetupYamahaOSCBridgingProtocol();
 
 	/**
 	 * A processing engine node can send data to and receive data from multiple protocols that is encapsulates.

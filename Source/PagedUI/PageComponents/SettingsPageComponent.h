@@ -43,24 +43,32 @@ public:
 	
 	void onToggleActive();
 
-	//==========================================================================
+	//==============================================================================
+	void setHelpUrl(const URL& helpUrl);
+
+	//==============================================================================
 	void paint(Graphics&) override;
 	void resized() override;
 
-	//==========================================================================
+	//==============================================================================
+	void lookAndFeelChanged() override;
+
+	//==============================================================================
 	std::function<void(HeaderWithElmListComponent*, bool)>	toggleIsActiveCallback;
 
 protected:
-	//==========================================================================
+	//==============================================================================
 	void setElementsActiveState(bool toggleState);
 
 private:
-	//==========================================================================
+	//==============================================================================
 	bool																		m_hasActiveToggle{ false };
 	bool																		m_toggleState{ true };
 	std::unique_ptr<ToggleButton>												m_activeToggle;
 	std::unique_ptr<Label>														m_activeToggleLabel;
 	std::unique_ptr<Label>														m_headerLabel;
+	std::unique_ptr<DrawableButton>												m_helpButton;
+	std::unique_ptr<URL>														m_helpUrl;
 	std::vector<std::pair<std::unique_ptr<Component>, std::pair<bool, bool>>>	m_components;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HeaderWithElmListComponent)

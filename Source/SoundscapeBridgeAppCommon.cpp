@@ -130,5 +130,28 @@ const Colour GetProtocolBridgingColour(ProtocolBridgingType type)
 	}
 }
 
+/**
+ * Helper method to query web repository base url (on gitub).
+ */
+String GetRepositoryBaseWebUrl()
+{
+	auto githubURL = String("https://www.github.com");
+	auto companyName = String("ChristianAhrens");
+	auto appName = JUCEApplication::getInstance()->getApplicationName();
+	auto repoBasePath = String("blob/master");
+	auto URLString = githubURL + "/" + companyName + "/" + appName + "/" + repoBasePath + "/";
+
+	return URLString;
+}
+
+/**
+ * Helper method to query web documentation base url (on gitub).
+ */
+String GetDocumentationBaseWebUrl()
+{
+	auto docuBasePath = String("Resources/Documentation/");
+	return GetRepositoryBaseWebUrl() + docuBasePath;
+}
+
 
 } // namespace SoundscapeBridgeApp

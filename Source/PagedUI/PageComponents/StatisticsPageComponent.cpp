@@ -357,7 +357,7 @@ void StatisticsLog::AddMessageData(StatisticsLogSource logSourceType, RemoteObje
 			float fvalue;
 			for (int i = 0; i < msgData._valCount; ++i)
 			{
-				fvalue = ((float*)msgData._payload)[i];
+				fvalue = static_cast<float*>(msgData._payload)[i];
 				valueString += String(fvalue, 2) + ",";
 			}
 		}
@@ -366,7 +366,7 @@ void StatisticsLog::AddMessageData(StatisticsLogSource logSourceType, RemoteObje
 			int ivalue;
 			for (int i = 0; i < msgData._valCount; ++i)
 			{
-				ivalue = ((int*)msgData._payload)[i];
+				ivalue = static_cast<int*>(msgData._payload)[i];
 				valueString += String(ivalue) + ",";
 			}
 		}

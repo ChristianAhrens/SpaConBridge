@@ -456,10 +456,10 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 
 	m_GenericMIDIHardcodedMatrixInputSelectLabel = std::make_unique<Label>();
 	m_GenericMIDIHardcodedMatrixInputSelectLabel->setJustificationType(Justification::centredLeft);
-	m_GenericMIDIHardcodedMatrixInputSelectLabel->setText("Object (De-)Select: Note 48...", dontSendNotification);
+	m_GenericMIDIHardcodedMatrixInputSelectLabel->setText("Object Select: Note 48+", dontSendNotification);
 	m_GenericMIDIHardcodedXValueLabel = std::make_unique<Label>();
 	m_GenericMIDIHardcodedXValueLabel->setJustificationType(Justification::centredLeft);
-	m_GenericMIDIHardcodedXValueLabel->setText("Pos. X: Pitchwheel", dontSendNotification);
+	m_GenericMIDIHardcodedXValueLabel->setText("Pos. X: Pitchwheel | Ctrl 2", dontSendNotification);
 	m_GenericMIDIHardcodedYValueLabel = std::make_unique<Label>();
 	m_GenericMIDIHardcodedYValueLabel->setJustificationType(Justification::centredLeft);
 	m_GenericMIDIHardcodedYValueLabel->setText("Pos. Y: Ctrl 1", dontSendNotification);

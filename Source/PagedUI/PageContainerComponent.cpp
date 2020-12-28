@@ -232,11 +232,12 @@ void PageContainerComponent::buttonClicked(Button* button)
 	}
 	if (m_helpButton && m_helpButton.get() == button)
 	{
-		auto githubURL = String("https://www.github.com");
-		auto companyName = String("ChristianAhrens");
-		auto appName = JUCEApplication::getInstance()->getApplicationName();
-		auto helpResourceName = String("blob/master/README.md");
-		auto helpURLString = githubURL + "/" + companyName + "/" + appName + "/" + helpResourceName;
+		//auto githubURL = String("https://www.github.com");
+		//auto companyName = String("ChristianAhrens");
+		//auto appName = JUCEApplication::getInstance()->getApplicationName();
+		//auto helpResourcePath = String("blob/master");
+		//auto helpURLString = githubURL + "/" + companyName + "/" + appName + "/" + helpResourcePath + "/" + "README.md";
+		auto helpURLString = GetRepositoryBaseWebUrl() + "README.md";
 		URL(helpURLString).launchInDefaultBrowser();
 	}
 }

@@ -172,4 +172,10 @@ enum ExtensionMode
 	EM_Mirror
 };
 
+/**
+ * Helper method to query web repository and documentation base urls (on gitub).
+ */
+String GetRepositoryBaseWebUrl();
+String GetDocumentationBaseWebUrl();
+
 } // namespace SoundscapeBridgeApp

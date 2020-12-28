@@ -87,6 +87,7 @@ void HeaderWithElmListComponent::setElementsActiveState(bool toggleState)
 
 	resized();
 	repaint();
+	lookAndFeelChanged();
 }
 
 /**
@@ -105,6 +106,26 @@ void HeaderWithElmListComponent::onToggleActive()
 
 		if (toggleIsActiveCallback)
 			toggleIsActiveCallback(this, m_toggleState);
+	}
+}
+
+/**
+ * Setter for the private url member that defines the web help location
+ * corresponding to this HWELC object's contents.
+ */
+void HeaderWithElmListComponent::setHelpUrl(const URL& helpUrl)
+{
+	m_helpUrl = std::make_unique<URL>(helpUrl);
+	if (!m_helpButton)
+	{
+		m_helpButton = std::make_unique<DrawableButton>("Help", DrawableButton::ButtonStyle::ImageFitted);
+		m_helpButton->onClick = [this] { 
+			m_helpUrl->launchInDefaultBrowser();
+		};
+		addAndMakeVisible(m_helpButton.get());
+
+		resized();
+		lookAndFeelChanged();
 	}
 }
 
@@ -179,6 +200,12 @@ void HeaderWithElmListComponent::paint(Graphics& g)
  */
 void HeaderWithElmListComponent::resized()
 {
+	if (!m_headerLabel)
+		return;
+
+	Font f = m_headerLabel->getFont();
+	auto headerTextWidth = f.getStringWidth(m_headerLabel->getText());
+
 	auto activeToggleHeight = 20.0f;
 	auto activeToggleMargin = 2.0f;
 	auto headerHeight = 25.0f;
@@ -201,8 +228,19 @@ void HeaderWithElmListComponent::resized()
 			.withMargin(FlexItem::Margin(activeToggleMargin, activeToggleMargin, 0, activeToggleMargin)));
 	}
 	// Add the headline section label
+	FlexBox headerFb;
+	headerFb.flexDirection = FlexBox::Direction::row;
+	headerFb.justifyContent = FlexBox::JustifyContent::flexStart;
+	headerFb.items.add(FlexItem(*m_headerLabel.get())
+		.withAlignSelf(FlexItem::AlignSelf::flexStart)
+		.withWidth(headerTextWidth + headerMargin)
+		.withHeight(headerHeight));
+	if (m_helpButton) headerFb.items.add(FlexItem(*m_helpButton.get())
+		.withAlignSelf(FlexItem::AlignSelf::flexStart)
+		.withWidth(headerHeight)
+		.withHeight(headerHeight));
 	fb.items.add(
-		FlexItem(*m_headerLabel.get())
+		FlexItem(headerFb)
 			.withHeight(headerHeight)
 			.withMargin(FlexItem::Margin(headerMargin, headerMargin, headerMargin, headerMargin)));
 	// Add all the componentes that are flagged to be included in layouting
@@ -235,6 +273,45 @@ void HeaderWithElmListComponent::resized()
 //#endif
 }
 
+/**
+ * Reimplemented method to handle changed look and feel data.
+ * This makes shure the help buttons' svg images are colored correctly.
+ */
+void HeaderWithElmListComponent::lookAndFeelChanged()
+{
+	// first forward the call to base implementation
+	Component::lookAndFeelChanged();
+
+	// all following is about the help button - if it does not exist, do not continue!
+	if (!m_helpButton)
+		return;
+
+	// create the required button drawable images based on lookandfeel colours
+	String imageName = BinaryData::help24px_svg;
+	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
+	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (dblookAndFeel)
+	{
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+
+		m_helpButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+	}
+
+	// set drawable button background colour according to the section enabled state
+	if (m_toggleState)
+		m_helpButton->setColour(DrawableButton::ColourIds::backgroundColourId, getLookAndFeel().findColour(TableListBox::backgroundColourId));
+	else
+		m_helpButton->setColour(DrawableButton::ColourIds::backgroundColourId, getLookAndFeel().findColour(TableListBox::backgroundColourId).darker());
+}
+
 
 /*
 ===============================================================================
@@ -257,6 +334,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	// DS100 settings section
 	m_DS100Settings = std::make_unique<HeaderWithElmListComponent>();
 	m_DS100Settings->setHeaderText("DS100");
+	m_DS100Settings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/DS100.md"));
 	m_DS100Settings->setHasActiveToggle(false);
 	addAndMakeVisible(m_DS100Settings.get());
 
@@ -317,9 +395,11 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 
 	m_DS100Settings->resized();
 
+
 	// DiGiCo settings section
 	m_DiGiCoBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
 	m_DiGiCoBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_DiGiCo) + " Bridging");
+	m_DiGiCoBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/DiGiCoOSC.md"));
 	m_DiGiCoBridgingSettings->setHasActiveToggle(true);
 	m_DiGiCoBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_DiGiCoBridgingSettings.get());
@@ -356,9 +436,11 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 
 	m_DiGiCoBridgingSettings->resized();
 
+
 	// BlackTrax RTTrPM settings section
 	m_RTTrPMBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
 	m_RTTrPMBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_BlacktraxRTTrPM) + " Bridging");
+	m_RTTrPMBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/BlacktraxRTTrPM.md"));
 	m_RTTrPMBridgingSettings->setHasActiveToggle(true);
 	m_RTTrPMBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_RTTrPMBridgingSettings.get());
@@ -397,9 +479,11 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 
 	m_RTTrPMBridgingSettings->resized();
 
+
 	// Generic OSC settings section
 	m_GenericOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
 	m_GenericOSCBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_GenericOSC) + " Bridging");
+	m_GenericOSCBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/GenericOSC.md"));
 	m_GenericOSCBridgingSettings->setHasActiveToggle(true);
 	m_GenericOSCBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_GenericOSCBridgingSettings.get());
@@ -436,9 +520,11 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 
 	m_GenericOSCBridgingSettings->resized();
 
+
 	// Generic MIDI settings section
 	m_GenericMIDIBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
 	m_GenericMIDIBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_GenericMIDI) + " Bridging");
+	m_GenericMIDIBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/GenericMIDI.md"));
 	m_GenericMIDIBridgingSettings->setHasActiveToggle(true);
 	m_GenericMIDIBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_GenericMIDIBridgingSettings.get());

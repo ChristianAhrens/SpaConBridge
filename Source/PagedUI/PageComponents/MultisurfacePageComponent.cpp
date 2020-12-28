@@ -140,7 +140,7 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 	auto ctrl = Controller::GetInstance();
 	if (ctrl && m_multiSliderSurface)
 	{
-		if (ctrl->PopParameterChanged(DCS_Overview, DCT_NumProcessors))
+		if (ctrl->PopParameterChanged(DCS_Overview, DCT_NumProcessors) || (ctrl->PopParameterChanged(DCS_Protocol, DCT_ProcessorSelection)))
 			update = true;
 		
 		// Iterate through all plugin instances and see if anything changed there.

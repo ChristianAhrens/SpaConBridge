@@ -144,7 +144,7 @@ public:
 	bool setStateXml(XmlElement* stateXml) override;
 
 	//==========================================================================
-	void HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData) override;
+	void HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier Id, const RemoteObjectMessageData& msgData) override;
 
 private:
 	void timerCallback() override;

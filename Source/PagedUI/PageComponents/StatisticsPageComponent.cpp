@@ -346,29 +346,29 @@ void StatisticsLog::timerCallback()
  * @param Id			The remote object id that was received
  * @param msgData		The actual message data that shall be logged
  */
-void StatisticsLog::AddMessageData(StatisticsLogSource logSourceType, RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData)
+void StatisticsLog::AddMessageData(StatisticsLogSource logSourceType, RemoteObjectIdentifier Id, const RemoteObjectMessageData& msgData)
 {
 	if (!m_showDS100Traffic && (logSourceType == SLS_DS100 || logSourceType == SLS_DS100_ext || logSourceType == SLS_DS100_mrr))
 		return;
 
 	String valueString;
-	if (msgData.payload != 0)
+	if (msgData._payload != 0)
 	{
-		if (msgData.valType == ROVT_FLOAT)
+		if (msgData._valType == ROVT_FLOAT)
 		{
 			float fvalue;
-			for (int i = 0; i < msgData.valCount; ++i)
+			for (int i = 0; i < msgData._valCount; ++i)
 			{
-				fvalue = ((float*)msgData.payload)[i];
+				fvalue = static_cast<float*>(msgData._payload)[i];
 				valueString += String(fvalue, 2) + ",";
 			}
 		}
-		else if (msgData.valType == ROVT_INT)
+		else if (msgData._valType == ROVT_INT)
 		{
 			int ivalue;
-			for (int i = 0; i < msgData.valCount; ++i)
+			for (int i = 0; i < msgData._valCount; ++i)
 			{
-				ivalue = ((int*)msgData.payload)[i];
+				ivalue = static_cast<int*>(msgData._payload)[i];
 				valueString += String(ivalue) + ",";
 			}
 		}
@@ -382,7 +382,7 @@ void StatisticsLog::AddMessageData(StatisticsLogSource logSourceType, RemoteObje
 	jassert(mapIdx >= 0);
 	m_logEntries[mapIdx][SLC_Number] = String(m_logEntryCounter);
 	m_logEntries[mapIdx][SLC_ObjectName] = ProcessingEngineConfig::GetObjectShortDescription(Id);
-	m_logEntries[mapIdx][SLC_SourceId] = String(msgData.addrVal.first);
+	m_logEntries[mapIdx][SLC_SourceId] = String(msgData._addrVal._first);
 	m_logEntries[mapIdx][SLC_Value] = valueString;
 	m_logEntries[mapIdx][SLC_LogSourceName] = GetLogSourceName(logSourceType);
 	m_logEntries[mapIdx][SLC_LogSourceType] = String(logSourceType);
@@ -683,7 +683,7 @@ void StatisticsPageComponent::onConfigUpdated()
  * @param objectId	The remote object id of the object that was received
  * @param msgData	The actual message data that was received
  */
-void StatisticsPageComponent::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData)
+void StatisticsPageComponent::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier Id, const RemoteObjectMessageData& msgData)
 {
 	if (nodeId != DEFAULT_PROCNODE_ID)
 		return;

@@ -575,6 +575,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	// YamahaOSC settings section
 	m_YamahaOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
 	m_YamahaOSCBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_YamahaOSC) + " Bridging");
+	m_YamahaOSCBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/YamahaOSC.md"));
 	m_YamahaOSCBridgingSettings->setHasActiveToggle(true);
 	m_YamahaOSCBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_YamahaOSCBridgingSettings.get());

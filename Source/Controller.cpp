@@ -529,7 +529,7 @@ void Controller::InitGlobalSettings(DataChangeSource changeSource, String ipAddr
  * @param objectId	The remote object id of the object that was received
  * @param msgData	The actual message data that was received
  */
-void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier objectId, RemoteObjectMessageData& msgData)
+void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier objectId, const RemoteObjectMessageData& msgData)
 {
 	jassert(nodeId == DEFAULT_PROCNODE_ID);
 	if (nodeId != DEFAULT_PROCNODE_ID)
@@ -570,10 +570,10 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 			case RemoteObjectIdentifier::ROI_CoordinateMapping_SourcePosition_XY:
 				{
 					// The Source ID
-					sourceId = msgData.addrVal.first;
+					sourceId = msgData._addrVal._first;
 					jassert(sourceId > 0);
 					// The Mapping ID
-					mappingId = msgData.addrVal.second;
+					mappingId = msgData._addrVal._second;
 					jassert(mappingId > 0);
 
 					pIdx = ParamIdx_X;
@@ -583,7 +583,7 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 			case RemoteObjectIdentifier::ROI_MatrixInput_ReverbSendGain:
 				{
 					// The Source ID
-					sourceId = msgData.addrVal.first;
+					sourceId = msgData._addrVal._first;
 					jassert(sourceId > 0);
 
 					pIdx = ParamIdx_ReverbSendGain;
@@ -593,7 +593,7 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 			case RemoteObjectIdentifier::ROI_Positioning_SourceSpread:
 				{
 					// The Source ID
-					sourceId = msgData.addrVal.first;
+					sourceId = msgData._addrVal._first;
 					jassert(sourceId > 0);
 
 					pIdx = ParamIdx_SourceSpread;
@@ -603,7 +603,7 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 			case RemoteObjectIdentifier::ROI_Positioning_SourceDelayMode:
 				{
 					// The Source ID
-					sourceId = msgData.addrVal.first;
+					sourceId = msgData._addrVal._first;
 					jassert(sourceId > 0);
 
 					pIdx = ParamIdx_DelayMode;
@@ -614,17 +614,17 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 			case RemoteObjectIdentifier::ROI_MatrixInput_Select:
 				{
 					// The Source ID
-					sourceId = msgData.addrVal.first;
+					sourceId = msgData._addrVal._first;
 					jassert(sourceId > 0);
 
-					jassert(msgData.valCount == 1 && msgData.valType == RemoteObjectValueType::ROVT_INT);
+					jassert(msgData._valCount == 1 && msgData._valType == RemoteObjectValueType::ROVT_INT);
 
 					change = DCT_ProcessorSelection;
 				}
 				break;
 			case RemoteObjectIdentifier::ROI_RemoteProtocolBridge_UIElementIndexSelect:
 				{
-					jassert(msgData.valCount == 1 && msgData.valType == RemoteObjectValueType::ROVT_INT);
+					jassert(msgData._valCount == 1 && msgData._valType == RemoteObjectValueType::ROVT_INT);
 
 					change = DCT_TabPageSelection;
 				}
@@ -643,9 +643,9 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 			// now process what changes were detected to be neccessary to perform
 			if (change == DCT_ProcessorSelection)
 			{
-				if (msgData.valCount == 1 && msgData.valType == RemoteObjectValueType::ROVT_INT)
+				if (msgData._valCount == 1 && msgData._valType == RemoteObjectValueType::ROVT_INT)
 				{
-					auto newSelectState = (static_cast<int*>(msgData.payload)[0] == 1);
+					auto newSelectState = (static_cast<int*>(msgData._payload)[0] == 1);
 					if (IsSoundSourceIdSelected(sourceId) != newSelectState)
 					{
 						SetSoundSourceIdSelectState(sourceId, newSelectState);
@@ -655,12 +655,12 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 			}
 			else if (change == DCT_TabPageSelection)
 			{
-				if (msgData.valCount == 1 && msgData.valType == RemoteObjectValueType::ROVT_INT)
+				if (msgData._valCount == 1 && msgData._valType == RemoteObjectValueType::ROVT_INT)
 				{
 					auto pageMgr = PageComponentManager::GetInstance();
 					if (pageMgr)
 					{
-						auto tabIndex = static_cast<int*>(msgData.payload)[0];
+						auto tabIndex = static_cast<int*>(msgData._payload)[0];
 						pageMgr->SetActiveTab(tabIndex, dontSendNotification);
 					}
 				}
@@ -689,10 +689,10 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 							{
 								if (mappingId == processor->GetMappingId())
 								{
-									jassert(msgData.valCount == 2 && msgData.valType == RemoteObjectValueType::ROVT_FLOAT);
+									jassert(msgData._valCount == 2 && msgData._valType == RemoteObjectValueType::ROVT_FLOAT);
 									// Set the processor's new position.
-									processor->SetParameterValue(DCS_Protocol, ParamIdx_X, static_cast<float*>(msgData.payload)[0]);
-									processor->SetParameterValue(DCS_Protocol, ParamIdx_Y, static_cast<float*>(msgData.payload)[1]);
+									processor->SetParameterValue(DCS_Protocol, ParamIdx_X, static_cast<float*>(msgData._payload)[0]);
+									processor->SetParameterValue(DCS_Protocol, ParamIdx_Y, static_cast<float*>(msgData._payload)[1]);
 
 									// A request was sent to the DS100 by the Controller because this processor was in CM_PollOnce mode.
 									// Since the response was now processed, set the processor back into it's original mode.
@@ -708,16 +708,16 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 							else
 							{
 								float newValue;
-								switch (msgData.valType)
+								switch (msgData._valType)
 								{
 								case RemoteObjectValueType::ROVT_INT:
-									newValue = static_cast<float>(static_cast<int*>(msgData.payload)[0]);
+									newValue = static_cast<float>(static_cast<int*>(msgData._payload)[0]);
 									break;
 								case RemoteObjectValueType::ROVT_FLOAT:
-									newValue = static_cast<float*>(msgData.payload)[0];
+									newValue = static_cast<float*>(msgData._payload)[0];
 									break;
 								case RemoteObjectValueType::ROVT_STRING:
-									newValue = std::stof(std::string(static_cast<char*>(msgData.payload)));
+									newValue = std::stof(std::string(static_cast<char*>(msgData._payload)));
 									break;
 								case RemoteObjectValueType::ROVT_NONE:
 								default:
@@ -802,8 +802,8 @@ void Controller::timerCallback()
 			bool msgSent;
 			DataChangeType paramSetsInTransit = DCT_None;
 
-			newMsgData.addrVal.first = static_cast<juce::uint16>(pro->GetSourceId());
-			newMsgData.addrVal.second = static_cast<juce::uint16>(pro->GetMappingId());
+			newMsgData._addrVal._first = static_cast<juce::uint16>(pro->GetSourceId());
+			newMsgData._addrVal._second = static_cast<juce::uint16>(pro->GetMappingId());
 
 			// Iterate through all automation parameters.
 			for (int pIdx = ParamIdx_X; pIdx < ParamIdx_MaxIndex; ++pIdx)
@@ -819,10 +819,10 @@ void Controller::timerCallback()
 						newDualFloatValue[0] = pro->GetParameterValue(ParamIdx_X);
 						newDualFloatValue[1] = pro->GetParameterValue(ParamIdx_Y);
 
-						newMsgData.valCount = 2;
-						newMsgData.valType = ROVT_FLOAT;
-						newMsgData.payload = &newDualFloatValue;
-						newMsgData.payloadSize = 2 * sizeof(float);
+						newMsgData._valCount = 2;
+						newMsgData._valType = ROVT_FLOAT;
+						newMsgData._payload = &newDualFloatValue;
+						newMsgData._payloadSize = 2 * sizeof(float);
 
 						// SET command is only sent out while in CM_Tx mode, provided that
 						// this parameter has been changed since the last timer tick.
@@ -843,10 +843,10 @@ void Controller::timerCallback()
 					{
 						float newFloatValue = pro->GetParameterValue(ParamIdx_ReverbSendGain);
 
-						newMsgData.valCount = 1;
-						newMsgData.valType = ROVT_FLOAT;
-						newMsgData.payload = &newFloatValue;
-						newMsgData.payloadSize = sizeof(float);
+						newMsgData._valCount = 1;
+						newMsgData._valType = ROVT_FLOAT;
+						newMsgData._payload = &newFloatValue;
+						newMsgData._payloadSize = sizeof(float);
 
 						// SET command is only sent out while in CM_Tx mode, provided that
 						// this parameter has been changed since the last timer tick.
@@ -862,10 +862,10 @@ void Controller::timerCallback()
 					{
 						float newFloatValue = pro->GetParameterValue(ParamIdx_SourceSpread);
 
-						newMsgData.valCount = 1;
-						newMsgData.valType = ROVT_FLOAT;
-						newMsgData.payload = &newFloatValue;
-						newMsgData.payloadSize = sizeof(float);
+						newMsgData._valCount = 1;
+						newMsgData._valType = ROVT_FLOAT;
+						newMsgData._payload = &newFloatValue;
+						newMsgData._payloadSize = sizeof(float);
 
 						// SET command is only sent out while in CM_Tx mode, provided that
 						// this parameter has been changed since the last timer tick.
@@ -881,10 +881,10 @@ void Controller::timerCallback()
 					{
 						float newFloatValue = pro->GetParameterValue(ParamIdx_DelayMode);
 
-						newMsgData.valCount = 1;
-						newMsgData.valType = ROVT_FLOAT;
-						newMsgData.payload = &newFloatValue;
-						newMsgData.payloadSize = sizeof(float);
+						newMsgData._valCount = 1;
+						newMsgData._valType = ROVT_FLOAT;
+						newMsgData._payload = &newFloatValue;
+						newMsgData._payloadSize = sizeof(float);
 
 						// SET command is only sent out while in CM_Tx mode, provided that
 						// this parameter has been changed since the last timer tick.
@@ -920,10 +920,10 @@ void Controller::timerCallback()
 		{
 			// If we aren't expecting any responses from the DS100, we need to at least send a "ping"
 			// so that we can use the "pong" to check our connection status.
-			newMsgData.valCount = 0;
-			newMsgData.valType = ROVT_NONE;
-			newMsgData.payload = 0;
-			newMsgData.payloadSize = 0;
+			newMsgData._valCount = 0;
+			newMsgData._valType = ROVT_NONE;
+			newMsgData._payload = 0;
+			newMsgData._payloadSize = 0;
 			m_protocolBridge.SendMessage(ROI_HeartbeatPing, newMsgData);
 		}
 

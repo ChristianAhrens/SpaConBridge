@@ -1,6 +1,6 @@
 ## Generic OSC bridging settings
 
-![Showreel.010.png](Resources/Documentation/Showreel/Showreel.010.png "Generic OSC bridging settings")
+![Showreel.010.png](../Showreel/Showreel.011.png "Generic OSC bridging settings")
 
 ### Supported OSC messages
 

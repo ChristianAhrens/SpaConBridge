@@ -14,11 +14,6 @@ The idea is to have a multi-platform application with a user interface that allo
 * [2D Position Slider page](#twodimensionalpositionslider)
 * [Protocol Bridging traffic logging and plotting page](#protocolbridgingtrafficloggingandplotting)
 * [App Settings page](#appsettings)
-  * [DS100 communication](#ds100settings)
-  * [DiGiCo bridging](#digicosettings)
-  * [Blacktrax bridging](#blacktraxsettings)
-  * [Generic OSC bridging](#genericoscsettings)
-  * [UI LookAndFeel](#lookandfeelsettings)
 * [Supported Sound Object parameters on UI](#uiparameters)
 * [Supported Sound Object parameters for protocol bridging](#bridgingparameters)
 
@@ -29,6 +24,12 @@ The idea is to have a multi-platform application with a user interface that allo
 
 * Monitoring of Soundscape Sound Object parameters
 * Protocol bridging from 3rd party devices/applications to d&b DS100 signal bridge
+  * [d&b DS100 signal bridge communication](Resources/Documentation/BridgingProtocols/DS100.md)
+  * [DiGiCo SD series mixing console communication](Resources/Documentation/BridgingProtocols/DiGiCoOSC.md)
+  * [Blacktrax tracking system communication](Resources/Documentation/BridgingProtocols/BlacktraxRTTrPM.md)
+  * [Generic OSC protocol communication](Resources/Documentation/BridgingProtocols/GenericOSC.md)
+  * [Generic MIDI communication](Resources/Documentation/BridgingProtocols/GenericMIDI.md)
+  * [Yamaha OSC communication](Resources/Documentation/BridgingProtocols/YamahaOSC.md)
 * Monitoring of protocol bridging performance in graphical and textual representation
 * Tab based user interface containing tabs for
   * Active Sound Objects in tabular form with dedicated controls for an object's parameters following table selection 
@@ -37,19 +38,23 @@ The idea is to have a multi-platform application with a user interface that allo
   * Application settings
 * Support for iOS/iPadOS/MacOS/Windows plattforms through using JUCE Framework
 
+
 <a name="soundobjecttable" />
 
 ## Sound Object Table
 
 ![Showreel.002.png](Resources/Documentation/Showreel/Showreel.002.png "Sound Object Table Overview")
 
+
 <a name="soundobjectmuting" />
 
 ![Showreel.003.png](Resources/Documentation/Showreel/Showreel.003.png "Sound Object Table Bridging Mutes")
 
+
 <a name="soundobjectparameterediting" />
 
 ![Showreel.004.png](Resources/Documentation/Showreel/Showreel.004.png "Sound Object Table Selection")
+
 
 <a name="twodimensionalpositionslider" />
 
@@ -57,45 +62,22 @@ The idea is to have a multi-platform application with a user interface that allo
 
 ![Showreel.005.png](Resources/Documentation/Showreel/Showreel.005.png "Multislider")
 
+
 <a name="protocolbridgingtrafficloggingandplotting" />
 
 ## Protocol Bridging traffic logging and plotting
 
 ![Showreel.006.png](Resources/Documentation/Showreel/Showreel.006.png "Protocol Bridging Statistics")
 
+
 <a name="appsettings" />
 
 ## App settings
 
-<a name="ds100settings" />
+![Showreel.007.png](Resources/Documentation/Showreel/Showreel.007.png "App Settings")
 
-### DS100 settings
+![Showreel.014.png](Resources/Documentation/Showreel/Showreel.014.png "Light LookAndFeel")
 
-![Showreel.007.png](Resources/Documentation/Showreel/Showreel.007.png "DS100 Settings")
-
-<a name="digicosettings" />
-
-### DiGiCo bridging settings
-
-![Showreel.008.png](Resources/Documentation/Showreel/Showreel.008.png "DiGiCo Bridging Settings")
-
-<a name="blacktraxsettings" />
-
-### Blacktrax RTTrPM bridging settings
-
-![Showreel.009.png](Resources/Documentation/Showreel/Showreel.009.png "Blacktrax Bridging Settings")
-
-<a name="genericoscsettings" />
-
-### Generic OSC bridging settings
-
-![Showreel.010.png](Resources/Documentation/Showreel/Showreel.010.png "Generic OSC Bridging Settings")
-
-<a name="lookandfeelsettings" />
-
-### App LookAndFeel settings
-
-![Showreel.011.png](Resources/Documentation/Showreel/Showreel.011.png "Light LookAndFeel")
 
 <a name="uiparameters" />
 
@@ -105,6 +87,7 @@ The idea is to have a multi-platform application with a user interface that allo
 - Matrix Input ReverbSendGain
 - Sound Object Spread
 - Sound Object Delay Mode
+
 
 <a name="bridgingparameters" />
 

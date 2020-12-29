@@ -1,6 +1,6 @@
 ## Blacktrax RTTrPM bridging settings
 
-![Showreel.009.png](Resources/Documentation/Showreel/Showreel.009.png "Blacktrax RTTrPM Bridging Settings")
+![Showreel.009.png](../Showreel/Showreel.010.png "Blacktrax RTTrPM Bridging Settings")
 
 ### Supported Soundscape parameters for protocol bridging
 

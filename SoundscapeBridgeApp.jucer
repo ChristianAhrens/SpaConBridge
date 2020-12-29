@@ -369,7 +369,7 @@
       </MODULEPATHS>
     </VS2019>
     <XCODE_MAC targetFolder="Builds/MacOSX" smallIcon="qJTuNs" bigIcon="qJTuNs"
-               hardenedRuntime="1" appSandbox="1" appSandboxOptions="com.apple.security.network.client,com.apple.security.network.server">
+               hardenedRuntime="1" appSandbox="1" appSandboxOptions="com.apple.security.device.bluetooth,com.apple.security.device.usb,com.apple.security.network.client,com.apple.security.network.server">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" headerPath="../../submodules/JUCE-AppBasics/Source/"/>
         <CONFIGURATION isDebug="0" name="Release" headerPath="../../submodules/JUCE-AppBasics/Source/"/>

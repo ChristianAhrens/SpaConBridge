@@ -3,9 +3,9 @@
 <JUCERPROJECT id="MFvkL5" name="SoundscapeBridgeApp" projectType="guiapp" version="0.1.17"
               bundleIdentifier="com.ChristianAhrens.SoundscapeBridgeApp" companyName="Christian Ahrens"
               companyEmail="christianahrens@me.com" displaySplashScreen="0"
-              reportAppUsage="0" companyCopyright="2020" jucerFormatVersion="1"
+              reportAppUsage="0" companyCopyright="2021" jucerFormatVersion="1"
               headerPath="../../submodules/RemoteProtocolBridge/Source;&#10;../../submodules/JUCE-AppBasics/Source;"
-              defines="SERVUS_STATIC">
+              defines="SERVUS_STATIC" companyWebsite="https://github.com/ChristianAhrens/SoundscapeBridgeApp">
   <MAINGROUP id="cS7SrP" name="SoundscapeBridgeApp">
     <GROUP id="{F93FDF74-FF39-A47E-E403-31E5ADA7ADD3}" name="submodules">
       <GROUP id="{5D1CEB5A-DB08-BAC9-EF17-843234394AA4}" name="RemoteProtocolBridge">

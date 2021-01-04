@@ -171,8 +171,9 @@ bool ProtocolBridgingWrapper::setStateXml(XmlElement* stateXml)
 /**
  * Method to create a basic configuration to use to setup the single supported
  * bridging node.
+ * @param bridgingProtocolsToActivate	Bitmask definition of what bridging protocols to activate in the bridging node about to be created.
  */
-void ProtocolBridgingWrapper::SetupBridgingNode()
+void ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridgingProtocolsToActivate)
 {
 	auto nodeXmlElement = std::make_unique<XmlElement>(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::NODE));
 
@@ -219,43 +220,58 @@ void ProtocolBridgingWrapper::SetupBridgingNode()
 	}
 
 	// DiGiCo protocol - RoleB
-	auto digicoBridgingXmlElement = SetupDiGiCoBridgingProtocol();
-	if (digicoBridgingXmlElement)
+	if ((bridgingProtocolsToActivate & PBT_DiGiCo) == PBT_DiGiCo)
 	{
-		m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_DiGiCo, *digicoBridgingXmlElement));
-		nodeXmlElement->addChildElement(digicoBridgingXmlElement.release());
+		auto digicoBridgingXmlElement = SetupDiGiCoBridgingProtocol();
+		if (digicoBridgingXmlElement)
+		{
+			m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_DiGiCo, *digicoBridgingXmlElement));
+			nodeXmlElement->addChildElement(digicoBridgingXmlElement.release());
+		}
 	}
 
 	// RTTrPM protocol - RoleB
-	auto RTTrPMBridgingXmlElement = SetupRTTrPMBridgingProtocol();
-	if (RTTrPMBridgingXmlElement)
+	if ((bridgingProtocolsToActivate & PBT_BlacktraxRTTrPM) == PBT_BlacktraxRTTrPM)
 	{
-		m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_BlacktraxRTTrPM, *RTTrPMBridgingXmlElement));
-		nodeXmlElement->addChildElement(RTTrPMBridgingXmlElement.release());
+		auto RTTrPMBridgingXmlElement = SetupRTTrPMBridgingProtocol();
+		if (RTTrPMBridgingXmlElement)
+		{
+			m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_BlacktraxRTTrPM, *RTTrPMBridgingXmlElement));
+			nodeXmlElement->addChildElement(RTTrPMBridgingXmlElement.release());
+		}
 	}
 
 	// GenericOSC protocol - RoleB
-	auto genericOSCBridgingXmlElement = SetupGenericOSCBridgingProtocol();
-	if (genericOSCBridgingXmlElement)
+	if ((bridgingProtocolsToActivate & PBT_GenericOSC) == PBT_GenericOSC)
 	{
-		m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericOSC, *genericOSCBridgingXmlElement));
-		nodeXmlElement->addChildElement(genericOSCBridgingXmlElement.release());
+		auto genericOSCBridgingXmlElement = SetupGenericOSCBridgingProtocol();
+		if (genericOSCBridgingXmlElement)
+		{
+			m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericOSC, *genericOSCBridgingXmlElement));
+			nodeXmlElement->addChildElement(genericOSCBridgingXmlElement.release());
+		}
 	}
 
 	// GenericMIDI protocol - RoleB
-	auto genericMIDIBridgingXmlElement = SetupGenericMIDIBridgingProtocol();
-	if (genericMIDIBridgingXmlElement)
+	if ((bridgingProtocolsToActivate & PBT_GenericMIDI) == PBT_GenericMIDI)
 	{
-		m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericMIDI, *genericMIDIBridgingXmlElement));
-		nodeXmlElement->addChildElement(genericMIDIBridgingXmlElement.release());
+		auto genericMIDIBridgingXmlElement = SetupGenericMIDIBridgingProtocol();
+		if (genericMIDIBridgingXmlElement)
+		{
+			m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericMIDI, *genericMIDIBridgingXmlElement));
+			nodeXmlElement->addChildElement(genericMIDIBridgingXmlElement.release());
+		}
 	}
 
 	// Yamaha OSC protocol - RoleB
-	auto yamahaOSCBridgingXmlElement = SetupYamahaOSCBridgingProtocol();
-	if (yamahaOSCBridgingXmlElement)
+	if ((bridgingProtocolsToActivate & PBT_YamahaOSC) == PBT_YamahaOSC)
 	{
-		m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_YamahaOSC, *yamahaOSCBridgingXmlElement));
-		nodeXmlElement->addChildElement(yamahaOSCBridgingXmlElement.release());
+		auto yamahaOSCBridgingXmlElement = SetupYamahaOSCBridgingProtocol();
+		if (yamahaOSCBridgingXmlElement)
+		{
+			m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_YamahaOSC, *yamahaOSCBridgingXmlElement));
+			nodeXmlElement->addChildElement(yamahaOSCBridgingXmlElement.release());
+		}
 	}
 
 	m_processingNode.setStateXml(nodeXmlElement.get());

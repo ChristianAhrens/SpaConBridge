@@ -197,7 +197,7 @@ private:
 	bool SetProtocolInputDeviceIndex(ProtocolId protocolId, int inputDeviceIndex, bool dontSendNotification = false);
 
 	//==========================================================================
-	void SetupBridgingNode();
+	void SetupBridgingNode(const ProtocolBridgingType bridgingProtocolsToActivate = PBT_None);
 	std::unique_ptr<XmlElement> SetupDiGiCoBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupRTTrPMBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupGenericOSCBridgingProtocol();

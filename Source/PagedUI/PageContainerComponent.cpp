@@ -279,7 +279,7 @@ void PageContainerComponent::UpdateGui(bool init)
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
-		if (ctrl->PopParameterChanged(DCS_Overview, DCT_Online) || init)
+		if (ctrl->PopParameterChanged(DCS_Protocol, DCT_Online) || init)
 			m_onlineLed->setToggleState(ctrl->GetOnline(), NotificationType::dontSendNotification);
 	}
 

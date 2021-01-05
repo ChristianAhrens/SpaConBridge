@@ -19,6 +19,7 @@
 #include "ProtocolBridgingWrapper.h"
 
 #include "Controller.h"
+#include "SoundsourceProcessor/SoundsourceProcessor.h"
 
 
 namespace SoundscapeBridgeApp
@@ -211,7 +212,7 @@ void ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridg
 			hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_DS100_HOST);
 
 		// Active objects preparation
-		Array<RemoteObject> activeObjects;
+		std::vector<RemoteObject> activeObjects;
 		RemoteObject objectX, objectY;
 
 		auto activeObjsXmlElement = protocolAXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ACTIVEOBJECTS));
@@ -1053,127 +1054,82 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 }
 
 /**
- * Sets the given soundobject/mapping as to be activly handled.
- * This method inserts the object into the cached xml element,
- * pushes the updated xml element into processing node and triggers configuration updating.
- * @param sourceId	The id of the new soundsource object to activate
- * @param mappingId The mapping id that is to be activated for the soundsource object
+ * Updates the active soundobject ids in DS100 device protocol configuration of bridging node.
+ * This method gets all current active remote objects from controller, maps them to one or two (64ch vs 128ch)
+ * DS100 devices and inserts them into an xml element that is then set as new config to bridging node.
  * @return	True on succes, false if failure
  */
-bool ProtocolBridgingWrapper::ActivateDS100SourceId(SourceId sourceId, MappingId mappingId)
+bool ProtocolBridgingWrapper::UpdateActiveDS100SourceIds()
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
 	{
-		auto mappedSourceId = sourceId;
-		auto DS100ProtocolId = DS100_1_PROCESSINGPROTOCOL_ID;
+		// we can't do anything here without the controller
+		auto ctrl = Controller::GetInstance();
+		if (!ctrl)
+			return false;
 
-		if (sourceId > DS100_CHANNELCOUNT)
+		// Get currently active objects from controller and split them 
+		// into those relevant for first and second DS100
+		auto activeObjects = ctrl->GetActivatedRemoteObjects();
+		auto activeObjectsOnFirstDS100 = std::vector<RemoteObject>{};
+		auto activeObjectsOnSecondDS100 = std::vector<RemoteObject>{};
+		for (auto const& ro : activeObjects)
 		{
-			mappedSourceId = sourceId - DS100_CHANNELCOUNT;
-			DS100ProtocolId = DS100_2_PROCESSINGPROTOCOL_ID;
+			auto sourceId = ro._Addr._first;
+
+			// We do not support anything exceeding two DS100 (ext. mode) channelcount wise
+			if (sourceId > DS100_EXTMODE_CHANNELCOUNT)
+				continue;
+
+			// If the sourceId is out of range for a single DS100, take it as relevant 
+			// for second and map the sourceid back into a single DS100's source range
+			if (sourceId > DS100_CHANNELCOUNT)
+			{
+				activeObjectsOnSecondDS100.push_back(ro);
+				activeObjectsOnSecondDS100.back()._Addr._first = static_cast<int>(sourceId - DS100_CHANNELCOUNT);
+			}
+			// Otherwise simply take it as relevant for first DS100
+			else
+			{
+				activeObjectsOnFirstDS100.push_back(ro);
+			}
 		}
 
-		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100ProtocolId));
-		if (protocolXmlElement)
+		// insert active objects for first DS100 into its xml element
+		auto protocolXmlElement1stDS100 = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement1stDS100)
 		{
-			auto activeObjsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ACTIVEOBJECTS));
+			auto activeObjsXmlElement = protocolXmlElement1stDS100->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ACTIVEOBJECTS));
 			if (activeObjsXmlElement)
 			{
-				juce::Array<RemoteObject> activeObjects;
-				ProcessingEngineConfig::ReadActiveObjects(activeObjsXmlElement, activeObjects);
-				for(auto roi : m_activeObjectsPerSource)
-				{
-					RemoteObject newSourceObject;
-					newSourceObject._Id = roi;
-					newSourceObject._Addr._first = mappedSourceId;
-					if (roi == ROI_CoordinateMapping_SourcePosition_X || roi == ROI_CoordinateMapping_SourcePosition_Y || roi == ROI_CoordinateMapping_SourcePosition_XY)
-						newSourceObject._Addr._second = mappingId;
-					else
-						newSourceObject._Addr._second = INVALID_ADDRESS_VALUE;
-			
-					if (!activeObjects.contains(newSourceObject))
-						activeObjects.add(newSourceObject);
-				}
-				ProcessingEngineConfig::ReplaceActiveObjects(activeObjsXmlElement, activeObjects);
+				ProcessingEngineConfig::ReplaceActiveObjects(activeObjsXmlElement, activeObjectsOnFirstDS100);
 			}
 			else
 				return false;
 		}
+		// first DS100 existence is mandatory, we can assume that an error occured if the corresp. xml element is not available (second DS100 xml element is optional)
 		else
 			return false;
 
-		m_processingNode.setStateXml(nodeXmlElement);
-
-		Controller* ctrl = Controller::GetInstance();
-		if (ctrl)
-			ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
-
-		return true;
-	}
-	else
-		return false;
-}
-
-/**
- * Removes the given soundobject/mapping as to no longer be activly handled.
- * This method removes the object from the cached xml element,
- * pushes the updated xml element into processing node and triggers configuration updating.
- * @param sourceId	The id of the new soundsource object to deactivate
- * @param mappingId The mapping id that is to be deactivated for the soundsource object
- * @return	True on succes, false if failure
- */
-bool ProtocolBridgingWrapper::DeactivateDS100SourceId(SourceId sourceId, MappingId mappingId)
-{
-	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
-	if (nodeXmlElement)
-	{
-		auto mappedSourceId = sourceId;
-		auto DS100ProtocolId = DS100_1_PROCESSINGPROTOCOL_ID;
-
-		if (sourceId > DS100_CHANNELCOUNT)
+		// insert active objects for second DS100 into its xml element
+		auto protocolXmlElement2ndDS100 = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_2_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement2ndDS100)
 		{
-			mappedSourceId = sourceId - DS100_CHANNELCOUNT;
-			DS100ProtocolId = DS100_2_PROCESSINGPROTOCOL_ID;
-		}
-
-		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100ProtocolId));
-		if (protocolXmlElement)
-		{
-			auto activeObjsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ACTIVEOBJECTS));
+			auto activeObjsXmlElement = protocolXmlElement2ndDS100->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ACTIVEOBJECTS));
 			if (activeObjsXmlElement)
 			{
-				juce::Array<RemoteObject> activeObjects;
-				ProcessingEngineConfig::ReadActiveObjects(activeObjsXmlElement, activeObjects);
-				for (auto roi : m_activeObjectsPerSource)
-				{
-					RemoteObject newSourceObject;
-					newSourceObject._Id = static_cast<RemoteObjectIdentifier>(roi);
-					newSourceObject._Addr._first = mappedSourceId;
-					if (roi == ROI_CoordinateMapping_SourcePosition_X || roi == ROI_CoordinateMapping_SourcePosition_Y || roi == ROI_CoordinateMapping_SourcePosition_XY)
-						newSourceObject._Addr._second = mappingId;
-					else
-						newSourceObject._Addr._second = INVALID_ADDRESS_VALUE;
-
-					if (activeObjects.contains(newSourceObject))
-					{
-						auto idx = activeObjects.indexOf(newSourceObject);
-						activeObjects.remove(idx);
-					}
-				}
-				ProcessingEngineConfig::ReplaceActiveObjects(activeObjsXmlElement, activeObjects);
+				ProcessingEngineConfig::ReplaceActiveObjects(activeObjsXmlElement, activeObjectsOnSecondDS100);
 			}
 			else
 				return false;
 		}
-		else
-			return false;
 
+		// set updated xml config live
 		m_processingNode.setStateXml(nodeXmlElement);
 
-		Controller* ctrl = Controller::GetInstance();
-		if (ctrl)
-			ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
+		// broadcast that bridging config has changed
+		ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
 
 		return true;
 	}

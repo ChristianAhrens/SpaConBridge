@@ -54,22 +54,6 @@ static constexpr int KEEPALIVE_INTERVAL = 1500;	//< Interval at which keepalive 
 static constexpr int MAX_HEARTBEAT_COUNT = 0xFFFF;	//< No point counting beyond this number.
 
 
-/**
- * Pre-defined OSC command and response strings
- */
-static const String kOscDelimiterString("/");
-static const String kOscCommandString_ping("/ping");
-static const String kOscCommandString_source_position_xy("/dbaudio1/coordinatemapping/source_position_xy/%d/%d");
-static const String kOscCommandString_reverbsendgain("/dbaudio1/matrixinput/reverbsendgain/%d");
-static const String kOscCommandString_source_spread("/dbaudio1/positioning/source_spread/%d");
-static const String kOscCommandString_source_delaymode("/dbaudio1/positioning/source_delaymode/%d");
-static const String kOscResponseString_pong("/pong");
-static const String kOscResponseString_source_position_xy("/dbaudio1/coordinatemapping/source_position_xy");
-static const String kOscResponseString_reverbsendgain("/dbaudio1/matrixinput/reverbsendgain");
-static const String kOscResponseString_source_spread("/dbaudio1/positioning/source_spread");
-static const String kOscResponseString_source_delaymode("/dbaudio1/positioning/source_delaymode");
-
-
 /*
 ===============================================================================
  Class Controller
@@ -163,9 +147,9 @@ void Controller::SetParameterChanged(DataChangeSource changeSource, DataChangeTy
 
 	// Forward the change to all processor instances. This is needed, for example, so that all processor's
 	// GUIs update an IP address change.
-	for (int i = 0; i < m_processors.size(); ++i)
+	for (auto const& processor : m_processors)
 	{
-		m_processors[i]->SetParameterChanged(changeSource, changeTypes);
+		processor->SetParameterChanged(changeSource, changeTypes);
 	}
 
 	switch (changeTypes)
@@ -253,21 +237,30 @@ ProcessorId Controller::AddProcessor(DataChangeSource changeSource, SoundsourceP
 
 	// Get the highest Input number of all current processors.
 	SourceId currentMaxSourceId = 0;
-	for (int i = 0; i < m_processors.size(); ++i)
+	for (auto const& processor : m_processors)
 	{
-		if (m_processors[i]->GetSourceId() > currentMaxSourceId)
-			currentMaxSourceId = m_processors[i]->GetSourceId();
+		if (processor->GetSourceId() > currentMaxSourceId)
+			currentMaxSourceId = processor->GetSourceId();
 	}
 
+	// Get the next free processor id to use (can be one inbetween or the next after the last)
+	auto newProcessorId = ProcessorId(0);
+	auto processorIds = GetProcessorIds();
+	std::sort(processorIds.begin(), processorIds.end());
+	for (auto const& processorId : processorIds)
+	{
+		if (processorId > newProcessorId) // we have found a gap in the list that we can use
+			break;
+		else
+			newProcessorId++;
+	}
+
+	// add the processor to list now, since we have taken all info we require from the so far untouched list
 	m_processors.add(p);
-	ProcessorId newProcessorId = static_cast<ProcessorId>(m_processors.size() - 1);
 
 	// Set the new Processor's id
 	p->SetProcessorId(changeSource, newProcessorId);
 	
-#ifdef JUCE_DEBUG
-	p->PushDebugMessage("Controller::AddProcessor: #" + String(newProcessorId));
-#endif
 	SetParameterChanged(changeSource, DCT_NumProcessors);
 
 	// Set the new Processor's InputID to the next in sequence.
@@ -700,7 +693,7 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 									if ((mode & CM_PollOnce) == CM_PollOnce)
 									{
 										mode &= ~CM_PollOnce;
-										processor->SetComsMode(DCS_Protocol, mode);
+										processor->SetComsMode(DCS_Host, mode);
 									}
 								}
 							}
@@ -773,7 +766,8 @@ void Controller::Reconnect()
 
 /**
  * Timer callback function, which will be called at regular intervals to
- * send out OSC messages.
+ * send out OSC messages for the parameters that have been changed on UI.
+ * 
  * Reimplemented from base class Timer.
  */
 void Controller::timerCallback()
@@ -785,26 +779,59 @@ void Controller::timerCallback()
 		bool sendKeepAlive = (((m_heartBeatsRx * m_oscMsgRate) > KEEPALIVE_INTERVAL) ||
 								((m_heartBeatsTx * m_oscMsgRate) > KEEPALIVE_INTERVAL));
 
-		int i;
-		SoundsourceProcessor* pro = nullptr;
-		ComsMode mode;
+		float newDualFloatValue[2];
 		RemoteObjectMessageData newMsgData;
 
-		for (i = 0; i < m_processors.size(); ++i)
+		for (auto const& processor : m_processors)
 		{
-			pro = m_processors[i];
+			auto comsMode = processor->GetComsMode();
 
-			mode = pro->GetComsMode();
+			// Check if the processor configuration has changed
+			// and need to be updated in the bridging configuration
+			if (processor->GetParameterChanged(DCS_SoundsourceTable, DCT_PluginInstanceConfig))
+			{
+				auto activateSSId = false;
+				auto deactivateSSId = false;
+				if (processor->GetParameterChanged(DCS_SoundsourceTable, DCT_SourceID))
+				{
+					// SoundsourceID change means update is only required when
+					// remote object is currently activated. 
+					activateSSId = ((comsMode & CM_Rx) == CM_Rx);
+				}
+				processor->PopParameterChanged(DCS_SoundsourceTable, DCT_SourceID);
+
+				if (processor->GetParameterChanged(DCS_SoundsourceTable, DCT_MappingID))
+				{
+					// MappingID change means update is only required when
+					// remote object is currently activated. 
+					activateSSId = ((comsMode & CM_Rx) == CM_Rx);
+				}
+				processor->PopParameterChanged(DCS_SoundsourceTable, DCT_MappingID);
+
+				if (processor->GetParameterChanged(DCS_SoundsourceTable, DCT_ComsMode))
+				{
+					// ComsMode change means toggling polling for the remote object,
+					// so one of the two activate/deactivate actions is required
+					activateSSId = ((comsMode & CM_Rx) == CM_Rx);
+					deactivateSSId = !activateSSId;
+				}
+				processor->PopParameterChanged(DCS_SoundsourceTable, DCT_ComsMode);
+
+				if (activateSSId)
+					ActivateSoundSourceId(processor->GetSourceId(), processor->GetMappingId());
+				else if (deactivateSSId)
+					DeactivateSoundSourceId(processor->GetSourceId(), processor->GetMappingId());
+			}
 
 			// Signal every timer tick to each processor instance. 
 			// This is used to trigger gestures for touch automation.
-			pro->Tick();
+			processor->Tick();
 
 			bool msgSent;
 			DataChangeType paramSetsInTransit = DCT_None;
 
-			newMsgData._addrVal._first = static_cast<juce::uint16>(pro->GetSourceId());
-			newMsgData._addrVal._second = static_cast<juce::uint16>(pro->GetMappingId());
+			newMsgData._addrVal._first = static_cast<juce::uint16>(processor->GetSourceId());
+			newMsgData._addrVal._second = static_cast<juce::uint16>(processor->GetMappingId());
 
 			// Iterate through all automation parameters.
 			for (int pIdx = ParamIdx_X; pIdx < ParamIdx_MaxIndex; ++pIdx)
@@ -815,20 +842,18 @@ void Controller::timerCallback()
 				{
 					case ParamIdx_X:
 					{
-						float newDualFloatValue[2];
-
-						newDualFloatValue[0] = pro->GetParameterValue(ParamIdx_X);
-						newDualFloatValue[1] = pro->GetParameterValue(ParamIdx_Y);
-
-						newMsgData._valCount = 2;
-						newMsgData._valType = ROVT_FLOAT;
-						newMsgData._payload = &newDualFloatValue;
-						newMsgData._payloadSize = 2 * sizeof(float);
-
 						// SET command is only sent out while in CM_Tx mode, provided that
 						// this parameter has been changed since the last timer tick.
-						if (((mode & CM_Tx) == CM_Tx) && pro->GetParameterChanged(DCS_Protocol, DCT_SourcePosition))
+						if (((comsMode & CM_Tx) == CM_Tx) && processor->GetParameterChanged(DCS_Protocol, DCT_SourcePosition))
 						{
+							newDualFloatValue[0] = processor->GetParameterValue(ParamIdx_X);
+							newDualFloatValue[1] = processor->GetParameterValue(ParamIdx_Y);
+
+							newMsgData._valCount = 2;
+							newMsgData._valType = ROVT_FLOAT;
+							newMsgData._payload = &newDualFloatValue;
+							newMsgData._payloadSize = 2 * sizeof(float);
+
 							msgSent = m_protocolBridge.SendMessage(ROI_CoordinateMapping_SourcePosition_XY, newMsgData);
 							paramSetsInTransit |= DCT_SourcePosition;
 						}
@@ -842,17 +867,17 @@ void Controller::timerCallback()
 
 					case ParamIdx_ReverbSendGain:
 					{
-						float newFloatValue = pro->GetParameterValue(ParamIdx_ReverbSendGain);
-
-						newMsgData._valCount = 1;
-						newMsgData._valType = ROVT_FLOAT;
-						newMsgData._payload = &newFloatValue;
-						newMsgData._payloadSize = sizeof(float);
-
 						// SET command is only sent out while in CM_Tx mode, provided that
 						// this parameter has been changed since the last timer tick.
-						if (((mode & CM_Tx) == CM_Tx) && pro->GetParameterChanged(DCS_Protocol, DCT_ReverbSendGain))
+						if (((comsMode & CM_Tx) == CM_Tx) && processor->GetParameterChanged(DCS_Protocol, DCT_ReverbSendGain))
 						{
+							newDualFloatValue[0] = processor->GetParameterValue(ParamIdx_ReverbSendGain);
+
+							newMsgData._valCount = 1;
+							newMsgData._valType = ROVT_FLOAT;
+							newMsgData._payload = &newDualFloatValue;
+							newMsgData._payloadSize = sizeof(float);
+
 							msgSent = m_protocolBridge.SendMessage(ROI_MatrixInput_ReverbSendGain, newMsgData);
 							paramSetsInTransit |= DCT_ReverbSendGain;
 						}
@@ -861,17 +886,17 @@ void Controller::timerCallback()
 
 					case ParamIdx_SourceSpread:
 					{
-						float newFloatValue = pro->GetParameterValue(ParamIdx_SourceSpread);
-
-						newMsgData._valCount = 1;
-						newMsgData._valType = ROVT_FLOAT;
-						newMsgData._payload = &newFloatValue;
-						newMsgData._payloadSize = sizeof(float);
-
 						// SET command is only sent out while in CM_Tx mode, provided that
 						// this parameter has been changed since the last timer tick.
-						if (((mode & CM_Tx) == CM_Tx) && pro->GetParameterChanged(DCS_Protocol, DCT_SourceSpread))
+						if (((comsMode & CM_Tx) == CM_Tx) && processor->GetParameterChanged(DCS_Protocol, DCT_SourceSpread))
 						{
+							newDualFloatValue[0] = processor->GetParameterValue(ParamIdx_SourceSpread);
+
+							newMsgData._valCount = 1;
+							newMsgData._valType = ROVT_FLOAT;
+							newMsgData._payload = &newDualFloatValue;
+							newMsgData._payloadSize = sizeof(float);
+
 							msgSent = m_protocolBridge.SendMessage(ROI_Positioning_SourceSpread, newMsgData);
 							paramSetsInTransit |= DCT_SourceSpread;
 						}
@@ -880,17 +905,17 @@ void Controller::timerCallback()
 
 					case ParamIdx_DelayMode:
 					{
-						float newFloatValue = pro->GetParameterValue(ParamIdx_DelayMode);
-
-						newMsgData._valCount = 1;
-						newMsgData._valType = ROVT_FLOAT;
-						newMsgData._payload = &newFloatValue;
-						newMsgData._payloadSize = sizeof(float);
-
 						// SET command is only sent out while in CM_Tx mode, provided that
 						// this parameter has been changed since the last timer tick.
-						if (((mode & CM_Tx) == CM_Tx) && pro->GetParameterChanged(DCS_Protocol, DCT_DelayMode))
+						if (((comsMode & CM_Tx) == CM_Tx) && processor->GetParameterChanged(DCS_Protocol, DCT_DelayMode))
 						{
+							newDualFloatValue[0] = processor->GetParameterValue(ParamIdx_DelayMode);
+
+							newMsgData._valCount = 1;
+							newMsgData._valType = ROVT_FLOAT;
+							newMsgData._payload = &newDualFloatValue;
+							newMsgData._payloadSize = sizeof(float);
+
 							msgSent = m_protocolBridge.SendMessage(ROI_Positioning_SourceDelayMode, newMsgData);
 							paramSetsInTransit |= DCT_DelayMode;
 						}
@@ -911,10 +936,10 @@ void Controller::timerCallback()
 			}
 
 			// Flag the parameters for which we just sent a SET command out.
-			pro->SetParamInTransit(paramSetsInTransit);
+			processor->SetParamInTransit(paramSetsInTransit);
 
 			// All changed parameters were sent out, so we can reset their flags now.
-			pro->PopParameterChanged(DCS_Protocol, DCT_AutomationParameters);
+			processor->PopParameterChanged(DCS_Protocol, DCT_AutomationParameters);
 		}
 		
 		if (sendKeepAlive)
@@ -1033,13 +1058,45 @@ std::unique_ptr<XmlElement> Controller::createStateXml()
 }
 
 /**
+ * Helper method to get a list of currently active remote objects.
+ * This is generated by dumping all active processor properties and their objects to a list.
+ * @return	The list of currently active remote objects.
+ */
+const std::vector<RemoteObject> Controller::GetActivatedRemoteObjects()
+{
+	std::vector<RemoteObject> activeRemoteObjects;
+	for (auto const& processor : m_processors)
+	{
+		if ((processor->GetComsMode() & CM_Rx) == CM_Rx)
+		{
+			for (auto const& roi : SoundsourceProcessor::GetUsedRemoteObjects())
+			{
+				auto sourceId = processor->GetSourceId();
+				auto mappingId = processor->GetMappingId();
+				if (sourceId != INVALID_ADDRESS_VALUE)
+				{
+					if (ProcessingEngineConfig::IsRecordAddressingObject(roi) && mappingId != INVALID_ADDRESS_VALUE)
+						activeRemoteObjects.push_back(RemoteObject(roi, RemoteObjectAddressing(sourceId, mappingId)));
+					else if (!ProcessingEngineConfig::IsRecordAddressingObject(roi))
+						activeRemoteObjects.push_back(RemoteObject(roi, RemoteObjectAddressing(sourceId, INVALID_ADDRESS_VALUE)));
+				}
+			}
+		}
+	}
+	return activeRemoteObjects;
+}
+
+/**
  * Activates the remote objects in protocol bridge proxy corresponding to given source/mapping via proxy bridge object
  * @param sourceId	The soundsource object id to activate
  * @param mappingId	The soundsource mapping id to activate
  */
 void Controller::ActivateSoundSourceId(SourceId sourceId, MappingId mappingId)
 {
-	m_protocolBridge.ActivateDS100SourceId(static_cast<juce::int16>(sourceId), static_cast<juce::int16>(mappingId));
+	ignoreUnused(sourceId);
+	ignoreUnused(mappingId);
+
+	m_protocolBridge.UpdateActiveDS100SourceIds();
 }
 
 /**
@@ -1049,7 +1106,10 @@ void Controller::ActivateSoundSourceId(SourceId sourceId, MappingId mappingId)
  */
 void Controller::DeactivateSoundSourceId(SourceId sourceId, MappingId mappingId)
 {
-	m_protocolBridge.DeactivateDS100SourceId(static_cast<juce::int16>(sourceId), static_cast<juce::int16>(mappingId));
+	ignoreUnused(sourceId);
+	ignoreUnused(mappingId);
+
+	m_protocolBridge.UpdateActiveDS100SourceIds();
 }
 
 /**

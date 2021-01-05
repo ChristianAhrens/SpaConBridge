@@ -96,6 +96,9 @@ public:
 	void SetExtensionMode(DataChangeSource changeSource, ExtensionMode mode, bool dontSendNotification = false);
 
 	//==========================================================================
+	const std::vector<RemoteObject> GetActivatedRemoteObjects();
+
+	//==========================================================================
 	void ActivateSoundSourceId(SourceId sourceId, MappingId mappingId);
 	void DeactivateSoundSourceId(SourceId sourceId, MappingId mappingId);
 

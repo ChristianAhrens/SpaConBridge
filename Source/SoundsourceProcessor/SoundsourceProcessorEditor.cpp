@@ -223,7 +223,7 @@ void SoundsourceProcessorEditor::sliderValueChanged(Slider* slider)
 		else if (slider == m_sourceSpreadSlider.get())
 			paramIdx = ParamIdx_SourceSpread;
 
-		plugin->SetParameterValue(DCS_Gui, paramIdx, static_cast<float>(slider->getValue()));
+		plugin->SetParameterValue(DCS_SoundsourceProcessor, paramIdx, static_cast<float>(slider->getValue()));
 	}
 }
 
@@ -273,7 +273,7 @@ void SoundsourceProcessorEditor::comboBoxChanged(ComboBox *comboBox)
 	{
 		if (comboBox == m_delayModeComboBox.get())
 		{
-			pro->SetParameterValue(DCS_Gui, ParamIdx_DelayMode, float(comboBox->getSelectedId() - 1));
+			pro->SetParameterValue(DCS_SoundsourceProcessor, ParamIdx_DelayMode, float(comboBox->getSelectedId() - 1));
 		}
 	}
 }
@@ -482,11 +482,11 @@ void SoundsourceProcessorEditor::UpdateGui(bool init)
 		AudioParameterFloat* fParam;
 
 		// See if any parameters changed since the last timer callback.
-		somethingChanged = (pro->GetParameterChanged(DCS_Gui, DCT_AutomationParameters) ||
-							pro->GetParameterChanged(DCS_Gui, DCT_PluginInstanceConfig) ||
-							pro->GetParameterChanged(DCS_Gui, DCT_OscConfig));
+		somethingChanged = (pro->GetParameterChanged(DCS_SoundsourceProcessor, DCT_AutomationParameters) ||
+							pro->GetParameterChanged(DCS_SoundsourceProcessor, DCT_PluginInstanceConfig) ||
+							pro->GetParameterChanged(DCS_SoundsourceProcessor, DCT_OscConfig));
 
-		if (pro->PopParameterChanged(DCS_Gui, DCT_SourcePosition))
+		if (pro->PopParameterChanged(DCS_SoundsourceProcessor, DCT_SourcePosition))
 		{
 			// Update position of X slider.
 			fParam = dynamic_cast<AudioParameterFloat*>(params[ParamIdx_X]);
@@ -502,7 +502,7 @@ void SoundsourceProcessorEditor::UpdateGui(bool init)
 			m_surfaceSlider->repaint();
 		}
 
-		if (pro->PopParameterChanged(DCS_Gui, DCT_ReverbSendGain))
+		if (pro->PopParameterChanged(DCS_SoundsourceProcessor, DCT_ReverbSendGain))
 		{
 			// Update ReverbSendGain slider
 			fParam = dynamic_cast<AudioParameterFloat*>(params[ParamIdx_ReverbSendGain]);
@@ -510,7 +510,7 @@ void SoundsourceProcessorEditor::UpdateGui(bool init)
 				m_reverbSendGainSlider->setValue(fParam->get(), dontSendNotification);
 		}
 
-		if (pro->PopParameterChanged(DCS_Gui, DCT_SourceSpread))
+		if (pro->PopParameterChanged(DCS_SoundsourceProcessor, DCT_SourceSpread))
 		{
 			// Update SourceSpread slider
 			fParam = dynamic_cast<AudioParameterFloat*>(params[ParamIdx_SourceSpread]);
@@ -518,7 +518,7 @@ void SoundsourceProcessorEditor::UpdateGui(bool init)
 				m_sourceSpreadSlider->setValue(fParam->get(), dontSendNotification);
 		}
 
-		if (pro->PopParameterChanged(DCS_Gui, DCT_DelayMode))
+		if (pro->PopParameterChanged(DCS_SoundsourceProcessor, DCT_DelayMode))
 		{
 			// Update DelayMode combo box
 			AudioParameterChoice* cParam = dynamic_cast<AudioParameterChoice*>(params[ParamIdx_DelayMode]);
@@ -529,7 +529,7 @@ void SoundsourceProcessorEditor::UpdateGui(bool init)
 			}
 		}
 
-		if (pro->PopParameterChanged(DCS_Gui, DCT_SourceID))
+		if (pro->PopParameterChanged(DCS_SoundsourceProcessor, DCT_SourceID))
 		{
 			// Update the displayName (Host probably called updateTrackProperties or changeProgramName)
 			m_displayNameLabel->setText(pro->getProgramName(0), dontSendNotification);

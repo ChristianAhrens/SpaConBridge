@@ -310,7 +310,7 @@ void TablePageComponent::UpdateGui(bool init)
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl && m_pageContainerTable)
 	{
-		if (ctrl->PopParameterChanged(DCS_Overview, DCT_NumProcessors) || init)
+		if (ctrl->PopParameterChanged(DCS_SoundsourceTable, DCT_NumProcessors) || init)
 		{
 			m_pageContainerTable->RecreateTableRowIds();
 			m_pageContainerTable->UpdateTable();
@@ -326,7 +326,7 @@ void TablePageComponent::UpdateGui(bool init)
 			for (auto const& processorId : ctrl->GetProcessorIds())
 			{
 				auto processor = ctrl->GetProcessor(processorId);
-				if (processor && processor->PopParameterChanged(DCS_Overview, DCT_PluginInstanceConfig))
+				if (processor && processor->GetParameterChanged(DCS_SoundsourceTable, DCT_PluginInstanceConfig))
 				{
 					m_pageContainerTable->UpdateTable();
 				}
@@ -1142,7 +1142,7 @@ void ComboBoxContainer::comboBoxChanged(ComboBox *comboBox)
 			// Set the value of the combobox to the current MappingID of the corresponding plugin.
 			SoundsourceProcessor* processor = ctrl->GetProcessor(ProcessorIds[i]);
 			if (processor)
-				processor->SetMappingId(DCS_Overview, newMapping);
+				processor->SetMappingId(DCS_SoundsourceTable, newMapping);
 		}
 	}
 }
@@ -1228,7 +1228,7 @@ void TextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
 			// Set the value of the combobox to the current MappingID of the corresponding plugin.
 			auto processor = ctrl->GetProcessor(processorId);
 			if (processor)
-				processor->SetSourceId(DCS_Overview, newSourceId);
+				processor->SetSourceId(DCS_SoundsourceTable, newSourceId);
 		}
 	}
 }
@@ -1349,7 +1349,7 @@ void RadioButtonContainer::buttonClicked(Button *button)
 				else
 					oldMode &= ~newFlag;
 
-				processor->SetComsMode(DCS_Overview, oldMode);
+				processor->SetComsMode(DCS_SoundsourceTable, oldMode);
 			}
 		}
 	}

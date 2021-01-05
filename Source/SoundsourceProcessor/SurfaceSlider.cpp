@@ -134,11 +134,11 @@ void SurfaceSlider::mouseDown(const MouseEvent& e)
 		GestureManagedAudioParameterFloat* param;
 		param = dynamic_cast<GestureManagedAudioParameterFloat*>(m_parent->getParameters()[ParamIdx_X]);
 		param->BeginGuiGesture();
-		processor->SetParameterValue(DCS_Gui, ParamIdx_X, x);
+		processor->SetParameterValue(DCS_SoundsourceProcessor, ParamIdx_X, x);
 		
 		param = dynamic_cast<GestureManagedAudioParameterFloat*>(m_parent->getParameters()[ParamIdx_Y]);
 		param->BeginGuiGesture();
-		processor->SetParameterValue(DCS_Gui, ParamIdx_Y, y);
+		processor->SetParameterValue(DCS_SoundsourceProcessor, ParamIdx_Y, y);
 	}
 }
 
@@ -160,8 +160,8 @@ void SurfaceSlider::mouseDrag(const MouseEvent& e)
 	if (plugin)
 	{
 		// Set new X and Y values
-		plugin->SetParameterValue(DCS_Gui, ParamIdx_X, x);
-		plugin->SetParameterValue(DCS_Gui, ParamIdx_Y, y);
+		plugin->SetParameterValue(DCS_SoundsourceProcessor, ParamIdx_X, x);
+		plugin->SetParameterValue(DCS_SoundsourceProcessor, ParamIdx_Y, y);
 	}
 }
 
@@ -345,8 +345,8 @@ void SurfaceMultiSlider::mouseDrag(const MouseEvent& e)
 				float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / getLocalBounds().getWidth())));
 				float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / getLocalBounds().getHeight())));
 
-				processor->SetParameterValue(DCS_Overview, ParamIdx_X, x);
-				processor->SetParameterValue(DCS_Overview, ParamIdx_Y, y);
+				processor->SetParameterValue(DCS_MultiSlider, ParamIdx_X, x);
+				processor->SetParameterValue(DCS_MultiSlider, ParamIdx_Y, y);
 			}
 		}
 	}
@@ -377,8 +377,8 @@ void SurfaceMultiSlider::mouseUp(const MouseEvent& e)
 				float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / getLocalBounds().getWidth())));
 				float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / getLocalBounds().getHeight())));
 
-				processor->SetParameterValue(DCS_Overview, ParamIdx_X, x);
-				processor->SetParameterValue(DCS_Overview, ParamIdx_Y, y);
+				processor->SetParameterValue(DCS_MultiSlider, ParamIdx_X, x);
+				processor->SetParameterValue(DCS_MultiSlider, ParamIdx_Y, y);
 			}
 		}
 

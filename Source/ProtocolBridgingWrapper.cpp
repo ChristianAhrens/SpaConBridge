@@ -228,57 +228,62 @@ void ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridg
 	}
 
 	// DiGiCo protocol - RoleB
-	if ((bridgingProtocolsToActivate & PBT_DiGiCo) == PBT_DiGiCo)
 	{
 		auto digicoBridgingXmlElement = SetupDiGiCoBridgingProtocol();
 		if (digicoBridgingXmlElement)
 		{
 			m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_DiGiCo, *digicoBridgingXmlElement));
-			nodeXmlElement->addChildElement(digicoBridgingXmlElement.release());
+
+			if ((bridgingProtocolsToActivate & PBT_DiGiCo) == PBT_DiGiCo)
+				nodeXmlElement->addChildElement(digicoBridgingXmlElement.release());
 		}
 	}
 
 	// RTTrPM protocol - RoleB
-	if ((bridgingProtocolsToActivate & PBT_BlacktraxRTTrPM) == PBT_BlacktraxRTTrPM)
 	{
 		auto RTTrPMBridgingXmlElement = SetupRTTrPMBridgingProtocol();
 		if (RTTrPMBridgingXmlElement)
 		{
 			m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_BlacktraxRTTrPM, *RTTrPMBridgingXmlElement));
-			nodeXmlElement->addChildElement(RTTrPMBridgingXmlElement.release());
+
+			if ((bridgingProtocolsToActivate & PBT_BlacktraxRTTrPM) == PBT_BlacktraxRTTrPM)
+				nodeXmlElement->addChildElement(RTTrPMBridgingXmlElement.release());
 		}
 	}
 
 	// GenericOSC protocol - RoleB
-	if ((bridgingProtocolsToActivate & PBT_GenericOSC) == PBT_GenericOSC)
 	{
 		auto genericOSCBridgingXmlElement = SetupGenericOSCBridgingProtocol();
 		if (genericOSCBridgingXmlElement)
 		{
 			m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericOSC, *genericOSCBridgingXmlElement));
-			nodeXmlElement->addChildElement(genericOSCBridgingXmlElement.release());
+
+			if ((bridgingProtocolsToActivate & PBT_GenericOSC) == PBT_GenericOSC)
+				nodeXmlElement->addChildElement(genericOSCBridgingXmlElement.release());
 		}
 	}
 
 	// GenericMIDI protocol - RoleB
-	if ((bridgingProtocolsToActivate & PBT_GenericMIDI) == PBT_GenericMIDI)
 	{
 		auto genericMIDIBridgingXmlElement = SetupGenericMIDIBridgingProtocol();
 		if (genericMIDIBridgingXmlElement)
 		{
 			m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericMIDI, *genericMIDIBridgingXmlElement));
-			nodeXmlElement->addChildElement(genericMIDIBridgingXmlElement.release());
+
+			if ((bridgingProtocolsToActivate & PBT_GenericMIDI) == PBT_GenericMIDI)
+				nodeXmlElement->addChildElement(genericMIDIBridgingXmlElement.release());
 		}
 	}
 
 	// Yamaha OSC protocol - RoleB
-	if ((bridgingProtocolsToActivate & PBT_YamahaOSC) == PBT_YamahaOSC)
 	{
 		auto yamahaOSCBridgingXmlElement = SetupYamahaOSCBridgingProtocol();
 		if (yamahaOSCBridgingXmlElement)
 		{
 			m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_YamahaOSC, *yamahaOSCBridgingXmlElement));
-			nodeXmlElement->addChildElement(yamahaOSCBridgingXmlElement.release());
+
+			if ((bridgingProtocolsToActivate & PBT_YamahaOSC) == PBT_YamahaOSC)
+				nodeXmlElement->addChildElement(yamahaOSCBridgingXmlElement.release());
 		}
 	}
 

@@ -191,7 +191,17 @@ void ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridg
 	auto objectHandlingXmlElement = nodeXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OBJECTHANDLING));
 	if (objectHandlingXmlElement)
 	{
-		objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Bypass));
+		objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Forward_only_valueChanges));
+        
+        // update precision element
+        auto precisionXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
+        if (!precisionXmlElement)
+            precisionXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
+        auto precisionTextXmlElement = precisionXmlElement->getFirstChildElement();
+        if (precisionTextXmlElement && precisionTextXmlElement->isTextElement())
+            precisionTextXmlElement->setText(String(DS100_VALUCHANGE_SENSITIVITY));
+        else
+            precisionXmlElement->addTextElement(String(DS100_VALUCHANGE_SENSITIVITY));
 	}
 
 	// DS100 protocol - RoleA

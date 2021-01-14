@@ -205,6 +205,10 @@
       </GROUP>
       <GROUP id="{FAEFB6F6-97A8-A4B1-8911-35FBC344E2EF}" name="JUCE-AppBasics">
         <GROUP id="{AEF488F2-ECE4-B5B0-0BC4-9A3644EF8A18}" name="Source">
+          <FILE id="nRrbs7" name="MidiLearnerComponent.cpp" compile="1" resource="0"
+                file="submodules/JUCE-AppBasics/Source/MidiLearnerComponent.cpp"/>
+          <FILE id="HK5MGg" name="MidiLearnerComponent.h" compile="0" resource="0"
+                file="submodules/JUCE-AppBasics/Source/MidiLearnerComponent.h"/>
           <FILE id="vbXiyi" name="AppConfigurationBase.cpp" compile="1" resource="0"
                 file="submodules/JUCE-AppBasics/Source/AppConfigurationBase.cpp"/>
           <FILE id="YDW7K8" name="AppConfigurationBase.h" compile="0" resource="0"
@@ -240,6 +244,7 @@
             <FILE id="N9NqBe" name="grain-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/grain-24px.svg"/>
             <FILE id="rlRTHW" name="help-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/help-24px.svg"/>
             <FILE id="f9cDvj" name="save-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/save-24px.svg"/>
+            <FILE id="Hiyloc" name="school-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/school-24px.svg"/>
             <FILE id="vVMBfg" name="settings-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/settings-24px.svg"/>
             <FILE id="N7oVfc" name="show_chart-24px.svg" compile="0" resource="1"

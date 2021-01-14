@@ -28,6 +28,7 @@
 #include "../../../submodules/JUCE-AppBasics/Source/ZeroconfDiscoverComponent.h"
 #include "../../../submodules/JUCE-AppBasics/Source/SplitButtonComponent.h"
 #include "../../../submodules/JUCE-AppBasics/Source/TextWithImageButton.h"
+#include "../../../submodules/JUCE-AppBasics/Source/MidiLearnerComponent.h"
 
 
 namespace SoundscapeBridgeApp
@@ -180,16 +181,21 @@ private:
 	std::unique_ptr<Label>						m_GenericOSCRemotePortLabel;
 
 	// Generic MIDI settings section
-	std::unique_ptr<HeaderWithElmListComponent>	m_GenericMIDIBridgingSettings;
-	std::unique_ptr<ComboBox>					m_GenericMIDIInputDeviceSelect;
-	std::unique_ptr<Label>						m_GenericMIDIInputDeviceSelectLabel;
-	std::unique_ptr<Label>						m_GenericMIDIHardcodedWarningLabel;
-	std::unique_ptr<Label>						m_GenericMIDIHardcodedMatrixInputSelectLabel;
-	std::unique_ptr<Label>						m_GenericMIDIHardcodedXValueLabel;
-	std::unique_ptr<Label>						m_GenericMIDIHardcodedYValueLabel;
-	std::unique_ptr<Label>						m_GenericMIDIHardcodedReverbSendGainLabel;
-	std::unique_ptr<Label>						m_GenericMIDIHardcodedSourceSpreadLabel;
-	std::unique_ptr<Label>						m_GenericMIDIHardcodedDelayModeLabel;
+	std::unique_ptr<HeaderWithElmListComponent>				m_GenericMIDIBridgingSettings;
+	std::unique_ptr<ComboBox>								m_GenericMIDIInputDeviceSelect;
+	std::unique_ptr<Label>									m_GenericMIDIInputDeviceSelectLabel;
+	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>	m_GenericMIDIMatrixInputSelectLearner;
+	std::unique_ptr<Label>									m_GenericMIDIMatrixInputSelectLabel;
+	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>	m_GenericMIDIXValueLearner;
+	std::unique_ptr<Label>									m_GenericMIDIXValueLabel;
+	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>	m_GenericMIDIYValueLearner;
+	std::unique_ptr<Label>									m_GenericMIDIYValueLabel;
+	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>	m_GenericMIDIReverbSendGainLearner;
+	std::unique_ptr<Label>									m_GenericMIDIReverbSendGainLabel;
+	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>	m_GenericMIDISourceSpreadLearner;
+	std::unique_ptr<Label>									m_GenericMIDISourceSpreadLabel;
+	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>	m_GenericMIDIDelayModeLearner;
+	std::unique_ptr<Label>									m_GenericMIDIDelayModeLabel;
 
 	// Yamaha OSC settings section
 	std::unique_ptr<HeaderWithElmListComponent>	m_YamahaOSCBridgingSettings;

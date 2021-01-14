@@ -548,35 +548,53 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIInputDeviceSelectLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIInputDeviceSelect.get(), true, false);
 
-	m_GenericMIDIHardcodedMatrixInputSelectLabel = std::make_unique<Label>();
-	m_GenericMIDIHardcodedMatrixInputSelectLabel->setJustificationType(Justification::centredLeft);
-	m_GenericMIDIHardcodedMatrixInputSelectLabel->setText("Object Select: Note 48+", dontSendNotification);
-	m_GenericMIDIHardcodedXValueLabel = std::make_unique<Label>();
-	m_GenericMIDIHardcodedXValueLabel->setJustificationType(Justification::centredLeft);
-	m_GenericMIDIHardcodedXValueLabel->setText("Pos. X: Pitchwheel | Ctrl 2", dontSendNotification);
-	m_GenericMIDIHardcodedYValueLabel = std::make_unique<Label>();
-	m_GenericMIDIHardcodedYValueLabel->setJustificationType(Justification::centredLeft);
-	m_GenericMIDIHardcodedYValueLabel->setText("Pos. Y: Ctrl 1", dontSendNotification);
-	m_GenericMIDIHardcodedReverbSendGainLabel = std::make_unique<Label>();
-	m_GenericMIDIHardcodedReverbSendGainLabel->setJustificationType(Justification::centredLeft);
-	m_GenericMIDIHardcodedReverbSendGainLabel->setText("Rvb Snd Gain: Ctrl 5", dontSendNotification);
-	m_GenericMIDIHardcodedSourceSpreadLabel = std::make_unique<Label>();
-	m_GenericMIDIHardcodedSourceSpreadLabel->setJustificationType(Justification::centredLeft);
-	m_GenericMIDIHardcodedSourceSpreadLabel->setText("Object Spread: Ctrl 6", dontSendNotification);
-	m_GenericMIDIHardcodedDelayModeLabel = std::make_unique<Label>();
-	m_GenericMIDIHardcodedDelayModeLabel->setJustificationType(Justification::centredLeft);
-	m_GenericMIDIHardcodedDelayModeLabel->setText("Object DlyMode: Ctrl 7", dontSendNotification);
-	m_GenericMIDIHardcodedWarningLabel = std::make_unique<Label>();
-	m_GenericMIDIHardcodedWarningLabel->setJustificationType(Justification::centred);
-	m_GenericMIDIHardcodedWarningLabel->setText("Currently hardcoded:", dontSendNotification);
-	m_GenericMIDIHardcodedWarningLabel->attachToComponent(m_GenericMIDIHardcodedMatrixInputSelectLabel.get(), true);
-	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedWarningLabel.get(), false, false);
-	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedMatrixInputSelectLabel.get(), true, false);
-	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedXValueLabel.get(), true, false);
-	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedYValueLabel.get(), true, false);
-	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedReverbSendGainLabel.get(), true, false);
-	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedSourceSpreadLabel.get(), true, false);
-	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedDelayModeLabel.get(), true, false);
+	m_GenericMIDIMatrixInputSelectLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>();
+	m_GenericMIDIMatrixInputSelectLabel = std::make_unique<Label>();
+	m_GenericMIDIMatrixInputSelectLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIMatrixInputSelectLabel->setText("Object Select", dontSendNotification);
+	m_GenericMIDIMatrixInputSelectLabel->attachToComponent(m_GenericMIDIMatrixInputSelectLearner.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMatrixInputSelectLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMatrixInputSelectLearner.get(), true, false);
+
+	m_GenericMIDIXValueLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>();
+	m_GenericMIDIXValueLabel = std::make_unique<Label>();
+	m_GenericMIDIXValueLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIXValueLabel->setText("Pos. X", dontSendNotification);
+	m_GenericMIDIXValueLabel->attachToComponent(m_GenericMIDIXValueLearner.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIXValueLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIXValueLearner.get(), true, false);
+
+	m_GenericMIDIYValueLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>();
+	m_GenericMIDIYValueLabel = std::make_unique<Label>();
+	m_GenericMIDIYValueLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIYValueLabel->setText("Pos. Y", dontSendNotification);
+	m_GenericMIDIYValueLabel->attachToComponent(m_GenericMIDIYValueLearner.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIYValueLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIYValueLearner.get(), true, false);
+
+	m_GenericMIDIReverbSendGainLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>();
+	m_GenericMIDIReverbSendGainLabel = std::make_unique<Label>();
+	m_GenericMIDIReverbSendGainLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIReverbSendGainLabel->setText("Rvb Snd Gain", dontSendNotification);
+	m_GenericMIDIReverbSendGainLabel->attachToComponent(m_GenericMIDIReverbSendGainLearner.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIReverbSendGainLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIReverbSendGainLearner.get(), true, false);
+
+	m_GenericMIDISourceSpreadLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>();
+	m_GenericMIDISourceSpreadLabel = std::make_unique<Label>();
+	m_GenericMIDISourceSpreadLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDISourceSpreadLabel->setText("Object Spread", dontSendNotification);
+	m_GenericMIDISourceSpreadLabel->attachToComponent(m_GenericMIDISourceSpreadLearner.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDISourceSpreadLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDISourceSpreadLearner.get(), true, false);
+
+	m_GenericMIDIDelayModeLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>();
+	m_GenericMIDIDelayModeLabel = std::make_unique<Label>();
+	m_GenericMIDIDelayModeLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIDelayModeLabel->setText("Object DlyMode", dontSendNotification);
+	m_GenericMIDIDelayModeLabel->attachToComponent(m_GenericMIDIDelayModeLearner.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIDelayModeLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIDelayModeLearner.get(), true, false);
 
 	m_GenericMIDIBridgingSettings->resized();
 

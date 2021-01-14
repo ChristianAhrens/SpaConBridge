@@ -1,12 +1,20 @@
-/*
-  ==============================================================================
-
-    StatisticsPageComponent.cpp
-    Created: 8 Nov 2020 10:19:43am
-    Author:  Christian Ahrens
-
-  ==============================================================================
-*/
+/* Copyright (c) 2020-2021, Christian Ahrens
+ *
+ * This file is part of SoundscapeBridgeApp <https://github.com/ChristianAhrens/SoundscapeBridgeApp>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #include "StatisticsPageComponent.h"
 
@@ -194,6 +202,8 @@ void StatisticsPlot::ResetStatisticsPlot()
 		m_plottedBridgingTypes.add(PBT_GenericMIDI);
 	if ((bridgingTypes & PBT_DS100) == PBT_DS100)
 		m_plottedBridgingTypes.add(PBT_DS100);
+	if ((bridgingTypes & PBT_YamahaOSC) == PBT_YamahaOSC)
+		m_plottedBridgingTypes.add(PBT_YamahaOSC);
 
 	for (auto bridgingProtocol : m_plottedBridgingTypes)
 	{
@@ -530,6 +540,8 @@ String StatisticsLog::GetLogSourceName(StatisticsLogSource logSourceType)
 		return GetProtocolBridgingShortName(PBT_GenericMIDI);
 	case SLS_YamahaSQ:
 		return GetProtocolBridgingShortName(PBT_YamahaSQ);
+	case SLS_YamahaOSC:
+		return GetProtocolBridgingShortName(PBT_YamahaOSC);
 	case SLS_HUI:
 		return GetProtocolBridgingShortName(PBT_HUI);
 	case SLS_DS100:
@@ -563,6 +575,8 @@ const Colour StatisticsLog::GetLogSourceColour(StatisticsLogSource logSourceType
 		return GetProtocolBridgingColour(PBT_GenericMIDI);
 	case SLS_YamahaSQ:
 		return GetProtocolBridgingColour(PBT_YamahaSQ);
+	case SLS_YamahaOSC:
+		return GetProtocolBridgingColour(PBT_YamahaOSC);
 	case SLS_HUI:
 		return GetProtocolBridgingColour(PBT_HUI);
 	case SLS_DS100:
@@ -710,6 +724,10 @@ void StatisticsPageComponent::HandleMessageData(NodeId nodeId, ProtocolId sender
 	case GENERICMIDI_PROCESSINGPROTOCOL_ID:
 		bridgingProtocol = PBT_GenericMIDI;
 		logSource = StatisticsLog::StatisticsLogSource::SLS_GenericMIDI;
+		break;
+	case YAMAHAOSC_PROCESSINGPROTOCOL_ID:
+		bridgingProtocol = PBT_YamahaOSC;
+		logSource = StatisticsLog::StatisticsLogSource::SLS_YamahaOSC;
 		break;
 	default:
 		return;

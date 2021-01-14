@@ -3,7 +3,7 @@
 
 Copyright (C) 2019 d&b audiotechnik GmbH & Co. KG. All Rights Reserved.
 
-This file is part of the Soundscape VST, AU, and AAX Plug-in.
+This file was originally part of the Soundscape VST, AU, and AAX Plug-in and now in a derived version is part of SoundscapeBridgeApp.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -140,7 +140,7 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 	auto ctrl = Controller::GetInstance();
 	if (ctrl && m_multiSliderSurface)
 	{
-		if (ctrl->PopParameterChanged(DCS_Overview, DCT_NumProcessors))
+		if (ctrl->GetParameterChanged(DCS_SoundsourceTable, DCT_NumProcessors) || (ctrl->GetParameterChanged(DCS_Protocol, DCT_ProcessorSelection)))
 			update = true;
 		
 		// Iterate through all plugin instances and see if anything changed there.
@@ -159,7 +159,7 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 					cachedPositions.insert(std::make_pair(processorId, SurfaceMultiSlider::SourcePosition(sourceId, p, ctrl->IsSoundSourceIdSelected(sourceId))));
 				}
 
-				if (processor->PopParameterChanged(DCS_Overview, (DCT_PluginInstanceConfig | DCT_SourcePosition)))
+				if (processor->GetParameterChanged(DCS_SoundsourceTable, (DCT_PluginInstanceConfig | DCT_SourcePosition)))
 					update = true;
 			}
 		}

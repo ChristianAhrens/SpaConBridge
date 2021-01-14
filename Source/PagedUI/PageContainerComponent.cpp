@@ -3,7 +3,8 @@
 
 Copyright (C) 2019 d&b audiotechnik GmbH & Co. KG. All Rights Reserved.
 
-This file is part of the Soundscape VST, AU, and AAX Plug-in.
+This file was originally part of the Soundscape VST, AU, and AAX Plug-in
+and now in a derived version is part of SoundscapeBridgeApp.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -232,11 +233,12 @@ void PageContainerComponent::buttonClicked(Button* button)
 	}
 	if (m_helpButton && m_helpButton.get() == button)
 	{
-		auto githubURL = String("https://www.github.com");
-		auto companyName = String("ChristianAhrens");
-		auto appName = JUCEApplication::getInstance()->getApplicationName();
-		auto helpResourceName = String("blob/master/README.md");
-		auto helpURLString = githubURL + "/" + companyName + "/" + appName + "/" + helpResourceName;
+		//auto githubURL = String("https://www.github.com");
+		//auto companyName = String("ChristianAhrens");
+		//auto appName = JUCEApplication::getInstance()->getApplicationName();
+		//auto helpResourcePath = String("blob/master");
+		//auto helpURLString = githubURL + "/" + companyName + "/" + appName + "/" + helpResourcePath + "/" + "README.md";
+		auto helpURLString = GetRepositoryBaseWebUrl() + "README.md";
 		URL(helpURLString).launchInDefaultBrowser();
 	}
 }
@@ -277,7 +279,7 @@ void PageContainerComponent::UpdateGui(bool init)
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
-		if (ctrl->PopParameterChanged(DCS_Overview, DCT_Online) || init)
+		if (ctrl->PopParameterChanged(DCS_Protocol, DCT_Online) || init)
 			m_onlineLed->setToggleState(ctrl->GetOnline(), NotificationType::dontSendNotification);
 	}
 

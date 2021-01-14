@@ -1,12 +1,20 @@
-/*
-  ==============================================================================
-
-	SettingsPageComponent.h
-	Created: 28 July 2020 17:48:55pm
-	Author:  Christian Ahrens
-
-  ==============================================================================
-*/
+/* Copyright (c) 2020-2021, Christian Ahrens
+ *
+ * This file is part of SoundscapeBridgeApp <https://github.com/ChristianAhrens/SoundscapeBridgeApp>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 
 #pragma once
@@ -43,24 +51,32 @@ public:
 	
 	void onToggleActive();
 
-	//==========================================================================
+	//==============================================================================
+	void setHelpUrl(const URL& helpUrl);
+
+	//==============================================================================
 	void paint(Graphics&) override;
 	void resized() override;
 
-	//==========================================================================
+	//==============================================================================
+	void lookAndFeelChanged() override;
+
+	//==============================================================================
 	std::function<void(HeaderWithElmListComponent*, bool)>	toggleIsActiveCallback;
 
 protected:
-	//==========================================================================
+	//==============================================================================
 	void setElementsActiveState(bool toggleState);
 
 private:
-	//==========================================================================
+	//==============================================================================
 	bool																		m_hasActiveToggle{ false };
 	bool																		m_toggleState{ true };
 	std::unique_ptr<ToggleButton>												m_activeToggle;
 	std::unique_ptr<Label>														m_activeToggleLabel;
 	std::unique_ptr<Label>														m_headerLabel;
+	std::unique_ptr<DrawableButton>												m_helpButton;
+	std::unique_ptr<URL>														m_helpUrl;
 	std::vector<std::pair<std::unique_ptr<Component>, std::pair<bool, bool>>>	m_components;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HeaderWithElmListComponent)
@@ -174,6 +190,17 @@ private:
 	std::unique_ptr<Label>						m_GenericMIDIHardcodedReverbSendGainLabel;
 	std::unique_ptr<Label>						m_GenericMIDIHardcodedSourceSpreadLabel;
 	std::unique_ptr<Label>						m_GenericMIDIHardcodedDelayModeLabel;
+
+	// Yamaha OSC settings section
+	std::unique_ptr<HeaderWithElmListComponent>	m_YamahaOSCBridgingSettings;
+	std::unique_ptr<TextEditor>					m_YamahaOSCIpAddressEdit;
+	std::unique_ptr<Label>						m_YamahaOSCIpAddressLabel;
+	std::unique_ptr<TextEditor>					m_YamahaOSCListeningPortEdit;
+	std::unique_ptr<Label>						m_YamahaOSCListeningPortLabel;
+	std::unique_ptr<TextEditor>					m_YamahaOSCRemotePortEdit;
+	std::unique_ptr<Label>						m_YamahaOSCRemotePortLabel;
+	std::unique_ptr<TextEditor>					m_YamahaOSCMappingAreaEdit;
+	std::unique_ptr<Label>						m_YamahaOSCMappingAreaLabel;
 };
 
 /**

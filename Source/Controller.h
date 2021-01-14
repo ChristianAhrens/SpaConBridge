@@ -3,7 +3,8 @@
 
 Copyright (C) 2019 d&b audiotechnik GmbH & Co. KG. All Rights Reserved.
 
-This file is part of the Soundscape VST, AU, and AAX Plug-in.
+This file was originally part of the Soundscape VST, AU, and AAX Plug-in
+and now in a derived version is part of SoundscapeBridgeApp.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -93,6 +94,9 @@ public:
 	//==========================================================================
 	ExtensionMode GetExtensionMode() const;
 	void SetExtensionMode(DataChangeSource changeSource, ExtensionMode mode, bool dontSendNotification = false);
+
+	//==========================================================================
+	const std::vector<RemoteObject> GetActivatedRemoteObjects();
 
 	//==========================================================================
 	void ActivateSoundSourceId(SourceId sourceId, MappingId mappingId);

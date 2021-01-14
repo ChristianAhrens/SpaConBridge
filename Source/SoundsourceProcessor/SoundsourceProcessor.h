@@ -3,7 +3,8 @@
 
 Copyright (C) 2019 d&b audiotechnik GmbH & Co. KG. All Rights Reserved.
 
-This file is part of the Soundscape VST, AU, and AAX Plug-in.
+This file was originally part of the Soundscape VST, AU, and AAX Plug-in
+and now in a derived version is part of SoundscapeBridgeApp.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -37,6 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../SoundscapeBridgeAppCommon.h"
 #include "../AppConfiguration.h"
+#include "../submodules/RemoteProtocolBridge/Source/RemoteProtocolBridgeCommon.h"
 
 
 namespace SoundscapeBridgeApp
@@ -77,6 +79,8 @@ public:
 
 	void InitializeSettings(SourceId sourceId, int mappingId, String ipAddress, ComsMode newMode);
 
+	static const std::vector<RemoteObjectIdentifier>	GetUsedRemoteObjects();
+
 	SourceId GetSourceId() const;
 	void SetSourceId(DataChangeSource changeSource, SourceId sourceId);
 
@@ -103,11 +107,6 @@ public:
 	bool IsParamInTransit(DataChangeType paramsChanged) const;
 
 	void OnOverviewButtonClicked();
-
-#ifdef JUCE_DEBUG
-	void PushDebugMessage(String message);
-	String FlushDebugMessages();
-#endif
 
 	// Overriden functions of class AppConfiguration::XmlConfigurableElement
 	std::unique_ptr<XmlElement> createStateXml() override;
@@ -136,9 +135,6 @@ public:
 	bool producesMidi() const override;
 	void releaseResources() override;
 	void setCurrentProgram(int index) override;
-#ifndef JucePlugin_PreferredChannelConfigurations
-	bool isBusesLayoutSupported(const BusesLayout& layouts) const override;
-#endif
 
 protected:
 	/**
@@ -220,12 +216,6 @@ protected:
 	 */
 	DataChangeSource			m_currentChangeSource = DCS_Host;
 
-#ifdef JUCE_DEBUG
-	/**
-	 * Temp buffer for debugging messages. 
-	 */
-	String						m_debugMessageBuffer;
-#endif
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SoundsourceProcessor)
 };

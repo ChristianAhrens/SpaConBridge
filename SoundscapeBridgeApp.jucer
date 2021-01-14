@@ -1,13 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="MFvkL5" name="SoundscapeBridgeApp" projectType="guiapp" version="0.1.17"
+<JUCERPROJECT id="MFvkL5" name="SoundscapeBridgeApp" projectType="guiapp" version="0.1.19"
               bundleIdentifier="com.ChristianAhrens.SoundscapeBridgeApp" companyName="Christian Ahrens"
               companyEmail="christianahrens@me.com" displaySplashScreen="0"
-              reportAppUsage="0" companyCopyright="2020" jucerFormatVersion="1"
+              reportAppUsage="0" companyCopyright="2021" jucerFormatVersion="1"
               headerPath="../../submodules/RemoteProtocolBridge/Source;&#10;../../submodules/JUCE-AppBasics/Source;"
-              defines="SERVUS_STATIC">
+              defines="SERVUS_STATIC" companyWebsite="https://github.com/ChristianAhrens/SoundscapeBridgeApp">
   <MAINGROUP id="cS7SrP" name="SoundscapeBridgeApp">
     <GROUP id="{F93FDF74-FF39-A47E-E403-31E5ADA7ADD3}" name="submodules">
+      <GROUP id="{9DC096DA-91BA-7269-7279-360739D665F3}" name="Servus">
+        <GROUP id="{E9256957-8D38-B004-8077-6812D1D88FEB}" name="avahi">
+          <FILE id="neaYJU" name="servus.h" compile="0" resource="0" file="submodules/Servus/servus/avahi/servus.h"/>
+        </GROUP>
+        <GROUP id="{68DD6299-EF70-ED03-FF86-0CBA0B159CE2}" name="dnssd">
+          <FILE id="O533SA" name="servus.h" compile="0" resource="0" file="submodules/Servus/servus/dnssd/servus.h"/>
+        </GROUP>
+        <GROUP id="{D20DC9DA-75CD-9546-88F1-BCAC8D625082}" name="md5">
+          <FILE id="ESqp8z" name="md5.cc" compile="1" resource="0" file="submodules/Servus/servus/md5/md5.cc"/>
+          <FILE id="BuP8OP" name="md5.hh" compile="0" resource="0" file="submodules/Servus/servus/md5/md5.hh"/>
+        </GROUP>
+        <GROUP id="{AC81F2E5-03B5-A116-7C44-5DCF6D317A34}" name="none">
+          <FILE id="XN3WfD" name="servus.h" compile="0" resource="0" file="submodules/Servus/servus/none/servus.h"/>
+        </GROUP>
+        <FILE id="vOSfJU" name="api.h" compile="0" resource="0" file="submodules/Servus/servus/api.h"/>
+        <FILE id="VgcVDS" name="defines.h" compile="0" resource="0" file="submodules/Servus/servus/defines.h"/>
+        <FILE id="m4gIBP" name="definesDarwin.h" compile="0" resource="0" file="submodules/Servus/servus/definesDarwin.h"/>
+        <FILE id="XLrEQ7" name="definesWin32.h" compile="0" resource="0" file="submodules/Servus/servus/definesWin32.h"/>
+        <FILE id="aQdCkI" name="listener.h" compile="0" resource="0" file="submodules/Servus/servus/listener.h"/>
+        <FILE id="yaEBIN" name="result.h" compile="0" resource="0" file="submodules/Servus/servus/result.h"/>
+        <FILE id="jmhz4s" name="serializable.cpp" compile="1" resource="0"
+              file="submodules/Servus/servus/serializable.cpp"/>
+        <FILE id="j8G6Sg" name="serializable.h" compile="0" resource="0" file="submodules/Servus/servus/serializable.h"/>
+        <FILE id="PQW3Nj" name="servus.cpp" compile="1" resource="0" file="submodules/Servus/servus/servus.cpp"/>
+        <FILE id="NzwgYm" name="servus.h" compile="0" resource="0" file="submodules/Servus/servus/servus.h"/>
+        <FILE id="vc3I5m" name="types.h" compile="0" resource="0" file="submodules/Servus/servus/types.h"/>
+        <FILE id="hnFLN0" name="uint128_t.cpp" compile="1" resource="0" file="submodules/Servus/servus/uint128_t.cpp"/>
+        <FILE id="RnqlJM" name="uint128_t.h" compile="0" resource="0" file="submodules/Servus/servus/uint128_t.h"/>
+        <FILE id="OZ7t1r" name="uri.cpp" compile="1" resource="0" file="submodules/Servus/servus/uri.cpp"/>
+        <FILE id="bRS1Nq" name="uri.h" compile="0" resource="0" file="submodules/Servus/servus/uri.h"/>
+        <FILE id="g6Tker" name="version.cpp" compile="1" resource="0" file="submodules/Servus/servus/version.cpp"/>
+        <FILE id="eBTkdF" name="version.h" compile="0" resource="0" file="submodules/Servus/servus/version.h"/>
+      </GROUP>
       <GROUP id="{5D1CEB5A-DB08-BAC9-EF17-843234394AA4}" name="RemoteProtocolBridge">
         <GROUP id="{101B7526-C17E-A526-9CCF-9B16385E1D4F}" name="Source">
           <GROUP id="{7BEDE2E7-D445-0646-3278-7EE2B5985D06}" name="ProcessingEngine">
@@ -147,6 +180,10 @@
                       file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/OSCProtocolProcessor/SenderAwareOSCReceiver.cpp"/>
                 <FILE id="H3sAQf" name="SenderAwareOSCReceiver.h" compile="0" resource="0"
                       file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/OSCProtocolProcessor/SenderAwareOSCReceiver.h"/>
+                <FILE id="B01NgG" name="YmhOSCProtocolProcessor.cpp" compile="1" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/OSCProtocolProcessor/YmhOSCProtocolProcessor.cpp"/>
+                <FILE id="wkMUTl" name="YmhOSCProtocolProcessor.h" compile="0" resource="0"
+                      file="submodules/RemoteProtocolBridge/Source/ProcessingEngine/ProtocolProcessor/OSCProtocolProcessor/YmhOSCProtocolProcessor.h"/>
               </GROUP>
             </GROUP>
             <FILE id="B0REQz" name="ProcessingEngineConfig.cpp" compile="1" resource="0"
@@ -168,39 +205,6 @@
       </GROUP>
       <GROUP id="{FAEFB6F6-97A8-A4B1-8911-35FBC344E2EF}" name="JUCE-AppBasics">
         <GROUP id="{AEF488F2-ECE4-B5B0-0BC4-9A3644EF8A18}" name="Source">
-          <GROUP id="{9DC096DA-91BA-7269-7279-360739D665F3}" name="Servus">
-            <GROUP id="{E9256957-8D38-B004-8077-6812D1D88FEB}" name="avahi">
-              <FILE id="LUL4V8" name="servus.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/avahi/servus.h"/>
-            </GROUP>
-            <GROUP id="{68DD6299-EF70-ED03-FF86-0CBA0B159CE2}" name="dnssd">
-              <FILE id="JCqzHd" name="servus.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/dnssd/servus.h"/>
-            </GROUP>
-            <GROUP id="{D20DC9DA-75CD-9546-88F1-BCAC8D625082}" name="md5">
-              <FILE id="AVALBo" name="md5.cc" compile="1" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/md5/md5.cc"/>
-              <FILE id="g5CkAc" name="md5.hh" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/md5/md5.hh"/>
-            </GROUP>
-            <GROUP id="{AC81F2E5-03B5-A116-7C44-5DCF6D317A34}" name="none">
-              <FILE id="pz5IMJ" name="servus.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/none/servus.h"/>
-            </GROUP>
-            <FILE id="KyRPg3" name="api.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/api.h"/>
-            <FILE id="vDKO10" name="defines.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/defines.h"/>
-            <FILE id="QbzSjx" name="definesDarwin.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/definesDarwin.h"/>
-            <FILE id="wIZuny" name="definesWin32.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/definesWin32.h"/>
-            <FILE id="UuxeOC" name="listener.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/listener.h"/>
-            <FILE id="ygXKpb" name="result.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/result.h"/>
-            <FILE id="UUQsfB" name="serializable.cpp" compile="1" resource="0"
-                  file="submodules/JUCE-AppBasics/Source/Servus/serializable.cpp"/>
-            <FILE id="Lq6495" name="serializable.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/serializable.h"/>
-            <FILE id="sJvywt" name="servus.cpp" compile="1" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/servus.cpp"/>
-            <FILE id="AgnNuU" name="servus.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/servus.h"/>
-            <FILE id="KdoLTK" name="types.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/types.h"/>
-            <FILE id="aIRn4g" name="uint128_t.cpp" compile="1" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/uint128_t.cpp"/>
-            <FILE id="toEKd2" name="uint128_t.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/uint128_t.h"/>
-            <FILE id="F5uPLJ" name="uri.cpp" compile="1" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/uri.cpp"/>
-            <FILE id="HH99Mv" name="uri.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/uri.h"/>
-            <FILE id="Yuozpo" name="version.cpp" compile="1" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/version.cpp"/>
-            <FILE id="mC6394" name="version.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Servus/version.h"/>
-          </GROUP>
           <FILE id="vbXiyi" name="AppConfigurationBase.cpp" compile="1" resource="0"
                 file="submodules/JUCE-AppBasics/Source/AppConfigurationBase.cpp"/>
           <FILE id="YDW7K8" name="AppConfigurationBase.h" compile="0" resource="0"
@@ -347,8 +351,8 @@
   <EXPORTFORMATS>
     <VS2019 targetFolder="Builds/VisualStudio2019" smallIcon="ZgXgfh" bigIcon="ZgXgfh">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" headerPath="../../submodules/JUCE-AppBasics/Source/"/>
-        <CONFIGURATION isDebug="0" name="Release" headerPath="../../submodules/JUCE-AppBasics/Source/"/>
+        <CONFIGURATION isDebug="1" name="Debug" headerPath="../../submodules/Servus/"/>
+        <CONFIGURATION isDebug="0" name="Release" headerPath="../../submodules/Servus/"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_osc"/>
@@ -365,10 +369,10 @@
       </MODULEPATHS>
     </VS2019>
     <XCODE_MAC targetFolder="Builds/MacOSX" smallIcon="qJTuNs" bigIcon="qJTuNs"
-               hardenedRuntime="1" appSandbox="1" appSandboxOptions="com.apple.security.network.client,com.apple.security.network.server">
+               hardenedRuntime="1" appSandbox="1" appSandboxOptions="com.apple.security.device.bluetooth,com.apple.security.device.usb,com.apple.security.files.downloads.read-write,com.apple.security.files.user-selected.read-write,com.apple.security.network.client,com.apple.security.network.server,com.apple.security.temporary-exception.files.home-relative-path.read-write">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" headerPath="../../submodules/JUCE-AppBasics/Source/"/>
-        <CONFIGURATION isDebug="0" name="Release" headerPath="../../submodules/JUCE-AppBasics/Source/"/>
+        <CONFIGURATION isDebug="1" name="Debug" headerPath="../../submodules/Servus/"/>
+        <CONFIGURATION isDebug="0" name="Release" headerPath="../../submodules/Servus/"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_osc"/>
@@ -389,10 +393,11 @@
                   iosScreenOrientation="UIInterfaceOrientationLandscapeLeft,UIInterfaceOrientationLandscapeRight,UIInterfaceOrientationPortrait"
                   iPadScreenOrientation="UIInterfaceOrientationLandscapeLeft,UIInterfaceOrientationLandscapeRight,UIInterfaceOrientationPortrait"
                   customLaunchStoryboard="Resources/Deployment/iOS/Launchscreen.storyboard"
-                  customPList="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&#10;&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;&#10;&lt;plist&gt;&#10;  &lt;dict&gt;&#10;    &lt;key&gt;NSLocalNetworkUsageDescription&lt;/key&gt;&#10;    &lt;string&gt;SoundscapeBridgeApp uses bonjour to discover IP Addresses of relevant devices on the network. uses bonjour to discover IP Addresses&lt;/string&gt;&#10;    &lt;key&gt;NSBonjourServices&lt;/key&gt;&#10;    &lt;array&gt;&#10;&#9;  &lt;string&gt;_osc._udp&lt;/string&gt;&#10;    &lt;/array&gt;&#10;  &lt;/dict&gt;&#10;&lt;/plist&gt;">
+                  customPList="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&#10;&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;&#10;&lt;plist&gt;&#10;  &lt;dict&gt;&#10;    &lt;key&gt;NSLocalNetworkUsageDescription&lt;/key&gt;&#10;    &lt;string&gt;SoundscapeBridgeApp uses bonjour to discover IP Addresses of relevant devices on the network.&lt;/string&gt;&#10;    &lt;key&gt;NSBonjourServices&lt;/key&gt;&#10;    &lt;array&gt;&#10;&#9;  &lt;string&gt;_osc._udp&lt;/string&gt;&#10;    &lt;/array&gt;&#10;    &lt;key&gt;NSDocumentsFolderUsageDescription&lt;/key&gt;&#10;    &lt;string&gt;SoundscapeBridgeApp accesses the document folder to load or save the app configuration.&lt;/string&gt;&#10;    &lt;key&gt;NSDownloadsFolderUsageDescription&lt;/key&gt;&#10;    &lt;string&gt;SoundscapeBridgeApp accesses the downloads folder to load or save the app configuration.&lt;/string&gt;&#10;    &lt;key&gt;NSDesktopFolderUsageDescription&lt;/key&gt;&#10;    &lt;string&gt;SoundscapeBridgeApp accesses the desktop folder to load or save the app configuration.&lt;/string&gt;&#10;  &lt;/dict&gt;&#10;&lt;/plist&gt;"
+                  UIFileSharingEnabled="1" iCloudPermissions="1">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" headerPath="../../submodules/JUCE-AppBasics/Source/"/>
-        <CONFIGURATION isDebug="0" name="Release" headerPath="../../submodules/JUCE-AppBasics/Source/"/>
+        <CONFIGURATION isDebug="1" name="Debug" headerPath="../../submodules/Servus/"/>
+        <CONFIGURATION isDebug="0" name="Release" headerPath="../../submodules/Servus/"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_osc"/>

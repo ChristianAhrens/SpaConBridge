@@ -1,12 +1,20 @@
-/*
-  ==============================================================================
-
-    ProtocolBridgingWrapper.h
-    Created: 11 Aug 2020 12:20:42pm
-    Author:  Christian Ahrens
-
-  ==============================================================================
-*/
+/* Copyright (c) 2020-2021, Christian Ahrens
+ *
+ * This file is part of SoundscapeBridgeApp <https://github.com/ChristianAhrens/SoundscapeBridgeApp>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #pragma once
 
@@ -39,6 +47,9 @@ static constexpr int RX_PORT_GENERICOSC_HOST = 50015;	//< UDP port to which the 
 
 static constexpr int RX_PORT_RTTRPM_HOST = 24100;		//< UDP port to which the Blacktrax tracker device will send RTTrPM data replies to (us)
 
+static constexpr int RX_PORT_YAMAHAOSC_DEVICE = 50016;	//< UDP port which the Yamaha Rivage console is listening to for OSC
+static constexpr int RX_PORT_YAMAHAOSC_HOST = 50017;	//< UDP port to which the Yamaha Rivage console will send OSC replies
+
 /**
  * Pre-define processing bridge config values
  */
@@ -49,6 +60,7 @@ static constexpr int RTTRPM_PROCESSINGPROTOCOL_ID = 5;
 static constexpr int GENERICOSC_PROCESSINGPROTOCOL_ID = 4;
 static constexpr int DS100_2_PROCESSINGPROTOCOL_ID = 6;
 static constexpr int GENERICMIDI_PROCESSINGPROTOCOL_ID = 7;
+static constexpr int YAMAHAOSC_PROCESSINGPROTOCOL_ID = 8;
 
 class ProtocolBridgingWrapper :
 	public ProcessingEngineNode::NodeListener,
@@ -87,8 +99,7 @@ public:
 	void SetActiveBridgingProtocols(ProtocolBridgingType desiredActiveBridgingTypes);
 
 	//==========================================================================
-	bool ActivateDS100SourceId(SourceId sourceId, MappingId mappingId);
-	bool DeactivateDS100SourceId(SourceId sourceId, MappingId mappingId);
+	bool UpdateActiveDS100SourceIds();
 
 	String GetDS100IpAddress();
 	bool SetDS100IpAddress(String ipAddress, bool dontSendNotification = false);
@@ -149,6 +160,20 @@ public:
 	bool SetGenericMIDIInputDeviceIndex(int MIDIInputDeviceIndex, bool dontSendNotification = false);
 
 	//==========================================================================
+	bool GetMuteYamahaOSCSourceId(SourceId sourceId);
+	bool SetMuteYamahaOSCSourceId(SourceId sourceId, bool mute = true);
+	bool SetMuteYamahaOSCSourceIds(const std::vector<SourceId>& sourceIds, bool mute = true);
+
+	String GetYamahaOSCIpAddress();
+	bool SetYamahaOSCIpAddress(String ipAddress, bool dontSendNotification = false);
+	int GetYamahaOSCListeningPort();
+	bool SetYamahaOSCListeningPort(int listeningPort, bool dontSendNotification = false);
+	int GetYamahaOSCRemotePort();
+	bool SetYamahaOSCRemotePort(int remotePort, bool dontSendNotification = false);
+	int GetYamahaOSCMappingArea();
+	bool SetYamahaOSCMappingArea(int mappingAreaId, bool dontSendNotification = false);
+
+	//==========================================================================
 	std::unique_ptr<XmlElement> createStateXml() override;
 	bool setStateXml(XmlElement* stateXml) override;
 
@@ -179,11 +204,12 @@ private:
 	bool SetProtocolInputDeviceIndex(ProtocolId protocolId, int inputDeviceIndex, bool dontSendNotification = false);
 
 	//==========================================================================
-	void SetupBridgingNode();
+	void SetupBridgingNode(const ProtocolBridgingType bridgingProtocolsToActivate = PBT_None);
 	std::unique_ptr<XmlElement> SetupDiGiCoBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupRTTrPMBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupGenericOSCBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupGenericMIDIBridgingProtocol();
+	std::unique_ptr<XmlElement> SetupYamahaOSCBridgingProtocol();
 
 	/**
 	 * A processing engine node can send data to and receive data from multiple protocols that is encapsulates.
@@ -194,7 +220,6 @@ private:
 	XmlElement										m_bridgingXml;		/**< The current xml config for bridging (contains node xml). */
 	std::map<ProtocolBridgingType, XmlElement>		m_bridgingProtocolCacheMap;	/**< Map that holds the xml config elements of bridging elements when currently not active, 
 																				 * to be able to reactivate correct previous config on request. */
-	std::vector<RemoteObjectIdentifier>				m_activeObjectsPerSource{ ROI_CoordinateMapping_SourcePosition_XY, ROI_CoordinateMapping_SourcePosition_X, ROI_CoordinateMapping_SourcePosition_Y, ROI_MatrixInput_ReverbSendGain, ROI_Positioning_SourceSpread, ROI_Positioning_SourceDelayMode };
 
 	std::vector<ProtocolBridgingWrapper::Listener*>	m_listeners;		/**< The listner objects, for message data handling callback. */
 

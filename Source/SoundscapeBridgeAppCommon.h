@@ -3,7 +3,8 @@
 
 Copyright (C) 2019 d&b audiotechnik GmbH & Co. KG. All Rights Reserved.
 
-This file is part of the Soundscape VST, AU, and AAX Plug-in.
+This file was originally part of the Soundscape VST, AU, and AAX Plug-in
+and now in a derived version is part of SoundscapeBridgeApp.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -58,12 +59,14 @@ typedef juce::uint8 ComsMode;
  */
 enum DataChangeSource
 {
-	DCS_Gui = 0,		//< Change was caused by the GUI, i.e. the user turning a knob to change a value.
-	DCS_Host,			//< Change was caused by the VST/AU/AAX host, i.e. a project was loaded or a DAW preset was recalled.
-	DCS_Protocol,		//< Change was caused by an incoming protocol message, or caused by internal operations by the Controller.
-	DCS_Overview,		//< Change was caused by the Overview. Similar to DCS_Gui, but specific to the Overview window's GUI.
-	DCS_Init,			//< Change was caused by Application initialization process (defaults)
-	DCS_Max				//< Number of change cources.
+	DCS_SoundsourceProcessor = 0,	//< Change was caused by the SoundsourceProcessor UI, i.e. the user turning a knob to change a value.
+	DCS_SoundsourceTable,			//< Change was caused by the soundsource overview table
+	DCS_MultiSlider,				//< Change was caused by the multislider
+	DCS_Settings,					//< Change was caused by the SettingsPage UI.	
+	DCS_Host,						//< Change was caused by the VST/AU/AAX host, i.e. a project was loaded or a DAW preset was recalled.
+	DCS_Protocol,					//< Change was caused by an incoming protocol message, or caused by internal operations by the Controller.
+	DCS_Init,						//< Change was caused by Application initialization process (defaults)
+	DCS_Max							//< Number of change sources.
 };
 
 /**
@@ -118,9 +121,10 @@ static constexpr ProtocolBridgingType PBT_GenericOSC		= 0x00000004;
 static constexpr ProtocolBridgingType PBT_GenericMIDI		= 0x00000008;
 static constexpr ProtocolBridgingType PBT_YamahaSQ			= 0x00000010;
 static constexpr ProtocolBridgingType PBT_HUI				= 0x00000020;
+static constexpr ProtocolBridgingType PBT_YamahaOSC			= 0x00000040;
 static constexpr ProtocolBridgingType PBT_DS100				= 0x10000000;
 
-static const std::vector<ProtocolBridgingType> ProtocolBridgingTypes{ PBT_DiGiCo, PBT_BlacktraxRTTrPM, PBT_GenericOSC, PBT_GenericMIDI, PBT_YamahaSQ, PBT_HUI, PBT_DS100 };
+static const std::vector<ProtocolBridgingType> ProtocolBridgingTypes{ PBT_DiGiCo, PBT_BlacktraxRTTrPM, PBT_GenericOSC, PBT_GenericMIDI, PBT_YamahaSQ, PBT_HUI, PBT_YamahaOSC, PBT_DS100 };
 
 String GetProtocolBridgingShortName(ProtocolBridgingType type);
 String GetProtocolBridgingNiceName(ProtocolBridgingType type);
@@ -170,5 +174,11 @@ enum ExtensionMode
 	EM_Extend,
 	EM_Mirror
 };
+
+/**
+ * Helper method to query web repository and documentation base urls (on gitub).
+ */
+String GetRepositoryBaseWebUrl();
+String GetDocumentationBaseWebUrl();
 
 } // namespace SoundscapeBridgeApp

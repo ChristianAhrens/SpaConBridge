@@ -1,12 +1,20 @@
-/*
-  ==============================================================================
-
-	SettingsPageComponent.cpp
-	Created: 28 July 2020 17:48:55pm
-	Author:  Christian Ahrens
-
-  ==============================================================================
-*/
+/* Copyright (c) 2020-2021, Christian Ahrens
+ *
+ * This file is part of SoundscapeBridgeApp <https://github.com/ChristianAhrens/SoundscapeBridgeApp>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 
 #include "SettingsPageComponent.h"
@@ -87,6 +95,7 @@ void HeaderWithElmListComponent::setElementsActiveState(bool toggleState)
 
 	resized();
 	repaint();
+	lookAndFeelChanged();
 }
 
 /**
@@ -105,6 +114,26 @@ void HeaderWithElmListComponent::onToggleActive()
 
 		if (toggleIsActiveCallback)
 			toggleIsActiveCallback(this, m_toggleState);
+	}
+}
+
+/**
+ * Setter for the private url member that defines the web help location
+ * corresponding to this HWELC object's contents.
+ */
+void HeaderWithElmListComponent::setHelpUrl(const URL& helpUrl)
+{
+	m_helpUrl = std::make_unique<URL>(helpUrl);
+	if (!m_helpButton)
+	{
+		m_helpButton = std::make_unique<DrawableButton>("Help", DrawableButton::ButtonStyle::ImageFitted);
+		m_helpButton->onClick = [this] { 
+			m_helpUrl->launchInDefaultBrowser();
+		};
+		addAndMakeVisible(m_helpButton.get());
+
+		resized();
+		lookAndFeelChanged();
 	}
 }
 
@@ -179,6 +208,12 @@ void HeaderWithElmListComponent::paint(Graphics& g)
  */
 void HeaderWithElmListComponent::resized()
 {
+	if (!m_headerLabel)
+		return;
+
+	Font f = m_headerLabel->getFont();
+	auto headerTextWidth = f.getStringWidth(m_headerLabel->getText());
+
 	auto activeToggleHeight = 20.0f;
 	auto activeToggleMargin = 2.0f;
 	auto headerHeight = 25.0f;
@@ -201,8 +236,19 @@ void HeaderWithElmListComponent::resized()
 			.withMargin(FlexItem::Margin(activeToggleMargin, activeToggleMargin, 0, activeToggleMargin)));
 	}
 	// Add the headline section label
+	FlexBox headerFb;
+	headerFb.flexDirection = FlexBox::Direction::row;
+	headerFb.justifyContent = FlexBox::JustifyContent::flexStart;
+	headerFb.items.add(FlexItem(*m_headerLabel.get())
+		.withAlignSelf(FlexItem::AlignSelf::flexStart)
+		.withWidth(headerTextWidth + headerMargin)
+		.withHeight(headerHeight));
+	if (m_helpButton) headerFb.items.add(FlexItem(*m_helpButton.get())
+		.withAlignSelf(FlexItem::AlignSelf::flexStart)
+		.withWidth(headerHeight)
+		.withHeight(headerHeight));
 	fb.items.add(
-		FlexItem(*m_headerLabel.get())
+		FlexItem(headerFb)
 			.withHeight(headerHeight)
 			.withMargin(FlexItem::Margin(headerMargin, headerMargin, headerMargin, headerMargin)));
 	// Add all the componentes that are flagged to be included in layouting
@@ -235,6 +281,45 @@ void HeaderWithElmListComponent::resized()
 //#endif
 }
 
+/**
+ * Reimplemented method to handle changed look and feel data.
+ * This makes shure the help buttons' svg images are colored correctly.
+ */
+void HeaderWithElmListComponent::lookAndFeelChanged()
+{
+	// first forward the call to base implementation
+	Component::lookAndFeelChanged();
+
+	// all following is about the help button - if it does not exist, do not continue!
+	if (!m_helpButton)
+		return;
+
+	// create the required button drawable images based on lookandfeel colours
+	String imageName = BinaryData::help24px_svg;
+	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
+	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (dblookAndFeel)
+	{
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+
+		m_helpButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+	}
+
+	// set drawable button background colour according to the section enabled state
+	if (m_toggleState)
+		m_helpButton->setColour(DrawableButton::ColourIds::backgroundColourId, getLookAndFeel().findColour(TableListBox::backgroundColourId));
+	else
+		m_helpButton->setColour(DrawableButton::ColourIds::backgroundColourId, getLookAndFeel().findColour(TableListBox::backgroundColourId).darker());
+}
+
 
 /*
 ===============================================================================
@@ -257,6 +342,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	// DS100 settings section
 	m_DS100Settings = std::make_unique<HeaderWithElmListComponent>();
 	m_DS100Settings->setHeaderText("DS100");
+	m_DS100Settings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/DS100.md"));
 	m_DS100Settings->setHasActiveToggle(false);
 	addAndMakeVisible(m_DS100Settings.get());
 
@@ -315,12 +401,13 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_DS100Settings->addComponent(m_SecondDS100IpAddressEdit.get(), true, false);
 	m_DS100Settings->addComponent(m_SecondDS100ZeroconfDiscovery.get(), true, false);
 
-
 	m_DS100Settings->resized();
+
 
 	// DiGiCo settings section
 	m_DiGiCoBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
 	m_DiGiCoBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_DiGiCo) + " Bridging");
+	m_DiGiCoBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/DiGiCoOSC.md"));
 	m_DiGiCoBridgingSettings->setHasActiveToggle(true);
 	m_DiGiCoBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_DiGiCoBridgingSettings.get());
@@ -357,9 +444,11 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 
 	m_DiGiCoBridgingSettings->resized();
 
+
 	// BlackTrax RTTrPM settings section
 	m_RTTrPMBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
 	m_RTTrPMBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_BlacktraxRTTrPM) + " Bridging");
+	m_RTTrPMBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/BlacktraxRTTrPM.md"));
 	m_RTTrPMBridgingSettings->setHasActiveToggle(true);
 	m_RTTrPMBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_RTTrPMBridgingSettings.get());
@@ -398,9 +487,11 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 
 	m_RTTrPMBridgingSettings->resized();
 
+
 	// Generic OSC settings section
 	m_GenericOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
 	m_GenericOSCBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_GenericOSC) + " Bridging");
+	m_GenericOSCBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/GenericOSC.md"));
 	m_GenericOSCBridgingSettings->setHasActiveToggle(true);
 	m_GenericOSCBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_GenericOSCBridgingSettings.get());
@@ -437,9 +528,11 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 
 	m_GenericOSCBridgingSettings->resized();
 
+
 	// Generic MIDI settings section
 	m_GenericMIDIBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
 	m_GenericMIDIBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_GenericMIDI) + " Bridging");
+	m_GenericMIDIBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/GenericMIDI.md"));
 	m_GenericMIDIBridgingSettings->setHasActiveToggle(true);
 	m_GenericMIDIBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_GenericMIDIBridgingSettings.get());
@@ -486,6 +579,56 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedDelayModeLabel.get(), true, false);
 
 	m_GenericMIDIBridgingSettings->resized();
+
+	// YamahaOSC settings section
+	m_YamahaOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
+	m_YamahaOSCBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_YamahaOSC) + " Bridging");
+	m_YamahaOSCBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/YamahaOSC.md"));
+	m_YamahaOSCBridgingSettings->setHasActiveToggle(true);
+	m_YamahaOSCBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
+	addAndMakeVisible(m_YamahaOSCBridgingSettings.get());
+
+	m_YamahaOSCIpAddressEdit = std::make_unique<TextEditor>();
+	m_YamahaOSCIpAddressEdit->addListener(this);
+	m_YamahaOSCIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
+	m_YamahaOSCIpAddressLabel = std::make_unique<Label>();
+	m_YamahaOSCIpAddressLabel->setJustificationType(Justification::centred);
+	m_YamahaOSCIpAddressLabel->setText("IP Address", dontSendNotification);
+	m_YamahaOSCIpAddressLabel->attachToComponent(m_YamahaOSCIpAddressEdit.get(), true);
+	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCIpAddressLabel.get(), false, false);
+	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCIpAddressEdit.get(), true, false);
+
+	m_YamahaOSCListeningPortEdit = std::make_unique<TextEditor>();
+	m_YamahaOSCListeningPortEdit->addListener(this);
+	m_YamahaOSCListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
+	m_YamahaOSCListeningPortLabel = std::make_unique<Label>();
+	m_YamahaOSCListeningPortLabel->setJustificationType(Justification::centred);
+	m_YamahaOSCListeningPortLabel->setText("Listening Port", dontSendNotification);
+	m_YamahaOSCListeningPortLabel->attachToComponent(m_YamahaOSCListeningPortEdit.get(), true);
+	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCListeningPortLabel.get(), false, false);
+	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCListeningPortEdit.get(), true, false);
+
+	m_YamahaOSCRemotePortEdit = std::make_unique<TextEditor>();
+	m_YamahaOSCRemotePortEdit->addListener(this);
+	m_YamahaOSCRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
+	m_YamahaOSCRemotePortLabel = std::make_unique<Label>();
+	m_YamahaOSCRemotePortLabel->setJustificationType(Justification::centred);
+	m_YamahaOSCRemotePortLabel->setText("Remote Port", dontSendNotification);
+	m_YamahaOSCRemotePortLabel->attachToComponent(m_YamahaOSCRemotePortEdit.get(), true);
+	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCRemotePortLabel.get(), false, false);
+	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCRemotePortEdit.get(), true, false);
+
+	m_YamahaOSCMappingAreaEdit = std::make_unique<TextEditor>();
+	m_YamahaOSCMappingAreaEdit->addListener(this);
+	m_YamahaOSCMappingAreaEdit->setInputFilter(m_mappingEditFilter.get(), false);
+	m_YamahaOSCMappingAreaLabel = std::make_unique<Label>();
+	m_YamahaOSCMappingAreaLabel->setJustificationType(Justification::centred);
+	m_YamahaOSCMappingAreaLabel->setText("Mapping Area", dontSendNotification);
+	m_YamahaOSCMappingAreaLabel->attachToComponent(m_YamahaOSCMappingAreaEdit.get(), true);
+	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCMappingAreaLabel.get(), false, false);
+	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCMappingAreaEdit.get(), true, false);
+
+	m_YamahaOSCBridgingSettings->resized();
 }
 
 /**
@@ -519,6 +662,7 @@ void SettingsSectionsComponent::resized()
 		+ m_RTTrPMBridgingSettings->getHeight()
 		+ m_GenericOSCBridgingSettings->getHeight()
 		+ m_GenericMIDIBridgingSettings->getHeight()
+		+ m_YamahaOSCBridgingSettings->getHeight()
 		+ (3 * 2 * margin);
 
 	auto bounds = getLocalBounds();
@@ -550,6 +694,9 @@ void SettingsSectionsComponent::resized()
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
 		FlexItem(*m_GenericMIDIBridgingSettings.get())
 			.withHeight(static_cast<float>(m_GenericMIDIBridgingSettings->getHeight()))
+			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
+		FlexItem(*m_YamahaOSCBridgingSettings.get())
+			.withHeight(static_cast<float>(m_YamahaOSCBridgingSettings->getHeight()))
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)) });
 	fb.performLayout(bounds);
 }
@@ -568,15 +715,15 @@ void SettingsSectionsComponent::buttonClicked(JUCEAppBasics::SplitButtonComponen
 	{
 		if (m_SecondDS100ModeButtonIds[m_SecondDS100Modes[0]] == buttonId) // Off
 		{
-			ctrl->SetExtensionMode(DCS_Gui, EM_Off);
+			ctrl->SetExtensionMode(DCS_Settings, EM_Off);
 		}
 		else if (m_SecondDS100ModeButtonIds[m_SecondDS100Modes[1]] == buttonId) // Extend
 		{
-			ctrl->SetExtensionMode(DCS_Gui, EM_Extend);
+			ctrl->SetExtensionMode(DCS_Settings, EM_Extend);
 		}
 		else if (m_SecondDS100ModeButtonIds[m_SecondDS100Modes[2]] == buttonId) // Mirror
 		{
-			ctrl->SetExtensionMode(DCS_Gui, EM_Mirror);
+			ctrl->SetExtensionMode(DCS_Settings, EM_Mirror);
 		}
 
 		processUpdatedConfig();
@@ -630,11 +777,11 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 
 	// DS100 settings section
 	if (m_DS100IntervalEdit && m_DS100IntervalEdit.get() == &editor)
-		ctrl->SetRate(DCS_Gui, m_DS100IntervalEdit->getText().getIntValue());
+		ctrl->SetRate(DCS_Settings, m_DS100IntervalEdit->getText().getIntValue());
 	if (m_DS100IpAddressEdit && m_DS100IpAddressEdit.get() == &editor)
-		ctrl->SetDS100IpAddress(DCS_Gui, m_DS100IpAddressEdit->getText());
+		ctrl->SetDS100IpAddress(DCS_Settings, m_DS100IpAddressEdit->getText());
 	if (m_SecondDS100IpAddressEdit && m_SecondDS100IpAddressEdit.get() == &editor)
-		ctrl->SetSecondDS100IpAddress(DCS_Gui, m_SecondDS100IpAddressEdit->getText());
+		ctrl->SetSecondDS100IpAddress(DCS_Settings, m_SecondDS100IpAddressEdit->getText());
 
 	// DiGiCo settings section
 	if (m_DiGiCoIpAddressEdit && m_DiGiCoIpAddressEdit.get() == &editor)
@@ -660,6 +807,21 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 		ctrl->SetBridgingListeningPort(PBT_GenericOSC, m_GenericOSCListeningPortEdit->getText().getIntValue());
 	if (m_GenericOSCRemotePortEdit && m_GenericOSCRemotePortEdit.get() == &editor)
 		ctrl->SetBridgingRemotePort(PBT_GenericOSC, m_GenericOSCRemotePortEdit->getText().getIntValue());
+
+	// Yamaha OSC settings section
+	if (m_YamahaOSCIpAddressEdit && m_YamahaOSCIpAddressEdit.get() == &editor)
+		ctrl->SetBridgingIpAddress(PBT_YamahaOSC, m_YamahaOSCIpAddressEdit->getText());
+	if (m_YamahaOSCListeningPortEdit && m_YamahaOSCListeningPortEdit.get() == &editor)
+		ctrl->SetBridgingListeningPort(PBT_YamahaOSC, m_YamahaOSCListeningPortEdit->getText().getIntValue());
+	if (m_YamahaOSCRemotePortEdit && m_YamahaOSCRemotePortEdit.get() == &editor)
+		ctrl->SetBridgingRemotePort(PBT_YamahaOSC, m_YamahaOSCRemotePortEdit->getText().getIntValue());
+	if (m_YamahaOSCListeningPortEdit && m_YamahaOSCListeningPortEdit.get() == &editor)
+		ctrl->SetBridgingListeningPort(PBT_YamahaOSC, m_YamahaOSCListeningPortEdit->getText().getIntValue());
+	if (m_YamahaOSCMappingAreaEdit && m_YamahaOSCMappingAreaEdit.get() == &editor)
+	{
+		ctrl->SetBridgingMappingArea(PBT_YamahaOSC, m_YamahaOSCMappingAreaEdit->getText().getIntValue());
+		m_previousRTTrPMMappingAreaId = m_YamahaOSCMappingAreaEdit->getText().getIntValue();
+	}
 }
 
 /**
@@ -696,6 +858,8 @@ void SettingsSectionsComponent::setSettingsSectionActiveState(HeaderWithElmListC
 		sectionType = PBT_GenericOSC;
 	else if (settingsSection == m_GenericMIDIBridgingSettings.get())
 		sectionType = PBT_GenericMIDI;
+	else if (settingsSection == m_YamahaOSCBridgingSettings.get())
+		sectionType = PBT_YamahaOSC;
 
 	if (activeState)
 		ctrl->SetActiveProtocolBridging(ctrl->GetActiveProtocolBridging() | sectionType);
@@ -802,6 +966,24 @@ void SettingsSectionsComponent::processUpdatedConfig()
 		m_GenericMIDIBridgingSettings->setToggleActiveState(GenericMIDIBridgingActive);
 	if (m_GenericMIDIInputDeviceSelect)
 		m_GenericMIDIInputDeviceSelect->setSelectedId(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI) + 1, dontSendNotification);
+
+	// Yamaha OSC settings section
+	auto YamahaOSCBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_YamahaOSC) == PBT_YamahaOSC;
+	if (m_YamahaOSCBridgingSettings)
+		m_YamahaOSCBridgingSettings->setToggleActiveState(YamahaOSCBridgingActive);
+	if (m_YamahaOSCIpAddressEdit)
+		m_YamahaOSCIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_YamahaOSC));
+	if (m_YamahaOSCListeningPortEdit)
+		m_YamahaOSCListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_YamahaOSC)), false);
+	if (m_YamahaOSCRemotePortEdit)
+		m_YamahaOSCRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_YamahaOSC)), false);
+	if (m_YamahaOSCMappingAreaEdit)
+	{
+		m_YamahaOSCMappingAreaEdit->setText(String(ctrl->GetBridgingMappingArea(PBT_YamahaOSC)), false);
+		m_YamahaOSCMappingAreaEdit->setEnabled((ctrl->GetBridgingMappingArea(PBT_YamahaOSC) != -1));
+	}
+	if (m_YamahaOSCMappingAreaLabel)
+		m_YamahaOSCMappingAreaLabel->setEnabled((ctrl->GetBridgingMappingArea(PBT_YamahaOSC) != -1));
 }
 
 /**
@@ -819,7 +1001,7 @@ void SettingsSectionsComponent::handleDS100ServiceSelected(JUCEAppBasics::Zeroco
         
         Controller* ctrl = Controller::GetInstance();
         if (ctrl)
-            ctrl->SetDS100IpAddress(DCS_Gui, info->ip);
+            ctrl->SetDS100IpAddress(DCS_Settings, info->ip);
 	}
 }
 
@@ -838,7 +1020,7 @@ void SettingsSectionsComponent::handleSecondDS100ServiceSelected(JUCEAppBasics::
 
 		Controller* ctrl = Controller::GetInstance();
 		if (ctrl)
-			ctrl->SetSecondDS100IpAddress(DCS_Gui, info->ip);
+			ctrl->SetSecondDS100IpAddress(DCS_Settings, info->ip);
 	}
 }
 
@@ -1123,9 +1305,10 @@ void SettingsPageComponent::onApplyClicked()
  */
 void SettingsPageComponent::onLoadConfigClicked()
 {
+    // create the file chooser dialog
 	FileChooser chooser("Select a " + JUCEApplication::getInstance()->getApplicationName() + " config file to load...",
-		File::getSpecialLocation(File::userHomeDirectory), "*.config");
-
+		File::getSpecialLocation(File::userDocumentsDirectory)); // all filepatterns are allowed for loading (currently seems to not work on iOS and not be regarded on macOS at all)
+    // and trigger opening it
 	if (chooser.browseForFileToOpen())
 	{
 		auto file = chooser.getResult();
@@ -1141,12 +1324,23 @@ void SettingsPageComponent::onLoadConfigClicked()
  */
 void SettingsPageComponent::onSaveConfigClicked()
 {
+    // prepare a default filename suggestion based on current date and app name
+    auto initialFolderPathName = File::getSpecialLocation(File::userDocumentsDirectory).getFullPathName();
+    auto initialFileNameSuggestion = Time::getCurrentTime().formatted("%Y-%m-%d_") + JUCEApplication::getInstance()->getApplicationName() + "Config";
+    auto initialFilePathSuggestion = initialFolderPathName + File::getSeparatorString() + initialFileNameSuggestion;
+    auto initialFileSuggestion = File(initialFilePathSuggestion);
+    
+    // create the file chooser dialog
 	FileChooser chooser("Save current " + JUCEApplication::getInstance()->getApplicationName() + " config file as...",
-		File::getSpecialLocation(File::userHomeDirectory), "*.config");
-
+                        initialFileSuggestion, "*.config");
+    // and trigger opening it
 	if (chooser.browseForFileToSave(true))
 	{
 		auto file = chooser.getResult();
+        
+        // enforce the .config extension
+        if (file.getFileExtension() != ".config")
+            file = file.withFileExtension(".config");
 
 		Controller* ctrl = Controller::GetInstance();
 		if (ctrl)

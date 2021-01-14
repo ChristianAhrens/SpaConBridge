@@ -3,7 +3,8 @@
 
 Copyright (C) 2019 d&b audiotechnik GmbH & Co. KG. All Rights Reserved.
 
-This file is part of the Soundscape VST, AU, and AAX Plug-in.
+This file was originally part of the Soundscape VST, AU, and AAX Plug-in
+and now in a derived version is part of SoundscapeBridgeApp.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -430,16 +431,6 @@ void SoundsourceProcessor::SetComsMode(DataChangeSource changeSource, ComsMode n
 
 		// Signal change to other modules in the plugin.
 		SetParameterChanged(changeSource, DCT_ComsMode);
-
-		// Activate the corresponding soundsource id in controller
-		Controller* ctrl = Controller::GetInstance();
-		if (ctrl && (changeSource != DCS_Init))
-		{
-			if (m_comsMode & CM_Rx)
-				ctrl->ActivateSoundSourceId(GetSourceId(), GetMappingId());
-			else
-				ctrl->DeactivateSoundSourceId(GetSourceId(), GetMappingId());
-		}
 	}
 }
 
@@ -591,35 +582,14 @@ void SoundsourceProcessor::InitializeSettings(int sourceId, int mappingId, Strin
 	}
 }
 
-#ifdef JUCE_DEBUG
 /**
- * Helper method to append a message onto the debugging buffer. This buffer can then be flushed with FlushDebugMessages().
- * @param message Message to be printed. A timestamp will automatically be prepended.
+ * Method to get a list of remote object identifiers that are used by this soundsource processing object.
+ * @return	The requested list of remote object identifiers.
  */
-void SoundsourceProcessor::PushDebugMessage(String message)
+const std::vector<RemoteObjectIdentifier>	SoundsourceProcessor::GetUsedRemoteObjects()
 {
-	if (message.isNotEmpty())
-	{
-		String timestamp = Time::getCurrentTime().toString(false, true, true, true);
-		message = timestamp + String(": ") + message + String("\n");
-		m_debugMessageBuffer += message;
-
-		SetParameterChanged(DCS_Host, DCT_DebugMessage);
-	}
-}
-
-/**
- * Helper method to get the contents of the debug message buffer. This call also clears the buffer.
- * @ret		Messages to be printed, one per line. 
- */
-String SoundsourceProcessor::FlushDebugMessages()
-{
-	String ret(m_debugMessageBuffer);
-	m_debugMessageBuffer.clear();
-	return ret;
-}
-#endif
-
+	return std::vector<RemoteObjectIdentifier>{ROI_CoordinateMapping_SourcePosition_XY, ROI_CoordinateMapping_SourcePosition_X, ROI_CoordinateMapping_SourcePosition_Y, ROI_MatrixInput_ReverbSendGain, ROI_Positioning_SourceSpread, ROI_Positioning_SourceDelayMode};
+};
 
 
 //==============================================================================
@@ -823,21 +793,6 @@ void SoundsourceProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 void SoundsourceProcessor::releaseResources()
 {
 }
-
-#ifndef JucePlugin_PreferredChannelConfigurations
-/**
- * Callback to query if the AudioProcessor supports a specific layout.
- * This callback is called when the host probes the supported bus layouts via the checkBusesLayoutSupported method. 
- * Used to limit the layouts that the AudioProcessor supports. 
- * @param layouts	Bus channel layouts to check.
- * @returns			True if a given layout is supported by this plugin.
- */
-bool SoundsourceProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
-{
-	ignoreUnused(layouts);
-	return true;
-}
-#endif
 
 
 /**

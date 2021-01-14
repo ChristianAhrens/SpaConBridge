@@ -1305,9 +1305,10 @@ void SettingsPageComponent::onApplyClicked()
  */
 void SettingsPageComponent::onLoadConfigClicked()
 {
+    // create the file chooser dialog
 	FileChooser chooser("Select a " + JUCEApplication::getInstance()->getApplicationName() + " config file to load...",
-		File::getSpecialLocation(File::userHomeDirectory), "*.config");
-
+		File::getSpecialLocation(File::userDocumentsDirectory)); // all filepatterns are allowed for loading (currently seems to not work on iOS and not be regarded on macOS at all)
+    // and trigger opening it
 	if (chooser.browseForFileToOpen())
 	{
 		auto file = chooser.getResult();
@@ -1323,12 +1324,23 @@ void SettingsPageComponent::onLoadConfigClicked()
  */
 void SettingsPageComponent::onSaveConfigClicked()
 {
+    // prepare a default filename suggestion based on current date and app name
+    auto initialFolderPathName = File::getSpecialLocation(File::userDocumentsDirectory).getFullPathName();
+    auto initialFileNameSuggestion = Time::getCurrentTime().formatted("%Y-%m-%d_") + JUCEApplication::getInstance()->getApplicationName() + "Config";
+    auto initialFilePathSuggestion = initialFolderPathName + File::getSeparatorString() + initialFileNameSuggestion;
+    auto initialFileSuggestion = File(initialFilePathSuggestion);
+    
+    // create the file chooser dialog
 	FileChooser chooser("Save current " + JUCEApplication::getInstance()->getApplicationName() + " config file as...",
-		File::getSpecialLocation(File::userHomeDirectory), "*.config");
-
+                        initialFileSuggestion, "*.config");
+    // and trigger opening it
 	if (chooser.browseForFileToSave(true))
 	{
 		auto file = chooser.getResult();
+        
+        // enforce the .config extension
+        if (file.getFileExtension() != ".config")
+            file = file.withFileExtension(".config");
 
 		Controller* ctrl = Controller::GetInstance();
 		if (ctrl)

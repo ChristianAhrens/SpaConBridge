@@ -878,7 +878,7 @@ int ProtocolBridgingWrapper::GetProtocolInputDeviceIndex(ProtocolId protocolId)
 		}
 	}
 
-	return INVALID_PORT_VALUE;
+	return INVALID_DEVICEID_VALUE;
 }
 
 /**

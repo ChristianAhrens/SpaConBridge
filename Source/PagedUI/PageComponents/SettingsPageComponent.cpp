@@ -559,7 +559,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIXValueLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>();
 	m_GenericMIDIXValueLabel = std::make_unique<Label>();
 	m_GenericMIDIXValueLabel->setJustificationType(Justification::centredLeft);
-	m_GenericMIDIXValueLabel->setText("Pos. X", dontSendNotification);
+	m_GenericMIDIXValueLabel->setText("Relative Pos. X", dontSendNotification);
 	m_GenericMIDIXValueLabel->attachToComponent(m_GenericMIDIXValueLearner.get(), true);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIXValueLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIXValueLearner.get(), true, false);
@@ -567,7 +567,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIYValueLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>();
 	m_GenericMIDIYValueLabel = std::make_unique<Label>();
 	m_GenericMIDIYValueLabel->setJustificationType(Justification::centredLeft);
-	m_GenericMIDIYValueLabel->setText("Pos. Y", dontSendNotification);
+	m_GenericMIDIYValueLabel->setText("Relative Pos. Y", dontSendNotification);
 	m_GenericMIDIYValueLabel->attachToComponent(m_GenericMIDIYValueLearner.get(), true);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIYValueLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIYValueLearner.get(), true, false);
@@ -575,7 +575,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIReverbSendGainLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>();
 	m_GenericMIDIReverbSendGainLabel = std::make_unique<Label>();
 	m_GenericMIDIReverbSendGainLabel->setJustificationType(Justification::centredLeft);
-	m_GenericMIDIReverbSendGainLabel->setText("Rvb Snd Gain", dontSendNotification);
+	m_GenericMIDIReverbSendGainLabel->setText("Reverb Send Gain", dontSendNotification);
 	m_GenericMIDIReverbSendGainLabel->attachToComponent(m_GenericMIDIReverbSendGainLearner.get(), true);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIReverbSendGainLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIReverbSendGainLearner.get(), true, false);
@@ -591,7 +591,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIDelayModeLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>();
 	m_GenericMIDIDelayModeLabel = std::make_unique<Label>();
 	m_GenericMIDIDelayModeLabel->setJustificationType(Justification::centredLeft);
-	m_GenericMIDIDelayModeLabel->setText("Object DlyMode", dontSendNotification);
+	m_GenericMIDIDelayModeLabel->setText("Object DelayMode", dontSendNotification);
 	m_GenericMIDIDelayModeLabel->attachToComponent(m_GenericMIDIDelayModeLearner.get(), true);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIDelayModeLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIDelayModeLearner.get(), true, false);
@@ -984,7 +984,19 @@ void SettingsSectionsComponent::processUpdatedConfig()
 		m_GenericMIDIBridgingSettings->setToggleActiveState(GenericMIDIBridgingActive);
 	if (m_GenericMIDIInputDeviceSelect)
 		m_GenericMIDIInputDeviceSelect->setSelectedId(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI) + 1, dontSendNotification);
-
+    if (m_GenericMIDIMatrixInputSelectLearner)
+        m_GenericMIDIMatrixInputSelectLearner->setSelectedDeviceIdx(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI));
+    if (m_GenericMIDIXValueLearner)
+        m_GenericMIDIXValueLearner->setSelectedDeviceIdx(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI));
+    if (m_GenericMIDIYValueLearner)
+        m_GenericMIDIYValueLearner->setSelectedDeviceIdx(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI));
+    if (m_GenericMIDIReverbSendGainLearner)
+        m_GenericMIDIReverbSendGainLearner->setSelectedDeviceIdx(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI));
+    if (m_GenericMIDISourceSpreadLearner)
+        m_GenericMIDISourceSpreadLearner->setSelectedDeviceIdx(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI));
+    if (m_GenericMIDIDelayModeLearner)
+        m_GenericMIDIDelayModeLearner->setSelectedDeviceIdx(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI));
+    
 	// Yamaha OSC settings section
 	auto YamahaOSCBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_YamahaOSC) == PBT_YamahaOSC;
 	if (m_YamahaOSCBridgingSettings)

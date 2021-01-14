@@ -1395,7 +1395,7 @@ int Controller::GetBridgingListeningPort(ProtocolBridgingType bridgingType)
 	case PBT_DS100:
 	default:
 		jassertfalse;
-		return false;
+		return INVALID_PORT_VALUE;
 	}
 }
 
@@ -1439,7 +1439,7 @@ int Controller::GetBridgingRemotePort(ProtocolBridgingType bridgingType)
 	case PBT_DS100:
 	default:
 		jassertfalse;
-		return false;
+		return INVALID_PORT_VALUE;
 	}
 }
 
@@ -1481,7 +1481,7 @@ int Controller::GetBridgingMappingArea(ProtocolBridgingType bridgingType)
 	case PBT_DS100:
 	default:
 		jassertfalse;
-		return false;
+		return INVALID_ADDRESS_VALUE;
 	}
 }
 
@@ -1520,7 +1520,7 @@ int Controller::GetBridgingInputDeviceIndex(ProtocolBridgingType bridgingType)
 	case PBT_DS100:
 	default:
 		jassertfalse;
-		return false;
+		return INVALID_ADDRESS_VALUE;
 	}
 }
 

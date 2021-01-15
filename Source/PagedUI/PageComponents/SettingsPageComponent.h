@@ -128,6 +128,9 @@ private:
 	void handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info);
 	void handleSecondDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info);
 
+	//==============================================================================
+	void handleMidiAssiSet(Component* sender, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& midiAssi);
+
 	// input filters for texteditors
 	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_intervalEditFilter;
 	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_ipAddressEditFilter;

@@ -205,6 +205,8 @@
       </GROUP>
       <GROUP id="{FAEFB6F6-97A8-A4B1-8911-35FBC344E2EF}" name="JUCE-AppBasics">
         <GROUP id="{AEF488F2-ECE4-B5B0-0BC4-9A3644EF8A18}" name="Source">
+          <FILE id="DQ1PKR" name="Midi_utils.cpp" compile="1" resource="0" file="submodules/JUCE-AppBasics/Source/Midi_utils.cpp"/>
+          <FILE id="SZ9CQH" name="Midi_utils.h" compile="0" resource="0" file="submodules/JUCE-AppBasics/Source/Midi_utils.h"/>
           <FILE id="nRrbs7" name="MidiLearnerComponent.cpp" compile="1" resource="0"
                 file="submodules/JUCE-AppBasics/Source/MidiLearnerComponent.cpp"/>
           <FILE id="HK5MGg" name="MidiLearnerComponent.h" compile="0" resource="0"

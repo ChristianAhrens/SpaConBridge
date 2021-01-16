@@ -932,7 +932,27 @@ bool ProtocolBridgingWrapper::SetProtocolInputDeviceIndex(ProtocolId protocolId,
  */
 JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment ProtocolBridgingWrapper::GetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId)
 {
-	return JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment();
+    auto midiAssiMap = JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment();
+    
+    auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+    if (nodeXmlElement)
+    {
+        auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+        if (protocolXmlElement)
+        {
+            auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+            if (assiMapXmlElement)
+            {
+                auto assiMapHexStringTextXmlElement = assiMapXmlElement->getFirstChildElement();
+                if (assiMapHexStringTextXmlElement && assiMapHexStringTextXmlElement->isTextElement())
+                {
+                    midiAssiMap.deserializeFromHexString(assiMapHexStringTextXmlElement->getText());
+                }
+            }
+        }
+    }
+
+	return midiAssiMap;
 }
 
 /**
@@ -947,7 +967,45 @@ JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment ProtocolBridgingWrapper::G
  */
 bool ProtocolBridgingWrapper::SetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification)
 {
-	return true;
+    auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+    if (nodeXmlElement)
+    {
+        auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+        if (protocolXmlElement)
+        {
+            auto assiMapHexString = assignmentMapping.serializeToHexString();
+            
+            auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+            if (assiMapXmlElement)
+            {
+                auto assiMapHexStringTextXmlElement = assiMapXmlElement->getFirstChildElement();
+                if (assiMapHexStringTextXmlElement && assiMapHexStringTextXmlElement->isTextElement())
+                    assiMapHexStringTextXmlElement->setText(assiMapHexString);
+                else
+                    assiMapXmlElement->addTextElement(assiMapHexString);
+            }
+            else
+            {
+                assiMapXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+                assiMapXmlElement->addTextElement(assiMapHexString);
+            }
+        }
+        else
+            return false;
+
+        m_processingNode.setStateXml(nodeXmlElement);
+
+        if (!dontSendNotification)
+        {
+            Controller* ctrl = Controller::GetInstance();
+            if (ctrl)
+                ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
+        }
+
+        return true;
+    }
+    else
+        return false;
 }
 
 /**

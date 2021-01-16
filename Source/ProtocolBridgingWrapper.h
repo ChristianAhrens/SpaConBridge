@@ -23,6 +23,8 @@
 
 #include <ProcessingEngine/ProcessingEngineNode.h>
 
+#include "../submodules/JUCE-AppBasics/Source/Midi_utils.h"
+
 #include <JuceHeader.h>
 
 
@@ -158,6 +160,8 @@ public:
 
 	int GetGenericMIDIInputDeviceIndex();
 	bool SetGenericMIDIInputDeviceIndex(int MIDIInputDeviceIndex, bool dontSendNotification = false);
+	JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment GetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId);
+	bool SetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification = false);
 
 	//==========================================================================
 	bool GetMuteYamahaOSCSourceId(SourceId sourceId);
@@ -202,6 +206,8 @@ private:
 	bool SetProtocolMappingArea(ProtocolId protocolId, int mappingAreaId, bool dontSendNotification = false);
 	int GetProtocolInputDeviceIndex(ProtocolId protocolId);
 	bool SetProtocolInputDeviceIndex(ProtocolId protocolId, int inputDeviceIndex, bool dontSendNotification = false);
+	JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment GetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId);
+	bool SetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification = false);
 
 	//==========================================================================
 	void SetupBridgingNode(const ProtocolBridgingType bridgingProtocolsToActivate = PBT_None);

@@ -1542,6 +1542,42 @@ bool Controller::SetBridgingInputDeviceIndex(ProtocolBridgingType bridgingType, 
 	}
 }
 
+JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment Controller::GetBridgingMidiAssignmentMapping(ProtocolBridgingType bridgingType, RemoteObjectIdentifier remoteObjectId)
+{
+	switch (bridgingType)
+	{
+	case PBT_GenericMIDI:
+		return m_protocolBridge.GetGenericMIDIAssignmentMapping(remoteObjectId);
+	case PBT_BlacktraxRTTrPM:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment();
+	}
+}
+
+bool Controller::SetBridgingMidiAssignmentMapping(ProtocolBridgingType bridgingType, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification)
+{
+	switch (bridgingType)
+	{
+	case PBT_GenericMIDI:
+		return m_protocolBridge.SetGenericMIDIAssignmentMapping(remoteObjectId, assignmentMapping, dontSendNotification);
+	case PBT_BlacktraxRTTrPM:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
 /**
  * Method to load a given input file as the new application configuration.
  * This tries to handle possible errors and shows a popup to the user in case an error was detected.

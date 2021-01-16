@@ -41,7 +41,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "ProtocolBridgingWrapper.h"
 
 
-
 namespace SoundscapeBridgeApp
 {
 
@@ -127,6 +126,8 @@ public:
 	bool SetBridgingMappingArea(ProtocolBridgingType bridgingType, int mappingAreaId, bool dontSendNotification = false);
 	int GetBridgingInputDeviceIndex(ProtocolBridgingType bridgingType);
 	bool SetBridgingInputDeviceIndex(ProtocolBridgingType bridgingType, int inputDeviceIndex, bool dontSendNotification = false);
+	JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment GetBridgingMidiAssignmentMapping(ProtocolBridgingType bridgingType, RemoteObjectIdentifier remoteObjectId);
+	bool SetBridgingMidiAssignmentMapping(ProtocolBridgingType bridgingType, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification = false);
 
 	//==========================================================================
 	void InitGlobalSettings(DataChangeSource changeSource, String ipAddress, int rate);

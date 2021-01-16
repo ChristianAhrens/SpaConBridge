@@ -548,7 +548,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIInputDeviceSelectLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIInputDeviceSelect.get(), true, false);
 
-	m_GenericMIDIMatrixInputSelectLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>();
+	m_GenericMIDIMatrixInputSelectLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(ROI_MatrixInput_Select);
 	m_GenericMIDIMatrixInputSelectLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
 	m_GenericMIDIMatrixInputSelectLabel = std::make_unique<Label>();
 	m_GenericMIDIMatrixInputSelectLabel->setJustificationType(Justification::centredLeft);
@@ -557,7 +557,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMatrixInputSelectLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMatrixInputSelectLearner.get(), true, false);
 
-	m_GenericMIDIXValueLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>();
+	m_GenericMIDIXValueLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(ROI_CoordinateMapping_SourcePosition_X);
 	m_GenericMIDIXValueLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
 	m_GenericMIDIXValueLabel = std::make_unique<Label>();
 	m_GenericMIDIXValueLabel->setJustificationType(Justification::centredLeft);
@@ -566,7 +566,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIXValueLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIXValueLearner.get(), true, false);
 
-	m_GenericMIDIYValueLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>();
+	m_GenericMIDIYValueLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(ROI_CoordinateMapping_SourcePosition_Y);
 	m_GenericMIDIYValueLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
 	m_GenericMIDIYValueLabel = std::make_unique<Label>();
 	m_GenericMIDIYValueLabel->setJustificationType(Justification::centredLeft);
@@ -575,7 +575,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIYValueLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIYValueLearner.get(), true, false);
 
-	m_GenericMIDIReverbSendGainLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>();
+	m_GenericMIDIReverbSendGainLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(ROI_MatrixInput_ReverbSendGain);
 	m_GenericMIDIReverbSendGainLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
 	m_GenericMIDIReverbSendGainLabel = std::make_unique<Label>();
 	m_GenericMIDIReverbSendGainLabel->setJustificationType(Justification::centredLeft);
@@ -584,7 +584,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIReverbSendGainLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIReverbSendGainLearner.get(), true, false);
 
-	m_GenericMIDISourceSpreadLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>();
+	m_GenericMIDISourceSpreadLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(ROI_Positioning_SourceSpread);
 	m_GenericMIDISourceSpreadLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
 	m_GenericMIDISourceSpreadLabel = std::make_unique<Label>();
 	m_GenericMIDISourceSpreadLabel->setJustificationType(Justification::centredLeft);
@@ -593,7 +593,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDISourceSpreadLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDISourceSpreadLearner.get(), true, false);
 
-	m_GenericMIDIDelayModeLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>();
+	m_GenericMIDIDelayModeLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(ROI_Positioning_SourceDelayMode);
 	m_GenericMIDIDelayModeLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
 	m_GenericMIDIDelayModeLabel = std::make_unique<Label>();
 	m_GenericMIDIDelayModeLabel->setJustificationType(Justification::centredLeft);
@@ -990,18 +990,36 @@ void SettingsSectionsComponent::processUpdatedConfig()
 		m_GenericMIDIBridgingSettings->setToggleActiveState(GenericMIDIBridgingActive);
 	if (m_GenericMIDIInputDeviceSelect)
 		m_GenericMIDIInputDeviceSelect->setSelectedId(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI) + 1, dontSendNotification);
-    if (m_GenericMIDIMatrixInputSelectLearner)
-        m_GenericMIDIMatrixInputSelectLearner->setSelectedDeviceIdx(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI));
+	if (m_GenericMIDIMatrixInputSelectLearner)
+	{
+		m_GenericMIDIMatrixInputSelectLearner->setSelectedDeviceIdx(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI));
+		m_GenericMIDIMatrixInputSelectLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIMatrixInputSelectLearner->getReferredId())));
+	}
     if (m_GenericMIDIXValueLearner)
-        m_GenericMIDIXValueLearner->setSelectedDeviceIdx(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI));
+	{
+		m_GenericMIDIXValueLearner->setSelectedDeviceIdx(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI));
+		m_GenericMIDIXValueLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIXValueLearner->getReferredId())));
+	}
     if (m_GenericMIDIYValueLearner)
-        m_GenericMIDIYValueLearner->setSelectedDeviceIdx(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI));
+	{
+		m_GenericMIDIYValueLearner->setSelectedDeviceIdx(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI));
+		m_GenericMIDIYValueLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIYValueLearner->getReferredId())));
+	}
     if (m_GenericMIDIReverbSendGainLearner)
-        m_GenericMIDIReverbSendGainLearner->setSelectedDeviceIdx(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI));
+	{
+		m_GenericMIDIReverbSendGainLearner->setSelectedDeviceIdx(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI));
+		m_GenericMIDIReverbSendGainLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIReverbSendGainLearner->getReferredId())));
+	}
     if (m_GenericMIDISourceSpreadLearner)
-        m_GenericMIDISourceSpreadLearner->setSelectedDeviceIdx(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI));
+	{
+		m_GenericMIDISourceSpreadLearner->setSelectedDeviceIdx(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI));
+		m_GenericMIDISourceSpreadLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDISourceSpreadLearner->getReferredId())));
+	}
     if (m_GenericMIDIDelayModeLearner)
-        m_GenericMIDIDelayModeLearner->setSelectedDeviceIdx(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI));
+	{
+		m_GenericMIDIDelayModeLearner->setSelectedDeviceIdx(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI));
+		m_GenericMIDIDelayModeLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIDelayModeLearner->getReferredId())));
+	}
     
 	// Yamaha OSC settings section
 	auto YamahaOSCBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_YamahaOSC) == PBT_YamahaOSC;
@@ -1067,24 +1085,16 @@ void SettingsSectionsComponent::handleSecondDS100ServiceSelected(JUCEAppBasics::
  */
 void SettingsSectionsComponent::handleMidiAssiSet(Component* sender, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& midiAssi)
 {
-	auto roi = RemoteObjectIdentifier::ROI_Invalid;
-	if (sender == m_GenericMIDIMatrixInputSelectLearner.get())
-		roi = ROI_MatrixInput_Select;
-	else if (sender == m_GenericMIDIXValueLearner.get())
-		roi = ROI_CoordinateMapping_SourcePosition_X;
-	else if (sender == m_GenericMIDIYValueLearner.get())
-		roi = ROI_CoordinateMapping_SourcePosition_Y;
-	else if (sender == m_GenericMIDIReverbSendGainLearner.get())
-		roi = ROI_MatrixInput_ReverbSendGain;
-	else if (sender == m_GenericMIDISourceSpreadLearner.get())
-		roi = ROI_Positioning_SourceSpread;
-	else if (sender == m_GenericMIDIDelayModeLearner.get())
-		roi = ROI_Positioning_SourceDelayMode;
-
-	Controller* ctrl = Controller::GetInstance();
-	if (ctrl)
+	auto learnerComponent = dynamic_cast<JUCEAppBasics::MidiLearnerComponent*>(sender);
+	if (learnerComponent)
 	{
-		//ctrl->SetBridgingMidiAssignmentMapping(PBT_GenericMIDI, roi, midiAssi);
+		// No need to set the assignment to learner here, 
+		// as is done in other handle methods with other editors,
+		// since it is already done by learners internally!
+
+		Controller* ctrl = Controller::GetInstance();
+		if (ctrl)
+			ctrl->SetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(learnerComponent->getReferredId()), midiAssi);
 	}
 }
 

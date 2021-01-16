@@ -858,7 +858,7 @@ bool ProtocolBridgingWrapper::SetProtocolMappingArea(ProtocolId protocolId, int 
 }
 
 /**
- * Gets the protocol's currently set input device index, if available for the given protocol.
+ * Gets the protocol's currently set input device index, if available, for the given protocol.
  * @param protocolId The id of the protocol for which to get the currently configured inputdevice index
  * @return	The input device index
  */
@@ -922,6 +922,32 @@ bool ProtocolBridgingWrapper::SetProtocolInputDeviceIndex(ProtocolId protocolId,
 	}
 	else
 		return false;
+}
+
+/**
+ * Gets the currently set midi assignment mapping for a given remote object, if available, for the given protocol.
+ * @param protocolId	The id of the protocol to get the midi assignment for.
+ * @param remoteObjectId	The remote object to get the midi mapping for.
+ * @return	The requested midi assignment mapping
+ */
+JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment ProtocolBridgingWrapper::GetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId)
+{
+	return JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment();
+}
+
+/**
+ * Sets the desired midi assignment mapping for a given remote object.
+ * This method inserts the mapping area id into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param protocolId	The id of the protocol to set the midi assignment for.
+ * @param remoteObjectId	The remote object to set the midi mapping for.
+ * @param assignmentMapping	The midi mapping to set for the remote object.
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification)
+{
+	return true;
 }
 
 /**
@@ -1749,6 +1775,7 @@ int ProtocolBridgingWrapper::GetGenericOSCListeningPort()
  * Sets the desired protocol listening port.
  * This method forwards the call to the generic implementation.
  * @param	listeningPort	The protocol port to set as listening port
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
  * @return	True on succes, false if failure
  */
 bool ProtocolBridgingWrapper::SetGenericOSCListeningPort(int listeningPort, bool dontSendNotification)
@@ -1770,6 +1797,7 @@ int ProtocolBridgingWrapper::GetGenericOSCRemotePort()
  * Sets the desired protocol remote port.
  * This method forwards the call to the generic implementation.
  * @param	remotePort	The protocol port to set as remote port
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
  * @return	True on succes, false if failure
  */
 bool ProtocolBridgingWrapper::SetGenericOSCRemotePort(int remotePort, bool dontSendNotification)
@@ -1829,11 +1857,36 @@ int ProtocolBridgingWrapper::GetGenericMIDIInputDeviceIndex()
  * Sets the desired protocol input device index.
  * This method forwards the call to the generic implementation.
  * @param	inputDeviceIndex	The protocol input device index to set
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
  * @return	True on succes, false if failure
  */
 bool ProtocolBridgingWrapper::SetGenericMIDIInputDeviceIndex(int inputDeviceIndex, bool dontSendNotification)
 {
 	return SetProtocolInputDeviceIndex(GENERICMIDI_PROCESSINGPROTOCOL_ID, inputDeviceIndex, dontSendNotification);
+}
+
+/**
+ * Gets the desired midi assignment mapping for a given remote object.
+ * This method forwards the call to the generic implementation.
+ * @param remoteObjectId	The remote object to get the midi mapping for.
+ * @return	The requested midi assignment mapping
+ */
+JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment ProtocolBridgingWrapper::GetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId)
+{
+	return GetMidiAssignmentMapping(GENERICMIDI_PROCESSINGPROTOCOL_ID, remoteObjectId);
+}
+
+/**
+ * Sets the desired midi assignment mapping for a given remote object.
+ * This method forwards the call to the generic implementation.
+ * @param remoteObjectId	The remote object to set the midi mapping for.
+ * @param assignmentMapping	The midi mapping to set for the remote object.
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification)
+{
+	return SetMidiAssignmentMapping(GENERICMIDI_PROCESSINGPROTOCOL_ID, remoteObjectId, assignmentMapping, dontSendNotification);
 }
 
 /**

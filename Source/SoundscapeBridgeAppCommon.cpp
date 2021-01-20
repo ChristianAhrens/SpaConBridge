@@ -68,7 +68,7 @@ String GetProtocolBridgingNiceName(ProtocolBridgingType type)
 	case PBT_DiGiCo:
 		return "DiGiCo OSC";
 	case PBT_GenericOSC:
-		return "Generic OSC";
+		return "Generic d&b OSC";
 	case PBT_BlacktraxRTTrPM:
 		return "Blacktrax RTTrPM";
 	case PBT_GenericMIDI:

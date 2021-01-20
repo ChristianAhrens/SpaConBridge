@@ -162,6 +162,8 @@ public:
 	bool SetGenericMIDIInputDeviceIndex(int MIDIInputDeviceIndex, bool dontSendNotification = false);
 	JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment GetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId);
 	bool SetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification = false);
+	int GetGenericMIDIMappingArea();
+	bool SetGenericMIDIMappingArea(int mappingAreaId, bool dontSendNotification = false);
 
 	//==========================================================================
 	bool GetMuteYamahaOSCSourceId(SourceId sourceId);

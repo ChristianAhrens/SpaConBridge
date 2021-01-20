@@ -1473,9 +1473,10 @@ int Controller::GetBridgingMappingArea(ProtocolBridgingType bridgingType)
 		return m_protocolBridge.GetRTTrPMMappingArea();
 	case PBT_YamahaOSC:
 		return m_protocolBridge.GetYamahaOSCMappingArea();
+	case PBT_GenericMIDI:
+		return m_protocolBridge.GetGenericMIDIMappingArea();
 	case PBT_DiGiCo:
 	case PBT_GenericOSC:
-	case PBT_GenericMIDI:
 	case PBT_YamahaSQ:
 	case PBT_HUI:
 	case PBT_DS100:
@@ -1493,9 +1494,10 @@ bool Controller::SetBridgingMappingArea(ProtocolBridgingType bridgingType, int m
 		return m_protocolBridge.SetYamahaOSCMappingArea(mappingAreaId, dontSendNotification);
 	case PBT_YamahaOSC:
 		return m_protocolBridge.SetYamahaOSCMappingArea(mappingAreaId, dontSendNotification);
+	case PBT_GenericMIDI:
+		return m_protocolBridge.SetGenericMIDIMappingArea(mappingAreaId, dontSendNotification);
 	case PBT_DiGiCo:
 	case PBT_GenericOSC:
-	case PBT_GenericMIDI:
 	case PBT_YamahaSQ:
 	case PBT_HUI:
 	case PBT_DS100:

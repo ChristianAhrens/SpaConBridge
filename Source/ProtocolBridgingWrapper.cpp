@@ -417,6 +417,10 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupGenericMIDIBridgingPro
 		if (inputDeviceIndexXmlElement)
 			inputDeviceIndexXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::DEVICEINDEX), PROTOCOL_DEFAULT_INPUTDEVICEINDEX);
 
+		auto mappingAreaIdXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MAPPINGAREA));
+		if (mappingAreaIdXmlElement)
+			mappingAreaIdXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), PROTOCOL_DEFAULT_MAPPINGAREA);
+
 		protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDCHANNELS));
 	}
 
@@ -1945,6 +1949,27 @@ JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment ProtocolBridgingWrapper::G
 bool ProtocolBridgingWrapper::SetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification)
 {
 	return SetMidiAssignmentMapping(GENERICMIDI_PROCESSINGPROTOCOL_ID, remoteObjectId, assignmentMapping, dontSendNotification);
+}
+
+/**
+ * Gets the desired protocol mapping area id.
+ * This method forwards the call to the generic implementation.
+ * @return	The requested mapping area id
+ */
+int ProtocolBridgingWrapper::GetGenericMIDIMappingArea()
+{
+	return GetProtocolMappingArea(GENERICMIDI_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol mapping area id.
+ * This method forwards the call to the generic implementation.
+ * @param	mappingAreaId	The protocol mapping area id to set
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetGenericMIDIMappingArea(int mappingAreaId, bool dontSendNotification)
+{
+	return SetProtocolMappingArea(GENERICMIDI_PROCESSINGPROTOCOL_ID, mappingAreaId, dontSendNotification);
 }
 
 /**

@@ -154,62 +154,64 @@ private:
 	std::unique_ptr<JUCEAppBasics::ZeroconfDiscoverComponent>	m_SecondDS100ZeroconfDiscovery;
 
 	// DiGiCo settings section
-	std::unique_ptr<HeaderWithElmListComponent>	m_DiGiCoBridgingSettings;
-	std::unique_ptr<TextEditor>					m_DiGiCoIpAddressEdit;
-	std::unique_ptr<Label>						m_DiGiCoIpAddressLabel;
-	std::unique_ptr<TextEditor>					m_DiGiCoListeningPortEdit;
-	std::unique_ptr<Label>						m_DiGiCoListeningPortLabel;
-	std::unique_ptr<TextEditor>					m_DiGiCoRemotePortEdit;
-	std::unique_ptr<Label>						m_DiGiCoRemotePortLabel;
+	std::unique_ptr<HeaderWithElmListComponent>					m_DiGiCoBridgingSettings;
+	std::unique_ptr<TextEditor>									m_DiGiCoIpAddressEdit;
+	std::unique_ptr<Label>										m_DiGiCoIpAddressLabel;
+	std::unique_ptr<TextEditor>									m_DiGiCoListeningPortEdit;
+	std::unique_ptr<Label>										m_DiGiCoListeningPortLabel;
+	std::unique_ptr<TextEditor>									m_DiGiCoRemotePortEdit;
+	std::unique_ptr<Label>										m_DiGiCoRemotePortLabel;
 
 	// RTTrPM settings section
-	std::unique_ptr<HeaderWithElmListComponent>				m_RTTrPMBridgingSettings;
-	std::unique_ptr<TextEditor>								m_RTTrPMListeningPortEdit;
-	std::unique_ptr<Label>									m_RTTrPMListeningPortLabel;
-	std::unique_ptr<JUCEAppBasics::SplitButtonComponent>	m_RTTrPMInterpretXYRelativeButton;
-	std::unique_ptr<Label>									m_RTTrPMInterpretXYRelativeLabel;
-	const std::vector<std::string>							m_RTTrPMInterpretXYRelativeModes{ "Absolute", "Relative" };
-	std::map<std::string, uint64>							m_RTTrPMInterpretXYRelativeButtonIds;
-	std::unique_ptr<TextEditor>								m_RTTrPMMappingAreaEdit;
-	std::unique_ptr<Label>									m_RTTrPMMappingAreaLabel;
-	int														m_previousRTTrPMMappingAreaId{ 1 };
+	std::unique_ptr<HeaderWithElmListComponent>					m_RTTrPMBridgingSettings;
+	std::unique_ptr<TextEditor>									m_RTTrPMListeningPortEdit;
+	std::unique_ptr<Label>										m_RTTrPMListeningPortLabel;
+	std::unique_ptr<JUCEAppBasics::SplitButtonComponent>		m_RTTrPMInterpretXYRelativeButton;
+	std::unique_ptr<Label>										m_RTTrPMInterpretXYRelativeLabel;
+	const std::vector<std::string>								m_RTTrPMInterpretXYRelativeModes{ "Absolute", "Relative" };
+	std::map<std::string, uint64>								m_RTTrPMInterpretXYRelativeButtonIds;
+	std::unique_ptr<ComboBox>									m_RTTrPMMappingAreaSelect;
+	std::unique_ptr<Label>										m_RTTrPMMappingAreaLabel;
+	int															m_previousRTTrPMMappingAreaId{ 1 };
 
 	// Generic OSC settings section
-	std::unique_ptr<HeaderWithElmListComponent>	m_GenericOSCBridgingSettings;
-	std::unique_ptr<TextEditor>					m_GenericOSCIpAddressEdit;
-	std::unique_ptr<Label>						m_GenericOSCIpAddressLabel;
-	std::unique_ptr<TextEditor>					m_GenericOSCListeningPortEdit;
-	std::unique_ptr<Label>						m_GenericOSCListeningPortLabel;
-	std::unique_ptr<TextEditor>					m_GenericOSCRemotePortEdit;
-	std::unique_ptr<Label>						m_GenericOSCRemotePortLabel;
+	std::unique_ptr<HeaderWithElmListComponent>					m_GenericOSCBridgingSettings;
+	std::unique_ptr<TextEditor>									m_GenericOSCIpAddressEdit;
+	std::unique_ptr<Label>										m_GenericOSCIpAddressLabel;
+	std::unique_ptr<TextEditor>									m_GenericOSCListeningPortEdit;
+	std::unique_ptr<Label>										m_GenericOSCListeningPortLabel;
+	std::unique_ptr<TextEditor>									m_GenericOSCRemotePortEdit;
+	std::unique_ptr<Label>										m_GenericOSCRemotePortLabel;
 
 	// Generic MIDI settings section
-	std::unique_ptr<HeaderWithElmListComponent>				m_GenericMIDIBridgingSettings;
-	std::unique_ptr<ComboBox>								m_GenericMIDIInputDeviceSelect;
-	std::unique_ptr<Label>									m_GenericMIDIInputDeviceSelectLabel;
-	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>	m_GenericMIDIMatrixInputSelectLearner;
-	std::unique_ptr<Label>									m_GenericMIDIMatrixInputSelectLabel;
-	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>	m_GenericMIDIXValueLearner;
-	std::unique_ptr<Label>									m_GenericMIDIXValueLabel;
-	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>	m_GenericMIDIYValueLearner;
-	std::unique_ptr<Label>									m_GenericMIDIYValueLabel;
-	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>	m_GenericMIDIReverbSendGainLearner;
-	std::unique_ptr<Label>									m_GenericMIDIReverbSendGainLabel;
-	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>	m_GenericMIDISourceSpreadLearner;
-	std::unique_ptr<Label>									m_GenericMIDISourceSpreadLabel;
-	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>	m_GenericMIDIDelayModeLearner;
-	std::unique_ptr<Label>									m_GenericMIDIDelayModeLabel;
+	std::unique_ptr<HeaderWithElmListComponent>					m_GenericMIDIBridgingSettings;
+	std::unique_ptr<ComboBox>									m_GenericMIDIInputDeviceSelect;
+	std::unique_ptr<Label>										m_GenericMIDIInputDeviceSelectLabel;
+	std::unique_ptr<ComboBox>									m_GenericMIDIMappingAreaSelect;
+	std::unique_ptr<Label>										m_GenericMIDIMappingAreaLabel;
+	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDIMatrixInputSelectLearner;
+	std::unique_ptr<Label>										m_GenericMIDIMatrixInputSelectLabel;
+	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDIXValueLearner;
+	std::unique_ptr<Label>										m_GenericMIDIXValueLabel;
+	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDIYValueLearner;
+	std::unique_ptr<Label>										m_GenericMIDIYValueLabel;
+	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDIReverbSendGainLearner;
+	std::unique_ptr<Label>										m_GenericMIDIReverbSendGainLabel;
+	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDISourceSpreadLearner;
+	std::unique_ptr<Label>										m_GenericMIDISourceSpreadLabel;
+	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDIDelayModeLearner;
+	std::unique_ptr<Label>										m_GenericMIDIDelayModeLabel;
 
 	// Yamaha OSC settings section
-	std::unique_ptr<HeaderWithElmListComponent>	m_YamahaOSCBridgingSettings;
-	std::unique_ptr<TextEditor>					m_YamahaOSCIpAddressEdit;
-	std::unique_ptr<Label>						m_YamahaOSCIpAddressLabel;
-	std::unique_ptr<TextEditor>					m_YamahaOSCListeningPortEdit;
-	std::unique_ptr<Label>						m_YamahaOSCListeningPortLabel;
-	std::unique_ptr<TextEditor>					m_YamahaOSCRemotePortEdit;
-	std::unique_ptr<Label>						m_YamahaOSCRemotePortLabel;
-	std::unique_ptr<TextEditor>					m_YamahaOSCMappingAreaEdit;
-	std::unique_ptr<Label>						m_YamahaOSCMappingAreaLabel;
+	std::unique_ptr<HeaderWithElmListComponent>					m_YamahaOSCBridgingSettings;
+	std::unique_ptr<TextEditor>									m_YamahaOSCIpAddressEdit;
+	std::unique_ptr<Label>										m_YamahaOSCIpAddressLabel;
+	std::unique_ptr<TextEditor>									m_YamahaOSCListeningPortEdit;
+	std::unique_ptr<Label>										m_YamahaOSCListeningPortLabel;
+	std::unique_ptr<TextEditor>									m_YamahaOSCRemotePortEdit;
+	std::unique_ptr<Label>										m_YamahaOSCRemotePortLabel;
+	std::unique_ptr<ComboBox>									m_YamahaOSCMappingAreaSelect;
+	std::unique_ptr<Label>										m_YamahaOSCMappingAreaLabel;
 };
 
 /**

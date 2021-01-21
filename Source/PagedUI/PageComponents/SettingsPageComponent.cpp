@@ -1001,7 +1001,7 @@ void SettingsSectionsComponent::processUpdatedConfig()
 	if (m_GenericMIDIBridgingSettings)
 		m_GenericMIDIBridgingSettings->setToggleActiveState(GenericMIDIBridgingActive);
 	if (m_GenericMIDIInputDeviceSelect)
-		m_GenericMIDIInputDeviceSelect->setSelectedItemIndex(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI) + 1, dontSendNotification);
+		m_GenericMIDIInputDeviceSelect->setSelectedId(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI) + 1, dontSendNotification);
 	if (m_GenericMIDIMappingAreaSelect)
 	{
 		m_GenericMIDIMappingAreaSelect->setSelectedId(ctrl->GetBridgingMappingArea(PBT_GenericMIDI), sendNotificationAsync);

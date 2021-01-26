@@ -158,8 +158,10 @@ public:
 	bool SetMuteGenericMIDISourceId(SourceId sourceId, bool mute = true);
 	bool SetMuteGenericMIDISourceIds(const std::vector<SourceId>& sourceIds, bool mute = true);
 
-	int GetGenericMIDIInputDeviceIndex();
-	bool SetGenericMIDIInputDeviceIndex(int MIDIInputDeviceIndex, bool dontSendNotification = false);
+	String GetGenericMIDIInputDeviceIdentifier();
+	bool SetGenericMIDIInputDeviceIdentifier(const String& MIDIInputDeviceIdentifier, bool dontSendNotification = false);
+	String GetGenericMIDIOutputDeviceIdentifier();
+	bool SetGenericMIDIOutputDeviceIdentifier(const String& MIDIInputDeviceIdentifier, bool dontSendNotification = false);
 	JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment GetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId);
 	bool SetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification = false);
 	int GetGenericMIDIMappingArea();
@@ -206,8 +208,10 @@ private:
 	bool SetProtocolRemotePort(ProtocolId protocolId, int remotePort, bool dontSendNotification = false);
 	int GetProtocolMappingArea(ProtocolId protocolId);
 	bool SetProtocolMappingArea(ProtocolId protocolId, int mappingAreaId, bool dontSendNotification = false);
-	int GetProtocolInputDeviceIndex(ProtocolId protocolId);
-	bool SetProtocolInputDeviceIndex(ProtocolId protocolId, int inputDeviceIndex, bool dontSendNotification = false);
+	String GetProtocolInputDeviceIdentifier(ProtocolId protocolId);
+	bool SetProtocolInputDeviceIdentifier(ProtocolId protocolId, const String& inputDeviceIdentifier, bool dontSendNotification = false);
+	String GetProtocolOutputDeviceIdentifier(ProtocolId protocolId);
+	bool SetProtocolOutputDeviceIdentifier(ProtocolId protocolId, const String& outputDeviceIdentifier, bool dontSendNotification = false);
 	JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment GetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId);
 	bool SetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification = false);
 

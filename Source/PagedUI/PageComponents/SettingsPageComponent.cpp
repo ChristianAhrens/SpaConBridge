@@ -548,6 +548,17 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIInputDeviceSelectLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIInputDeviceSelect.get(), true, false);
 
+	m_GenericMIDIOutputDeviceSelect = std::make_unique<ComboBox>();
+	m_GenericMIDIOutputDeviceSelect->setTextWhenNoChoicesAvailable("No MIDI Outputs Enabled");
+	updateAvailableMidiOutputDevices();
+	m_GenericMIDIOutputDeviceSelect->addListener(this);
+	m_GenericMIDIOutputDeviceSelectLabel = std::make_unique<Label>();
+	m_GenericMIDIOutputDeviceSelectLabel->setJustificationType(Justification::centred);
+	m_GenericMIDIOutputDeviceSelectLabel->setText("MIDI Output", dontSendNotification);
+	m_GenericMIDIOutputDeviceSelectLabel->attachToComponent(m_GenericMIDIOutputDeviceSelect.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIOutputDeviceSelectLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIOutputDeviceSelect.get(), true, false);
+
 	m_GenericMIDIMappingAreaSelect = std::make_unique<ComboBox>();
 	m_GenericMIDIMappingAreaSelect->addListener(this);
 	m_GenericMIDIMappingAreaSelect->addItemList({ "1", "2", "3", "4" }, MAI_First);
@@ -878,7 +889,19 @@ void SettingsSectionsComponent::comboBoxChanged(ComboBox* comboBox)
 
 	// Generic MIDI settings section
 	if (m_GenericMIDIInputDeviceSelect && m_GenericMIDIInputDeviceSelect.get() == comboBox)
-		ctrl->SetBridgingInputDeviceIndex(PBT_GenericMIDI, m_GenericMIDIInputDeviceSelect->getSelectedId() - 1);
+	{
+		if (m_midiInputDeviceIdentifiers.count(m_GenericMIDIInputDeviceSelect->getSelectedId()) > 0)
+			ctrl->SetBridgingInputDeviceIdentifier(PBT_GenericMIDI, m_midiInputDeviceIdentifiers.at(m_GenericMIDIInputDeviceSelect->getSelectedId()));
+		else
+			ctrl->SetBridgingInputDeviceIdentifier(PBT_GenericMIDI, String());
+	}
+	if (m_GenericMIDIOutputDeviceSelect && m_GenericMIDIOutputDeviceSelect.get() == comboBox)
+	{
+		if (m_midiOutputDeviceIdentifiers.count(m_GenericMIDIOutputDeviceSelect->getSelectedId()) > 0)
+			ctrl->SetBridgingOutputDeviceIdentifier(PBT_GenericMIDI, m_midiOutputDeviceIdentifiers.at(m_GenericMIDIOutputDeviceSelect->getSelectedId()));
+		else
+			ctrl->SetBridgingOutputDeviceIdentifier(PBT_GenericMIDI, String());
+	}
 	if (m_GenericMIDIMappingAreaSelect && m_GenericMIDIMappingAreaSelect.get() == comboBox)
 		ctrl->SetBridgingMappingArea(PBT_GenericMIDI, m_GenericMIDIMappingAreaSelect->getSelectedId());
 
@@ -923,13 +946,44 @@ void SettingsSectionsComponent::updateAvailableMidiInputDevices()
 	if (!m_GenericMIDIInputDeviceSelect)
 		return;
 
+	m_midiInputDeviceIdentifiers.clear();
+
 	// collect available devices to populate our dropdown
+	auto startItemIndex = 1;
+	auto itemIndex = startItemIndex;
 	auto midiInputs = juce::MidiInput::getAvailableDevices();
 	juce::StringArray midiInputNames;
 	for (auto input : midiInputs)
+	{
 		midiInputNames.add(input.name);
+		m_midiInputDeviceIdentifiers[itemIndex++] = input.identifier;
+	}
 
-	m_GenericMIDIInputDeviceSelect->addItemList(midiInputNames, 1);
+	m_GenericMIDIInputDeviceSelect->addItemList(midiInputNames, startItemIndex);
+}
+
+/**
+ * Private helper method to update midi output device selection dropdown contents.
+ */
+void SettingsSectionsComponent::updateAvailableMidiOutputDevices()
+{
+	if (!m_GenericMIDIOutputDeviceSelect)
+		return;
+
+	m_midiOutputDeviceIdentifiers.clear();
+
+	// collect available devices to populate our dropdown
+	auto startItemIndex = 1;
+	auto itemIndex = startItemIndex;
+	auto midiOutputs = juce::MidiOutput::getAvailableDevices();
+	juce::StringArray midiOutputNames;
+	for (auto output : midiOutputs)
+	{
+		midiOutputNames.add(output.name);
+		m_midiOutputDeviceIdentifiers[itemIndex++] = output.identifier;
+	}
+
+	m_GenericMIDIOutputDeviceSelect->addItemList(midiOutputNames, startItemIndex);
 }
 
 /**
@@ -1013,7 +1067,31 @@ void SettingsSectionsComponent::processUpdatedConfig()
 	if (m_GenericMIDIBridgingSettings)
 		m_GenericMIDIBridgingSettings->setToggleActiveState(GenericMIDIBridgingActive);
 	if (m_GenericMIDIInputDeviceSelect)
-		m_GenericMIDIInputDeviceSelect->setSelectedId(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI) + 1, dontSendNotification);
+	{
+		auto idToSelect = -1;
+		for (auto const& selectIdDevIdentKV : m_midiInputDeviceIdentifiers)
+		{
+			if (selectIdDevIdentKV.second == ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI))
+			{
+				idToSelect = selectIdDevIdentKV.first;
+				break;
+			}
+		}
+		m_GenericMIDIInputDeviceSelect->setSelectedId(idToSelect);
+	}
+	if (m_GenericMIDIOutputDeviceSelect)
+	{
+		auto idToSelect = -1;
+		for (auto const& selectIdDevIdentKV : m_midiOutputDeviceIdentifiers)
+		{
+			if (selectIdDevIdentKV.second == ctrl->GetBridgingOutputDeviceIdentifier(PBT_GenericMIDI))
+			{
+				idToSelect = selectIdDevIdentKV.first;
+				break;
+			}
+		}
+		m_GenericMIDIOutputDeviceSelect->setSelectedId(idToSelect);
+	}
 	if (m_GenericMIDIMappingAreaSelect)
 	{
 		m_GenericMIDIMappingAreaSelect->setSelectedId(ctrl->GetBridgingMappingArea(PBT_GenericMIDI), sendNotificationAsync);
@@ -1023,32 +1101,32 @@ void SettingsSectionsComponent::processUpdatedConfig()
 		m_GenericMIDIMappingAreaLabel->setEnabled((ctrl->GetBridgingMappingArea(PBT_GenericMIDI) != MAI_Invalid));
 	if (m_GenericMIDIMatrixInputSelectLearner)
 	{
-		m_GenericMIDIMatrixInputSelectLearner->setSelectedDeviceIdx(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI));
+		m_GenericMIDIMatrixInputSelectLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
 		m_GenericMIDIMatrixInputSelectLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIMatrixInputSelectLearner->getReferredId())));
 	}
     if (m_GenericMIDIXValueLearner)
 	{
-		m_GenericMIDIXValueLearner->setSelectedDeviceIdx(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI));
+		m_GenericMIDIXValueLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
 		m_GenericMIDIXValueLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIXValueLearner->getReferredId())));
 	}
     if (m_GenericMIDIYValueLearner)
 	{
-		m_GenericMIDIYValueLearner->setSelectedDeviceIdx(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI));
+		m_GenericMIDIYValueLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
 		m_GenericMIDIYValueLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIYValueLearner->getReferredId())));
 	}
     if (m_GenericMIDIReverbSendGainLearner)
 	{
-		m_GenericMIDIReverbSendGainLearner->setSelectedDeviceIdx(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI));
+		m_GenericMIDIReverbSendGainLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
 		m_GenericMIDIReverbSendGainLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIReverbSendGainLearner->getReferredId())));
 	}
     if (m_GenericMIDISourceSpreadLearner)
 	{
-		m_GenericMIDISourceSpreadLearner->setSelectedDeviceIdx(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI));
+		m_GenericMIDISourceSpreadLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
 		m_GenericMIDISourceSpreadLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDISourceSpreadLearner->getReferredId())));
 	}
     if (m_GenericMIDIDelayModeLearner)
 	{
-		m_GenericMIDIDelayModeLearner->setSelectedDeviceIdx(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI));
+		m_GenericMIDIDelayModeLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
 		m_GenericMIDIDelayModeLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIDelayModeLearner->getReferredId())));
 	}
     

@@ -1507,12 +1507,12 @@ bool Controller::SetBridgingMappingArea(ProtocolBridgingType bridgingType, int m
 	}
 }
 
-int Controller::GetBridgingInputDeviceIndex(ProtocolBridgingType bridgingType)
+String Controller::GetBridgingInputDeviceIdentifier(ProtocolBridgingType bridgingType)
 {
 	switch (bridgingType)
 	{
 	case PBT_GenericMIDI:
-		return m_protocolBridge.GetGenericMIDIInputDeviceIndex();
+		return m_protocolBridge.GetGenericMIDIInputDeviceIdentifier();
 	case PBT_YamahaOSC:
 	case PBT_BlacktraxRTTrPM:
 	case PBT_DiGiCo:
@@ -1522,16 +1522,53 @@ int Controller::GetBridgingInputDeviceIndex(ProtocolBridgingType bridgingType)
 	case PBT_DS100:
 	default:
 		jassertfalse;
-		return INVALID_ADDRESS_VALUE;
+		return String();
 	}
 }
 
-bool Controller::SetBridgingInputDeviceIndex(ProtocolBridgingType bridgingType, int inputDeviceIndex, bool dontSendNotification)
+bool Controller::SetBridgingInputDeviceIdentifier(ProtocolBridgingType bridgingType, const String& inputDeviceIdentifier, bool dontSendNotification)
 {
 	switch (bridgingType)
 	{
 	case PBT_GenericMIDI:
-		return m_protocolBridge.SetGenericMIDIInputDeviceIndex(inputDeviceIndex, dontSendNotification);
+		return m_protocolBridge.SetGenericMIDIInputDeviceIdentifier(inputDeviceIdentifier, dontSendNotification);
+	case PBT_BlacktraxRTTrPM:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
+String Controller::GetBridgingOutputDeviceIdentifier(ProtocolBridgingType bridgingType)
+{
+	switch (bridgingType)
+	{
+	case PBT_GenericMIDI:
+		return m_protocolBridge.GetGenericMIDIInputDeviceIdentifier();
+	case PBT_YamahaOSC:
+	case PBT_BlacktraxRTTrPM:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return String();
+	}
+}
+
+bool Controller::SetBridgingOutputDeviceIdentifier(ProtocolBridgingType bridgingType, const String& outputDeviceIdentifier, bool dontSendNotification)
+{
+	switch (bridgingType)
+	{
+	case PBT_GenericMIDI:
+		return m_protocolBridge.SetGenericMIDIOutputDeviceIdentifier(outputDeviceIdentifier, dontSendNotification);
 	case PBT_BlacktraxRTTrPM:
 	case PBT_DiGiCo:
 	case PBT_GenericOSC:

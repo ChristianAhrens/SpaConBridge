@@ -124,8 +124,10 @@ public:
 	bool SetBridgingRemotePort(ProtocolBridgingType bridgingType, int remotePort, bool dontSendNotification = false);
 	int GetBridgingMappingArea(ProtocolBridgingType bridgingType);
 	bool SetBridgingMappingArea(ProtocolBridgingType bridgingType, int mappingAreaId, bool dontSendNotification = false);
-	int GetBridgingInputDeviceIndex(ProtocolBridgingType bridgingType);
-	bool SetBridgingInputDeviceIndex(ProtocolBridgingType bridgingType, int inputDeviceIndex, bool dontSendNotification = false);
+	String GetBridgingInputDeviceIdentifier(ProtocolBridgingType bridgingType);
+	bool SetBridgingInputDeviceIdentifier(ProtocolBridgingType bridgingType, const String& inputDeviceIdentifier, bool dontSendNotification = false);
+	String GetBridgingOutputDeviceIdentifier(ProtocolBridgingType bridgingType);
+	bool SetBridgingOutputDeviceIdentifier(ProtocolBridgingType bridgingType, const String& outputDeviceIdentifier, bool dontSendNotification = false);
 	JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment GetBridgingMidiAssignmentMapping(ProtocolBridgingType bridgingType, RemoteObjectIdentifier remoteObjectId);
 	bool SetBridgingMidiAssignmentMapping(ProtocolBridgingType bridgingType, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification = false);
 

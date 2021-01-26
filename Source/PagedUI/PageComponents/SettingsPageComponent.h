@@ -120,6 +120,7 @@ public:
 
 private:
 	void updateAvailableMidiInputDevices();
+	void updateAvailableMidiOutputDevices();
 
 	//==========================================================================
 	void textEditorUpdated(TextEditor&);
@@ -186,7 +187,11 @@ private:
 	// Generic MIDI settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_GenericMIDIBridgingSettings;
 	std::unique_ptr<ComboBox>									m_GenericMIDIInputDeviceSelect;
+	std::map<int, juce::String>									m_midiOutputDeviceIdentifiers;
 	std::unique_ptr<Label>										m_GenericMIDIInputDeviceSelectLabel;
+	std::unique_ptr<ComboBox>									m_GenericMIDIOutputDeviceSelect;
+	std::map<int, juce::String>									m_midiInputDeviceIdentifiers;
+	std::unique_ptr<Label>										m_GenericMIDIOutputDeviceSelectLabel;
 	std::unique_ptr<ComboBox>									m_GenericMIDIMappingAreaSelect;
 	std::unique_ptr<Label>										m_GenericMIDIMappingAreaLabel;
 	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDIMatrixInputSelectLearner;

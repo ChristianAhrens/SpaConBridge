@@ -953,6 +953,8 @@ void SettingsSectionsComponent::updateAvailableMidiInputDevices()
 	auto itemIndex = startItemIndex;
 	auto midiInputs = juce::MidiInput::getAvailableDevices();
 	juce::StringArray midiInputNames;
+	midiInputNames.add("None");
+	m_midiInputDeviceIdentifiers[itemIndex++] = String();
 	for (auto input : midiInputs)
 	{
 		midiInputNames.add(input.name);
@@ -977,6 +979,8 @@ void SettingsSectionsComponent::updateAvailableMidiOutputDevices()
 	auto itemIndex = startItemIndex;
 	auto midiOutputs = juce::MidiOutput::getAvailableDevices();
 	juce::StringArray midiOutputNames;
+	midiOutputNames.add("None");
+	m_midiOutputDeviceIdentifiers[itemIndex++] = String();
 	for (auto output : midiOutputs)
 	{
 		midiOutputNames.add(output.name);

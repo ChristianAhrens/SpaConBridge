@@ -878,10 +878,10 @@ String ProtocolBridgingWrapper::GetProtocolInputDeviceIdentifier(ProtocolId prot
 		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
 		if (protocolXmlElement)
 		{
-			auto inputDeviceIndexXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::INPUTDEVICE));
-			if (inputDeviceIndexXmlElement)
+			auto inputDeviceIdentifierXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::INPUTDEVICE));
+			if (inputDeviceIdentifierXmlElement)
 			{
-				return inputDeviceIndexXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::DEVICEIDENTIFIER));
+				return inputDeviceIdentifierXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::DEVICEIDENTIFIER));
 			}
 		}
 	}
@@ -906,10 +906,10 @@ bool ProtocolBridgingWrapper::SetProtocolInputDeviceIdentifier(ProtocolId protoc
 		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
 		if (protocolXmlElement)
 		{
-			auto inputDeviceIndexXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::INPUTDEVICE));
-			if (inputDeviceIndexXmlElement)
+			auto inputDeviceIdentifierXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::INPUTDEVICE));
+			if (inputDeviceIdentifierXmlElement)
 			{
-				inputDeviceIndexXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::DEVICEIDENTIFIER), inputDeviceIdentifier);
+				inputDeviceIdentifierXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::DEVICEIDENTIFIER), inputDeviceIdentifier);
 			}
 			else
 				return false;
@@ -945,10 +945,10 @@ String ProtocolBridgingWrapper::GetProtocolOutputDeviceIdentifier(ProtocolId pro
 		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
 		if (protocolXmlElement)
 		{
-			auto outputDeviceIndexXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OUTPUTDEVICE));
-			if (outputDeviceIndexXmlElement)
+			auto outputDeviceIdentifierXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OUTPUTDEVICE));
+			if (outputDeviceIdentifierXmlElement)
 			{
-				return outputDeviceIndexXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::DEVICEIDENTIFIER));
+				return outputDeviceIdentifierXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::DEVICEIDENTIFIER));
 			}
 		}
 	}
@@ -973,10 +973,10 @@ bool ProtocolBridgingWrapper::SetProtocolOutputDeviceIdentifier(ProtocolId proto
 		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
 		if (protocolXmlElement)
 		{
-			auto inputDeviceIndexXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OUTPUTDEVICE));
-			if (inputDeviceIndexXmlElement)
+			auto outputDeviceIdentifierXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OUTPUTDEVICE));
+			if (outputDeviceIdentifierXmlElement)
 			{
-				inputDeviceIndexXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::DEVICEIDENTIFIER), outputDeviceIdentifier);
+				outputDeviceIdentifierXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::DEVICEIDENTIFIER), outputDeviceIdentifier);
 			}
 			else
 				return false;

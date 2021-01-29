@@ -23,7 +23,7 @@
 
 #include <ProcessingEngine/ProcessingEngineNode.h>
 
-#include "../submodules/JUCE-AppBasics/Source/Midi_utils.h"
+#include "../submodules/JUCE-AppBasics/Source/MidiCommandRangeAssignment.h"
 
 #include <JuceHeader.h>
 
@@ -162,8 +162,8 @@ public:
 	bool SetGenericMIDIInputDeviceIdentifier(const String& MIDIInputDeviceIdentifier, bool dontSendNotification = false);
 	String GetGenericMIDIOutputDeviceIdentifier();
 	bool SetGenericMIDIOutputDeviceIdentifier(const String& MIDIInputDeviceIdentifier, bool dontSendNotification = false);
-	JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment GetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId);
-	bool SetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification = false);
+	JUCEAppBasics::MidiCommandRangeAssignment GetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId);
+	bool SetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification = false);
 	int GetGenericMIDIMappingArea();
 	bool SetGenericMIDIMappingArea(int mappingAreaId, bool dontSendNotification = false);
 
@@ -212,8 +212,8 @@ private:
 	bool SetProtocolInputDeviceIdentifier(ProtocolId protocolId, const String& inputDeviceIdentifier, bool dontSendNotification = false);
 	String GetProtocolOutputDeviceIdentifier(ProtocolId protocolId);
 	bool SetProtocolOutputDeviceIdentifier(ProtocolId protocolId, const String& outputDeviceIdentifier, bool dontSendNotification = false);
-	JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment GetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId);
-	bool SetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification = false);
+	JUCEAppBasics::MidiCommandRangeAssignment GetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId);
+	bool SetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification = false);
 
 	//==========================================================================
 	void SetupBridgingNode(const ProtocolBridgingType bridgingProtocolsToActivate = PBT_None);

@@ -572,7 +572,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIMatrixInputSelectLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
 		static_cast<std::int16_t>(ROI_MatrixInput_Select), 
 		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_Trigger | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
-	m_GenericMIDIMatrixInputSelectLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+	m_GenericMIDIMatrixInputSelectLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
 	m_GenericMIDIMatrixInputSelectLabel = std::make_unique<Label>();
 	m_GenericMIDIMatrixInputSelectLabel->setJustificationType(Justification::centredLeft);
 	m_GenericMIDIMatrixInputSelectLabel->setText("Object Select", dontSendNotification);
@@ -583,7 +583,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIXValueLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
 		static_cast<std::int16_t>(ROI_CoordinateMapping_SourcePosition_X),
 		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_ValueRange | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
-	m_GenericMIDIXValueLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+	m_GenericMIDIXValueLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
 	m_GenericMIDIXValueLabel = std::make_unique<Label>();
 	m_GenericMIDIXValueLabel->setJustificationType(Justification::centredLeft);
 	m_GenericMIDIXValueLabel->setText("Relative Pos. X", dontSendNotification);
@@ -594,7 +594,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIYValueLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
 		static_cast<std::int16_t>(ROI_CoordinateMapping_SourcePosition_Y),
 		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_ValueRange | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
-	m_GenericMIDIYValueLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+	m_GenericMIDIYValueLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
 	m_GenericMIDIYValueLabel = std::make_unique<Label>();
 	m_GenericMIDIYValueLabel->setJustificationType(Justification::centredLeft);
 	m_GenericMIDIYValueLabel->setText("Relative Pos. Y", dontSendNotification);
@@ -605,7 +605,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIReverbSendGainLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
 		static_cast<std::int16_t>(ROI_MatrixInput_ReverbSendGain),
 		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_ValueRange | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
-	m_GenericMIDIReverbSendGainLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+	m_GenericMIDIReverbSendGainLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
 	m_GenericMIDIReverbSendGainLabel = std::make_unique<Label>();
 	m_GenericMIDIReverbSendGainLabel->setJustificationType(Justification::centredLeft);
 	m_GenericMIDIReverbSendGainLabel->setText("Reverb Send Gain", dontSendNotification);
@@ -616,7 +616,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDISourceSpreadLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
 		static_cast<std::int16_t>(ROI_Positioning_SourceSpread),
 		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_ValueRange | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
-	m_GenericMIDISourceSpreadLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+	m_GenericMIDISourceSpreadLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
 	m_GenericMIDISourceSpreadLabel = std::make_unique<Label>();
 	m_GenericMIDISourceSpreadLabel->setJustificationType(Justification::centredLeft);
 	m_GenericMIDISourceSpreadLabel->setText("Object Spread", dontSendNotification);
@@ -627,7 +627,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIDelayModeLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
 		static_cast<std::int16_t>(ROI_Positioning_SourceDelayMode),
 		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_ValueRange | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
-	m_GenericMIDIDelayModeLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+	m_GenericMIDIDelayModeLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
 	m_GenericMIDIDelayModeLabel = std::make_unique<Label>();
 	m_GenericMIDIDelayModeLabel->setJustificationType(Justification::centredLeft);
 	m_GenericMIDIDelayModeLabel->setText("Object DelayMode", dontSendNotification);
@@ -1198,7 +1198,7 @@ void SettingsSectionsComponent::handleSecondDS100ServiceSelected(JUCEAppBasics::
  * @param sender	The MidiLearnerComponent that sent the assignment.
  * @param midiAssi	The sent assignment that was chosen by user
  */
-void SettingsSectionsComponent::handleMidiAssiSet(Component* sender, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& midiAssi)
+void SettingsSectionsComponent::handleMidiAssiSet(Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi)
 {
 	auto learnerComponent = dynamic_cast<JUCEAppBasics::MidiLearnerComponent*>(sender);
 	if (learnerComponent)

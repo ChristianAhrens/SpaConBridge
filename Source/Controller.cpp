@@ -1581,7 +1581,7 @@ bool Controller::SetBridgingOutputDeviceIdentifier(ProtocolBridgingType bridging
 	}
 }
 
-JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment Controller::GetBridgingMidiAssignmentMapping(ProtocolBridgingType bridgingType, RemoteObjectIdentifier remoteObjectId)
+JUCEAppBasics::MidiCommandRangeAssignment Controller::GetBridgingMidiAssignmentMapping(ProtocolBridgingType bridgingType, RemoteObjectIdentifier remoteObjectId)
 {
 	switch (bridgingType)
 	{
@@ -1595,11 +1595,11 @@ JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment Controller::GetBridgingMid
 	case PBT_DS100:
 	default:
 		jassertfalse;
-		return JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment();
+		return JUCEAppBasics::MidiCommandRangeAssignment();
 	}
 }
 
-bool Controller::SetBridgingMidiAssignmentMapping(ProtocolBridgingType bridgingType, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification)
+bool Controller::SetBridgingMidiAssignmentMapping(ProtocolBridgingType bridgingType, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification)
 {
 	switch (bridgingType)
 	{

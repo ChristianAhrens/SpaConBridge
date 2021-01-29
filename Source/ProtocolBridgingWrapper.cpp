@@ -1005,9 +1005,9 @@ bool ProtocolBridgingWrapper::SetProtocolOutputDeviceIdentifier(ProtocolId proto
  * @param remoteObjectId	The remote object to get the midi mapping for.
  * @return	The requested midi assignment mapping
  */
-JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment ProtocolBridgingWrapper::GetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId)
+JUCEAppBasics::MidiCommandRangeAssignment ProtocolBridgingWrapper::GetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId)
 {
-    auto midiAssiMap = JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment();
+    auto midiAssiMap = JUCEAppBasics::MidiCommandRangeAssignment();
     
     auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
     if (nodeXmlElement)
@@ -1040,7 +1040,7 @@ JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment ProtocolBridgingWrapper::G
  * @param dontSendNotification	Flag if change notification shall be broadcasted.
  * @return	True on succes, false if failure
  */
-bool ProtocolBridgingWrapper::SetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification)
+bool ProtocolBridgingWrapper::SetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification)
 {
     auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
     if (nodeXmlElement)
@@ -2026,7 +2026,7 @@ bool ProtocolBridgingWrapper::SetGenericMIDIOutputDeviceIdentifier(const String&
  * @param remoteObjectId	The remote object to get the midi mapping for.
  * @return	The requested midi assignment mapping
  */
-JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment ProtocolBridgingWrapper::GetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId)
+JUCEAppBasics::MidiCommandRangeAssignment ProtocolBridgingWrapper::GetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId)
 {
 	return GetMidiAssignmentMapping(GENERICMIDI_PROCESSINGPROTOCOL_ID, remoteObjectId);
 }
@@ -2039,7 +2039,7 @@ JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment ProtocolBridgingWrapper::G
  * @param dontSendNotification	Flag if change notification shall be broadcasted.
  * @return	True on succes, false if failure
  */
-bool ProtocolBridgingWrapper::SetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::Midi_utils::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification)
+bool ProtocolBridgingWrapper::SetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification)
 {
 	return SetMidiAssignmentMapping(GENERICMIDI_PROCESSINGPROTOCOL_ID, remoteObjectId, assignmentMapping, dontSendNotification);
 }

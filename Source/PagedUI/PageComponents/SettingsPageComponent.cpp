@@ -1073,9 +1073,10 @@ void SettingsSectionsComponent::processUpdatedConfig()
 	if (m_GenericMIDIInputDeviceSelect)
 	{
 		auto idToSelect = -1;
+		auto identifierToSelect = ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI);
 		for (auto const& selectIdDevIdentKV : m_midiInputDeviceIdentifiers)
 		{
-			if (selectIdDevIdentKV.second == ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI))
+			if (selectIdDevIdentKV.second == identifierToSelect)
 			{
 				idToSelect = selectIdDevIdentKV.first;
 				break;
@@ -1086,9 +1087,10 @@ void SettingsSectionsComponent::processUpdatedConfig()
 	if (m_GenericMIDIOutputDeviceSelect)
 	{
 		auto idToSelect = -1;
+		auto identifierToSelect = ctrl->GetBridgingOutputDeviceIdentifier(PBT_GenericMIDI);
 		for (auto const& selectIdDevIdentKV : m_midiOutputDeviceIdentifiers)
 		{
-			if (selectIdDevIdentKV.second == ctrl->GetBridgingOutputDeviceIdentifier(PBT_GenericMIDI))
+			if (selectIdDevIdentKV.second == identifierToSelect)
 			{
 				idToSelect = selectIdDevIdentKV.first;
 				break;

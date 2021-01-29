@@ -1549,7 +1549,7 @@ String Controller::GetBridgingOutputDeviceIdentifier(ProtocolBridgingType bridgi
 	switch (bridgingType)
 	{
 	case PBT_GenericMIDI:
-		return m_protocolBridge.GetGenericMIDIInputDeviceIdentifier();
+		return m_protocolBridge.GetGenericMIDIOutputDeviceIdentifier();
 	case PBT_YamahaOSC:
 	case PBT_BlacktraxRTTrPM:
 	case PBT_DiGiCo:

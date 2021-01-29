@@ -767,6 +767,7 @@ void SettingsSectionsComponent::buttonClicked(JUCEAppBasics::SplitButtonComponen
 	if (!ctrl)
 		return;
 
+	// DS100 settings section
 	if (m_SecondDS100ModeButton && m_SecondDS100ModeButton.get() == button)
 	{
 		if (m_SecondDS100ModeButtonIds[m_SecondDS100Modes[0]] == buttonId) // Off
@@ -781,9 +782,9 @@ void SettingsSectionsComponent::buttonClicked(JUCEAppBasics::SplitButtonComponen
 		{
 			ctrl->SetExtensionMode(DCS_Settings, EM_Mirror);
 		}
-
-		processUpdatedConfig();
 	}
+
+	// RTTrPM settings section
 	else if (m_RTTrPMInterpretXYRelativeButton && m_RTTrPMInterpretXYRelativeButton.get() == button)
 	{
 		// If button is set to absolute, set the mapping area id to -1 (meaning that the RTTrPM data will be handled as absolute, not relative to a mapping area)
@@ -796,9 +797,13 @@ void SettingsSectionsComponent::buttonClicked(JUCEAppBasics::SplitButtonComponen
 		{
 			ctrl->SetBridgingMappingArea(PBT_BlacktraxRTTrPM, m_previousRTTrPMMappingAreaId);
 		}
-
-		processUpdatedConfig();
 	}
+
+	// return without config update trigger if the button was unknown
+	else
+		return;
+
+	processUpdatedConfig();
 }
 
 /**
@@ -834,40 +839,46 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 	// DS100 settings section
 	if (m_DS100IntervalEdit && m_DS100IntervalEdit.get() == &editor)
 		ctrl->SetRate(DCS_Settings, m_DS100IntervalEdit->getText().getIntValue());
-	if (m_DS100IpAddressEdit && m_DS100IpAddressEdit.get() == &editor)
+	else if (m_DS100IpAddressEdit && m_DS100IpAddressEdit.get() == &editor)
 		ctrl->SetDS100IpAddress(DCS_Settings, m_DS100IpAddressEdit->getText());
-	if (m_SecondDS100IpAddressEdit && m_SecondDS100IpAddressEdit.get() == &editor)
+	else if (m_SecondDS100IpAddressEdit && m_SecondDS100IpAddressEdit.get() == &editor)
 		ctrl->SetSecondDS100IpAddress(DCS_Settings, m_SecondDS100IpAddressEdit->getText());
 
 	// DiGiCo settings section
-	if (m_DiGiCoIpAddressEdit && m_DiGiCoIpAddressEdit.get() == &editor)
+	else if (m_DiGiCoIpAddressEdit && m_DiGiCoIpAddressEdit.get() == &editor)
 		ctrl->SetBridgingIpAddress(PBT_DiGiCo, m_DiGiCoIpAddressEdit->getText());
-	if (m_DiGiCoListeningPortEdit && m_DiGiCoListeningPortEdit.get() == &editor)
+	else if (m_DiGiCoListeningPortEdit && m_DiGiCoListeningPortEdit.get() == &editor)
 		ctrl->SetBridgingListeningPort(PBT_DiGiCo, m_DiGiCoListeningPortEdit->getText().getIntValue());
-	if (m_DiGiCoRemotePortEdit && m_DiGiCoRemotePortEdit.get() == &editor)
+	else if (m_DiGiCoRemotePortEdit && m_DiGiCoRemotePortEdit.get() == &editor)
 		ctrl->SetBridgingRemotePort(PBT_DiGiCo, m_DiGiCoRemotePortEdit->getText().getIntValue());
 
 	// RTTrPM settings section
-	if (m_RTTrPMListeningPortEdit && m_RTTrPMListeningPortEdit.get() == &editor)
+	else if (m_RTTrPMListeningPortEdit && m_RTTrPMListeningPortEdit.get() == &editor)
 		ctrl->SetBridgingListeningPort(PBT_BlacktraxRTTrPM, m_RTTrPMListeningPortEdit->getText().getIntValue());
 
 	// Generic OSC settings section
-	if (m_GenericOSCIpAddressEdit && m_GenericOSCIpAddressEdit.get() == &editor)
+	else if (m_GenericOSCIpAddressEdit && m_GenericOSCIpAddressEdit.get() == &editor)
 		ctrl->SetBridgingIpAddress(PBT_GenericOSC, m_GenericOSCIpAddressEdit->getText());
-	if (m_GenericOSCListeningPortEdit && m_GenericOSCListeningPortEdit.get() == &editor)
+	else if (m_GenericOSCListeningPortEdit && m_GenericOSCListeningPortEdit.get() == &editor)
 		ctrl->SetBridgingListeningPort(PBT_GenericOSC, m_GenericOSCListeningPortEdit->getText().getIntValue());
-	if (m_GenericOSCRemotePortEdit && m_GenericOSCRemotePortEdit.get() == &editor)
+	else if (m_GenericOSCRemotePortEdit && m_GenericOSCRemotePortEdit.get() == &editor)
 		ctrl->SetBridgingRemotePort(PBT_GenericOSC, m_GenericOSCRemotePortEdit->getText().getIntValue());
 
 	// Yamaha OSC settings section
-	if (m_YamahaOSCIpAddressEdit && m_YamahaOSCIpAddressEdit.get() == &editor)
+	else if (m_YamahaOSCIpAddressEdit && m_YamahaOSCIpAddressEdit.get() == &editor)
 		ctrl->SetBridgingIpAddress(PBT_YamahaOSC, m_YamahaOSCIpAddressEdit->getText());
-	if (m_YamahaOSCListeningPortEdit && m_YamahaOSCListeningPortEdit.get() == &editor)
+	else if (m_YamahaOSCListeningPortEdit && m_YamahaOSCListeningPortEdit.get() == &editor)
 		ctrl->SetBridgingListeningPort(PBT_YamahaOSC, m_YamahaOSCListeningPortEdit->getText().getIntValue());
-	if (m_YamahaOSCRemotePortEdit && m_YamahaOSCRemotePortEdit.get() == &editor)
+	else if (m_YamahaOSCRemotePortEdit && m_YamahaOSCRemotePortEdit.get() == &editor)
 		ctrl->SetBridgingRemotePort(PBT_YamahaOSC, m_YamahaOSCRemotePortEdit->getText().getIntValue());
-	if (m_YamahaOSCListeningPortEdit && m_YamahaOSCListeningPortEdit.get() == &editor)
+	else if (m_YamahaOSCListeningPortEdit && m_YamahaOSCListeningPortEdit.get() == &editor)
 		ctrl->SetBridgingListeningPort(PBT_YamahaOSC, m_YamahaOSCListeningPortEdit->getText().getIntValue());
+
+	// return without config update trigger if the editor was unknown
+	else
+		return;
+
+	processUpdatedConfig();
 }
 
 /**
@@ -888,26 +899,32 @@ void SettingsSectionsComponent::comboBoxChanged(ComboBox* comboBox)
 	}
 
 	// Generic MIDI settings section
-	if (m_GenericMIDIInputDeviceSelect && m_GenericMIDIInputDeviceSelect.get() == comboBox)
+	else if (m_GenericMIDIInputDeviceSelect && m_GenericMIDIInputDeviceSelect.get() == comboBox)
 	{
 		if (m_midiInputDeviceIdentifiers.count(m_GenericMIDIInputDeviceSelect->getSelectedId()) > 0)
 			ctrl->SetBridgingInputDeviceIdentifier(PBT_GenericMIDI, m_midiInputDeviceIdentifiers.at(m_GenericMIDIInputDeviceSelect->getSelectedId()));
 		else
 			ctrl->SetBridgingInputDeviceIdentifier(PBT_GenericMIDI, String());
 	}
-	if (m_GenericMIDIOutputDeviceSelect && m_GenericMIDIOutputDeviceSelect.get() == comboBox)
+	else if (m_GenericMIDIOutputDeviceSelect && m_GenericMIDIOutputDeviceSelect.get() == comboBox)
 	{
 		if (m_midiOutputDeviceIdentifiers.count(m_GenericMIDIOutputDeviceSelect->getSelectedId()) > 0)
 			ctrl->SetBridgingOutputDeviceIdentifier(PBT_GenericMIDI, m_midiOutputDeviceIdentifiers.at(m_GenericMIDIOutputDeviceSelect->getSelectedId()));
 		else
 			ctrl->SetBridgingOutputDeviceIdentifier(PBT_GenericMIDI, String());
 	}
-	if (m_GenericMIDIMappingAreaSelect && m_GenericMIDIMappingAreaSelect.get() == comboBox)
+	else if (m_GenericMIDIMappingAreaSelect && m_GenericMIDIMappingAreaSelect.get() == comboBox)
 		ctrl->SetBridgingMappingArea(PBT_GenericMIDI, m_GenericMIDIMappingAreaSelect->getSelectedId());
 
 	// Yamaha OSC settings section
-	if (m_YamahaOSCMappingAreaSelect && m_YamahaOSCMappingAreaSelect.get() == comboBox)
+	else if (m_YamahaOSCMappingAreaSelect && m_YamahaOSCMappingAreaSelect.get() == comboBox)
 		ctrl->SetBridgingMappingArea(PBT_YamahaOSC, m_YamahaOSCMappingAreaSelect->getSelectedId());
+
+	// return without config update trigger if the comboBox was unknown
+	else
+		return;
+
+	processUpdatedConfig();
 }
 
 /**

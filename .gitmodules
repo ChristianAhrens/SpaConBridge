@@ -1,12 +1,12 @@
 [submodule "submodules/JUCE-AppBasics"]
 	path = submodules/JUCE-AppBasics
 	url = https://github.com/ChristianAhrens/JUCE-AppBasics.git
-[submodule "submodules/RemoteProtocolBridge"]
-	path = submodules/RemoteProtocolBridge
-	url = https://github.com/ChristianAhrens/RemoteProtocolBridge.git
 [submodule "submodules/create-dmg"]
 	path = submodules/create-dmg
 	url = https://github.com/create-dmg/create-dmg
 [submodule "submodules/Servus"]
 	path = submodules/Servus
 	url = https://github.com/ChristianAhrens/Servus
+[submodule "submodules/RemoteProtocolBridgeCore"]
+	path = submodules/RemoteProtocolBridgeCore
+	url = https://github.com/ChristianAhrens/RemoteProtocolBridgeCore

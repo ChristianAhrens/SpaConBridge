@@ -38,7 +38,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../SoundscapeBridgeAppCommon.h"
 #include "../AppConfiguration.h"
-#include "../submodules/RemoteProtocolBridge/Source/RemoteProtocolBridgeCommon.h"
+
+#include <RemoteProtocolBridgeCommon.h>
 
 
 namespace SoundscapeBridgeApp

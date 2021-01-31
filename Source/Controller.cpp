@@ -1395,7 +1395,7 @@ int Controller::GetBridgingListeningPort(ProtocolBridgingType bridgingType)
 	case PBT_DS100:
 	default:
 		jassertfalse;
-		return false;
+		return INVALID_PORT_VALUE;
 	}
 }
 
@@ -1439,7 +1439,7 @@ int Controller::GetBridgingRemotePort(ProtocolBridgingType bridgingType)
 	case PBT_DS100:
 	default:
 		jassertfalse;
-		return false;
+		return INVALID_PORT_VALUE;
 	}
 }
 
@@ -1473,15 +1473,16 @@ int Controller::GetBridgingMappingArea(ProtocolBridgingType bridgingType)
 		return m_protocolBridge.GetRTTrPMMappingArea();
 	case PBT_YamahaOSC:
 		return m_protocolBridge.GetYamahaOSCMappingArea();
+	case PBT_GenericMIDI:
+		return m_protocolBridge.GetGenericMIDIMappingArea();
 	case PBT_DiGiCo:
 	case PBT_GenericOSC:
-	case PBT_GenericMIDI:
 	case PBT_YamahaSQ:
 	case PBT_HUI:
 	case PBT_DS100:
 	default:
 		jassertfalse;
-		return false;
+		return INVALID_ADDRESS_VALUE;
 	}
 }
 
@@ -1493,9 +1494,10 @@ bool Controller::SetBridgingMappingArea(ProtocolBridgingType bridgingType, int m
 		return m_protocolBridge.SetYamahaOSCMappingArea(mappingAreaId, dontSendNotification);
 	case PBT_YamahaOSC:
 		return m_protocolBridge.SetYamahaOSCMappingArea(mappingAreaId, dontSendNotification);
+	case PBT_GenericMIDI:
+		return m_protocolBridge.SetGenericMIDIMappingArea(mappingAreaId, dontSendNotification);
 	case PBT_DiGiCo:
 	case PBT_GenericOSC:
-	case PBT_GenericMIDI:
 	case PBT_YamahaSQ:
 	case PBT_HUI:
 	case PBT_DS100:
@@ -1505,13 +1507,31 @@ bool Controller::SetBridgingMappingArea(ProtocolBridgingType bridgingType, int m
 	}
 }
 
-int Controller::GetBridgingInputDeviceIndex(ProtocolBridgingType bridgingType)
+String Controller::GetBridgingInputDeviceIdentifier(ProtocolBridgingType bridgingType)
 {
 	switch (bridgingType)
 	{
 	case PBT_GenericMIDI:
-		return m_protocolBridge.GetGenericMIDIInputDeviceIndex();
+		return m_protocolBridge.GetGenericMIDIInputDeviceIdentifier();
 	case PBT_YamahaOSC:
+	case PBT_BlacktraxRTTrPM:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return String();
+	}
+}
+
+bool Controller::SetBridgingInputDeviceIdentifier(ProtocolBridgingType bridgingType, const String& inputDeviceIdentifier, bool dontSendNotification)
+{
+	switch (bridgingType)
+	{
+	case PBT_GenericMIDI:
+		return m_protocolBridge.SetGenericMIDIInputDeviceIdentifier(inputDeviceIdentifier, dontSendNotification);
 	case PBT_BlacktraxRTTrPM:
 	case PBT_DiGiCo:
 	case PBT_GenericOSC:
@@ -1524,12 +1544,67 @@ int Controller::GetBridgingInputDeviceIndex(ProtocolBridgingType bridgingType)
 	}
 }
 
-bool Controller::SetBridgingInputDeviceIndex(ProtocolBridgingType bridgingType, int inputDeviceIndex, bool dontSendNotification)
+String Controller::GetBridgingOutputDeviceIdentifier(ProtocolBridgingType bridgingType)
 {
 	switch (bridgingType)
 	{
 	case PBT_GenericMIDI:
-		return m_protocolBridge.SetGenericMIDIInputDeviceIndex(inputDeviceIndex, dontSendNotification);
+		return m_protocolBridge.GetGenericMIDIOutputDeviceIdentifier();
+	case PBT_YamahaOSC:
+	case PBT_BlacktraxRTTrPM:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return String();
+	}
+}
+
+bool Controller::SetBridgingOutputDeviceIdentifier(ProtocolBridgingType bridgingType, const String& outputDeviceIdentifier, bool dontSendNotification)
+{
+	switch (bridgingType)
+	{
+	case PBT_GenericMIDI:
+		return m_protocolBridge.SetGenericMIDIOutputDeviceIdentifier(outputDeviceIdentifier, dontSendNotification);
+	case PBT_BlacktraxRTTrPM:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
+JUCEAppBasics::MidiCommandRangeAssignment Controller::GetBridgingMidiAssignmentMapping(ProtocolBridgingType bridgingType, RemoteObjectIdentifier remoteObjectId)
+{
+	switch (bridgingType)
+	{
+	case PBT_GenericMIDI:
+		return m_protocolBridge.GetGenericMIDIAssignmentMapping(remoteObjectId);
+	case PBT_BlacktraxRTTrPM:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return JUCEAppBasics::MidiCommandRangeAssignment();
+	}
+}
+
+bool Controller::SetBridgingMidiAssignmentMapping(ProtocolBridgingType bridgingType, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification)
+{
+	switch (bridgingType)
+	{
+	case PBT_GenericMIDI:
+		return m_protocolBridge.SetGenericMIDIAssignmentMapping(remoteObjectId, assignmentMapping, dontSendNotification);
 	case PBT_BlacktraxRTTrPM:
 	case PBT_DiGiCo:
 	case PBT_GenericOSC:

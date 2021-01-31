@@ -475,15 +475,15 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMInterpretXYRelativeLabel.get(), false, false);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMInterpretXYRelativeButton.get(), true, false);
 
-	m_RTTrPMMappingAreaEdit = std::make_unique<TextEditor>();
-	m_RTTrPMMappingAreaEdit->addListener(this);
-	m_RTTrPMMappingAreaEdit->setInputFilter(m_mappingEditFilter.get(), false);
+	m_RTTrPMMappingAreaSelect = std::make_unique<ComboBox>();
+	m_RTTrPMMappingAreaSelect->addListener(this);
+	m_RTTrPMMappingAreaSelect->addItemList({ "1", "2", "3", "4" }, MAI_First);
 	m_RTTrPMMappingAreaLabel = std::make_unique<Label>();
 	m_RTTrPMMappingAreaLabel->setJustificationType(Justification::centred);
 	m_RTTrPMMappingAreaLabel->setText("Mapping Area", dontSendNotification);
-	m_RTTrPMMappingAreaLabel->attachToComponent(m_RTTrPMMappingAreaEdit.get(), true);
+	m_RTTrPMMappingAreaLabel->attachToComponent(m_RTTrPMMappingAreaSelect.get(), true);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingAreaLabel.get(), false, false);
-	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingAreaEdit.get(), true, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingAreaSelect.get(), true, false);
 
 	m_RTTrPMBridgingSettings->resized();
 
@@ -548,35 +548,92 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIInputDeviceSelectLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIInputDeviceSelect.get(), true, false);
 
-	m_GenericMIDIHardcodedMatrixInputSelectLabel = std::make_unique<Label>();
-	m_GenericMIDIHardcodedMatrixInputSelectLabel->setJustificationType(Justification::centredLeft);
-	m_GenericMIDIHardcodedMatrixInputSelectLabel->setText("Object Select: Note 48+", dontSendNotification);
-	m_GenericMIDIHardcodedXValueLabel = std::make_unique<Label>();
-	m_GenericMIDIHardcodedXValueLabel->setJustificationType(Justification::centredLeft);
-	m_GenericMIDIHardcodedXValueLabel->setText("Pos. X: Pitchwheel | Ctrl 2", dontSendNotification);
-	m_GenericMIDIHardcodedYValueLabel = std::make_unique<Label>();
-	m_GenericMIDIHardcodedYValueLabel->setJustificationType(Justification::centredLeft);
-	m_GenericMIDIHardcodedYValueLabel->setText("Pos. Y: Ctrl 1", dontSendNotification);
-	m_GenericMIDIHardcodedReverbSendGainLabel = std::make_unique<Label>();
-	m_GenericMIDIHardcodedReverbSendGainLabel->setJustificationType(Justification::centredLeft);
-	m_GenericMIDIHardcodedReverbSendGainLabel->setText("Rvb Snd Gain: Ctrl 5", dontSendNotification);
-	m_GenericMIDIHardcodedSourceSpreadLabel = std::make_unique<Label>();
-	m_GenericMIDIHardcodedSourceSpreadLabel->setJustificationType(Justification::centredLeft);
-	m_GenericMIDIHardcodedSourceSpreadLabel->setText("Object Spread: Ctrl 6", dontSendNotification);
-	m_GenericMIDIHardcodedDelayModeLabel = std::make_unique<Label>();
-	m_GenericMIDIHardcodedDelayModeLabel->setJustificationType(Justification::centredLeft);
-	m_GenericMIDIHardcodedDelayModeLabel->setText("Object DlyMode: Ctrl 7", dontSendNotification);
-	m_GenericMIDIHardcodedWarningLabel = std::make_unique<Label>();
-	m_GenericMIDIHardcodedWarningLabel->setJustificationType(Justification::centred);
-	m_GenericMIDIHardcodedWarningLabel->setText("Currently hardcoded:", dontSendNotification);
-	m_GenericMIDIHardcodedWarningLabel->attachToComponent(m_GenericMIDIHardcodedMatrixInputSelectLabel.get(), true);
-	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedWarningLabel.get(), false, false);
-	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedMatrixInputSelectLabel.get(), true, false);
-	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedXValueLabel.get(), true, false);
-	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedYValueLabel.get(), true, false);
-	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedReverbSendGainLabel.get(), true, false);
-	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedSourceSpreadLabel.get(), true, false);
-	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIHardcodedDelayModeLabel.get(), true, false);
+	m_GenericMIDIOutputDeviceSelect = std::make_unique<ComboBox>();
+	m_GenericMIDIOutputDeviceSelect->setTextWhenNoChoicesAvailable("No MIDI Outputs Enabled");
+	updateAvailableMidiOutputDevices();
+	m_GenericMIDIOutputDeviceSelect->addListener(this);
+	m_GenericMIDIOutputDeviceSelectLabel = std::make_unique<Label>();
+	m_GenericMIDIOutputDeviceSelectLabel->setJustificationType(Justification::centred);
+	m_GenericMIDIOutputDeviceSelectLabel->setText("MIDI Output", dontSendNotification);
+	m_GenericMIDIOutputDeviceSelectLabel->attachToComponent(m_GenericMIDIOutputDeviceSelect.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIOutputDeviceSelectLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIOutputDeviceSelect.get(), true, false);
+
+	m_GenericMIDIMappingAreaSelect = std::make_unique<ComboBox>();
+	m_GenericMIDIMappingAreaSelect->addListener(this);
+	m_GenericMIDIMappingAreaSelect->addItemList({ "1", "2", "3", "4" }, MAI_First);
+	m_GenericMIDIMappingAreaLabel = std::make_unique<Label>();
+	m_GenericMIDIMappingAreaLabel->setJustificationType(Justification::centred);
+	m_GenericMIDIMappingAreaLabel->setText("Mapping Area", dontSendNotification);
+	m_GenericMIDIMappingAreaLabel->attachToComponent(m_GenericMIDIMappingAreaSelect.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMappingAreaLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMappingAreaSelect.get(), true, false);
+
+	m_GenericMIDIMatrixInputSelectLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
+		static_cast<std::int16_t>(ROI_MatrixInput_Select), 
+		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_Trigger | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
+	m_GenericMIDIMatrixInputSelectLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+	m_GenericMIDIMatrixInputSelectLabel = std::make_unique<Label>();
+	m_GenericMIDIMatrixInputSelectLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIMatrixInputSelectLabel->setText("Object Select", dontSendNotification);
+	m_GenericMIDIMatrixInputSelectLabel->attachToComponent(m_GenericMIDIMatrixInputSelectLearner.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMatrixInputSelectLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMatrixInputSelectLearner.get(), true, false);
+
+	m_GenericMIDIXValueLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
+		static_cast<std::int16_t>(ROI_CoordinateMapping_SourcePosition_X),
+		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_ValueRange | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
+	m_GenericMIDIXValueLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+	m_GenericMIDIXValueLabel = std::make_unique<Label>();
+	m_GenericMIDIXValueLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIXValueLabel->setText("Relative Pos. X", dontSendNotification);
+	m_GenericMIDIXValueLabel->attachToComponent(m_GenericMIDIXValueLearner.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIXValueLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIXValueLearner.get(), true, false);
+
+	m_GenericMIDIYValueLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
+		static_cast<std::int16_t>(ROI_CoordinateMapping_SourcePosition_Y),
+		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_ValueRange | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
+	m_GenericMIDIYValueLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+	m_GenericMIDIYValueLabel = std::make_unique<Label>();
+	m_GenericMIDIYValueLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIYValueLabel->setText("Relative Pos. Y", dontSendNotification);
+	m_GenericMIDIYValueLabel->attachToComponent(m_GenericMIDIYValueLearner.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIYValueLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIYValueLearner.get(), true, false);
+
+	m_GenericMIDIReverbSendGainLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
+		static_cast<std::int16_t>(ROI_MatrixInput_ReverbSendGain),
+		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_ValueRange | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
+	m_GenericMIDIReverbSendGainLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+	m_GenericMIDIReverbSendGainLabel = std::make_unique<Label>();
+	m_GenericMIDIReverbSendGainLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIReverbSendGainLabel->setText("Reverb Send Gain", dontSendNotification);
+	m_GenericMIDIReverbSendGainLabel->attachToComponent(m_GenericMIDIReverbSendGainLearner.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIReverbSendGainLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIReverbSendGainLearner.get(), true, false);
+
+	m_GenericMIDISourceSpreadLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
+		static_cast<std::int16_t>(ROI_Positioning_SourceSpread),
+		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_ValueRange | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
+	m_GenericMIDISourceSpreadLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+	m_GenericMIDISourceSpreadLabel = std::make_unique<Label>();
+	m_GenericMIDISourceSpreadLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDISourceSpreadLabel->setText("Object Spread", dontSendNotification);
+	m_GenericMIDISourceSpreadLabel->attachToComponent(m_GenericMIDISourceSpreadLearner.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDISourceSpreadLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDISourceSpreadLearner.get(), true, false);
+
+	m_GenericMIDIDelayModeLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
+		static_cast<std::int16_t>(ROI_Positioning_SourceDelayMode),
+		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_ValueRange | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
+	m_GenericMIDIDelayModeLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+	m_GenericMIDIDelayModeLabel = std::make_unique<Label>();
+	m_GenericMIDIDelayModeLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIDelayModeLabel->setText("Object DelayMode", dontSendNotification);
+	m_GenericMIDIDelayModeLabel->attachToComponent(m_GenericMIDIDelayModeLearner.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIDelayModeLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIDelayModeLearner.get(), true, false);
 
 	m_GenericMIDIBridgingSettings->resized();
 
@@ -618,15 +675,15 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCRemotePortLabel.get(), false, false);
 	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCRemotePortEdit.get(), true, false);
 
-	m_YamahaOSCMappingAreaEdit = std::make_unique<TextEditor>();
-	m_YamahaOSCMappingAreaEdit->addListener(this);
-	m_YamahaOSCMappingAreaEdit->setInputFilter(m_mappingEditFilter.get(), false);
+	m_YamahaOSCMappingAreaSelect = std::make_unique<ComboBox>();
+	m_YamahaOSCMappingAreaSelect->addListener(this);
+	m_YamahaOSCMappingAreaSelect->addItemList({ "1", "2", "3", "4" }, MAI_First);
 	m_YamahaOSCMappingAreaLabel = std::make_unique<Label>();
 	m_YamahaOSCMappingAreaLabel->setJustificationType(Justification::centred);
 	m_YamahaOSCMappingAreaLabel->setText("Mapping Area", dontSendNotification);
-	m_YamahaOSCMappingAreaLabel->attachToComponent(m_YamahaOSCMappingAreaEdit.get(), true);
+	m_YamahaOSCMappingAreaLabel->attachToComponent(m_YamahaOSCMappingAreaSelect.get(), true);
 	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCMappingAreaLabel.get(), false, false);
-	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCMappingAreaEdit.get(), true, false);
+	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCMappingAreaSelect.get(), true, false);
 
 	m_YamahaOSCBridgingSettings->resized();
 }
@@ -657,13 +714,12 @@ void SettingsSectionsComponent::resized()
 	auto margin = 3.0f;
 
 	auto minWidth = 300;
-	auto minHeight = m_DS100Settings->getHeight()
-		+ m_DiGiCoBridgingSettings->getHeight()
-		+ m_RTTrPMBridgingSettings->getHeight()
-		+ m_GenericOSCBridgingSettings->getHeight()
-		+ m_GenericMIDIBridgingSettings->getHeight()
-		+ m_YamahaOSCBridgingSettings->getHeight()
-		+ (3 * 2 * margin);
+	auto minHeight = (m_DS100Settings->getHeight() + (2 * margin))
+		+ (m_DiGiCoBridgingSettings->getHeight() + (2 * margin))
+		+ (m_RTTrPMBridgingSettings->getHeight() + (2 * margin))
+		+ (m_GenericOSCBridgingSettings->getHeight() + (2 * margin))
+		+ (m_GenericMIDIBridgingSettings->getHeight() + (2 * margin))
+		+ (m_YamahaOSCBridgingSettings->getHeight() + (2 * margin));
 
 	auto bounds = getLocalBounds();
 	if (bounds.getWidth() < minWidth || bounds.getHeight() < minHeight)
@@ -711,6 +767,7 @@ void SettingsSectionsComponent::buttonClicked(JUCEAppBasics::SplitButtonComponen
 	if (!ctrl)
 		return;
 
+	// DS100 settings section
 	if (m_SecondDS100ModeButton && m_SecondDS100ModeButton.get() == button)
 	{
 		if (m_SecondDS100ModeButtonIds[m_SecondDS100Modes[0]] == buttonId) // Off
@@ -725,9 +782,9 @@ void SettingsSectionsComponent::buttonClicked(JUCEAppBasics::SplitButtonComponen
 		{
 			ctrl->SetExtensionMode(DCS_Settings, EM_Mirror);
 		}
-
-		processUpdatedConfig();
 	}
+
+	// RTTrPM settings section
 	else if (m_RTTrPMInterpretXYRelativeButton && m_RTTrPMInterpretXYRelativeButton.get() == button)
 	{
 		// If button is set to absolute, set the mapping area id to -1 (meaning that the RTTrPM data will be handled as absolute, not relative to a mapping area)
@@ -740,9 +797,13 @@ void SettingsSectionsComponent::buttonClicked(JUCEAppBasics::SplitButtonComponen
 		{
 			ctrl->SetBridgingMappingArea(PBT_BlacktraxRTTrPM, m_previousRTTrPMMappingAreaId);
 		}
-
-		processUpdatedConfig();
 	}
+
+	// return without config update trigger if the button was unknown
+	else
+		return;
+
+	processUpdatedConfig();
 }
 
 /**
@@ -778,50 +839,46 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 	// DS100 settings section
 	if (m_DS100IntervalEdit && m_DS100IntervalEdit.get() == &editor)
 		ctrl->SetRate(DCS_Settings, m_DS100IntervalEdit->getText().getIntValue());
-	if (m_DS100IpAddressEdit && m_DS100IpAddressEdit.get() == &editor)
+	else if (m_DS100IpAddressEdit && m_DS100IpAddressEdit.get() == &editor)
 		ctrl->SetDS100IpAddress(DCS_Settings, m_DS100IpAddressEdit->getText());
-	if (m_SecondDS100IpAddressEdit && m_SecondDS100IpAddressEdit.get() == &editor)
+	else if (m_SecondDS100IpAddressEdit && m_SecondDS100IpAddressEdit.get() == &editor)
 		ctrl->SetSecondDS100IpAddress(DCS_Settings, m_SecondDS100IpAddressEdit->getText());
 
 	// DiGiCo settings section
-	if (m_DiGiCoIpAddressEdit && m_DiGiCoIpAddressEdit.get() == &editor)
+	else if (m_DiGiCoIpAddressEdit && m_DiGiCoIpAddressEdit.get() == &editor)
 		ctrl->SetBridgingIpAddress(PBT_DiGiCo, m_DiGiCoIpAddressEdit->getText());
-	if (m_DiGiCoListeningPortEdit && m_DiGiCoListeningPortEdit.get() == &editor)
+	else if (m_DiGiCoListeningPortEdit && m_DiGiCoListeningPortEdit.get() == &editor)
 		ctrl->SetBridgingListeningPort(PBT_DiGiCo, m_DiGiCoListeningPortEdit->getText().getIntValue());
-	if (m_DiGiCoRemotePortEdit && m_DiGiCoRemotePortEdit.get() == &editor)
+	else if (m_DiGiCoRemotePortEdit && m_DiGiCoRemotePortEdit.get() == &editor)
 		ctrl->SetBridgingRemotePort(PBT_DiGiCo, m_DiGiCoRemotePortEdit->getText().getIntValue());
 
 	// RTTrPM settings section
-	if (m_RTTrPMListeningPortEdit && m_RTTrPMListeningPortEdit.get() == &editor)
+	else if (m_RTTrPMListeningPortEdit && m_RTTrPMListeningPortEdit.get() == &editor)
 		ctrl->SetBridgingListeningPort(PBT_BlacktraxRTTrPM, m_RTTrPMListeningPortEdit->getText().getIntValue());
-	if (m_RTTrPMMappingAreaEdit && m_RTTrPMMappingAreaEdit.get() == &editor)
-	{
-		ctrl->SetBridgingMappingArea(PBT_BlacktraxRTTrPM, m_RTTrPMMappingAreaEdit->getText().getIntValue());
-		m_previousRTTrPMMappingAreaId = m_RTTrPMMappingAreaEdit->getText().getIntValue();
-	}
 
 	// Generic OSC settings section
-	if (m_GenericOSCIpAddressEdit && m_GenericOSCIpAddressEdit.get() == &editor)
+	else if (m_GenericOSCIpAddressEdit && m_GenericOSCIpAddressEdit.get() == &editor)
 		ctrl->SetBridgingIpAddress(PBT_GenericOSC, m_GenericOSCIpAddressEdit->getText());
-	if (m_GenericOSCListeningPortEdit && m_GenericOSCListeningPortEdit.get() == &editor)
+	else if (m_GenericOSCListeningPortEdit && m_GenericOSCListeningPortEdit.get() == &editor)
 		ctrl->SetBridgingListeningPort(PBT_GenericOSC, m_GenericOSCListeningPortEdit->getText().getIntValue());
-	if (m_GenericOSCRemotePortEdit && m_GenericOSCRemotePortEdit.get() == &editor)
+	else if (m_GenericOSCRemotePortEdit && m_GenericOSCRemotePortEdit.get() == &editor)
 		ctrl->SetBridgingRemotePort(PBT_GenericOSC, m_GenericOSCRemotePortEdit->getText().getIntValue());
 
 	// Yamaha OSC settings section
-	if (m_YamahaOSCIpAddressEdit && m_YamahaOSCIpAddressEdit.get() == &editor)
+	else if (m_YamahaOSCIpAddressEdit && m_YamahaOSCIpAddressEdit.get() == &editor)
 		ctrl->SetBridgingIpAddress(PBT_YamahaOSC, m_YamahaOSCIpAddressEdit->getText());
-	if (m_YamahaOSCListeningPortEdit && m_YamahaOSCListeningPortEdit.get() == &editor)
+	else if (m_YamahaOSCListeningPortEdit && m_YamahaOSCListeningPortEdit.get() == &editor)
 		ctrl->SetBridgingListeningPort(PBT_YamahaOSC, m_YamahaOSCListeningPortEdit->getText().getIntValue());
-	if (m_YamahaOSCRemotePortEdit && m_YamahaOSCRemotePortEdit.get() == &editor)
+	else if (m_YamahaOSCRemotePortEdit && m_YamahaOSCRemotePortEdit.get() == &editor)
 		ctrl->SetBridgingRemotePort(PBT_YamahaOSC, m_YamahaOSCRemotePortEdit->getText().getIntValue());
-	if (m_YamahaOSCListeningPortEdit && m_YamahaOSCListeningPortEdit.get() == &editor)
+	else if (m_YamahaOSCListeningPortEdit && m_YamahaOSCListeningPortEdit.get() == &editor)
 		ctrl->SetBridgingListeningPort(PBT_YamahaOSC, m_YamahaOSCListeningPortEdit->getText().getIntValue());
-	if (m_YamahaOSCMappingAreaEdit && m_YamahaOSCMappingAreaEdit.get() == &editor)
-	{
-		ctrl->SetBridgingMappingArea(PBT_YamahaOSC, m_YamahaOSCMappingAreaEdit->getText().getIntValue());
-		m_previousRTTrPMMappingAreaId = m_YamahaOSCMappingAreaEdit->getText().getIntValue();
-	}
+
+	// return without config update trigger if the editor was unknown
+	else
+		return;
+
+	processUpdatedConfig();
 }
 
 /**
@@ -834,9 +891,40 @@ void SettingsSectionsComponent::comboBoxChanged(ComboBox* comboBox)
 	if (!ctrl)
 		return;
 
+	// RTTrPM settings section
+	if (m_RTTrPMMappingAreaSelect && m_RTTrPMMappingAreaSelect.get() == comboBox)
+	{
+		m_previousRTTrPMMappingAreaId = m_RTTrPMMappingAreaSelect->getSelectedId();
+		ctrl->SetBridgingMappingArea(PBT_BlacktraxRTTrPM, m_previousRTTrPMMappingAreaId);
+	}
+
 	// Generic MIDI settings section
-	if (m_GenericMIDIInputDeviceSelect && m_GenericMIDIInputDeviceSelect.get() == comboBox)
-		ctrl->SetBridgingInputDeviceIndex(PBT_GenericMIDI, m_GenericMIDIInputDeviceSelect->getSelectedId() - 1);
+	else if (m_GenericMIDIInputDeviceSelect && m_GenericMIDIInputDeviceSelect.get() == comboBox)
+	{
+		if (m_midiInputDeviceIdentifiers.count(m_GenericMIDIInputDeviceSelect->getSelectedId()) > 0)
+			ctrl->SetBridgingInputDeviceIdentifier(PBT_GenericMIDI, m_midiInputDeviceIdentifiers.at(m_GenericMIDIInputDeviceSelect->getSelectedId()));
+		else
+			ctrl->SetBridgingInputDeviceIdentifier(PBT_GenericMIDI, String());
+	}
+	else if (m_GenericMIDIOutputDeviceSelect && m_GenericMIDIOutputDeviceSelect.get() == comboBox)
+	{
+		if (m_midiOutputDeviceIdentifiers.count(m_GenericMIDIOutputDeviceSelect->getSelectedId()) > 0)
+			ctrl->SetBridgingOutputDeviceIdentifier(PBT_GenericMIDI, m_midiOutputDeviceIdentifiers.at(m_GenericMIDIOutputDeviceSelect->getSelectedId()));
+		else
+			ctrl->SetBridgingOutputDeviceIdentifier(PBT_GenericMIDI, String());
+	}
+	else if (m_GenericMIDIMappingAreaSelect && m_GenericMIDIMappingAreaSelect.get() == comboBox)
+		ctrl->SetBridgingMappingArea(PBT_GenericMIDI, m_GenericMIDIMappingAreaSelect->getSelectedId());
+
+	// Yamaha OSC settings section
+	else if (m_YamahaOSCMappingAreaSelect && m_YamahaOSCMappingAreaSelect.get() == comboBox)
+		ctrl->SetBridgingMappingArea(PBT_YamahaOSC, m_YamahaOSCMappingAreaSelect->getSelectedId());
+
+	// return without config update trigger if the comboBox was unknown
+	else
+		return;
+
+	processUpdatedConfig();
 }
 
 /**
@@ -875,13 +963,48 @@ void SettingsSectionsComponent::updateAvailableMidiInputDevices()
 	if (!m_GenericMIDIInputDeviceSelect)
 		return;
 
+	m_midiInputDeviceIdentifiers.clear();
+
 	// collect available devices to populate our dropdown
+	auto startItemIndex = 1;
+	auto itemIndex = startItemIndex;
 	auto midiInputs = juce::MidiInput::getAvailableDevices();
 	juce::StringArray midiInputNames;
+	midiInputNames.add("None");
+	m_midiInputDeviceIdentifiers[itemIndex++] = String();
 	for (auto input : midiInputs)
+	{
 		midiInputNames.add(input.name);
+		m_midiInputDeviceIdentifiers[itemIndex++] = input.identifier;
+	}
 
-	m_GenericMIDIInputDeviceSelect->addItemList(midiInputNames, 1);
+	m_GenericMIDIInputDeviceSelect->addItemList(midiInputNames, startItemIndex);
+}
+
+/**
+ * Private helper method to update midi output device selection dropdown contents.
+ */
+void SettingsSectionsComponent::updateAvailableMidiOutputDevices()
+{
+	if (!m_GenericMIDIOutputDeviceSelect)
+		return;
+
+	m_midiOutputDeviceIdentifiers.clear();
+
+	// collect available devices to populate our dropdown
+	auto startItemIndex = 1;
+	auto itemIndex = startItemIndex;
+	auto midiOutputs = juce::MidiOutput::getAvailableDevices();
+	juce::StringArray midiOutputNames;
+	midiOutputNames.add("None");
+	m_midiOutputDeviceIdentifiers[itemIndex++] = String();
+	for (auto output : midiOutputs)
+	{
+		midiOutputNames.add(output.name);
+		m_midiOutputDeviceIdentifiers[itemIndex++] = output.identifier;
+	}
+
+	m_GenericMIDIOutputDeviceSelect->addItemList(midiOutputNames, startItemIndex);
 }
 
 /**
@@ -941,13 +1064,13 @@ void SettingsSectionsComponent::processUpdatedConfig()
 		auto newActiveButtonId = m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[(ctrl->GetBridgingMappingArea(PBT_BlacktraxRTTrPM) == -1) ? 0 : 1]];
 		m_RTTrPMInterpretXYRelativeButton->setButtonDown(newActiveButtonId);
 	}
-	if (m_RTTrPMMappingAreaEdit)
+	if (m_RTTrPMMappingAreaSelect)
 	{
-		m_RTTrPMMappingAreaEdit->setText(String(ctrl->GetBridgingMappingArea(PBT_BlacktraxRTTrPM)), false);
-		m_RTTrPMMappingAreaEdit->setEnabled((ctrl->GetBridgingMappingArea(PBT_BlacktraxRTTrPM) != -1));
+		m_RTTrPMMappingAreaSelect->setSelectedId(ctrl->GetBridgingMappingArea(PBT_BlacktraxRTTrPM), sendNotificationAsync);
+		m_RTTrPMMappingAreaSelect->setEnabled((ctrl->GetBridgingMappingArea(PBT_BlacktraxRTTrPM) != MAI_Invalid));
 	}
 	if (m_RTTrPMMappingAreaLabel)
-		m_RTTrPMMappingAreaLabel->setEnabled((ctrl->GetBridgingMappingArea(PBT_BlacktraxRTTrPM) != -1));
+		m_RTTrPMMappingAreaLabel->setEnabled((ctrl->GetBridgingMappingArea(PBT_BlacktraxRTTrPM) != MAI_Invalid));
 
 	// Generic OSC settings section
 	auto GenericOSCBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_GenericOSC) == PBT_GenericOSC;
@@ -965,8 +1088,71 @@ void SettingsSectionsComponent::processUpdatedConfig()
 	if (m_GenericMIDIBridgingSettings)
 		m_GenericMIDIBridgingSettings->setToggleActiveState(GenericMIDIBridgingActive);
 	if (m_GenericMIDIInputDeviceSelect)
-		m_GenericMIDIInputDeviceSelect->setSelectedId(ctrl->GetBridgingInputDeviceIndex(PBT_GenericMIDI) + 1, dontSendNotification);
-
+	{
+		auto idToSelect = -1;
+		auto identifierToSelect = ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI);
+		for (auto const& selectIdDevIdentKV : m_midiInputDeviceIdentifiers)
+		{
+			if (selectIdDevIdentKV.second == identifierToSelect)
+			{
+				idToSelect = selectIdDevIdentKV.first;
+				break;
+			}
+		}
+		m_GenericMIDIInputDeviceSelect->setSelectedId(idToSelect);
+	}
+	if (m_GenericMIDIOutputDeviceSelect)
+	{
+		auto idToSelect = -1;
+		auto identifierToSelect = ctrl->GetBridgingOutputDeviceIdentifier(PBT_GenericMIDI);
+		for (auto const& selectIdDevIdentKV : m_midiOutputDeviceIdentifiers)
+		{
+			if (selectIdDevIdentKV.second == identifierToSelect)
+			{
+				idToSelect = selectIdDevIdentKV.first;
+				break;
+			}
+		}
+		m_GenericMIDIOutputDeviceSelect->setSelectedId(idToSelect);
+	}
+	if (m_GenericMIDIMappingAreaSelect)
+	{
+		m_GenericMIDIMappingAreaSelect->setSelectedId(ctrl->GetBridgingMappingArea(PBT_GenericMIDI), sendNotificationAsync);
+		m_GenericMIDIMappingAreaSelect->setEnabled((ctrl->GetBridgingMappingArea(PBT_GenericMIDI) != MAI_Invalid));
+	}
+	if (m_GenericMIDIMappingAreaLabel)
+		m_GenericMIDIMappingAreaLabel->setEnabled((ctrl->GetBridgingMappingArea(PBT_GenericMIDI) != MAI_Invalid));
+	if (m_GenericMIDIMatrixInputSelectLearner)
+	{
+		m_GenericMIDIMatrixInputSelectLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
+		m_GenericMIDIMatrixInputSelectLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIMatrixInputSelectLearner->getReferredId())));
+	}
+    if (m_GenericMIDIXValueLearner)
+	{
+		m_GenericMIDIXValueLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
+		m_GenericMIDIXValueLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIXValueLearner->getReferredId())));
+	}
+    if (m_GenericMIDIYValueLearner)
+	{
+		m_GenericMIDIYValueLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
+		m_GenericMIDIYValueLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIYValueLearner->getReferredId())));
+	}
+    if (m_GenericMIDIReverbSendGainLearner)
+	{
+		m_GenericMIDIReverbSendGainLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
+		m_GenericMIDIReverbSendGainLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIReverbSendGainLearner->getReferredId())));
+	}
+    if (m_GenericMIDISourceSpreadLearner)
+	{
+		m_GenericMIDISourceSpreadLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
+		m_GenericMIDISourceSpreadLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDISourceSpreadLearner->getReferredId())));
+	}
+    if (m_GenericMIDIDelayModeLearner)
+	{
+		m_GenericMIDIDelayModeLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
+		m_GenericMIDIDelayModeLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIDelayModeLearner->getReferredId())));
+	}
+    
 	// Yamaha OSC settings section
 	auto YamahaOSCBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_YamahaOSC) == PBT_YamahaOSC;
 	if (m_YamahaOSCBridgingSettings)
@@ -977,13 +1163,13 @@ void SettingsSectionsComponent::processUpdatedConfig()
 		m_YamahaOSCListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_YamahaOSC)), false);
 	if (m_YamahaOSCRemotePortEdit)
 		m_YamahaOSCRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_YamahaOSC)), false);
-	if (m_YamahaOSCMappingAreaEdit)
+	if (m_YamahaOSCMappingAreaSelect)
 	{
-		m_YamahaOSCMappingAreaEdit->setText(String(ctrl->GetBridgingMappingArea(PBT_YamahaOSC)), false);
-		m_YamahaOSCMappingAreaEdit->setEnabled((ctrl->GetBridgingMappingArea(PBT_YamahaOSC) != -1));
+		m_YamahaOSCMappingAreaSelect->setSelectedId(ctrl->GetBridgingMappingArea(PBT_YamahaOSC), sendNotificationAsync);
+		m_YamahaOSCMappingAreaSelect->setEnabled((ctrl->GetBridgingMappingArea(PBT_YamahaOSC) != MAI_Invalid));
 	}
 	if (m_YamahaOSCMappingAreaLabel)
-		m_YamahaOSCMappingAreaLabel->setEnabled((ctrl->GetBridgingMappingArea(PBT_YamahaOSC) != -1));
+		m_YamahaOSCMappingAreaLabel->setEnabled((ctrl->GetBridgingMappingArea(PBT_YamahaOSC) != MAI_Invalid));
 }
 
 /**
@@ -1021,6 +1207,26 @@ void SettingsSectionsComponent::handleSecondDS100ServiceSelected(JUCEAppBasics::
 		Controller* ctrl = Controller::GetInstance();
 		if (ctrl)
 			ctrl->SetSecondDS100IpAddress(DCS_Settings, info->ip);
+	}
+}
+
+/**
+ * Callback method to be registered with MidiLearnerComponent to handle midi assignment selection.
+ * @param sender	The MidiLearnerComponent that sent the assignment.
+ * @param midiAssi	The sent assignment that was chosen by user
+ */
+void SettingsSectionsComponent::handleMidiAssiSet(Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi)
+{
+	auto learnerComponent = dynamic_cast<JUCEAppBasics::MidiLearnerComponent*>(sender);
+	if (learnerComponent)
+	{
+		// No need to set the assignment to learner here, 
+		// as is done in other handle methods with other editors,
+		// since it is already done by learners internally!
+
+		Controller* ctrl = Controller::GetInstance();
+		if (ctrl)
+			ctrl->SetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(learnerComponent->getReferredId()), midiAssi);
 	}
 }
 
@@ -1305,9 +1511,10 @@ void SettingsPageComponent::onApplyClicked()
  */
 void SettingsPageComponent::onLoadConfigClicked()
 {
+    // create the file chooser dialog
 	FileChooser chooser("Select a " + JUCEApplication::getInstance()->getApplicationName() + " config file to load...",
-		File::getSpecialLocation(File::userHomeDirectory), "*.config");
-
+		File::getSpecialLocation(File::userDocumentsDirectory)); // all filepatterns are allowed for loading (currently seems to not work on iOS and not be regarded on macOS at all)
+    // and trigger opening it
 	if (chooser.browseForFileToOpen())
 	{
 		auto file = chooser.getResult();
@@ -1323,12 +1530,23 @@ void SettingsPageComponent::onLoadConfigClicked()
  */
 void SettingsPageComponent::onSaveConfigClicked()
 {
+    // prepare a default filename suggestion based on current date and app name
+    auto initialFolderPathName = File::getSpecialLocation(File::userDocumentsDirectory).getFullPathName();
+    auto initialFileNameSuggestion = Time::getCurrentTime().formatted("%Y-%m-%d_") + JUCEApplication::getInstance()->getApplicationName() + "Config";
+    auto initialFilePathSuggestion = initialFolderPathName + File::getSeparatorString() + initialFileNameSuggestion;
+    auto initialFileSuggestion = File(initialFilePathSuggestion);
+    
+    // create the file chooser dialog
 	FileChooser chooser("Save current " + JUCEApplication::getInstance()->getApplicationName() + " config file as...",
-		File::getSpecialLocation(File::userHomeDirectory), "*.config");
-
+                        initialFileSuggestion, "*.config");
+    // and trigger opening it
 	if (chooser.browseForFileToSave(true))
 	{
 		auto file = chooser.getResult();
+        
+        // enforce the .config extension
+        if (file.getFileExtension() != ".config")
+            file = file.withFileExtension(".config");
 
 		Controller* ctrl = Controller::GetInstance();
 		if (ctrl)

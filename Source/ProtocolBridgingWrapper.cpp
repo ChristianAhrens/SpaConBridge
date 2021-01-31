@@ -413,9 +413,17 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupGenericMIDIBridgingPro
 		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), ProcessingEngineConfig::ProtocolTypeToString(PT_MidiProtocol));
 		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::USESACTIVEOBJ), 0);
 
-		auto inputDeviceIndexXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::INPUTDEVICE));
-		if (inputDeviceIndexXmlElement)
-			inputDeviceIndexXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::DEVICEINDEX), PROTOCOL_DEFAULT_INPUTDEVICEINDEX);
+		auto inputDeviceIdentifierXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::INPUTDEVICE));
+		if (inputDeviceIdentifierXmlElement)
+			inputDeviceIdentifierXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::DEVICEIDENTIFIER), String());
+
+		auto outputDeviceIdentifierXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OUTPUTDEVICE));
+		if (outputDeviceIdentifierXmlElement)
+			outputDeviceIdentifierXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::DEVICEIDENTIFIER), String());
+
+		auto mappingAreaIdXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MAPPINGAREA));
+		if (mappingAreaIdXmlElement)
+			mappingAreaIdXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), PROTOCOL_DEFAULT_MAPPINGAREA);
 
 		protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDCHANNELS));
 	}
@@ -858,11 +866,11 @@ bool ProtocolBridgingWrapper::SetProtocolMappingArea(ProtocolId protocolId, int 
 }
 
 /**
- * Gets the protocol's currently set input device index, if available for the given protocol.
- * @param protocolId The id of the protocol for which to get the currently configured inputdevice index
- * @return	The input device index
+ * Gets the protocol's currently set input device identifier, if available, for the given protocol.
+ * @param protocolId The id of the protocol for which to get the currently configured inputdevice identifier
+ * @return	The input device dentifier
  */
-int ProtocolBridgingWrapper::GetProtocolInputDeviceIndex(ProtocolId protocolId)
+String ProtocolBridgingWrapper::GetProtocolInputDeviceIdentifier(ProtocolId protocolId)
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
@@ -870,27 +878,27 @@ int ProtocolBridgingWrapper::GetProtocolInputDeviceIndex(ProtocolId protocolId)
 		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
 		if (protocolXmlElement)
 		{
-			auto inputDeviceIndexXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::INPUTDEVICE));
-			if (inputDeviceIndexXmlElement)
+			auto inputDeviceIdentifierXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::INPUTDEVICE));
+			if (inputDeviceIdentifierXmlElement)
 			{
-				return inputDeviceIndexXmlElement->getIntAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::DEVICEINDEX));
+				return inputDeviceIdentifierXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::DEVICEIDENTIFIER));
 			}
 		}
 	}
 
-	return INVALID_PORT_VALUE;
+	return String();
 }
 
 /**
- * Sets the given protocol mapping area id.
+ * Sets the given protocol device string identifier.
  * This method inserts the mapping area id into the cached xml element,
  * pushes the updated xml element into processing node and triggers configuration updating.
- * @param protocolId The id of the protocol for which to set the ip address
- * @param inputDeviceIndex	The new device index to set as input device
+ * @param protocolId The id of the protocol for which to set the identifier
+ * @param inputDeviceIdentifier	The new device identifier to set as input device
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  * @return	True on succes, false if failure
  */
-bool ProtocolBridgingWrapper::SetProtocolInputDeviceIndex(ProtocolId protocolId, int inputDeviceIndex, bool dontSendNotification)
+bool ProtocolBridgingWrapper::SetProtocolInputDeviceIdentifier(ProtocolId protocolId, const String& inputDeviceIdentifier, bool dontSendNotification)
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
@@ -898,10 +906,10 @@ bool ProtocolBridgingWrapper::SetProtocolInputDeviceIndex(ProtocolId protocolId,
 		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
 		if (protocolXmlElement)
 		{
-			auto inputDeviceIndexXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::INPUTDEVICE));
-			if (inputDeviceIndexXmlElement)
+			auto inputDeviceIdentifierXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::INPUTDEVICE));
+			if (inputDeviceIdentifierXmlElement)
 			{
-				inputDeviceIndexXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::DEVICEINDEX), inputDeviceIndex);
+				inputDeviceIdentifierXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::DEVICEIDENTIFIER), inputDeviceIdentifier);
 			}
 			else
 				return false;
@@ -922,6 +930,157 @@ bool ProtocolBridgingWrapper::SetProtocolInputDeviceIndex(ProtocolId protocolId,
 	}
 	else
 		return false;
+}
+
+/**
+ * Gets the protocol's currently set output device identifier, if available, for the given protocol.
+ * @param protocolId The id of the protocol for which to get the currently configured outputdevice identifier
+ * @return	The output device identifier
+ */
+String ProtocolBridgingWrapper::GetProtocolOutputDeviceIdentifier(ProtocolId protocolId)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto outputDeviceIdentifierXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OUTPUTDEVICE));
+			if (outputDeviceIdentifierXmlElement)
+			{
+				return outputDeviceIdentifierXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::DEVICEIDENTIFIER));
+			}
+		}
+	}
+
+	return String();
+}
+
+/**
+ * Sets the given protocol device string identifier.
+ * This method inserts the mapping area id into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param protocolId The id of the protocol for which to set the identifier
+ * @param outputDeviceIdentifier	The new device identifier to set as output device
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetProtocolOutputDeviceIdentifier(ProtocolId protocolId, const String& outputDeviceIdentifier, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto outputDeviceIdentifierXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OUTPUTDEVICE));
+			if (outputDeviceIdentifierXmlElement)
+			{
+				outputDeviceIdentifierXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::DEVICEIDENTIFIER), outputDeviceIdentifier);
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+
+		m_processingNode.setStateXml(nodeXmlElement);
+
+		if (!dontSendNotification)
+		{
+			Controller* ctrl = Controller::GetInstance();
+			if (ctrl)
+				ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
+		}
+
+		return true;
+	}
+	else
+		return false;
+}
+
+/**
+ * Gets the currently set midi assignment mapping for a given remote object, if available, for the given protocol.
+ * @param protocolId	The id of the protocol to get the midi assignment for.
+ * @param remoteObjectId	The remote object to get the midi mapping for.
+ * @return	The requested midi assignment mapping
+ */
+JUCEAppBasics::MidiCommandRangeAssignment ProtocolBridgingWrapper::GetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId)
+{
+    auto midiAssiMap = JUCEAppBasics::MidiCommandRangeAssignment();
+    
+    auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+    if (nodeXmlElement)
+    {
+        auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+        if (protocolXmlElement)
+        {
+            auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+            if (assiMapXmlElement)
+            {
+                auto assiMapHexStringTextXmlElement = assiMapXmlElement->getFirstChildElement();
+                if (assiMapHexStringTextXmlElement && assiMapHexStringTextXmlElement->isTextElement())
+                {
+                    midiAssiMap.deserializeFromHexString(assiMapHexStringTextXmlElement->getText());
+                }
+            }
+        }
+    }
+
+	return midiAssiMap;
+}
+
+/**
+ * Sets the desired midi assignment mapping for a given remote object.
+ * This method inserts the mapping area id into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param protocolId	The id of the protocol to set the midi assignment for.
+ * @param remoteObjectId	The remote object to set the midi mapping for.
+ * @param assignmentMapping	The midi mapping to set for the remote object.
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification)
+{
+    auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+    if (nodeXmlElement)
+    {
+        auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+        if (protocolXmlElement)
+        {
+            auto assiMapHexString = assignmentMapping.serializeToHexString();
+            
+            auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+            if (assiMapXmlElement)
+            {
+                auto assiMapHexStringTextXmlElement = assiMapXmlElement->getFirstChildElement();
+                if (assiMapHexStringTextXmlElement && assiMapHexStringTextXmlElement->isTextElement())
+                    assiMapHexStringTextXmlElement->setText(assiMapHexString);
+                else
+                    assiMapXmlElement->addTextElement(assiMapHexString);
+            }
+            else
+            {
+                assiMapXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+                assiMapXmlElement->addTextElement(assiMapHexString);
+            }
+        }
+        else
+            return false;
+
+        m_processingNode.setStateXml(nodeXmlElement);
+
+        if (!dontSendNotification)
+        {
+            Controller* ctrl = Controller::GetInstance();
+            if (ctrl)
+                ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
+        }
+
+        return true;
+    }
+    else
+        return false;
 }
 
 /**
@@ -1749,6 +1908,7 @@ int ProtocolBridgingWrapper::GetGenericOSCListeningPort()
  * Sets the desired protocol listening port.
  * This method forwards the call to the generic implementation.
  * @param	listeningPort	The protocol port to set as listening port
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
  * @return	True on succes, false if failure
  */
 bool ProtocolBridgingWrapper::SetGenericOSCListeningPort(int listeningPort, bool dontSendNotification)
@@ -1770,6 +1930,7 @@ int ProtocolBridgingWrapper::GetGenericOSCRemotePort()
  * Sets the desired protocol remote port.
  * This method forwards the call to the generic implementation.
  * @param	remotePort	The protocol port to set as remote port
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
  * @return	True on succes, false if failure
  */
 bool ProtocolBridgingWrapper::SetGenericOSCRemotePort(int remotePort, bool dontSendNotification)
@@ -1820,20 +1981,88 @@ bool ProtocolBridgingWrapper::SetMuteGenericMIDISourceIds(const std::vector<Sour
  * This method forwards the call to the generic implementation.
  * @return	The requested input device index
  */
-int ProtocolBridgingWrapper::GetGenericMIDIInputDeviceIndex()
+String ProtocolBridgingWrapper::GetGenericMIDIInputDeviceIdentifier()
 {
-	return GetProtocolInputDeviceIndex(GENERICMIDI_PROCESSINGPROTOCOL_ID);
+	return GetProtocolInputDeviceIdentifier(GENERICMIDI_PROCESSINGPROTOCOL_ID);
 }
 
 /**
  * Sets the desired protocol input device index.
  * This method forwards the call to the generic implementation.
  * @param	inputDeviceIndex	The protocol input device index to set
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
  * @return	True on succes, false if failure
  */
-bool ProtocolBridgingWrapper::SetGenericMIDIInputDeviceIndex(int inputDeviceIndex, bool dontSendNotification)
+bool ProtocolBridgingWrapper::SetGenericMIDIInputDeviceIdentifier(const String& inputDeviceIdentifier, bool dontSendNotification)
 {
-	return SetProtocolInputDeviceIndex(GENERICMIDI_PROCESSINGPROTOCOL_ID, inputDeviceIndex, dontSendNotification);
+	return SetProtocolInputDeviceIdentifier(GENERICMIDI_PROCESSINGPROTOCOL_ID, inputDeviceIdentifier, dontSendNotification);
+}
+
+/**
+ * Gets the desired protocol output device index.
+ * This method forwards the call to the generic implementation.
+ * @return	The requested output device index
+ */
+String ProtocolBridgingWrapper::GetGenericMIDIOutputDeviceIdentifier()
+{
+	return GetProtocolOutputDeviceIdentifier(GENERICMIDI_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol output device identifier.
+ * This method forwards the call to the generic implementation.
+ * @param	outputDeviceIdentifier	The protocol output device identifier to set
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetGenericMIDIOutputDeviceIdentifier(const String& outputDeviceIdentifier, bool dontSendNotification)
+{
+	return SetProtocolOutputDeviceIdentifier(GENERICMIDI_PROCESSINGPROTOCOL_ID, outputDeviceIdentifier, dontSendNotification);
+}
+
+/**
+ * Gets the desired midi assignment mapping for a given remote object.
+ * This method forwards the call to the generic implementation.
+ * @param remoteObjectId	The remote object to get the midi mapping for.
+ * @return	The requested midi assignment mapping
+ */
+JUCEAppBasics::MidiCommandRangeAssignment ProtocolBridgingWrapper::GetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId)
+{
+	return GetMidiAssignmentMapping(GENERICMIDI_PROCESSINGPROTOCOL_ID, remoteObjectId);
+}
+
+/**
+ * Sets the desired midi assignment mapping for a given remote object.
+ * This method forwards the call to the generic implementation.
+ * @param remoteObjectId	The remote object to set the midi mapping for.
+ * @param assignmentMapping	The midi mapping to set for the remote object.
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification)
+{
+	return SetMidiAssignmentMapping(GENERICMIDI_PROCESSINGPROTOCOL_ID, remoteObjectId, assignmentMapping, dontSendNotification);
+}
+
+/**
+ * Gets the desired protocol mapping area id.
+ * This method forwards the call to the generic implementation.
+ * @return	The requested mapping area id
+ */
+int ProtocolBridgingWrapper::GetGenericMIDIMappingArea()
+{
+	return GetProtocolMappingArea(GENERICMIDI_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol mapping area id.
+ * This method forwards the call to the generic implementation.
+ * @param	mappingAreaId	The protocol mapping area id to set
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetGenericMIDIMappingArea(int mappingAreaId, bool dontSendNotification)
+{
+	return SetProtocolMappingArea(GENERICMIDI_PROCESSINGPROTOCOL_ID, mappingAreaId, dontSendNotification);
 }
 
 /**

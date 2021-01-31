@@ -64,23 +64,34 @@ static constexpr int DEFAULT_COORD_MAPPING = 1;		//< Default coordinate mapping
 SoundsourceProcessor::SoundsourceProcessor(bool insertToConfig)
 {
 	// Automation parameters.
-	m_xPos = new GestureManagedAudioParameterFloat("x_pos", "x", 0.0f, 1.0f, 0.001f, 0.5f);
-	m_yPos = new GestureManagedAudioParameterFloat("y_pos", "y", 0.0f, 1.0f, 0.001f, 0.5f);
+	// x coord. param
+	auto xR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_CoordinateMapping_SourcePosition_X);
+	m_xPos = new GestureManagedAudioParameterFloat("x_pos", "x", xR.getStart(), xR.getEnd(), 0.001f, 0.5f);
 	m_xPos->addListener(this);
-	m_yPos->addListener(this);
 	addParameter(m_xPos);
+
+	// x coord. param
+	auto yR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_CoordinateMapping_SourcePosition_Y);
+	m_yPos = new GestureManagedAudioParameterFloat("y_pos", "y", yR.getStart(), yR.getEnd(), 0.001f, 0.5f);
+	m_yPos->addListener(this);
 	addParameter(m_yPos);
 
-	m_reverbSendGain = new GestureManagedAudioParameterFloat("ReverbSendGain", "Reverb", -120.0f, 24.0f, 0.1f, 0.0f);
-	m_sourceSpread = new GestureManagedAudioParameterFloat("SourceSpread", "Spread", 0.0f, 1.0f, 0.001f, 0.5f);
+	// EnSpace send gain param
+	auto rsgR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
+	m_reverbSendGain = new GestureManagedAudioParameterFloat("ReverbSendGain", "Reverb", rsgR.getStart(), rsgR.getEnd(), 0.1f, 0.0f);
+	m_reverbSendGain->addListener(this);
+	addParameter(m_reverbSendGain);
+
+	// sound object spread param
+	auto ssR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_Positioning_SourceSpread);
+	m_sourceSpread = new GestureManagedAudioParameterFloat("SourceSpread", "Spread", ssR.getStart(), ssR.getEnd(), 0.01f, 0.5f);
+	m_sourceSpread->addListener(this);
+	addParameter(m_sourceSpread);
+
+	// sound object delay mode param
 	StringArray delayModeChoices("Off", "Tight", "Full");
 	m_delayMode = new GestureManagedAudioParameterChoice("DelayMode", "Delay", delayModeChoices, 1);
-
-	m_reverbSendGain->addListener(this);
-	m_sourceSpread->addListener(this);
 	m_delayMode->addListener(this);
-	addParameter(m_reverbSendGain);
-	addParameter(m_sourceSpread);
 	addParameter(m_delayMode);
 
 	// Plugin's display name is empty per default.

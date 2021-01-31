@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="MFvkL5" name="SoundscapeBridgeApp" projectType="guiapp" version="0.2.0"
+<JUCERPROJECT id="MFvkL5" name="SoundscapeBridgeApp" projectType="guiapp" version="0.2.1"
               bundleIdentifier="com.ChristianAhrens.SoundscapeBridgeApp" companyName="Christian Ahrens"
               companyEmail="christianahrens@me.com" displaySplashScreen="0"
               reportAppUsage="0" companyCopyright="2021" jucerFormatVersion="1"

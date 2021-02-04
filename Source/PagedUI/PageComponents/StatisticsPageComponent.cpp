@@ -310,7 +310,7 @@ StatisticsLog::StatisticsLog()
 	m_table->getHeader().addColumn("Remote Object", SLC_ObjectName, 120, 120, -1, tableHeaderFlags);
 	m_table->getHeader().addColumn("Ch.", SLC_SourceId, 35, 35, -1, tableHeaderFlags);
 	m_table->getHeader().addColumn("Value", SLC_Value, 70, 70, -1, tableHeaderFlags);
-	m_table->getHeader().addColumn("Type", SLC_LogSourceName, 60, 60, -1, tableHeaderFlags);
+	m_table->getHeader().addColumn("Origin", SLC_LogSourceName, 60, 60, -1, tableHeaderFlags);
 
 	startTimer(PC_HOR_DEFAULTSTEPPING);
 }

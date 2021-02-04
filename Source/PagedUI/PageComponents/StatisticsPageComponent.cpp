@@ -222,7 +222,6 @@ void StatisticsPlot::ResetStatisticsPlot()
 void StatisticsPlot::timerCallback()
 {
 	// accumulate all protocol msgs as well as handle individual protocol msg counts
-	int msgCount = 0;
 	auto maxCurrentValueOfProtocols = static_cast<float>(PC_VERT_RANGE);
 	for (auto const& msgCountKV : m_currentMsgPerProtocol)
 	{
@@ -238,8 +237,6 @@ void StatisticsPlot::timerCallback()
 		std::vector<float> shiftedVector(m_plotData[msgCountKV.first].begin() + 1, m_plotData[msgCountKV.first].end());
 		m_plotData[msgCountKV.first].swap(shiftedVector);
 		m_plotData[msgCountKV.first].push_back(float(msgCountKV.second));
-
-		msgCount += msgCountKV.second;
 
 		m_currentMsgPerProtocol[msgCountKV.first] = 0;
 

@@ -2,7 +2,10 @@
 
 ![Showreel.008.png](../Showreel/Showreel.009.png "DiGiCo OSC bridging settings")
 
-### Supported OSC messages for bridging that are also handled in app UI
+_This bridging protocol is the same as [Generic OSC](GenericOSC.md) and is only available separately to allow using both a DiGiCo SD series console and other OSC input at the same time, both using d&b [DS100 OSC protocol specification](https://www.dbaudio.com/assets/products/downloads/manuals-documentation/electronics/dbaudio-osc-protocol-ds100-1.3.0-en.pdf)._
+
+
+### Supported OSC messages for bridging that are also visible in app UI
 
 | OSC input from SD series console | Internal remote object | |
 | -- | -- | -- |

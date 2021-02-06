@@ -2,7 +2,8 @@
 
 ![Showreel.009.png](../Showreel/Showreel.010.png "Blacktrax RTTrPM Bridging Settings")
 
-### Supported Soundscape parameters for protocol bridging
+
+### Implemented Soundscape remote objects for protocol bridging
 
 | RTTrPM packet module | Internal remote object | |
 | -- | -- | -- |

@@ -1,10 +1,11 @@
 ## Yamaha OSC bridging settings
 
-Yamaha OSC bridging support is purely experimental - the commands as described below should be sent by a Plugin available in Rivage series consoles - this has yet to be verified.
+**Yamaha OSC bridging support is purely experimental - if the commands as described below can actually be used in Rivage series consoles has yet to be verified/tested. If you are interested in this functionality and have the means to try it out, feedback is welcome!**
 
 ![Showreel.013.png](../Showreel/Showreel.013.png "Yamaha OSC bridging settings")
 
-### Supported OSC messages
+
+### Implemented OSC messages
 
 | OSC input from Rivage series console | Internal remote object | |
 | -- | -- | -- |

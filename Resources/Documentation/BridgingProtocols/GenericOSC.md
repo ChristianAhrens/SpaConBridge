@@ -1,6 +1,9 @@
-## Generic OSC bridging settings
+## Generic d&b OSC bridging settings
 
 ![Showreel.010.png](../Showreel/Showreel.011.png "Generic OSC bridging settings")
+
+_This bridging protocol implementation is also used for communication with DS100 and follows d&b [DS100 OSC protocol specification](https://www.dbaudio.com/assets/products/downloads/manuals-documentation/electronics/dbaudio-osc-protocol-ds100-1.3.0-en.pdf). In addition to this, two OSC comands specific to SoundscapeBridgeApp are implemented ("/RemoteProtocolBridge/SoundObjectSelect", "/RemoteProtocolBridge/UIElementIndexSelect")._
+
 
 ### Supported OSC messages handled in app UI
 
@@ -10,11 +13,12 @@
 | _/dbaudio1/matrixinput/reverbsendgain_ | Matrix Input ReverbSendGain          |  |
 | _/dbaudio1/positioning/source_spread_ | Sound Object Spread                  |  |
 | _/dbaudio1/positioning/source_delaymode_ | Sound Object Delay Mode              |  |
-| _/dbaudio1/matrixinput/select_ | Matrix Input Select                    | _Used to externally (de-)select a sound object_ |
 | _/RemoteProtocolBridge/SoundObjectSelect_ | SoundscapeBridgeApp Sound Object Select | _Used to externally (de-)select a sound object_ |
 | _/RemoteProtocolBridge/UIElementIndexSelect_ | SoundscapeBridgeApp UI Element Index Select | _Used to externally switch between tabs_ |
 
-### Supported OSC messages for protocol bridging
+### Implemented Soundscape remote objects for protocol bridging *
+
+&ast; String remote objects have not been tested at all. All others should work ok, but extensive testing is still pending.
 
 | External OSC input | Internal remote object | |
 | -- | -- | -- |
@@ -22,7 +26,6 @@
 | _/dbaudio1/error/gnrlerr_ | General Error                        |  |
 | _/dbaudio1/status/errortext_ | Error Text                           |  |
 | _/dbaudio1/status/statustext_ | Status Text                          |  |
-| _/dbaudio1/matrixinput/select_ | Matrix Input Select                    |  |
 | _/dbaudio1/matrixinput/mute_ | Matrix Input Mute                    |  |
 | _/dbaudio1/matrixinput/gain_ | Matrix Input Gain                    |  |
 | _/dbaudio1/matrixinput/delay_ | Matrix Input Delay                   |  |

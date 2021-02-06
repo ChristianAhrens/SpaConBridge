@@ -4,6 +4,10 @@
 
 _This bridging protocol implementation is also used for communication with DS100 and follows d&b [DS100 OSC protocol specification](https://www.dbaudio.com/assets/products/downloads/manuals-documentation/electronics/dbaudio-osc-protocol-ds100-1.3.0-en.pdf). In addition to this, two OSC comands specific to SoundscapeBridgeApp are implemented ("/RemoteProtocolBridge/SoundObjectSelect", "/RemoteProtocolBridge/UIElementIndexSelect")._
 
+_Minimal video tutorial for example setup with OSC input from OSControl software:_
+
+[![Example setup with OSC input from OSControl software](https://img.youtube.com/vi/burVq2k0ub8/0.jpg)](https://www.youtube.com/watch?v=burVq2k0ub8)
+
 
 ### Supported OSC messages handled in app UI
 

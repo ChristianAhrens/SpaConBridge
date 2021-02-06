@@ -12,6 +12,10 @@ This can be activated clicking on the learner trigger buttons and brings up a po
 
 As soon as the desired MIDI mapping is learned, it can be selected from the listing and in consequence is assigned to the remote object. MIDI mappings currently cannot be cleared but only new ones selected as replacement. Deactivating the Generic MIDI bridging protocol and reactivating can be used as workaround, since this clears all learned assignments.
 
+_Minimal video tutorial for example setup with Allen&Heath Qu-16 Mixing Console as TCP/IP MIDI input/output (using Allen&Heath Midi Control utility https://www.allen-heath.com/midi-control/):_
+
+[![Example setup with Qu-16 as MIDI device](https://img.youtube.com/vi/rPLoEjHT6SU/0.jpg)](https://www.youtube.com/watch?v=rPLoEjHT6SU)
+
 
 ### Supported MIDI values/commands
 

@@ -2,6 +2,8 @@
 
 ![Showreel.009.png](../Showreel/Showreel.010.png "Blacktrax RTTrPM Bridging Settings")
 
+[![Example setup with Blacktrax simulation software](https://img.youtube.com/vi/uIS1dVCuTkE/0.jpg)](https://www.youtube.com/watch?v=uIS1dVCuTkE)
+
 
 ### Implemented Soundscape remote objects for protocol bridging
 

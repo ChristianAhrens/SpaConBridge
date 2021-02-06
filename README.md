@@ -23,6 +23,8 @@ __Note:__ Needs to be implemented...
 __Note:__ Suspicion: Underlying UI framework issue is the cause for this
 * MIDI device listing is not updated during runtime  
 __Note:__ In consequence, devices being plugged in / coming online while app is running cannot be used unless app is restarted
+* Removal of multiselection of Sound Objects in table is not possible  
+__Note:__ Needs to be implemented...
 
 
 <a name="toc" />
@@ -79,15 +81,24 @@ __Note:__ In consequence, devices being plugged in / coming online while app is 
 
 ![Showreel.002.png](Resources/Documentation/Showreel/Showreel.002.png "Sound Object Table Overview")
 
+Every row in the table corresponds to an active Sound Object, meaning that it is shown on UI and its values can be received from DS100. This does not affect the pure protocol bridging in underlying module. E.g. in case an external OSC input sends new positioning values for a channel that is not present in the table, the values will still be bridged to DS100. This needs to be kept in mind if muting the input data from a protocol for a Sound Object is desired!
+The table allows multiselection and editing of receive, send and mapping area selection for multiple Sound Objects at a time.
 
 <a name="soundobjectmuting" />
 
 ![Showreel.003.png](Resources/Documentation/Showreel/Showreel.003.png "Sound Object Table Bridging Mutes")
 
+For every active bridging protocol, a sub column with mute buttons is presented in 'Bridging' column. This allows muting individual data input related to a Sound Object coming in from bridging protocols.
+Table multiselection allows editing of mute state for multiple Sound Objects and bridging protocols at a time.
 
 <a name="soundobjectparameterediting" />
 
 ![Showreel.004.png](Resources/Documentation/Showreel/Showreel.004.png "Sound Object Table Selection")
+
+Following the selection in Sound Object table, the corresponding Soundscape parameters are shown in an editing area.
+The UI layout is designed to adapt to the available screen real estate of the device SoundscapeBridgeApp is used on. Depending on the screen geometry a vertical or horizontal layout of table and parameter editing area is used. On small screens, legend annotation and control value displays are hidden. (useful for Tablet landscape vs. portrait rotation, small Smartphone screens, embedded device touchscreens, ...)
+
+The selection in Sound Object table and the currently active tab can be externally controlled by bridging protocols that support the commands 'SoundscapeBridgeApp Sound Object Select' and 'SoundscapeBridgeApp UI Element Index Select'.
 
 
 <a name="twodimensionalpositionslider" />
@@ -96,12 +107,18 @@ __Note:__ In consequence, devices being plugged in / coming online while app is 
 
 ![Showreel.005.png](Resources/Documentation/Showreel/Showreel.005.png "Multislider")
 
+All Sound Objects assigned to the selected DS100 mapping area are shown simultaneously. The dropdown on the bottom can be used to switch the selection to one of the four available mapping areas.
+The selection / multiselection in Sound Object table is followed here and reflected in Sound Object circle sizing - selected objects are shown enlarged.
+
 
 <a name="protocolbridgingtrafficloggingandplotting" />
 
 ### Statistics
 
 ![Showreel.006.png](Resources/Documentation/Showreel/Showreel.006.png "Protocol Bridging Statistics")
+
+Statistics page shows a graphical representation for current bridging protocol load (messages per second) for every active protocol and a tabular log view of the last 200 received messages. The graphical representation shown describes the raw incoming data rate only and contains no information on actual bridging.
+Both plot and log are refreshed at a small rate to keep the performance impact on the host system resources low.
 
 
 <a name="appsettings" />
@@ -112,6 +129,9 @@ __Note:__ In consequence, devices being plugged in / coming online while app is 
 
 <a name="appsettingsprotocols" />
 
+Settings page is structured in protocol sections.
+DS100 OSC communication protocol is always active. The IP address can be manually configured or, if the build of SoundscapeBridgeApp for the host system supports this, zeroconf discovery button can be used to select on of the discovered devices. OSC UDP communication ports are hardcoded to match the ones used by DS100.
+
 For details on the settings for the implemented protocols, see the individual documentation
   * [d&b DS100 signal bridge communication](Resources/Documentation/BridgingProtocols/DS100.md)
   * [DiGiCo SD series mixing console communication](Resources/Documentation/BridgingProtocols/DiGiCoOSC.md)
@@ -120,7 +140,10 @@ For details on the settings for the implemented protocols, see the individual do
   * [Generic MIDI communication](Resources/Documentation/BridgingProtocols/GenericMIDI.md)
   * [Yamaha OSC communication *](Resources/Documentation/BridgingProtocols/YamahaOSC.md)
   
-  &ast; Implemented with simulated devices only, entirely untested with real ones.
+  &ast; Implemented using simulation only, entirely untested with real ones.
+
+The bottom bar of settings page contains buttons to save and load entire SoundscapeBridgeApp configurations, as well as a button to show the raw current configuration in a text editor overlay. The latter is mainly useful for debugging purposes.
+Depending on the available horizontal UI resolution, buttons are hidden. 'Show raw config' disappears first, since it is least relevant for use. On host devices as smartphones, rotating from portrait to landscape mode can help to make the buttons visible, in case they are hidden in portrait mode.
 
 ![Showreel.014.png](Resources/Documentation/Showreel/Showreel.014.png "Light LookAndFeel")
 

@@ -1491,7 +1491,7 @@ bool Controller::SetBridgingMappingArea(ProtocolBridgingType bridgingType, int m
 	switch (bridgingType)
 	{
 	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.SetYamahaOSCMappingArea(mappingAreaId, dontSendNotification);
+		return m_protocolBridge.SetRTTrPMMappingArea(mappingAreaId, dontSendNotification);
 	case PBT_YamahaOSC:
 		return m_protocolBridge.SetYamahaOSCMappingArea(mappingAreaId, dontSendNotification);
 	case PBT_GenericMIDI:

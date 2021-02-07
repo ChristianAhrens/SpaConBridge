@@ -890,6 +890,10 @@ void SettingsSectionsComponent::comboBoxChanged(ComboBox* comboBox)
 	Controller* ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return;
+    
+    // if the combobox that was changed is disabled, don't handle its change
+    if (comboBox && !comboBox->isEnabled())
+        return;
 
 	// RTTrPM settings section
 	if (m_RTTrPMMappingAreaSelect && m_RTTrPMMappingAreaSelect.get() == comboBox)
@@ -1059,18 +1063,19 @@ void SettingsSectionsComponent::processUpdatedConfig()
 		m_RTTrPMBridgingSettings->setToggleActiveState(RTTrPMBridgingActive);
 	if (m_RTTrPMListeningPortEdit)
 		m_RTTrPMListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_BlacktraxRTTrPM)), false);
+    auto RTTrPMMappingAreaId = ctrl->GetBridgingMappingArea(PBT_BlacktraxRTTrPM);
 	if (m_RTTrPMInterpretXYRelativeButton)
 	{
-		auto newActiveButtonId = m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[(ctrl->GetBridgingMappingArea(PBT_BlacktraxRTTrPM) == -1) ? 0 : 1]];
+		auto newActiveButtonId = m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[(RTTrPMMappingAreaId == -1) ? 0 : 1]];
 		m_RTTrPMInterpretXYRelativeButton->setButtonDown(newActiveButtonId);
 	}
 	if (m_RTTrPMMappingAreaSelect)
 	{
-		m_RTTrPMMappingAreaSelect->setSelectedId(ctrl->GetBridgingMappingArea(PBT_BlacktraxRTTrPM), sendNotificationAsync);
-		m_RTTrPMMappingAreaSelect->setEnabled((ctrl->GetBridgingMappingArea(PBT_BlacktraxRTTrPM) != MAI_Invalid));
+		m_RTTrPMMappingAreaSelect->setSelectedId(RTTrPMMappingAreaId, sendNotificationAsync);
+		m_RTTrPMMappingAreaSelect->setEnabled((RTTrPMMappingAreaId != MAI_Invalid));
 	}
 	if (m_RTTrPMMappingAreaLabel)
-		m_RTTrPMMappingAreaLabel->setEnabled((ctrl->GetBridgingMappingArea(PBT_BlacktraxRTTrPM) != MAI_Invalid));
+		m_RTTrPMMappingAreaLabel->setEnabled((RTTrPMMappingAreaId != MAI_Invalid));
 
 	// Generic OSC settings section
 	auto GenericOSCBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_GenericOSC) == PBT_GenericOSC;

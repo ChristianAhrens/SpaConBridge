@@ -17,6 +17,11 @@ _Minimal video tutorial for example setup with Allen&Heath Qu-16 Mixing Console 
 [![Example setup with Qu-16 as MIDI device](https://img.youtube.com/vi/rPLoEjHT6SU/0.jpg)](https://www.youtube.com/watch?v=rPLoEjHT6SU)
 
 
+_Minimal video tutorial for example setup with AKAI MPKmini2 as MIDI input:_
+
+[![Example setup with MPKmini2 as MIDI device](https://img.youtube.com/vi/pixnpqa3V3M/0.jpg)](https://www.youtube.com/watch?v=pixnpqa3V3M)
+
+
 ### Supported MIDI values/commands
 
 | Internal remote object | Supported MIDI mapping type | |

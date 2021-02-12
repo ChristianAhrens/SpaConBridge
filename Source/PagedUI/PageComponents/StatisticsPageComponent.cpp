@@ -353,7 +353,7 @@ void StatisticsLog::timerCallback()
  */
 void StatisticsLog::AddMessageData(StatisticsLogSource logSourceType, RemoteObjectIdentifier Id, const RemoteObjectMessageData& msgData)
 {
-	if (!m_showDS100Traffic && (logSourceType == SLS_DS100 || logSourceType == SLS_DS100_ext || logSourceType == SLS_DS100_mrr))
+	if (!m_showDS100Traffic && (logSourceType == SLS_DS100 || logSourceType == SLS_DS100_2))
 		return;
 
 	String valueString;
@@ -543,10 +543,8 @@ String StatisticsLog::GetLogSourceName(StatisticsLogSource logSourceType)
 		return GetProtocolBridgingShortName(PBT_HUI);
 	case SLS_DS100:
 		return GetProtocolBridgingShortName(PBT_DS100);
-	case SLS_DS100_ext:
-		return GetProtocolBridgingShortName(PBT_DS100) + "(ext.)";
-	case SLS_DS100_mrr:
-		return GetProtocolBridgingShortName(PBT_DS100) + "(mirror)";
+	case SLS_DS100_2:
+		return GetProtocolBridgingShortName(PBT_DS100) + "(2nd)";
 	default:
 		return GetProtocolBridgingShortName(PBT_None);
 	}
@@ -577,8 +575,7 @@ const Colour StatisticsLog::GetLogSourceColour(StatisticsLogSource logSourceType
 	case SLS_HUI:
 		return GetProtocolBridgingColour(PBT_HUI);
 	case SLS_DS100:
-	case SLS_DS100_ext:
-	case SLS_DS100_mrr:
+	case SLS_DS100_2:
 		return GetProtocolBridgingColour(PBT_DS100);
 	default:
 		return GetProtocolBridgingColour(PBT_None);
@@ -716,7 +713,7 @@ void StatisticsPageComponent::HandleMessageData(NodeId nodeId, ProtocolId sender
 		break;
 	case DS100_2_PROCESSINGPROTOCOL_ID:
 		bridgingProtocol = PBT_DS100;
-		logSource = StatisticsLog::StatisticsLogSource::SLS_DS100_ext;
+		logSource = StatisticsLog::StatisticsLogSource::SLS_DS100_2;
 		break;
 	case GENERICMIDI_PROCESSINGPROTOCOL_ID:
 		bridgingProtocol = PBT_GenericMIDI;

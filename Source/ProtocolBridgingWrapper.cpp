@@ -1249,14 +1249,7 @@ bool ProtocolBridgingWrapper::UpdateActiveDS100SourceIds()
 	if (!ctrl)
 		return false;
 
-	auto extensionMode = EM_Off;
-	auto modeName = objectHandlingXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE));
-	if (modeName == ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Forward_only_valueChanges))
-		extensionMode = EM_Off;
-	else if (modeName == ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Mux_nA_to_mB_withValFilter))
-		extensionMode = EM_Extend;
-	else if (modeName == ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Mirror_dualA_withValFilter))
-		extensionMode = EM_Mirror;
+	auto extensionMode = ctrl->GetExtensionMode();
 
 	// Get currently active objects from controller and split them 
 	// into those relevant for first and second DS100

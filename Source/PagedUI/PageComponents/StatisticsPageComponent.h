@@ -100,8 +100,7 @@ public:
 		SLS_YamahaOSC,
 		SLS_HUI,
 		SLS_DS100,
-		SLS_DS100_ext,
-		SLS_DS100_mrr,
+		SLS_DS100_2,
 	};
 
 	enum StatisticsLogColumn

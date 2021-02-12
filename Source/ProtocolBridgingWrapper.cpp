@@ -65,7 +65,14 @@ void ProtocolBridgingWrapper::AddListener(ProtocolBridgingWrapper::Listener* lis
 bool ProtocolBridgingWrapper::SendMessage(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData)
 {
 	if (msgData._addrVal._first > DS100_CHANNELCOUNT)
+	{
+		auto mappedChannel = static_cast<std::int32_t>(msgData._addrVal._first % DS100_CHANNELCOUNT);
+		if (mappedChannel == 0)
+			mappedChannel = static_cast<std::int32_t>(DS100_CHANNELCOUNT);
+		msgData._addrVal._first = mappedChannel;
+
 		return m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData);
+	}
 	else
 		return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
 }

@@ -22,6 +22,7 @@
 #include "AppConfiguration.h"
 
 #include <ProcessingEngine/ProcessingEngineNode.h>
+#include <ProcessingEngine/ObjectDataHandling/ObjectDataHandling_Abstract.h>
 
 #include "../submodules/JUCE-AppBasics/Source/MidiCommandRangeAssignment.h"
 
@@ -66,8 +67,18 @@ static constexpr int YAMAHAOSC_PROCESSINGPROTOCOL_ID = 8;
 
 class ProtocolBridgingWrapper :
 	public ProcessingEngineNode::NodeListener,
-	public AppConfiguration::XmlConfigurableElement
+	public AppConfiguration::XmlConfigurableElement,
+	public ObjectDataHandling_Abstract::StatusListener
 {
+public:
+	enum BridgingProtocolStatus
+	{
+		BPS_Invalid,
+		BPS_Online,
+		BPS_Offline,
+		BPS_Overload
+	};
+
 public:
 	/**
 	 * Abstract embedded interface class for message data handling
@@ -114,6 +125,11 @@ public:
 
 	ExtensionMode GetDS100ExtensionMode();
 	bool SetDS100ExtensionMode(ExtensionMode mode, bool dontSendNotification = false);
+
+	BridgingProtocolStatus GetDS100Status() const;
+	void SetDS100Status(BridgingProtocolStatus status);
+	BridgingProtocolStatus GetSecondDS100Status() const;
+	void SetSecondDS100Status(BridgingProtocolStatus status);
 
 	//==========================================================================
 	bool GetMuteDiGiCoSourceId(SourceId sourceId);
@@ -186,6 +202,9 @@ public:
 	bool setStateXml(XmlElement* stateXml) override;
 
 	//==========================================================================
+	void protocolStatusChanged(ProtocolId id, ObjectDataHandling_Abstract::ObjectHandlingStatus status) override;
+
+	//==========================================================================
 	void Disconnect();
 	void Reconnect();
 
@@ -214,9 +233,12 @@ private:
 	bool SetProtocolOutputDeviceIdentifier(ProtocolId protocolId, const String& outputDeviceIdentifier, bool dontSendNotification = false);
 	JUCEAppBasics::MidiCommandRangeAssignment GetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId);
 	bool SetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification = false);
+	BridgingProtocolStatus GetProtocolStatus(ProtocolId protocolId) const;
+	void SetProtocolStatus(ProtocolId protocolId, BridgingProtocolStatus status);
 
 	//==========================================================================
-	void SetupBridgingNode(const ProtocolBridgingType bridgingProtocolsToActivate = PBT_None);
+	bool SetBridgingNodeStateXml(XmlElement* stateXml, bool dontSendNotification = false);
+	bool SetupBridgingNode(const ProtocolBridgingType bridgingProtocolsToActivate = PBT_None);
 	std::unique_ptr<XmlElement> SetupDiGiCoBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupRTTrPMBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupGenericOSCBridgingProtocol();
@@ -228,12 +250,13 @@ private:
 	 * Depending on the node configuration, there can exist two groups of protocols, A and B, that are handled
 	 * in a specific way to pass incoming and outgoing data to each other and this parent controller instance.
 	 */
-	ProcessingEngineNode							m_processingNode;	/**< The node that encapsulates the protocols that are used to send, receive and bridge data. */
-	XmlElement										m_bridgingXml;		/**< The current xml config for bridging (contains node xml). */
-	std::map<ProtocolBridgingType, XmlElement>		m_bridgingProtocolCacheMap;	/**< Map that holds the xml config elements of bridging elements when currently not active, 
-																				 * to be able to reactivate correct previous config on request. */
+	ProcessingEngineNode													m_processingNode;			/**< The node that encapsulates the protocols that are used to send, receive and bridge data. */
+	XmlElement																m_bridgingXml;				/**< The current xml config for bridging (contains node xml). */
+	std::map<ProtocolBridgingType, XmlElement>								m_bridgingProtocolCacheMap;	/**< Map that holds the xml config elements of bridging elements when currently not active, 
+																										 * to be able to reactivate correct previous config on request. */
+	std::map<ProtocolId, ObjectDataHandling_Abstract::ObjectHandlingStatus>	m_bridgingProtocolStatus;	/**< Map that holds the current protocol status as were communicated by protocol processing engine node data handling object. */
 
-	std::vector<ProtocolBridgingWrapper::Listener*>	m_listeners;		/**< The listner objects, for message data handling callback. */
+	std::vector<ProtocolBridgingWrapper::Listener*>							m_listeners;				/**< The listner objects, for message data handling callback. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ProtocolBridgingWrapper)
 };

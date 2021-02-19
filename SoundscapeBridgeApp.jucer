@@ -101,6 +101,12 @@
                     file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/ProtocolProcessorBase.h"/>
             </GROUP>
             <GROUP id="{DAC3D2E0-7E73-9402-80DB-F7F79EBFECF9}" name="ObjectDataHandling">
+              <GROUP id="{CA438030-B5E3-3697-3107-EE18B0F9EAC3}" name="Mirror_dualA_withValFilter">
+                <FILE id="NiNJqv" name="Mirror_dualA_withValFilter.cpp" compile="1"
+                      resource="0" file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ObjectDataHandling/Mirror_dualA_withValFilter/Mirror_dualA_withValFilter.cpp"/>
+                <FILE id="YVZHOv" name="Mirror_dualA_withValFilter.h" compile="0" resource="0"
+                      file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ObjectDataHandling/Mirror_dualA_withValFilter/Mirror_dualA_withValFilter.h"/>
+              </GROUP>
               <GROUP id="{F90BC420-6049-0AEB-60A2-7F57DDFC12FB}" name="Reverse_B_to_A_only">
                 <FILE id="Oih4fr" name="Reverse_B_to_A_only.cpp" compile="1" resource="0"
                       file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ObjectDataHandling/Reverse_B_to_A_only/Reverse_B_to_A_only.cpp"/>

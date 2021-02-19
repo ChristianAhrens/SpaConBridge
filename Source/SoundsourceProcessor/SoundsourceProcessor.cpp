@@ -564,11 +564,11 @@ int SoundsourceProcessor::GetMessageRate() const
  * Getter function for the last OSCSender connection status.
  * @return	True if the last message attempted by the OSCSender was successful, false if it failed.
  */
-bool SoundsourceProcessor::GetOnline() const
+bool SoundsourceProcessor::IsOnline() const
 {
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
-		return ctrl->GetOnline();
+		return ctrl->IsOnline();
 
 	return false;
 }

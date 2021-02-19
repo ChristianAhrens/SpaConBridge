@@ -85,9 +85,12 @@ PageContainerComponent::PageContainerComponent()
 	m_onlineLabel = std::make_unique<Label>("Online Label", "Online:");
 	m_onlineLabel->setJustificationType(Justification::centred);
 	addAndMakeVisible(m_onlineLabel.get());
-	m_onlineLed = std::make_unique<LedButton>();
-	m_onlineLed->setEnabled(false);
-	addAndMakeVisible(m_onlineLed.get());
+	m_onlineLed1st = std::make_unique<LedButton>();
+	m_onlineLed1st->setEnabled(false);
+	addAndMakeVisible(m_onlineLed1st.get());
+	m_onlineLed2nd = std::make_unique<LedButton>();
+	m_onlineLed2nd->setEnabled(false);
+	addAndMakeVisible(m_onlineLed2nd.get());
 
 	// app logo button and Plugin version label
 	m_logoButton = std::make_unique<ImageButton>("LogoButton");
@@ -189,10 +192,24 @@ void PageContainerComponent::resized()
 		FlexItem(*m_helpButton.get()).withWidth(27).withHeight(27).withMargin(FlexItem::Margin(5, 0, 5, 10)),
 		// Spacing
 		FlexItem().withFlex(1),
-		// Online
-		FlexItem(*m_onlineLabel.get()).withWidth(65).withHeight(25).withMargin(FlexItem::Margin(5, 0, 5, 0)),
-		FlexItem(*m_onlineLed.get()).withWidth(24).withHeight(24).withMargin(FlexItem::Margin(5, 10, 5, 0)),
 		});
+
+	if (Controller* ctrl = Controller::GetInstance())
+	{
+		// Online
+		bottomBarFB.items.add(FlexItem(*m_onlineLabel.get()).withWidth(65).withHeight(25).withMargin(FlexItem::Margin(5, 0, 5, 0)));
+		// depending on controller extension mode, we use one or two leds
+		if (ctrl->GetExtensionMode() == ExtensionMode::EM_Off)
+		{
+			bottomBarFB.items.add(FlexItem(*m_onlineLed1st.get()).withWidth(24).withHeight(24).withMargin(FlexItem::Margin(5, 10, 5, 0)));
+		}
+		else
+		{
+			bottomBarFB.items.add(FlexItem(*m_onlineLed1st.get()).withWidth(24).withHeight(24).withMargin(FlexItem::Margin(5, 0, 5, 0)));
+			bottomBarFB.items.add(FlexItem(*m_onlineLed2nd.get()).withWidth(24).withHeight(24).withMargin(FlexItem::Margin(5, 10, 5, 0)));
+		}
+	}
+
 	bottomBarFB.performLayout(getLocalBounds().removeFromBottom(45));
 
 	// Name and Version label
@@ -233,11 +250,6 @@ void PageContainerComponent::buttonClicked(Button* button)
 	}
 	if (m_helpButton && m_helpButton.get() == button)
 	{
-		//auto githubURL = String("https://www.github.com");
-		//auto companyName = String("ChristianAhrens");
-		//auto appName = JUCEApplication::getInstance()->getApplicationName();
-		//auto helpResourcePath = String("blob/master");
-		//auto helpURLString = githubURL + "/" + companyName + "/" + appName + "/" + helpResourcePath + "/" + "README.md";
 		auto helpURLString = GetRepositoryBaseWebUrl() + "README.md";
 		URL(helpURLString).launchInDefaultBrowser();
 	}
@@ -248,7 +260,7 @@ void PageContainerComponent::buttonClicked(Button* button)
  */
 void PageContainerComponent::toggleAboutPage()
 {
-	if (m_aboutPage->isVisible())
+	if (m_aboutPage && m_aboutPage->isVisible())
 	{
 		m_aboutPage->setVisible(false);
 		removeChildComponent(m_aboutPage.get());
@@ -276,15 +288,26 @@ void PageContainerComponent::timerCallback()
  */
 void PageContainerComponent::UpdateGui(bool init)
 {
-	Controller* ctrl = Controller::GetInstance();
-	if (ctrl)
+	auto ctrl = Controller::GetInstance();
+	if (ctrl && m_onlineLed1st && m_onlineLed2nd)
 	{
+		auto secondDS100Used = (ctrl->GetExtensionMode() != ExtensionMode::EM_Off);
+		auto secondDS100Visible = m_onlineLed2nd->isVisible();
+		if (secondDS100Used != secondDS100Visible)
+		{
+			m_onlineLed2nd->setVisible(secondDS100Used);
+			resized();
+		}
 		if (ctrl->PopParameterChanged(DCS_Protocol, DCT_Online) || init)
-			m_onlineLed->setToggleState(ctrl->GetOnline(), NotificationType::dontSendNotification);
+		{
+			m_onlineLed1st->setToggleState(ctrl->IsFirstDS100Online(), NotificationType::dontSendNotification);
+			if (secondDS100Used)
+				m_onlineLed2nd->setToggleState(ctrl->IsSecondDS100Online(), NotificationType::dontSendNotification);
+		}
 	}
 
 	// Save some performance: only update the component inside the currently active tab.
-	if (m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_Table)
+	if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_Table)
 	{
 		if (m_tablePage)
 			m_tablePage->UpdateGui(init);
@@ -296,7 +319,7 @@ void PageContainerComponent::UpdateGui(bool init)
 			startTimer(GUI_UPDATE_RATE_SLOW);
 		}
 	}
-	else if (m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_MultiSlider)
+	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_MultiSlider)
 	{
 		if (m_multiSliderPage)
 			m_multiSliderPage->UpdateGui(init);

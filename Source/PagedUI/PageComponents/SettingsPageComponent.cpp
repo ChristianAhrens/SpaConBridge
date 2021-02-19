@@ -378,7 +378,6 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_SecondDS100ModeButtonIds[m_SecondDS100Modes[1]] = m_SecondDS100ModeButton->addButton(m_SecondDS100Modes[1]);
 	m_SecondDS100ModeButtonIds[m_SecondDS100Modes[2]] = m_SecondDS100ModeButton->addButton(m_SecondDS100Modes[2]);
 	m_SecondDS100ModeButton->setButtonDown(m_SecondDS100ModeButtonIds[m_SecondDS100Modes[0]]);
-	m_SecondDS100ModeButton->setButtonEnabled(m_SecondDS100ModeButtonIds[m_SecondDS100Modes[2]], false);
 	m_SecondDS100ModeLabel = std::make_unique<Label>();
 	m_SecondDS100ModeLabel->setJustificationType(Justification::centred);
 	m_SecondDS100ModeLabel->setText("2nd DS100", dontSendNotification);

@@ -363,7 +363,7 @@ void Controller::SetDS100IpAddress(DataChangeSource changeSource, String ipAddre
 		m_protocolBridge.SetDS100IpAddress(ipAddress, dontSendNotification);
 
 		// Start "offline" after changing IP address
-		m_heartBeatsRx = MAX_HEARTBEAT_COUNT;
+		m_protocolBridge.SetDS100Status(ProtocolBridgingWrapper::BPS_Offline);
 		m_heartBeatsTx = 0;
 
 		// Signal the change to all Processors. 
@@ -400,7 +400,7 @@ void Controller::SetSecondDS100IpAddress(DataChangeSource changeSource, String i
 		m_protocolBridge.SetSecondDS100IpAddress(ipAddress, dontSendNotification);
 
 		// Start "offline" after changing IP address
-		m_heartBeatsRx = MAX_HEARTBEAT_COUNT;
+		m_protocolBridge.SetSecondDS100Status(ProtocolBridgingWrapper::BPS_Offline);
 		m_heartBeatsTx = 0;
 
 		// Signal the change to all Processors. 
@@ -411,13 +411,39 @@ void Controller::SetSecondDS100IpAddress(DataChangeSource changeSource, String i
 }
 
 /**
- * Getter function for the OSC communication state.
- * @return		True if a valid OSC message was received and successfully processed recently.
- *				False if no response was received for longer than the timeout threshold.
+ * Getter function for the DS100 bridging communication state.
+ * @return		True if all communication channels are online.
  */
-bool Controller::GetOnline() const
+bool Controller::IsOnline() const
 {
-	return ((m_heartBeatsRx * m_oscMsgRate) < KEEPALIVE_TIMEOUT);
+	switch (GetExtensionMode())
+	{
+	case ExtensionMode::EM_Off:
+		return IsFirstDS100Online();
+	case ExtensionMode::EM_Extend:
+	case ExtensionMode::EM_Mirror:
+		return (IsFirstDS100Online() && IsSecondDS100Online());
+	default:
+		return false;
+	}
+}
+
+/**
+ * Getter function for the DS100 bridging communication state.
+ * @return		True if communication channel with second DS100 is online.
+ */
+bool Controller::IsFirstDS100Online() const
+{
+	return (m_protocolBridge.GetDS100Status() == ProtocolBridgingWrapper::BPS_Online);
+}
+
+/**
+ * Getter function for the DS100 bridging communication state.
+ * @return		True if communication channel with first DS100 is online.
+ */
+bool Controller::IsSecondDS100Online() const
+{
+	return (m_protocolBridge.GetSecondDS100Status() == ProtocolBridgingWrapper::BPS_Online);
 }
 
 /**
@@ -493,7 +519,8 @@ void Controller::SetExtensionMode(DataChangeSource changeSource, ExtensionMode m
 		m_protocolBridge.SetDS100ExtensionMode(mode, dontSendNotification);
 
 		// Start "offline" after changing mode
-		m_heartBeatsRx = MAX_HEARTBEAT_COUNT;
+		m_protocolBridge.SetDS100Status(ProtocolBridgingWrapper::BPS_Offline);
+		m_protocolBridge.SetSecondDS100Status(ProtocolBridgingWrapper::BPS_Offline);
 		m_heartBeatsTx = 0;
 
 		// Signal the change to all Processors. 
@@ -730,21 +757,6 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 				resetHeartbeat = true;
 			}
 		}
-
-		// A valid OSC message was received and successfully processed
-		// -> reset the number of heartbeats since last response.
-		if (resetHeartbeat)
-		{
-			bool wasOnline = GetOnline();
-			m_heartBeatsRx = 0;
-
-			// If previous state was "Offline", force all processors to
-			// update their GUI, since we are now Online.
-			if (!wasOnline)
-			{
-				SetParameterChanged(DCS_Protocol, DCT_Online);
-			}
-		}
 	}
 }
 
@@ -776,8 +788,7 @@ void Controller::timerCallback()
 	if (m_processors.size() > 0)
 	{
 		// Check that we don't flood the line with pings, only send them in small intervals.
-		bool sendKeepAlive = (((m_heartBeatsRx * m_oscMsgRate) > KEEPALIVE_INTERVAL) ||
-								((m_heartBeatsTx * m_oscMsgRate) > KEEPALIVE_INTERVAL));
+		bool sendKeepAlive = ((m_heartBeatsTx * m_oscMsgRate) > KEEPALIVE_INTERVAL);
 
 		float newDualFloatValue[2];
 		RemoteObjectMessageData newMsgData;
@@ -823,8 +834,7 @@ void Controller::timerCallback()
 					DeactivateSoundSourceId(processor->GetSourceId(), processor->GetMappingId());
 			}
 
-			// Signal every timer tick to each processor instance. 
-			// This is used to trigger gestures for touch automation.
+			// Signal every timer tick to each processor instance.
 			processor->Tick();
 
 			bool msgSent;
@@ -953,15 +963,12 @@ void Controller::timerCallback()
 			m_protocolBridge.SendMessage(ROI_HeartbeatPing, newMsgData);
 		}
 
-		bool wasOnline = GetOnline();
-		if (m_heartBeatsRx < MAX_HEARTBEAT_COUNT)
-			m_heartBeatsRx++;
 		if (m_heartBeatsTx < MAX_HEARTBEAT_COUNT)
 			m_heartBeatsTx++;
 
 		// If we have just crossed the treshold, force all processors to update their
 		// GUI, since we are now Offline.
-		if (wasOnline && (GetOnline() == false))
+		if (IsOnline() == false)
 			SetParameterChanged(DCS_Protocol, DCT_Online);
 	}
 }

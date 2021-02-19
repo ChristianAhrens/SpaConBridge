@@ -280,7 +280,7 @@ void PageContainerComponent::UpdateGui(bool init)
 	if (ctrl)
 	{
 		if (ctrl->PopParameterChanged(DCS_Protocol, DCT_Online) || init)
-			m_onlineLed->setToggleState(ctrl->GetOnline(), NotificationType::dontSendNotification);
+			m_onlineLed->setToggleState(ctrl->IsOnline(), NotificationType::dontSendNotification);
 	}
 
 	// Save some performance: only update the component inside the currently active tab.

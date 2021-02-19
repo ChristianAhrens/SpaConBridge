@@ -21,6 +21,8 @@
 #include "Controller.h"
 #include "SoundsourceProcessor/SoundsourceProcessor.h"
 
+#include <ProcessingEngine/ObjectDataHandling/ObjectDataHandling_Abstract.h>
+
 
 namespace SoundscapeBridgeApp
 {
@@ -48,7 +50,7 @@ ProtocolBridgingWrapper::~ProtocolBridgingWrapper()
 
 /**
  * Method to register a listener object to be called when the node has received the respective data via a node protocol.
- * @param listener	The listener object to add to the internal list of listeners
+ * @param	listener						The listener object to add to the internal list of listeners
  */
 void ProtocolBridgingWrapper::AddListener(ProtocolBridgingWrapper::Listener* listener)
 {
@@ -108,7 +110,7 @@ void ProtocolBridgingWrapper::Reconnect()
 
 	auto nodeXmlElement = m_bridgingXml.getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::NODE));
 	if (nodeXmlElement)
-		m_processingNode.setStateXml(nodeXmlElement);
+		SetBridgingNodeStateXml(nodeXmlElement, true);
 	m_processingNode.Start();
 }
 
@@ -128,6 +130,21 @@ bool ProtocolBridgingWrapper::IsBridgingObjectOnly(RemoteObjectIdentifier id)
 	default:
 		return true;
 	}
+}
+
+/**
+ * Reimplemented from ObjectDataHandling_Abstract::StatusListener to get notified on status changes
+ * in bridging object handling object regarding protocol status changes.
+ * @param	id		The id of the protocol that the status has changed of.
+ * @param	status	The new status enum value.
+ */
+void ProtocolBridgingWrapper::protocolStatusChanged(ProtocolId id, ObjectDataHandling_Abstract::ObjectHandlingStatus status)
+{
+	auto ctrl = Controller::GetInstance();
+	if (ctrl)
+		ctrl->SetParameterChanged(DCS_Protocol, DCT_Online);
+
+	m_bridgingProtocolStatus[id] = status;
 }
 
 /**
@@ -173,23 +190,57 @@ bool ProtocolBridgingWrapper::setStateXml(XmlElement* stateXml)
 			if (yamahaOSCProtocolXmlElement)
 				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_YamahaOSC, *yamahaOSCProtocolXmlElement));
 
-			return m_processingNode.setStateXml(nodeXmlElement);
+			return SetBridgingNodeStateXml(nodeXmlElement, true);
 		}
+		else
+			return false;
 	}
 	else
 	{
 		SetupBridgingNode();
+
+		return false;
 	}
 
-	return false;
+}
+
+/**
+ * Method to set an updated xml config element as new bridging node config.
+ * This also takes care to re-register object handling module listeners after configuration change.
+ * 
+ * @param	stateXml		The new bridging node xml configuration to activate.
+ * @return	True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetBridgingNodeStateXml(XmlElement* stateXml, bool dontSendNotification)
+{
+	if (!stateXml || (stateXml->getTagName() != ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::NODE)))
+		return false;
+
+	if (!dontSendNotification)
+	{
+		Controller* ctrl = Controller::GetInstance();
+		if (ctrl)
+			ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
+	}
+
+	if (m_processingNode.setStateXml(stateXml))
+	{
+		if (auto objHandling = m_processingNode.GetObjectDataHandling())
+			objHandling->AddStatusListener(this);
+
+		return true;
+	}
+	else
+		return false;
 }
 
 /**
  * Method to create a basic configuration to use to setup the single supported
  * bridging node.
- * @param bridgingProtocolsToActivate	Bitmask definition of what bridging protocols to activate in the bridging node about to be created.
+ * @param	bridgingProtocolsToActivate		Bitmask definition of what bridging protocols to activate in the bridging node about to be created.
+ * @return	True on success, false on failure
  */
-void ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridgingProtocolsToActivate)
+bool ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridgingProtocolsToActivate)
 {
 	auto nodeXmlElement = std::make_unique<XmlElement>(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::NODE));
 
@@ -305,9 +356,13 @@ void ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridg
 		}
 	}
 
-	m_processingNode.setStateXml(nodeXmlElement.get());
-
-	m_bridgingXml.addChildElement(nodeXmlElement.release());
+	if (SetBridgingNodeStateXml(nodeXmlElement.get(), true))
+	{
+		m_bridgingXml.addChildElement(nodeXmlElement.release());
+		return true;
+	}
+	else
+		return false;
 }
 
 /**
@@ -538,7 +593,7 @@ bool ProtocolBridgingWrapper::SetMuteProtocolSourceIds(ProtocolId protocolId, co
 			{
 				ProcessingEngineConfig::WriteMutedObjectChannels(mutedObjChsXmlElement, mutedChannels);
 
-				m_processingNode.setStateXml(nodeXmlElement);
+				SetBridgingNodeStateXml(nodeXmlElement, true);
 
 				Controller* ctrl = Controller::GetInstance();
 				if (ctrl)
@@ -590,7 +645,7 @@ bool ProtocolBridgingWrapper::SetUnmuteProtocolSourceIds(ProtocolId protocolId, 
 			{
 				ProcessingEngineConfig::WriteMutedObjectChannels(mutedObjChsXmlElement, mutedChannels);
 
-				m_processingNode.setStateXml(nodeXmlElement);
+				SetBridgingNodeStateXml(nodeXmlElement, true);
 
 				Controller* ctrl = Controller::GetInstance();
 				if (ctrl)
@@ -656,16 +711,7 @@ bool ProtocolBridgingWrapper::SetProtocolIpAddress(ProtocolId protocolId, String
 		else
 			return false;
 
-		m_processingNode.setStateXml(nodeXmlElement);
-
-		if (!dontSendNotification)
-		{
-			Controller* ctrl = Controller::GetInstance();
-			if (ctrl)
-				ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
-		}
-
-		return true;
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
 	}
 	else
 		return false;
@@ -723,16 +769,7 @@ bool ProtocolBridgingWrapper::SetProtocolListeningPort(ProtocolId protocolId, in
 		else
 			return false;
 
-		m_processingNode.setStateXml(nodeXmlElement);
-
-		if (!dontSendNotification)
-		{
-			Controller* ctrl = Controller::GetInstance();
-			if (ctrl)
-				ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
-		}
-
-		return true;
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
 	}
 	else
 		return false;
@@ -790,16 +827,7 @@ bool ProtocolBridgingWrapper::SetProtocolRemotePort(ProtocolId protocolId, int r
 		else
 			return false;
 
-		m_processingNode.setStateXml(nodeXmlElement);
-
-		if (!dontSendNotification)
-		{
-			Controller* ctrl = Controller::GetInstance();
-			if (ctrl)
-				ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
-		}
-
-		return true;
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
 	}
 	else
 		return false;
@@ -857,16 +885,7 @@ bool ProtocolBridgingWrapper::SetProtocolMappingArea(ProtocolId protocolId, int 
 		else
 			return false;
 
-		m_processingNode.setStateXml(nodeXmlElement);
-
-		if (!dontSendNotification)
-		{
-			Controller* ctrl = Controller::GetInstance();
-			if (ctrl)
-				ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
-		}
-
-		return true;
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
 	}
 	else
 		return false;
@@ -924,16 +943,7 @@ bool ProtocolBridgingWrapper::SetProtocolInputDeviceIdentifier(ProtocolId protoc
 		else
 			return false;
 
-		m_processingNode.setStateXml(nodeXmlElement);
-
-		if (!dontSendNotification)
-		{
-			Controller* ctrl = Controller::GetInstance();
-			if (ctrl)
-				ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
-		}
-
-		return true;
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
 	}
 	else
 		return false;
@@ -991,16 +1001,7 @@ bool ProtocolBridgingWrapper::SetProtocolOutputDeviceIdentifier(ProtocolId proto
 		else
 			return false;
 
-		m_processingNode.setStateXml(nodeXmlElement);
-
-		if (!dontSendNotification)
-		{
-			Controller* ctrl = Controller::GetInstance();
-			if (ctrl)
-				ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
-		}
-
-		return true;
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
 	}
 	else
 		return false;
@@ -1075,19 +1076,62 @@ bool ProtocolBridgingWrapper::SetMidiAssignmentMapping(ProtocolId protocolId, Re
         else
             return false;
 
-        m_processingNode.setStateXml(nodeXmlElement);
-
-        if (!dontSendNotification)
-        {
-            Controller* ctrl = Controller::GetInstance();
-            if (ctrl)
-                ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
-        }
-
-        return true;
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
     }
     else
         return false;
+}
+
+/**
+ * Getter for the controller-understandable status per protocol as can be presented to the user.
+ * @param	protocolId	The id of the protocol to get the status for
+ * @return	The status as requested
+ */
+ProtocolBridgingWrapper::BridgingProtocolStatus ProtocolBridgingWrapper::GetProtocolStatus(ProtocolId protocolId) const
+{
+	if (m_bridgingProtocolStatus.count(protocolId) < 1)
+		return BPS_Invalid;
+	else
+	{
+		switch (m_bridgingProtocolStatus.at(protocolId))
+		{
+		case ObjectDataHandling_Abstract::OHS_Invalid:
+		case ObjectDataHandling_Abstract::OHS_Protocol_Up:
+		case ObjectDataHandling_Abstract::OHS_Protocol_PromotedPrimary:
+			return BPS_Online;
+		case ObjectDataHandling_Abstract::OHS_Protocol_DegradedSecondary:
+		case ObjectDataHandling_Abstract::OHS_Protocol_Down:
+			return BPS_Offline;
+		case ObjectDataHandling_Abstract::OHS_Protocol_Fail:
+		default:
+			return BPS_Invalid;
+		}
+	}
+}
+
+/***
+ * Setter for the protocol status values hashed by protocol id.
+ * @param	protocolId	The id of the protocol to set a status value for
+ * @param	status		The status to set for the protocol
+ */
+void ProtocolBridgingWrapper::SetProtocolStatus(ProtocolId protocolId, ProtocolBridgingWrapper::BridgingProtocolStatus status)
+{
+	switch (status)
+	{
+	case BPS_Online:
+		m_bridgingProtocolStatus[protocolId] = ObjectDataHandling_Abstract::OHS_Protocol_Up;
+		break;
+	case BPS_Offline:
+		m_bridgingProtocolStatus[protocolId] = ObjectDataHandling_Abstract::OHS_Protocol_Down;
+		break;
+	default:
+		m_bridgingProtocolStatus[protocolId] = ObjectDataHandling_Abstract::OHS_Invalid;
+		break;
+	}
+
+	auto ctrl = Controller::GetInstance();
+	if (ctrl)
+		ctrl->SetParameterChanged(DCS_Protocol, DCT_Online);
 }
 
 /**
@@ -1220,7 +1264,7 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 				}
 			}
 
-			m_processingNode.setStateXml(nodeXmlElement);
+			SetBridgingNodeStateXml(nodeXmlElement);
 
 			Controller* ctrl = Controller::GetInstance();
 			if (ctrl)
@@ -1328,12 +1372,7 @@ bool ProtocolBridgingWrapper::UpdateActiveDS100SourceIds()
 	}
 
 	// set updated xml config live
-	m_processingNode.setStateXml(nodeXmlElement);
-
-	// broadcast that bridging config has changed
-	ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
-
-	return true;
+	return SetBridgingNodeStateXml(nodeXmlElement);
 }
 
 /**
@@ -1444,16 +1483,7 @@ bool ProtocolBridgingWrapper::SetDS100MsgRate(int msgRate, bool dontSendNotifica
 		else
 			return false;
 
-		m_processingNode.setStateXml(nodeXmlElement);
-
-		if (!dontSendNotification)
-		{
-			Controller* ctrl = Controller::GetInstance();
-			if (ctrl)
-				ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
-		}
-
-		return true;
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
 	}
 	else
 		return false;
@@ -1668,19 +1698,40 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 		else
 			return false;
 
-		m_processingNode.setStateXml(nodeXmlElement);
-
-		if (!dontSendNotification)
-		{
-			Controller* ctrl = Controller::GetInstance();
-			if (ctrl)
-				ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
-		}
-
-		return true;
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
 	}
 	else
 		return false;
+}
+
+/**
+ * Gets the status of the first DS100 protocol connection.
+ * This forwards the call to the generic implementation that itself gets the info from BridgingWrapper.
+ * @return	The protocol status
+ */
+ProtocolBridgingWrapper::BridgingProtocolStatus ProtocolBridgingWrapper::GetDS100Status() const
+{
+	return GetProtocolStatus(DS100_1_PROCESSINGPROTOCOL_ID);
+}
+
+void ProtocolBridgingWrapper::SetDS100Status(ProtocolBridgingWrapper::BridgingProtocolStatus status)
+{
+	SetProtocolStatus(DS100_1_PROCESSINGPROTOCOL_ID, status);
+}
+
+/**
+ * Gets the status of the second DS100 protocol connection.
+ * This forwards the call to the generic implementation that itself gets the info from BridgingWrapper.
+ * @return	The protocol status
+ */
+ProtocolBridgingWrapper::BridgingProtocolStatus ProtocolBridgingWrapper::GetSecondDS100Status() const
+{
+	return GetProtocolStatus(DS100_2_PROCESSINGPROTOCOL_ID);
+}
+
+void ProtocolBridgingWrapper::SetSecondDS100Status(ProtocolBridgingWrapper::BridgingProtocolStatus status)
+{
+	SetProtocolStatus(DS100_2_PROCESSINGPROTOCOL_ID, status);
 }
 
 /**

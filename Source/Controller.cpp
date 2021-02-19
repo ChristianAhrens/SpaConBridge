@@ -419,13 +419,31 @@ bool Controller::IsOnline() const
 	switch (GetExtensionMode())
 	{
 	case ExtensionMode::EM_Off:
-		return (m_protocolBridge.GetDS100Status() == ProtocolBridgingWrapper::BPS_Online);
+		return IsFirstDS100Online();
 	case ExtensionMode::EM_Extend:
 	case ExtensionMode::EM_Mirror:
-		return ((m_protocolBridge.GetDS100Status() == ProtocolBridgingWrapper::BPS_Online) && (m_protocolBridge.GetSecondDS100Status() == ProtocolBridgingWrapper::BPS_Online));
+		return (IsFirstDS100Online() && IsSecondDS100Online());
 	default:
 		return false;
 	}
+}
+
+/**
+ * Getter function for the DS100 bridging communication state.
+ * @return		True if communication channel with second DS100 is online.
+ */
+bool Controller::IsFirstDS100Online() const
+{
+	return (m_protocolBridge.GetDS100Status() == ProtocolBridgingWrapper::BPS_Online);
+}
+
+/**
+ * Getter function for the DS100 bridging communication state.
+ * @return		True if communication channel with first DS100 is online.
+ */
+bool Controller::IsSecondDS100Online() const
+{
+	return (m_protocolBridge.GetSecondDS100Status() == ProtocolBridgingWrapper::BPS_Online);
 }
 
 /**

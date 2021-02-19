@@ -657,7 +657,7 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 			// If source id is present, it needs to be checked regarding special DS100 extension mode
 			if (sourceId > 0)
 			{
-				if (senderProtocolId == DS100_2_PROCESSINGPROTOCOL_ID)
+				if (senderProtocolId == DS100_2_PROCESSINGPROTOCOL_ID && GetExtensionMode() == EM_Extend)
 					sourceId += DS100_CHANNELCOUNT;
 			}
 

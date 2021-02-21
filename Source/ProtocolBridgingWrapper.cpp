@@ -133,18 +133,14 @@ bool ProtocolBridgingWrapper::IsBridgingObjectOnly(RemoteObjectIdentifier id)
 }
 
 /**
- * Reimplemented from ObjectDataHandling_Abstract::StatusListener to get notified on status changes
- * in bridging object handling object regarding protocol status changes.
+ * Reimplemented from ObjectDataHandling_Abstract::StateListener to get notified on state changes
+ * in bridging object handling object regarding protocol state changes.
  * @param	id		The id of the protocol that the status has changed of.
- * @param	status	The new status enum value.
+ * @param	state	The new state value.
  */
-void ProtocolBridgingWrapper::protocolStatusChanged(ProtocolId id, ObjectDataHandling_Abstract::ObjectHandlingStatus status)
+void ProtocolBridgingWrapper::protocolStateChanged(ProtocolId id, ObjectHandlingState state)
 {
-	auto ctrl = Controller::GetInstance();
-	if (ctrl)
-		ctrl->SetParameterChanged(DCS_Protocol, DCT_Online);
-
-	m_bridgingProtocolStatus[id] = status;
+	SetProtocolState(id, state);
 }
 
 /**
@@ -226,7 +222,7 @@ bool ProtocolBridgingWrapper::SetBridgingNodeStateXml(XmlElement* stateXml, bool
 	if (m_processingNode.setStateXml(stateXml))
 	{
 		if (auto objHandling = m_processingNode.GetObjectDataHandling())
-			objHandling->AddStatusListener(this);
+			objHandling->AddStateListener(this);
 
 		return true;
 	}
@@ -1087,47 +1083,22 @@ bool ProtocolBridgingWrapper::SetMidiAssignmentMapping(ProtocolId protocolId, Re
  * @param	protocolId	The id of the protocol to get the status for
  * @return	The status as requested
  */
-ProtocolBridgingWrapper::BridgingProtocolStatus ProtocolBridgingWrapper::GetProtocolStatus(ProtocolId protocolId) const
+ObjectHandlingState ProtocolBridgingWrapper::GetProtocolState(ProtocolId protocolId) const
 {
-	if (m_bridgingProtocolStatus.count(protocolId) < 1)
-		return BPS_Invalid;
+	if (m_bridgingProtocolState.count(protocolId) < 1)
+		return OHS_Invalid;
 	else
-	{
-		switch (m_bridgingProtocolStatus.at(protocolId))
-		{
-		case ObjectDataHandling_Abstract::OHS_Invalid:
-		case ObjectDataHandling_Abstract::OHS_Protocol_Up:
-		case ObjectDataHandling_Abstract::OHS_Protocol_PromotedPrimary:
-			return BPS_Online;
-		case ObjectDataHandling_Abstract::OHS_Protocol_DegradedSecondary:
-		case ObjectDataHandling_Abstract::OHS_Protocol_Down:
-			return BPS_Offline;
-		case ObjectDataHandling_Abstract::OHS_Protocol_Fail:
-		default:
-			return BPS_Invalid;
-		}
-	}
+		return m_bridgingProtocolState.at(protocolId);
 }
 
 /***
  * Setter for the protocol status values hashed by protocol id.
  * @param	protocolId	The id of the protocol to set a status value for
- * @param	status		The status to set for the protocol
+ * @param	state		The state to set for the protocol
  */
-void ProtocolBridgingWrapper::SetProtocolStatus(ProtocolId protocolId, ProtocolBridgingWrapper::BridgingProtocolStatus status)
+void ProtocolBridgingWrapper::SetProtocolState(ProtocolId protocolId, ObjectHandlingState state)
 {
-	switch (status)
-	{
-	case BPS_Online:
-		m_bridgingProtocolStatus[protocolId] = ObjectDataHandling_Abstract::OHS_Protocol_Up;
-		break;
-	case BPS_Offline:
-		m_bridgingProtocolStatus[protocolId] = ObjectDataHandling_Abstract::OHS_Protocol_Down;
-		break;
-	default:
-		m_bridgingProtocolStatus[protocolId] = ObjectDataHandling_Abstract::OHS_Invalid;
-		break;
-	}
+	m_bridgingProtocolState[protocolId] = state;
 
 	auto ctrl = Controller::GetInstance();
 	if (ctrl)
@@ -1709,14 +1680,19 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
  * This forwards the call to the generic implementation that itself gets the info from BridgingWrapper.
  * @return	The protocol status
  */
-ProtocolBridgingWrapper::BridgingProtocolStatus ProtocolBridgingWrapper::GetDS100Status() const
+ObjectHandlingState ProtocolBridgingWrapper::GetDS100State() const
 {
-	return GetProtocolStatus(DS100_1_PROCESSINGPROTOCOL_ID);
+	return GetProtocolState(DS100_1_PROCESSINGPROTOCOL_ID);
 }
 
-void ProtocolBridgingWrapper::SetDS100Status(ProtocolBridgingWrapper::BridgingProtocolStatus status)
+/**
+ * Sets the status of the first DS100 protocol connection.
+ * This forwards the call to the generic implementation that itself gets the info from BridgingWrapper.
+ * @param	state	The protocol state
+ */
+void ProtocolBridgingWrapper::SetDS100State(ObjectHandlingState state)
 {
-	SetProtocolStatus(DS100_1_PROCESSINGPROTOCOL_ID, status);
+	SetProtocolState(DS100_1_PROCESSINGPROTOCOL_ID, state);
 }
 
 /**
@@ -1724,14 +1700,19 @@ void ProtocolBridgingWrapper::SetDS100Status(ProtocolBridgingWrapper::BridgingPr
  * This forwards the call to the generic implementation that itself gets the info from BridgingWrapper.
  * @return	The protocol status
  */
-ProtocolBridgingWrapper::BridgingProtocolStatus ProtocolBridgingWrapper::GetSecondDS100Status() const
+ObjectHandlingState ProtocolBridgingWrapper::GetSecondDS100State() const
 {
-	return GetProtocolStatus(DS100_2_PROCESSINGPROTOCOL_ID);
+	return GetProtocolState(DS100_2_PROCESSINGPROTOCOL_ID);
 }
 
-void ProtocolBridgingWrapper::SetSecondDS100Status(ProtocolBridgingWrapper::BridgingProtocolStatus status)
+/**
+ * Sets the status of the first DS100 protocol connection.
+ * This forwards the call to the generic implementation that itself gets the info from BridgingWrapper.
+ * @param	state	The protocol state
+ */
+void ProtocolBridgingWrapper::SetSecondDS100State(ObjectHandlingState state)
 {
-	SetProtocolStatus(DS100_2_PROCESSINGPROTOCOL_ID, status);
+	SetProtocolState(DS100_2_PROCESSINGPROTOCOL_ID, state);
 }
 
 /**

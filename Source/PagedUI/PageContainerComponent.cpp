@@ -85,10 +85,10 @@ PageContainerComponent::PageContainerComponent()
 	m_onlineLabel = std::make_unique<Label>("Online Label", "Online:");
 	m_onlineLabel->setJustificationType(Justification::centred);
 	addAndMakeVisible(m_onlineLabel.get());
-	m_onlineLed1st = std::make_unique<LedButton>();
+	m_onlineLed1st = std::make_unique<LedComponent>();
 	m_onlineLed1st->setEnabled(false);
 	addAndMakeVisible(m_onlineLed1st.get());
-	m_onlineLed2nd = std::make_unique<LedButton>();
+	m_onlineLed2nd = std::make_unique<LedComponent>();
 	m_onlineLed2nd->setEnabled(false);
 	addAndMakeVisible(m_onlineLed2nd.get());
 
@@ -300,9 +300,17 @@ void PageContainerComponent::UpdateGui(bool init)
 		}
 		if (ctrl->PopParameterChanged(DCS_Protocol, DCT_Online) || init)
 		{
-			m_onlineLed1st->setToggleState(ctrl->IsFirstDS100Online(), NotificationType::dontSendNotification);
+			auto online1 = ctrl->IsFirstDS100Online();
+			auto mm1 = ctrl->IsFirstDS100MirrorMaster();
+			m_onlineLed1st->SetOn(online1);
+			m_onlineLed1st->SetHighlightOn(online1 && mm1);
 			if (secondDS100Used)
-				m_onlineLed2nd->setToggleState(ctrl->IsSecondDS100Online(), NotificationType::dontSendNotification);
+			{
+				auto online2 = ctrl->IsSecondDS100Online();
+				auto mm2 = ctrl->IsSecondDS100MirrorMaster();
+				m_onlineLed2nd->SetOn(online2);
+				m_onlineLed2nd->SetHighlightOn(online2 && mm2);
+			}
 		}
 	}
 

@@ -139,7 +139,9 @@ public:
 	void Reconnect();
 	bool IsOnline() const;
 	bool IsFirstDS100Online() const;
+	bool IsFirstDS100MirrorMaster() const;
 	bool IsSecondDS100Online() const;
+	bool IsSecondDS100MirrorMaster() const;
 
 	//==========================================================================
 	bool LoadConfigurationFile(const File& fileToLoadFrom);

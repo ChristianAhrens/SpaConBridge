@@ -58,59 +58,75 @@ class AboutPageComponent;
 /**
  * class LedButton, a custom ToggleButton
  */
-class LedButton : public ToggleButton
+class LedComponent : public Component
 {
 public:
-	explicit LedButton()
-		: ToggleButton()
+	explicit LedComponent()
+		: Component()
 	{
 
 	}
-	~LedButton() override
+	~LedComponent() override
 	{
 
 	}
 
-protected:
-	void paintButton(Graphics& g, bool isMouseOverButton, bool isButtonDown) override
+	void SetOn(bool on)
 	{
-		Rectangle<int> bounds = getLocalBounds();
-		Rectangle<float> buttonRectF = Rectangle<float>(2.5f, 2.5f, bounds.getWidth() - 4.0f, bounds.getHeight() - 4.0f);
-		bool on = getToggleState();
-		bool enabled = isEnabled();
+		m_on = on;
 
-		auto blueColour = Colours::blue;
+		repaint();
+	}
+
+	void SetHighlightOn(bool on)
+	{
+		m_highlightOn = on;
+
+		repaint();
+	}
+
+	void paint(Graphics& g) override
+	{
+		auto bounds = getLocalBounds();
+		auto ledBounds = bounds.reduced(2).toFloat();
+
+		auto mainColour = Colours::blue;
+		auto highlightColour = Colours::blue.brighter();
 		auto customlookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
 		if (customlookAndFeel)
-			blueColour = customlookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonBlueColor);
-
-		// Button's main colour
-		if (on)
 		{
-			if (isButtonDown)
-				blueColour = blueColour.brighter(0.1f);
-			else if (isMouseOverButton)
-				blueColour = blueColour.brighter(0.05f);
-			g.setColour(blueColour);
+			mainColour = customlookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::HighlightColor);
+			highlightColour = customlookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::HighlightColor).brighter(0.6f);
+		}
+
+		// main led circle
+		if (m_highlightOn)
+		{
+			g.setColour(highlightColour);
+		}
+		else if (m_on)
+		{
+			g.setColour(mainColour);
 		}
 		else
 		{
 			Colour col = getLookAndFeel().findColour(TextButton::buttonColourId);
-			if (!enabled)
+			if (!isEnabled())
 				col = getLookAndFeel().findColour(TextEditor::backgroundColourId);
-			else if (isButtonDown)
-				col = blueColour.brighter(0.05f);
-			else if (isMouseOverButton)
-				col = getLookAndFeel().findColour(TextEditor::backgroundColourId).brighter(0.05f);
 			g.setColour(col);
 		}
+		g.fillRoundedRectangle(ledBounds, 10);
 
-		g.fillRoundedRectangle(buttonRectF, 10);
+		// led border
 		g.setColour(getLookAndFeel().findColour(TextEditor::outlineColourId));
-		g.drawRoundedRectangle(buttonRectF, 10, 1);
+		g.drawRoundedRectangle(ledBounds, 10, 1);
 	}
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LedButton)
+private:
+	bool	m_on{ false };
+	bool	m_highlightOn{ false };
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LedComponent)
 };
 
 
@@ -158,7 +174,8 @@ private:
 	std::unique_ptr<ImageButton>					m_logoButton;			/**> App logo button triggering about page. */
 	std::unique_ptr<DrawableButton>					m_helpButton;			/**< Button to open the github readme url. */
 	std::unique_ptr<Label>							m_onlineLabel;			/**> Online indicator label. */
-	std::unique_ptr<LedButton>						m_onlineLed;			/**> Button used as Online indicator LED. */
+	std::unique_ptr<LedComponent>					m_onlineLed1st;			/**> Button used as Online indicator LED for first DS100. */
+	std::unique_ptr<LedComponent>					m_onlineLed2nd;			/**> Button used as Online indicator LED for second DS100. */
 	std::unique_ptr<CustomButtonTabbedComponent>	m_tabbedComponent;		/**> A container for tabs. */
 	std::unique_ptr<TablePageComponent>				m_tablePage;			/**> The actual table container inside this component. */
 	std::unique_ptr<MultiSurfacePageComponent>		m_multiSliderPage;		/**> Container for multi-slider. */

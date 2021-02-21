@@ -21,6 +21,8 @@
 #include "Controller.h"
 #include "SoundsourceProcessor/SoundsourceProcessor.h"
 
+#include <ProcessingEngine/ObjectDataHandling/ObjectDataHandling_Abstract.h>
+
 
 namespace SoundscapeBridgeApp
 {
@@ -48,7 +50,7 @@ ProtocolBridgingWrapper::~ProtocolBridgingWrapper()
 
 /**
  * Method to register a listener object to be called when the node has received the respective data via a node protocol.
- * @param listener	The listener object to add to the internal list of listeners
+ * @param	listener						The listener object to add to the internal list of listeners
  */
 void ProtocolBridgingWrapper::AddListener(ProtocolBridgingWrapper::Listener* listener)
 {
@@ -64,17 +66,34 @@ void ProtocolBridgingWrapper::AddListener(ProtocolBridgingWrapper::Listener* lis
  */
 bool ProtocolBridgingWrapper::SendMessage(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData)
 {
-	if (msgData._addrVal._first > DS100_CHANNELCOUNT)
+	if (GetDS100ExtensionMode() == EM_Mirror)
 	{
-		auto mappedChannel = static_cast<std::int32_t>(msgData._addrVal._first % DS100_CHANNELCOUNT);
-		if (mappedChannel == 0)
-			mappedChannel = static_cast<std::int32_t>(DS100_CHANNELCOUNT);
-		msgData._addrVal._first = mappedChannel;
+		// if the first DS100 is master, send data to it
+		if ((GetProtocolState(DS100_1_PROCESSINGPROTOCOL_ID) & OHS_Protocol_Master) == OHS_Protocol_Master)
+			return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
 
-		return m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData);
+		// if the second DS100 is master, send data to it
+		else if ((GetProtocolState(DS100_2_PROCESSINGPROTOCOL_ID) & OHS_Protocol_Master) == OHS_Protocol_Master)
+			return m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData);
+
+		// of no master is present, we have an undefined state, cannot happen!
+		else
+			return false;
 	}
 	else
-		return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
+	{
+		if (msgData._addrVal._first > DS100_CHANNELCOUNT)
+		{
+			auto mappedChannel = static_cast<std::int32_t>(msgData._addrVal._first % DS100_CHANNELCOUNT);
+			if (mappedChannel == 0)
+				mappedChannel = static_cast<std::int32_t>(DS100_CHANNELCOUNT);
+			msgData._addrVal._first = mappedChannel;
+
+			return m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData);
+		}
+		else
+			return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
+	}
 }
 
 /**
@@ -108,7 +127,7 @@ void ProtocolBridgingWrapper::Reconnect()
 
 	auto nodeXmlElement = m_bridgingXml.getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::NODE));
 	if (nodeXmlElement)
-		m_processingNode.setStateXml(nodeXmlElement);
+		SetBridgingNodeStateXml(nodeXmlElement, true);
 	m_processingNode.Start();
 }
 
@@ -128,6 +147,17 @@ bool ProtocolBridgingWrapper::IsBridgingObjectOnly(RemoteObjectIdentifier id)
 	default:
 		return true;
 	}
+}
+
+/**
+ * Reimplemented from ObjectDataHandling_Abstract::StateListener to get notified on state changes
+ * in bridging object handling object regarding protocol state changes.
+ * @param	id		The id of the protocol that the status has changed of.
+ * @param	state	The new state value.
+ */
+void ProtocolBridgingWrapper::protocolStateChanged(ProtocolId id, ObjectHandlingState state)
+{
+	SetProtocolState(id, state);
 }
 
 /**
@@ -173,23 +203,57 @@ bool ProtocolBridgingWrapper::setStateXml(XmlElement* stateXml)
 			if (yamahaOSCProtocolXmlElement)
 				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_YamahaOSC, *yamahaOSCProtocolXmlElement));
 
-			return m_processingNode.setStateXml(nodeXmlElement);
+			return SetBridgingNodeStateXml(nodeXmlElement, true);
 		}
+		else
+			return false;
 	}
 	else
 	{
 		SetupBridgingNode();
+
+		return false;
 	}
 
-	return false;
+}
+
+/**
+ * Method to set an updated xml config element as new bridging node config.
+ * This also takes care to re-register object handling module listeners after configuration change.
+ * 
+ * @param	stateXml		The new bridging node xml configuration to activate.
+ * @return	True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetBridgingNodeStateXml(XmlElement* stateXml, bool dontSendNotification)
+{
+	if (!stateXml || (stateXml->getTagName() != ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::NODE)))
+		return false;
+
+	if (!dontSendNotification)
+	{
+		Controller* ctrl = Controller::GetInstance();
+		if (ctrl)
+			ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
+	}
+
+	if (m_processingNode.setStateXml(stateXml))
+	{
+		if (auto objHandling = m_processingNode.GetObjectDataHandling())
+			objHandling->AddStateListener(this);
+
+		return true;
+	}
+	else
+		return false;
 }
 
 /**
  * Method to create a basic configuration to use to setup the single supported
  * bridging node.
- * @param bridgingProtocolsToActivate	Bitmask definition of what bridging protocols to activate in the bridging node about to be created.
+ * @param	bridgingProtocolsToActivate		Bitmask definition of what bridging protocols to activate in the bridging node about to be created.
+ * @return	True on success, false on failure
  */
-void ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridgingProtocolsToActivate)
+bool ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridgingProtocolsToActivate)
 {
 	auto nodeXmlElement = std::make_unique<XmlElement>(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::NODE));
 
@@ -305,9 +369,13 @@ void ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridg
 		}
 	}
 
-	m_processingNode.setStateXml(nodeXmlElement.get());
-
-	m_bridgingXml.addChildElement(nodeXmlElement.release());
+	if (SetBridgingNodeStateXml(nodeXmlElement.get(), true))
+	{
+		m_bridgingXml.addChildElement(nodeXmlElement.release());
+		return true;
+	}
+	else
+		return false;
 }
 
 /**
@@ -538,7 +606,7 @@ bool ProtocolBridgingWrapper::SetMuteProtocolSourceIds(ProtocolId protocolId, co
 			{
 				ProcessingEngineConfig::WriteMutedObjectChannels(mutedObjChsXmlElement, mutedChannels);
 
-				m_processingNode.setStateXml(nodeXmlElement);
+				SetBridgingNodeStateXml(nodeXmlElement, true);
 
 				Controller* ctrl = Controller::GetInstance();
 				if (ctrl)
@@ -590,7 +658,7 @@ bool ProtocolBridgingWrapper::SetUnmuteProtocolSourceIds(ProtocolId protocolId, 
 			{
 				ProcessingEngineConfig::WriteMutedObjectChannels(mutedObjChsXmlElement, mutedChannels);
 
-				m_processingNode.setStateXml(nodeXmlElement);
+				SetBridgingNodeStateXml(nodeXmlElement, true);
 
 				Controller* ctrl = Controller::GetInstance();
 				if (ctrl)
@@ -656,16 +724,7 @@ bool ProtocolBridgingWrapper::SetProtocolIpAddress(ProtocolId protocolId, String
 		else
 			return false;
 
-		m_processingNode.setStateXml(nodeXmlElement);
-
-		if (!dontSendNotification)
-		{
-			Controller* ctrl = Controller::GetInstance();
-			if (ctrl)
-				ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
-		}
-
-		return true;
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
 	}
 	else
 		return false;
@@ -723,16 +782,7 @@ bool ProtocolBridgingWrapper::SetProtocolListeningPort(ProtocolId protocolId, in
 		else
 			return false;
 
-		m_processingNode.setStateXml(nodeXmlElement);
-
-		if (!dontSendNotification)
-		{
-			Controller* ctrl = Controller::GetInstance();
-			if (ctrl)
-				ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
-		}
-
-		return true;
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
 	}
 	else
 		return false;
@@ -790,16 +840,7 @@ bool ProtocolBridgingWrapper::SetProtocolRemotePort(ProtocolId protocolId, int r
 		else
 			return false;
 
-		m_processingNode.setStateXml(nodeXmlElement);
-
-		if (!dontSendNotification)
-		{
-			Controller* ctrl = Controller::GetInstance();
-			if (ctrl)
-				ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
-		}
-
-		return true;
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
 	}
 	else
 		return false;
@@ -857,16 +898,7 @@ bool ProtocolBridgingWrapper::SetProtocolMappingArea(ProtocolId protocolId, int 
 		else
 			return false;
 
-		m_processingNode.setStateXml(nodeXmlElement);
-
-		if (!dontSendNotification)
-		{
-			Controller* ctrl = Controller::GetInstance();
-			if (ctrl)
-				ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
-		}
-
-		return true;
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
 	}
 	else
 		return false;
@@ -924,16 +956,7 @@ bool ProtocolBridgingWrapper::SetProtocolInputDeviceIdentifier(ProtocolId protoc
 		else
 			return false;
 
-		m_processingNode.setStateXml(nodeXmlElement);
-
-		if (!dontSendNotification)
-		{
-			Controller* ctrl = Controller::GetInstance();
-			if (ctrl)
-				ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
-		}
-
-		return true;
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
 	}
 	else
 		return false;
@@ -991,16 +1014,7 @@ bool ProtocolBridgingWrapper::SetProtocolOutputDeviceIdentifier(ProtocolId proto
 		else
 			return false;
 
-		m_processingNode.setStateXml(nodeXmlElement);
-
-		if (!dontSendNotification)
-		{
-			Controller* ctrl = Controller::GetInstance();
-			if (ctrl)
-				ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
-		}
-
-		return true;
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
 	}
 	else
 		return false;
@@ -1075,19 +1089,37 @@ bool ProtocolBridgingWrapper::SetMidiAssignmentMapping(ProtocolId protocolId, Re
         else
             return false;
 
-        m_processingNode.setStateXml(nodeXmlElement);
-
-        if (!dontSendNotification)
-        {
-            Controller* ctrl = Controller::GetInstance();
-            if (ctrl)
-                ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
-        }
-
-        return true;
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
     }
     else
         return false;
+}
+
+/**
+ * Getter for the controller-understandable status per protocol as can be presented to the user.
+ * @param	protocolId	The id of the protocol to get the status for
+ * @return	The status as requested
+ */
+ObjectHandlingState ProtocolBridgingWrapper::GetProtocolState(ProtocolId protocolId) const
+{
+	if (m_bridgingProtocolState.count(protocolId) < 1)
+		return OHS_Invalid;
+	else
+		return m_bridgingProtocolState.at(protocolId);
+}
+
+/***
+ * Setter for the protocol status values hashed by protocol id.
+ * @param	protocolId	The id of the protocol to set a status value for
+ * @param	state		The state to set for the protocol
+ */
+void ProtocolBridgingWrapper::SetProtocolState(ProtocolId protocolId, ObjectHandlingState state)
+{
+	m_bridgingProtocolState[protocolId] = state;
+
+	auto ctrl = Controller::GetInstance();
+	if (ctrl)
+		ctrl->SetParameterChanged(DCS_Protocol, DCT_Online);
 }
 
 /**
@@ -1220,7 +1252,7 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 				}
 			}
 
-			m_processingNode.setStateXml(nodeXmlElement);
+			SetBridgingNodeStateXml(nodeXmlElement);
 
 			Controller* ctrl = Controller::GetInstance();
 			if (ctrl)
@@ -1238,25 +1270,39 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 bool ProtocolBridgingWrapper::UpdateActiveDS100SourceIds()
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
-	if (nodeXmlElement)
+	if (!nodeXmlElement)
+		return false;
+
+	auto objectHandlingXmlElement = nodeXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OBJECTHANDLING));
+	if (!objectHandlingXmlElement)
+		return false;
+
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return false;
+
+	auto extensionMode = ctrl->GetExtensionMode();
+
+	// Get currently active objects from controller and split them 
+	// into those relevant for first and second DS100
+	auto activeObjects = ctrl->GetActivatedRemoteObjects();
+	auto activeObjectsOnFirstDS100 = std::vector<RemoteObject>{};
+	auto activeObjectsOnSecondDS100 = std::vector<RemoteObject>{};
+	for (auto const& ro : activeObjects)
 	{
-		// we can't do anything here without the controller
-		auto ctrl = Controller::GetInstance();
-		if (!ctrl)
-			return false;
+		auto sourceId = ro._Addr._first;
 
-		// Get currently active objects from controller and split them 
-		// into those relevant for first and second DS100
-		auto activeObjects = ctrl->GetActivatedRemoteObjects();
-		auto activeObjectsOnFirstDS100 = std::vector<RemoteObject>{};
-		auto activeObjectsOnSecondDS100 = std::vector<RemoteObject>{};
-		for (auto const& ro : activeObjects)
+		switch (extensionMode)
 		{
-			auto sourceId = ro._Addr._first;
-
+		case EM_Off:
+			// We do not support anything exceeding one DS100 channelcount wise
+			if (sourceId <= DS100_CHANNELCOUNT)
+				activeObjectsOnFirstDS100.push_back(ro);
+			break;
+		case EM_Extend:
 			// We do not support anything exceeding two DS100 (ext. mode) channelcount wise
 			if (sourceId > DS100_EXTMODE_CHANNELCOUNT)
-				continue;
+				break;
 
 			// If the sourceId is out of range for a single DS100, take it as relevant 
 			// for second and map the sourceid back into a single DS100's source range
@@ -1270,47 +1316,51 @@ bool ProtocolBridgingWrapper::UpdateActiveDS100SourceIds()
 			{
 				activeObjectsOnFirstDS100.push_back(ro);
 			}
-		}
-
-		// insert active objects for first DS100 into its xml element
-		auto protocolXmlElement1stDS100 = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
-		if (protocolXmlElement1stDS100)
-		{
-			auto activeObjsXmlElement = protocolXmlElement1stDS100->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ACTIVEOBJECTS));
-			if (activeObjsXmlElement)
+			break;
+		case EM_Mirror:
+			// We do not support anything exceeding one DS100 channelcount wise
+			if (sourceId <= DS100_CHANNELCOUNT)
 			{
-				ProcessingEngineConfig::ReplaceActiveObjects(activeObjsXmlElement, activeObjectsOnFirstDS100);
+				activeObjectsOnFirstDS100.push_back(ro);
+				activeObjectsOnSecondDS100.push_back(ro);
 			}
-			else
-				return false;
+			break;
+		default:
+			break;
 		}
-		// first DS100 existence is mandatory, we can assume that an error occured if the corresp. xml element is not available (second DS100 xml element is optional)
+	}
+
+	// insert active objects for first DS100 into its xml element
+	auto protocolXmlElement1stDS100 = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
+	if (protocolXmlElement1stDS100)
+	{
+		auto activeObjsXmlElement = protocolXmlElement1stDS100->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ACTIVEOBJECTS));
+		if (activeObjsXmlElement)
+		{
+			ProcessingEngineConfig::ReplaceActiveObjects(activeObjsXmlElement, activeObjectsOnFirstDS100);
+		}
 		else
 			return false;
-
-		// insert active objects for second DS100 into its xml element
-		auto protocolXmlElement2ndDS100 = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_2_PROCESSINGPROTOCOL_ID));
-		if (protocolXmlElement2ndDS100)
-		{
-			auto activeObjsXmlElement = protocolXmlElement2ndDS100->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ACTIVEOBJECTS));
-			if (activeObjsXmlElement)
-			{
-				ProcessingEngineConfig::ReplaceActiveObjects(activeObjsXmlElement, activeObjectsOnSecondDS100);
-			}
-			else
-				return false;
-		}
-
-		// set updated xml config live
-		m_processingNode.setStateXml(nodeXmlElement);
-
-		// broadcast that bridging config has changed
-		ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
-
-		return true;
 	}
+	// first DS100 existence is mandatory, we can assume that an error occured if the corresp. xml element is not available (second DS100 xml element is optional)
 	else
 		return false;
+
+	// insert active objects for second DS100 into its xml element
+	auto protocolXmlElement2ndDS100 = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_2_PROCESSINGPROTOCOL_ID));
+	if (protocolXmlElement2ndDS100)
+	{
+		auto activeObjsXmlElement = protocolXmlElement2ndDS100->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ACTIVEOBJECTS));
+		if (activeObjsXmlElement)
+		{
+			ProcessingEngineConfig::ReplaceActiveObjects(activeObjsXmlElement, activeObjectsOnSecondDS100);
+		}
+		else
+			return false;
+	}
+
+	// set updated xml config live
+	return SetBridgingNodeStateXml(nodeXmlElement);
 }
 
 /**
@@ -1421,16 +1471,7 @@ bool ProtocolBridgingWrapper::SetDS100MsgRate(int msgRate, bool dontSendNotifica
 		else
 			return false;
 
-		m_processingNode.setStateXml(nodeXmlElement);
-
-		if (!dontSendNotification)
-		{
-			Controller* ctrl = Controller::GetInstance();
-			if (ctrl)
-				ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
-		}
-
-		return true;
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
 	}
 	else
 		return false;
@@ -1452,6 +1493,8 @@ ExtensionMode ProtocolBridgingWrapper::GetDS100ExtensionMode()
 			auto objectHandlingMode = ProcessingEngineConfig::ObjectHandlingModeFromString(objectHandlingXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE)));
 			switch (objectHandlingMode)
 			{
+			case OHM_Mirror_dualA_withValFilter:
+				return EM_Mirror;
 			case OHM_Mux_nA_to_mB_withValFilter:
 				return EM_Extend;
 			case OHM_Forward_only_valueChanges:
@@ -1495,8 +1538,9 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 			{
 			case EM_Off:
 			{
-				// EM_Off refers to Bypass object handling mode without any channelcount parameter attributes
+				// EM_Off refers to valuechange forwarding object handling mode without any channelcount parameter attributes
 				objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Forward_only_valueChanges));
+
 				// remove elements that are not used by this ohm
 				auto protocolAChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
 				if (protocolAChCntXmlElement)
@@ -1504,6 +1548,9 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 				auto protocolBChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLBCHCNT));
 				if (protocolBChCntXmlElement)
 					objectHandlingXmlElement->removeChildElement(protocolBChCntXmlElement, true);
+				auto protoFailoverTimeXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::FAILOVERTIME));
+				if (protoFailoverTimeXmlElement)
+					objectHandlingXmlElement->removeChildElement(protoFailoverTimeXmlElement, true);
 
 				// update precision element
 				auto precisionXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
@@ -1520,6 +1567,11 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 			{
 				// EM_Extend refers to Multiplex nA to mB object handling mode with channel A and B parameter attributes
 				objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Mux_nA_to_mB_withValFilter));
+
+				// remove elements that are not used by this ohm
+				auto protoFailoverTimeXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::FAILOVERTIME));
+				if (protoFailoverTimeXmlElement)
+					objectHandlingXmlElement->removeChildElement(protoFailoverTimeXmlElement, true);
 				
 				// update first DS100 channel count elements
 				auto protocolAChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
@@ -1553,6 +1605,39 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 			}
 			break;
 			case EM_Mirror:
+			{
+				// EM_Extend refers to Multiplex nA to mB object handling mode with channel A and B parameter attributes
+				objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Mirror_dualA_withValFilter));
+				
+				// remove elements that are not used by this ohm
+				auto protocolAChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
+				if (protocolAChCntXmlElement)
+					objectHandlingXmlElement->removeChildElement(protocolAChCntXmlElement, true);
+				auto protocolBChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLBCHCNT));
+				if (protocolBChCntXmlElement)
+					objectHandlingXmlElement->removeChildElement(protocolBChCntXmlElement, true);
+
+				// update failover time element
+				auto protoFailoverTimeXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::FAILOVERTIME));
+				if (!protoFailoverTimeXmlElement)
+					protoFailoverTimeXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::FAILOVERTIME));
+				auto protoFailoverTimeTextXmlElement = protoFailoverTimeXmlElement->getFirstChildElement();
+				if (protoFailoverTimeTextXmlElement && protoFailoverTimeTextXmlElement->isTextElement())
+					protoFailoverTimeTextXmlElement->setText("1000");
+				else
+					protoFailoverTimeXmlElement->addTextElement("1000");
+
+				// update precision element
+				auto precisionXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
+				if (!precisionXmlElement)
+					precisionXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
+				auto precisionTextXmlElement = precisionXmlElement->getFirstChildElement();
+				if (precisionTextXmlElement && precisionTextXmlElement->isTextElement())
+					precisionTextXmlElement->setText(String(DS100_VALUCHANGE_SENSITIVITY));
+				else if (precisionTextXmlElement)
+					precisionXmlElement->addTextElement(String(DS100_VALUCHANGE_SENSITIVITY));
+			}
+			break;
 			default:
 				break;
 			}
@@ -1572,28 +1657,28 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 				// EM_Off requires the second DS100 protocol to not be present
 				if (protocolA2XmlElement)
 					nodeXmlElement->removeChildElement(protocolA2XmlElement, true);
+
+				auto ctrl = Controller::GetInstance();
+				if (ctrl)
+					ctrl->SetSecondDS100IpAddress(DCS_Host, "", dontSendNotification);
 			}
 			break;
 			case EM_Extend:
+			case EM_Mirror:
 			{
 				// EM_Extend requires the second DS100 protocol to be present
 				if (!protocolA2XmlElement)
 				{
 					protocolA2XmlElement = std::make_unique<XmlElement>(*protocolA1XmlElement).release();
 					protocolA2XmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_2_PROCESSINGPROTOCOL_ID));
-					auto ipAddressXmlElement = protocolA2XmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
-					if (ipAddressXmlElement)
-					{
-						ipAddressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT2_IP);
-					}
-					else
-						return false;
-
 					nodeXmlElement->addChildElement(protocolA2XmlElement);
+
+					auto ctrl = Controller::GetInstance();
+					if (ctrl)
+						ctrl->SetSecondDS100IpAddress(DCS_Host, PROTOCOL_DEFAULT2_IP, dontSendNotification);
 				}
 			}
 			break;
-			case EM_Mirror:
 			default:
 				break;
 			}
@@ -1601,19 +1686,50 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 		else
 			return false;
 
-		m_processingNode.setStateXml(nodeXmlElement);
-
-		if (!dontSendNotification)
-		{
-			Controller* ctrl = Controller::GetInstance();
-			if (ctrl)
-				ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
-		}
-
-		return true;
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
 	}
 	else
 		return false;
+}
+
+/**
+ * Gets the status of the first DS100 protocol connection.
+ * This forwards the call to the generic implementation that itself gets the info from BridgingWrapper.
+ * @return	The protocol status
+ */
+ObjectHandlingState ProtocolBridgingWrapper::GetDS100State() const
+{
+	return GetProtocolState(DS100_1_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the status of the first DS100 protocol connection.
+ * This forwards the call to the generic implementation that itself gets the info from BridgingWrapper.
+ * @param	state	The protocol state
+ */
+void ProtocolBridgingWrapper::SetDS100State(ObjectHandlingState state)
+{
+	SetProtocolState(DS100_1_PROCESSINGPROTOCOL_ID, state);
+}
+
+/**
+ * Gets the status of the second DS100 protocol connection.
+ * This forwards the call to the generic implementation that itself gets the info from BridgingWrapper.
+ * @return	The protocol status
+ */
+ObjectHandlingState ProtocolBridgingWrapper::GetSecondDS100State() const
+{
+	return GetProtocolState(DS100_2_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the status of the first DS100 protocol connection.
+ * This forwards the call to the generic implementation that itself gets the info from BridgingWrapper.
+ * @param	state	The protocol state
+ */
+void ProtocolBridgingWrapper::SetSecondDS100State(ObjectHandlingState state)
+{
+	SetProtocolState(DS100_2_PROCESSINGPROTOCOL_ID, state);
 }
 
 /**

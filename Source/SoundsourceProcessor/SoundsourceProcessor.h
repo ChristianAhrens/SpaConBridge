@@ -94,7 +94,7 @@ public:
 	ComsMode GetComsMode() const;
 	void SetComsMode(DataChangeSource changeSource, ComsMode newMode);
 	void RestoreComsMode(DataChangeSource changeSource);
-	bool GetOnline() const;
+	bool IsOnline() const;
 
 	float GetParameterValue(AutomationParameterIndex paramIdx, bool normalized = false) const;
 	void SetParameterValue(DataChangeSource changeSource, AutomationParameterIndex paramIdx, float newValue);

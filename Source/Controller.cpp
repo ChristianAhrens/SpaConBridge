@@ -363,7 +363,6 @@ void Controller::SetDS100IpAddress(DataChangeSource changeSource, String ipAddre
 		m_protocolBridge.SetDS100IpAddress(ipAddress, dontSendNotification);
 
 		// Start "offline" after changing IP address
-		m_protocolBridge.SetDS100Status(ProtocolBridgingWrapper::BPS_Offline);
 		m_heartBeatsTx = 0;
 
 		// Signal the change to all Processors. 
@@ -400,7 +399,6 @@ void Controller::SetSecondDS100IpAddress(DataChangeSource changeSource, String i
 		m_protocolBridge.SetSecondDS100IpAddress(ipAddress, dontSendNotification);
 
 		// Start "offline" after changing IP address
-		m_protocolBridge.SetSecondDS100Status(ProtocolBridgingWrapper::BPS_Offline);
 		m_heartBeatsTx = 0;
 
 		// Signal the change to all Processors. 
@@ -430,20 +428,44 @@ bool Controller::IsOnline() const
 
 /**
  * Getter function for the DS100 bridging communication state.
- * @return		True if communication channel with second DS100 is online.
+ * @return		True if communication channel with first DS100 is online.
  */
 bool Controller::IsFirstDS100Online() const
 {
-	return (m_protocolBridge.GetDS100Status() == ProtocolBridgingWrapper::BPS_Online);
+	return ((m_protocolBridge.GetDS100State() & OHS_Protocol_Up) == OHS_Protocol_Up);
+}
+
+/**
+ * Getter function for the DS100 bridging mirror state.
+ * @return		True if first DS100 is currently master in mirror extension mode.
+ */
+bool Controller::IsFirstDS100MirrorMaster() const
+{
+	if (GetExtensionMode() != EM_Mirror)
+		return false;
+
+	return ((m_protocolBridge.GetDS100State() & OHS_Protocol_Master) == OHS_Protocol_Master);
 }
 
 /**
  * Getter function for the DS100 bridging communication state.
- * @return		True if communication channel with first DS100 is online.
+ * @return		True if communication channel with second DS100 is online.
  */
 bool Controller::IsSecondDS100Online() const
 {
-	return (m_protocolBridge.GetSecondDS100Status() == ProtocolBridgingWrapper::BPS_Online);
+	return ((m_protocolBridge.GetSecondDS100State() & OHS_Protocol_Up) == OHS_Protocol_Up);
+}
+
+/**
+ * Getter function for the DS100 bridging mirror state.
+ * @return		True if second DS100 is currently master in mirror extension mode.
+ */
+bool Controller::IsSecondDS100MirrorMaster() const
+{
+	if (GetExtensionMode() != EM_Mirror)
+		return false;
+
+	return ((m_protocolBridge.GetSecondDS100State() & OHS_Protocol_Master) == OHS_Protocol_Master);
 }
 
 /**
@@ -519,8 +541,6 @@ void Controller::SetExtensionMode(DataChangeSource changeSource, ExtensionMode m
 		m_protocolBridge.SetDS100ExtensionMode(mode, dontSendNotification);
 
 		// Start "offline" after changing mode
-		m_protocolBridge.SetDS100Status(ProtocolBridgingWrapper::BPS_Offline);
-		m_protocolBridge.SetSecondDS100Status(ProtocolBridgingWrapper::BPS_Offline);
 		m_heartBeatsTx = 0;
 
 		// Signal the change to all Processors. 

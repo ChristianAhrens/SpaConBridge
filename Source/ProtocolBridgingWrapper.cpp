@@ -1669,6 +1669,10 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 				// EM_Off requires the second DS100 protocol to not be present
 				if (protocolA2XmlElement)
 					nodeXmlElement->removeChildElement(protocolA2XmlElement, true);
+
+				auto ctrl = Controller::GetInstance();
+				if (ctrl)
+					ctrl->SetSecondDS100IpAddress(DCS_Host, "", dontSendNotification);
 			}
 			break;
 			case EM_Extend:
@@ -1679,15 +1683,11 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 				{
 					protocolA2XmlElement = std::make_unique<XmlElement>(*protocolA1XmlElement).release();
 					protocolA2XmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_2_PROCESSINGPROTOCOL_ID));
-					auto ipAddressXmlElement = protocolA2XmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
-					if (ipAddressXmlElement)
-					{
-						ipAddressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT2_IP);
-					}
-					else
-						return false;
-
 					nodeXmlElement->addChildElement(protocolA2XmlElement);
+
+					auto ctrl = Controller::GetInstance();
+					if (ctrl)
+						ctrl->SetSecondDS100IpAddress(DCS_Host, PROTOCOL_DEFAULT2_IP, dontSendNotification);
 				}
 			}
 			break;

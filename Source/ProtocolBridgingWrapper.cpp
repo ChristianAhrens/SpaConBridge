@@ -66,17 +66,34 @@ void ProtocolBridgingWrapper::AddListener(ProtocolBridgingWrapper::Listener* lis
  */
 bool ProtocolBridgingWrapper::SendMessage(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData)
 {
-	if (msgData._addrVal._first > DS100_CHANNELCOUNT)
+	if (GetDS100ExtensionMode() == EM_Mirror)
 	{
-		auto mappedChannel = static_cast<std::int32_t>(msgData._addrVal._first % DS100_CHANNELCOUNT);
-		if (mappedChannel == 0)
-			mappedChannel = static_cast<std::int32_t>(DS100_CHANNELCOUNT);
-		msgData._addrVal._first = mappedChannel;
+		// if the first DS100 is master, send data to it
+		if ((GetProtocolState(DS100_1_PROCESSINGPROTOCOL_ID) & OHS_Protocol_Master) == OHS_Protocol_Master)
+			return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
 
-		return m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData);
+		// if the second DS100 is master, send data to it
+		else if ((GetProtocolState(DS100_2_PROCESSINGPROTOCOL_ID) & OHS_Protocol_Master) == OHS_Protocol_Master)
+			return m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData);
+
+		// of no master is present, we have an undefined state, cannot happen!
+		else
+			return false;
 	}
 	else
-		return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
+	{
+		if (msgData._addrVal._first > DS100_CHANNELCOUNT)
+		{
+			auto mappedChannel = static_cast<std::int32_t>(msgData._addrVal._first % DS100_CHANNELCOUNT);
+			if (mappedChannel == 0)
+				mappedChannel = static_cast<std::int32_t>(DS100_CHANNELCOUNT);
+			msgData._addrVal._first = mappedChannel;
+
+			return m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData);
+		}
+		else
+			return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
+	}
 }
 
 /**

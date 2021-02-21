@@ -362,9 +362,6 @@ void Controller::SetDS100IpAddress(DataChangeSource changeSource, String ipAddre
 
 		m_protocolBridge.SetDS100IpAddress(ipAddress, dontSendNotification);
 
-		// Start "offline" after changing IP address
-		m_heartBeatsTx = 0;
-
 		// Signal the change to all Processors. 
 		SetParameterChanged(changeSource, (DCT_IPAddress | DCT_Online));
 
@@ -397,9 +394,6 @@ void Controller::SetSecondDS100IpAddress(DataChangeSource changeSource, String i
 		m_SecondDS100IpAddress = ipAddress;
 
 		m_protocolBridge.SetSecondDS100IpAddress(ipAddress, dontSendNotification);
-
-		// Start "offline" after changing IP address
-		m_heartBeatsTx = 0;
 
 		// Signal the change to all Processors. 
 		SetParameterChanged(changeSource, (DCT_IPAddress | DCT_Online));
@@ -539,9 +533,6 @@ void Controller::SetExtensionMode(DataChangeSource changeSource, ExtensionMode m
 		m_DS100ExtensionMode = mode;
 
 		m_protocolBridge.SetDS100ExtensionMode(mode, dontSendNotification);
-
-		// Start "offline" after changing mode
-		m_heartBeatsTx = 0;
 
 		// Signal the change to all Processors. 
 		SetParameterChanged(changeSource, (DCT_ExtensionMode | DCT_Online));
@@ -807,9 +798,6 @@ void Controller::timerCallback()
 	const ScopedLock lock(m_mutex);
 	if (m_processors.size() > 0)
 	{
-		// Check that we don't flood the line with pings, only send them in small intervals.
-		bool sendKeepAlive = ((m_heartBeatsTx * m_oscMsgRate) > KEEPALIVE_INTERVAL);
-
 		float newDualFloatValue[2];
 		RemoteObjectMessageData newMsgData;
 
@@ -956,13 +944,6 @@ void Controller::timerCallback()
 						jassertfalse;
 						break;
 				}
-
-				if (msgSent)
-				{
-					// Since we are expecting at least one response from the DS100, 
-					// we can use that as heartbeat, no need to send an extra ping.
-					sendKeepAlive = false;
-				}
 			}
 
 			// Flag the parameters for which we just sent a SET command out.
@@ -971,20 +952,6 @@ void Controller::timerCallback()
 			// All changed parameters were sent out, so we can reset their flags now.
 			processor->PopParameterChanged(DCS_Protocol, DCT_AutomationParameters);
 		}
-		
-		if (sendKeepAlive)
-		{
-			// If we aren't expecting any responses from the DS100, we need to at least send a "ping"
-			// so that we can use the "pong" to check our connection status.
-			newMsgData._valCount = 0;
-			newMsgData._valType = ROVT_NONE;
-			newMsgData._payload = 0;
-			newMsgData._payloadSize = 0;
-			m_protocolBridge.SendMessage(ROI_HeartbeatPing, newMsgData);
-		}
-
-		if (m_heartBeatsTx < MAX_HEARTBEAT_COUNT)
-			m_heartBeatsTx++;
 
 		// If we have just crossed the treshold, force all processors to update their
 		// GUI, since we are now Offline.

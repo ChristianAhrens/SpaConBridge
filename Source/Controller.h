@@ -176,7 +176,6 @@ protected:
 	int								m_oscMsgRate;			/**< Interval at which OSC messages are sent to the host, in ms. */
 	DataChangeType					m_parametersChanged[DCS_Max];	/**< Keep track of which OSC parameters have changed recently.
 																	 * The array has one entry for each application module (see enum DataChangeSource). */
-	int								m_heartBeatsTx;			/**< Number of timer intervals since the last OSC message was sent out. */
 	CriticalSection					m_mutex;				/**< A re-entrant mutex. Safety first. */
 	std::map<SourceId, bool>		m_soundObjectSelection;	/**< The current select state of sound objects. */
 

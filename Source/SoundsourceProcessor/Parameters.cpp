@@ -87,7 +87,6 @@ GestureManagedAudioParameterFloat::~GestureManagedAudioParameterFloat()
  */
 void GestureManagedAudioParameterFloat::BeginGuiGesture()
 {
-	DBG(String(__FUNCTION__));
 	jassert(m_inGuiGesture == false);
 	if (!m_inGuiGesture)
 	{
@@ -102,7 +101,6 @@ void GestureManagedAudioParameterFloat::BeginGuiGesture()
  */
 void GestureManagedAudioParameterFloat::EndGuiGesture()
 {
-	DBG(String(__FUNCTION__));
 	jassert(m_inGuiGesture == true);
 	if (m_inGuiGesture)
 	{

@@ -67,7 +67,7 @@ public:
 
 	//==============================================================================
 	static constexpr std::uint32_t	m_attachedItemWidth{ 150 };
-	static constexpr std::uint32_t	m_layoutItemWidth{ 195 };
+	static constexpr std::uint32_t	m_layoutItemWidth{ 205 };
 
 protected:
 	//==============================================================================

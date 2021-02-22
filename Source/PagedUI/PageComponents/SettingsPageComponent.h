@@ -65,6 +65,10 @@ public:
 	//==============================================================================
 	std::function<void(HeaderWithElmListComponent*, bool)>	toggleIsActiveCallback;
 
+	//==============================================================================
+	static constexpr std::uint32_t	m_attachedItemWidth{ 150 };
+	static constexpr std::uint32_t	m_layoutItemWidth{ 205 };
+
 protected:
 	//==============================================================================
 	void setElementsActiveState(bool toggleState);
@@ -147,7 +151,7 @@ private:
 	std::unique_ptr<JUCEAppBasics::ZeroconfDiscoverComponent>	m_DS100ZeroconfDiscovery;
 	std::unique_ptr<JUCEAppBasics::SplitButtonComponent>		m_SecondDS100ModeButton;
 	std::unique_ptr<Label>										m_SecondDS100ModeLabel;
-	const std::vector<std::string>								m_SecondDS100Modes{ "Off", "Extend", "Mirror" };
+	const std::vector<std::string>								m_SecondDS100Modes{ "Off", "Extend", "Parallel", "Mirror" };
 	std::map<std::string, uint64>								m_SecondDS100ModeButtonIds;
 
 	std::unique_ptr<TextEditor>									m_SecondDS100IpAddressEdit;

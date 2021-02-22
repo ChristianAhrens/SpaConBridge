@@ -259,6 +259,8 @@
                   file="submodules/JUCE-AppBasics/Resources/Images/folder_open-24px.svg"/>
             <FILE id="N9NqBe" name="grain-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/grain-24px.svg"/>
             <FILE id="rlRTHW" name="help-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/help-24px.svg"/>
+            <FILE id="Jc6pvI" name="mobiledata_off-24px.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/mobiledata_off-24px.svg"/>
             <FILE id="f9cDvj" name="save-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/save-24px.svg"/>
             <FILE id="Hiyloc" name="school-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/school-24px.svg"/>
             <FILE id="vVMBfg" name="settings-24px.svg" compile="0" resource="1"
@@ -267,8 +269,6 @@
                   file="submodules/JUCE-AppBasics/Resources/Images/show_chart-24px.svg"/>
             <FILE id="YFXXxo" name="vertical_split-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/vertical_split-24px.svg"/>
-            <FILE id="nTMZyk" name="volume_off-24px.svg" compile="0" resource="1"
-                  file="submodules/JUCE-AppBasics/Resources/Images/volume_off-24px.svg"/>
           </GROUP>
         </GROUP>
       </GROUP>

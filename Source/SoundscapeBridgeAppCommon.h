@@ -172,7 +172,8 @@ enum ExtensionMode
 {
 	EM_Off = 0,
 	EM_Extend,
-	EM_Mirror
+	EM_Mirror,
+	EM_Parallel,
 };
 
 /**

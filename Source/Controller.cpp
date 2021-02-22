@@ -414,6 +414,7 @@ bool Controller::IsOnline() const
 		return IsFirstDS100Online();
 	case ExtensionMode::EM_Extend:
 	case ExtensionMode::EM_Mirror:
+	case ExtensionMode::EM_Parallel:
 		return (IsFirstDS100Online() && IsSecondDS100Online());
 	default:
 		return false;

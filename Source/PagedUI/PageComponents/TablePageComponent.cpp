@@ -1489,7 +1489,7 @@ void MuteButtonContainer::updateBridgingMuteButtons()
 		return;
 
 	// create the required button drawable images based on lookandfeel colours
-	String imageName = BinaryData::volume_off24px_svg;
+	String imageName = BinaryData::mobiledata_off24px_svg;
 	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
 	JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
 		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
@@ -1542,7 +1542,7 @@ void MuteButtonContainer::updateDrawableButtonImageColours()
 		return;
 
 	// create the required button drawable images based on lookandfeel colours
-	String imageName = BinaryData::volume_off24px_svg;
+	String imageName = BinaryData::mobiledata_off24px_svg;
 	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
 	JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
 		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),

@@ -103,7 +103,6 @@ SoundsourceProcessor::SoundsourceProcessor(bool insertToConfig)
 
 	// Default OSC communication mode.
 	m_comsMode = CM_Off;
-	m_comsModeWhenNotBypassed = m_comsMode;
 
 	// Start with all parameter changed flags cleared. Function setStateInformation() 
 	// will check whether or not we should initialize parameters when starting up.
@@ -346,21 +345,6 @@ bool SoundsourceProcessor::IsParamInTransit(DataChangeType paramsChanged) const
 }
 
 /**
- * Function called when the "Overview" button on the GUI is clicked.
- */
-void SoundsourceProcessor::OnOverviewButtonClicked()
-{
-	PageComponentManager* pageMgr = PageComponentManager::GetInstance();
-	if (pageMgr)
-	{
-		pageMgr->OpenPageContainer();
-
-		// Set the selected coordinate mapping on the Overview slider to this Plug-in's setting.
-		pageMgr->SetSelectedMapping(GetMappingId());
-	}
-}
-
-/**
  * Overriden from AppConfiguration::XmlConfigurableElement to dump this objects' settings
  * to a XML element structure that is returned and written to config file by the
  * singleton AppConfiguration class implementation.
@@ -433,26 +417,12 @@ void SoundsourceProcessor::SetComsMode(DataChangeSource changeSource, ComsMode n
 	{
 		m_comsMode = newMode;
 
-		// Backup last non-bypass mode.
-		if (newMode != CM_Off)
-			m_comsModeWhenNotBypassed = newMode;
-
 		// Reset response-ignoring mechanism.
 		m_paramSetCommandsInTransit = DCT_None;
 
 		// Signal change to other modules in the plugin.
 		SetParameterChanged(changeSource, DCT_ComsMode);
 	}
-}
-
-/**
- * Restore the Plugin's OSC Rx/Tx mode to whatever it was before going into Bypass.
- * @param changeSource	The application module which is causing the property change.
- */
-void SoundsourceProcessor::RestoreComsMode(DataChangeSource changeSource)
-{
-	if (m_comsModeWhenNotBypassed != CM_Off)
-		SetComsMode(changeSource, m_comsModeWhenNotBypassed);
 }
 
 /**
@@ -558,19 +528,6 @@ int SoundsourceProcessor::GetMessageRate() const
 		rate = ctrl->GetRate();
 
 	return rate;
-}
-
-/**
- * Getter function for the last OSCSender connection status.
- * @return	True if the last message attempted by the OSCSender was successful, false if it failed.
- */
-bool SoundsourceProcessor::IsOnline() const
-{
-	Controller* ctrl = Controller::GetInstance();
-	if (ctrl)
-		return ctrl->IsOnline();
-
-	return false;
 }
 
 /**

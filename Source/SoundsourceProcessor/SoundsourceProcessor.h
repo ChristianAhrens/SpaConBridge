@@ -62,16 +62,6 @@ class SoundsourceProcessor :
 	public AppConfiguration::XmlConfigurableElement
 {
 public:
-	/**
-	 * Target hosts or DAWs which require special handling of some kind.
-	 */
-	enum TargetHost
-	{
-		TargetHost_Unknown = 0,
-		TargetHost_ProTools,
-		TargetHost_S6L
-	};
-
 	SoundsourceProcessor(bool insertToConfig = true);
 	~SoundsourceProcessor() override;
 
@@ -93,8 +83,6 @@ public:
 
 	ComsMode GetComsMode() const;
 	void SetComsMode(DataChangeSource changeSource, ComsMode newMode);
-	void RestoreComsMode(DataChangeSource changeSource);
-	bool IsOnline() const;
 
 	float GetParameterValue(AutomationParameterIndex paramIdx, bool normalized = false) const;
 	void SetParameterValue(DataChangeSource changeSource, AutomationParameterIndex paramIdx, float newValue);
@@ -106,8 +94,6 @@ public:
 	void Tick();
 	void SetParamInTransit(DataChangeType paramsChanged);
 	bool IsParamInTransit(DataChangeType paramsChanged) const;
-
-	void OnOverviewButtonClicked();
 
 	// Overriden functions of class AppConfiguration::XmlConfigurableElement
 	std::unique_ptr<XmlElement> createStateXml() override;
@@ -168,11 +154,6 @@ protected:
 	 * Current OSC communication mode, sending and/or receiving.
 	 */
 	ComsMode					m_comsMode;
-
-	/**
-	 * Previous OSC communication mode, before going into Bypass.
-	 */
-	ComsMode					m_comsModeWhenNotBypassed;
 
 	/*
 	 * Coordinate mapping index (1 to 4).

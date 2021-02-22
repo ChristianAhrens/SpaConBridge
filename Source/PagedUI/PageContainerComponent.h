@@ -50,6 +50,7 @@ namespace SoundscapeBridgeApp
 class CustomButtonTabbedComponent;
 class TablePageComponent;
 class MultiSurfacePageComponent;
+class MatrixIOPageComponent;
 class SettingsPageComponent;
 class StatisticsPageComponent;
 class AboutPageComponent;
@@ -179,6 +180,7 @@ private:
 	std::unique_ptr<CustomButtonTabbedComponent>	m_tabbedComponent;		/**> A container for tabs. */
 	std::unique_ptr<TablePageComponent>				m_tablePage;			/**> The actual table container inside this component. */
 	std::unique_ptr<MultiSurfacePageComponent>		m_multiSliderPage;		/**> Container for multi-slider. */
+    std::unique_ptr<MatrixIOPageComponent>          m_matrixIOPage;         /**> Container for matrix inputs/outputs. */
 	std::unique_ptr<SettingsPageComponent>			m_settingsPage;			/**> Container for settings component. */
 	std::unique_ptr<StatisticsPageComponent>		m_statisticsPage;		/**> Container for statistics component. */
 	std::unique_ptr<AboutPageComponent>				m_aboutPage;			/**> Container for about component. */
@@ -202,6 +204,7 @@ public:
 	{
 		OTI_Table = 0,
 		OTI_MultiSlider,
+        OTI_MatrixIOs,
 		OTI_Statistics,
 		OTI_Settings,
 	};

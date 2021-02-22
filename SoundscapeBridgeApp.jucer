@@ -267,6 +267,7 @@
                   file="submodules/JUCE-AppBasics/Resources/Images/settings-24px.svg"/>
             <FILE id="N7oVfc" name="show_chart-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/show_chart-24px.svg"/>
+            <FILE id="nSAA4c" name="tune-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/tune-24px.svg"/>
             <FILE id="YFXXxo" name="vertical_split-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/vertical_split-24px.svg"/>
           </GROUP>
@@ -326,6 +327,10 @@
                 file="Source/PagedUI/PageComponents/AboutPageComponent.cpp"/>
           <FILE id="swNf0J" name="AboutPageComponent.h" compile="0" resource="0"
                 file="Source/PagedUI/PageComponents/AboutPageComponent.h"/>
+          <FILE id="Po7Qsu" name="MatrixIOPageComponent.cpp" compile="1" resource="0"
+                file="Source/PagedUI/PageComponents/MatrixIOPageComponent.cpp"/>
+          <FILE id="XzusXk" name="MatrixIOPageComponent.h" compile="0" resource="0"
+                file="Source/PagedUI/PageComponents/MatrixIOPageComponent.h"/>
           <FILE id="bcX4Ju" name="MultisurfacePageComponent.cpp" compile="1"
                 resource="0" file="Source/PagedUI/PageComponents/MultisurfacePageComponent.cpp"/>
           <FILE id="GPUSzO" name="MultisurfacePageComponent.h" compile="0" resource="0"

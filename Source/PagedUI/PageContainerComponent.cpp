@@ -39,6 +39,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PageComponentManager.h"
 #include "PageComponents/TablePageComponent.h"
 #include "PageComponents/MultisurfacePageComponent.h"
+#include "PageComponents/MatrixIOPageComponent.h"
 #include "PageComponents/SettingsPageComponent.h"
 #include "PageComponents/StatisticsPageComponent.h"
 #include "PageComponents/AboutPageComponent.h"
@@ -112,6 +113,7 @@ PageContainerComponent::PageContainerComponent()
 	// Create the pages.
 	m_tablePage = std::make_unique<TablePageComponent>();
 	m_multiSliderPage = std::make_unique<MultiSurfacePageComponent>();
+    m_matrixIOPage = std::make_unique<MatrixIOPageComponent>();
 	m_settingsPage = std::make_unique<SettingsPageComponent>();
 	m_statisticsPage = std::make_unique<StatisticsPageComponent>();
 	m_aboutPage = std::make_unique<AboutPageComponent>();
@@ -128,7 +130,8 @@ PageContainerComponent::PageContainerComponent()
 	m_tabbedComponent->SetIsHandlingChanges(false);
 	m_tabbedComponent->addTab("Table", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_tablePage.get(), false, CustomButtonTabbedComponent::OTI_Table);
 	m_tabbedComponent->addTab("Slider", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSliderPage.get(), false, CustomButtonTabbedComponent::OTI_MultiSlider);
-	m_tabbedComponent->addTab("Statistics", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_statisticsPage.get(), false, CustomButtonTabbedComponent::OTI_Statistics);
+	m_tabbedComponent->addTab("Matrix IOs", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_matrixIOPage.get(), false, CustomButtonTabbedComponent::OTI_MatrixIOs);
+    m_tabbedComponent->addTab("Statistics", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_statisticsPage.get(), false, CustomButtonTabbedComponent::OTI_Statistics);
 	m_tabbedComponent->addTab("Settings", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_settingsPage.get(), false, CustomButtonTabbedComponent::OTI_Settings);
 	m_tabbedComponent->SetIsHandlingChanges(true);
 
@@ -227,6 +230,7 @@ void PageContainerComponent::resized()
 	auto rect = Rectangle<int>(0, 44, w, getLocalBounds().getHeight() - 89);
 	m_tablePage->setBounds(rect);
 	m_multiSliderPage->setBounds(rect);
+    m_matrixIOPage->setBounds(rect);
 	m_settingsPage->setBounds(rect);
 	m_statisticsPage->setBounds(rect);
 
@@ -339,6 +343,18 @@ void PageContainerComponent::UpdateGui(bool init)
 			startTimer(GUI_UPDATE_RATE_FAST);
 		}
 	}
+    else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_MatrixIOs)
+    {
+        if (m_matrixIOPage)
+            m_matrixIOPage->UpdateGui(init);
+
+        // When multi-slider is active, we refresh the GUI faster
+        if (getTimerInterval() == GUI_UPDATE_RATE_SLOW)
+        {
+            //DBG("PageContainerComponent::timerCallback: Switching to GUI_UPDATE_RATE_FAST");
+            startTimer(GUI_UPDATE_RATE_FAST);
+        }
+    }
 }
 
 /**
@@ -522,6 +538,9 @@ void CustomDrawableTabBarButton::updateDrawableButtonImageColours()
 	case CustomButtonTabbedComponent::OTI_MultiSlider:
 		imageName = BinaryData::grain24px_svg;
 		break;
+    case CustomButtonTabbedComponent::OTI_MatrixIOs:
+        imageName = BinaryData::tune24px_svg;
+        break;
 	case CustomButtonTabbedComponent::OTI_Settings:
 		imageName = BinaryData::settings24px_svg;
 		break;

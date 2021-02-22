@@ -1,3 +1,12 @@
+/*
+  ==============================================================================
+
+    MatrixIOPageComponent.h
+    Created: 22 Feb 2021 4:21:34pm
+    Author:  Christian Ahrens
+
+  ==============================================================================
+*/
 /* Copyright (c) 2020-2021, Christian Ahrens
  *
  * This file is part of SoundscapeBridgeApp <https://github.com/ChristianAhrens/SoundscapeBridgeApp>
@@ -16,10 +25,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #pragma once
 
-#include <JuceHeader.h>
+#include "PageComponentBase.h"
 
 
 namespace SoundscapeBridgeApp
@@ -27,40 +35,26 @@ namespace SoundscapeBridgeApp
 
 
 /**
- * Abstract class PageComponentBase.
- * Must be reimplemented to provide a component for an app page.
+ * Class MatrixIOPageComponent is a component that contains
+ * matrix inputs and outputs processor elements
  */
-class PageComponentBase : public Component
+class MatrixIOPageComponent : public PageComponentBase
 {
 public:
-
-	/**
-	 * Overlay types. There can only be one active at the time.
-	 */
-	enum PageComponentType
-	{
-		PCT_Unknown = 0,
-		PCT_Overview,
-		PCT_MultiSlide,
-        PCT_MatrixIOs,
-		PCT_Settings,
-		PCT_Statistics,
-		PCT_About
-	};
-
-	explicit PageComponentBase(PageComponentType type);
-	~PageComponentBase() override;
+	MatrixIOPageComponent();
+	~MatrixIOPageComponent() override;
 
 	//==============================================================================
-	PageComponentType GetPageComponentType() const;
+	void UpdateGui(bool init) override;
 
+protected:
 	//==============================================================================
-	virtual void UpdateGui(bool init) = 0;
+	void paint(Graphics&) override;
+	void resized() override;
 
 private:
-	PageComponentType	m_pageComponentType;	/**> Type of page as specified by the PageComponentType enum. */
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PageComponentBase)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixIOPageComponent)
 };
 
 

@@ -259,7 +259,7 @@ void HeaderWithElmListComponent::resized()
 		{
 			fb.items.add(FlexItem(*component.first.get())
 				.withHeight(itemHeight)
-				.withMaxWidth(150)
+				.withMaxWidth(m_layoutItemWidth)
 				.withMargin(FlexItem::Margin(itemMargin, itemMargin, itemMargin, 130 + itemMargin)));
 			itemCount++;
 		}
@@ -713,7 +713,7 @@ void SettingsSectionsComponent::resized()
 {
 	auto margin = 3.0f;
 
-	auto minWidth = 300;
+	auto minWidth = HeaderWithElmListComponent::m_attachedItemWidth + HeaderWithElmListComponent::m_layoutItemWidth;
 	auto minHeight = (m_DS100Settings->getHeight() + (2 * margin))
 		+ (m_DiGiCoBridgingSettings->getHeight() + (2 * margin))
 		+ (m_RTTrPMBridgingSettings->getHeight() + (2 * margin))

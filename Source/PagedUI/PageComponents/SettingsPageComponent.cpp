@@ -259,7 +259,7 @@ void HeaderWithElmListComponent::resized()
 		{
 			fb.items.add(FlexItem(*component.first.get())
 				.withHeight(itemHeight)
-				.withMaxWidth(150)
+				.withMaxWidth(m_layoutItemWidth)
 				.withMargin(FlexItem::Margin(itemMargin, itemMargin, itemMargin, 130 + itemMargin)));
 			itemCount++;
 		}
@@ -377,6 +377,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_SecondDS100ModeButtonIds[m_SecondDS100Modes[0]] = m_SecondDS100ModeButton->addButton(m_SecondDS100Modes[0]);
 	m_SecondDS100ModeButtonIds[m_SecondDS100Modes[1]] = m_SecondDS100ModeButton->addButton(m_SecondDS100Modes[1]);
 	m_SecondDS100ModeButtonIds[m_SecondDS100Modes[2]] = m_SecondDS100ModeButton->addButton(m_SecondDS100Modes[2]);
+	m_SecondDS100ModeButtonIds[m_SecondDS100Modes[3]] = m_SecondDS100ModeButton->addButton(m_SecondDS100Modes[3]);
 	m_SecondDS100ModeButton->setButtonDown(m_SecondDS100ModeButtonIds[m_SecondDS100Modes[0]]);
 	m_SecondDS100ModeLabel = std::make_unique<Label>();
 	m_SecondDS100ModeLabel->setJustificationType(Justification::centred);
@@ -712,7 +713,7 @@ void SettingsSectionsComponent::resized()
 {
 	auto margin = 3.0f;
 
-	auto minWidth = 300;
+	auto minWidth = HeaderWithElmListComponent::m_attachedItemWidth + HeaderWithElmListComponent::m_layoutItemWidth;
 	auto minHeight = (m_DS100Settings->getHeight() + (2 * margin))
 		+ (m_DiGiCoBridgingSettings->getHeight() + (2 * margin))
 		+ (m_RTTrPMBridgingSettings->getHeight() + (2 * margin))
@@ -777,7 +778,11 @@ void SettingsSectionsComponent::buttonClicked(JUCEAppBasics::SplitButtonComponen
 		{
 			ctrl->SetExtensionMode(DCS_Settings, EM_Extend);
 		}
-		else if (m_SecondDS100ModeButtonIds[m_SecondDS100Modes[2]] == buttonId) // Mirror
+		else if (m_SecondDS100ModeButtonIds[m_SecondDS100Modes[2]] == buttonId) // Parallel
+		{
+			ctrl->SetExtensionMode(DCS_Settings, EM_Parallel);
+		}
+		else if (m_SecondDS100ModeButtonIds[m_SecondDS100Modes[3]] == buttonId) // Mirror
 		{
 			ctrl->SetExtensionMode(DCS_Settings, EM_Mirror);
 		}
@@ -1031,8 +1036,10 @@ void SettingsSectionsComponent::processUpdatedConfig()
 		auto newActiveButtonId = m_SecondDS100ModeButtonIds[m_SecondDS100Modes[0]];
 		if (ctrl->GetExtensionMode() == EM_Extend)
 			newActiveButtonId = m_SecondDS100ModeButtonIds[m_SecondDS100Modes[1]];
-		else if (ctrl->GetExtensionMode() == EM_Mirror)
+		else if (ctrl->GetExtensionMode() == EM_Parallel)
 			newActiveButtonId = m_SecondDS100ModeButtonIds[m_SecondDS100Modes[2]];
+		else if (ctrl->GetExtensionMode() == EM_Mirror)
+			newActiveButtonId = m_SecondDS100ModeButtonIds[m_SecondDS100Modes[3]];
 		m_SecondDS100ModeButton->setButtonDown(newActiveButtonId);
 	}
 	if (m_SecondDS100IpAddressEdit)

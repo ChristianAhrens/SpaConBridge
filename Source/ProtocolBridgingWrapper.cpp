@@ -1317,6 +1317,7 @@ bool ProtocolBridgingWrapper::UpdateActiveDS100SourceIds()
 				activeObjectsOnFirstDS100.push_back(ro);
 			}
 			break;
+		case EM_Parallel:
 		case EM_Mirror:
 			// We do not support anything exceeding one DS100 channelcount wise
 			if (sourceId <= DS100_CHANNELCOUNT)
@@ -1498,7 +1499,17 @@ ExtensionMode ProtocolBridgingWrapper::GetDS100ExtensionMode()
 			case OHM_Mux_nA_to_mB_withValFilter:
 				return EM_Extend;
 			case OHM_Forward_only_valueChanges:
-				return EM_Off;
+				{
+				auto protocol1XmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
+				auto protocol2XmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_2_PROCESSINGPROTOCOL_ID));
+				// if two DS100 protocol processors are configured for OHM_Forward_only_valueChanges, we are in parallel mode
+				if (protocol1XmlElement && protocol2XmlElement)
+					return EM_Parallel;
+				// if only one is configured, we are in off mode
+				else if (protocol1XmlElement)
+					return EM_Off;
+				// if no one is configured, we are in undefined mode and fallthrough into default and assert
+				}
 			case OHM_Bypass:
 			case OHM_Invalid:
 			case OHM_Mux_nA_to_mB:
@@ -1537,6 +1548,7 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 			switch (mode)
 			{
 			case EM_Off:
+			case EM_Parallel:
 			{
 				// EM_Off refers to valuechange forwarding object handling mode without any channelcount parameter attributes
 				objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Forward_only_valueChanges));
@@ -1664,9 +1676,10 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 			}
 			break;
 			case EM_Extend:
+			case EM_Parallel:
 			case EM_Mirror:
 			{
-				// EM_Extend requires the second DS100 protocol to be present
+				// EM_Extend/EM_Parallel/EM_Mirror require the second DS100 protocol to be present
 				if (!protocolA2XmlElement)
 				{
 					protocolA2XmlElement = std::make_unique<XmlElement>(*protocolA1XmlElement).release();

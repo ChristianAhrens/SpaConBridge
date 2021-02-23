@@ -19,7 +19,7 @@
 #include "ProtocolBridgingWrapper.h"
 
 #include "Controller.h"
-#include "SoundsourceProcessor/SoundsourceProcessor.h"
+#include "CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
 
 #include <ProcessingEngine/ObjectDataHandling/ObjectDataHandling_Abstract.h>
 
@@ -546,10 +546,10 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupYamahaOSCBridgingProto
 /**
  * Gets the mute state of the given source of given protocol
  * @param protocolId The id of the protocol the muted state shall be returned of
- * @param sourceId The id of the source that shall be muted
+ * @param soundobjectId The id of the source that shall be muted
  * @return True if mute is active, false if not
  */
-bool ProtocolBridgingWrapper::GetMuteProtocolSourceId(ProtocolId protocolId, SourceId sourceId)
+bool ProtocolBridgingWrapper::GetMuteProtocolSoundobjectId(ProtocolId protocolId, SoundobjectId soundobjectId)
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
@@ -561,7 +561,7 @@ bool ProtocolBridgingWrapper::GetMuteProtocolSourceId(ProtocolId protocolId, Sou
 			Array<int> mutedChannels;
 			ProcessingEngineConfig::ReadMutedObjectChannels(mutedObjChsXmlElement, mutedChannels);
 			
-			return mutedChannels.contains(sourceId);
+			return mutedChannels.contains(soundobjectId);
 		}
 	}
 
@@ -571,22 +571,22 @@ bool ProtocolBridgingWrapper::GetMuteProtocolSourceId(ProtocolId protocolId, Sou
 /**
  * Sets the given source of given protocol to be muted
  * @param protocolId The id of the protocol the source shall be muted of
- * @param sourceId The id of the source that shall be muted
+ * @param soundobjectId The id of the source that shall be muted
  * @return True on success, false on failure
  */
-bool ProtocolBridgingWrapper::SetMuteProtocolSourceId(ProtocolId protocolId, SourceId sourceId)
+bool ProtocolBridgingWrapper::SetMuteProtocolSoundobjectId(ProtocolId protocolId, SoundobjectId soundobjectId)
 {
-	std::vector<SourceId> sourceIds{ sourceId };
-	return SetMuteProtocolSourceIds(protocolId, sourceIds);
+	std::vector<SoundobjectId> soundobjectIds{ soundobjectId };
+	return SetMuteProtocolSoundobjectIds(protocolId, soundobjectIds);
 }
 
 /**
  * Sets the given sources of given protocol to be muted
  * @param protocolId The id of the protocol the source shall be muted of
- * @param sourceIds The ids of the sources that shall be muted
+ * @param soundobjectIds The ids of the sources that shall be muted
  * @return True on success, false on failure
  */
-bool ProtocolBridgingWrapper::SetMuteProtocolSourceIds(ProtocolId protocolId, const std::vector<SourceId>& sourceIds)
+bool ProtocolBridgingWrapper::SetMuteProtocolSoundobjectIds(ProtocolId protocolId, const std::vector<SoundobjectId>& soundobjectIds)
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
@@ -598,9 +598,9 @@ bool ProtocolBridgingWrapper::SetMuteProtocolSourceIds(ProtocolId protocolId, co
 			Array<int> mutedChannels;
 			ProcessingEngineConfig::ReadMutedObjectChannels(mutedObjChsXmlElement, mutedChannels);
 			auto oldMutedChannels = mutedChannels;
-			for (auto sourceId : sourceIds)
-				if (!mutedChannels.contains(sourceId))
-					mutedChannels.add(sourceId);
+			for (auto soundobjectId : soundobjectIds)
+				if (!mutedChannels.contains(soundobjectId))
+					mutedChannels.add(soundobjectId);
 
 			if (oldMutedChannels != mutedChannels)
 			{
@@ -623,22 +623,22 @@ bool ProtocolBridgingWrapper::SetMuteProtocolSourceIds(ProtocolId protocolId, co
 /**
  * Sets the given source of given protocol to be unmuted
  * @param protocolId The id of the protocol the source shall be unmuted of
- * @param sourceId The id of the source that shall be unmuted
+ * @param soundobjectId The id of the source that shall be unmuted
  * @return True on success, false on failure
  */
-bool ProtocolBridgingWrapper::SetUnmuteProtocolSourceId(ProtocolId protocolId, SourceId sourceId)
+bool ProtocolBridgingWrapper::SetUnmuteProtocolSoundobjectId(ProtocolId protocolId, SoundobjectId soundobjectId)
 {
-	std::vector<SourceId> sourceIds{ sourceId };
-	return SetUnmuteProtocolSourceIds(protocolId, sourceIds);
+	std::vector<SoundobjectId> soundobjectIds{ soundobjectId };
+	return SetUnmuteProtocolSoundobjectIds(protocolId, soundobjectIds);
 }
 
 /**
  * Sets the given sources of given protocol to be unmuted
  * @param protocolId The id of the protocol the sources shall be unmuted of
- * @param sourceIds The ids of the sources that shall be unmuted
+ * @param soundobjectIds The ids of the sources that shall be unmuted
  * @return True on success, false on failure
  */
-bool ProtocolBridgingWrapper::SetUnmuteProtocolSourceIds(ProtocolId protocolId, const std::vector<SourceId>& sourceIds)
+bool ProtocolBridgingWrapper::SetUnmuteProtocolSoundobjectIds(ProtocolId protocolId, const std::vector<SoundobjectId>& soundobjectIds)
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
@@ -650,9 +650,9 @@ bool ProtocolBridgingWrapper::SetUnmuteProtocolSourceIds(ProtocolId protocolId, 
 			Array<int> mutedChannels;
 			ProcessingEngineConfig::ReadMutedObjectChannels(mutedObjChsXmlElement, mutedChannels);
 			auto oldMutedChannels = mutedChannels;
-			for (auto sourceId : sourceIds)
-				if (mutedChannels.contains(sourceId))
-					mutedChannels.removeAllInstancesOf(sourceId);
+			for (auto soundobjectId : soundobjectIds)
+				if (mutedChannels.contains(soundobjectId))
+					mutedChannels.removeAllInstancesOf(soundobjectId);
 
 			if (oldMutedChannels != mutedChannels)
 			{
@@ -1267,7 +1267,7 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
  * DS100 devices and inserts them into an xml element that is then set as new config to bridging node.
  * @return	True on succes, false if failure
  */
-bool ProtocolBridgingWrapper::UpdateActiveDS100SourceIds()
+bool ProtocolBridgingWrapper::UpdateActiveDS100RemoteObjectIds()
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (!nodeXmlElement)
@@ -1285,31 +1285,37 @@ bool ProtocolBridgingWrapper::UpdateActiveDS100SourceIds()
 
 	// Get currently active objects from controller and split them 
 	// into those relevant for first and second DS100
-	auto activeObjects = ctrl->GetActivatedRemoteObjects();
+	auto activeSoObjects = ctrl->GetActivatedSoundObjectRemoteObjects();
+	auto activeMcObjects = ctrl->GetActivatedMatrixChannelRemoteObjects();
+
+	auto activeObjects = std::vector<RemoteObject>();
+	activeObjects.insert(activeObjects.end(), activeSoObjects.begin(), activeSoObjects.end());
+	activeObjects.insert(activeObjects.end(), activeMcObjects.begin(), activeMcObjects.end());
+
 	auto activeObjectsOnFirstDS100 = std::vector<RemoteObject>{};
 	auto activeObjectsOnSecondDS100 = std::vector<RemoteObject>{};
 	for (auto const& ro : activeObjects)
 	{
-		auto sourceId = ro._Addr._first;
+		auto objectId = ro._Addr._first;
 
 		switch (extensionMode)
 		{
 		case EM_Off:
 			// We do not support anything exceeding one DS100 channelcount wise
-			if (sourceId <= DS100_CHANNELCOUNT)
+			if (objectId <= DS100_CHANNELCOUNT)
 				activeObjectsOnFirstDS100.push_back(ro);
 			break;
 		case EM_Extend:
 			// We do not support anything exceeding two DS100 (ext. mode) channelcount wise
-			if (sourceId > DS100_EXTMODE_CHANNELCOUNT)
+			if (objectId > DS100_EXTMODE_CHANNELCOUNT)
 				break;
 
-			// If the sourceId is out of range for a single DS100, take it as relevant 
-			// for second and map the sourceid back into a single DS100's source range
-			if (sourceId > DS100_CHANNELCOUNT)
+			// If the soundobjectId is out of range for a single DS100, take it as relevant 
+			// for second and map the soundobjectId back into a single DS100's source range
+			if (objectId > DS100_CHANNELCOUNT)
 			{
 				activeObjectsOnSecondDS100.push_back(ro);
-				activeObjectsOnSecondDS100.back()._Addr._first = static_cast<int>(sourceId - DS100_CHANNELCOUNT);
+				activeObjectsOnSecondDS100.back()._Addr._first = static_cast<int>(objectId - DS100_CHANNELCOUNT);
 			}
 			// Otherwise simply take it as relevant for first DS100
 			else
@@ -1320,7 +1326,7 @@ bool ProtocolBridgingWrapper::UpdateActiveDS100SourceIds()
 		case EM_Parallel:
 		case EM_Mirror:
 			// We do not support anything exceeding one DS100 channelcount wise
-			if (sourceId <= DS100_CHANNELCOUNT)
+			if (objectId <= DS100_CHANNELCOUNT)
 			{
 				activeObjectsOnFirstDS100.push_back(ro);
 				activeObjectsOnSecondDS100.push_back(ro);
@@ -1747,40 +1753,40 @@ void ProtocolBridgingWrapper::SetSecondDS100State(ObjectHandlingState state)
 
 /**
  * Gets the mute state of the given source
- * @param sourceId The id of the source for which the mute state shall be returned
+ * @param soundobjectId The id of the source for which the mute state shall be returned
  * @return The mute state
  */
-bool ProtocolBridgingWrapper::GetMuteDiGiCoSourceId(SourceId sourceId)
+bool ProtocolBridgingWrapper::GetMuteDiGiCoSoundobjectId(SoundobjectId soundobjectId)
 {
-	return GetMuteProtocolSourceId(DIGICO_PROCESSINGPROTOCOL_ID, sourceId);
+	return GetMuteProtocolSoundobjectId(DIGICO_PROCESSINGPROTOCOL_ID, soundobjectId);
 }
 
 /**
  * Sets the given source to be (un-)muted
- * @param sourceId The id of the source that shall be muted
+ * @param soundobjectId The id of the source that shall be muted
  * @param mute Set to true for mute and false for unmute
  * @return True on success, false on failure
  */
-bool ProtocolBridgingWrapper::SetMuteDiGiCoSourceId(SourceId sourceId, bool mute)
+bool ProtocolBridgingWrapper::SetMuteDiGiCoSoundobjectId(SoundobjectId soundobjectId, bool mute)
 {
 	if (mute)
-		return SetMuteProtocolSourceId(DIGICO_PROCESSINGPROTOCOL_ID, sourceId);
+		return SetMuteProtocolSoundobjectId(DIGICO_PROCESSINGPROTOCOL_ID, soundobjectId);
 	else
-		return SetUnmuteProtocolSourceId(DIGICO_PROCESSINGPROTOCOL_ID, sourceId);
+		return SetUnmuteProtocolSoundobjectId(DIGICO_PROCESSINGPROTOCOL_ID, soundobjectId);
 }
 
 /**
  * Sets the given sources to be (un-)muted
- * @param sourceIds The ids of the sources that shall be muted
+ * @param soundobjectIds The ids of the sources that shall be muted
  * @param mute Set to true for mute and false for unmute
  * @return True on success, false on failure
  */
-bool ProtocolBridgingWrapper::SetMuteDiGiCoSourceIds(const std::vector<SourceId>& sourceIds, bool mute)
+bool ProtocolBridgingWrapper::SetMuteDiGiCoSoundobjectIds(const std::vector<SoundobjectId>& soundobjectIds, bool mute)
 {
 	if (mute)
-		return SetMuteProtocolSourceIds(DIGICO_PROCESSINGPROTOCOL_ID, sourceIds);
+		return SetMuteProtocolSoundobjectIds(DIGICO_PROCESSINGPROTOCOL_ID, soundobjectIds);
 	else
-		return SetUnmuteProtocolSourceIds(DIGICO_PROCESSINGPROTOCOL_ID, sourceIds);
+		return SetUnmuteProtocolSoundobjectIds(DIGICO_PROCESSINGPROTOCOL_ID, soundobjectIds);
 }
 
 /**
@@ -1849,40 +1855,40 @@ bool ProtocolBridgingWrapper::SetDiGiCoRemotePort(int remotePort, bool dontSendN
 
 /**
  * Gets the mute state of the given source
- * @param sourceId The id of the source for which the mute state shall be returned
+ * @param soundobjectId The id of the source for which the mute state shall be returned
  * @return The mute state
  */
-bool ProtocolBridgingWrapper::GetMuteRTTrPMSourceId(SourceId sourceId)
+bool ProtocolBridgingWrapper::GetMuteRTTrPMSoundobjectId(SoundobjectId soundobjectId)
 {
-	return GetMuteProtocolSourceId(RTTRPM_PROCESSINGPROTOCOL_ID, sourceId);
+	return GetMuteProtocolSoundobjectId(RTTRPM_PROCESSINGPROTOCOL_ID, soundobjectId);
 }
 
 /**
  * Sets the given source to be (un-)muted
- * @param sourceId The id of the source that shall be muted
+ * @param soundobjectId The id of the source that shall be muted
  * @param mute Set to true for mute and false for unmute
  * @return True on success, false on failure
  */
-bool ProtocolBridgingWrapper::SetMuteRTTrPMSourceId(SourceId sourceId, bool mute)
+bool ProtocolBridgingWrapper::SetMuteRTTrPMSoundobjectId(SoundobjectId soundobjectId, bool mute)
 {
 	if (mute)
-		return SetMuteProtocolSourceId(RTTRPM_PROCESSINGPROTOCOL_ID, sourceId);
+		return SetMuteProtocolSoundobjectId(RTTRPM_PROCESSINGPROTOCOL_ID, soundobjectId);
 	else
-		return SetUnmuteProtocolSourceId(RTTRPM_PROCESSINGPROTOCOL_ID, sourceId);
+		return SetUnmuteProtocolSoundobjectId(RTTRPM_PROCESSINGPROTOCOL_ID, soundobjectId);
 }
 
 /**
  * Sets the given sources to be (un-)muted
- * @param sourceIds The ids of the sources that shall be muted
+ * @param soundobjectIds The ids of the sources that shall be muted
  * @param mute Set to true for mute and false for unmute
  * @return True on success, false on failure
  */
-bool ProtocolBridgingWrapper::SetMuteRTTrPMSourceIds(const std::vector<SourceId>& sourceIds, bool mute)
+bool ProtocolBridgingWrapper::SetMuteRTTrPMSoundobjectIds(const std::vector<SoundobjectId>& soundobjectIds, bool mute)
 {
 	if (mute)
-		return SetMuteProtocolSourceIds(RTTRPM_PROCESSINGPROTOCOL_ID, sourceIds);
+		return SetMuteProtocolSoundobjectIds(RTTRPM_PROCESSINGPROTOCOL_ID, soundobjectIds);
 	else
-		return SetUnmuteProtocolSourceIds(RTTRPM_PROCESSINGPROTOCOL_ID, sourceIds);
+		return SetUnmuteProtocolSoundobjectIds(RTTRPM_PROCESSINGPROTOCOL_ID, soundobjectIds);
 }
 
 /**
@@ -1972,40 +1978,40 @@ bool ProtocolBridgingWrapper::SetRTTrPMMappingArea(int mappingAreaId, bool dontS
 
 /**
  * Gets the mute state of the given source
- * @param sourceId The id of the source for which the mute state shall be returned
+ * @param soundobjectId The id of the source for which the mute state shall be returned
  * @return The mute state
  */
-bool ProtocolBridgingWrapper::GetMuteGenericOSCSourceId(SourceId sourceId)
+bool ProtocolBridgingWrapper::GetMuteGenericOSCSoundobjectId(SoundobjectId soundobjectId)
 {
-	return GetMuteProtocolSourceId(GENERICOSC_PROCESSINGPROTOCOL_ID, sourceId);
+	return GetMuteProtocolSoundobjectId(GENERICOSC_PROCESSINGPROTOCOL_ID, soundobjectId);
 }
 
 /**
  * Sets the given source to be (un-)muted
- * @param sourceId The id of the source that shall be muted
+ * @param soundobjectId The id of the source that shall be muted
  * @param mute Set to true for mute and false for unmute
  * @return True on success, false on failure
  */
-bool ProtocolBridgingWrapper::SetMuteGenericOSCSourceId(SourceId sourceId, bool mute)
+bool ProtocolBridgingWrapper::SetMuteGenericOSCSoundobjectId(SoundobjectId soundobjectId, bool mute)
 {
 	if (mute)
-		return SetMuteProtocolSourceId(GENERICOSC_PROCESSINGPROTOCOL_ID, sourceId);
+		return SetMuteProtocolSoundobjectId(GENERICOSC_PROCESSINGPROTOCOL_ID, soundobjectId);
 	else
-		return SetUnmuteProtocolSourceId(GENERICOSC_PROCESSINGPROTOCOL_ID, sourceId);
+		return SetUnmuteProtocolSoundobjectId(GENERICOSC_PROCESSINGPROTOCOL_ID, soundobjectId);
 }
 
 /**
  * Sets the given sources to be (un-)muted
- * @param sourceIds The ids of the sources that shall be muted
+ * @param soundobjectIds The ids of the sources that shall be muted
  * @param mute Set to true for mute and false for unmute
  * @return True on success, false on failure
  */
-bool ProtocolBridgingWrapper::SetMuteGenericOSCSourceIds(const std::vector<SourceId>& sourceIds, bool mute)
+bool ProtocolBridgingWrapper::SetMuteGenericOSCSoundobjectIds(const std::vector<SoundobjectId>& soundobjectIds, bool mute)
 {
 	if (mute)
-		return SetMuteProtocolSourceIds(GENERICOSC_PROCESSINGPROTOCOL_ID, sourceIds);
+		return SetMuteProtocolSoundobjectIds(GENERICOSC_PROCESSINGPROTOCOL_ID, soundobjectIds);
 	else
-		return SetUnmuteProtocolSourceIds(GENERICOSC_PROCESSINGPROTOCOL_ID, sourceIds);
+		return SetUnmuteProtocolSoundobjectIds(GENERICOSC_PROCESSINGPROTOCOL_ID, soundobjectIds);
 }
 
 /**
@@ -2076,40 +2082,40 @@ bool ProtocolBridgingWrapper::SetGenericOSCRemotePort(int remotePort, bool dontS
 
 /**
  * Gets the mute state of the given source
- * @param sourceId The id of the source for which the mute state shall be returned
+ * @param soundobjectId The id of the source for which the mute state shall be returned
  * @return The mute state
  */
-bool ProtocolBridgingWrapper::GetMuteGenericMIDISourceId(SourceId sourceId)
+bool ProtocolBridgingWrapper::GetMuteGenericMIDISoundobjectId(SoundobjectId soundobjectId)
 {
-	return GetMuteProtocolSourceId(GENERICMIDI_PROCESSINGPROTOCOL_ID, sourceId);
+	return GetMuteProtocolSoundobjectId(GENERICMIDI_PROCESSINGPROTOCOL_ID, soundobjectId);
 }
 
 /**
  * Sets the given source to be (un-)muted
- * @param sourceId The id of the source that shall be muted
+ * @param soundobjectId The id of the source that shall be muted
  * @param mute Set to true for mute and false for unmute
  * @return True on success, false on failure
  */
-bool ProtocolBridgingWrapper::SetMuteGenericMIDISourceId(SourceId sourceId, bool mute)
+bool ProtocolBridgingWrapper::SetMuteGenericMIDISoundobjectId(SoundobjectId soundobjectId, bool mute)
 {
 	if (mute)
-		return SetMuteProtocolSourceId(GENERICMIDI_PROCESSINGPROTOCOL_ID, sourceId);
+		return SetMuteProtocolSoundobjectId(GENERICMIDI_PROCESSINGPROTOCOL_ID, soundobjectId);
 	else
-		return SetUnmuteProtocolSourceId(GENERICMIDI_PROCESSINGPROTOCOL_ID, sourceId);
+		return SetUnmuteProtocolSoundobjectId(GENERICMIDI_PROCESSINGPROTOCOL_ID, soundobjectId);
 }
 
 /**
  * Sets the given sources to be (un-)muted
- * @param sourceIds The ids of the sources that shall be muted
+ * @param soundobjectIds The ids of the sources that shall be muted
  * @param mute Set to true for mute and false for unmute
  * @return True on success, false on failure
  */
-bool ProtocolBridgingWrapper::SetMuteGenericMIDISourceIds(const std::vector<SourceId>& sourceIds, bool mute)
+bool ProtocolBridgingWrapper::SetMuteGenericMIDISoundobjectIds(const std::vector<SoundobjectId>& soundobjectIds, bool mute)
 {
 	if (mute)
-		return SetMuteProtocolSourceIds(GENERICMIDI_PROCESSINGPROTOCOL_ID, sourceIds);
+		return SetMuteProtocolSoundobjectIds(GENERICMIDI_PROCESSINGPROTOCOL_ID, soundobjectIds);
 	else
-		return SetUnmuteProtocolSourceIds(GENERICMIDI_PROCESSINGPROTOCOL_ID, sourceIds);
+		return SetUnmuteProtocolSoundobjectIds(GENERICMIDI_PROCESSINGPROTOCOL_ID, soundobjectIds);
 }
 
 /**
@@ -2203,40 +2209,40 @@ bool ProtocolBridgingWrapper::SetGenericMIDIMappingArea(int mappingAreaId, bool 
 
 /**
  * Gets the mute state of the given source
- * @param sourceId The id of the source for which the mute state shall be returned
+ * @param soundobjectId The id of the source for which the mute state shall be returned
  * @return The mute state
  */
-bool ProtocolBridgingWrapper::GetMuteYamahaOSCSourceId(SourceId sourceId)
+bool ProtocolBridgingWrapper::GetMuteYamahaOSCSoundobjectId(SoundobjectId soundobjectId)
 {
-	return GetMuteProtocolSourceId(YAMAHAOSC_PROCESSINGPROTOCOL_ID, sourceId);
+	return GetMuteProtocolSoundobjectId(YAMAHAOSC_PROCESSINGPROTOCOL_ID, soundobjectId);
 }
 
 /**
  * Sets the given source to be (un-)muted
- * @param sourceId The id of the source that shall be muted
+ * @param soundobjectId The id of the source that shall be muted
  * @param mute Set to true for mute and false for unmute
  * @return True on success, false on failure
  */
-bool ProtocolBridgingWrapper::SetMuteYamahaOSCSourceId(SourceId sourceId, bool mute)
+bool ProtocolBridgingWrapper::SetMuteYamahaOSCSoundobjectId(SoundobjectId soundobjectId, bool mute)
 {
 	if (mute)
-		return SetMuteProtocolSourceId(YAMAHAOSC_PROCESSINGPROTOCOL_ID, sourceId);
+		return SetMuteProtocolSoundobjectId(YAMAHAOSC_PROCESSINGPROTOCOL_ID, soundobjectId);
 	else
-		return SetUnmuteProtocolSourceId(YAMAHAOSC_PROCESSINGPROTOCOL_ID, sourceId);
+		return SetUnmuteProtocolSoundobjectId(YAMAHAOSC_PROCESSINGPROTOCOL_ID, soundobjectId);
 }
 
 /**
  * Sets the given sources to be (un-)muted
- * @param sourceIds The ids of the sources that shall be muted
+ * @param soundobjectIds The ids of the sources that shall be muted
  * @param mute Set to true for mute and false for unmute
  * @return True on success, false on failure
  */
-bool ProtocolBridgingWrapper::SetMuteYamahaOSCSourceIds(const std::vector<SourceId>& sourceIds, bool mute)
+bool ProtocolBridgingWrapper::SetMuteYamahaOSCSoundobjectIds(const std::vector<SoundobjectId>& soundobjectIds, bool mute)
 {
 	if (mute)
-		return SetMuteProtocolSourceIds(YAMAHAOSC_PROCESSINGPROTOCOL_ID, sourceIds);
+		return SetMuteProtocolSoundobjectIds(YAMAHAOSC_PROCESSINGPROTOCOL_ID, soundobjectIds);
 	else
-		return SetUnmuteProtocolSourceIds(YAMAHAOSC_PROCESSINGPROTOCOL_ID, sourceIds);
+		return SetUnmuteProtocolSoundobjectIds(YAMAHAOSC_PROCESSINGPROTOCOL_ID, soundobjectIds);
 }
 
 /**

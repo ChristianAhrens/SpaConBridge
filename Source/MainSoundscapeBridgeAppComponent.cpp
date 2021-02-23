@@ -23,7 +23,7 @@
 #include "PagedUI/PageContainerComponent.h"
 #include "PagedUI/PageComponentManager.h"
 
-#include "SoundsourceProcessor/SoundsourceProcessor.h"
+#include "CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
 
 #include <iOS_utils.h>
 
@@ -95,9 +95,9 @@ MainSoundscapeBridgeAppComponent::~MainSoundscapeBridgeAppComponent()
     {
         // Delete the processor instances held in controller externally,
         // since we otherwise would run into a loop ~Controller -> Controller::RemoveProcessor -> 
-        // ~SoundsourceProcessor -> Controller::RemoveProcessor
-        for (auto const& processorId : ctrl->GetProcessorIds())
-            delete ctrl->GetProcessor(processorId);
+        // ~SoundobjectProcessor -> Controller::RemoveProcessor
+        for (auto const& processorId : ctrl->GetSoundobjectProcessorIds())
+            delete ctrl->GetSoundobjectProcessor(processorId);
 
         ctrl->DestroyInstance();
     }

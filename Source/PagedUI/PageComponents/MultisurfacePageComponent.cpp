@@ -37,9 +37,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../PageComponentManager.h"
 
-#include "../../SoundsourceProcessor/SoundsourceProcessor.h"
+#include "../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
 #include "../../Controller.h"
-#include "../../SoundsourceProcessor/SurfaceSlider.h"
+#include "../../SurfaceSlider.h"
 
 #include <Image_utils.h>
 
@@ -140,26 +140,26 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 	auto ctrl = Controller::GetInstance();
 	if (ctrl && m_multiSliderSurface)
 	{
-		if (ctrl->GetParameterChanged(DCS_SoundsourceTable, DCT_NumProcessors) || (ctrl->GetParameterChanged(DCS_Protocol, DCT_ProcessorSelection)))
+		if (ctrl->GetParameterChanged(DCS_SoundobjectTable, DCT_NumProcessors) || (ctrl->GetParameterChanged(DCS_Protocol, DCT_ProcessorSelection)))
 			update = true;
 		
 		// Iterate through all plugin instances and see if anything changed there.
 		// At the same time collect all sources positions for updating.
 		SurfaceMultiSlider::PositionCache cachedPositions;
-		for (auto const& processorId : ctrl->GetProcessorIds())
+		for (auto const& processorId : ctrl->GetSoundobjectProcessorIds())
 		{
-			auto processor = ctrl->GetProcessor(processorId);
+			auto processor = ctrl->GetSoundobjectProcessor(processorId);
 			if (processor)
 			{
-				auto sourceId = processor->GetSourceId();
+				auto soundobjectId = processor->GetSoundobjectId();
 				if (processor->GetMappingId() == selectedMapping)
 				{
 					// NOTE: only sources are included, which match the selected viewing mapping.
-					Point<float> p(processor->GetParameterValue(ParamIdx_X), processor->GetParameterValue(ParamIdx_Y));
-					cachedPositions.insert(std::make_pair(processorId, SurfaceMultiSlider::SourcePosition(sourceId, p, ctrl->IsSoundSourceIdSelected(sourceId))));
+					Point<float> p(processor->GetParameterValue(SPI_ParamIdx_X), processor->GetParameterValue(SPI_ParamIdx_Y));
+					cachedPositions.insert(std::make_pair(processorId, SurfaceMultiSlider::SoundobjectPosition(soundobjectId, p, ctrl->IsSoundobjectIdSelected(soundobjectId))));
 				}
 
-				if (processor->GetParameterChanged(DCS_SoundsourceTable, (DCT_PluginInstanceConfig | DCT_SourcePosition)))
+				if (processor->GetParameterChanged(DCS_SoundobjectTable, (DCT_ProcessorInstanceConfig | DCT_SoundobjectPosition)))
 					update = true;
 			}
 		}

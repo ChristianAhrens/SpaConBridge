@@ -44,7 +44,7 @@ namespace SoundscapeBridgeApp
 
 
 /**
- * Class GestureManagedAudioParameterFloat, a custom.
+ * Class GestureManagedAudioParameterFloat, a custom AudioParameterFloat.
  *
  * This derivation supports automatic gesture management, which depends on the Tick() method 
  * being called regular intervals.
@@ -80,6 +80,44 @@ protected:
 											 * These values are normalized between 0.0f and 1.0f. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GestureManagedAudioParameterFloat)
+};
+
+/**
+ * Class GestureManagedAudioParameterInt, a custom AudioParameterInt.
+ *
+ * This derivation supports automatic gesture management, which depends on the Tick() method
+ * being called regular intervals.
+ */
+class GestureManagedAudioParameterInt : public AudioParameterInt
+{
+public:
+	GestureManagedAudioParameterInt(String parameterID,
+		String name,
+		int minValue,
+		int maxValue,
+		int defaultValue);
+
+	~GestureManagedAudioParameterInt() override;
+
+	void BeginGuiGesture();
+	void EndGuiGesture();
+
+	void SetParameterValue(int);
+	int GetLastValue() const;
+	void Tick();
+
+protected:
+	void valueChanged(int newValue) override;
+
+	int				m_ticksSinceLastChange;	/**> Number of Tick() calls since the last value change. */
+	bool			m_inGuiGesture;			/**> True if user is currently dragging or turning a GUI control, and thus in the middle of a gesture. */
+	CriticalSection	m_mutex;				/**> SetParameterValue() and Tick() may be called from 2 different threads, so make sure
+											 * m_ticksSinceLastChange is handled in a tread-safe way. */
+	int				m_lastValue[2];			/**> Since AudioParameterFloat::setValue() is unfortunately private, we use this to remember
+											 * the last two values in order to detect actual value changes in AudioProcessorParameter::Listener::parameterValueChanged().
+											 * These values are normalized between 0.0f and 1.0f. */
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(GestureManagedAudioParameterInt)
 };
 
 

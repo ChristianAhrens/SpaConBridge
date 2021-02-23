@@ -1,104 +1,71 @@
-/*
-===============================================================================
-
-Copyright (C) 2019 d&b audiotechnik GmbH & Co. KG. All Rights Reserved.
-
-This file was originally part of the Soundscape VST, AU, and AAX Plug-in
-and now in a derived version is part of SoundscapeBridgeApp.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice,
-this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
-
-3. The name of the author may not be used to endorse or promote products
-derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY d&b audiotechnik GmbH & Co. KG "AS IS" AND ANY
-EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-===============================================================================
-*/
+/* Copyright (c) 2020-2021, Christian Ahrens
+ *
+ * This file is part of SoundscapeBridgeApp <https://github.com/ChristianAhrens/SoundscapeBridgeApp>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 
-#include "SoundsourceProcessor.h"
+#include "MatrixChannelProcessor.h"
 
-#include "SoundsourceProcessorEditor.h"			//<USE SoundsourceProcessorEditor
-#include "Parameters.h"
+#include "MatrixChannelProcessorEditor.h"			//<USE MatrixChannelProcessorEditor
 
-#include "../Controller.h"						//<USE Controller
-#include "../PagedUI/PageComponentManager.h"	//<USE PageComponentManager
-#include "../SoundscapeBridgeAppCommon.h"
+#include "../Parameters.h"
+
+#include "../../Controller.h"					//<USE Controller
+#include "../../PagedUI/PageComponentManager.h"	//<USE PageComponentManager
+#include "../../SoundscapeBridgeAppCommon.h"
 
 
 namespace SoundscapeBridgeApp
 {
 
 
-static constexpr SourceId SOURCE_ID_MIN = 1;		//< Minimum maxtrix input number / SourceId
-static constexpr SourceId SOURCE_ID_MAX = 128;		//< Highest maxtrix input number / SourceId
-static constexpr int DEFAULT_COORD_MAPPING = 1;		//< Default coordinate mapping
+static constexpr MatrixChannelId MATRIXCHANNEL_ID_MIN = 1;		//< Minimum maxtrix input number
+static constexpr MatrixChannelId MATRIXCHANNEL_ID_MAX = 128;		//< Highest maxtrix input number
 
 /*
 ===============================================================================
- Class SoundsourceProcessor
+ Class MatrixChannelProcessor
 ===============================================================================
 */
 
 /**
  * Class constructor for the processor.
  */
-SoundsourceProcessor::SoundsourceProcessor(bool insertToConfig)
+MatrixChannelProcessor::MatrixChannelProcessor(bool insertToConfig)
 {
 	// Automation parameters.
-	// x coord. param
-	auto xR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_CoordinateMapping_SourcePosition_X);
-	m_xPos = new GestureManagedAudioParameterFloat("x_pos", "x", xR.getStart(), xR.getEnd(), 0.001f, 0.5f);
-	m_xPos->addListener(this);
-	addParameter(m_xPos);
+	// level meter param
+	auto lmR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_LevelMeterPreMute);
+	m_matrixChannelLevelMeter = new GestureManagedAudioParameterFloat("MatrixInput_LevelMeterPreMute", "levelMeter", lmR.getStart(), lmR.getEnd(), 0.1f, 0.0f);
+	m_matrixChannelLevelMeter->addListener(this);
+	addParameter(m_matrixChannelLevelMeter);
 
-	// x coord. param
-	auto yR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_CoordinateMapping_SourcePosition_Y);
-	m_yPos = new GestureManagedAudioParameterFloat("y_pos", "y", yR.getStart(), yR.getEnd(), 0.001f, 0.5f);
-	m_yPos->addListener(this);
-	addParameter(m_yPos);
+	// gain param
+	auto gR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_Gain);
+	m_matrixChannelGain = new GestureManagedAudioParameterFloat("MatrixInput_Gain", "gain", gR.getStart(), gR.getEnd(), 0.1f, 0.0f);
+	m_matrixChannelGain->addListener(this);
+	addParameter(m_matrixChannelGain);
 
-	// EnSpace send gain param
-	auto rsgR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
-	m_reverbSendGain = new GestureManagedAudioParameterFloat("ReverbSendGain", "Reverb", rsgR.getStart(), rsgR.getEnd(), 0.1f, 0.0f);
-	m_reverbSendGain->addListener(this);
-	addParameter(m_reverbSendGain);
+	// mute param
+	auto mR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_Mute);
+	m_matrixChannelMute = new GestureManagedAudioParameterInt("MatrixInput_mute", "mute", static_cast<int>(mR.getStart()), static_cast<int>(mR.getEnd()), 0);
+	m_matrixChannelMute->addListener(this);
+	addParameter(m_matrixChannelMute);
 
-	// sound object spread param
-	auto ssR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_Positioning_SourceSpread);
-	m_sourceSpread = new GestureManagedAudioParameterFloat("SourceSpread", "Spread", ssR.getStart(), ssR.getEnd(), 0.01f, 0.5f);
-	m_sourceSpread->addListener(this);
-	addParameter(m_sourceSpread);
-
-	// sound object delay mode param
-	StringArray delayModeChoices("Off", "Tight", "Full");
-	m_delayMode = new GestureManagedAudioParameterChoice("DelayMode", "Delay", delayModeChoices, 1);
-	m_delayMode->addListener(this);
-	addParameter(m_delayMode);
-
-	// Plugin's display name is empty per default.
-	m_pluginDisplayName = String();
-
-	m_sourceId = SOURCE_ID_MIN; // This default sourceId will be overwritten by ctrl->AddProcessor() below.
-	m_mappingId = DEFAULT_COORD_MAPPING; // Default: coordinate mapping 1.
+	m_matrixChannelId = MATRIXCHANNEL_ID_MIN; // This default sourceId will be overwritten by ctrl->AddProcessor() below.
 	m_processorId = INVALID_PROCESSOR_ID;
 
 	// Default OSC communication mode.
@@ -112,24 +79,24 @@ SoundsourceProcessor::SoundsourceProcessor(bool insertToConfig)
 	// Register this new plugin instance to the singleton Controller object's internal list.
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
-		m_processorId = ctrl->AddProcessor(insertToConfig ? DCS_Host : DCS_Init, this);
+		m_processorId = ctrl->AddMatrixChannelProcessor(insertToConfig ? DCS_Host : DCS_Init, this);
 }
 
 /**
  * Class destructor for the processor.
  */
-SoundsourceProcessor::~SoundsourceProcessor()
+MatrixChannelProcessor::~MatrixChannelProcessor()
 {
 	// Erase this new plugin instance from the singleton Controller object's internal list.
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
-		ctrl->RemoveProcessor(this);
+		ctrl->RemoveMatrixChannelProcessor(this);
 }
 
 /**
  * Get the id of this processor instance 
  */
-int SoundsourceProcessor::GetProcessorId() const
+int MatrixChannelProcessor::GetProcessorId() const
 {
 	return m_processorId;
 }
@@ -139,7 +106,7 @@ int SoundsourceProcessor::GetProcessorId() const
  * @param changeSource	The application module which is causing the property change.
  * @param processorId	The new ID
  */
-void SoundsourceProcessor::SetProcessorId(DataChangeSource changeSource, ProcessorId processorId)
+void MatrixChannelProcessor::SetProcessorId(DataChangeSource changeSource, MatrixChannelProcessorId processorId)
 {
 	ignoreUnused(changeSource);
 	if (m_processorId != processorId && processorId != INVALID_PROCESSOR_ID)
@@ -155,7 +122,7 @@ void SoundsourceProcessor::SetProcessorId(DataChangeSource changeSource, Process
  * @return	True if any of the given parameters has changed it's value 
  *			since the last time PopParameterChanged() was called.
  */
-bool SoundsourceProcessor::GetParameterChanged(DataChangeSource changeSource, DataChangeType change)
+bool MatrixChannelProcessor::GetParameterChanged(DataChangeSource changeSource, DataChangeType change)
 {
 	return ((m_parametersChanged[changeSource] & change) != 0);
 }
@@ -168,7 +135,7 @@ bool SoundsourceProcessor::GetParameterChanged(DataChangeSource changeSource, Da
  * @return	True if any of the given parameters has changed it's value 
  *			since the last time PopParameterChanged() was called.
  */
-bool SoundsourceProcessor::PopParameterChanged(DataChangeSource changeSource, DataChangeType change)
+bool MatrixChannelProcessor::PopParameterChanged(DataChangeSource changeSource, DataChangeType change)
 {
 	bool ret((m_parametersChanged[changeSource] & change) != 0);
 	m_parametersChanged[changeSource] &= ~change; // Reset flag.
@@ -180,7 +147,7 @@ bool SoundsourceProcessor::PopParameterChanged(DataChangeSource changeSource, Da
  * @param changeSource	The application module which is causing the property change.
  * @param changeTypes	Defines which parameter or property has been changed.
  */
-void SoundsourceProcessor::SetParameterChanged(DataChangeSource changeSource, DataChangeType changeTypes)
+void MatrixChannelProcessor::SetParameterChanged(DataChangeSource changeSource, DataChangeType changeTypes)
 {
 	// Set the specified change flag for all DataChangeSources.
 	for (int cs = 0; cs < DCS_Max; cs++)
@@ -199,46 +166,31 @@ void SoundsourceProcessor::SetParameterChanged(DataChangeSource changeSource, Da
  * @param normalized If true, the returned value will be normalized to a 0.0f to 1.0f range. False per default.
  * @return	The desired parameter value, as float.
  */
-float SoundsourceProcessor::GetParameterValue(AutomationParameterIndex paramIdx, bool normalized) const
+float MatrixChannelProcessor::GetParameterValue(SoundobjectParameterIndex paramIdx, bool normalized) const
 {
 	float ret = 0.0f;
 
 	switch (paramIdx)
 	{
-		case ParamIdx_X:
+		case MCI_ParamIdx_LevelMeterPreMute:
 			{
-				ret = m_xPos->get();
+				ret = m_matrixChannelLevelMeter->get();
 				if (normalized)
-					ret = m_xPos->getNormalisableRange().convertTo0to1(ret);
+					ret = m_matrixChannelLevelMeter->getNormalisableRange().convertTo0to1(ret);
 			}
 			break;
-		case ParamIdx_Y:
+		case MCI_ParamIdx_Gain:
 			{
-				ret = m_yPos->get();
+				ret = m_matrixChannelGain->get();
 				if (normalized)
-					ret = m_yPos->getNormalisableRange().convertTo0to1(ret);
+					ret = m_matrixChannelGain->getNormalisableRange().convertTo0to1(ret);
 			}
 			break;
-		case ParamIdx_ReverbSendGain:
+		case MCI_ParamIdx_Mute:
 			{
-				ret = m_reverbSendGain->get();
+				ret = static_cast<float>(m_matrixChannelMute->get());
 				if (normalized)
-					ret = m_reverbSendGain->getNormalisableRange().convertTo0to1(ret);
-			}
-			break;
-		case ParamIdx_SourceSpread:
-			{
-				ret = m_sourceSpread->get();
-				if (normalized)
-					ret = m_sourceSpread->getNormalisableRange().convertTo0to1(ret);
-			}
-			break;
-		case ParamIdx_DelayMode:
-			{
-				// AudioParameterChoice::getIndex() maps the internal 0.0f - 1.0f value to the 0 to N-1 range.
-				ret = static_cast<float>(m_delayMode->getIndex());
-				if (normalized)
-					ret = m_delayMode->getNormalisableRange().convertTo0to1(ret);
+					ret = m_matrixChannelMute->getNormalisableRange().convertTo0to1(ret);
 			}
 			break;
 		default:
@@ -255,7 +207,7 @@ float SoundsourceProcessor::GetParameterValue(AutomationParameterIndex paramIdx,
  * @param paramIdx	The index of the desired parameter.
  * @param newValue	The new value as a float.
  */
-void SoundsourceProcessor::SetParameterValue(DataChangeSource changeSource, AutomationParameterIndex paramIdx, float newValue)
+void MatrixChannelProcessor::SetParameterValue(DataChangeSource changeSource, SoundobjectParameterIndex paramIdx, float newValue)
 {
 	// The reimplemented method AudioProcessor::parameterValueChanged() will trigger a SetParameterChanged() call.
 	// We need to ensure that this change is registered to the correct source. 
@@ -264,20 +216,14 @@ void SoundsourceProcessor::SetParameterValue(DataChangeSource changeSource, Auto
 
 	switch (paramIdx)
 	{
-	case ParamIdx_X:
-		m_xPos->SetParameterValue(newValue);
+	case MCI_ParamIdx_LevelMeterPreMute:
+		m_matrixChannelLevelMeter->SetParameterValue(newValue);
 		break;
-	case ParamIdx_Y:
-		m_yPos->SetParameterValue(newValue);
+	case MCI_ParamIdx_Gain:
+		m_matrixChannelGain->SetParameterValue(newValue);
 		break;
-	case ParamIdx_ReverbSendGain:
-		m_reverbSendGain->SetParameterValue(newValue);
-		break;
-	case ParamIdx_SourceSpread:
-		m_sourceSpread->SetParameterValue(newValue);
-		break;
-	case ParamIdx_DelayMode:
-		m_delayMode->SetParameterValue(newValue);
+	case MCI_ParamIdx_Mute:
+		m_matrixChannelMute->SetParameterValue(static_cast<int>(newValue));
 		break;
 	default:
 		jassertfalse; // Unknown parameter index!
@@ -294,30 +240,24 @@ void SoundsourceProcessor::SetParameterValue(DataChangeSource changeSource, Auto
  * This method should be called once every timer callback tick of the Controller. 
  * The signal is passed on to all automation parameters. This is used to trigger gestures for touch automation.
  */
-void SoundsourceProcessor::Tick()
+void MatrixChannelProcessor::Tick()
 {
 	// Reset the flags indicating when a parameter's SET command is out on the network. 
 	// These flags are set during Controller::timerCallback() and queried in Controller::oscMessageReceived()
 	m_paramSetCommandsInTransit = DCT_None;
 
-	for (int pIdx = 0; pIdx < ParamIdx_MaxIndex; pIdx++)
+	for (int pIdx = 0; pIdx < MCI_ParamIdx_MaxIndex; pIdx++)
 	{
 		switch (pIdx)
 		{
-		case ParamIdx_X:
-			m_xPos->Tick();
+		case MCI_ParamIdx_LevelMeterPreMute:
+			m_matrixChannelLevelMeter->Tick();
 			break;
-		case ParamIdx_Y:
-			m_yPos->Tick();
+		case MCI_ParamIdx_Gain:
+			m_matrixChannelGain->Tick();
 			break;
-		case ParamIdx_ReverbSendGain:
-			m_reverbSendGain->Tick();
-			break;
-		case ParamIdx_SourceSpread:
-			m_sourceSpread->Tick();
-			break;
-		case ParamIdx_DelayMode:
-			m_delayMode->Tick();
+		case MCI_ParamIdx_Mute:
+			m_matrixChannelMute->Tick();
 			break;
 		default:
 			jassert(false); // missing implementation!
@@ -330,7 +270,7 @@ void SoundsourceProcessor::Tick()
  * The given parameter(s) have a SET command message which has just been sent out on the network.
  * @param paramsChanged		Which parameter(s) should be marked as having a SET command in transit.
  */
-void SoundsourceProcessor::SetParamInTransit(DataChangeType paramsChanged)
+void MatrixChannelProcessor::SetParamInTransit(DataChangeType paramsChanged)
 {
 	m_paramSetCommandsInTransit |= paramsChanged;
 }
@@ -339,7 +279,7 @@ void SoundsourceProcessor::SetParamInTransit(DataChangeType paramsChanged)
  * Check if the given parameter(s) have a SET command message which has just been sent out on the network.
  * @return True if the specified paranmeter(s) are marked as having a SET command in transit.
  */
-bool SoundsourceProcessor::IsParamInTransit(DataChangeType paramsChanged) const
+bool MatrixChannelProcessor::IsParamInTransit(DataChangeType paramsChanged) const
 {
 	return ((m_paramSetCommandsInTransit & paramsChanged) != DCT_None);
 }
@@ -350,13 +290,12 @@ bool SoundsourceProcessor::IsParamInTransit(DataChangeType paramsChanged) const
  * singleton AppConfiguration class implementation.
  * @return	The XML element data that was created.
  */
-std::unique_ptr<XmlElement> SoundsourceProcessor::createStateXml()
+std::unique_ptr<XmlElement> MatrixChannelProcessor::createStateXml()
 {
 	auto processorInstanceXmlElement = std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE) + String(GetProcessorId()));
 	if (processorInstanceXmlElement)
 	{
-		processorInstanceXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORSOURCEID), static_cast<int>(GetSourceId()));
-        processorInstanceXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORMAPPINGID), static_cast<int>(GetMappingId()));
+		processorInstanceXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSOROBJECTID), static_cast<int>(GetMatrixChannelId()));
         processorInstanceXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORCOMSMODE), static_cast<int>(GetComsMode()));
 	}
 
@@ -369,13 +308,12 @@ std::unique_ptr<XmlElement> SoundsourceProcessor::createStateXml()
  * @param stateXml	The XML element containing this objects' configuration data
  * @return	True if the data was read and handled successfuly, false if not.
  */
-bool SoundsourceProcessor::setStateXml(XmlElement* stateXml)
+bool MatrixChannelProcessor::setStateXml(XmlElement* stateXml)
 {
 	if (!stateXml || (stateXml->getTagName() != (AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE) + String(GetProcessorId()))))
 		return false;
 
-	SetSourceId(DCS_Init, static_cast<SourceId>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORSOURCEID))));
-    SetMappingId(DCS_Init, static_cast<MappingId>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORMAPPINGID))));
+	SetMatrixChannelId(DCS_Init, static_cast<MatrixChannelId>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSOROBJECTID))));
     SetComsMode(DCS_Init, static_cast<ComsMode>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORCOMSMODE))));
 
 	return true;
@@ -387,7 +325,7 @@ bool SoundsourceProcessor::setStateXml(XmlElement* stateXml)
  * so that the host can store this and later restore it using setStateInformation().
  * @param destData		Stream where the plugin parameters will be written to.
  */
-void SoundsourceProcessor::getStateInformation(MemoryBlock& destData)
+void MatrixChannelProcessor::getStateInformation(MemoryBlock& destData)
 {
 	ignoreUnused(destData);
 }
@@ -396,11 +334,11 @@ void SoundsourceProcessor::getStateInformation(MemoryBlock& destData)
  * This method is called when project is loaded, or when a snapshot is recalled.
  * Use this method to restore your parameters from this memory block,
  * whose contents will have been created by the getStateInformation() call.
- * @sa SoundsourceProcessor::DisablePollingForTicks()
+ * @sa MatrixChannelProcessor::DisablePollingForTicks()
  * @param data			Stream where the plugin parameters will be read from.
  * @param sizeInBytes	Size of stream buffer.
  */
-void SoundsourceProcessor::setStateInformation(const void* data, int sizeInBytes)
+void MatrixChannelProcessor::setStateInformation(const void* data, int sizeInBytes)
 {
 	ignoreUnused(data);
 	ignoreUnused(sizeInBytes);
@@ -411,7 +349,7 @@ void SoundsourceProcessor::setStateInformation(const void* data, int sizeInBytes
  * @param changeSource	The application module which is causing the property change.
  * @param newMode	The new OSC communication mode.
  */
-void SoundsourceProcessor::SetComsMode(DataChangeSource changeSource, ComsMode newMode)
+void MatrixChannelProcessor::SetComsMode(DataChangeSource changeSource, ComsMode newMode)
 {
 	if (m_comsMode != newMode)
 	{
@@ -429,65 +367,25 @@ void SoundsourceProcessor::SetComsMode(DataChangeSource changeSource, ComsMode n
  * Get the current OSC communication mode (either sending or receiving).
  * @return The current OSC communication mode.
  */
-ComsMode SoundsourceProcessor::GetComsMode() const
+ComsMode MatrixChannelProcessor::GetComsMode() const
 {
 	return m_comsMode;
 }
 
 /**
- * Setter function for the coordinate mapping idx.
+ * Setter function for the MatrixChannel Id
  * @param changeSource	The application module which is causing the property change.
- * @param mappingId		The new coordinate mapping ID
+ * @param matrixChannelId	The new ID
  */
-void SoundsourceProcessor::SetMappingId(DataChangeSource changeSource, MappingId mappingId)
+void MatrixChannelProcessor::SetMatrixChannelId(DataChangeSource changeSource, MatrixChannelId matrixChannelId)
 {
-	if (m_mappingId != mappingId)
-	{
-		DataChangeType dct = DCT_MappingID;
-
-		m_mappingId = mappingId;
-
-		// If the user changes the coodinate mapping and we are in Receive mode, then the position
-		// of the X/Y sliders will update automatically to reflect the new mapping in the DS100.
-		// However, in Send-only mode we need to manually poll the DS100's position for the new mapping once.
-		if ((GetComsMode() & CM_Rx) != CM_Rx)
-		{
-			dct |= DCT_ComsMode;
-			m_comsMode |= CM_PollOnce;
-		}
-
-		// Signal change to other modules in the plugin.
-		SetParameterChanged(changeSource, dct);
-        
-        // finally trigger config update
-        if (changeSource != DCS_Init)
-            triggerConfigurationUpdate(false);
-	}
-}
-
-/**
- * Getter function for the coordinate mapping Id
- * @return	The current coordinate mapping ID
- */
-MappingId SoundsourceProcessor::GetMappingId() const
-{
-	return m_mappingId;
-}
-
-/**
- * Setter function for the source Id
- * @param changeSource	The application module which is causing the property change.
- * @param sourceId	The new ID
- */
-void SoundsourceProcessor::SetSourceId(DataChangeSource changeSource, SourceId sourceId)
-{
-	if (m_sourceId != sourceId)
+	if (m_matrixChannelId != matrixChannelId)
 	{
 		// Ensure it's within allowed range.
-		m_sourceId = jmin(SOURCE_ID_MAX, jmax(SOURCE_ID_MIN, sourceId));
+		m_matrixChannelId = jmin(MATRIXCHANNEL_ID_MAX, jmax(MATRIXCHANNEL_ID_MIN, matrixChannelId));
 
 		// Signal change to other modules in the plugin.
-		SetParameterChanged(changeSource, DCT_SourceID);
+		SetParameterChanged(changeSource, DCT_MatrixChannelID);
         
         // finally trigger config update
         if (changeSource != DCS_Init)
@@ -496,12 +394,12 @@ void SoundsourceProcessor::SetSourceId(DataChangeSource changeSource, SourceId s
 }
 
 /**
- * Getter function for the source Id
- * @return	The current source ID
+ * Getter function for the MatrixChannel Id
+ * @return	The current MatrixChannel ID
  */
-SourceId SoundsourceProcessor::GetSourceId() const
+MatrixChannelId MatrixChannelProcessor::GetMatrixChannelId() const
 {
-	return m_sourceId;
+	return m_matrixChannelId;
 }
 
 /**
@@ -509,7 +407,7 @@ SourceId SoundsourceProcessor::GetSourceId() const
  * @param changeSource	The application module which is causing the property change.
  * @param oscMsgRate	The interval at which OSC messages are sent, in ms.
  */
-void SoundsourceProcessor::SetMessageRate(DataChangeSource changeSource, int oscMsgRate)
+void MatrixChannelProcessor::SetMessageRate(DataChangeSource changeSource, int oscMsgRate)
 {
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
@@ -520,7 +418,7 @@ void SoundsourceProcessor::SetMessageRate(DataChangeSource changeSource, int osc
  * Getter function for the send rate used in the outgoing OSC messages.
  * @return	The interval at which OSC messages are sent, in ms.
  */
-int SoundsourceProcessor::GetMessageRate() const
+int MatrixChannelProcessor::GetMessageRate() const
 {
 	int rate = 0;
 	Controller* ctrl = Controller::GetInstance();
@@ -532,20 +430,18 @@ int SoundsourceProcessor::GetMessageRate() const
 
 /**
  * Method to initialize config setting, without risking overwriting with the defaults.
- * @param sourceId		New SourceID or matrix input number to use for this plugin instance.
+ * @param matrixChannelId		New SourceID or matrix input number to use for this plugin instance.
  * @param mappingId		New coordinate mapping to use for this plugin instance.
  * @param ipAddress		New IP address of the DS100 device.
  * @param newMode		New OSC communication mode (Rx/Tx).
  */
-void SoundsourceProcessor::InitializeSettings(int sourceId, int mappingId, String ipAddress, ComsMode newMode)
+void MatrixChannelProcessor::InitializeSettings(MatrixChannelId matrixChannelId, String ipAddress, ComsMode newMode)
 {
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
-		jassert(sourceId > 128);
-		SetSourceId(DCS_Init, static_cast<MappingId>(sourceId));
-		jassert(mappingId > 4);
-		SetMappingId(DCS_Init, static_cast<MappingId>(mappingId));
+		jassert(matrixChannelId > 128);
+		SetMatrixChannelId(DCS_Init, matrixChannelId);
 		SetComsMode(DCS_Init, newMode);
 	}
 }
@@ -554,7 +450,7 @@ void SoundsourceProcessor::InitializeSettings(int sourceId, int mappingId, Strin
  * Method to get a list of remote object identifiers that are used by this soundsource processing object.
  * @return	The requested list of remote object identifiers.
  */
-const std::vector<RemoteObjectIdentifier>	SoundsourceProcessor::GetUsedRemoteObjects()
+const std::vector<RemoteObjectIdentifier>	MatrixChannelProcessor::GetUsedRemoteObjects()
 {
 	return std::vector<RemoteObjectIdentifier>{ROI_CoordinateMapping_SourcePosition_XY, ROI_CoordinateMapping_SourcePosition_X, ROI_CoordinateMapping_SourcePosition_Y, ROI_MatrixInput_ReverbSendGain, ROI_Positioning_SourceSpread, ROI_Positioning_SourceDelayMode};
 };
@@ -572,41 +468,29 @@ const std::vector<RemoteObjectIdentifier>	SoundsourceProcessor::GetUsedRemoteObj
  * @param parameterIndex	Index of the plugin parameter being changed.
  * @param newValue			New parameter value, always between 0.0f and 1.0f.
  */
-void SoundsourceProcessor::parameterValueChanged(int parameterIndex, float newValue)
+void MatrixChannelProcessor::parameterValueChanged(int parameterIndex, float newValue)
 {
 	DataChangeType changed = DCT_None;
 
 	switch (parameterIndex)
 	{
-		case ParamIdx_X:
+		case MCI_ParamIdx_LevelMeterPreMute:
 			{
-				if (m_xPos->get() != m_xPos->GetLastValue())
-					changed = DCT_SourcePosition;
+				if (m_matrixChannelLevelMeter->get() != m_matrixChannelLevelMeter->GetLastValue())
+					changed = DCT_MatrixChannelLevelMeter;
 			}
 			break;
-		case ParamIdx_Y:
+		case MCI_ParamIdx_Gain:
 			{
-				if (m_yPos->get() != m_yPos->GetLastValue())
-					changed = DCT_SourcePosition;
+				if (m_matrixChannelGain->get() != m_matrixChannelGain->GetLastValue())
+					changed = DCT_MatrixChannelGain;
 			}
 			break;
-		case ParamIdx_ReverbSendGain:
+		case MCI_ParamIdx_Mute:
 			{
-				if (m_reverbSendGain->get() != m_reverbSendGain->GetLastValue())
-					changed = DCT_ReverbSendGain;
-			}
-			break;
-		case ParamIdx_SourceSpread:
-			{
-				if (m_sourceSpread->get() != m_sourceSpread->GetLastValue())
-					changed = DCT_SourceSpread;
-			}
-			break;
-		case ParamIdx_DelayMode:
-			{
-				int newValueDenorm = static_cast<int>(m_delayMode->getNormalisableRange().convertFrom0to1(newValue));
-				if (newValueDenorm != m_delayMode->GetLastIndex())
-					changed = DCT_DelayMode;
+				int newValueDenorm = static_cast<int>(m_matrixChannelMute->getNormalisableRange().convertFrom0to1(newValue));
+				if (newValueDenorm != m_matrixChannelMute->GetLastValue())
+					changed = DCT_MatrixChannelMute;
 			}
 			break;
 		default:
@@ -629,7 +513,7 @@ void SoundsourceProcessor::parameterValueChanged(int parameterIndex, float newVa
  * @param parameterIndex	Index of the plugin parameter being changed.
  * @param gestureIsStarting	True if starting, false if ending.
  */
-void SoundsourceProcessor::parameterGestureChanged(int parameterIndex, bool gestureIsStarting)
+void MatrixChannelProcessor::parameterGestureChanged(int parameterIndex, bool gestureIsStarting)
 {
 	ignoreUnused(parameterIndex);
 	ignoreUnused(gestureIsStarting);
@@ -645,7 +529,7 @@ void SoundsourceProcessor::parameterGestureChanged(int parameterIndex, bool gest
  * Returns the name of this processor.
  * @return The plugin name.
  */
-const String SoundsourceProcessor::getName() const
+const String MatrixChannelProcessor::getName() const
 {
 	return JUCEApplication::getInstance()->getApplicationName();
 }
@@ -654,7 +538,7 @@ const String SoundsourceProcessor::getName() const
  * Returns true if the processor wants midi messages.
  * @return	True if the processor wants midi messages.
  */
-bool SoundsourceProcessor::acceptsMidi() const
+bool MatrixChannelProcessor::acceptsMidi() const
 {
 #if JucePlugin_WantsMidiInput
 	return true;
@@ -667,7 +551,7 @@ bool SoundsourceProcessor::acceptsMidi() const
  * Returns true if the processor produces midi messages.
  * @return	True if the processor produces midi messages.
  */
-bool SoundsourceProcessor::producesMidi() const
+bool MatrixChannelProcessor::producesMidi() const
 {
 #if JucePlugin_ProducesMidiOutput
 	return true;
@@ -681,7 +565,7 @@ bool SoundsourceProcessor::producesMidi() const
  * @return	Zero, since no audio delay is introduced.
  */
 
-double SoundsourceProcessor::getTailLengthSeconds() const
+double MatrixChannelProcessor::getTailLengthSeconds() const
 {
 	return 0.0;
 }
@@ -691,7 +575,7 @@ double SoundsourceProcessor::getTailLengthSeconds() const
  * The value returned must be valid as soon as this object is created, and must not change over its lifetime.
  * @return Number of preset programs the filter supports. This value shouldn't be less than 1.
  */
-int SoundsourceProcessor::getNumPrograms()
+int MatrixChannelProcessor::getNumPrograms()
 {
 	return 1;
 }
@@ -700,7 +584,7 @@ int SoundsourceProcessor::getNumPrograms()
  * Returns the number of the currently active program.
  * @return Returns the number of the currently active program.
  */
-int SoundsourceProcessor::getCurrentProgram()
+int MatrixChannelProcessor::getCurrentProgram()
 {
 	return 0;
 }
@@ -709,7 +593,7 @@ int SoundsourceProcessor::getCurrentProgram()
  * Called by the host to change the current program.
  * @param index		New program index.
  */
-void SoundsourceProcessor::setCurrentProgram(int index)
+void MatrixChannelProcessor::setCurrentProgram(int index)
 {
 	ignoreUnused(index);
 }
@@ -719,10 +603,10 @@ void SoundsourceProcessor::setCurrentProgram(int index)
  * @param index		Index of the desired program
  * @return			Desired program name.
  */
-const String SoundsourceProcessor::getProgramName(int index)
+const String MatrixChannelProcessor::getProgramName(int index)
 {
 	ignoreUnused(index);
-	return m_pluginDisplayName;
+	return m_processorDisplayName;
 }
 
 /**
@@ -730,13 +614,13 @@ const String SoundsourceProcessor::getProgramName(int index)
  * @param index		Index of the desired program
  * @param newName	Desired new program name.
  */
-void SoundsourceProcessor::changeProgramName(int index, const String& newName)
+void MatrixChannelProcessor::changeProgramName(int index, const String& newName)
 {
 	ignoreUnused(index);
-	m_pluginDisplayName = newName;
+	m_processorDisplayName = newName;
 
 	// Signal change to other modules in the plugin.
-	SetParameterChanged(DCS_Host, DCT_SourceID);
+	SetParameterChanged(DCS_Host, DCT_MatrixChannelID);
 }
 
 /**
@@ -749,7 +633,7 @@ void SoundsourceProcessor::changeProgramName(int index, const String& newName)
  *							a buggy host exceeds this value. The actual block sizes that the host uses may be different each time
  *							the callback happens: completely variable block sizes can be expected from some hosts.
  */
-void SoundsourceProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
+void MatrixChannelProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
 	ignoreUnused(sampleRate, samplesPerBlock);
 }
@@ -758,7 +642,7 @@ void SoundsourceProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
  * Called after playback has stopped, to let the filter free up any resources it no longer needs.
  * When playback stops, you can use this as an opportunity to free up any spare memory, etc.
  */
-void SoundsourceProcessor::releaseResources()
+void MatrixChannelProcessor::releaseResources()
 {
 }
 
@@ -774,7 +658,7 @@ void SoundsourceProcessor::releaseResources()
  *						to be the filter's midi output. This means that your filter should be careful to clear any incoming
  *						messages from the array if it doesn't want them to be passed-on.
  */
-void SoundsourceProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
+void MatrixChannelProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
 	ignoreUnused(buffer, midiMessages);
 }
@@ -783,7 +667,7 @@ void SoundsourceProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffer& m
  * This function returns true if the plugin can create an editor component.
  * @return True.
  */
-bool SoundsourceProcessor::hasEditor() const
+bool MatrixChannelProcessor::hasEditor() const
 {
 	return true;
 }
@@ -793,12 +677,12 @@ bool SoundsourceProcessor::hasEditor() const
  * This can return nullptr if you want a UI-less filter, in which case the host may create a generic UI that lets the user twiddle the parameters directly.
  * @return	A pointer to the newly created editor component.
  */
-AudioProcessorEditor* SoundsourceProcessor::createEditor()
+AudioProcessorEditor* MatrixChannelProcessor::createEditor()
 {
-	AudioProcessorEditor* editor = new SoundsourceProcessorEditor(*this);
+	AudioProcessorEditor* editor = new MatrixChannelProcessorEditor(*this);
 
 	// Initialize GUI with current IP address, etc.
-	SetParameterChanged(DCS_Host, (DCT_PluginInstanceConfig | DCT_OscConfig | DCT_AutomationParameters));
+	SetParameterChanged(DCS_Host, (DCT_ProcessorInstanceConfig | DCT_CommunicationConfig | DCT_SoundobjectParameters));
 
 	return editor;
 }
@@ -806,12 +690,3 @@ AudioProcessorEditor* SoundsourceProcessor::createEditor()
 
 } // namespace SoundscapeBridgeApp
 
-
-/**
- * This global (i.e. outside the dbaudio namespace) function creates new instances of the plugin.
- * @return Creates and returns a new plugin instance.
- */
-AudioProcessor* JUCE_CALLTYPE createPluginFilter()
-{
-	return new SoundscapeBridgeApp::SoundsourceProcessor();
-}

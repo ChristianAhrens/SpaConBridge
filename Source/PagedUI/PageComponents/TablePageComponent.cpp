@@ -35,10 +35,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "TablePageComponent.h"
 
-#include "../../SoundsourceProcessor/SoundsourceProcessor.h"
-#include "../../SoundsourceProcessor/SoundsourceProcessorEditor.h"
-#include "../../SoundsourceProcessor/SurfaceSlider.h"
+#include "../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
+#include "../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessorEditor.h"
 
+#include "../../SurfaceSlider.h"
 #include "../../Controller.h"
 #include "../../LookAndFeel.h"
 
@@ -63,7 +63,7 @@ TablePageComponent::TablePageComponent()
 {
 	// Create the table model/component.
 	m_pageContainerTable = std::make_unique<TableModelComponent>();
-	m_pageContainerTable->currentSelectedProcessorChanged = [=](ProcessorId id) { this->onCurrentSelectedProcessorChanged(id); };
+	m_pageContainerTable->currentSelectedProcessorChanged = [=](SoundobjectProcessorId id) { this->onCurrentSelectedProcessorChanged(id); };
 	addAndMakeVisible(m_pageContainerTable.get());
 
 	// Add/Remove Buttons
@@ -224,27 +224,27 @@ void TablePageComponent::buttonClicked(Button *button)
 		{
 			if (addInstance)
 			{
-				ctrl->createNewProcessor();
+				ctrl->createNewSoundobjectProcessor();
 			}
 			else if (removeInstance)
 			{
 				auto const& selectedProcessorIds = m_pageContainerTable->GetProcessorIdsForRows(m_pageContainerTable->GetSelectedRows());
 
-				if (ctrl->GetProcessorCount() <= selectedProcessorIds.size())
+				if (ctrl->GetSoundobjectProcessorCount() <= selectedProcessorIds.size())
 					onCurrentSelectedProcessorChanged(INVALID_PROCESSOR_ID);
 				else
 				{
-					auto processorCount = ctrl->GetProcessorCount();
+					auto processorCount = ctrl->GetSoundobjectProcessorCount();
 					auto currentLastProcessorId = processorCount - 1;
 					auto selectedProcessorsToRemoveCount = selectedProcessorIds.size();
-					auto nextStillExistingId = static_cast<ProcessorId>(currentLastProcessorId - selectedProcessorsToRemoveCount);
+					auto nextStillExistingId = static_cast<SoundobjectProcessorId>(currentLastProcessorId - selectedProcessorsToRemoveCount);
 					m_pageContainerTable->selectedRowsChanged(nextStillExistingId);
 				}
 
 				for (auto processorId : selectedProcessorIds)
 				{
-					if (ctrl->GetProcessorCount() >= 1)
-						auto processor = std::unique_ptr<SoundsourceProcessor>(ctrl->GetProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
+					if (ctrl->GetSoundobjectProcessorCount() >= 1)
+						auto processor = std::unique_ptr<SoundobjectProcessor>(ctrl->GetSoundobjectProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
 				}
 			}
 			else
@@ -256,7 +256,7 @@ void TablePageComponent::buttonClicked(Button *button)
 /**
  * Function to be called from model when the current selection has changed
  */
-void TablePageComponent::onCurrentSelectedProcessorChanged(ProcessorId selectedProcessorId)
+void TablePageComponent::onCurrentSelectedProcessorChanged(SoundobjectProcessorId selectedProcessorId)
 {
 	if (selectedProcessorId == INVALID_PROCESSOR_ID)
 	{
@@ -275,16 +275,16 @@ void TablePageComponent::onCurrentSelectedProcessorChanged(ProcessorId selectedP
 		auto ctrl = Controller::GetInstance();
 		if (ctrl)
 		{
-			auto processor = ctrl->GetProcessor(selectedProcessorId);
+			auto processor = ctrl->GetSoundobjectProcessor(selectedProcessorId);
 			if (processor)
 			{
 				auto processorEditor = processor->createEditorIfNeeded();
-				auto sspEditor = dynamic_cast<SoundsourceProcessorEditor*>(processorEditor);
+				auto sspEditor = dynamic_cast<SoundobjectProcessorEditor*>(processorEditor);
 				if (sspEditor != m_selectedProcessorInstanceEditor.get())
 				{
 					removeChildComponent(m_selectedProcessorInstanceEditor.get());
 					m_selectedProcessorInstanceEditor.reset();
-					m_selectedProcessorInstanceEditor = std::unique_ptr<SoundsourceProcessorEditor>(sspEditor);
+					m_selectedProcessorInstanceEditor = std::unique_ptr<SoundobjectProcessorEditor>(sspEditor);
 					if (m_selectedProcessorInstanceEditor)
 					{
 						addAndMakeVisible(m_selectedProcessorInstanceEditor.get());
@@ -310,7 +310,7 @@ void TablePageComponent::UpdateGui(bool init)
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl && m_pageContainerTable)
 	{
-		if (ctrl->PopParameterChanged(DCS_SoundsourceTable, DCT_NumProcessors) || init)
+		if (ctrl->PopParameterChanged(DCS_SoundobjectTable, DCT_NumProcessors) || init)
 		{
 			m_pageContainerTable->RecreateTableRowIds();
 			m_pageContainerTable->UpdateTable();
@@ -323,10 +323,10 @@ void TablePageComponent::UpdateGui(bool init)
 		else
 		{
 			// Iterate through all plugin instances and see if anything changed there.
-			for (auto const& processorId : ctrl->GetProcessorIds())
+			for (auto const& processorId : ctrl->GetSoundobjectProcessorIds())
 			{
-				auto processor = ctrl->GetProcessor(processorId);
-				if (processor && processor->GetParameterChanged(DCS_SoundsourceTable, DCT_PluginInstanceConfig))
+				auto processor = ctrl->GetSoundobjectProcessor(processorId);
+				if (processor && processor->GetParameterChanged(DCS_SoundobjectTable, DCT_ProcessorInstanceConfig))
 				{
 					m_pageContainerTable->UpdateTable();
 				}
@@ -511,7 +511,7 @@ TableModelComponent::~TableModelComponent()
  * @param rowNumber	The desired row number (starts at 0).
  * @return	The ID of the plugin instance at that row number, if any.
  */
-ProcessorId TableModelComponent::GetProcessorIdForRow(int rowNumber) const
+SoundobjectProcessorId TableModelComponent::GetProcessorIdForRow(int rowNumber) const
 {
 	if ((unsigned int)rowNumber > (m_processorIds.size() - 1) || m_processorIds.empty())
 	{
@@ -527,9 +527,9 @@ ProcessorId TableModelComponent::GetProcessorIdForRow(int rowNumber) const
  * @param rowNumbers	A list of desired row numbers.
  * @return	A list of IDs of the plugin instances at those rows.
  */
-std::vector<ProcessorId> TableModelComponent::GetProcessorIdsForRows(const std::vector<int>& rowNumbers) const
+std::vector<SoundobjectProcessorId> TableModelComponent::GetProcessorIdsForRows(const std::vector<int>& rowNumbers) const
 {
-	std::vector<ProcessorId> ids;
+	std::vector<SoundobjectProcessorId> ids;
 	ids.reserve(rowNumbers.size());
 	for (std::size_t i = 0; i < rowNumbers.size(); ++i)
 		ids.push_back(GetProcessorIdForRow(rowNumbers[i]));
@@ -542,7 +542,7 @@ std::vector<ProcessorId> TableModelComponent::GetProcessorIdsForRows(const std::
  * @param processorId	The id of the processor to get the corresp. row for.
  * @return	The table row of the processor.
  */
-int TableModelComponent::GetRowForProcessorId(ProcessorId processorId) const
+int TableModelComponent::GetRowForProcessorId(SoundobjectProcessorId processorId) const
 {
 	auto processorIdIter = std::find(m_processorIds.begin(), m_processorIds.end(), processorId);
 	if (processorIdIter == m_processorIds.end())
@@ -559,7 +559,7 @@ int TableModelComponent::GetRowForProcessorId(ProcessorId processorId) const
  * @param processorIds	A list of desired processorIds.
  * @return	A list of table rows corresp. to the given processorIds.
  */
-std::vector<int> TableModelComponent::GetRowsForProcessorIds(const std::vector<ProcessorId>& processorIds) const
+std::vector<int> TableModelComponent::GetRowsForProcessorIds(const std::vector<SoundobjectProcessorId>& processorIds) const
 {
 	std::vector<int> rows;
 	rows.reserve(processorIds.size());
@@ -613,27 +613,27 @@ void TableModelComponent::SelectAllRows(bool all)
 
 /**
  * Helper sorting function used by std::sort(). This version is used to sort by plugin's SourceId.
- * @param pId1	Id of the first plugin processor.
- * @param pId2	Id of the second plugin processor.
+ * @param pId1	Id of the first processor.
+ * @param pId2	Id of the second processor.
  * @return	True if the first plugin's SourceId is less than the second's.
  */
-bool TableModelComponent::LessThanSourceId(ProcessorId pId1, ProcessorId pId2)
+bool TableModelComponent::LessThanSourceId(SoundobjectProcessorId pId1, SoundobjectProcessorId pId2)
 {
 	auto ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return false;
 
-	auto processorIds = ctrl->GetProcessorIds();
+	auto processorIds = ctrl->GetSoundobjectProcessorIds();
 	auto maxProcessorIdIter = std::max_element(processorIds.begin(), processorIds.end());
 	if (maxProcessorIdIter == processorIds.end())
 		return false;
 	auto maxProcessorId = *maxProcessorIdIter;
 	if ((pId1 <= maxProcessorId) && (pId2 <= maxProcessorId))
 	{
-		auto p1 = ctrl->GetProcessor(pId1);
-		auto p2 = ctrl->GetProcessor(pId2);
+		auto p1 = ctrl->GetSoundobjectProcessor(pId1);
+		auto p2 = ctrl->GetSoundobjectProcessor(pId2);
 		if (p1 && p2)
-			return (p1->GetSourceId() < p2->GetSourceId());
+			return (p1->GetSoundobjectId() < p2->GetSoundobjectId());
 	}
 
 	jassertfalse; // Index out of range!
@@ -642,25 +642,25 @@ bool TableModelComponent::LessThanSourceId(ProcessorId pId1, ProcessorId pId2)
 
 /**
  * Helper sorting function used by std::sort(). This version is used to sort by plugin's MappingId.
- * @param pId1	Id of the first plugin processor.
- * @param pId2	Id of the second plugin processor.
- * @return	True if the first plugin's MappingId is less than the second's.
+ * @param pId1	Id of the first processor.
+ * @param pId2	Id of the second processor.
+ * @return	True if the first MappingId is less than the second.
  */
-bool TableModelComponent::LessThanMapping(ProcessorId pId1, ProcessorId pId2)
+bool TableModelComponent::LessThanMapping(SoundobjectProcessorId pId1, SoundobjectProcessorId pId2)
 {
 	auto ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return false;
 
-	auto processorIds = ctrl->GetProcessorIds();
+	auto processorIds = ctrl->GetSoundobjectProcessorIds();
 	auto maxProcessorIdIter = std::max_element(processorIds.begin(), processorIds.end());
 	if (maxProcessorIdIter == processorIds.end())
 		return false;
 	auto maxProcessorId = *maxProcessorIdIter;
 	if ((pId1 <= maxProcessorId) && (pId2 <= maxProcessorId))
 	{
-		auto p1 = ctrl->GetProcessor(pId1);
-		auto p2 = ctrl->GetProcessor(pId2);
+		auto p1 = ctrl->GetSoundobjectProcessor(pId1);
+		auto p2 = ctrl->GetSoundobjectProcessor(pId2);
 		if (p1 && p2)
 			return (p1->GetMappingId() < p2->GetMappingId());
 	}
@@ -671,25 +671,25 @@ bool TableModelComponent::LessThanMapping(ProcessorId pId1, ProcessorId pId2)
 
 /**
  * Helper sorting function used by std::sort(). This version is used to sort by plugin's ComsMode. 
- * @param pId1	Id of the first plugin processor.
- * @param pId2	Id of the second plugin processor.
+ * @param pId1	Id of the first processor.
+ * @param pId2	Id of the second processor.
  * @return	True if the first plugin's ComsMode is less than the second's.
  */
-bool TableModelComponent::LessThanComsMode(ProcessorId pId1, ProcessorId pId2)
+bool TableModelComponent::LessThanComsMode(SoundobjectProcessorId pId1, SoundobjectProcessorId pId2)
 {
 	auto ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return false;
 
-	auto processorIds = ctrl->GetProcessorIds();
+	auto processorIds = ctrl->GetSoundobjectProcessorIds();
 	auto maxProcessorIdIter = std::max_element(processorIds.begin(), processorIds.end());
 	if (maxProcessorIdIter == processorIds.end())
 		return false;
 	auto maxProcessorId = *maxProcessorIdIter;
 	if ((pId1 <= maxProcessorId) && (pId2 <= maxProcessorId))
 	{
-		auto p1 = ctrl->GetProcessor(pId1);
-		auto p2 = ctrl->GetProcessor(pId2);
+		auto p1 = ctrl->GetSoundobjectProcessor(pId1);
+		auto p2 = ctrl->GetSoundobjectProcessor(pId2);
 		if (p1 && p2)
 			return (p1->GetComsMode() < p2->GetComsMode());
 	}
@@ -700,11 +700,11 @@ bool TableModelComponent::LessThanComsMode(ProcessorId pId1, ProcessorId pId2)
 
 /**
  * Helper sorting function used by std::sort(). This version is used to sort by plugin's ComsMode.
- * @param pId1	Id of the first plugin processor.
- * @param pId2	Id of the second plugin processor.
+ * @param pId1	Id of the first processor.
+ * @param pId2	Id of the second processor.
  * @return	True if the first plugin's ComsMode is less than the second's.
  */
-bool TableModelComponent::LessThanBridgingMute(ProcessorId pId1, ProcessorId pId2)
+bool TableModelComponent::LessThanBridgingMute(SoundobjectProcessorId pId1, SoundobjectProcessorId pId2)
 {
 	auto ctrl = Controller::GetInstance();
 	if (!ctrl)
@@ -714,29 +714,29 @@ bool TableModelComponent::LessThanBridgingMute(ProcessorId pId1, ProcessorId pId
 	// Nevertheless, to have some defined behaviour, we use the collected 
 	// count of muted briding protocols of every soundsource for this.
 	// (Nothing muted < some protocols muted < all protocols muted)
-	auto processorIds = ctrl->GetProcessorIds();
+	auto processorIds = ctrl->GetSoundobjectProcessorIds();
 	auto maxProcessorIdIter = std::max_element(processorIds.begin(), processorIds.end());
 	if (maxProcessorIdIter == processorIds.end())
 		return false;
 	auto maxProcessorId = *maxProcessorIdIter;
 	if ((pId1 <= maxProcessorId) && (pId2 <= maxProcessorId))
 	{
-		auto p1 = ctrl->GetProcessor(pId1);
-		auto p2 = ctrl->GetProcessor(pId2);
+		auto p1 = ctrl->GetSoundobjectProcessor(pId1);
+		auto p2 = ctrl->GetSoundobjectProcessor(pId2);
 		if (p1 && p2)
 		{
 			auto mutedProtocolCountP1 = 0;
 			auto mutedProtocolCountP2 = 0;
 
-			auto sourceId1 = p1->GetSourceId();
-			auto sourceId2 = p2->GetSourceId();
+			auto soundobjectId1 = p1->GetSoundobjectId();
+			auto soundobjectId2 = p2->GetSoundobjectId();
 			for (auto bridgingType : ProtocolBridgingTypes)
 			{
 				auto activeBridging = ctrl->GetActiveProtocolBridging();
 				if ((activeBridging & bridgingType) == bridgingType)
 				{
-					mutedProtocolCountP1 += ctrl->GetMuteBridgingSourceId(bridgingType, sourceId1) ? 1 : 0;
-					mutedProtocolCountP2 += ctrl->GetMuteBridgingSourceId(bridgingType, sourceId2) ? 1 : 0;
+					mutedProtocolCountP1 += ctrl->GetMuteBridgingSoundobjectId(bridgingType, soundobjectId1) ? 1 : 0;
+					mutedProtocolCountP2 += ctrl->GetMuteBridgingSoundobjectId(bridgingType, soundobjectId2) ? 1 : 0;
 				}
 			}
 
@@ -757,8 +757,8 @@ void TableModelComponent::RecreateTableRowIds()
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
-		m_processorIds.reserve(ctrl->GetProcessorCount());
-		for (auto const& processorId : ctrl->GetProcessorIds())
+		m_processorIds.reserve(ctrl->GetSoundobjectProcessorCount());
+		for (auto const& processorId : ctrl->GetSoundobjectProcessorIds())
 			m_processorIds.push_back(processorId);
 	}
 
@@ -779,7 +779,7 @@ void TableModelComponent::UpdateTable()
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
-		auto selectedProcessorIds = ctrl->GetSelectedProcessorIds();
+		auto selectedProcessorIds = ctrl->GetSelectedSoundobjectProcessorIds();
 		auto selectedRows = GetRowsForProcessorIds(selectedProcessorIds);
 		if (GetSelectedRows() != selectedRows)
 			SetSelectedRows(selectedRows);
@@ -817,7 +817,7 @@ int TableModelComponent::getNumRows()
 
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
-		ret = ctrl->GetProcessorCount();
+		ret = ctrl->GetSoundobjectProcessorCount();
 
 	return ret;
 }
@@ -875,7 +875,7 @@ void TableModelComponent::paintCell(Graphics& g, int rowNumber, int columnId, in
 void TableModelComponent::sortOrderChanged(int newSortColumnId, bool isForwards)
 {
 	// Remember row selection so it can be restored after sorting.
-	std::vector<ProcessorId> selectedProcessors = GetProcessorIdsForRows(GetSelectedRows());
+	std::vector<SoundobjectProcessorId> selectedProcessors = GetProcessorIdsForRows(GetSelectedRows());
 	m_table.deselectAllRows();
 
 	// Use a different helper sorting function depending on which column is selected for sorting.
@@ -908,7 +908,7 @@ void TableModelComponent::sortOrderChanged(int newSortColumnId, bool isForwards)
 
 	// Restore row selection after sorting order has been changed, BUT make sure that
 	// it is the same Processors which are selected after the sorting, NOT the same rows.
-	for (ProcessorId processorId : selectedProcessors)
+	for (SoundobjectProcessorId processorId : selectedProcessors)
 	{
 		int rowNo = static_cast<int>(std::find(m_processorIds.begin(), m_processorIds.end(), processorId) - m_processorIds.begin());
 		m_table.selectRow(rowNo, true /* don't scroll */, false /* do not deselect other rows*/);
@@ -1058,7 +1058,7 @@ void TableModelComponent::selectedRowsChanged(int lastRowSelected)
 {
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
-		ctrl->SetSelectedProcessorIds(GetProcessorIdsForRows(GetSelectedRows()), true);
+		ctrl->SetSelectedSoundobjectProcessorIds(GetProcessorIdsForRows(GetSelectedRows()), true);
 
 	if (currentSelectedProcessorChanged)
 	{
@@ -1130,7 +1130,7 @@ void ComboBoxContainer::comboBoxChanged(ComboBox *comboBox)
 	}
 
 	// Get the IDs of the plugins on the selected rows.
-	std::vector<ProcessorId> ProcessorIds = m_owner.GetProcessorIdsForRows(selectedRows);
+	std::vector<SoundobjectProcessorId> ProcessorIds = m_owner.GetProcessorIdsForRows(selectedRows);
 
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
@@ -1140,9 +1140,9 @@ void ComboBoxContainer::comboBoxChanged(ComboBox *comboBox)
 		for (std::size_t i = 0; i < ProcessorIds.size(); ++i)
 		{
 			// Set the value of the combobox to the current MappingID of the corresponding plugin.
-			SoundsourceProcessor* processor = ctrl->GetProcessor(ProcessorIds[i]);
+			SoundobjectProcessor* processor = ctrl->GetSoundobjectProcessor(ProcessorIds[i]);
 			if (processor)
-				processor->SetMappingId(DCS_SoundsourceTable, newMapping);
+				processor->SetMappingId(DCS_SoundobjectTable, newMapping);
 		}
 	}
 }
@@ -1165,12 +1165,12 @@ void ComboBoxContainer::SetRow(int newRow)
 	m_row = newRow;
 
 	// Find the plugin instance corresponding to the given row number.
-	auto ProcessorId = m_owner.GetProcessorIdForRow(newRow);
+	auto processorId = m_owner.GetProcessorIdForRow(newRow);
 	auto ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
 		// Set the value of the combobox to the current MappingID of the corresponding plugin.
-		auto processor = ctrl->GetProcessor(ProcessorId);
+		auto processor = ctrl->GetSoundobjectProcessor(processorId);
 		if (processor)
 			m_comboBox.setSelectedId(processor->GetMappingId(), dontSendNotification);
 	}
@@ -1226,9 +1226,9 @@ void TextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
 		for (auto const& processorId : m_owner.GetProcessorIdsForRows(selectedRows))
 		{
 			// Set the value of the combobox to the current MappingID of the corresponding plugin.
-			auto processor = ctrl->GetProcessor(processorId);
+			auto processor = ctrl->GetSoundobjectProcessor(processorId);
 			if (processor)
-				processor->SetSourceId(DCS_SoundsourceTable, newSourceId);
+				processor->SetSoundobjectId(DCS_SoundobjectTable, newSourceId);
 		}
 	}
 }
@@ -1272,9 +1272,9 @@ void TextEditorContainer::SetRow(int newRow)
 	if (ctrl)
 	{
 		// Set the value of the textEditor to the current SourceID of the corresponding plugin.
-		auto processor = ctrl->GetProcessor(processorId);
+		auto processor = ctrl->GetSoundobjectProcessor(processorId);
 		if (processor)
-			m_editor.setText(String(processor->GetSourceId()), false);
+			m_editor.setText(String(processor->GetSoundobjectId()), false);
 	}
 }
 
@@ -1338,7 +1338,7 @@ void RadioButtonContainer::buttonClicked(Button *button)
 
 		for (auto const& processorId : m_owner.GetProcessorIdsForRows(selectedRows))
 		{
-			auto processor = ctrl->GetProcessor(processorId);
+			auto processor = ctrl->GetSoundobjectProcessor(processorId);
 			if (processor)
 			{
 				ComsMode oldMode = processor->GetComsMode();
@@ -1349,7 +1349,7 @@ void RadioButtonContainer::buttonClicked(Button *button)
 				else
 					oldMode &= ~newFlag;
 
-				processor->SetComsMode(DCS_SoundsourceTable, oldMode);
+				processor->SetComsMode(DCS_SoundobjectTable, oldMode);
 			}
 		}
 	}
@@ -1384,17 +1384,12 @@ void RadioButtonContainer::SetRow(int newRow)
 	if (ctrl)
 	{
 		// Toggle the correct radio buttons to the current ComsMode of the corresponding plugin.
-		auto processor = ctrl->GetProcessor(m_owner.GetProcessorIdForRow(newRow));
+		auto processor = ctrl->GetSoundobjectProcessor(m_owner.GetProcessorIdForRow(newRow));
 		if (processor)
 		{
-			auto params = processor->getParameters();
-			auto param = dynamic_cast<AudioParameterChoice*>(params[ParamIdx_DelayMode]);
-			if (param)
-			{
-				ComsMode newMode = processor->GetComsMode();
-				m_txButton.setToggleState(((newMode & CM_Tx) == CM_Tx), dontSendNotification);
-				m_rxButton.setToggleState(((newMode & CM_Rx) == CM_Rx), dontSendNotification);
-			}
+			ComsMode newMode = processor->GetComsMode();
+			m_txButton.setToggleState(((newMode & CM_Tx) == CM_Tx), dontSendNotification);
+			m_rxButton.setToggleState(((newMode & CM_Rx) == CM_Rx), dontSendNotification);
 		}
 	}
 }
@@ -1605,16 +1600,16 @@ void MuteButtonContainer::buttonClicked(Button* button)
 			}
 
 			// Get the IDs of the processors on the selected rows.
-			auto ProcessorIds = m_owner.GetProcessorIdsForRows(selectedRows);
-			std::vector<SourceId> SourceIds;
-			for (auto processorId : ProcessorIds)
+			auto processorIds = m_owner.GetProcessorIdsForRows(selectedRows);
+			std::vector<SoundobjectId> soundobjectIds;
+			for (auto processorId : processorIds)
 			{
-				auto processor = ctrl->GetProcessor(processorId);
+				auto processor = ctrl->GetSoundobjectProcessor(processorId);
 				if (processor)
-					SourceIds.push_back(processor->GetSourceId());
+					soundobjectIds.push_back(processor->GetSoundobjectId());
 			}
 
-			ctrl->SetMuteBridgingSourceIds(type, SourceIds, newToggleState);
+			ctrl->SetMuteBridgingSoundobjectIds(type, soundobjectIds, newToggleState);
 
 			m_owner.UpdateTable();
 		}
@@ -1658,9 +1653,9 @@ void MuteButtonContainer::SetRow(int newRow)
 		{
 			if (m_bridgingMutes.count(type) > 0)
 			{
-				auto processor = ctrl->GetProcessor(processorId);
+				auto processor = ctrl->GetSoundobjectProcessor(processorId);
 				if (processor)
-					m_bridgingMutes.at(type)->setToggleState(ctrl->GetMuteBridgingSourceId(type, processor->GetSourceId()), dontSendNotification);
+					m_bridgingMutes.at(type)->setToggleState(ctrl->GetMuteBridgingSoundobjectId(type, processor->GetSoundobjectId()), dontSendNotification);
 			}
 		}
 	}
@@ -1739,7 +1734,7 @@ void EditableLabelContainer::SetRow(int newRow)
 	//if (ctrl)
 	//{
 	//	// Set the value of the combobox to the current MappingID of the corresponding plugin.
-	//	SoundsourceProcessor* plugin = ctrl->GetProcessor(ProcessorId);
+	//	SoundobjectProcessor* plugin = ctrl->GetProcessor(ProcessorId);
 	//	if (plugin)
 	//	{
 	//		displayName = plugin->getProgramName(0);

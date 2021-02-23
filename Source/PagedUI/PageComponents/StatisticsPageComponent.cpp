@@ -20,9 +20,9 @@
 
 #include "../PageComponentManager.h"
 
-#include "../../SoundsourceProcessor/SoundsourceProcessor.h"
+#include "../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
 #include "../../Controller.h"
-#include "../../SoundsourceProcessor/SurfaceSlider.h"
+#include "../../SurfaceSlider.h"
 
 #include <Image_utils.h>
 

@@ -35,6 +35,7 @@ public:
         ACTIVEOVRTAB,
         CONTROLLER,
         SOUNDSOURCEPROCESSORS,
+        MATRIXCHANNELPROCESSORS,
         PROCESSORINSTANCE,
 		BRIDGING,
         LOOKANDFEELTYPE,
@@ -51,6 +52,8 @@ public:
             return "Controller";
         case SOUNDSOURCEPROCESSORS:
             return "SoundsourceProcessors";
+        case MATRIXCHANNELPROCESSORS:
+            return "MatrixChannelProcessors";
         case PROCESSORINSTANCE:
             return "Proc";
         case BRIDGING:
@@ -64,7 +67,7 @@ public:
 
 	enum AttributeID
 	{
-		PROCESSORSOURCEID,
+		PROCESSOROBJECTID,
         PROCESSORMAPPINGID,
         PROCESSORCOMSMODE,
 	};
@@ -72,7 +75,7 @@ public:
 	{
 		switch (Id)
 		{
-        case PROCESSORSOURCEID:
+        case PROCESSOROBJECTID:
             return "ProcSrcId";
         case PROCESSORMAPPINGID:
             return "MappingId";

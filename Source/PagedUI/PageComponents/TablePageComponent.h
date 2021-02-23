@@ -55,7 +55,7 @@ class ComboBoxContainer;
 class TextEditorContainer;
 class RadioButtonContainer;
 class EditableLabelContainer;
-class SoundsourceProcessorEditor;
+class SoundobjectProcessorEditor;
 
 
 /**
@@ -77,7 +77,7 @@ public:
 	void buttonClicked(Button*) override;
 
 	//==============================================================================
-	void onCurrentSelectedProcessorChanged(ProcessorId selectedProcessorId);
+	void onCurrentSelectedProcessorChanged(SoundobjectProcessorId selectedProcessorId);
 
 	//==========================================================================
 	void onConfigUpdated() override;
@@ -88,8 +88,8 @@ protected:
 	void resized() override;
 
 private:
-	std::unique_ptr<TableModelComponent>		m_pageContainerTable;					/**> The actual table model / component inside this component. */
-	std::unique_ptr<SoundsourceProcessorEditor> m_selectedProcessorInstanceEditor;	/**> The processor editor component corresponding to the selected row */
+	std::unique_ptr<TableModelComponent>		m_pageContainerTable;				/**> The actual table model / component inside this component. */
+	std::unique_ptr<SoundobjectProcessorEditor> m_selectedProcessorInstanceEditor;	/**> The processor editor component corresponding to the selected row */
 	std::unique_ptr<TextButton>					m_addInstance;						/**> Button to add a processor instance */
 	std::unique_ptr<TextButton>					m_removeInstance;					/**> Button to remove the selected processor instance */
 	std::unique_ptr<Label>						m_selectLabel;						/**> Quick select label */
@@ -143,15 +143,15 @@ public:
 	TableModelComponent();
 	~TableModelComponent() override;
 
-	static bool LessThanSourceId(ProcessorId pId1, ProcessorId pId2);
-	static bool LessThanMapping(ProcessorId pId1, ProcessorId pId2);
-	static bool LessThanComsMode(ProcessorId pId1, ProcessorId pId2);
-	static bool LessThanBridgingMute(ProcessorId pId1, ProcessorId pId2);
+	static bool LessThanSourceId(SoundobjectProcessorId pId1, SoundobjectProcessorId pId2);
+	static bool LessThanMapping(SoundobjectProcessorId pId1, SoundobjectProcessorId pId2);
+	static bool LessThanComsMode(SoundobjectProcessorId pId1, SoundobjectProcessorId pId2);
+	static bool LessThanBridgingMute(SoundobjectProcessorId pId1, SoundobjectProcessorId pId2);
 
-	ProcessorId GetProcessorIdForRow(int rowNumber) const;
-	std::vector<ProcessorId> GetProcessorIdsForRows(const std::vector<int>& rowNumbers) const;
-	int GetRowForProcessorId(ProcessorId processorId) const;
-	std::vector<int> GetRowsForProcessorIds(const std::vector<ProcessorId>& processorIds) const;
+	SoundobjectProcessorId GetProcessorIdForRow(int rowNumber) const;
+	std::vector<SoundobjectProcessorId> GetProcessorIdsForRows(const std::vector<int>& rowNumbers) const;
+	int GetRowForProcessorId(SoundobjectProcessorId processorId) const;
+	std::vector<int> GetRowsForProcessorIds(const std::vector<SoundobjectProcessorId>& processorIds) const;
 
 	void RecreateTableRowIds();
 	void UpdateTable();
@@ -175,11 +175,11 @@ public:
 	void resized() override;
 
 	// Callback functions
-	std::function<void(ProcessorId)>	currentSelectedProcessorChanged;
+	std::function<void(SoundobjectProcessorId)>	currentSelectedProcessorChanged;
 
 private:
-	TableListBox				m_table;			/**> The table component itself. */
-	std::vector<ProcessorId>	m_processorIds;		/**> Local list of Plug-in instance IDs, one for each row in the table. */
+	TableListBox						m_table;			/**> The table component itself. */
+	std::vector<SoundobjectProcessorId>	m_processorIds;		/**> Local list of Soundobject Processor instance IDs, one for each row in the table. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TableModelComponent)
 };

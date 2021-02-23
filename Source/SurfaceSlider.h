@@ -37,7 +37,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 #include <JuceHeader.h>
-#include "../SoundscapeBridgeAppCommon.h"
+
+#include "SoundscapeBridgeAppCommon.h"
 
 
 namespace SoundscapeBridgeApp
@@ -71,16 +72,16 @@ private:
 class SurfaceMultiSlider  : public Component
 {
 public:
-	struct SourcePosition
+	struct SoundobjectPosition
 	{
-		SourcePosition() : _id(-1), _pos(Point<float>(0.0f, 0.0f)), _selected(false) {};
-		SourcePosition(SourceId id, const Point<float>& pos, bool selected) : _id(id), _pos(pos), _selected(selected) {};
+		SoundobjectPosition() : _id(-1), _pos(Point<float>(0.0f, 0.0f)), _selected(false) {};
+		SoundobjectPosition(SoundobjectId id, const Point<float>& pos, bool selected) : _id(id), _pos(pos), _selected(selected) {};
 
-		SourceId		_id;
+		SoundobjectId	_id;
 		Point<float>	_pos;
 		bool			_selected;
 	};
-	typedef std::map<ProcessorId, SourcePosition> PositionCache;
+	typedef std::map<SoundobjectProcessorId, SoundobjectPosition> PositionCache;
 
 	SurfaceMultiSlider();
 	~SurfaceMultiSlider() override;
@@ -95,11 +96,11 @@ public:
 private:
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SurfaceMultiSlider)
-	ProcessorId				m_currentlyDraggedId;	/**> ProcessorId of the currently selected knob, if any. */
-	std::vector<SourceId>	m_highlightedIds;		/**> SourceIds of the currently highlighted knobs, if any. */
-	PositionCache			m_cachedPositions;		/**> To save us from iterating over all Plug-ins at every click, cache the source positions.
-													 * Keys are the PluginIds of each source, while values are pairs of the corresponding
-													 * input number and position coordinates (0.0 to 1.0). */
+	SoundobjectProcessorId		m_currentlyDraggedId;	/**> ProcessorId of the currently selected knob, if any. */
+	std::vector<SoundobjectId>	m_highlightedIds;		/**> SourceIds of the currently highlighted knobs, if any. */
+	PositionCache				m_cachedPositions;		/**> To save us from iterating over all Plug-ins at every click, cache the source positions.
+														 * Keys are the PluginIds of each source, while values are pairs of the corresponding
+														 * input number and position coordinates (0.0 to 1.0). */
 };
 
 

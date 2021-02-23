@@ -1,43 +1,26 @@
-/*
-===============================================================================
-
-Copyright (C) 2019 d&b audiotechnik GmbH & Co. KG. All Rights Reserved.
-
-This file was originally part of the Soundscape VST, AU, and AAX Plug-in
-and now in a derived version is part of SoundscapeBridgeApp.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice,
-this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
-
-3. The name of the author may not be used to endorse or promote products
-derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY d&b audiotechnik GmbH & Co. KG "AS IS" AND ANY
-EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-===============================================================================
-*/
+/* Copyright (c) 2020-2021, Christian Ahrens
+ *
+ * This file is part of SoundscapeBridgeApp <https://github.com/ChristianAhrens/SoundscapeBridgeApp>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 
 #pragma once
 
-#include "../SoundscapeBridgeAppCommon.h"
-#include "../AppConfiguration.h"
+#include "../../SoundscapeBridgeAppCommon.h"
+#include "../../AppConfiguration.h"
 
 #include <RemoteProtocolBridgeCommon.h>
 
@@ -50,33 +33,30 @@ namespace SoundscapeBridgeApp
  * Forward declarations.
  */
 class GestureManagedAudioParameterFloat;
-class GestureManagedAudioParameterChoice;
+class GestureManagedAudioParameterInt;
 
 
 /**
- * Class MainProcessor, a derived AudioProcessor which can be wrapped as VST, AU, or AAX. 
+ * Class MatrixChannelProcessor. 
  */
-class SoundsourceProcessor :
+class MatrixChannelProcessor :
 	public AudioProcessor,
 	public AudioProcessorParameter::Listener,
 	public AppConfiguration::XmlConfigurableElement
 {
 public:
-	SoundsourceProcessor(bool insertToConfig = true);
-	~SoundsourceProcessor() override;
+	MatrixChannelProcessor(bool insertToConfig = true);
+	~MatrixChannelProcessor() override;
 
 	int GetProcessorId() const;
 	void SetProcessorId(DataChangeSource changeSource, int processorId);
 
-	void InitializeSettings(SourceId sourceId, int mappingId, String ipAddress, ComsMode newMode);
+	void InitializeSettings(MatrixChannelId channelId, String ipAddress, ComsMode newMode);
 
 	static const std::vector<RemoteObjectIdentifier>	GetUsedRemoteObjects();
 
-	SourceId GetSourceId() const;
-	void SetSourceId(DataChangeSource changeSource, SourceId sourceId);
-
-	MappingId GetMappingId() const;
-	void SetMappingId(DataChangeSource changeSource, MappingId mappingId);
+	MatrixChannelId GetMatrixChannelId() const;
+	void SetMatrixChannelId(DataChangeSource changeSource, MatrixChannelId matrixChannelId);
 
 	int GetMessageRate() const;
 	void SetMessageRate(DataChangeSource changeSource, int oscMsgRate);
@@ -84,8 +64,8 @@ public:
 	ComsMode GetComsMode() const;
 	void SetComsMode(DataChangeSource changeSource, ComsMode newMode);
 
-	float GetParameterValue(AutomationParameterIndex paramIdx, bool normalized = false) const;
-	void SetParameterValue(DataChangeSource changeSource, AutomationParameterIndex paramIdx, float newValue);
+	float GetParameterValue(SoundobjectParameterIndex paramIdx, bool normalized = false) const;
+	void SetParameterValue(DataChangeSource changeSource, SoundobjectParameterIndex paramIdx, float newValue);
 
 	bool GetParameterChanged(DataChangeSource changeSource, DataChangeType change);
 	bool PopParameterChanged(DataChangeSource changeSource, DataChangeType change);
@@ -125,30 +105,19 @@ public:
 
 protected:
 	/**
-	 * X coordinate in meters.
-	 * NOTE: not using std::unique_ptr here, see addParameter().
-	 */
-	GestureManagedAudioParameterFloat*		m_xPos;
-
-	/**
-	 * Y coordinate in meters.
-	 */
-	GestureManagedAudioParameterFloat*		m_yPos;
-
-	/**
 	 * Matrix input En-Space gain.
 	 */
-	GestureManagedAudioParameterFloat*		m_reverbSendGain;
+	GestureManagedAudioParameterFloat*	m_matrixChannelLevelMeter;
 
 	/**
 	 * Sound object spread.
 	 */
-	GestureManagedAudioParameterFloat*		m_sourceSpread;
+	GestureManagedAudioParameterFloat*	m_matrixChannelGain;
 
 	/**
 	 * Sound object delay mode (Off, Tight, Full).
 	 */
-	GestureManagedAudioParameterChoice*		m_delayMode;
+	GestureManagedAudioParameterInt*	m_matrixChannelMute;
 
 	/**
 	 * Current OSC communication mode, sending and/or receiving.
@@ -156,20 +125,15 @@ protected:
 	ComsMode					m_comsMode;
 
 	/*
-	 * Coordinate mapping index (1 to 4).
+	 * MatrixChannelProcessor, or matrix input number.
 	 */
-	MappingId					m_mappingId;
-
-	/*
-	 * SourceID, or matrix input number.
-	 */
-	SourceId					m_sourceId;
+	MatrixChannelProcessorId	m_matrixChannelId;
 
 	/**
 	 * Unique ID of this Processor instance. 
 	 * This is also this Processor's index within the Controller::m_processors array.
 	 */
-	ProcessorId					m_processorId;
+	MatrixChannelProcessorId	m_processorId;
 
 	/**
 	 * Keep track of which automation parameters have changed recently. 
@@ -186,11 +150,9 @@ protected:
 	DataChangeType				m_paramSetCommandsInTransit = DCT_None;
 
 	/**
-	 * Name of this Plug-in instance. Some hosts (i.e. VST3) which support updateTrackProperties(..) 
-	 * or changeProgramName(..) will set this to the DAW track name (i.e. "Guitar", or "Vocals", etc).
-	 * On other hosts this will remain empty.
+	 * User friendly name for this processor instance
 	 */
-	String						m_pluginDisplayName;
+	String						m_processorDisplayName;
 
 	/**
 	 * Member used to ensure that property changes are registered to the correct source.
@@ -199,7 +161,7 @@ protected:
 	DataChangeSource			m_currentChangeSource = DCS_Host;
 
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SoundsourceProcessor)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixChannelProcessor)
 };
 
 

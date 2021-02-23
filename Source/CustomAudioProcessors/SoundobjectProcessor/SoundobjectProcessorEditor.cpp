@@ -34,12 +34,13 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#include "SoundsourceProcessorEditor.h"
+#include "SoundobjectProcessorEditor.h"
 
-#include "SoundsourceProcessor.h"
-#include "Parameters.h"
+#include "SoundobjectProcessor.h"
 
-#include "../PagedUI/PageContainerComponent.h"
+#include "../Parameters.h"
+
+#include "../../PagedUI/PageContainerComponent.h"
 
 
 namespace SoundscapeBridgeApp
@@ -65,7 +66,7 @@ static constexpr int GUI_UPDATE_DELAY_TICKS = 15;
 
 /*
 ===============================================================================
- Class SoundsourceProcessorEditor
+ Class SoundobjectProcessorEditor
 ===============================================================================
 */
 
@@ -74,7 +75,7 @@ static constexpr int GUI_UPDATE_DELAY_TICKS = 15;
  * This is the base class for the component that acts as the GUI for an AudioProcessor.
  * @param parent	The audio processor object to act as parent.
  */
-SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& parent)
+SoundobjectProcessorEditor::SoundobjectProcessorEditor(SoundobjectProcessor& parent)
 	: AudioProcessorEditor(&parent)
 {
 	m_surfaceSlider = std::make_unique<SurfaceSlider>(&parent);
@@ -85,7 +86,7 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 	if (params.size() >= 2)
 	{
 		//--- X Slider ---//
-		AudioParameterFloat* param = dynamic_cast<AudioParameterFloat*> (params[ParamIdx_X]);
+		AudioParameterFloat* param = dynamic_cast<AudioParameterFloat*> (params[SPI_ParamIdx_X]);
 		m_xSlider = std::make_unique<Slider>(param->name);
 		m_xSlider->setRange(param->range.start, param->range.end, param->range.interval);
 		m_xSlider->setSliderStyle(Slider::LinearHorizontal);
@@ -99,7 +100,7 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 		addAndMakeVisible(m_xAxisLabel.get());
 
 		//--- Y Slider ---//
-		param = dynamic_cast<AudioParameterFloat*> (params[ParamIdx_Y]);
+		param = dynamic_cast<AudioParameterFloat*> (params[SPI_ParamIdx_Y]);
 		m_ySlider = std::make_unique<Slider>(param->name);
 		m_ySlider->setRange(param->range.start, param->range.end, param->range.interval);
 		m_ySlider->setSliderStyle(Slider::LinearVertical);
@@ -112,10 +113,10 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 		m_yAxisLabel->setJustificationType(Justification::centred);
 		addAndMakeVisible(m_yAxisLabel.get());
 
-		if (params.size() == ParamIdx_MaxIndex)
+		if (params.size() == SPI_ParamIdx_MaxIndex)
 		{
 			//--- ReverbSendGain Slider ---//
-			param = dynamic_cast<AudioParameterFloat*> (params[ParamIdx_ReverbSendGain]);
+			param = dynamic_cast<AudioParameterFloat*> (params[SPI_ParamIdx_ReverbSendGain]);
 			m_reverbSendGainSlider = std::make_unique<Slider>(param->name);
 			m_reverbSendGainSlider->setRange(param->range.start, param->range.end, param->range.interval);
 			m_reverbSendGainSlider->setSliderStyle(Slider::Rotary);
@@ -129,21 +130,21 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 			addAndMakeVisible(m_reverbSendGainLabel.get());
 
 			//--- SourceSpread Slider ---//
-			param = dynamic_cast<AudioParameterFloat*> (params[ParamIdx_SourceSpread]);
-			m_sourceSpreadSlider = std::make_unique<Slider>(param->name);
-			m_sourceSpreadSlider->setRange(param->range.start, param->range.end, param->range.interval);
-			m_sourceSpreadSlider->setSliderStyle(Slider::Rotary);
-			m_sourceSpreadSlider->setTextBoxStyle(Slider::TextBoxBelow, false, 80, 20);
-			m_sourceSpreadSlider->addListener(this);
-			addAndMakeVisible(m_sourceSpreadSlider.get());
+			param = dynamic_cast<AudioParameterFloat*> (params[SPI_ParamIdx_ObjectSpread]);
+			m_soundobjectSpreadSlider = std::make_unique<Slider>(param->name);
+			m_soundobjectSpreadSlider->setRange(param->range.start, param->range.end, param->range.interval);
+			m_soundobjectSpreadSlider->setSliderStyle(Slider::Rotary);
+			m_soundobjectSpreadSlider->setTextBoxStyle(Slider::TextBoxBelow, false, 80, 20);
+			m_soundobjectSpreadSlider->addListener(this);
+			addAndMakeVisible(m_soundobjectSpreadSlider.get());
 
 			// Label for SourceSpread
-			m_sourceSpreadLabel = std::make_unique<Label>(param->name, param->name);
-			m_sourceSpreadLabel->setJustificationType(Justification::centred);
-			addAndMakeVisible(m_sourceSpreadLabel.get());
+			m_soundobjectSpreadLabel = std::make_unique<Label>(param->name, param->name);
+			m_soundobjectSpreadLabel->setJustificationType(Justification::centred);
+			addAndMakeVisible(m_soundobjectSpreadLabel.get());
 
 			//--- DelayMode ComboBox ---//
-			AudioParameterChoice* choiceParam = dynamic_cast<AudioParameterChoice*> (params[ParamIdx_DelayMode]);
+			AudioParameterChoice* choiceParam = dynamic_cast<AudioParameterChoice*> (params[SPI_ParamIdx_DelayMode]);
 			m_delayModeComboBox = std::make_unique<ComboBox>(choiceParam->name);
 			m_delayModeComboBox->setEditableText(false);
 			m_delayModeComboBox->addItem("Off",	1);
@@ -159,7 +160,7 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 		}
 	}
 
-	// Label for Plugin' display name.
+	// Label for processor' display name.
 	m_displayNameLabel = std::make_unique<Label>("DisplayName");
 	m_displayNameLabel->setJustificationType(Justification(Justification::centredLeft));
 	addAndMakeVisible(m_displayNameLabel.get());
@@ -173,7 +174,7 @@ SoundsourceProcessorEditor::SoundsourceProcessorEditor(SoundsourceProcessor& par
 /**
  * Object destructor.
  */
-SoundsourceProcessorEditor::~SoundsourceProcessorEditor()
+SoundobjectProcessorEditor::~SoundobjectProcessorEditor()
 {
 	stopTimer();
 
@@ -181,21 +182,21 @@ SoundsourceProcessorEditor::~SoundsourceProcessorEditor()
 }
 
 /**
- * Helper function to get the pointer to a plugin parameter based on the slider assigned to it.
+ * Helper function to get the pointer to a processor parameter based on the slider assigned to it.
  * @param slider	The slider object for which the parameter is desired.
- * @return			The desired plugin parameter.
+ * @return			The desired processor parameter.
  */
-GestureManagedAudioParameterFloat* SoundsourceProcessorEditor::GetParameterForSlider(Slider* slider)
+GestureManagedAudioParameterFloat* SoundobjectProcessorEditor::GetParameterForSlider(Slider* slider)
 {
 	const Array<AudioProcessorParameter*>& params = getAudioProcessor()->getParameters();
 	if (slider == m_xSlider.get())
-		return dynamic_cast<GestureManagedAudioParameterFloat*> (params[ParamIdx_X]);
+		return dynamic_cast<GestureManagedAudioParameterFloat*> (params[SPI_ParamIdx_X]);
 	else if (slider == m_ySlider.get())
-		return dynamic_cast<GestureManagedAudioParameterFloat*> (params[ParamIdx_Y]);
+		return dynamic_cast<GestureManagedAudioParameterFloat*> (params[SPI_ParamIdx_Y]);
 	else if (slider == m_reverbSendGainSlider.get())
-		return dynamic_cast<GestureManagedAudioParameterFloat*> (params[ParamIdx_ReverbSendGain]);
-	else if (slider == m_sourceSpreadSlider.get())
-		return dynamic_cast<GestureManagedAudioParameterFloat*> (params[ParamIdx_SourceSpread]);
+		return dynamic_cast<GestureManagedAudioParameterFloat*> (params[SPI_ParamIdx_ReverbSendGain]);
+	else if (slider == m_soundobjectSpreadSlider.get())
+		return dynamic_cast<GestureManagedAudioParameterFloat*> (params[SPI_ParamIdx_ObjectSpread]);
 
 	// Should not make it this far.
 	jassertfalse;
@@ -208,22 +209,22 @@ GestureManagedAudioParameterFloat* SoundsourceProcessorEditor::GetParameterForSl
  * You can find out the new value using Slider::getValue().
  * @param slider	Slider object which was dragged by user.
  */
-void SoundsourceProcessorEditor::sliderValueChanged(Slider* slider)
+void SoundobjectProcessorEditor::sliderValueChanged(Slider* slider)
 {
-	SoundsourceProcessor* plugin = dynamic_cast<SoundsourceProcessor*>(getAudioProcessor());
-	if (plugin)
+	SoundobjectProcessor* processor = dynamic_cast<SoundobjectProcessor*>(getAudioProcessor());
+	if (processor)
 	{
-		AutomationParameterIndex paramIdx = ParamIdx_MaxIndex;
+		SoundobjectParameterIndex paramIdx = SPI_ParamIdx_MaxIndex;
 		if (slider == m_xSlider.get())
-			paramIdx = ParamIdx_X;
+			paramIdx = SPI_ParamIdx_X;
 		else if (slider == m_ySlider.get())
-			paramIdx = ParamIdx_Y;
+			paramIdx = SPI_ParamIdx_Y;
 		else if (slider == m_reverbSendGainSlider.get())
-			paramIdx = ParamIdx_ReverbSendGain;
-		else if (slider == m_sourceSpreadSlider.get())
-			paramIdx = ParamIdx_SourceSpread;
+			paramIdx = SPI_ParamIdx_ReverbSendGain;
+		else if (slider == m_soundobjectSpreadSlider.get())
+			paramIdx = SPI_ParamIdx_ObjectSpread;
 
-		plugin->SetParameterValue(DCS_SoundsourceProcessor, paramIdx, static_cast<float>(slider->getValue()));
+		processor->SetParameterValue(DCS_SoundobjectProcessor, paramIdx, static_cast<float>(slider->getValue()));
 	}
 }
 
@@ -233,7 +234,7 @@ void SoundsourceProcessorEditor::sliderValueChanged(Slider* slider)
  * and then sliderDragEnded() is called after the user lets go.
  * @param slider	Slider object which was dragged by user.
  */
-void SoundsourceProcessorEditor::sliderDragStarted(Slider* slider)
+void SoundobjectProcessorEditor::sliderDragStarted(Slider* slider)
 {
 	if (GestureManagedAudioParameterFloat* param = GetParameterForSlider(static_cast<Slider*>(slider)))
 		param->BeginGuiGesture();
@@ -243,7 +244,7 @@ void SoundsourceProcessorEditor::sliderDragStarted(Slider* slider)
  * Called after a drag operation has finished.
  * @param slider	Slider object which was dragged by user.
  */
-void SoundsourceProcessorEditor::sliderDragEnded(Slider* slider)
+void SoundobjectProcessorEditor::sliderDragEnded(Slider* slider)
 {
 	if (GestureManagedAudioParameterFloat* param = GetParameterForSlider(static_cast<Slider*>(slider)))
 		param->EndGuiGesture();
@@ -253,7 +254,7 @@ void SoundsourceProcessorEditor::sliderDragEnded(Slider* slider)
  * Callback function for Enter key presses on textEditors.
  * @param textEditor	The TextEditor object whose where enter key was pressed.
  */
-void SoundsourceProcessorEditor::textEditorReturnKeyPressed(TextEditor& textEditor)
+void SoundobjectProcessorEditor::textEditorReturnKeyPressed(TextEditor& textEditor)
 {
 	ignoreUnused(textEditor);
 
@@ -266,14 +267,14 @@ void SoundsourceProcessorEditor::textEditorReturnKeyPressed(TextEditor& textEdit
  * Called when a ComboBox has its selected item changed. 
  * @param comboBox	The combo box which has changed.
  */
-void SoundsourceProcessorEditor::comboBoxChanged(ComboBox *comboBox)
+void SoundobjectProcessorEditor::comboBoxChanged(ComboBox *comboBox)
 {
-	SoundsourceProcessor* pro = dynamic_cast<SoundsourceProcessor*>(getAudioProcessor());
+	SoundobjectProcessor* pro = dynamic_cast<SoundobjectProcessor*>(getAudioProcessor());
 	if (pro)
 	{
 		if (comboBox == m_delayModeComboBox.get())
 		{
-			pro->SetParameterValue(DCS_SoundsourceProcessor, ParamIdx_DelayMode, float(comboBox->getSelectedId() - 1));
+			pro->SetParameterValue(DCS_SoundobjectProcessor, SPI_ParamIdx_DelayMode, float(comboBox->getSelectedId() - 1));
 		}
 	}
 }
@@ -284,7 +285,7 @@ void SoundsourceProcessorEditor::comboBoxChanged(ComboBox *comboBox)
 * screen that means a section of a window needs to be redrawn.
 * @param g		Graphics context that must be used to do the drawing operations.
 */
-void SoundsourceProcessorEditor::paint(Graphics& g)
+void SoundobjectProcessorEditor::paint(Graphics& g)
 {
 	Rectangle<int> twoDSurfaceArea = getLocalBounds();
 	Rectangle<int> parameterEditArea = getLocalBounds();
@@ -303,14 +304,14 @@ void SoundsourceProcessorEditor::paint(Graphics& g)
 	g.drawRect(getLocalBounds().toFloat());
     
     // processor id (object #) in upper left corner
-    SoundsourceProcessor* pro = dynamic_cast<SoundsourceProcessor*>(getAudioProcessor());
+    SoundobjectProcessor* pro = dynamic_cast<SoundobjectProcessor*>(getAudioProcessor());
     if (pro)
     {
         auto surfaceSliderLabelVisible = true;
         if (twoDSurfaceArea.getWidth() < 250 || twoDSurfaceArea.getHeight() < 250)
             surfaceSliderLabelVisible = false;
         
-        auto objNumTitleText = (surfaceSliderLabelVisible ? String("Object #") : String("#")) + String(pro->GetSourceId());
+        auto objNumTitleText = (surfaceSliderLabelVisible ? String("Object #") : String("#")) + String(pro->GetSoundobjectId());
         auto titleTextWidth = surfaceSliderLabelVisible ? 73 : 33;
         auto objNumTitleRect = twoDSurfaceArea.removeFromBottom(25).removeFromLeft(titleTextWidth + 7).removeFromRight(titleTextWidth);
         
@@ -327,7 +328,7 @@ void SoundsourceProcessorEditor::paint(Graphics& g)
  * @param parameterEditArea	The area to be used for parameter controls
  * @return	True if the layout is to be done in portrait, false if in landscape orientation
  */
-bool SoundsourceProcessorEditor::getResizePaintAreaSplit(Rectangle<int>& twoDSurfaceArea, Rectangle<int>& parameterEditArea)
+bool SoundobjectProcessorEditor::getResizePaintAreaSplit(Rectangle<int>& twoDSurfaceArea, Rectangle<int>& parameterEditArea)
 {
 	auto paramEditStripWidth = 90;
 	auto paramEditStripHeight = 105;
@@ -351,7 +352,7 @@ bool SoundsourceProcessorEditor::getResizePaintAreaSplit(Rectangle<int>& twoDSur
 * Called when this component's size has been changed.
 * This is generally where you'll want to lay out the positions of any subcomponents in your editor.
 */
-void SoundsourceProcessorEditor::resized()
+void SoundobjectProcessorEditor::resized()
 {
 	//==============================================================================
 	Rectangle<int> twoDSurfaceArea = getLocalBounds();
@@ -416,9 +417,9 @@ void SoundsourceProcessorEditor::resized()
 		hPos += 85;
 
 		// SourceSpread Slider
-		m_sourceSpreadLabel->setBounds(Rectangle<int>(hPos, vPos, labelSliderWidth, labelHeight));
-		m_sourceSpreadSlider->setBounds(Rectangle<int>(hPos, vPos + 18, labelSliderWidth, sliderHeight));
-        m_sourceSpreadSlider->setTextBoxStyle(paramSliderLabelVisible ? Slider::TextBoxBelow : Slider::NoTextBox, false, 80, 20);
+		m_soundobjectSpreadLabel->setBounds(Rectangle<int>(hPos, vPos, labelSliderWidth, labelHeight));
+		m_soundobjectSpreadSlider->setBounds(Rectangle<int>(hPos, vPos + 18, labelSliderWidth, sliderHeight));
+        m_soundobjectSpreadSlider->setTextBoxStyle(paramSliderLabelVisible ? Slider::TextBoxBelow : Slider::NoTextBox, false, 80, 20);
 		hPos += 85;
 
 		// DelayMode ComboBox
@@ -440,10 +441,10 @@ void SoundsourceProcessorEditor::resized()
 		vPos += paramSliderLabelVisible ? 86 : 56;
 	
 		// SourceSpread Slider
-		m_sourceSpreadLabel->setBounds(Rectangle<int>(hPos, vPos, labelSliderWidth, labelHeight));
+		m_soundobjectSpreadLabel->setBounds(Rectangle<int>(hPos, vPos, labelSliderWidth, labelHeight));
 		vPos += 18;
-		m_sourceSpreadSlider->setBounds(Rectangle<int>(hPos, vPos, labelSliderWidth, sliderHeight));
-		m_sourceSpreadSlider->setTextBoxStyle(paramSliderLabelVisible ? Slider::TextBoxBelow : Slider::NoTextBox, false, 80, 20);
+		m_soundobjectSpreadSlider->setBounds(Rectangle<int>(hPos, vPos, labelSliderWidth, sliderHeight));
+		m_soundobjectSpreadSlider->setTextBoxStyle(paramSliderLabelVisible ? Slider::TextBoxBelow : Slider::NoTextBox, false, 80, 20);
 		vPos += paramSliderLabelVisible ? 86 : 56;
 	
 		// DelayMode ComboBox
@@ -458,7 +459,7 @@ void SoundsourceProcessorEditor::resized()
  * Timer callback function, which will be called at regular intervals to update the GUI.
  * Reimplemented from base class Timer.
  */
-void SoundsourceProcessorEditor::timerCallback()
+void SoundobjectProcessorEditor::timerCallback()
 {
 	// Also update the regular GUI.
 	UpdateGui(false);
@@ -469,32 +470,32 @@ void SoundsourceProcessorEditor::timerCallback()
  * @param init	True to ignore any changed flags and update parameters
  *				in the GUI anyway. Good for when opening the GUI for the first time.
  */
-void SoundsourceProcessorEditor::UpdateGui(bool init)
+void SoundobjectProcessorEditor::UpdateGui(bool init)
 {
 	ignoreUnused(init); // No need to use this here so far.
 
 	bool somethingChanged = false;
 
-	SoundsourceProcessor* pro = dynamic_cast<SoundsourceProcessor*>(getAudioProcessor());
+	SoundobjectProcessor* pro = dynamic_cast<SoundobjectProcessor*>(getAudioProcessor());
 	if (pro)
 	{
 		const Array<AudioProcessorParameter*>& params = pro->getParameters();
 		AudioParameterFloat* fParam;
 
 		// See if any parameters changed since the last timer callback.
-		somethingChanged = (pro->GetParameterChanged(DCS_SoundsourceProcessor, DCT_AutomationParameters) ||
-							pro->GetParameterChanged(DCS_SoundsourceProcessor, DCT_PluginInstanceConfig) ||
-							pro->GetParameterChanged(DCS_SoundsourceProcessor, DCT_OscConfig));
+		somethingChanged = (pro->GetParameterChanged(DCS_SoundobjectProcessor, DCT_SoundobjectParameters) ||
+							pro->GetParameterChanged(DCS_SoundobjectProcessor, DCT_ProcessorInstanceConfig) ||
+							pro->GetParameterChanged(DCS_SoundobjectProcessor, DCT_CommunicationConfig));
 
-		if (pro->PopParameterChanged(DCS_SoundsourceProcessor, DCT_SourcePosition))
+		if (pro->PopParameterChanged(DCS_SoundobjectProcessor, DCT_SoundobjectPosition))
 		{
 			// Update position of X slider.
-			fParam = dynamic_cast<AudioParameterFloat*>(params[ParamIdx_X]);
+			fParam = dynamic_cast<AudioParameterFloat*>(params[SPI_ParamIdx_X]);
 			if (fParam)
 				m_xSlider->setValue(fParam->get(), dontSendNotification);
 
 			// Update position of Y slider.
-			fParam = dynamic_cast<AudioParameterFloat*>(params[ParamIdx_Y]);
+			fParam = dynamic_cast<AudioParameterFloat*>(params[SPI_ParamIdx_Y]);
 			if (fParam)
 				m_ySlider->setValue(fParam->get(), dontSendNotification);
 
@@ -502,26 +503,26 @@ void SoundsourceProcessorEditor::UpdateGui(bool init)
 			m_surfaceSlider->repaint();
 		}
 
-		if (pro->PopParameterChanged(DCS_SoundsourceProcessor, DCT_ReverbSendGain))
+		if (pro->PopParameterChanged(DCS_SoundobjectProcessor, DCT_ReverbSendGain))
 		{
 			// Update ReverbSendGain slider
-			fParam = dynamic_cast<AudioParameterFloat*>(params[ParamIdx_ReverbSendGain]);
+			fParam = dynamic_cast<AudioParameterFloat*>(params[SPI_ParamIdx_ReverbSendGain]);
 			if (fParam)
 				m_reverbSendGainSlider->setValue(fParam->get(), dontSendNotification);
 		}
 
-		if (pro->PopParameterChanged(DCS_SoundsourceProcessor, DCT_SourceSpread))
+		if (pro->PopParameterChanged(DCS_SoundobjectProcessor, DCT_SoundobjectSpread))
 		{
 			// Update SourceSpread slider
-			fParam = dynamic_cast<AudioParameterFloat*>(params[ParamIdx_SourceSpread]);
+			fParam = dynamic_cast<AudioParameterFloat*>(params[SPI_ParamIdx_ObjectSpread]);
 			if (fParam)
-				m_sourceSpreadSlider->setValue(fParam->get(), dontSendNotification);
+				m_soundobjectSpreadSlider->setValue(fParam->get(), dontSendNotification);
 		}
 
-		if (pro->PopParameterChanged(DCS_SoundsourceProcessor, DCT_DelayMode))
+		if (pro->PopParameterChanged(DCS_SoundobjectProcessor, DCT_DelayMode))
 		{
 			// Update DelayMode combo box
-			AudioParameterChoice* cParam = dynamic_cast<AudioParameterChoice*>(params[ParamIdx_DelayMode]);
+			AudioParameterChoice* cParam = dynamic_cast<AudioParameterChoice*>(params[SPI_ParamIdx_DelayMode]);
 			if (cParam)
 			{
 				// Need to add 1 because the parameter's indeces go from 0 to 2, while the combo box's ID's go from 1 to 3.
@@ -529,7 +530,7 @@ void SoundsourceProcessorEditor::UpdateGui(bool init)
 			}
 		}
 
-		if (pro->PopParameterChanged(DCS_SoundsourceProcessor, DCT_SourceID))
+		if (pro->PopParameterChanged(DCS_SoundobjectProcessor, DCT_SoundobjectID))
 		{
 			// Update the displayName (Host probably called updateTrackProperties or changeProgramName)
 			m_displayNameLabel->setText(pro->getProgramName(0), dontSendNotification);
@@ -541,11 +542,11 @@ void SoundsourceProcessorEditor::UpdateGui(bool init)
 		// At least one parameter was changed -> reset counter to prevent switching to "slow" refresh rate too soon.
 		m_ticksSinceLastChange = 0;
 
-		// Parameters have changed in the plugin: Switch to frequent GUI refreshing rate
+		// Parameters have changed in the processor: Switch to frequent GUI refreshing rate
 		if (getTimerInterval() == GUI_UPDATE_RATE_SLOW)
 		{
 			startTimer(GUI_UPDATE_RATE_FAST);
-			DBG("SoundsourceProcessorEditor::timerCallback: Switching to GUI_UPDATE_RATE_FAST");
+			DBG("SoundobjectProcessorEditor::timerCallback: Switching to GUI_UPDATE_RATE_FAST");
 		}
 	}
 
@@ -558,7 +559,7 @@ void SoundsourceProcessorEditor::UpdateGui(bool init)
 		// Once counter has reached a certain limit: Switch to lazy GUI refreshing rate
 		else if (getTimerInterval() == GUI_UPDATE_RATE_FAST)
 		{
-			DBG("SoundsourceProcessorEditor::timerCallback(): Switching to GUI_UPDATE_RATE_SLOW");
+			DBG("SoundobjectProcessorEditor::timerCallback(): Switching to GUI_UPDATE_RATE_SLOW");
 			startTimer(GUI_UPDATE_RATE_SLOW);
 		}
 	}

@@ -45,7 +45,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PageComponents/AboutPageComponent.h"
 
 #include "../Controller.h"
-#include "../SoundsourceProcessor/SurfaceSlider.h"
+#include "../SurfaceSlider.h"
 
 #include <Image_utils.h>
 

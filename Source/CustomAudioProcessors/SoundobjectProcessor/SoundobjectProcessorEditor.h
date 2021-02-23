@@ -36,9 +36,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "SoundsourceProcessor.h"
+#include "SoundobjectProcessor.h"
 
-#include "SurfaceSlider.h"
+#include "../../SurfaceSlider.h"
 
 
 namespace SoundscapeBridgeApp
@@ -48,7 +48,7 @@ namespace SoundscapeBridgeApp
 /**
  * Class MainProcessorEditor, a component that acts as the GUI for the AudioProcessor. 
  */
-class SoundsourceProcessorEditor :
+class SoundobjectProcessorEditor :
 	public AudioProcessorEditor,
 	public TextEditor::Listener,
 	public Slider::Listener,
@@ -56,8 +56,8 @@ class SoundsourceProcessorEditor :
 	private Timer
 {
 public:
-	SoundsourceProcessorEditor(SoundsourceProcessor&);
-	~SoundsourceProcessorEditor() override;
+	SoundobjectProcessorEditor(SoundobjectProcessor&);
+	~SoundobjectProcessorEditor() override;
 
 	void paint(Graphics&) override;
 	void resized() override;
@@ -76,12 +76,12 @@ private:
 	std::unique_ptr<Slider>			m_xSlider;					/**> Horizontal slider for X axis. */
 	std::unique_ptr<Slider>			m_ySlider;					/**> Vertical slider for Y axis. */
 	std::unique_ptr<Slider>			m_reverbSendGainSlider;		/**> Slider for ReverbSendGain */
-	std::unique_ptr<Slider>			m_sourceSpreadSlider;		/**> Slider for SourceSpread */
+	std::unique_ptr<Slider>			m_soundobjectSpreadSlider;	/**> Slider for SourceSpread */
 	std::unique_ptr<ComboBox>		m_delayModeComboBox;		/**> ComboBox for DelayMode */
 	std::unique_ptr<Label>			m_xAxisLabel;				/**> X axis slider label */
 	std::unique_ptr<Label>			m_yAxisLabel;				/**> Y axis slider label */
 	std::unique_ptr<Label>			m_reverbSendGainLabel;		/**> ReverbSendGain slider label */
-	std::unique_ptr<Label>			m_sourceSpreadLabel;		/**> SourceSpread slider label */
+	std::unique_ptr<Label>			m_soundobjectSpreadLabel;	/**> SourceSpread slider label */
 	std::unique_ptr<Label>			m_delayModeLabel;			/**> DelayMode ComboBox label */
 	std::unique_ptr<SurfaceSlider>	m_surfaceSlider;			/**> 2D Slider component. */
 	std::unique_ptr<Label>			m_displayNameLabel;			/**> Plug-in display name label. On the hosts which support updateTrackProperties
@@ -93,7 +93,7 @@ private:
 																 * changed, the GUI will switch to GUI_UPDATE_RATE_SLOW. Switches to
 																 * GUI_UPDATE_RATE_FAST happen immediately after any change. */
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SoundsourceProcessorEditor)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SoundobjectProcessorEditor)
 };
 
 

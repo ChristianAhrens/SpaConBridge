@@ -152,6 +152,10 @@ void Controller::SetParameterChanged(DataChangeSource changeSource, DataChangeTy
 	{
 		processor->SetParameterChanged(changeSource, changeTypes);
 	}
+	for (auto const& processor : m_matrixChannelProcessors)
+	{
+		processor->SetParameterChanged(changeSource, changeTypes);
+	}
 
 	switch (changeTypes)
 	{

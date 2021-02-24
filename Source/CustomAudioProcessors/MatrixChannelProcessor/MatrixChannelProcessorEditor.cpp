@@ -194,8 +194,8 @@ GestureManagedAudioParameterFloat* MatrixChannelProcessorEditor::GetParameterFor
  */
 void MatrixChannelProcessorEditor::sliderValueChanged(Slider* slider)
 {
-	MatrixChannelProcessor* processor = dynamic_cast<MatrixChannelProcessor*>(getAudioProcessor());
-	if (processor)
+	MatrixChannelProcessor* mcProcessor = dynamic_cast<MatrixChannelProcessor*>(getAudioProcessor());
+	if (mcProcessor)
 	{
 	//	SoundobjectParameterIndex paramIdx = ParamIdx_MaxIndex;
 	//	if (slider == m_xSlider.get())
@@ -207,7 +207,7 @@ void MatrixChannelProcessorEditor::sliderValueChanged(Slider* slider)
 	//	else if (slider == m_sourceSpreadSlider.get())
 	//		paramIdx = ParamIdx_ObjectSpread;
 	//
-	//	procssor->SetParameterValue(DCS_MatrixChannelProcessor, paramIdx, static_cast<float>(slider->getValue()));
+	//	mcProcessor->SetParameterValue(DCS_MatrixChannelProcessor, paramIdx, static_cast<float>(slider->getValue()));
 	}
 }
 

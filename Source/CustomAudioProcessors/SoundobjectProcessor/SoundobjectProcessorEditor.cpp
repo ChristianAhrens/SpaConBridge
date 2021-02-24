@@ -211,8 +211,8 @@ GestureManagedAudioParameterFloat* SoundobjectProcessorEditor::GetParameterForSl
  */
 void SoundobjectProcessorEditor::sliderValueChanged(Slider* slider)
 {
-	SoundobjectProcessor* processor = dynamic_cast<SoundobjectProcessor*>(getAudioProcessor());
-	if (processor)
+	SoundobjectProcessor* soProcessor = dynamic_cast<SoundobjectProcessor*>(getAudioProcessor());
+	if (soProcessor)
 	{
 		SoundobjectParameterIndex paramIdx = SPI_ParamIdx_MaxIndex;
 		if (slider == m_xSlider.get())
@@ -224,7 +224,7 @@ void SoundobjectProcessorEditor::sliderValueChanged(Slider* slider)
 		else if (slider == m_soundobjectSpreadSlider.get())
 			paramIdx = SPI_ParamIdx_ObjectSpread;
 
-		processor->SetParameterValue(DCS_SoundobjectProcessor, paramIdx, static_cast<float>(slider->getValue()));
+		soProcessor->SetParameterValue(DCS_SoundobjectProcessor, paramIdx, static_cast<float>(slider->getValue()));
 	}
 }
 

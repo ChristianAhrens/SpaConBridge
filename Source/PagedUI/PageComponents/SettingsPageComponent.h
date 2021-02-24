@@ -66,8 +66,8 @@ public:
 	std::function<void(HeaderWithElmListComponent*, bool)>	toggleIsActiveCallback;
 
 	//==============================================================================
-	static constexpr std::uint32_t	m_attachedItemWidth{ 150 };
-	static constexpr std::uint32_t	m_layoutItemWidth{ 205 };
+	static constexpr std::int32_t	m_attachedItemWidth{ 150 };
+	static constexpr std::int32_t	m_layoutItemWidth{ 205 };
 
 protected:
 	//==============================================================================

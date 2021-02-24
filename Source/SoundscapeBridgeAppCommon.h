@@ -68,7 +68,7 @@ enum DataChangeSource
 	DCS_Host,						//< Change was caused by the VST/AU/AAX host, i.e. a project was loaded or a DAW preset was recalled.
 	DCS_Protocol,					//< Change was caused by an incoming protocol message, or caused by internal operations by the Controller.
 	DCS_Init,						//< Change was caused by Application initialization process (defaults)
-	DCS_MatrixChannelProcessor = 0,	//< Change was caused by the MatrixChannelProcessor UI, i.e. the user turning a knob to change a value.
+	DCS_MatrixChannelProcessor,		//< Change was caused by the MatrixChannelProcessor UI, i.e. the user turning a knob to change a value.
 	DCS_MatrixIO,					//< Change was caused by the matrix io channel page
 	DCS_Max							//< Number of change sources.
 };

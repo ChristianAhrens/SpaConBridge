@@ -302,7 +302,7 @@ void TablePageComponent::onCurrentSelectedProcessorChanged(SoundobjectProcessorI
 
 /**
  * If any relevant parameters have been marked as changed, update the table contents.
- * @param init	True to ignore any changed flags and update the plugin parameters
+ * @param init	True to ignore any changed flags and update the procssor parameters
  *				in the GUI anyway. Good for when opening the Overview for the first time.
  */
 void TablePageComponent::UpdateGui(bool init)
@@ -322,7 +322,7 @@ void TablePageComponent::UpdateGui(bool init)
 		}
 		else
 		{
-			// Iterate through all plugin instances and see if anything changed there.
+			// Iterate through all procssor instances and see if anything changed there.
 			for (auto const& processorId : ctrl->GetSoundobjectProcessorIds())
 			{
 				auto processor = ctrl->GetSoundobjectProcessor(processorId);
@@ -507,9 +507,9 @@ TableModelComponent::~TableModelComponent()
 }
 
 /**
- * Get the ID of the plugin instance corresponding to the given table row number.
+ * Get the ID of the procssor instance corresponding to the given table row number.
  * @param rowNumber	The desired row number (starts at 0).
- * @return	The ID of the plugin instance at that row number, if any.
+ * @return	The ID of the procssor instance at that row number, if any.
  */
 SoundobjectProcessorId TableModelComponent::GetProcessorIdForRow(int rowNumber) const
 {
@@ -523,9 +523,9 @@ SoundobjectProcessorId TableModelComponent::GetProcessorIdForRow(int rowNumber) 
 }
 
 /**
- * Get the IDs of the plugin instances corresponding to the given table row numbers.
+ * Get the IDs of the procssor instances corresponding to the given table row numbers.
  * @param rowNumbers	A list of desired row numbers.
- * @return	A list of IDs of the plugin instances at those rows.
+ * @return	A list of IDs of the procssor instances at those rows.
  */
 std::vector<SoundobjectProcessorId> TableModelComponent::GetProcessorIdsForRows(const std::vector<int>& rowNumbers) const
 {
@@ -612,10 +612,10 @@ void TableModelComponent::SelectAllRows(bool all)
 }
 
 /**
- * Helper sorting function used by std::sort(). This version is used to sort by plugin's SourceId.
+ * Helper sorting function used by std::sort(). This version is used to sort by procssor's SourceId.
  * @param pId1	Id of the first processor.
  * @param pId2	Id of the second processor.
- * @return	True if the first plugin's SourceId is less than the second's.
+ * @return	True if the first procssor's SourceId is less than the second's.
  */
 bool TableModelComponent::LessThanSourceId(SoundobjectProcessorId pId1, SoundobjectProcessorId pId2)
 {
@@ -641,7 +641,7 @@ bool TableModelComponent::LessThanSourceId(SoundobjectProcessorId pId1, Soundobj
 }
 
 /**
- * Helper sorting function used by std::sort(). This version is used to sort by plugin's MappingId.
+ * Helper sorting function used by std::sort(). This version is used to sort by procssor's MappingId.
  * @param pId1	Id of the first processor.
  * @param pId2	Id of the second processor.
  * @return	True if the first MappingId is less than the second.
@@ -670,10 +670,10 @@ bool TableModelComponent::LessThanMapping(SoundobjectProcessorId pId1, Soundobje
 }
 
 /**
- * Helper sorting function used by std::sort(). This version is used to sort by plugin's ComsMode. 
+ * Helper sorting function used by std::sort(). This version is used to sort by procssor's ComsMode. 
  * @param pId1	Id of the first processor.
  * @param pId2	Id of the second processor.
- * @return	True if the first plugin's ComsMode is less than the second's.
+ * @return	True if the first procssor's ComsMode is less than the second's.
  */
 bool TableModelComponent::LessThanComsMode(SoundobjectProcessorId pId1, SoundobjectProcessorId pId2)
 {
@@ -699,10 +699,10 @@ bool TableModelComponent::LessThanComsMode(SoundobjectProcessorId pId1, Soundobj
 }
 
 /**
- * Helper sorting function used by std::sort(). This version is used to sort by plugin's ComsMode.
+ * Helper sorting function used by std::sort(). This version is used to sort by procssor's ComsMode.
  * @param pId1	Id of the first processor.
  * @param pId2	Id of the second processor.
- * @return	True if the first plugin's ComsMode is less than the second's.
+ * @return	True if the first procssor's ComsMode is less than the second's.
  */
 bool TableModelComponent::LessThanBridgingMute(SoundobjectProcessorId pId1, SoundobjectProcessorId pId2)
 {
@@ -809,7 +809,7 @@ void TableModelComponent::backgroundClicked(const MouseEvent &event)
 
 /**
  * This is overloaded from TableListBoxModel, and must return the total number of rows in our table.
- * @return	Number of rows on the table, equal to number of plugin instances.
+ * @return	Number of rows on the table, equal to number of procssor instances.
  */
 int TableModelComponent::getNumRows()
 {
@@ -1129,17 +1129,17 @@ void ComboBoxContainer::comboBoxChanged(ComboBox *comboBox)
 		selectedRows.push_back(m_row);
 	}
 
-	// Get the IDs of the plugins on the selected rows.
+	// Get the IDs of the procssors on the selected rows.
 	std::vector<SoundobjectProcessorId> ProcessorIds = m_owner.GetProcessorIdsForRows(selectedRows);
 
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
-		// New MappingID which should be applied to all plugins in the selected rows.
+		// New MappingID which should be applied to all procssors in the selected rows.
 		auto newMapping = static_cast<MappingId>(comboBox->getSelectedId());
 		for (std::size_t i = 0; i < ProcessorIds.size(); ++i)
 		{
-			// Set the value of the combobox to the current MappingID of the corresponding plugin.
+			// Set the value of the combobox to the current MappingID of the corresponding procssor.
 			SoundobjectProcessor* processor = ctrl->GetSoundobjectProcessor(ProcessorIds[i]);
 			if (processor)
 				processor->SetMappingId(DCS_SoundobjectTable, newMapping);
@@ -1157,19 +1157,19 @@ void ComboBoxContainer::resized()
 
 /**
  * Saves the row number where this component is located inside the overview table.
- * It also updated the combo box's selected item according to that plugin's MappingID.
+ * It also updated the combo box's selected item according to that procssor's MappingID.
  * @param newRow	The new row number.
  */
 void ComboBoxContainer::SetRow(int newRow)
 {
 	m_row = newRow;
 
-	// Find the plugin instance corresponding to the given row number.
+	// Find the procssor instance corresponding to the given row number.
 	auto processorId = m_owner.GetProcessorIdForRow(newRow);
 	auto ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
-		// Set the value of the combobox to the current MappingID of the corresponding plugin.
+		// Set the value of the combobox to the current MappingID of the corresponding procssor.
 		auto processor = ctrl->GetSoundobjectProcessor(processorId);
 		if (processor)
 			m_comboBox.setSelectedId(processor->GetMappingId(), dontSendNotification);
@@ -1221,11 +1221,11 @@ void TextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
 	auto ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
-		// New SourceID which should be applied to all plugins in the selected rows.
+		// New SourceID which should be applied to all procssors in the selected rows.
 		auto newSourceId = textEditor.getText().getIntValue();
 		for (auto const& processorId : m_owner.GetProcessorIdsForRows(selectedRows))
 		{
-			// Set the value of the combobox to the current MappingID of the corresponding plugin.
+			// Set the value of the combobox to the current MappingID of the corresponding procssor.
 			auto processor = ctrl->GetSoundobjectProcessor(processorId);
 			if (processor)
 				processor->SetSoundobjectId(DCS_SoundobjectTable, newSourceId);
@@ -1266,12 +1266,12 @@ void TextEditorContainer::SetRow(int newRow)
 {
 	m_row = newRow;
 
-	// Find the plugin instance corresponding to the given row number.
+	// Find the procssor instance corresponding to the given row number.
 	auto processorId = m_owner.GetProcessorIdForRow(newRow);
 	auto ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
-		// Set the value of the textEditor to the current SourceID of the corresponding plugin.
+		// Set the value of the textEditor to the current SourceID of the corresponding procssor.
 		auto processor = ctrl->GetSoundobjectProcessor(processorId);
 		if (processor)
 			m_editor.setText(String(processor->GetSoundobjectId()), false);
@@ -1379,11 +1379,11 @@ void RadioButtonContainer::SetRow(int newRow)
 {
 	m_row = newRow;
 
-	// Find the plugin instance corresponding to the given row number.
+	// Find the procssor instance corresponding to the given row number.
 	auto ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
-		// Toggle the correct radio buttons to the current ComsMode of the corresponding plugin.
+		// Toggle the correct radio buttons to the current ComsMode of the corresponding procssor.
 		auto processor = ctrl->GetSoundobjectProcessor(m_owner.GetProcessorIdForRow(newRow));
 		if (processor)
 		{
@@ -1644,7 +1644,7 @@ void MuteButtonContainer::SetRow(int newRow)
 {
 	m_row = newRow;
 
-	// Find the plugin instance corresponding to the given row number.
+	// Find the procssor instance corresponding to the given row number.
 	auto processorId = m_owner.GetProcessorIdForRow(newRow);
 	auto ctrl = Controller::GetInstance();
 	if (ctrl)
@@ -1728,18 +1728,18 @@ void EditableLabelContainer::SetRow(int newRow)
 	m_row = newRow;
 	//String displayName;
 	//
-	//// Find the plugin instance corresponding to the given row number.
+	//// Find the procssor instance corresponding to the given row number.
 	//ProcessorId ProcessorId = m_owner.GetProcessorIdForRow(newRow);
 	//Controller* ctrl = Controller::GetInstance();
 	//if (ctrl)
 	//{
-	//	// Set the value of the combobox to the current MappingID of the corresponding plugin.
-	//	SoundobjectProcessor* plugin = ctrl->GetProcessor(ProcessorId);
-	//	if (plugin)
+	//	// Set the value of the combobox to the current MappingID of the corresponding procssor.
+	//	SoundobjectProcessor* procssor = ctrl->GetProcessor(ProcessorId);
+	//	if (procssor)
 	//	{
-	//		displayName = plugin->getProgramName(0);
+	//		displayName = procssor->getProgramName(0);
 	//		if (displayName.isEmpty())
-	//			displayName = String("Input ") + String(plugin->GetSourceId());
+	//			displayName = String("Input ") + String(procssor->GetSourceId());
 	//
 	//	}
 	//}

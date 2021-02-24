@@ -143,7 +143,7 @@ MatrixChannelProcessorEditor::MatrixChannelProcessorEditor(MatrixChannelProcesso
 	//	}
 	//}
 	//
-	//// Label for Plugin' display name.
+	//// Label for procssor' display name.
 	//m_displayNameLabel = std::make_unique<Label>("DisplayName");
 	//m_displayNameLabel->setJustificationType(Justification(Justification::centredLeft));
 	//addAndMakeVisible(m_displayNameLabel.get());
@@ -165,9 +165,9 @@ MatrixChannelProcessorEditor::~MatrixChannelProcessorEditor()
 }
 
 /**
- * Helper function to get the pointer to a plugin parameter based on the slider assigned to it.
+ * Helper function to get the pointer to a procssor parameter based on the slider assigned to it.
  * @param slider	The slider object for which the parameter is desired.
- * @return			The desired plugin parameter.
+ * @return			The desired procssor parameter.
  */
 GestureManagedAudioParameterFloat* MatrixChannelProcessorEditor::GetParameterForSlider(Slider* slider)
 {
@@ -207,7 +207,7 @@ void MatrixChannelProcessorEditor::sliderValueChanged(Slider* slider)
 	//	else if (slider == m_sourceSpreadSlider.get())
 	//		paramIdx = ParamIdx_ObjectSpread;
 	//
-	//	plugin->SetParameterValue(DCS_MatrixChannelProcessor, paramIdx, static_cast<float>(slider->getValue()));
+	//	procssor->SetParameterValue(DCS_MatrixChannelProcessor, paramIdx, static_cast<float>(slider->getValue()));
 	}
 }
 
@@ -491,7 +491,7 @@ void MatrixChannelProcessorEditor::UpdateGui(bool init)
 		// At least one parameter was changed -> reset counter to prevent switching to "slow" refresh rate too soon.
 		m_ticksSinceLastChange = 0;
 
-		// Parameters have changed in the plugin: Switch to frequent GUI refreshing rate
+		// Parameters have changed in the procssor: Switch to frequent GUI refreshing rate
 		if (getTimerInterval() == GUI_UPDATE_RATE_SLOW)
 		{
 			startTimer(GUI_UPDATE_RATE_FAST);

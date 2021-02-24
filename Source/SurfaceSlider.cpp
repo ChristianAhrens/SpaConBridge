@@ -157,12 +157,12 @@ void SurfaceSlider::mouseDrag(const MouseEvent& e)
 	float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / w)));
 	float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / h)));
 
-	SoundobjectProcessor* plugin = dynamic_cast<SoundobjectProcessor*>(m_parent);
-	if (plugin)
+	SoundobjectProcessor* procssor = dynamic_cast<SoundobjectProcessor*>(m_parent);
+	if (procssor)
 	{
 		// Set new X and Y values
-		plugin->SetParameterValue(DCS_SoundobjectProcessor, SPI_ParamIdx_X, x);
-		plugin->SetParameterValue(DCS_SoundobjectProcessor, SPI_ParamIdx_Y, y);
+		procssor->SetParameterValue(DCS_SoundobjectProcessor, SPI_ParamIdx_X, x);
+		procssor->SetParameterValue(DCS_SoundobjectProcessor, SPI_ParamIdx_Y, y);
 	}
 }
 

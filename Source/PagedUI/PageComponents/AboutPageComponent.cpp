@@ -286,7 +286,7 @@ AboutPageComponent::~AboutPageComponent()
 /**
  * If any relevant parameters have been marked as changed, update the table contents.
  * NOTE: this reimplementation does nothing, since these pages are static.
- * @param init	True to ignore any changed flags and update the plugin parameters
+ * @param init	True to ignore any changed flags and update the processor parameters
  *				in the GUI anyway. Good for when opening the Overview for the first time.
  */
 void AboutPageComponent::UpdateGui(bool init)

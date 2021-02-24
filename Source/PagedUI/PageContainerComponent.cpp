@@ -93,7 +93,7 @@ PageContainerComponent::PageContainerComponent()
 	m_onlineLed2nd->setEnabled(false);
 	addAndMakeVisible(m_onlineLed2nd.get());
 
-	// app logo button and Plugin version label
+	// app logo button and procssor version label
 	m_logoButton = std::make_unique<ImageButton>("LogoButton");
 	m_logoButton->setImages(false, true, true,
 		ImageCache::getFromMemory(BinaryData::SoundscapeBridgeApp_png, BinaryData::SoundscapeBridgeApp_pngSize), 1.0f, Colours::transparentWhite,

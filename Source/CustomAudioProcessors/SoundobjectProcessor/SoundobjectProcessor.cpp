@@ -110,7 +110,7 @@ SoundobjectProcessor::SoundobjectProcessor(bool insertToConfig)
 	for (int cs = 0; cs < DCS_Max; cs++)
 		m_parametersChanged[cs] = DCT_None;
 
-	// Register this new plugin instance to the singleton Controller object's internal list.
+	// Register this new procssor instance to the singleton Controller object's internal list.
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 		m_processorId = ctrl->AddSoundobjectProcessor(insertToConfig ? DCS_Host : DCS_Init, this);
@@ -121,7 +121,7 @@ SoundobjectProcessor::SoundobjectProcessor(bool insertToConfig)
  */
 SoundobjectProcessor::~SoundobjectProcessor()
 {
-	// Erase this new plugin instance from the singleton Controller object's internal list.
+	// Erase this new procssor instance from the singleton Controller object's internal list.
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 		ctrl->RemoveSoundobjectProcessor(this);
@@ -386,7 +386,7 @@ bool SoundobjectProcessor::setStateXml(XmlElement* stateXml)
  * The host will call this method when it wants to save the processor's internal state.
  * This must copy any info about the processor's state into the block of memory provided, 
  * so that the host can store this and later restore it using setStateInformation().
- * @param destData		Stream where the plugin parameters will be written to.
+ * @param destData		Stream where the procssor parameters will be written to.
  */
 void SoundobjectProcessor::getStateInformation(MemoryBlock& destData)
 {
@@ -398,7 +398,7 @@ void SoundobjectProcessor::getStateInformation(MemoryBlock& destData)
  * Use this method to restore your parameters from this memory block,
  * whose contents will have been created by the getStateInformation() call.
  * @sa SoundobjectProcessor::DisablePollingForTicks()
- * @param data			Stream where the plugin parameters will be read from.
+ * @param data			Stream where the procssor parameters will be read from.
  * @param sizeInBytes	Size of stream buffer.
  */
 void SoundobjectProcessor::setStateInformation(const void* data, int sizeInBytes)
@@ -421,7 +421,7 @@ void SoundobjectProcessor::SetComsMode(DataChangeSource changeSource, ComsMode n
 		// Reset response-ignoring mechanism.
 		m_paramSetCommandsInTransit = DCT_None;
 
-		// Signal change to other modules in the plugin.
+		// Signal change to other modules in the procssor.
 		SetParameterChanged(changeSource, DCT_ComsMode);
 	}
 }
@@ -457,7 +457,7 @@ void SoundobjectProcessor::SetMappingId(DataChangeSource changeSource, MappingId
 			m_comsMode |= CM_PollOnce;
 		}
 
-		// Signal change to other modules in the plugin.
+		// Signal change to other modules in the procssor.
 		SetParameterChanged(changeSource, dct);
         
         // finally trigger config update
@@ -487,7 +487,7 @@ void SoundobjectProcessor::SetSoundobjectId(DataChangeSource changeSource, Sound
 		// Ensure it's within allowed range.
 		m_soundobjectId = jmin(SOURCE_ID_MAX, jmax(SOURCE_ID_MIN, soundobjectId));
 
-		// Signal change to other modules in the plugin.
+		// Signal change to other modules in the procssor.
 		SetParameterChanged(changeSource, DCT_SoundobjectID);
         
         // finally trigger config update
@@ -534,7 +534,7 @@ int SoundobjectProcessor::GetMessageRate() const
 /**
  * Method to initialize config setting, without risking overwriting with the defaults.
  * @param soundobjectId	New SoundobjectID or matrix input number to use for this processor instance.
- * @param mappingId		New coordinate mapping to use for this plugin instance.
+ * @param mappingId		New coordinate mapping to use for this procssor instance.
  * @param ipAddress		New IP address of the DS100 device.
  * @param newMode		New protocol communication mode (Rx/Tx).
  */
@@ -570,7 +570,7 @@ const std::vector<RemoteObjectIdentifier>	SoundobjectProcessor::GetUsedRemoteObj
  * The host will call this method AFTER one of the filter's parameters has been changed.
  * The host may call this at any time, even when a parameter's value isn't actually being changed, 
  * including during the audio processing callback (avoid blocking!).
- * @param parameterIndex	Index of the plugin parameter being changed.
+ * @param parameterIndex	Index of the procssor parameter being changed.
  * @param newValue			New parameter value, always between 0.0f and 1.0f.
  */
 void SoundobjectProcessor::parameterValueChanged(int parameterIndex, float newValue)
@@ -627,7 +627,7 @@ void SoundobjectProcessor::parameterValueChanged(int parameterIndex, float newVa
  * REIMPLEMENTED from AudioProcessorParameter::Listener::parameterGestureChanged()
  * Indicates that a parameter change gesture has started / ended. 
  * This reimplementation does nothing. See GestureManagedAudioParameterFloat::BeginGuiGesture().
- * @param parameterIndex	Index of the plugin parameter being changed.
+ * @param parameterIndex	Index of the procssor parameter being changed.
  * @param gestureIsStarting	True if starting, false if ending.
  */
 void SoundobjectProcessor::parameterGestureChanged(int parameterIndex, bool gestureIsStarting)
@@ -644,7 +644,7 @@ void SoundobjectProcessor::parameterGestureChanged(int parameterIndex, bool gest
 
 /**
  * Returns the name of this processor.
- * @return The plugin name.
+ * @return The procssor name.
  */
 const String SoundobjectProcessor::getName() const
 {
@@ -736,7 +736,7 @@ void SoundobjectProcessor::changeProgramName(int index, const String& newName)
 	ignoreUnused(index);
 	m_processorDisplayName = newName;
 
-	// Signal change to other modules in the plugin.
+	// Signal change to other modules in the procssor.
 	SetParameterChanged(DCS_Host, DCT_SoundobjectID);
 }
 
@@ -781,7 +781,7 @@ void SoundobjectProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffer& m
 }
 
 /**
- * This function returns true if the plugin can create an editor component.
+ * This function returns true if the procssor can create an editor component.
  * @return True.
  */
 bool SoundobjectProcessor::hasEditor() const
@@ -790,7 +790,7 @@ bool SoundobjectProcessor::hasEditor() const
 }
 
 /**
- * Creates the plugin's GUI.
+ * Creates the procssor's GUI.
  * This can return nullptr if you want a UI-less filter, in which case the host may create a generic UI that lets the user twiddle the parameters directly.
  * @return	A pointer to the newly created editor component.
  */

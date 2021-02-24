@@ -410,7 +410,7 @@ void StatisticsLog::backgroundClicked(const MouseEvent& event)
 
 /**
  * This is overloaded from TableListBoxModel, and must return the total number of rows in our table.
- * @return	Number of rows on the table, equal to number of plugin instances.
+ * @return	Number of rows on the table, equal to number of procssor instances.
  */
 int StatisticsLog::getNumRows()
 {
@@ -660,7 +660,7 @@ void StatisticsPageComponent::resized()
 
 /**
  * If any relevant parameters have been marked as changed, update the table contents.
- * @param init	True to ignore any changed flags and update the plugin parameters
+ * @param init	True to ignore any changed flags and update the procssor parameters
  *				in the GUI anyway. Good for when opening the Overview for the first time.
  */
 void StatisticsPageComponent::UpdateGui(bool init)

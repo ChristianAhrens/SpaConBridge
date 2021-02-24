@@ -116,7 +116,7 @@ void MultiSurfacePageComponent::resized()
 
 /**
  * If any relevant parameters have been marked as changed, update the table contents.
- * @param init	True to ignore any changed flags and update the plugin parameters
+ * @param init	True to ignore any changed flags and update the procssor parameters
  *				in the GUI anyway. Good for when opening the Overview for the first time.
  */
 void MultiSurfacePageComponent::UpdateGui(bool init)
@@ -143,7 +143,7 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 		if (ctrl->GetParameterChanged(DCS_SoundobjectTable, DCT_NumProcessors) || (ctrl->GetParameterChanged(DCS_Protocol, DCT_ProcessorSelection)))
 			update = true;
 		
-		// Iterate through all plugin instances and see if anything changed there.
+		// Iterate through all procssor instances and see if anything changed there.
 		// At the same time collect all sources positions for updating.
 		SurfaceMultiSlider::PositionCache cachedPositions;
 		for (auto const& processorId : ctrl->GetSoundobjectProcessorIds())

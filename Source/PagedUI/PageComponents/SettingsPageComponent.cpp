@@ -1461,7 +1461,7 @@ void SettingsPageComponent::lookAndFeelChanged()
 
 /**
  * If any relevant parameters have been marked as changed, update the table contents.
- * @param init	True to ignore any changed flags and update the plugin parameters
+ * @param init	True to ignore any changed flags and update the procssor parameters
  *				in the GUI anyway. Good for when opening the Overview for the first time.
  */
 void SettingsPageComponent::UpdateGui(bool init)

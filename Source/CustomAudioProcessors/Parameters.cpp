@@ -301,10 +301,11 @@ void GestureManagedAudioParameterInt::SetParameterValue(int newValue)
 	const ScopedLock lock(m_mutex);
 
 	// Clip new value within allowed range for this parameter.
-	newValue = jmax(jmin(static_cast<float>(newValue), getNormalisableRange().end), getNormalisableRange().start);
+	auto clippedNewValue = jmax(jmin(static_cast<float>(newValue), getNormalisableRange().end), getNormalisableRange().start);
+	auto oldValue = static_cast<float>(get());
 
 	// Check for an actual value change, taking precision errors into account.
-	if (newValue >= get() || newValue <= get())
+	if (clippedNewValue >= oldValue || clippedNewValue <= oldValue)
 	{
 		// If user ist'n dragging a GUI control and already in the middle of a gesture, 
 		// signal the start of a gesture now.
@@ -319,7 +320,7 @@ void GestureManagedAudioParameterInt::SetParameterValue(int newValue)
 
 		// Map the newValue to the 0.0 to 1.0 range, and then
 		// pass the parameter value change to base class.
-		setValueNotifyingHost(getNormalisableRange().convertTo0to1(newValue));
+		setValueNotifyingHost(getNormalisableRange().convertTo0to1(clippedNewValue));
 	}
 }
 

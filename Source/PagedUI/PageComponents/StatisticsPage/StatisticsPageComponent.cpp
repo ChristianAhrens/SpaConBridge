@@ -18,6 +18,9 @@
 
 #include "StatisticsPageComponent.h"
 
+#include "StatisticsPlotComponent.h"
+#include "StatisticsLogComponent.h"
+
 #include "../../PageComponentManager.h"
 
 #include "../../../Controller.h"
@@ -97,7 +100,7 @@ void StatisticsPageComponent::resized()
 	plotAndLogFlex.justifyContent = FlexBox::JustifyContent::center;
 
 	plotAndLogFlex.items.add(FlexItem(*m_plotComponent).withFlex(2).withMargin(FlexItem::Margin(5, 5, 5, 5)));
-	plotAndLogFlex.items.add(FlexItem(*m_logComponent.get()).withFlex(1).withMargin(FlexItem::Margin(5, 5, 5, 5)));
+	plotAndLogFlex.items.add(FlexItem(*m_logComponent).withFlex(1).withMargin(FlexItem::Margin(5, 5, 5, 5)));
 
 	plotAndLogFlex.performLayout(bounds);
 }

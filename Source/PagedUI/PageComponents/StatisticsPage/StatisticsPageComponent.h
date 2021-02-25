@@ -19,9 +19,6 @@
 
 #pragma once
 
-#include "StatisticsPlotComponent.h"
-#include "StatisticsLogComponent.h"
-
 #include "../PageComponentBase.h"
 
 #include "../../../SoundscapeBridgeAppCommon.h"
@@ -31,6 +28,13 @@
 
 namespace SoundscapeBridgeApp
 {
+
+
+/**
+ * Forward declarations.
+ */
+class StatisticsPlot;
+class StatisticsLog;
 
 
 /**

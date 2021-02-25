@@ -18,6 +18,9 @@
 
 #include "MatrixIOPageComponent.h"
 
+#include "MatrixInputsComponent.h"
+#include "MatrixOutputsComponent.h"
+
 #include "../../PageComponentManager.h"
 
 #include "../../../Controller.h"
@@ -41,7 +44,15 @@ namespace SoundscapeBridgeApp
 MatrixIOPageComponent::MatrixIOPageComponent()
 	: PageComponentBase(PCT_MatrixIOs)
 {
+	m_inputsComponent = std::make_unique<MatrixInputsComponent>();
+	addAndMakeVisible(m_inputsComponent.get());
 
+	m_outputsComponent = std::make_unique<MatrixOutputsComponent>();
+	addAndMakeVisible(m_outputsComponent.get());
+
+	auto config = SoundscapeBridgeApp::AppConfiguration::getInstance();
+	if (config)
+		config->addWatcher(this);
 }
 
 /**
@@ -68,6 +79,26 @@ void MatrixIOPageComponent::paint(Graphics& g)
 void MatrixIOPageComponent::resized()
 {
 	auto bounds = getLocalBounds().toFloat().reduced(5);
+
+	// determine the layout direction (we want a ratio of 0.75 to be the switching point)
+	auto layoutSwitchAspectRatio = 0.5f;
+	auto w = bounds.getWidth();
+	auto h = bounds.getHeight();
+	auto aspectRatio = h / (w != 0.0f ? w : 1.0f);
+	auto isPortrait = layoutSwitchAspectRatio < aspectRatio;
+
+	// The layouting flexbox with parameters
+	FlexBox matrixIOFlex;
+	if (isPortrait)
+		matrixIOFlex.flexDirection = FlexBox::Direction::column;
+	else
+		matrixIOFlex.flexDirection = FlexBox::Direction::row;
+	matrixIOFlex.justifyContent = FlexBox::JustifyContent::center;
+
+	matrixIOFlex.items.add(FlexItem(*m_inputsComponent).withFlex(1).withMargin(FlexItem::Margin(5, 5, 5, 5)));
+	matrixIOFlex.items.add(FlexItem(*m_outputsComponent).withFlex(1).withMargin(FlexItem::Margin(5, 5, 5, 5)));
+
+	matrixIOFlex.performLayout(bounds);
 }
 
 /**
@@ -78,6 +109,15 @@ void MatrixIOPageComponent::resized()
 void MatrixIOPageComponent::UpdateGui(bool init)
 {
 	ignoreUnused(init);
+}
+
+/**
+ * Overridden from AppConfiguration Watcher to be able
+ * to live react on config changes and update the table contents.
+ */
+void MatrixIOPageComponent::onConfigUpdated()
+{
+
 }
 
 

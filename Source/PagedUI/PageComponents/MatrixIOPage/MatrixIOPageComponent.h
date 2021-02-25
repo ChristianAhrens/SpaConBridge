@@ -21,16 +21,26 @@
 
 #include "../PageComponentBase.h"
 
+#include "../../../AppConfiguration.h"
+
 
 namespace SoundscapeBridgeApp
 {
 
 
 /**
+ * Forward declarations.
+ */
+class MatrixInputsComponent;
+class MatrixOutputsComponent;
+
+
+/**
  * Class MatrixIOPageComponent is a component that contains
  * matrix inputs and outputs processor elements
  */
-class MatrixIOPageComponent : public PageComponentBase
+class MatrixIOPageComponent :	public PageComponentBase,
+								public AppConfiguration::Watcher
 {
 public:
 	MatrixIOPageComponent();
@@ -39,12 +49,17 @@ public:
 	//==============================================================================
 	void UpdateGui(bool init) override;
 
+	//==========================================================================
+	void onConfigUpdated() override;
+
 protected:
 	//==============================================================================
 	void paint(Graphics&) override;
 	void resized() override;
 
 private:
+	std::unique_ptr<MatrixInputsComponent>	m_inputsComponent;	/**> Matrix input channelstrips component. */
+	std::unique_ptr<MatrixOutputsComponent>	m_outputsComponent;	/**> Matrix output channelstrips component. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixIOPageComponent)
 };

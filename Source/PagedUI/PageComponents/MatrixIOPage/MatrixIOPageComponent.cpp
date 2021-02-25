@@ -68,9 +68,20 @@ MatrixIOPageComponent::~MatrixIOPageComponent()
  */
 void MatrixIOPageComponent::paint(Graphics& g)
 {
-	// Paint background to cover the controls behind this overlay.
+	auto bounds = getLocalBounds();
+	auto bottomBarBounds = bounds.reduced(8).removeFromBottom(33);
+
+	// Background
 	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
-	g.fillRect(Rectangle<int>(0, 0, getLocalBounds().getWidth(), getLocalBounds().getHeight()));
+	g.fillRect(bounds);
+
+	// Bottm bar background
+	g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId));
+	g.fillRect(bottomBarBounds);
+
+	// Frame
+	g.setColour(getLookAndFeel().findColour(TableListBox::outlineColourId));
+	g.drawRect(bottomBarBounds, 1);
 }
 
 /**
@@ -78,7 +89,8 @@ void MatrixIOPageComponent::paint(Graphics& g)
  */
 void MatrixIOPageComponent::resized()
 {
-	auto bounds = getLocalBounds().toFloat().reduced(5);
+	auto bounds = getLocalBounds().toFloat().reduced(3);
+	bounds.removeFromBottom(32);
 
 	// determine the layout direction (we want a ratio of 0.75 to be the switching point)
 	auto layoutSwitchAspectRatio = 0.5f;

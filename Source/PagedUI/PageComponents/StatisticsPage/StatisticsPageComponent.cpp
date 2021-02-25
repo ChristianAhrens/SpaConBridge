@@ -82,7 +82,7 @@ void StatisticsPageComponent::paint(Graphics& g)
  */
 void StatisticsPageComponent::resized()
 {
-	auto bounds = getLocalBounds().toFloat().reduced(5);
+	auto bounds = getLocalBounds().toFloat().reduced(3);
 
 	// determine the layout direction (we want a ratio of 0.75 to be the switching point)
 	auto layoutSwitchAspectRatio = 0.75f;

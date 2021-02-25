@@ -117,20 +117,20 @@ SoundobjectTablePageComponent::~SoundobjectTablePageComponent()
  */
 void SoundobjectTablePageComponent::paint(Graphics& g)
 {
-	int w = getLocalBounds().getWidth();
-	int h = getLocalBounds().getHeight();	
+	auto bounds = getLocalBounds();
+	auto bottomBarBounds = bounds.reduced(8).removeFromBottom(33);
 
 	// Background
 	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
-	g.fillRect(getLocalBounds());
+	g.fillRect(bounds);
 
 	// Bottm bar background
 	g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId));
-	g.fillRect(Rectangle<int>(8, h - 41, w - 16, 34));
+	g.fillRect(bottomBarBounds);
 
 	// Frame
 	g.setColour(getLookAndFeel().findColour(TableListBox::outlineColourId));
-	g.drawRect(Rectangle<int>(8, h - 41, w - 16, 34), 1);
+	g.drawRect(bottomBarBounds, 1);
 }
 
 /**
@@ -182,12 +182,12 @@ void SoundobjectTablePageComponent::resized()
 	bottomBarFlex.justifyContent = FlexBox::JustifyContent::center;
 	bottomBarFlex.alignContent = FlexBox::AlignContent::center;
 	bottomBarFlex.items.addArray({
-		FlexItem(*m_addInstance.get()).withFlex(1).withMaxWidth(40).withMargin(FlexItem::Margin(2, 2, 2, 4)),
-		FlexItem(*m_removeInstance.get()).withFlex(1).withMaxWidth(60).withMargin(FlexItem::Margin(2)),
+		FlexItem(*m_addInstance.get()).withFlex(1).withMaxWidth(40).withMargin(FlexItem::Margin(2, 2, 3, 4)),
+		FlexItem(*m_removeInstance.get()).withFlex(1).withMaxWidth(60).withMargin(FlexItem::Margin(2, 2, 3, 2)),
 		FlexItem().withFlex(2).withHeight(30),
 		FlexItem(*m_selectLabel.get()).withFlex(1).withMaxWidth(80),
-		FlexItem(*m_selectAll.get()).withFlex(1).withMaxWidth(40).withMargin(FlexItem::Margin(2)),
-		FlexItem(*m_selectNone.get()).withFlex(1).withMaxWidth(46).withMargin(FlexItem::Margin(2, 4, 2, 2)),
+		FlexItem(*m_selectAll.get()).withFlex(1).withMaxWidth(40).withMargin(FlexItem::Margin(2, 2, 3, 2)),
+		FlexItem(*m_selectNone.get()).withFlex(1).withMaxWidth(46).withMargin(FlexItem::Margin(2, 4, 3, 2)),
 		});
 
 	FlexBox mainFB;

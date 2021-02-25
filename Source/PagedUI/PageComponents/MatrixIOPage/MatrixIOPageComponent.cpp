@@ -18,9 +18,9 @@
 
 #include "MatrixIOPageComponent.h"
 
-#include "../PageComponentManager.h"
+#include "../../PageComponentManager.h"
 
-#include "../../Controller.h"
+#include "../../../Controller.h"
 
 #include <Image_utils.h>
 

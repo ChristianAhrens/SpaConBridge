@@ -335,34 +335,62 @@
             file="Source/AppConfiguration.h"/>
       <GROUP id="{ABC3680A-0C49-EE16-E766-E6ED89078A7C}" name="PagedUI">
         <GROUP id="{4680382C-A46A-B4C1-0D87-F92C4050063D}" name="PageComponents">
-          <FILE id="HhvbAy" name="AboutPageComponent.cpp" compile="1" resource="0"
-                file="Source/PagedUI/PageComponents/AboutPageComponent.cpp"/>
-          <FILE id="swNf0J" name="AboutPageComponent.h" compile="0" resource="0"
-                file="Source/PagedUI/PageComponents/AboutPageComponent.h"/>
-          <FILE id="Po7Qsu" name="MatrixIOPageComponent.cpp" compile="1" resource="0"
-                file="Source/PagedUI/PageComponents/MatrixIOPageComponent.cpp"/>
-          <FILE id="XzusXk" name="MatrixIOPageComponent.h" compile="0" resource="0"
-                file="Source/PagedUI/PageComponents/MatrixIOPageComponent.h"/>
-          <FILE id="bcX4Ju" name="MultisurfacePageComponent.cpp" compile="1"
-                resource="0" file="Source/PagedUI/PageComponents/MultisurfacePageComponent.cpp"/>
-          <FILE id="GPUSzO" name="MultisurfacePageComponent.h" compile="0" resource="0"
-                file="Source/PagedUI/PageComponents/MultisurfacePageComponent.h"/>
+          <GROUP id="{49670C0C-DE7C-D21A-221C-9FD67169A2B2}" name="SoundobjectTablePage">
+            <FILE id="QdViFe" name="SoundobjectTablePageComponent.cpp" compile="1"
+                  resource="0" file="Source/PagedUI/PageComponents/SoundobjectTablePage/SoundobjectTablePageComponent.cpp"/>
+            <FILE id="TlVqRW" name="SoundobjectTablePageComponent.h" compile="0"
+                  resource="0" file="Source/PagedUI/PageComponents/SoundobjectTablePage/SoundobjectTablePageComponent.h"/>
+          </GROUP>
+          <GROUP id="{1FBC281E-3196-9A1A-451F-E510FF2D2902}" name="StatisticsPage">
+            <FILE id="go3nU7" name="StatisticsLogComponent.cpp" compile="1" resource="0"
+                  file="Source/PagedUI/PageComponents/StatisticsPage/StatisticsLogComponent.cpp"/>
+            <FILE id="lLk4QW" name="StatisticsLogComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/StatisticsPage/StatisticsLogComponent.h"/>
+            <FILE id="yZ5iQO" name="StatisticsPageComponent.cpp" compile="1" resource="0"
+                  file="Source/PagedUI/PageComponents/StatisticsPage/StatisticsPageComponent.cpp"/>
+            <FILE id="qijggL" name="StatisticsPageComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/StatisticsPage/StatisticsPageComponent.h"/>
+            <FILE id="ceiDPW" name="StatisticsPlotComponent.cpp" compile="1" resource="0"
+                  file="Source/PagedUI/PageComponents/StatisticsPage/StatisticsPlotComponent.cpp"/>
+            <FILE id="UibXv0" name="StatisticsPlotComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/StatisticsPage/StatisticsPlotComponent.h"/>
+          </GROUP>
+          <GROUP id="{811EF1A2-3AD2-5387-1DC2-32ED14213B13}" name="SettingsPage">
+            <FILE id="csxZSv" name="HeaderWithElmListComponent.cpp" compile="1"
+                  resource="0" file="Source/PagedUI/PageComponents/SettingsPage/HeaderWithElmListComponent.cpp"/>
+            <FILE id="YBHy5N" name="HeaderWithElmListComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/SettingsPage/HeaderWithElmListComponent.h"/>
+            <FILE id="XTyWNE" name="SettingsPageComponent.cpp" compile="1" resource="0"
+                  file="Source/PagedUI/PageComponents/SettingsPage/SettingsPageComponent.cpp"/>
+            <FILE id="DKcTjc" name="SettingsPageComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/SettingsPage/SettingsPageComponent.h"/>
+            <FILE id="Dobam7" name="SettingsSectionsComponent.cpp" compile="1"
+                  resource="0" file="Source/PagedUI/PageComponents/SettingsPage/SettingsSectionsComponent.cpp"/>
+            <FILE id="RwWyr9" name="SettingsSectionsComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/SettingsPage/SettingsSectionsComponent.h"/>
+          </GROUP>
+          <GROUP id="{AE87B67F-F38C-02B1-7766-C315A14B1AA5}" name="MultisurfacePage">
+            <FILE id="iZVABT" name="MultisurfacePageComponent.cpp" compile="1"
+                  resource="0" file="Source/PagedUI/PageComponents/MultisurfacePage/MultisurfacePageComponent.cpp"/>
+            <FILE id="g1pfot" name="MultisurfacePageComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/MultisurfacePage/MultisurfacePageComponent.h"/>
+          </GROUP>
+          <GROUP id="{59435D02-8728-9CA1-282E-B7B15C7B9CAB}" name="MatrixIOPage">
+            <FILE id="ZBB21m" name="MatrixIOPageComponent.cpp" compile="1" resource="0"
+                  file="Source/PagedUI/PageComponents/MatrixIOPage/MatrixIOPageComponent.cpp"/>
+            <FILE id="th9JeX" name="MatrixIOPageComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/MatrixIOPage/MatrixIOPageComponent.h"/>
+          </GROUP>
+          <GROUP id="{EA1B1C28-C721-9683-BA42-F0893D802CB4}" name="AboutPage">
+            <FILE id="Cee0pf" name="AboutPageComponent.cpp" compile="1" resource="0"
+                  file="Source/PagedUI/PageComponents/AboutPage/AboutPageComponent.cpp"/>
+            <FILE id="QfpD8D" name="AboutPageComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/AboutPage/AboutPageComponent.h"/>
+          </GROUP>
           <FILE id="n5XHjT" name="PageComponentBase.cpp" compile="1" resource="0"
                 file="Source/PagedUI/PageComponents/PageComponentBase.cpp"/>
           <FILE id="oNGL8i" name="PageComponentBase.h" compile="0" resource="0"
                 file="Source/PagedUI/PageComponents/PageComponentBase.h"/>
-          <FILE id="xOisB1" name="SettingsPageComponent.cpp" compile="1" resource="0"
-                file="Source/PagedUI/PageComponents/SettingsPageComponent.cpp"/>
-          <FILE id="xe3MKR" name="SettingsPageComponent.h" compile="0" resource="0"
-                file="Source/PagedUI/PageComponents/SettingsPageComponent.h"/>
-          <FILE id="IjyBqv" name="StatisticsPageComponent.cpp" compile="1" resource="0"
-                file="Source/PagedUI/PageComponents/StatisticsPageComponent.cpp"/>
-          <FILE id="qVOhP7" name="StatisticsPageComponent.h" compile="0" resource="0"
-                file="Source/PagedUI/PageComponents/StatisticsPageComponent.h"/>
-          <FILE id="fOhomW" name="TablePageComponent.cpp" compile="1" resource="0"
-                file="Source/PagedUI/PageComponents/TablePageComponent.cpp"/>
-          <FILE id="oQheIw" name="TablePageComponent.h" compile="0" resource="0"
-                file="Source/PagedUI/PageComponents/TablePageComponent.h"/>
         </GROUP>
         <FILE id="mIIIv5" name="PageComponentManager.cpp" compile="1" resource="0"
               file="Source/PagedUI/PageComponentManager.cpp"/>

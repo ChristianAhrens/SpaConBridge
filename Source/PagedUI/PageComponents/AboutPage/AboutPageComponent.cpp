@@ -19,8 +19,8 @@
 
 #include "AboutPageComponent.h"
 
-#include "../../LookAndFeel.h"
-#include "../../SoundscapeBridgeAppCommon.h"
+#include "../../../LookAndFeel.h"
+#include "../../../SoundscapeBridgeAppCommon.h"
 
 #include <Image_utils.h>
 

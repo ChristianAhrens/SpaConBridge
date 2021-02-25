@@ -33,14 +33,14 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 
-#include "TablePageComponent.h"
+#include "SoundobjectTablePageComponent.h"
 
-#include "../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
-#include "../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessorEditor.h"
+#include "../../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
+#include "../../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessorEditor.h"
 
-#include "../../SurfaceSlider.h"
-#include "../../Controller.h"
-#include "../../LookAndFeel.h"
+#include "../../../SurfaceSlider.h"
+#include "../../../Controller.h"
+#include "../../../LookAndFeel.h"
 
 #include <Image_utils.h>
 
@@ -51,14 +51,14 @@ namespace SoundscapeBridgeApp
 
 /*
 ===============================================================================
- Class TablePageComponent
+ Class SoundobjectTablePageComponent
 ===============================================================================
 */
 
 /**
  * Class constructor.
  */
-TablePageComponent::TablePageComponent()
+SoundobjectTablePageComponent::SoundobjectTablePageComponent()
 	: PageComponentBase(PCT_Overview)
 {
 	// Create the table model/component.
@@ -107,7 +107,7 @@ TablePageComponent::TablePageComponent()
 /**
  * Class destructor.
  */
-TablePageComponent::~TablePageComponent()
+SoundobjectTablePageComponent::~SoundobjectTablePageComponent()
 {
 }
 
@@ -115,7 +115,7 @@ TablePageComponent::~TablePageComponent()
  * Reimplemented to paint background and frame.
  * @param g		Graphics context that must be used to do the drawing operations.
  */
-void TablePageComponent::paint(Graphics& g)
+void SoundobjectTablePageComponent::paint(Graphics& g)
 {
 	int w = getLocalBounds().getWidth();
 	int h = getLocalBounds().getHeight();	
@@ -136,7 +136,7 @@ void TablePageComponent::paint(Graphics& g)
 /**
  * Reimplemented to resize and re-postion controls on the overview window.
  */
-void TablePageComponent::resized()
+void SoundobjectTablePageComponent::resized()
 {
 	// flexbox for table and editor as column or row layout depending on aspect ratio
 	FlexBox tableAndEditorFlex;
@@ -204,7 +204,7 @@ void TablePageComponent::resized()
  * Reimplemented from Button::Listener, gets called whenever the buttons are clicked.
  * @param button	The button which has been clicked.
  */
-void TablePageComponent::buttonClicked(Button *button)
+void SoundobjectTablePageComponent::buttonClicked(Button *button)
 {
 	if ((button == m_selectAll.get()) || (button == m_selectNone.get()))
 	{
@@ -256,7 +256,7 @@ void TablePageComponent::buttonClicked(Button *button)
 /**
  * Function to be called from model when the current selection has changed
  */
-void TablePageComponent::onCurrentSelectedProcessorChanged(SoundobjectProcessorId selectedProcessorId)
+void SoundobjectTablePageComponent::onCurrentSelectedProcessorChanged(SoundobjectProcessorId selectedProcessorId)
 {
 	if (selectedProcessorId == INVALID_PROCESSOR_ID)
 	{
@@ -305,7 +305,7 @@ void TablePageComponent::onCurrentSelectedProcessorChanged(SoundobjectProcessorI
  * @param init	True to ignore any changed flags and update the procssor parameters
  *				in the GUI anyway. Good for when opening the Overview for the first time.
  */
-void TablePageComponent::UpdateGui(bool init)
+void SoundobjectTablePageComponent::UpdateGui(bool init)
 {
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl && m_pageContainerTable)
@@ -339,7 +339,7 @@ void TablePageComponent::UpdateGui(bool init)
  * Overridden from AppConfiguration Watcher to be able
  * to live react on config changes and update the table contents.
  */
-void TablePageComponent::onConfigUpdated()
+void SoundobjectTablePageComponent::onConfigUpdated()
 {
 	UpdateGui(false);
 }

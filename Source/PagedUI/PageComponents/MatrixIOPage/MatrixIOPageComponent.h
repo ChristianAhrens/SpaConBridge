@@ -1,12 +1,3 @@
-/*
-  ==============================================================================
-
-    MatrixIOPageComponent.h
-    Created: 22 Feb 2021 4:21:34pm
-    Author:  Christian Ahrens
-
-  ==============================================================================
-*/
 /* Copyright (c) 2020-2021, Christian Ahrens
  *
  * This file is part of SoundscapeBridgeApp <https://github.com/ChristianAhrens/SoundscapeBridgeApp>
@@ -25,9 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+
 #pragma once
 
-#include "PageComponentBase.h"
+#include "../PageComponentBase.h"
 
 
 namespace SoundscapeBridgeApp

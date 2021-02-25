@@ -37,12 +37,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PageContainerComponent.h"
 
 #include "PageComponentManager.h"
-#include "PageComponents/TablePageComponent.h"
-#include "PageComponents/MultisurfacePageComponent.h"
-#include "PageComponents/MatrixIOPageComponent.h"
-#include "PageComponents/SettingsPageComponent.h"
-#include "PageComponents/StatisticsPageComponent.h"
-#include "PageComponents/AboutPageComponent.h"
+#include "PageComponents/SoundobjectTablePage/SoundobjectTablePageComponent.h"
+#include "PageComponents/MultisurfacePage/MultisurfacePageComponent.h"
+#include "PageComponents/MatrixIOPage/MatrixIOPageComponent.h"
+#include "PageComponents/SettingsPage/SettingsPageComponent.h"
+#include "PageComponents/StatisticsPage/StatisticsPageComponent.h"
+#include "PageComponents/AboutPage/AboutPageComponent.h"
 
 #include "../Controller.h"
 #include "../SurfaceSlider.h"
@@ -111,7 +111,7 @@ PageContainerComponent::PageContainerComponent()
 	addAndMakeVisible(m_versionStringLabel.get());
 
 	// Create the pages.
-	m_tablePage = std::make_unique<TablePageComponent>();
+	m_tablePage = std::make_unique<SoundobjectTablePageComponent>();
 	m_multiSliderPage = std::make_unique<MultiSurfacePageComponent>();
     m_matrixIOPage = std::make_unique<MatrixIOPageComponent>();
 	m_settingsPage = std::make_unique<SettingsPageComponent>();

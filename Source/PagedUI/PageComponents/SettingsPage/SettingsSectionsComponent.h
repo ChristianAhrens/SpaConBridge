@@ -19,73 +19,19 @@
 
 #pragma once
 
-#include "PageComponentBase.h"
+#include "HeaderWithElmListComponent.h"
 
-#include "../../SoundscapeBridgeAppCommon.h"
-#include "../../AppConfiguration.h"
-#include "../../LookAndFeel.h"
+#include "../../../SoundscapeBridgeAppCommon.h"
 
-#include "../../../submodules/JUCE-AppBasics/Source/ZeroconfDiscoverComponent.h"
-#include "../../../submodules/JUCE-AppBasics/Source/SplitButtonComponent.h"
-#include "../../../submodules/JUCE-AppBasics/Source/TextWithImageButton.h"
-#include "../../../submodules/JUCE-AppBasics/Source/MidiLearnerComponent.h"
+#include <ZeroconfDiscoverComponent.h>
+#include <SplitButtonComponent.h>
+#include <TextWithImageButton.h>
+#include <MidiLearnerComponent.h>
 
 
 namespace SoundscapeBridgeApp
 {
 
-
-/**
- * HeaderWithElmListComponent is a component to hold a header component with multiple other components in a specific layout.
- */
-class HeaderWithElmListComponent : public Component
-{
-public:
-	HeaderWithElmListComponent(const String& componentName = String());
-	~HeaderWithElmListComponent() override;
-
-	//==============================================================================
-	void setHasActiveToggle(bool hasActiveToggle);
-	void setHeaderText(String headerText);
-	void addComponent(Component* compo, bool includeInLayout = true, bool takeOwnership = true);
-	void setToggleActiveState(bool toggleState);
-	
-	void onToggleActive();
-
-	//==============================================================================
-	void setHelpUrl(const URL& helpUrl);
-
-	//==============================================================================
-	void paint(Graphics&) override;
-	void resized() override;
-
-	//==============================================================================
-	void lookAndFeelChanged() override;
-
-	//==============================================================================
-	std::function<void(HeaderWithElmListComponent*, bool)>	toggleIsActiveCallback;
-
-	//==============================================================================
-	static constexpr std::int32_t	m_attachedItemWidth{ 150 };
-	static constexpr std::int32_t	m_layoutItemWidth{ 205 };
-
-protected:
-	//==============================================================================
-	void setElementsActiveState(bool toggleState);
-
-private:
-	//==============================================================================
-	bool																		m_hasActiveToggle{ false };
-	bool																		m_toggleState{ true };
-	std::unique_ptr<ToggleButton>												m_activeToggle;
-	std::unique_ptr<Label>														m_activeToggleLabel;
-	std::unique_ptr<Label>														m_headerLabel;
-	std::unique_ptr<DrawableButton>												m_helpButton;
-	std::unique_ptr<URL>														m_helpUrl;
-	std::vector<std::pair<std::unique_ptr<Component>, std::pair<bool, bool>>>	m_components;
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HeaderWithElmListComponent)
-};
 
 /**
  * SettingsSectionsComponent is the component to hold multiple components 
@@ -221,57 +167,6 @@ private:
 	std::unique_ptr<Label>										m_YamahaOSCRemotePortLabel;
 	std::unique_ptr<ComboBox>									m_YamahaOSCMappingAreaSelect;
 	std::unique_ptr<Label>										m_YamahaOSCMappingAreaLabel;
-};
-
-/**
- * SettingsPageComponent is a component to hold multiple components that are dedicated to app configuration.
- */
-class SettingsPageComponent :	public PageComponentBase, 
-								public AppConfiguration::Watcher // for raw text editing
-{
-public:
-	SettingsPageComponent();
-	~SettingsPageComponent() override;
-
-	//==========================================================================
-	void onApplyClicked();
-	void onLoadConfigClicked();
-	void onSaveConfigClicked();
-	void onToggleRawConfigVisible();
-	void onSelectedLookAndFeelChanged();
-
-	//==========================================================================
-	void SetSelectedLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType);
-	DbLookAndFeelBase::LookAndFeelType GetSelectedLookAndFeelType();
-
-	//==========================================================================
-	void lookAndFeelChanged() override;
-
-	//==========================================================================
-	void UpdateGui(bool init) override;
-
-	//==========================================================================
-	void onConfigUpdated() override;
-
-	//==========================================================================
-	void paint(Graphics&) override;
-	void resized() override;
-
-private:
-	//==============================================================================
-	std::unique_ptr<SettingsSectionsComponent>	m_settingsComponent;
-	std::unique_ptr<Viewport>					m_settingsViewport;
-
-	std::unique_ptr<TextButton>		m_settingsRawApplyButton;
-	std::unique_ptr<TextEditor>		m_settingsRawEditor;
-	std::unique_ptr<ComboBox>		m_lookAndFeelSelect;
-	std::unique_ptr<Label>			m_lookAndFeelLabel;
-
-	std::unique_ptr<JUCEAppBasics::TextWithImageButton>	m_loadConfigButton;
-	std::unique_ptr<JUCEAppBasics::TextWithImageButton>	m_saveConfigButton;
-	std::unique_ptr<TextButton>							m_useRawConfigButton;
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SettingsPageComponent)
 };
 
 

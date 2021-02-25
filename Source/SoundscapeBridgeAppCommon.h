@@ -38,6 +38,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <JuceHeader.h>
 
+#include <RemoteProtocolBridgeCommon.h>
+
 
 namespace SoundscapeBridgeApp
 {

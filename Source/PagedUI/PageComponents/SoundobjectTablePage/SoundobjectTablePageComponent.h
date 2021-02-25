@@ -35,10 +35,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "PageComponentBase.h"
+#include "../PageComponentBase.h"
 
-#include "../../SoundscapeBridgeAppCommon.h"
-#include "../../AppConfiguration.h"
+#include "../../../SoundscapeBridgeAppCommon.h"
+#include "../../../AppConfiguration.h"
 
 
 namespace SoundscapeBridgeApp
@@ -48,7 +48,6 @@ namespace SoundscapeBridgeApp
 /**
  * Forward declarations
  */
-class TablePageComponent;
 class CustomTableHeaderComponent;
 class TableModelComponent;
 class ComboBoxContainer;
@@ -59,16 +58,16 @@ class SoundobjectProcessorEditor;
 
 
 /**
- * Class TablePageComponent is just a component which contains the overview table 
+ * Class SoundobjectTablePageComponent is just a component which contains the overview table 
  * and it's quick selection buttons.
  */
-class TablePageComponent :	public PageComponentBase,
-								public Button::Listener,
-								public AppConfiguration::Watcher
+class SoundobjectTablePageComponent :	public PageComponentBase,
+										public Button::Listener,
+										public AppConfiguration::Watcher
 {
 public:
-	TablePageComponent();
-	~TablePageComponent() override;
+	SoundobjectTablePageComponent();
+	~SoundobjectTablePageComponent() override;
 
 	//==============================================================================
 	void UpdateGui(bool init) override;
@@ -96,7 +95,7 @@ private:
 	std::unique_ptr<TextButton>					m_selectAll;						/**> Select all rows button. */
 	std::unique_ptr<TextButton>					m_selectNone;						/**> Select no rows button. */
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TablePageComponent)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SoundobjectTablePageComponent)
 };
 
 /**

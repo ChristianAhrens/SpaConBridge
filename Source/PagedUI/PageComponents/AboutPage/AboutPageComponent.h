@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "PageComponentBase.h"	//<USE PageComponentBase
+#include "../PageComponentBase.h"	//<USE PageComponentBase
 
 
 namespace SoundscapeBridgeApp

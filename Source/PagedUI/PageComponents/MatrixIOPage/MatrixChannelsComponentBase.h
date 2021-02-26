@@ -30,47 +30,20 @@ namespace SoundscapeBridgeApp
  * MatrixChannelsComponentBase class provides a rolling log to show protocol data.
  */
 class MatrixChannelsComponentBase :	public Component,
-						private Timer,
 						public TableListBoxModel
 {
-public:
-	/**
-	 * Enum to define where a log entry originates from.
-	 * This is used to e.g. differentiate between different DS100 in log,
-	 * but show only a single DS100 category in plot.
-	 */
-	enum MatrixChannelsComponentBaseSource
-	{
-		SLS_None,
-		SLS_DiGiCo,
-		SLS_BlacktraxRTTrPM,
-		SLS_GenericOSC,
-		SLS_GenericMIDI,
-		SLS_YamahaSQ,
-		SLS_YamahaOSC,
-		SLS_HUI,
-		SLS_DS100,
-		SLS_DS100_2,
-	};
-
 	enum MatrixChannelsComponentBaseColumn
 	{
-		SLC_None = 0,		//< Juce column IDs start at 1
-		SLC_Number,
-		SLC_LogSourceName,
-		SLC_ObjectName,
-		SLC_SourceId,
-		SLC_Value,
-		SLC_LogSourceType,
-		SLC_MAX_COLUMNS
+		MCC_None = 0,		//< Juce column IDs start at 1
+		MCC_SourceID,
+		MCC_InputEditor,
+		MCC_ComsMode,
+		MCC_BridgingMute,
+		MCC_MAX_COLUMNS
 	};
-
 public:
 	MatrixChannelsComponentBase();
 	virtual ~MatrixChannelsComponentBase() override;
-
-	//==============================================================================
-	void AddMessageData(MatrixChannelsComponentBaseSource logSourceType, RemoteObjectIdentifier Id, const RemoteObjectMessageData& msgData);
 
 	//==========================================================================
 	void backgroundClicked(const MouseEvent&) override;
@@ -79,27 +52,14 @@ public:
 	void paintCell(Graphics& g, int rowNumber, int columnId, int width, int height, bool rowIsSelected) override;
 	int getColumnAutoSizeWidth(int columnId) override;
 
-	//==========================================================================
-	void SetShowDS100Traffic(bool show);
-
 protected:
 	//==============================================================================
 	void resized() override;
 
 private:
-	String GetLogSourceName(MatrixChannelsComponentBaseSource logSourceType);
-	const Colour GetLogSourceColour(MatrixChannelsComponentBaseSource logSourceType);
-
-	//==============================================================================
-	void timerCallback() override;
-
-private:
 	std::unique_ptr<TableListBox>			m_table;				/**< The table component itself. */
-	std::map<int, std::map<int, String>>	m_logEntries;			/**< Map of log entry # and map of column and its cell string contents. */
 	const int								m_logCount{ 200 };
-	int										m_logEntryCounter{ 0 };
 	bool									m_dataChanged{ false };
-	bool									m_showDS100Traffic{ false };
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixChannelsComponentBase)
 };

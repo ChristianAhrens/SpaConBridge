@@ -69,7 +69,12 @@ MatrixIOPageComponent::~MatrixIOPageComponent()
 void MatrixIOPageComponent::paint(Graphics& g)
 {
 	auto bounds = getLocalBounds();
-	auto bottomBarBounds = bounds.reduced(8).removeFromBottom(33);
+	auto bottomBarBounds = bounds.reduced(8);
+
+	if (IsPortraitAspectRatio())
+		bottomBarBounds = bottomBarBounds.removeFromLeft(33);
+	else
+		bottomBarBounds = bottomBarBounds.removeFromBottom(33);
 
 	// Background
 	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
@@ -90,27 +95,43 @@ void MatrixIOPageComponent::paint(Graphics& g)
 void MatrixIOPageComponent::resized()
 {
 	auto bounds = getLocalBounds().toFloat().reduced(3);
-	bounds.removeFromBottom(32);
-
-	// determine the layout direction (we want a ratio of 0.75 to be the switching point)
-	auto layoutSwitchAspectRatio = 0.5f;
-	auto w = bounds.getWidth();
-	auto h = bounds.getHeight();
-	auto aspectRatio = h / (w != 0.0f ? w : 1.0f);
-	auto isPortrait = layoutSwitchAspectRatio < aspectRatio;
 
 	// The layouting flexbox with parameters
 	FlexBox matrixIOFlex;
-	if (isPortrait)
+	if (IsPortraitAspectRatio())
+	{
 		matrixIOFlex.flexDirection = FlexBox::Direction::column;
+		bounds.removeFromLeft(32);
+	}
 	else
+	{
 		matrixIOFlex.flexDirection = FlexBox::Direction::row;
+		bounds.removeFromBottom(32);
+	}
 	matrixIOFlex.justifyContent = FlexBox::JustifyContent::center;
 
 	matrixIOFlex.items.add(FlexItem(*m_inputsComponent).withFlex(1).withMargin(FlexItem::Margin(5, 5, 5, 5)));
 	matrixIOFlex.items.add(FlexItem(*m_outputsComponent).withFlex(1).withMargin(FlexItem::Margin(5, 5, 5, 5)));
 
 	matrixIOFlex.performLayout(bounds);
+}
+
+/**
+ * Minimal helper method to determine if aspect ratio of currently
+ * available screen realestate suggests we are in portrait or landscape orientation
+ * and be able to use the same determination code in multiple places.
+ * 
+ * @return	True if we are in portrait, false if in landscape aspect ratio.
+ */
+bool MatrixIOPageComponent::IsPortraitAspectRatio()
+{
+	// determine the layout direction (we want a ratio of 0.75 to be the switching point)
+	auto layoutSwitchAspectRatio = 0.75f;
+	auto w = getLocalBounds().getWidth();
+	auto h = getLocalBounds().getHeight();
+	auto aspectRatio = h / (w != 0.0f ? w : 1.0f);
+
+	return layoutSwitchAspectRatio < aspectRatio;
 }
 
 /**

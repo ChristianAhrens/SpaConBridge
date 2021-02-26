@@ -58,6 +58,8 @@ protected:
 	void resized() override;
 
 private:
+	bool	IsPortraitAspectRatio();
+
 	std::unique_ptr<MatrixInputsComponent>	m_inputsComponent;	/**> Matrix input channelstrips component. */
 	std::unique_ptr<MatrixOutputsComponent>	m_outputsComponent;	/**> Matrix output channelstrips component. */
 

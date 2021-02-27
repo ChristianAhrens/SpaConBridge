@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "MatrixChannelProcessor.h"
+#include "MatrixInputProcessor.h"
 
 #include "../../SurfaceSlider.h"
 
@@ -31,15 +31,15 @@ namespace SoundscapeBridgeApp
 /**
  * Class MainProcessorEditor, a component that acts as the GUI for the AudioProcessor. 
  */
-class MatrixChannelProcessorEditor :
+class MatrixInputProcessorEditor :
 	public AudioProcessorEditor,
 	public TextEditor::Listener,
 	public Slider::Listener,
 	private Timer
 {
 public:
-	MatrixChannelProcessorEditor(MatrixChannelProcessor&);
-	~MatrixChannelProcessorEditor() override;
+	MatrixInputProcessorEditor(MatrixInputProcessor&);
+	~MatrixInputProcessorEditor() override;
 
 	void paint(Graphics&) override;
 	void resized() override;
@@ -53,9 +53,9 @@ private:
 	void textEditorReturnKeyPressed(TextEditor &) override;
 	void timerCallback() override;
 
-	std::unique_ptr<Slider>			m_matrixChannelLevelMeterSlider;	/**> Slider for ReverbSendGain */
-	std::unique_ptr<Slider>			m_matrixChannelGainSlider;			/**> Slider for SourceSpread */
-	std::unique_ptr<DrawableButton>	m_matrixChannelMuteButton;			/**> ComboBox for DelayMode */
+	std::unique_ptr<Slider>			m_MatrixInputLevelMeterSlider;	/**> Slider for ReverbSendGain */
+	std::unique_ptr<Slider>			m_MatrixInputGainSlider;			/**> Slider for SourceSpread */
+	std::unique_ptr<DrawableButton>	m_MatrixInputMuteButton;			/**> ComboBox for DelayMode */
 	std::unique_ptr<Label>			m_levelMeterLabel;					/**> X axis slider label */
 	std::unique_ptr<Label>			m_gainLabel;						/**> Y axis slider label */
 	std::unique_ptr<Label>			m_muteLabel;						/**> ReverbSendGain slider label */
@@ -70,7 +70,7 @@ private:
 
 	static constexpr int Mute_On = 1;
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixChannelProcessorEditor)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixInputProcessorEditor)
 };
 
 

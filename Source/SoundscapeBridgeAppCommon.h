@@ -50,9 +50,11 @@ namespace SoundscapeBridgeApp
  */
 typedef juce::int32 SoundobjectId;
 typedef juce::int8 MappingId;
-typedef juce::int32 MatrixChannelId;
+typedef juce::int32 MatrixInputId;
+typedef juce::int32 MatrixOutputId;
 typedef juce::int32 SoundobjectProcessorId;
-typedef juce::int32 MatrixChannelProcessorId;
+typedef juce::int32 MatrixInputProcessorId;
+typedef juce::int32 MatrixOutputProcessorId;
 typedef juce::uint64 DataChangeType;
 typedef juce::uint32 ProtocolBridgingType;
 typedef juce::uint8 ComsMode;
@@ -70,7 +72,8 @@ enum DataChangeSource
 	DCS_Host,						//< Change was caused by the VST/AU/AAX host, i.e. a project was loaded or a DAW preset was recalled.
 	DCS_Protocol,					//< Change was caused by an incoming protocol message, or caused by internal operations by the Controller.
 	DCS_Init,						//< Change was caused by Application initialization process (defaults)
-	DCS_MatrixChannelProcessor,		//< Change was caused by the MatrixChannelProcessor UI, i.e. the user turning a knob to change a value.
+	DCS_MatrixInputProcessor,		//< Change was caused by the MatrixInputProcessor UI, i.e. the user turning a knob to change a value.
+	DCS_MatrixOutputProcessor,		//< Change was caused by the MatrixOutputProcessor UI, i.e. the user turning a knob to change a value.
 	DCS_MatrixIO,					//< Change was caused by the matrix io channel page
 	DCS_Max							//< Number of change sources.
 };
@@ -112,17 +115,22 @@ static constexpr DataChangeType DCT_CommunicationConfig		= (DCT_IPAddress | DCT_
 static constexpr DataChangeType DCT_SoundobjectID			= 0x00000010; //< The SoundobjectID of this processor instance has been changed.
 static constexpr DataChangeType DCT_MappingID				= 0x00000020; //< The user has selected a different coordinate mapping for this Plug-in.
 static constexpr DataChangeType DCT_ComsMode				= 0x00000040; //< The Rx / Tx mode of a soundobject channel has been changed.
-static constexpr DataChangeType DCT_MatrixChannelID			= 0x00000080; //< The MatrixChannelId of this processor instance has been changed..
-static constexpr DataChangeType DCT_ProcessorInstanceConfig	= (DCT_SoundobjectID | DCT_MappingID | DCT_ComsMode | DCT_MatrixChannelID); //< SoundobjectID, MappingID, Rx/Tx and MatrixChannel.
+static constexpr DataChangeType DCT_MatrixInputID			= 0x00100000; //< The MatrixInputId of this processor instance has been changed.
+static constexpr DataChangeType DCT_MatrixOutputID			= 0x01000000; //< The MatrixOutputId of this processor instance has been changed.
+static constexpr DataChangeType DCT_ProcessorInstanceConfig	= (DCT_SoundobjectID | DCT_MappingID | DCT_ComsMode | DCT_MatrixInputID | DCT_MatrixOutputID); //< SoundobjectID, MappingID, Rx/Tx and MatrixInput/-Output.
 static constexpr DataChangeType DCT_SoundobjectPosition		= 0x00000100; //< The X/Y coordinates of this Soundobject have changed.
 static constexpr DataChangeType DCT_ReverbSendGain			= 0x00000200; //< The En-Space Gain for this Soundobject has changed.
 static constexpr DataChangeType DCT_SoundobjectSpread		= 0x00000400; //< The En-Scene Spread factor for this Soundobject has changed.
 static constexpr DataChangeType DCT_DelayMode				= 0x00000800; //< The En-Scene Delay mode (Off/Tight/Full) of this Soundobject has changed.
 static constexpr DataChangeType DCT_SoundobjectParameters	= (DCT_SoundobjectPosition | DCT_ReverbSendGain | DCT_SoundobjectSpread | DCT_DelayMode); //< All parameters used by soundobject processor.
-static constexpr DataChangeType DCT_MatrixChannelLevelMeter	= 0x00100000; //< The level meter value for this matrix channel has changed.
-static constexpr DataChangeType DCT_MatrixChannelGain		= 0x00200000; //< The gain for this matrix channel has changed.
-static constexpr DataChangeType DCT_MatrixChannelMute		= 0x00300000; //< The mute state for this matrix channel has changed.
-static constexpr DataChangeType DCT_MatrixChannelParameters = (DCT_MatrixChannelLevelMeter | DCT_MatrixChannelGain | DCT_MatrixChannelMute); //< All parameters used by matrix channel processor.
+static constexpr DataChangeType DCT_MatrixInputLevelMeter	= 0x00200000; //< The level meter value for this matrix input has changed.
+static constexpr DataChangeType DCT_MatrixInputGain			= 0x00400000; //< The gain for this matrix input has changed.
+static constexpr DataChangeType DCT_MatrixInputMute			= 0x00800000; //< The mute state for this matrix input has changed.
+static constexpr DataChangeType DCT_MatrixInputParameters	= (DCT_MatrixInputLevelMeter | DCT_MatrixInputGain | DCT_MatrixInputMute); //< All parameters used by matrix input processor.
+static constexpr DataChangeType DCT_MatrixOutputLevelMeter	= 0x02000000; //< The level meter value for this matrix output has changed.
+static constexpr DataChangeType DCT_MatrixOutputGain		= 0x04000000; //< The gain for this matrix output has changed.
+static constexpr DataChangeType DCT_MatrixOutputMute		= 0x08000000; //< The mute state for this matrix output has changed.
+static constexpr DataChangeType DCT_MatrixOutputParameters	= (DCT_MatrixOutputLevelMeter | DCT_MatrixOutputGain | DCT_MatrixOutputMute); //< All parameters used by matrix output processor.
 static constexpr DataChangeType DCT_ExtensionMode			= 0x00001000; //< The extensionmode of bridging module has changed.
 static constexpr DataChangeType DCT_MuteState				= 0x00002000; //< The mute state for a channel of a bridging protocol has changed. */
 static constexpr DataChangeType DCT_NumBridgingModules		= 0x00004000; //< The count of active bridging protocols has changed. */
@@ -130,7 +138,7 @@ static constexpr DataChangeType DCT_BridgingConfig			= (DCT_ExtensionMode | DCT_
 static constexpr DataChangeType DCT_DebugMessage			= 0x00010000; //< There is a new debug message to be displayed on the GUI.
 static constexpr DataChangeType DCT_ProcessorSelection		= 0x00020000; //< The currently selected SourceID has changed.
 static constexpr DataChangeType DCT_TabPageSelection		= 0x00040000; //< The currently selected Tab Index has changed.
-static constexpr DataChangeType DCT_AllConfigParameters		= (DCT_IPAddress | DCT_MessageRate | DCT_SoundobjectID | DCT_MatrixChannelID | DCT_MappingID | DCT_ComsMode | DCT_ExtensionMode | DCT_MuteState | DCT_NumBridgingModules); // < All app configuration related parameters.
+static constexpr DataChangeType DCT_AllConfigParameters		= (DCT_IPAddress | DCT_MessageRate | DCT_SoundobjectID | DCT_MatrixInputID | DCT_MatrixOutputID | DCT_MappingID | DCT_ComsMode | DCT_ExtensionMode | DCT_MuteState | DCT_NumBridgingModules); // < All app configuration related parameters.
 
 /**
  * Protocol Bridging Type

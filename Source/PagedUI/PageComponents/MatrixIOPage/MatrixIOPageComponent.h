@@ -40,6 +40,7 @@ class MatrixOutputsComponent;
  * matrix inputs and outputs processor elements
  */
 class MatrixIOPageComponent :	public PageComponentBase,
+								public Button::Listener,
 								public AppConfiguration::Watcher
 {
 public:
@@ -48,6 +49,9 @@ public:
 
 	//==============================================================================
 	void UpdateGui(bool init) override;
+
+	//==============================================================================
+	void buttonClicked(Button*) override;
 
 	//==========================================================================
 	void onConfigUpdated() override;
@@ -61,7 +65,12 @@ private:
 	bool	IsPortraitAspectRatio();
 
 	std::unique_ptr<MatrixInputsComponent>	m_inputsComponent;	/**> Matrix input channelstrips component. */
+	std::unique_ptr<TextButton>				m_addInput;			/**> Button to add an input */
+	std::unique_ptr<TextButton>				m_removeInput;		/**> Button to remove the selected intput */
+
 	std::unique_ptr<MatrixOutputsComponent>	m_outputsComponent;	/**> Matrix output channelstrips component. */
+	std::unique_ptr<TextButton>				m_addOutput;		/**> Button to add an output*/
+	std::unique_ptr<TextButton>				m_removeOutput;		/**> Button to remove the selected output */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixIOPageComponent)
 };

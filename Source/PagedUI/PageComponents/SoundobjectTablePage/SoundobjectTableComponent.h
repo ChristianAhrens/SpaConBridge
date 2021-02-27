@@ -16,39 +16,42 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "MatrixChannelsComponentBase.h"
 
-#include "../../../Controller.h"
+#pragma once
+
+
+#include "../TableModelComponent.h"
+
+#include "../../../SoundscapeBridgeAppCommon.h"
 
 
 namespace SoundscapeBridgeApp
 {
 
 
-/*
-===============================================================================
-	Class MatrixChannelsComponentBase
-===============================================================================
-*/
-
 /**
- * Class constructor.
+ * SoundobjectTableComponent class provides a .
  */
-MatrixChannelsComponentBase::MatrixChannelsComponentBase()
-	: TableModelComponent()
+class SoundobjectTableComponent :	public TableModelComponent
 {
-	GetTable().setRowHeight(33);
-	GetTable().setOutlineThickness(1);
-	GetTable().setClickingTogglesRowSelection(false);
-	GetTable().setMultipleSelectionEnabled(true);
-}
+public:
+	SoundobjectTableComponent();
+	virtual ~SoundobjectTableComponent() override;
 
-/**
-	* Class destructor.
-	*/
-MatrixChannelsComponentBase::~MatrixChannelsComponentBase()
-{
-}
+	//==========================================================================
+	void RecreateTableRowIds() override;
+	void UpdateTable() override;
+
+	//==========================================================================
+	int getNumRows() override;
+	void selectedRowsChanged(int lastRowSelected) override;
+
+protected:
+
+private:
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SoundobjectTableComponent)
+};
 
 
 } // namespace SoundscapeBridgeApp

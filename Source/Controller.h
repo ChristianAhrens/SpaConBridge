@@ -49,7 +49,8 @@ namespace SoundscapeBridgeApp
  * Forward declarations.
  */
 class SoundobjectProcessor;
-class MatrixChannelProcessor;
+class MatrixInputProcessor;
+class MatrixOutputProcessor;
 
 
 /**
@@ -80,33 +81,45 @@ public:
 	SoundobjectProcessor* GetSoundobjectProcessor(SoundobjectProcessorId processorId) const;
 	std::vector<SoundobjectProcessorId> GetSoundobjectProcessorIds() const;
 
-	//==========================================================================
 	void ActivateSoundobjectId(SoundobjectId soundobjectId, MappingId mappingId);
 	void DeactivateSoundobjectId(SoundobjectId soundobjectId, MappingId mappingId);
 
-	//==========================================================================
 	void SetSelectedSoundobjectProcessorIds(const std::vector<SoundobjectProcessorId>& processorIds, bool clearPrevSelection);
 	const std::vector<SoundobjectProcessorId> GetSelectedSoundobjectProcessorIds();
 	void SetSoundobjectIdSelectState(SoundobjectId soundobjectId, bool selected);
 	bool IsSoundobjectIdSelected(SoundobjectId soundobjectId);
 
 	//==========================================================================
-	void createNewMatrixChannelProcessor();
-	MatrixChannelProcessorId AddMatrixChannelProcessor(DataChangeSource changeSource, MatrixChannelProcessor* p);
-	void RemoveMatrixChannelProcessor(MatrixChannelProcessor* p);
-	int GetMatrixChannelProcessorCount() const;
-	MatrixChannelProcessor* GetMatrixChannelProcessor(MatrixChannelProcessorId processorId) const;
-	std::vector<MatrixChannelProcessorId> GetMatrixChannelProcessorIds() const;
+	void createNewMatrixInputProcessor();
+	MatrixInputProcessorId AddMatrixInputProcessor(DataChangeSource changeSource, MatrixInputProcessor* p);
+	void RemoveMatrixInputProcessor(MatrixInputProcessor* p);
+	int GetMatrixInputProcessorCount() const;
+	MatrixInputProcessor* GetMatrixInputProcessor(MatrixInputProcessorId processorId) const;
+	std::vector<MatrixInputProcessorId> GetMatrixInputProcessorIds() const;
+
+	void ActivateMatrixInputId(MatrixInputId matrixInputId);
+	void DeactivateMatrixInputId(MatrixInputId matrixInputId);
+
+	void SetSelectedMatrixInputProcessorIds(const std::vector<MatrixInputProcessorId>& processorIds, bool clearPrevSelection);
+	const std::vector<MatrixInputProcessorId> GetSelectedMatrixInputProcessorIds();
+	void SetMatrixInputIdSelectState(MatrixInputId matrixInputId, bool selected);
+	bool IsMatrixInputIdSelected(MatrixInputId matrixInputId);
 
 	//==========================================================================
-	void ActivateMatrixChannelId(MatrixChannelId matrixChannelId);
-	void DeactivateMatrixChannelId(MatrixChannelId matrixChannelId);
+	void createNewMatrixOutputProcessor();
+	MatrixOutputProcessorId AddMatrixOutputProcessor(DataChangeSource changeSource, MatrixOutputProcessor* p);
+	void RemoveMatrixOutputProcessor(MatrixOutputProcessor* p);
+	int GetMatrixOutputProcessorCount() const;
+	MatrixOutputProcessor* GetMatrixOutputProcessor(MatrixOutputProcessorId processorId) const;
+	std::vector<MatrixOutputProcessorId> GetMatrixOutputProcessorIds() const;
 
-	//==========================================================================
-	void SetSelectedMatrixChannelProcessorIds(const std::vector<MatrixChannelProcessorId>& processorIds, bool clearPrevSelection);
-	const std::vector<MatrixChannelProcessorId> GetSelectedMatrixChannelProcessorIds();
-	void SetMatrixChannelIdSelectState(MatrixChannelId matrixChannelId, bool selected);
-	bool IsMatrixChannelIdSelected(MatrixChannelId matrixChannelId);
+	void ActivateMatrixOutputId(MatrixOutputId matrixOutputId);
+	void DeactivateMatrixOutputId(MatrixOutputId matrixOutputId);
+
+	void SetSelectedMatrixOutputProcessorIds(const std::vector<MatrixOutputProcessorId>& processorIds, bool clearPrevSelection);
+	const std::vector<MatrixOutputProcessorId> GetSelectedMatrixOutputProcessorIds();
+	void SetMatrixOutputIdSelectState(MatrixOutputId matrixOutputId, bool selected);
+	bool IsMatrixOutputIdSelected(MatrixOutputId matrixOutputId);
 
 	//==========================================================================
 	static String GetDefaultDS100IpAddress();
@@ -126,7 +139,8 @@ public:
 
 	//==========================================================================
 	const std::vector<RemoteObject> GetActivatedSoundObjectRemoteObjects();
-	const std::vector<RemoteObject> GetActivatedMatrixChannelRemoteObjects();
+	const std::vector<RemoteObject> GetActivatedMatrixInputRemoteObjects();
+	const std::vector<RemoteObject> GetActivatedMatrixOutputRemoteObjects();
 
 	//==========================================================================
 	ProtocolBridgingType GetActiveProtocolBridging();
@@ -190,7 +204,8 @@ protected:
 																	 * When removing Plug-in instances from a project, this list will shrink. When the list becomes empty,
 																	 * The Controller singleton object is no longer necessary and will destruct itself.
 																	 */
-	Array<MatrixChannelProcessor*>	m_matrixChannelProcessors;		/**< List of registered processor instances. */
+	Array<MatrixInputProcessor*>	m_matrixInputProcessors;		/**< List of registered processor instances. */
+	Array<MatrixOutputProcessor*>	m_matrixOutputProcessors;		/**< List of registered processor instances. */
 	ProtocolBridgingWrapper			m_protocolBridge;				/**< The wrapper for protocol bridging node, allowing to easily interface with it. */
 	String							m_DS100IpAddress;				/**< IP Address where OSC messages will be sent to / received from. */
 	ExtensionMode					m_DS100ExtensionMode;			/**< Current extension mode. This has impact on if second DS100 is active or not. */
@@ -200,7 +215,8 @@ protected:
 																	 * The array has one entry for each application module (see enum DataChangeSource). */
 	CriticalSection					m_mutex;						/**< A re-entrant mutex. Safety first. */
 	std::map<SoundobjectId, bool>	m_soundObjectSelection;			/**< The current select state of sound objects. */
-	std::map<MatrixChannelId, bool>	m_matrixChannelSelection;		/**< The current select state of matrix channels. */
+	std::map<MatrixInputId, bool>	m_matrixInputSelection;			/**< The current select state of matrix inputs. */
+	std::map<MatrixOutputId, bool>	m_matrixOutputSelection;		/**< The current select state of matrix outputs. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Controller)
 };

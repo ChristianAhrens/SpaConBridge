@@ -300,15 +300,25 @@
             file="Source/SurfaceSlider.cpp"/>
       <FILE id="Ui13o2" name="SurfaceSlider.h" compile="0" resource="0" file="Source/SurfaceSlider.h"/>
       <GROUP id="{A8ED2A1C-3C07-0E79-BDAB-3610B84A5477}" name="CustomAudioProcessors">
-        <GROUP id="{4B509C1B-A792-E602-3BD1-999A7C1B208D}" name="MatrixChannelProcessor">
-          <FILE id="dhmgSX" name="MatrixChannelProcessor.cpp" compile="1" resource="0"
-                file="Source/CustomAudioProcessors/MatrixChannelProcessor/MatrixChannelProcessor.cpp"/>
-          <FILE id="q5Sjl3" name="MatrixChannelProcessor.h" compile="0" resource="0"
-                file="Source/CustomAudioProcessors/MatrixChannelProcessor/MatrixChannelProcessor.h"/>
-          <FILE id="RCliGy" name="MatrixChannelProcessorEditor.cpp" compile="1"
-                resource="0" file="Source/CustomAudioProcessors/MatrixChannelProcessor/MatrixChannelProcessorEditor.cpp"/>
-          <FILE id="AXkVpe" name="MatrixChannelProcessorEditor.h" compile="0"
-                resource="0" file="Source/CustomAudioProcessors/MatrixChannelProcessor/MatrixChannelProcessorEditor.h"/>
+        <GROUP id="{4B509C1B-A792-E602-3BD1-999A7C1B208D}" name="MatrixInputProcessor">
+          <FILE id="rj7WFi" name="MatrixInputProcessor.cpp" compile="1" resource="0"
+                file="Source/CustomAudioProcessors/MatrixInputProcessor/MatrixInputProcessor.cpp"/>
+          <FILE id="yu1EC7" name="MatrixInputProcessor.h" compile="0" resource="0"
+                file="Source/CustomAudioProcessors/MatrixInputProcessor/MatrixInputProcessor.h"/>
+          <FILE id="XHBKbw" name="MatrixInputProcessorEditor.cpp" compile="1"
+                resource="0" file="Source/CustomAudioProcessors/MatrixInputProcessor/MatrixInputProcessorEditor.cpp"/>
+          <FILE id="o3Exid" name="MatrixInputProcessorEditor.h" compile="0" resource="0"
+                file="Source/CustomAudioProcessors/MatrixInputProcessor/MatrixInputProcessorEditor.h"/>
+        </GROUP>
+        <GROUP id="{DDD08CEF-3384-65B9-E910-E33B1C6EC895}" name="MatrixOutputProcessor">
+          <FILE id="daumZf" name="MatrixOutputProcessor.cpp" compile="1" resource="0"
+                file="Source/CustomAudioProcessors/MatrixOutputProcessor/MatrixOutputProcessor.cpp"/>
+          <FILE id="bHbcVj" name="MatrixOutputProcessor.h" compile="0" resource="0"
+                file="Source/CustomAudioProcessors/MatrixOutputProcessor/MatrixOutputProcessor.h"/>
+          <FILE id="mXsxMO" name="MatrixOutputProcessorEditor.cpp" compile="1"
+                resource="0" file="Source/CustomAudioProcessors/MatrixOutputProcessor/MatrixOutputProcessorEditor.cpp"/>
+          <FILE id="CI4Gjf" name="MatrixOutputProcessorEditor.h" compile="0"
+                resource="0" file="Source/CustomAudioProcessors/MatrixOutputProcessor/MatrixOutputProcessorEditor.h"/>
         </GROUP>
         <GROUP id="{8ABA8DAF-F1DA-A229-34AD-FCB9BEB371BB}" name="SoundobjectProcessor">
           <FILE id="pAerq1" name="SoundobjectProcessor.cpp" compile="1" resource="0"
@@ -336,6 +346,10 @@
       <GROUP id="{ABC3680A-0C49-EE16-E766-E6ED89078A7C}" name="PagedUI">
         <GROUP id="{4680382C-A46A-B4C1-0D87-F92C4050063D}" name="PageComponents">
           <GROUP id="{49670C0C-DE7C-D21A-221C-9FD67169A2B2}" name="SoundobjectTablePage">
+            <FILE id="f5Ls1u" name="SoundobjectTableComponent.cpp" compile="1"
+                  resource="0" file="Source/PagedUI/PageComponents/SoundobjectTablePage/SoundobjectTableComponent.cpp"/>
+            <FILE id="NFoXD0" name="SoundobjectTableComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/SoundobjectTablePage/SoundobjectTableComponent.h"/>
             <FILE id="QdViFe" name="SoundobjectTablePageComponent.cpp" compile="1"
                   resource="0" file="Source/PagedUI/PageComponents/SoundobjectTablePage/SoundobjectTablePageComponent.cpp"/>
             <FILE id="TlVqRW" name="SoundobjectTablePageComponent.h" compile="0"
@@ -403,6 +417,10 @@
                 file="Source/PagedUI/PageComponents/PageComponentBase.cpp"/>
           <FILE id="oNGL8i" name="PageComponentBase.h" compile="0" resource="0"
                 file="Source/PagedUI/PageComponents/PageComponentBase.h"/>
+          <FILE id="QDmNPN" name="TableModelComponent.cpp" compile="1" resource="0"
+                file="Source/PagedUI/PageComponents/TableModelComponent.cpp"/>
+          <FILE id="voDICu" name="TableModelComponent.h" compile="0" resource="0"
+                file="Source/PagedUI/PageComponents/TableModelComponent.h"/>
         </GROUP>
         <FILE id="mIIIv5" name="PageComponentManager.cpp" compile="1" resource="0"
               file="Source/PagedUI/PageComponentManager.cpp"/>

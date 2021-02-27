@@ -17,9 +17,9 @@
  */
 
 
-#include "MatrixChannelProcessorEditor.h"
+#include "MatrixOutputProcessorEditor.h"
 
-#include "MatrixChannelProcessor.h"
+#include "MatrixOutputProcessor.h"
 
 #include "../Parameters.h"
 
@@ -49,7 +49,7 @@ static constexpr int GUI_UPDATE_DELAY_TICKS = 15;
 
 /*
 ===============================================================================
- Class MatrixChannelProcessorEditor
+ Class MatrixOutputProcessorEditor
 ===============================================================================
 */
 
@@ -58,7 +58,7 @@ static constexpr int GUI_UPDATE_DELAY_TICKS = 15;
  * This is the base class for the component that acts as the GUI for an AudioProcessor.
  * @param parent	The audio processor object to act as parent.
  */
-MatrixChannelProcessorEditor::MatrixChannelProcessorEditor(MatrixChannelProcessor& parent)
+MatrixOutputProcessorEditor::MatrixOutputProcessorEditor(MatrixOutputProcessor& parent)
 	: AudioProcessorEditor(&parent)
 {
 	//m_surfaceSlider = std::make_unique<SurfaceSlider>(&parent);
@@ -157,7 +157,7 @@ MatrixChannelProcessorEditor::MatrixChannelProcessorEditor(MatrixChannelProcesso
 /**
  * Object destructor.
  */
-MatrixChannelProcessorEditor::~MatrixChannelProcessorEditor()
+MatrixOutputProcessorEditor::~MatrixOutputProcessorEditor()
 {
 	stopTimer();
 
@@ -169,7 +169,7 @@ MatrixChannelProcessorEditor::~MatrixChannelProcessorEditor()
  * @param slider	The slider object for which the parameter is desired.
  * @return			The desired procssor parameter.
  */
-GestureManagedAudioParameterFloat* MatrixChannelProcessorEditor::GetParameterForSlider(Slider* slider)
+GestureManagedAudioParameterFloat* MatrixOutputProcessorEditor::GetParameterForSlider(Slider* slider)
 {
 	//const Array<AudioProcessorParameter*>& params = getAudioProcessor()->getParameters();
 	//if (slider == m_xSlider.get())
@@ -192,9 +192,9 @@ GestureManagedAudioParameterFloat* MatrixChannelProcessorEditor::GetParameterFor
  * You can find out the new value using Slider::getValue().
  * @param slider	Slider object which was dragged by user.
  */
-void MatrixChannelProcessorEditor::sliderValueChanged(Slider* slider)
+void MatrixOutputProcessorEditor::sliderValueChanged(Slider* slider)
 {
-	MatrixChannelProcessor* mcProcessor = dynamic_cast<MatrixChannelProcessor*>(getAudioProcessor());
+	MatrixOutputProcessor* mcProcessor = dynamic_cast<MatrixOutputProcessor*>(getAudioProcessor());
 	if (mcProcessor)
 	{
 	//	SoundobjectParameterIndex paramIdx = ParamIdx_MaxIndex;
@@ -207,7 +207,7 @@ void MatrixChannelProcessorEditor::sliderValueChanged(Slider* slider)
 	//	else if (slider == m_sourceSpreadSlider.get())
 	//		paramIdx = ParamIdx_ObjectSpread;
 	//
-	//	mcProcessor->SetParameterValue(DCS_MatrixChannelProcessor, paramIdx, static_cast<float>(slider->getValue()));
+	//	mcProcessor->SetParameterValue(DCS_MatrixOutputProcessor, paramIdx, static_cast<float>(slider->getValue()));
 	}
 }
 
@@ -217,7 +217,7 @@ void MatrixChannelProcessorEditor::sliderValueChanged(Slider* slider)
  * and then sliderDragEnded() is called after the user lets go.
  * @param slider	Slider object which was dragged by user.
  */
-void MatrixChannelProcessorEditor::sliderDragStarted(Slider* slider)
+void MatrixOutputProcessorEditor::sliderDragStarted(Slider* slider)
 {
 	if (GestureManagedAudioParameterFloat* param = GetParameterForSlider(static_cast<Slider*>(slider)))
 		param->BeginGuiGesture();
@@ -227,7 +227,7 @@ void MatrixChannelProcessorEditor::sliderDragStarted(Slider* slider)
  * Called after a drag operation has finished.
  * @param slider	Slider object which was dragged by user.
  */
-void MatrixChannelProcessorEditor::sliderDragEnded(Slider* slider)
+void MatrixOutputProcessorEditor::sliderDragEnded(Slider* slider)
 {
 	if (GestureManagedAudioParameterFloat* param = GetParameterForSlider(static_cast<Slider*>(slider)))
 		param->EndGuiGesture();
@@ -237,7 +237,7 @@ void MatrixChannelProcessorEditor::sliderDragEnded(Slider* slider)
  * Callback function for Enter key presses on textEditors.
  * @param textEditor	The TextEditor object whose where enter key was pressed.
  */
-void MatrixChannelProcessorEditor::textEditorReturnKeyPressed(TextEditor& textEditor)
+void MatrixOutputProcessorEditor::textEditorReturnKeyPressed(TextEditor& textEditor)
 {
 	ignoreUnused(textEditor);
 
@@ -252,7 +252,7 @@ void MatrixChannelProcessorEditor::textEditorReturnKeyPressed(TextEditor& textEd
 * screen that means a section of a window needs to be redrawn.
 * @param g		Graphics context that must be used to do the drawing operations.
 */
-void MatrixChannelProcessorEditor::paint(Graphics& g)
+void MatrixOutputProcessorEditor::paint(Graphics& g)
 {
 	//Rectangle<int> twoDSurfaceArea = getLocalBounds();
 	//Rectangle<int> parameterEditArea = getLocalBounds();
@@ -271,14 +271,14 @@ void MatrixChannelProcessorEditor::paint(Graphics& g)
 	g.drawRect(getLocalBounds().toFloat());
     
     //// processor id (object #) in upper left corner
-    //MatrixChannelProcessor* pro = dynamic_cast<MatrixChannelProcessor*>(getAudioProcessor());
+    //MatrixOutputProcessor* pro = dynamic_cast<MatrixOutputProcessor*>(getAudioProcessor());
     //if (pro)
     //{
     //    auto surfaceSliderLabelVisible = true;
     //    if (twoDSurfaceArea.getWidth() < 250 || twoDSurfaceArea.getHeight() < 250)
     //        surfaceSliderLabelVisible = false;
     //    
-    //    auto objNumTitleText = (surfaceSliderLabelVisible ? String("Object #") : String("#")) + String(pro->GetMatrixChannelId());
+    //    auto objNumTitleText = (surfaceSliderLabelVisible ? String("Object #") : String("#")) + String(pro->GetMatrixOutputId());
     //    auto titleTextWidth = surfaceSliderLabelVisible ? 73 : 33;
     //    auto objNumTitleRect = twoDSurfaceArea.removeFromBottom(25).removeFromLeft(titleTextWidth + 7).removeFromRight(titleTextWidth);
     //    
@@ -295,7 +295,7 @@ void MatrixChannelProcessorEditor::paint(Graphics& g)
 // * @param parameterEditArea	The area to be used for parameter controls
 // * @return	True if the layout is to be done in portrait, false if in landscape orientation
 // */
-//bool MatrixChannelProcessorEditor::getResizePaintAreaSplit(Rectangle<int>& twoDSurfaceArea, Rectangle<int>& parameterEditArea)
+//bool MatrixOutputProcessorEditor::getResizePaintAreaSplit(Rectangle<int>& twoDSurfaceArea, Rectangle<int>& parameterEditArea)
 //{
 //	auto paramEditStripWidth = 90;
 //	auto paramEditStripHeight = 105;
@@ -319,7 +319,7 @@ void MatrixChannelProcessorEditor::paint(Graphics& g)
 * Called when this component's size has been changed.
 * This is generally where you'll want to lay out the positions of any subcomponents in your editor.
 */
-void MatrixChannelProcessorEditor::resized()
+void MatrixOutputProcessorEditor::resized()
 {
 	////==============================================================================
 	//Rectangle<int> twoDSurfaceArea = getLocalBounds();
@@ -426,7 +426,7 @@ void MatrixChannelProcessorEditor::resized()
  * Timer callback function, which will be called at regular intervals to update the GUI.
  * Reimplemented from base class Timer.
  */
-void MatrixChannelProcessorEditor::timerCallback()
+void MatrixOutputProcessorEditor::timerCallback()
 {
 	// Also update the regular GUI.
 	UpdateGui(false);
@@ -437,13 +437,13 @@ void MatrixChannelProcessorEditor::timerCallback()
  * @param init	True to ignore any changed flags and update parameters
  *				in the GUI anyway. Good for when opening the GUI for the first time.
  */
-void MatrixChannelProcessorEditor::UpdateGui(bool init)
+void MatrixOutputProcessorEditor::UpdateGui(bool init)
 {
 	ignoreUnused(init); // No need to use this here so far.
 
 	bool somethingChanged = false;
 
-	MatrixChannelProcessor* pro = dynamic_cast<MatrixChannelProcessor*>(getAudioProcessor());
+	MatrixOutputProcessor* pro = dynamic_cast<MatrixOutputProcessor*>(getAudioProcessor());
 	if (pro)
 	{
 		const Array<AudioProcessorParameter*>& params = pro->getParameters();
@@ -451,35 +451,35 @@ void MatrixChannelProcessorEditor::UpdateGui(bool init)
 		AudioParameterInt* iParam;
 
 		// See if any parameters changed since the last timer callback.
-		somethingChanged = (pro->GetParameterChanged(DCS_MatrixChannelProcessor, DCT_MatrixChannelParameters) ||
-							pro->GetParameterChanged(DCS_MatrixChannelProcessor, DCT_ProcessorInstanceConfig) ||
-							pro->GetParameterChanged(DCS_MatrixChannelProcessor, DCT_CommunicationConfig));
+		somethingChanged = (pro->GetParameterChanged(DCS_MatrixOutputProcessor, DCT_MatrixOutputParameters) ||
+							pro->GetParameterChanged(DCS_MatrixOutputProcessor, DCT_ProcessorInstanceConfig) ||
+							pro->GetParameterChanged(DCS_MatrixOutputProcessor, DCT_CommunicationConfig));
 
-		if (pro->PopParameterChanged(DCS_MatrixChannelProcessor, DCT_MatrixChannelLevelMeter))
+		if (pro->PopParameterChanged(DCS_MatrixOutputProcessor, DCT_MatrixOutputLevelMeter))
 		{
 			// Update level meter.
 			fParam = dynamic_cast<AudioParameterFloat*>(params[MCI_ParamIdx_LevelMeterPreMute]);
 			if (fParam)
-				m_matrixChannelLevelMeterSlider->setValue(fParam->get(), dontSendNotification);
+				m_MatrixOutputLevelMeterSlider->setValue(fParam->get(), dontSendNotification);
 		}
 
-		if (pro->PopParameterChanged(DCS_MatrixChannelProcessor, DCT_MatrixChannelGain))
+		if (pro->PopParameterChanged(DCS_MatrixOutputProcessor, DCT_MatrixOutputGain))
 		{
 			// Update gain slider
 			fParam = dynamic_cast<AudioParameterFloat*>(params[MCI_ParamIdx_Gain]);
 			if (fParam)
-				m_matrixChannelGainSlider->setValue(fParam->get(), dontSendNotification);
+				m_MatrixOutputGainSlider->setValue(fParam->get(), dontSendNotification);
 		}
 
-		if (pro->PopParameterChanged(DCS_MatrixChannelProcessor, DCT_MatrixChannelMute))
+		if (pro->PopParameterChanged(DCS_MatrixOutputProcessor, DCT_MatrixOutputMute))
 		{
 			// Update mute button
 			iParam = dynamic_cast<AudioParameterInt*>(params[MCI_ParamIdx_Mute]);
 			if (iParam)
-				m_matrixChannelMuteButton->setToggleState(iParam->get() == Mute_On, dontSendNotification);
+				m_MatrixOutputMuteButton->setToggleState(iParam->get() == Mute_On, dontSendNotification);
 		}
 
-		if (pro->PopParameterChanged(DCS_MatrixChannelProcessor, DCT_MatrixChannelID))
+		if (pro->PopParameterChanged(DCS_MatrixOutputProcessor, DCT_MatrixOutputID))
 		{
 			// Update the displayName (Host probably called updateTrackProperties or changeProgramName)
 			m_displayNameLabel->setText(pro->getProgramName(0), dontSendNotification);
@@ -495,7 +495,7 @@ void MatrixChannelProcessorEditor::UpdateGui(bool init)
 		if (getTimerInterval() == GUI_UPDATE_RATE_SLOW)
 		{
 			startTimer(GUI_UPDATE_RATE_FAST);
-			DBG("MatrixChannelProcessorEditor::timerCallback: Switching to GUI_UPDATE_RATE_FAST");
+			DBG("MatrixOutputProcessorEditor::timerCallback: Switching to GUI_UPDATE_RATE_FAST");
 		}
 	}
 
@@ -508,7 +508,7 @@ void MatrixChannelProcessorEditor::UpdateGui(bool init)
 		// Once counter has reached a certain limit: Switch to lazy GUI refreshing rate
 		else if (getTimerInterval() == GUI_UPDATE_RATE_FAST)
 		{
-			DBG("MatrixChannelProcessorEditor::timerCallback(): Switching to GUI_UPDATE_RATE_SLOW");
+			DBG("MatrixOutputProcessorEditor::timerCallback(): Switching to GUI_UPDATE_RATE_SLOW");
 			startTimer(GUI_UPDATE_RATE_SLOW);
 		}
 	}

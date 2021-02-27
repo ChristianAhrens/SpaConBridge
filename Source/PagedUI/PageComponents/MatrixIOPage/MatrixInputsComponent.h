@@ -37,6 +37,13 @@ public:
 	MatrixInputsComponent();
 	~MatrixInputsComponent() override;
 
+	//==========================================================================
+	void RecreateTableRowIds() override;
+	void UpdateTable() override;
+
+	//==========================================================================
+	int getNumRows() override;
+
 protected:
 
 private:

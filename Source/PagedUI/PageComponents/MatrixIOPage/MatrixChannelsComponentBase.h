@@ -19,6 +19,9 @@
 
 #pragma once
 
+
+#include "../TableModelComponent.h"
+
 #include "../../../SoundscapeBridgeAppCommon.h"
 
 
@@ -29,37 +32,15 @@ namespace SoundscapeBridgeApp
 /**
  * MatrixChannelsComponentBase class provides a rolling log to show protocol data.
  */
-class MatrixChannelsComponentBase :	public Component,
-						public TableListBoxModel
+class MatrixChannelsComponentBase :	public TableModelComponent
 {
-	enum MatrixChannelsComponentBaseColumn
-	{
-		MCC_None = 0,		//< Juce column IDs start at 1
-		MCC_SourceID,
-		MCC_InputEditor,
-		MCC_ComsMode,
-		MCC_BridgingMute,
-		MCC_MAX_COLUMNS
-	};
 public:
 	MatrixChannelsComponentBase();
 	virtual ~MatrixChannelsComponentBase() override;
 
-	//==========================================================================
-	void backgroundClicked(const MouseEvent&) override;
-	int getNumRows() override;
-	void paintRowBackground(Graphics& g, int rowNumber, int width, int height, bool rowIsSelected) override;
-	void paintCell(Graphics& g, int rowNumber, int columnId, int width, int height, bool rowIsSelected) override;
-	int getColumnAutoSizeWidth(int columnId) override;
-
 protected:
-	//==============================================================================
-	void resized() override;
 
 private:
-	std::unique_ptr<TableListBox>			m_table;				/**< The table component itself. */
-	const int								m_logCount{ 200 };
-	bool									m_dataChanged{ false };
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixChannelsComponentBase)
 };

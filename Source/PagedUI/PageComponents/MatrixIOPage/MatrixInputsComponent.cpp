@@ -37,6 +37,20 @@ namespace SoundscapeBridgeApp
 MatrixInputsComponent::MatrixInputsComponent()
 	: MatrixChannelsComponentBase()
 {
+	// This fills m_ids.
+	RecreateTableRowIds();
+
+	SetModel(this);
+
+	// collect required info for table columns
+	std::map<CustomTableHeaderComponent::TableColumn, CustomTableHeaderComponent::ColumnProperties> tableColumns;
+	int tableHeaderFlags = (TableHeaderComponent::visible | TableHeaderComponent::sortable);
+	tableColumns[CustomTableHeaderComponent::TC_InputEditor] = CustomTableHeaderComponent::ColumnProperties("Matrix Input", 140, 140, -1, tableHeaderFlags);
+	tableColumns[CustomTableHeaderComponent::TC_ComsMode] = CustomTableHeaderComponent::ColumnProperties("Mode", 90, 90, -1, tableHeaderFlags);
+	tableColumns[CustomTableHeaderComponent::TC_BridgingMute] = CustomTableHeaderComponent::ColumnProperties("", 90, 90, -1, tableHeaderFlags);
+
+	GetTable().setHeader(std::make_unique<CustomTableHeaderComponent>(tableColumns));
+
 }
 
 /**
@@ -44,6 +58,67 @@ MatrixInputsComponent::MatrixInputsComponent()
  */
 MatrixInputsComponent::~MatrixInputsComponent()
 {
+}
+
+/**
+ * This clears and re-fills m_processorIds.
+ */
+void MatrixInputsComponent::RecreateTableRowIds()
+{
+	GetProcessorIds().clear();
+	Controller* ctrl = Controller::GetInstance();
+	if (ctrl)
+	{
+		GetProcessorIds().reserve(ctrl->GetSoundobjectProcessorCount());
+		for (auto const& processorId : ctrl->GetSoundobjectProcessorIds())
+			GetProcessorIds().push_back(processorId);
+	}
+	
+	// Clear row selection, since rows may have changed.
+	auto currentSelectedRows = GetTable().getSelectedRows();
+	if (!currentSelectedRows.isEmpty())
+	{
+		GetTable().deselectAllRows();
+		GetTable().selectRow(currentSelectedRows[currentSelectedRows.size() - 1]);
+	}
+}
+
+/**
+ * This refreshes the table contents.
+ */
+void MatrixInputsComponent::UpdateTable()
+{
+	Controller* ctrl = Controller::GetInstance();
+	if (ctrl)
+	{
+		auto selectedProcessorIds = ctrl->GetSelectedSoundobjectProcessorIds();
+		auto selectedRows = GetRowsForProcessorIds(selectedProcessorIds);
+		if (GetSelectedRows() != selectedRows)
+			SetSelectedRows(selectedRows);
+	}
+	
+	// Refresh table
+	GetTable().updateContent();
+	
+	// Refresh table header
+	auto customTableHeader = dynamic_cast<CustomTableHeaderComponent*>(&GetTable().getHeader());
+	if (customTableHeader)
+		customTableHeader->updateBridgingTitles();
+}
+
+/**
+ * This is overloaded from TableListBoxModel, and must return the total number of rows in our table.
+ * @return	Number of rows on the table, equal to number of procssor instances.
+ */
+int MatrixInputsComponent::getNumRows()
+{
+	int ret = 0;
+
+	Controller* ctrl = Controller::GetInstance();
+	if (ctrl)
+		ret = ctrl->GetMatrixInputProcessorCount();
+
+	return ret;
 }
 
 

@@ -39,7 +39,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PagedUI/PageComponentManager.h"
 #include "PagedUI/PageContainerComponent.h"
 #include "CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
-#include "CustomAudioProcessors/MatrixChannelProcessor/MatrixChannelProcessor.h"
+#include "CustomAudioProcessors/MatrixInputProcessor/MatrixInputProcessor.h"
+#include "CustomAudioProcessors/MatrixOutputProcessor/MatrixOutputProcessor.h"
 
 
 namespace SoundscapeBridgeApp
@@ -152,7 +153,11 @@ void Controller::SetParameterChanged(DataChangeSource changeSource, DataChangeTy
 	{
 		processor->SetParameterChanged(changeSource, changeTypes);
 	}
-	for (auto const& processor : m_matrixChannelProcessors)
+	for (auto const& processor : m_matrixInputProcessors)
+	{
+		processor->SetParameterChanged(changeSource, changeTypes);
+	}
+	for (auto const& processor : m_matrixOutputProcessors)
 	{
 		processor->SetParameterChanged(changeSource, changeTypes);
 	}
@@ -165,7 +170,8 @@ void Controller::SetParameterChanged(DataChangeSource changeSource, DataChangeTy
 	case DCT_MessageRate:
 	case DCT_CommunicationConfig:
 	case DCT_SoundobjectID:
-	case DCT_MatrixChannelID:
+	case DCT_MatrixInputID:
+	case DCT_MatrixOutputID:
 	case DCT_MappingID:
 	case DCT_ComsMode:
 	case DCT_ProcessorInstanceConfig:
@@ -187,7 +193,8 @@ void Controller::SetParameterChanged(DataChangeSource changeSource, DataChangeTy
 	case DCT_SoundobjectSpread:
 	case DCT_DelayMode:
 	case DCT_SoundobjectParameters:
-	case DCT_MatrixChannelParameters:
+	case DCT_MatrixInputParameters:
+	case DCT_MatrixOutputParameters:
 	case DCT_DebugMessage:
 	default:
 		break;
@@ -339,9 +346,9 @@ std::vector<SoundobjectProcessorId> Controller::GetSoundobjectProcessorIds() con
  * Helper method to create a new processor incl. implicit triggering of
  * inserting it into xml config (by setting constructor bool flag to insertToConfig=true)
  */
-void Controller::createNewMatrixChannelProcessor()
+void Controller::createNewMatrixInputProcessor()
 {
-	auto processor = std::make_unique<SoundscapeBridgeApp::MatrixChannelProcessor>(true);
+	auto processor = std::make_unique<SoundscapeBridgeApp::MatrixInputProcessor>(true);
 	processor.release(); // let go of the instance here, we do not want to destroy it, since it lives as member of controller when constructed
 }
 
@@ -351,21 +358,21 @@ void Controller::createNewMatrixChannelProcessor()
  * @param p				Pointer to newly crated processor processor object.
  * @return				The ProcessorId of the newly added processor.
  */
-MatrixChannelProcessorId Controller::AddMatrixChannelProcessor(DataChangeSource changeSource, MatrixChannelProcessor* p)
+MatrixInputProcessorId Controller::AddMatrixInputProcessor(DataChangeSource changeSource, MatrixInputProcessor* p)
 {
 	const ScopedLock lock(m_mutex);
 
 	// Get the highest Input number of all current processors.
-	MatrixChannelId currentMaxMatrixChannelId = 0;
-	for (auto const& processor : m_matrixChannelProcessors)
+	MatrixInputId currentMaxMatrixInputId = 0;
+	for (auto const& processor : m_matrixInputProcessors)
 	{
-		if (processor->GetMatrixChannelId() > currentMaxMatrixChannelId)
-			currentMaxMatrixChannelId = processor->GetMatrixChannelId();
+		if (processor->GetMatrixInputId() > currentMaxMatrixInputId)
+			currentMaxMatrixInputId = processor->GetMatrixInputId();
 	}
 
 	// Get the next free processor id to use (can be one inbetween or the next after the last)
-	auto newProcessorId = MatrixChannelProcessorId(0);
-	auto processorIds = GetMatrixChannelProcessorIds();
+	auto newProcessorId = MatrixInputProcessorId(0);
+	auto processorIds = GetMatrixInputProcessorIds();
 	std::sort(processorIds.begin(), processorIds.end());
 	for (auto const& processorId : processorIds)
 	{
@@ -376,7 +383,7 @@ MatrixChannelProcessorId Controller::AddMatrixChannelProcessor(DataChangeSource 
 	}
 
 	// add the processor to list now, since we have taken all info we require from the so far untouched list
-	m_matrixChannelProcessors.add(p);
+	m_matrixInputProcessors.add(p);
 
 	// Set the new Processor's id
 	p->SetProcessorId(changeSource, newProcessorId);
@@ -384,7 +391,7 @@ MatrixChannelProcessorId Controller::AddMatrixChannelProcessor(DataChangeSource 
 	SetParameterChanged(changeSource, DCT_NumProcessors);
 
 	// Set the new Processor's InputID to the next in sequence.
-	p->SetMatrixChannelId(changeSource, currentMaxMatrixChannelId + 1);
+	p->SetMatrixInputId(changeSource, currentMaxMatrixInputId + 1);
 
 	return newProcessorId;
 }
@@ -393,16 +400,16 @@ MatrixChannelProcessorId Controller::AddMatrixChannelProcessor(DataChangeSource 
  * Remove a Processor instance from the local list of processors.
  * @param p		Pointer to Processor object which should be removed.
  */
-void Controller::RemoveMatrixChannelProcessor(MatrixChannelProcessor* p)
+void Controller::RemoveMatrixInputProcessor(MatrixInputProcessor* p)
 {
-	DeactivateMatrixChannelId(p->GetMatrixChannelId());
+	DeactivateMatrixInputId(p->GetMatrixInputId());
 
-	int idx = m_matrixChannelProcessors.indexOf(p);
+	int idx = m_matrixInputProcessors.indexOf(p);
 	jassert(idx >= 0); // Tried to remove inexistent Processor object.
 	if (idx >= 0)
 	{
 		const ScopedLock lock(m_mutex);
-		m_matrixChannelProcessors.remove(idx);
+		m_matrixInputProcessors.remove(idx);
 
 		SetParameterChanged(DCS_Protocol, DCT_NumProcessors);
 	}
@@ -412,10 +419,10 @@ void Controller::RemoveMatrixChannelProcessor(MatrixChannelProcessor* p)
  * Number of registered Processor instances.
  * @return	Number of registered Processor instances.
  */
-int Controller::GetMatrixChannelProcessorCount() const
+int Controller::GetMatrixInputProcessorCount() const
 {
 	const ScopedLock lock(m_mutex);
-	return m_matrixChannelProcessors.size();
+	return m_matrixInputProcessors.size();
 }
 
 /**
@@ -423,10 +430,10 @@ int Controller::GetMatrixChannelProcessorCount() const
  * @param processorId	The id of the desired processor.
  * @return	The pointer to the desired processor.
  */
-MatrixChannelProcessor* Controller::GetMatrixChannelProcessor(MatrixChannelProcessorId processorId) const
+MatrixInputProcessor* Controller::GetMatrixInputProcessor(MatrixInputProcessorId processorId) const
 {
 	const ScopedLock lock(m_mutex);
-	for (auto processor : m_matrixChannelProcessors)
+	for (auto processor : m_matrixInputProcessors)
 		if (processor->GetProcessorId() == processorId)
 			return processor;
 
@@ -438,15 +445,127 @@ MatrixChannelProcessor* Controller::GetMatrixChannelProcessor(MatrixChannelProce
  * Getter for all currently active processor's processorIds
  * @return	The vector of active processorids
  */
-std::vector<MatrixChannelProcessorId> Controller::GetMatrixChannelProcessorIds() const
+std::vector<MatrixInputProcessorId> Controller::GetMatrixInputProcessorIds() const
 {
-	std::vector<MatrixChannelProcessorId> processorIds;
-	processorIds.reserve(m_matrixChannelProcessors.size());
-	for (auto const& p : m_matrixChannelProcessors)
+	std::vector<MatrixInputProcessorId> processorIds;
+	processorIds.reserve(m_matrixInputProcessors.size());
+	for (auto const& p : m_matrixInputProcessors)
 		processorIds.push_back(p->GetProcessorId());
 	return processorIds;
 }
 
+
+/**
+ * Helper method to create a new processor incl. implicit triggering of
+ * inserting it into xml config (by setting constructor bool flag to insertToConfig=true)
+ */
+void Controller::createNewMatrixOutputProcessor()
+{
+	auto processor = std::make_unique<SoundscapeBridgeApp::MatrixOutputProcessor>(true);
+	processor.release(); // let go of the instance here, we do not want to destroy it, since it lives as member of controller when constructed
+}
+
+/**
+ * Register a processor instance to the local list of processors.
+ * @param changeSource	The application module which is causing the property change.
+ * @param p				Pointer to newly crated processor processor object.
+ * @return				The ProcessorId of the newly added processor.
+ */
+MatrixOutputProcessorId Controller::AddMatrixOutputProcessor(DataChangeSource changeSource, MatrixOutputProcessor* p)
+{
+	const ScopedLock lock(m_mutex);
+
+	// Get the highest Input number of all current processors.
+	MatrixOutputId currentMaxMatrixOutputId = 0;
+	for (auto const& processor : m_matrixOutputProcessors)
+	{
+		if (processor->GetMatrixOutputId() > currentMaxMatrixOutputId)
+			currentMaxMatrixOutputId = processor->GetMatrixOutputId();
+	}
+
+	// Get the next free processor id to use (can be one inbetween or the next after the last)
+	auto newProcessorId = MatrixOutputProcessorId(0);
+	auto processorIds = GetMatrixOutputProcessorIds();
+	std::sort(processorIds.begin(), processorIds.end());
+	for (auto const& processorId : processorIds)
+	{
+		if (processorId > newProcessorId) // we have found a gap in the list that we can use
+			break;
+		else
+			newProcessorId++;
+	}
+
+	// add the processor to list now, since we have taken all info we require from the so far untouched list
+	m_matrixOutputProcessors.add(p);
+
+	// Set the new Processor's id
+	p->SetProcessorId(changeSource, newProcessorId);
+
+	SetParameterChanged(changeSource, DCT_NumProcessors);
+
+	// Set the new Processor's InputID to the next in sequence.
+	p->SetMatrixOutputId(changeSource, currentMaxMatrixOutputId + 1);
+
+	return newProcessorId;
+}
+
+/**
+ * Remove a Processor instance from the local list of processors.
+ * @param p		Pointer to Processor object which should be removed.
+ */
+void Controller::RemoveMatrixOutputProcessor(MatrixOutputProcessor* p)
+{
+	DeactivateMatrixOutputId(p->GetMatrixOutputId());
+
+	int idx = m_matrixOutputProcessors.indexOf(p);
+	jassert(idx >= 0); // Tried to remove inexistent Processor object.
+	if (idx >= 0)
+	{
+		const ScopedLock lock(m_mutex);
+		m_matrixOutputProcessors.remove(idx);
+
+		SetParameterChanged(DCS_Protocol, DCT_NumProcessors);
+	}
+}
+
+/**
+ * Number of registered Processor instances.
+ * @return	Number of registered Processor instances.
+ */
+int Controller::GetMatrixOutputProcessorCount() const
+{
+	const ScopedLock lock(m_mutex);
+	return m_matrixOutputProcessors.size();
+}
+
+/**
+ * Get a pointer to a specified processor.
+ * @param processorId	The id of the desired processor.
+ * @return	The pointer to the desired processor.
+ */
+MatrixOutputProcessor* Controller::GetMatrixOutputProcessor(MatrixOutputProcessorId processorId) const
+{
+	const ScopedLock lock(m_mutex);
+	for (auto processor : m_matrixOutputProcessors)
+		if (processor->GetProcessorId() == processorId)
+			return processor;
+
+	jassertfalse; // id not existing!
+	return nullptr;
+}
+
+/**
+ * Getter for all currently active processor's processorIds
+ * @return	The vector of active processorids
+ */
+std::vector<MatrixOutputProcessorId> Controller::GetMatrixOutputProcessorIds() const
+{
+	std::vector<MatrixOutputProcessorId> processorIds;
+	processorIds.reserve(m_matrixOutputProcessors.size());
+	for (auto const& p : m_matrixOutputProcessors)
+		processorIds.push_back(p->GetProcessorId());
+	return processorIds;
+}
 
 
 /**
@@ -1076,54 +1195,54 @@ void Controller::timerCallback()
 			soProcessor->PopParameterChanged(DCS_Protocol, DCT_SoundobjectParameters);
 		}
 
-		for (auto const& mcProcessor : m_matrixChannelProcessors)
+		for (auto const& miProcessor : m_matrixInputProcessors)
 		{
-			auto comsMode = mcProcessor->GetComsMode();
+			auto comsMode = miProcessor->GetComsMode();
 
 			// Check if the processor configuration has changed
 			// and need to be updated in the bridging configuration
-			if (mcProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_ProcessorInstanceConfig))
+			if (miProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_ProcessorInstanceConfig))
 			{
-				auto activateSSId = false;
-				auto deactivateSSId = false;
-				if (mcProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_SoundobjectID))
+				auto activateMIId = false;
+				auto deactivateMIId = false;
+				if (miProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_SoundobjectID))
 				{
 					// SoundsourceID change means update is only required when
 					// remote object is currently activated. 
-					activateSSId = ((comsMode & CM_Rx) == CM_Rx);
+					activateMIId = ((comsMode & CM_Rx) == CM_Rx);
 				}
-				mcProcessor->PopParameterChanged(DCS_SoundobjectTable, DCT_SoundobjectID);
+				miProcessor->PopParameterChanged(DCS_SoundobjectTable, DCT_SoundobjectID);
 
-				if (mcProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_MappingID))
+				if (miProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_MappingID))
 				{
 					// MappingID change means update is only required when
 					// remote object is currently activated. 
-					activateSSId = ((comsMode & CM_Rx) == CM_Rx);
+					activateMIId = ((comsMode & CM_Rx) == CM_Rx);
 				}
-				mcProcessor->PopParameterChanged(DCS_SoundobjectTable, DCT_MappingID);
+				miProcessor->PopParameterChanged(DCS_SoundobjectTable, DCT_MappingID);
 
-				if (mcProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_ComsMode))
+				if (miProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_ComsMode))
 				{
 					// ComsMode change means toggling polling for the remote object,
 					// so one of the two activate/deactivate actions is required
-					activateSSId = ((comsMode & CM_Rx) == CM_Rx);
-					deactivateSSId = !activateSSId;
+					activateMIId = ((comsMode & CM_Rx) == CM_Rx);
+					deactivateMIId = !activateMIId;
 				}
-				mcProcessor->PopParameterChanged(DCS_SoundobjectTable, DCT_ComsMode);
+				miProcessor->PopParameterChanged(DCS_SoundobjectTable, DCT_ComsMode);
 
-				if (activateSSId)
-					ActivateMatrixChannelId(mcProcessor->GetMatrixChannelId());
-				else if (deactivateSSId)
-					DeactivateMatrixChannelId(mcProcessor->GetMatrixChannelId());
+				if (activateMIId)
+					ActivateMatrixInputId(miProcessor->GetMatrixInputId());
+				else if (deactivateMIId)
+					DeactivateMatrixInputId(miProcessor->GetMatrixInputId());
 			}
 
 			// Signal every timer tick to each processor instance.
-			mcProcessor->Tick();
+			miProcessor->Tick();
 
 			bool msgSent;
 			DataChangeType paramSetsInTransit = DCT_None;
 
-			newMsgData._addrVal._first = static_cast<juce::uint16>(mcProcessor->GetMatrixChannelId());
+			newMsgData._addrVal._first = static_cast<juce::uint16>(miProcessor->GetMatrixInputId());
 
 			// Iterate through all automation parameters.
 			for (int pIdx = SPI_ParamIdx_X; pIdx < SPI_ParamIdx_MaxIndex; ++pIdx)
@@ -1136,10 +1255,10 @@ void Controller::timerCallback()
 				{
 					// SET command is only sent out while in CM_Tx mode, provided that
 					// this parameter has been changed since the last timer tick.
-					if (((comsMode & CM_Tx) == CM_Tx) && mcProcessor->GetParameterChanged(DCS_Protocol, DCT_SoundobjectPosition))
+					if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCS_Protocol, DCT_SoundobjectPosition))
 					{
-						newDualFloatValue[0] = mcProcessor->GetParameterValue(SPI_ParamIdx_X);
-						newDualFloatValue[1] = mcProcessor->GetParameterValue(SPI_ParamIdx_Y);
+						newDualFloatValue[0] = miProcessor->GetParameterValue(SPI_ParamIdx_X);
+						newDualFloatValue[1] = miProcessor->GetParameterValue(SPI_ParamIdx_Y);
 
 						newMsgData._valCount = 2;
 						newMsgData._valType = ROVT_FLOAT;
@@ -1161,9 +1280,9 @@ void Controller::timerCallback()
 				{
 					// SET command is only sent out while in CM_Tx mode, provided that
 					// this parameter has been changed since the last timer tick.
-					if (((comsMode & CM_Tx) == CM_Tx) && mcProcessor->GetParameterChanged(DCS_Protocol, DCT_ReverbSendGain))
+					if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCS_Protocol, DCT_ReverbSendGain))
 					{
-						newDualFloatValue[0] = mcProcessor->GetParameterValue(SPI_ParamIdx_ReverbSendGain);
+						newDualFloatValue[0] = miProcessor->GetParameterValue(SPI_ParamIdx_ReverbSendGain);
 
 						newMsgData._valCount = 1;
 						newMsgData._valType = ROVT_FLOAT;
@@ -1180,9 +1299,9 @@ void Controller::timerCallback()
 				{
 					// SET command is only sent out while in CM_Tx mode, provided that
 					// this parameter has been changed since the last timer tick.
-					if (((comsMode & CM_Tx) == CM_Tx) && mcProcessor->GetParameterChanged(DCS_Protocol, DCT_SoundobjectSpread))
+					if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCS_Protocol, DCT_SoundobjectSpread))
 					{
-						newDualFloatValue[0] = mcProcessor->GetParameterValue(SPI_ParamIdx_ObjectSpread);
+						newDualFloatValue[0] = miProcessor->GetParameterValue(SPI_ParamIdx_ObjectSpread);
 
 						newMsgData._valCount = 1;
 						newMsgData._valType = ROVT_FLOAT;
@@ -1199,9 +1318,9 @@ void Controller::timerCallback()
 				{
 					// SET command is only sent out while in CM_Tx mode, provided that
 					// this parameter has been changed since the last timer tick.
-					if (((comsMode & CM_Tx) == CM_Tx) && mcProcessor->GetParameterChanged(DCS_Protocol, DCT_DelayMode))
+					if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCS_Protocol, DCT_DelayMode))
 					{
-						newDualFloatValue[0] = mcProcessor->GetParameterValue(SPI_ParamIdx_DelayMode);
+						newDualFloatValue[0] = miProcessor->GetParameterValue(SPI_ParamIdx_DelayMode);
 
 						newMsgData._valCount = 1;
 						newMsgData._valType = ROVT_FLOAT;
@@ -1221,10 +1340,161 @@ void Controller::timerCallback()
 			}
 
 			// Flag the parameters for which we just sent a SET command out.
-			mcProcessor->SetParamInTransit(paramSetsInTransit);
+			miProcessor->SetParamInTransit(paramSetsInTransit);
 
 			// All changed parameters were sent out, so we can reset their flags now.
-			mcProcessor->PopParameterChanged(DCS_Protocol, DCT_MatrixChannelParameters);
+			miProcessor->PopParameterChanged(DCS_Protocol, DCT_MatrixOutputParameters);
+		}
+
+		for (auto const& moProcessor : m_matrixOutputProcessors)
+		{
+			auto comsMode = moProcessor->GetComsMode();
+
+			// Check if the processor configuration has changed
+			// and need to be updated in the bridging configuration
+			if (moProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_ProcessorInstanceConfig))
+			{
+				auto activateMOId = false;
+				auto deactivateMOId = false;
+				if (moProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_SoundobjectID))
+				{
+					// SoundsourceID change means update is only required when
+					// remote object is currently activated. 
+					activateMOId = ((comsMode & CM_Rx) == CM_Rx);
+				}
+				moProcessor->PopParameterChanged(DCS_SoundobjectTable, DCT_SoundobjectID);
+
+				if (moProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_MappingID))
+				{
+					// MappingID change means update is only required when
+					// remote object is currently activated. 
+					activateMOId = ((comsMode & CM_Rx) == CM_Rx);
+				}
+				moProcessor->PopParameterChanged(DCS_SoundobjectTable, DCT_MappingID);
+
+				if (moProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_ComsMode))
+				{
+					// ComsMode change means toggling polling for the remote object,
+					// so one of the two activate/deactivate actions is required
+					activateMOId = ((comsMode & CM_Rx) == CM_Rx);
+					deactivateMOId = !activateMOId;
+				}
+				moProcessor->PopParameterChanged(DCS_SoundobjectTable, DCT_ComsMode);
+
+				if (activateMOId)
+					ActivateMatrixOutputId(moProcessor->GetMatrixOutputId());
+				else if (deactivateMOId)
+					DeactivateMatrixOutputId(moProcessor->GetMatrixOutputId());
+			}
+
+			// Signal every timer tick to each processor instance.
+			moProcessor->Tick();
+
+			bool msgSent;
+			DataChangeType paramSetsInTransit = DCT_None;
+
+			newMsgData._addrVal._first = static_cast<juce::uint16>(moProcessor->GetMatrixOutputId());
+
+			// Iterate through all automation parameters.
+			for (int pIdx = SPI_ParamIdx_X; pIdx < SPI_ParamIdx_MaxIndex; ++pIdx)
+			{
+				msgSent = false;
+
+				switch (pIdx)
+				{
+				case SPI_ParamIdx_X:
+				{
+					// SET command is only sent out while in CM_Tx mode, provided that
+					// this parameter has been changed since the last timer tick.
+					if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCS_Protocol, DCT_SoundobjectPosition))
+					{
+						newDualFloatValue[0] = moProcessor->GetParameterValue(SPI_ParamIdx_X);
+						newDualFloatValue[1] = moProcessor->GetParameterValue(SPI_ParamIdx_Y);
+
+						newMsgData._valCount = 2;
+						newMsgData._valType = ROVT_FLOAT;
+						newMsgData._payload = &newDualFloatValue;
+						newMsgData._payloadSize = 2 * sizeof(float);
+
+						msgSent = m_protocolBridge.SendMessage(ROI_CoordinateMapping_SourcePosition_XY, newMsgData);
+						paramSetsInTransit |= DCT_SoundobjectPosition;
+					}
+				}
+				break;
+
+				case SPI_ParamIdx_Y:
+					// Changes to ParamIdx_Y are handled together with ParamIdx_X, so skip it.
+					continue;
+					break;
+
+				case SPI_ParamIdx_ReverbSendGain:
+				{
+					// SET command is only sent out while in CM_Tx mode, provided that
+					// this parameter has been changed since the last timer tick.
+					if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCS_Protocol, DCT_ReverbSendGain))
+					{
+						newDualFloatValue[0] = moProcessor->GetParameterValue(SPI_ParamIdx_ReverbSendGain);
+
+						newMsgData._valCount = 1;
+						newMsgData._valType = ROVT_FLOAT;
+						newMsgData._payload = &newDualFloatValue;
+						newMsgData._payloadSize = sizeof(float);
+
+						msgSent = m_protocolBridge.SendMessage(ROI_MatrixInput_ReverbSendGain, newMsgData);
+						paramSetsInTransit |= DCT_ReverbSendGain;
+					}
+				}
+				break;
+
+				case SPI_ParamIdx_ObjectSpread:
+				{
+					// SET command is only sent out while in CM_Tx mode, provided that
+					// this parameter has been changed since the last timer tick.
+					if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCS_Protocol, DCT_SoundobjectSpread))
+					{
+						newDualFloatValue[0] = moProcessor->GetParameterValue(SPI_ParamIdx_ObjectSpread);
+
+						newMsgData._valCount = 1;
+						newMsgData._valType = ROVT_FLOAT;
+						newMsgData._payload = &newDualFloatValue;
+						newMsgData._payloadSize = sizeof(float);
+
+						msgSent = m_protocolBridge.SendMessage(ROI_Positioning_SourceSpread, newMsgData);
+						paramSetsInTransit |= DCT_SoundobjectSpread;
+					}
+				}
+				break;
+
+				case SPI_ParamIdx_DelayMode:
+				{
+					// SET command is only sent out while in CM_Tx mode, provided that
+					// this parameter has been changed since the last timer tick.
+					if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCS_Protocol, DCT_DelayMode))
+					{
+						newDualFloatValue[0] = moProcessor->GetParameterValue(SPI_ParamIdx_DelayMode);
+
+						newMsgData._valCount = 1;
+						newMsgData._valType = ROVT_FLOAT;
+						newMsgData._payload = &newDualFloatValue;
+						newMsgData._payloadSize = sizeof(float);
+
+						msgSent = m_protocolBridge.SendMessage(ROI_Positioning_SourceDelayMode, newMsgData);
+						paramSetsInTransit |= DCT_DelayMode;
+					}
+				}
+				break;
+
+				default:
+					jassertfalse;
+					break;
+				}
+			}
+
+			// Flag the parameters for which we just sent a SET command out.
+			moProcessor->SetParamInTransit(paramSetsInTransit);
+
+			// All changed parameters were sent out, so we can reset their flags now.
+			moProcessor->PopParameterChanged(DCS_Protocol, DCT_MatrixOutputParameters);
 		}
 	}
 }
@@ -1354,16 +1624,44 @@ const std::vector<RemoteObject> Controller::GetActivatedSoundObjectRemoteObjects
  * This is generated by dumping all active processor properties and their objects to a list.
  * @return	The list of currently active remote objects.
  */
-const std::vector<RemoteObject> Controller::GetActivatedMatrixChannelRemoteObjects()
+const std::vector<RemoteObject> Controller::GetActivatedMatrixInputRemoteObjects()
 {
 	std::vector<RemoteObject> activeRemoteObjects;
-	for (auto const& processor : m_matrixChannelProcessors)
+	for (auto const& processor : m_matrixInputProcessors)
 	{
 		if ((processor->GetComsMode() & CM_Rx) == CM_Rx)
 		{
-			for (auto const& roi : MatrixChannelProcessor::GetUsedRemoteObjects())
+			for (auto const& roi : MatrixInputProcessor::GetUsedRemoteObjects())
 			{
-				auto sourceId = processor->GetMatrixChannelId();
+				auto sourceId = processor->GetMatrixInputId();
+				if (sourceId != INVALID_ADDRESS_VALUE)
+				{
+					if (ProcessingEngineConfig::IsRecordAddressingObject(roi))
+						activeRemoteObjects.push_back(RemoteObject(roi, RemoteObjectAddressing(sourceId, INVALID_ADDRESS_VALUE)));
+					else if (!ProcessingEngineConfig::IsRecordAddressingObject(roi))
+						activeRemoteObjects.push_back(RemoteObject(roi, RemoteObjectAddressing(sourceId, INVALID_ADDRESS_VALUE)));
+				}
+			}
+		}
+	}
+	return activeRemoteObjects;
+}
+
+/**
+ * Helper method to get a list of currently active remote objects.
+ * This is generated by dumping all active processor properties and their objects to a list.
+ * @return	The list of currently active remote objects.
+ */
+const std::vector<RemoteObject> Controller::GetActivatedMatrixOutputRemoteObjects()
+{
+	std::vector<RemoteObject> activeRemoteObjects;
+	for (auto const& processor : m_matrixOutputProcessors)
+	{
+		if ((processor->GetComsMode() & CM_Rx) == CM_Rx)
+		{
+			for (auto const& roi : MatrixInputProcessor::GetUsedRemoteObjects())
+			{
+				auto sourceId = processor->GetMatrixOutputId();
 				if (sourceId != INVALID_ADDRESS_VALUE)
 				{
 					if (ProcessingEngineConfig::IsRecordAddressingObject(roi))
@@ -1485,9 +1783,9 @@ bool Controller::IsSoundobjectIdSelected(SoundobjectId soundobjectId)
  * Activates the remote objects in protocol bridge proxy corresponding to given MatrixChannel/mapping via proxy bridge object
  * @param matrixChannelId	The soundsource object id to activate
  */
-void Controller::ActivateMatrixChannelId(MatrixChannelId matrixChannelId)
+void Controller::ActivateMatrixInputId(MatrixInputId matrixInputId)
 {
-	ignoreUnused(matrixChannelId);
+	ignoreUnused(matrixInputId);
 
 	m_protocolBridge.UpdateActiveDS100RemoteObjectIds();
 }
@@ -1496,9 +1794,9 @@ void Controller::ActivateMatrixChannelId(MatrixChannelId matrixChannelId)
  * Deactivates the remote objects in protocol bridge proxy corresponding to given MatrixChannel/mapping via proxy bridge object
  * @param matrixChannelId	The soundsource object id to activate
  */
-void Controller::DeactivateMatrixChannelId(MatrixChannelId matrixChannelId)
+void Controller::DeactivateMatrixInputId(MatrixInputId matrixInputId)
 {
-	ignoreUnused(matrixChannelId);
+	ignoreUnused(matrixInputId);
 
 	m_protocolBridge.UpdateActiveDS100RemoteObjectIds();
 }
@@ -1510,19 +1808,19 @@ void Controller::DeactivateMatrixChannelId(MatrixChannelId matrixChannelId)
  * @param processorIds	The list of processorIds to use to set internal map of soundsourceids selected state
  * @param clearPrevSelection	Use to indicate if previously active selection shall be replaced or extended.
  */
-void Controller::SetSelectedMatrixChannelProcessorIds(const std::vector<MatrixChannelProcessorId>& processorIds, bool clearPrevSelection)
+void Controller::SetSelectedMatrixInputProcessorIds(const std::vector<MatrixInputProcessorId>& processorIds, bool clearPrevSelection)
 {
 	if (clearPrevSelection)
 	{
 		// clear all selected soundobject ids
-		m_matrixChannelSelection.clear();
+		m_matrixInputSelection.clear();
 
 		// iterate through all processors and set each selected state based on given selection list
-		for (auto const& processorId : GetMatrixChannelProcessorIds())
+		for (auto const& processorId : GetMatrixInputProcessorIds())
 		{
-			auto processor = GetMatrixChannelProcessor(processorId);
+			auto processor = GetMatrixInputProcessor(processorId);
 			if (processor)
-				SetMatrixChannelIdSelectState(processor->GetMatrixChannelId(), std::find(processorIds.begin(), processorIds.end(), processorId) != processorIds.end());
+				SetMatrixInputIdSelectState(processor->GetMatrixInputId(), std::find(processorIds.begin(), processorIds.end(), processorId) != processorIds.end());
 		}
 	}
 	else
@@ -1530,9 +1828,9 @@ void Controller::SetSelectedMatrixChannelProcessorIds(const std::vector<MatrixCh
 		// iterate through selection list and set all contained processor ids to selected
 		for (auto const& processorId : processorIds)
 		{
-			auto processor = GetMatrixChannelProcessor(processorId);
+			auto processor = GetMatrixInputProcessor(processorId);
 			if (processor)
-				SetMatrixChannelIdSelectState(processor->GetMatrixChannelId(), true);
+				SetMatrixInputIdSelectState(processor->GetMatrixInputId(), true);
 		}
 	}
 }
@@ -1542,14 +1840,14 @@ void Controller::SetSelectedMatrixChannelProcessorIds(const std::vector<MatrixCh
  * This internally accesses the list of processors and selected MatrixChannelids and combines the info in new list.
  * @return The list of currently selected processors.
  */
-const std::vector<MatrixChannelProcessorId> Controller::GetSelectedMatrixChannelProcessorIds()
+const std::vector<MatrixInputProcessorId> Controller::GetSelectedMatrixInputProcessorIds()
 {
-	std::vector<MatrixChannelProcessorId> processorIds;
-	processorIds.reserve(m_matrixChannelSelection.size());
-	for (auto const& processor : m_matrixChannelProcessors)
+	std::vector<MatrixInputProcessorId> processorIds;
+	processorIds.reserve(m_matrixInputSelection.size());
+	for (auto const& processor : m_matrixInputProcessors)
 	{
-		auto sourceId = processor->GetMatrixChannelId();
-		if ((m_matrixChannelSelection.count(sourceId) > 0) && m_matrixChannelSelection.at(sourceId))
+		auto sourceId = processor->GetMatrixInputId();
+		if ((m_matrixInputSelection.count(sourceId) > 0) && m_matrixInputSelection.at(sourceId))
 			processorIds.push_back(processor->GetProcessorId());
 	}
 
@@ -1562,9 +1860,9 @@ const std::vector<MatrixChannelProcessorId> Controller::GetSelectedMatrixChannel
  * @param sourceId	The sourceId to modify regarding selected state
  * @param selected	The selected state to set.
  */
-void Controller::SetMatrixChannelIdSelectState(MatrixChannelId matrixChannelId, bool selected)
+void Controller::SetMatrixInputIdSelectState(MatrixInputId matrixInputId, bool selected)
 {
-	m_matrixChannelSelection[matrixChannelId] = selected;
+	m_matrixInputSelection[matrixInputId] = selected;
 }
 
 /**
@@ -1572,14 +1870,113 @@ void Controller::SetMatrixChannelIdSelectState(MatrixChannelId matrixChannelId, 
  * @param matrixChannelId	The sourceId to modify regarding selected state
  * @param selected	The selected state to set.
  */
-bool Controller::IsMatrixChannelIdSelected(MatrixChannelId matrixChannelId)
+bool Controller::IsMatrixInputIdSelected(MatrixInputId matrixInputId)
 {
-	if (m_matrixChannelSelection.count(matrixChannelId) > 0)
-		return m_matrixChannelSelection.at(matrixChannelId);
+	if (m_matrixInputSelection.count(matrixInputId) > 0)
+		return m_matrixInputSelection.at(matrixInputId);
 	else
 		return false;
 }
 
+
+/**
+ * Activates the remote objects in protocol bridge proxy corresponding to given MatrixChannel/mapping via proxy bridge object
+ * @param matrixChannelId	The soundsource object id to activate
+ */
+void Controller::ActivateMatrixOutputId(MatrixOutputId MatrixOutputId)
+{
+	ignoreUnused(MatrixOutputId);
+
+	m_protocolBridge.UpdateActiveDS100RemoteObjectIds();
+}
+
+/**
+ * Deactivates the remote objects in protocol bridge proxy corresponding to given MatrixChannel/mapping via proxy bridge object
+ * @param matrixChannelId	The soundsource object id to activate
+ */
+void Controller::DeactivateMatrixOutputId(MatrixOutputId MatrixOutputId)
+{
+	ignoreUnused(MatrixOutputId);
+
+	m_protocolBridge.UpdateActiveDS100RemoteObjectIds();
+}
+
+/**
+ * Method to set a list of soundsource ids to be selected, based on given list of processorIds.
+ * This affects the internal map of soundsource select states and triggers setting/updating table/multislider pages.
+ * The additional bool is used to indicate if the current selection shall be extended or cleared and be replaced by new selection.
+ * @param processorIds	The list of processorIds to use to set internal map of soundsourceids selected state
+ * @param clearPrevSelection	Use to indicate if previously active selection shall be replaced or extended.
+ */
+void Controller::SetSelectedMatrixOutputProcessorIds(const std::vector<MatrixOutputProcessorId>& processorIds, bool clearPrevSelection)
+{
+	if (clearPrevSelection)
+	{
+		// clear all selected soundobject ids
+		m_matrixOutputSelection.clear();
+
+		// iterate through all processors and set each selected state based on given selection list
+		for (auto const& processorId : GetMatrixOutputProcessorIds())
+		{
+			auto processor = GetMatrixOutputProcessor(processorId);
+			if (processor)
+				SetMatrixOutputIdSelectState(processor->GetMatrixOutputId(), std::find(processorIds.begin(), processorIds.end(), processorId) != processorIds.end());
+		}
+	}
+	else
+	{
+		// iterate through selection list and set all contained processor ids to selected
+		for (auto const& processorId : processorIds)
+		{
+			auto processor = GetMatrixOutputProcessor(processorId);
+			if (processor)
+				SetMatrixOutputIdSelectState(processor->GetMatrixOutputId(), true);
+		}
+	}
+}
+
+/**
+ * Method to get the list of currently selected processors.
+ * This internally accesses the list of processors and selected MatrixChannelids and combines the info in new list.
+ * @return The list of currently selected processors.
+ */
+const std::vector<MatrixOutputProcessorId> Controller::GetSelectedMatrixOutputProcessorIds()
+{
+	std::vector<MatrixOutputProcessorId> processorIds;
+	processorIds.reserve(m_matrixOutputSelection.size());
+	for (auto const& processor : m_matrixOutputProcessors)
+	{
+		auto sourceId = processor->GetMatrixOutputId();
+		if ((m_matrixOutputSelection.count(sourceId) > 0) && m_matrixOutputSelection.at(sourceId))
+			processorIds.push_back(processor->GetProcessorId());
+	}
+
+	return processorIds;
+}
+
+/**
+ * Method to set a MatrixChannel to be selected. This affects the internal map of MatrixChannel select states
+ * and triggers setting/updating MatrixChannel pages.
+ * @param sourceId	The sourceId to modify regarding selected state
+ * @param selected	The selected state to set.
+ */
+void Controller::SetMatrixOutputIdSelectState(MatrixOutputId MatrixOutputId, bool selected)
+{
+	m_matrixOutputSelection[MatrixOutputId] = selected;
+}
+
+/**
+ * Method to get a MatrixChannel id selected state.
+ * @param matrixChannelId	The sourceId to modify regarding selected state
+ * @param selected	The selected state to set.
+ */
+bool Controller::IsMatrixOutputIdSelected(MatrixOutputId MatrixOutputId)
+{
+	if (m_matrixOutputSelection.count(MatrixOutputId) > 0)
+		return m_matrixOutputSelection.at(MatrixOutputId);
+	else
+		return false;
+}
 
 
 /**

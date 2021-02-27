@@ -37,26 +37,26 @@ class GestureManagedAudioParameterInt;
 
 
 /**
- * Class MatrixChannelProcessor. 
+ * Class MatrixInputProcessor. 
  */
-class MatrixChannelProcessor :
+class MatrixInputProcessor :
 	public AudioProcessor,
 	public AudioProcessorParameter::Listener,
 	public AppConfiguration::XmlConfigurableElement
 {
 public:
-	MatrixChannelProcessor(bool insertToConfig = true);
-	~MatrixChannelProcessor() override;
+	MatrixInputProcessor(bool insertToConfig = true);
+	~MatrixInputProcessor() override;
 
 	int GetProcessorId() const;
 	void SetProcessorId(DataChangeSource changeSource, int processorId);
 
-	void InitializeSettings(MatrixChannelId channelId, String ipAddress, ComsMode newMode);
+	void InitializeSettings(MatrixInputId channelId, String ipAddress, ComsMode newMode);
 
 	static const std::vector<RemoteObjectIdentifier>	GetUsedRemoteObjects();
 
-	MatrixChannelId GetMatrixChannelId() const;
-	void SetMatrixChannelId(DataChangeSource changeSource, MatrixChannelId matrixChannelId);
+	MatrixInputId GetMatrixInputId() const;
+	void SetMatrixInputId(DataChangeSource changeSource, MatrixInputId MatrixInputId);
 
 	int GetMessageRate() const;
 	void SetMessageRate(DataChangeSource changeSource, int oscMsgRate);
@@ -107,17 +107,17 @@ protected:
 	/**
 	 * Matrix input En-Space gain.
 	 */
-	GestureManagedAudioParameterFloat*	m_matrixChannelLevelMeter;
+	GestureManagedAudioParameterFloat*	m_MatrixInputLevelMeter;
 
 	/**
 	 * Sound object spread.
 	 */
-	GestureManagedAudioParameterFloat*	m_matrixChannelGain;
+	GestureManagedAudioParameterFloat*	m_MatrixInputGain;
 
 	/**
 	 * Sound object delay mode (Off, Tight, Full).
 	 */
-	GestureManagedAudioParameterInt*	m_matrixChannelMute;
+	GestureManagedAudioParameterInt*	m_MatrixInputMute;
 
 	/**
 	 * Current OSC communication mode, sending and/or receiving.
@@ -125,15 +125,15 @@ protected:
 	ComsMode					m_comsMode;
 
 	/*
-	 * MatrixChannelProcessor, or matrix input number.
+	 * MatrixInputProcessor, or matrix input number.
 	 */
-	MatrixChannelProcessorId	m_matrixChannelId;
+	MatrixInputProcessorId	m_MatrixInputId;
 
 	/**
 	 * Unique ID of this Processor instance. 
 	 * This is also this Processor's index within the Controller::m_processors array.
 	 */
-	MatrixChannelProcessorId	m_processorId;
+	MatrixInputProcessorId	m_processorId;
 
 	/**
 	 * Keep track of which automation parameters have changed recently. 
@@ -161,7 +161,7 @@ protected:
 	DataChangeSource			m_currentChangeSource = DCS_Host;
 
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixChannelProcessor)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixInputProcessor)
 };
 
 

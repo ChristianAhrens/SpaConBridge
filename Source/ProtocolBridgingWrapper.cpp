@@ -1286,11 +1286,13 @@ bool ProtocolBridgingWrapper::UpdateActiveDS100RemoteObjectIds()
 	// Get currently active objects from controller and split them 
 	// into those relevant for first and second DS100
 	auto activeSoObjects = ctrl->GetActivatedSoundObjectRemoteObjects();
-	auto activeMcObjects = ctrl->GetActivatedMatrixChannelRemoteObjects();
+	auto activeMiObjects = ctrl->GetActivatedMatrixInputRemoteObjects();
+	auto activeMoObjects = ctrl->GetActivatedMatrixOutputRemoteObjects();
 
 	auto activeObjects = std::vector<RemoteObject>();
 	activeObjects.insert(activeObjects.end(), activeSoObjects.begin(), activeSoObjects.end());
-	activeObjects.insert(activeObjects.end(), activeMcObjects.begin(), activeMcObjects.end());
+	activeObjects.insert(activeObjects.end(), activeMiObjects.begin(), activeMiObjects.end());
+	activeObjects.insert(activeObjects.end(), activeMoObjects.begin(), activeMoObjects.end());
 
 	auto activeObjectsOnFirstDS100 = std::vector<RemoteObject>{};
 	auto activeObjectsOnSecondDS100 = std::vector<RemoteObject>{};

@@ -17,9 +17,9 @@
  */
 
 
-#include "MatrixChannelProcessor.h"
+#include "MatrixOutputProcessor.h"
 
-#include "MatrixChannelProcessorEditor.h"			//<USE MatrixChannelProcessorEditor
+#include "MatrixOutputProcessorEditor.h"			//<USE MatrixOutputProcessorEditor
 
 #include "../Parameters.h"
 
@@ -32,40 +32,40 @@ namespace SoundscapeBridgeApp
 {
 
 
-static constexpr MatrixChannelId MATRIXCHANNEL_ID_MIN = 1;		//< Minimum maxtrix input number
-static constexpr MatrixChannelId MATRIXCHANNEL_ID_MAX = 128;		//< Highest maxtrix input number
+static constexpr MatrixOutputId MatrixOutput_ID_MIN = 1;		//< Minimum maxtrix input number
+static constexpr MatrixOutputId MatrixOutput_ID_MAX = 128;		//< Highest maxtrix input number
 
 /*
 ===============================================================================
- Class MatrixChannelProcessor
+ Class MatrixOutputProcessor
 ===============================================================================
 */
 
 /**
  * Class constructor for the processor.
  */
-MatrixChannelProcessor::MatrixChannelProcessor(bool insertToConfig)
+MatrixOutputProcessor::MatrixOutputProcessor(bool insertToConfig)
 {
 	// Automation parameters.
 	// level meter param
-	auto lmR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_LevelMeterPreMute);
-	m_matrixChannelLevelMeter = new GestureManagedAudioParameterFloat("MatrixInput_LevelMeterPreMute", "levelMeter", lmR.getStart(), lmR.getEnd(), 0.1f, 0.0f);
-	m_matrixChannelLevelMeter->addListener(this);
-	addParameter(m_matrixChannelLevelMeter);
+	auto lmR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixOutput_LevelMeterPostMute);
+	m_MatrixOutputLevelMeter = new GestureManagedAudioParameterFloat("MatrixOutput_LevelMeterPostMute", "levelMeter", lmR.getStart(), lmR.getEnd(), 0.1f, 0.0f);
+	m_MatrixOutputLevelMeter->addListener(this);
+	addParameter(m_MatrixOutputLevelMeter);
 
 	// gain param
-	auto gR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_Gain);
-	m_matrixChannelGain = new GestureManagedAudioParameterFloat("MatrixInput_Gain", "gain", gR.getStart(), gR.getEnd(), 0.1f, 0.0f);
-	m_matrixChannelGain->addListener(this);
-	addParameter(m_matrixChannelGain);
+	auto gR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixOutput_Gain);
+	m_MatrixOutputGain = new GestureManagedAudioParameterFloat("MatrixOutput_Gain", "gain", gR.getStart(), gR.getEnd(), 0.1f, 0.0f);
+	m_MatrixOutputGain->addListener(this);
+	addParameter(m_MatrixOutputGain);
 
 	// mute param
-	auto mR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_Mute);
-	m_matrixChannelMute = new GestureManagedAudioParameterInt("MatrixInput_mute", "mute", static_cast<int>(mR.getStart()), static_cast<int>(mR.getEnd()), 0);
-	m_matrixChannelMute->addListener(this);
-	addParameter(m_matrixChannelMute);
+	auto mR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixOutput_Mute);
+	m_MatrixOutputMute = new GestureManagedAudioParameterInt("MatrixOutput_mute", "mute", static_cast<int>(mR.getStart()), static_cast<int>(mR.getEnd()), 0);
+	m_MatrixOutputMute->addListener(this);
+	addParameter(m_MatrixOutputMute);
 
-	m_matrixChannelId = MATRIXCHANNEL_ID_MIN; // This default sourceId will be overwritten by ctrl->AddProcessor() below.
+	m_MatrixOutputId = MatrixOutput_ID_MIN; // This default sourceId will be overwritten by ctrl->AddProcessor() below.
 	m_processorId = INVALID_PROCESSOR_ID;
 
 	// Default OSC communication mode.
@@ -79,24 +79,24 @@ MatrixChannelProcessor::MatrixChannelProcessor(bool insertToConfig)
 	// Register this new processor instance to the singleton Controller object's internal list.
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
-		m_processorId = ctrl->AddMatrixChannelProcessor(insertToConfig ? DCS_Host : DCS_Init, this);
+		m_processorId = ctrl->AddMatrixOutputProcessor(insertToConfig ? DCS_Host : DCS_Init, this);
 }
 
 /**
  * Class destructor for the processor.
  */
-MatrixChannelProcessor::~MatrixChannelProcessor()
+MatrixOutputProcessor::~MatrixOutputProcessor()
 {
 	// Erase this new processor instance from the singleton Controller object's internal list.
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
-		ctrl->RemoveMatrixChannelProcessor(this);
+		ctrl->RemoveMatrixOutputProcessor(this);
 }
 
 /**
  * Get the id of this processor instance 
  */
-int MatrixChannelProcessor::GetProcessorId() const
+int MatrixOutputProcessor::GetProcessorId() const
 {
 	return m_processorId;
 }
@@ -106,7 +106,7 @@ int MatrixChannelProcessor::GetProcessorId() const
  * @param changeSource	The application module which is causing the property change.
  * @param processorId	The new ID
  */
-void MatrixChannelProcessor::SetProcessorId(DataChangeSource changeSource, MatrixChannelProcessorId processorId)
+void MatrixOutputProcessor::SetProcessorId(DataChangeSource changeSource, MatrixOutputProcessorId processorId)
 {
 	ignoreUnused(changeSource);
 	if (m_processorId != processorId && processorId != INVALID_PROCESSOR_ID)
@@ -122,7 +122,7 @@ void MatrixChannelProcessor::SetProcessorId(DataChangeSource changeSource, Matri
  * @return	True if any of the given parameters has changed it's value 
  *			since the last time PopParameterChanged() was called.
  */
-bool MatrixChannelProcessor::GetParameterChanged(DataChangeSource changeSource, DataChangeType change)
+bool MatrixOutputProcessor::GetParameterChanged(DataChangeSource changeSource, DataChangeType change)
 {
 	return ((m_parametersChanged[changeSource] & change) != 0);
 }
@@ -135,7 +135,7 @@ bool MatrixChannelProcessor::GetParameterChanged(DataChangeSource changeSource, 
  * @return	True if any of the given parameters has changed it's value 
  *			since the last time PopParameterChanged() was called.
  */
-bool MatrixChannelProcessor::PopParameterChanged(DataChangeSource changeSource, DataChangeType change)
+bool MatrixOutputProcessor::PopParameterChanged(DataChangeSource changeSource, DataChangeType change)
 {
 	bool ret((m_parametersChanged[changeSource] & change) != 0);
 	m_parametersChanged[changeSource] &= ~change; // Reset flag.
@@ -147,7 +147,7 @@ bool MatrixChannelProcessor::PopParameterChanged(DataChangeSource changeSource, 
  * @param changeSource	The application module which is causing the property change.
  * @param changeTypes	Defines which parameter or property has been changed.
  */
-void MatrixChannelProcessor::SetParameterChanged(DataChangeSource changeSource, DataChangeType changeTypes)
+void MatrixOutputProcessor::SetParameterChanged(DataChangeSource changeSource, DataChangeType changeTypes)
 {
 	// Set the specified change flag for all DataChangeSources.
 	for (int cs = 0; cs < DCS_Max; cs++)
@@ -166,7 +166,7 @@ void MatrixChannelProcessor::SetParameterChanged(DataChangeSource changeSource, 
  * @param normalized If true, the returned value will be normalized to a 0.0f to 1.0f range. False per default.
  * @return	The desired parameter value, as float.
  */
-float MatrixChannelProcessor::GetParameterValue(SoundobjectParameterIndex paramIdx, bool normalized) const
+float MatrixOutputProcessor::GetParameterValue(SoundobjectParameterIndex paramIdx, bool normalized) const
 {
 	float ret = 0.0f;
 
@@ -174,23 +174,23 @@ float MatrixChannelProcessor::GetParameterValue(SoundobjectParameterIndex paramI
 	{
 		case MCI_ParamIdx_LevelMeterPreMute:
 			{
-				ret = m_matrixChannelLevelMeter->get();
+				ret = m_MatrixOutputLevelMeter->get();
 				if (normalized)
-					ret = m_matrixChannelLevelMeter->getNormalisableRange().convertTo0to1(ret);
+					ret = m_MatrixOutputLevelMeter->getNormalisableRange().convertTo0to1(ret);
 			}
 			break;
 		case MCI_ParamIdx_Gain:
 			{
-				ret = m_matrixChannelGain->get();
+				ret = m_MatrixOutputGain->get();
 				if (normalized)
-					ret = m_matrixChannelGain->getNormalisableRange().convertTo0to1(ret);
+					ret = m_MatrixOutputGain->getNormalisableRange().convertTo0to1(ret);
 			}
 			break;
 		case MCI_ParamIdx_Mute:
 			{
-				ret = static_cast<float>(m_matrixChannelMute->get());
+				ret = static_cast<float>(m_MatrixOutputMute->get());
 				if (normalized)
-					ret = m_matrixChannelMute->getNormalisableRange().convertTo0to1(ret);
+					ret = m_MatrixOutputMute->getNormalisableRange().convertTo0to1(ret);
 			}
 			break;
 		default:
@@ -207,7 +207,7 @@ float MatrixChannelProcessor::GetParameterValue(SoundobjectParameterIndex paramI
  * @param paramIdx	The index of the desired parameter.
  * @param newValue	The new value as a float.
  */
-void MatrixChannelProcessor::SetParameterValue(DataChangeSource changeSource, SoundobjectParameterIndex paramIdx, float newValue)
+void MatrixOutputProcessor::SetParameterValue(DataChangeSource changeSource, SoundobjectParameterIndex paramIdx, float newValue)
 {
 	// The reimplemented method AudioProcessor::parameterValueChanged() will trigger a SetParameterChanged() call.
 	// We need to ensure that this change is registered to the correct source. 
@@ -217,13 +217,13 @@ void MatrixChannelProcessor::SetParameterValue(DataChangeSource changeSource, So
 	switch (paramIdx)
 	{
 	case MCI_ParamIdx_LevelMeterPreMute:
-		m_matrixChannelLevelMeter->SetParameterValue(newValue);
+		m_MatrixOutputLevelMeter->SetParameterValue(newValue);
 		break;
 	case MCI_ParamIdx_Gain:
-		m_matrixChannelGain->SetParameterValue(newValue);
+		m_MatrixOutputGain->SetParameterValue(newValue);
 		break;
 	case MCI_ParamIdx_Mute:
-		m_matrixChannelMute->SetParameterValue(static_cast<int>(newValue));
+		m_MatrixOutputMute->SetParameterValue(static_cast<int>(newValue));
 		break;
 	default:
 		jassertfalse; // Unknown parameter index!
@@ -240,7 +240,7 @@ void MatrixChannelProcessor::SetParameterValue(DataChangeSource changeSource, So
  * This method should be called once every timer callback tick of the Controller. 
  * The signal is passed on to all automation parameters. This is used to trigger gestures for touch automation.
  */
-void MatrixChannelProcessor::Tick()
+void MatrixOutputProcessor::Tick()
 {
 	// Reset the flags indicating when a parameter's SET command is out on the network. 
 	// These flags are set during Controller::timerCallback() and queried in Controller::oscMessageReceived()
@@ -251,13 +251,13 @@ void MatrixChannelProcessor::Tick()
 		switch (pIdx)
 		{
 		case MCI_ParamIdx_LevelMeterPreMute:
-			m_matrixChannelLevelMeter->Tick();
+			m_MatrixOutputLevelMeter->Tick();
 			break;
 		case MCI_ParamIdx_Gain:
-			m_matrixChannelGain->Tick();
+			m_MatrixOutputGain->Tick();
 			break;
 		case MCI_ParamIdx_Mute:
-			m_matrixChannelMute->Tick();
+			m_MatrixOutputMute->Tick();
 			break;
 		default:
 			jassert(false); // missing implementation!
@@ -270,7 +270,7 @@ void MatrixChannelProcessor::Tick()
  * The given parameter(s) have a SET command message which has just been sent out on the network.
  * @param paramsChanged		Which parameter(s) should be marked as having a SET command in transit.
  */
-void MatrixChannelProcessor::SetParamInTransit(DataChangeType paramsChanged)
+void MatrixOutputProcessor::SetParamInTransit(DataChangeType paramsChanged)
 {
 	m_paramSetCommandsInTransit |= paramsChanged;
 }
@@ -279,7 +279,7 @@ void MatrixChannelProcessor::SetParamInTransit(DataChangeType paramsChanged)
  * Check if the given parameter(s) have a SET command message which has just been sent out on the network.
  * @return True if the specified paranmeter(s) are marked as having a SET command in transit.
  */
-bool MatrixChannelProcessor::IsParamInTransit(DataChangeType paramsChanged) const
+bool MatrixOutputProcessor::IsParamInTransit(DataChangeType paramsChanged) const
 {
 	return ((m_paramSetCommandsInTransit & paramsChanged) != DCT_None);
 }
@@ -290,12 +290,12 @@ bool MatrixChannelProcessor::IsParamInTransit(DataChangeType paramsChanged) cons
  * singleton AppConfiguration class implementation.
  * @return	The XML element data that was created.
  */
-std::unique_ptr<XmlElement> MatrixChannelProcessor::createStateXml()
+std::unique_ptr<XmlElement> MatrixOutputProcessor::createStateXml()
 {
 	auto processorInstanceXmlElement = std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE) + String(GetProcessorId()));
 	if (processorInstanceXmlElement)
 	{
-		processorInstanceXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSOROBJECTID), static_cast<int>(GetMatrixChannelId()));
+		processorInstanceXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSOROBJECTID), static_cast<int>(GetMatrixOutputId()));
         processorInstanceXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORCOMSMODE), static_cast<int>(GetComsMode()));
 	}
 
@@ -308,12 +308,12 @@ std::unique_ptr<XmlElement> MatrixChannelProcessor::createStateXml()
  * @param stateXml	The XML element containing this objects' configuration data
  * @return	True if the data was read and handled successfuly, false if not.
  */
-bool MatrixChannelProcessor::setStateXml(XmlElement* stateXml)
+bool MatrixOutputProcessor::setStateXml(XmlElement* stateXml)
 {
 	if (!stateXml || (stateXml->getTagName() != (AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE) + String(GetProcessorId()))))
 		return false;
 
-	SetMatrixChannelId(DCS_Init, static_cast<MatrixChannelId>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSOROBJECTID))));
+	SetMatrixOutputId(DCS_Init, static_cast<MatrixOutputId>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSOROBJECTID))));
     SetComsMode(DCS_Init, static_cast<ComsMode>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORCOMSMODE))));
 
 	return true;
@@ -325,7 +325,7 @@ bool MatrixChannelProcessor::setStateXml(XmlElement* stateXml)
  * so that the host can store this and later restore it using setStateInformation().
  * @param destData		Stream where the processor parameters will be written to.
  */
-void MatrixChannelProcessor::getStateInformation(MemoryBlock& destData)
+void MatrixOutputProcessor::getStateInformation(MemoryBlock& destData)
 {
 	ignoreUnused(destData);
 }
@@ -334,11 +334,11 @@ void MatrixChannelProcessor::getStateInformation(MemoryBlock& destData)
  * This method is called when project is loaded, or when a snapshot is recalled.
  * Use this method to restore your parameters from this memory block,
  * whose contents will have been created by the getStateInformation() call.
- * @sa MatrixChannelProcessor::DisablePollingForTicks()
+ * @sa MatrixOutputProcessor::DisablePollingForTicks()
  * @param data			Stream where the processor parameters will be read from.
  * @param sizeInBytes	Size of stream buffer.
  */
-void MatrixChannelProcessor::setStateInformation(const void* data, int sizeInBytes)
+void MatrixOutputProcessor::setStateInformation(const void* data, int sizeInBytes)
 {
 	ignoreUnused(data);
 	ignoreUnused(sizeInBytes);
@@ -349,7 +349,7 @@ void MatrixChannelProcessor::setStateInformation(const void* data, int sizeInByt
  * @param changeSource	The application module which is causing the property change.
  * @param newMode	The new OSC communication mode.
  */
-void MatrixChannelProcessor::SetComsMode(DataChangeSource changeSource, ComsMode newMode)
+void MatrixOutputProcessor::SetComsMode(DataChangeSource changeSource, ComsMode newMode)
 {
 	if (m_comsMode != newMode)
 	{
@@ -367,25 +367,25 @@ void MatrixChannelProcessor::SetComsMode(DataChangeSource changeSource, ComsMode
  * Get the current OSC communication mode (either sending or receiving).
  * @return The current OSC communication mode.
  */
-ComsMode MatrixChannelProcessor::GetComsMode() const
+ComsMode MatrixOutputProcessor::GetComsMode() const
 {
 	return m_comsMode;
 }
 
 /**
- * Setter function for the MatrixChannel Id
+ * Setter function for the MatrixOutput Id
  * @param changeSource	The application module which is causing the property change.
- * @param matrixChannelId	The new ID
+ * @param MatrixOutputId	The new ID
  */
-void MatrixChannelProcessor::SetMatrixChannelId(DataChangeSource changeSource, MatrixChannelId matrixChannelId)
+void MatrixOutputProcessor::SetMatrixOutputId(DataChangeSource changeSource, MatrixOutputId MatrixOutputId)
 {
-	if (m_matrixChannelId != matrixChannelId)
+	if (m_MatrixOutputId != MatrixOutputId)
 	{
 		// Ensure it's within allowed range.
-		m_matrixChannelId = jmin(MATRIXCHANNEL_ID_MAX, jmax(MATRIXCHANNEL_ID_MIN, matrixChannelId));
+		m_MatrixOutputId = jmin(MatrixOutput_ID_MAX, jmax(MatrixOutput_ID_MIN, MatrixOutputId));
 
 		// Signal change to other modules in the processor.
-		SetParameterChanged(changeSource, DCT_MatrixChannelID);
+		SetParameterChanged(changeSource, DCT_MatrixOutputID);
         
         // finally trigger config update
         if (changeSource != DCS_Init)
@@ -394,12 +394,12 @@ void MatrixChannelProcessor::SetMatrixChannelId(DataChangeSource changeSource, M
 }
 
 /**
- * Getter function for the MatrixChannel Id
- * @return	The current MatrixChannel ID
+ * Getter function for the MatrixOutput Id
+ * @return	The current MatrixOutput ID
  */
-MatrixChannelId MatrixChannelProcessor::GetMatrixChannelId() const
+MatrixOutputId MatrixOutputProcessor::GetMatrixOutputId() const
 {
-	return m_matrixChannelId;
+	return m_MatrixOutputId;
 }
 
 /**
@@ -407,7 +407,7 @@ MatrixChannelId MatrixChannelProcessor::GetMatrixChannelId() const
  * @param changeSource	The application module which is causing the property change.
  * @param oscMsgRate	The interval at which OSC messages are sent, in ms.
  */
-void MatrixChannelProcessor::SetMessageRate(DataChangeSource changeSource, int oscMsgRate)
+void MatrixOutputProcessor::SetMessageRate(DataChangeSource changeSource, int oscMsgRate)
 {
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
@@ -418,7 +418,7 @@ void MatrixChannelProcessor::SetMessageRate(DataChangeSource changeSource, int o
  * Getter function for the send rate used in the outgoing OSC messages.
  * @return	The interval at which OSC messages are sent, in ms.
  */
-int MatrixChannelProcessor::GetMessageRate() const
+int MatrixOutputProcessor::GetMessageRate() const
 {
 	int rate = 0;
 	Controller* ctrl = Controller::GetInstance();
@@ -430,18 +430,18 @@ int MatrixChannelProcessor::GetMessageRate() const
 
 /**
  * Method to initialize config setting, without risking overwriting with the defaults.
- * @param matrixChannelId		New SourceID or matrix input number to use for this processor instance.
+ * @param MatrixOutputId		New SourceID or matrix input number to use for this processor instance.
  * @param mappingId		New coordinate mapping to use for this procssor instance.
  * @param ipAddress		New IP address of the DS100 device.
  * @param newMode		New OSC communication mode (Rx/Tx).
  */
-void MatrixChannelProcessor::InitializeSettings(MatrixChannelId matrixChannelId, String ipAddress, ComsMode newMode)
+void MatrixOutputProcessor::InitializeSettings(MatrixOutputId MatrixOutputId, String ipAddress, ComsMode newMode)
 {
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
-		jassert(matrixChannelId > 128);
-		SetMatrixChannelId(DCS_Init, matrixChannelId);
+		jassert(MatrixOutputId > 128);
+		SetMatrixOutputId(DCS_Init, MatrixOutputId);
 		SetComsMode(DCS_Init, newMode);
 	}
 }
@@ -450,7 +450,7 @@ void MatrixChannelProcessor::InitializeSettings(MatrixChannelId matrixChannelId,
  * Method to get a list of remote object identifiers that are used by this soundsource processing object.
  * @return	The requested list of remote object identifiers.
  */
-const std::vector<RemoteObjectIdentifier>	MatrixChannelProcessor::GetUsedRemoteObjects()
+const std::vector<RemoteObjectIdentifier>	MatrixOutputProcessor::GetUsedRemoteObjects()
 {
 	return std::vector<RemoteObjectIdentifier>{ROI_CoordinateMapping_SourcePosition_XY, ROI_CoordinateMapping_SourcePosition_X, ROI_CoordinateMapping_SourcePosition_Y, ROI_MatrixInput_ReverbSendGain, ROI_Positioning_SourceSpread, ROI_Positioning_SourceDelayMode};
 };
@@ -468,7 +468,7 @@ const std::vector<RemoteObjectIdentifier>	MatrixChannelProcessor::GetUsedRemoteO
  * @param parameterIndex	Index of the procssor parameter being changed.
  * @param newValue			New parameter value, always between 0.0f and 1.0f.
  */
-void MatrixChannelProcessor::parameterValueChanged(int parameterIndex, float newValue)
+void MatrixOutputProcessor::parameterValueChanged(int parameterIndex, float newValue)
 {
 	DataChangeType changed = DCT_None;
 
@@ -476,21 +476,21 @@ void MatrixChannelProcessor::parameterValueChanged(int parameterIndex, float new
 	{
 		case MCI_ParamIdx_LevelMeterPreMute:
 			{
-				if (m_matrixChannelLevelMeter->get() != m_matrixChannelLevelMeter->GetLastValue())
-					changed = DCT_MatrixChannelLevelMeter;
+				if (m_MatrixOutputLevelMeter->get() != m_MatrixOutputLevelMeter->GetLastValue())
+					changed = DCT_MatrixOutputLevelMeter;
 			}
 			break;
 		case MCI_ParamIdx_Gain:
 			{
-				if (m_matrixChannelGain->get() != m_matrixChannelGain->GetLastValue())
-					changed = DCT_MatrixChannelGain;
+				if (m_MatrixOutputGain->get() != m_MatrixOutputGain->GetLastValue())
+					changed = DCT_MatrixOutputGain;
 			}
 			break;
 		case MCI_ParamIdx_Mute:
 			{
-				int newValueDenorm = static_cast<int>(m_matrixChannelMute->getNormalisableRange().convertFrom0to1(newValue));
-				if (newValueDenorm != m_matrixChannelMute->GetLastValue())
-					changed = DCT_MatrixChannelMute;
+				int newValueDenorm = static_cast<int>(m_MatrixOutputMute->getNormalisableRange().convertFrom0to1(newValue));
+				if (newValueDenorm != m_MatrixOutputMute->GetLastValue())
+					changed = DCT_MatrixOutputMute;
 			}
 			break;
 		default:
@@ -513,7 +513,7 @@ void MatrixChannelProcessor::parameterValueChanged(int parameterIndex, float new
  * @param parameterIndex	Index of the procssor parameter being changed.
  * @param gestureIsStarting	True if starting, false if ending.
  */
-void MatrixChannelProcessor::parameterGestureChanged(int parameterIndex, bool gestureIsStarting)
+void MatrixOutputProcessor::parameterGestureChanged(int parameterIndex, bool gestureIsStarting)
 {
 	ignoreUnused(parameterIndex);
 	ignoreUnused(gestureIsStarting);
@@ -529,7 +529,7 @@ void MatrixChannelProcessor::parameterGestureChanged(int parameterIndex, bool ge
  * Returns the name of this processor.
  * @return The procssor name.
  */
-const String MatrixChannelProcessor::getName() const
+const String MatrixOutputProcessor::getName() const
 {
 	return JUCEApplication::getInstance()->getApplicationName();
 }
@@ -538,7 +538,7 @@ const String MatrixChannelProcessor::getName() const
  * Returns true if the processor wants midi messages.
  * @return	True if the processor wants midi messages.
  */
-bool MatrixChannelProcessor::acceptsMidi() const
+bool MatrixOutputProcessor::acceptsMidi() const
 {
 #if JucePlugin_WantsMidiInput
 	return true;
@@ -551,7 +551,7 @@ bool MatrixChannelProcessor::acceptsMidi() const
  * Returns true if the processor produces midi messages.
  * @return	True if the processor produces midi messages.
  */
-bool MatrixChannelProcessor::producesMidi() const
+bool MatrixOutputProcessor::producesMidi() const
 {
 #if JucePlugin_ProducesMidiOutput
 	return true;
@@ -565,7 +565,7 @@ bool MatrixChannelProcessor::producesMidi() const
  * @return	Zero, since no audio delay is introduced.
  */
 
-double MatrixChannelProcessor::getTailLengthSeconds() const
+double MatrixOutputProcessor::getTailLengthSeconds() const
 {
 	return 0.0;
 }
@@ -575,7 +575,7 @@ double MatrixChannelProcessor::getTailLengthSeconds() const
  * The value returned must be valid as soon as this object is created, and must not change over its lifetime.
  * @return Number of preset programs the filter supports. This value shouldn't be less than 1.
  */
-int MatrixChannelProcessor::getNumPrograms()
+int MatrixOutputProcessor::getNumPrograms()
 {
 	return 1;
 }
@@ -584,7 +584,7 @@ int MatrixChannelProcessor::getNumPrograms()
  * Returns the number of the currently active program.
  * @return Returns the number of the currently active program.
  */
-int MatrixChannelProcessor::getCurrentProgram()
+int MatrixOutputProcessor::getCurrentProgram()
 {
 	return 0;
 }
@@ -593,7 +593,7 @@ int MatrixChannelProcessor::getCurrentProgram()
  * Called by the host to change the current program.
  * @param index		New program index.
  */
-void MatrixChannelProcessor::setCurrentProgram(int index)
+void MatrixOutputProcessor::setCurrentProgram(int index)
 {
 	ignoreUnused(index);
 }
@@ -603,7 +603,7 @@ void MatrixChannelProcessor::setCurrentProgram(int index)
  * @param index		Index of the desired program
  * @return			Desired program name.
  */
-const String MatrixChannelProcessor::getProgramName(int index)
+const String MatrixOutputProcessor::getProgramName(int index)
 {
 	ignoreUnused(index);
 	return m_processorDisplayName;
@@ -614,13 +614,13 @@ const String MatrixChannelProcessor::getProgramName(int index)
  * @param index		Index of the desired program
  * @param newName	Desired new program name.
  */
-void MatrixChannelProcessor::changeProgramName(int index, const String& newName)
+void MatrixOutputProcessor::changeProgramName(int index, const String& newName)
 {
 	ignoreUnused(index);
 	m_processorDisplayName = newName;
 
 	// Signal change to other modules in the procssor.
-	SetParameterChanged(DCS_Host, DCT_MatrixChannelID);
+	SetParameterChanged(DCS_Host, DCT_MatrixOutputID);
 }
 
 /**
@@ -633,7 +633,7 @@ void MatrixChannelProcessor::changeProgramName(int index, const String& newName)
  *							a buggy host exceeds this value. The actual block sizes that the host uses may be different each time
  *							the callback happens: completely variable block sizes can be expected from some hosts.
  */
-void MatrixChannelProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
+void MatrixOutputProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
 	ignoreUnused(sampleRate, samplesPerBlock);
 }
@@ -642,7 +642,7 @@ void MatrixChannelProcessor::prepareToPlay(double sampleRate, int samplesPerBloc
  * Called after playback has stopped, to let the filter free up any resources it no longer needs.
  * When playback stops, you can use this as an opportunity to free up any spare memory, etc.
  */
-void MatrixChannelProcessor::releaseResources()
+void MatrixOutputProcessor::releaseResources()
 {
 }
 
@@ -658,7 +658,7 @@ void MatrixChannelProcessor::releaseResources()
  *						to be the filter's midi output. This means that your filter should be careful to clear any incoming
  *						messages from the array if it doesn't want them to be passed-on.
  */
-void MatrixChannelProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
+void MatrixOutputProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
 	ignoreUnused(buffer, midiMessages);
 }
@@ -667,7 +667,7 @@ void MatrixChannelProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffer&
  * This function returns true if the procssor can create an editor component.
  * @return True.
  */
-bool MatrixChannelProcessor::hasEditor() const
+bool MatrixOutputProcessor::hasEditor() const
 {
 	return true;
 }
@@ -677,9 +677,9 @@ bool MatrixChannelProcessor::hasEditor() const
  * This can return nullptr if you want a UI-less filter, in which case the host may create a generic UI that lets the user twiddle the parameters directly.
  * @return	A pointer to the newly created editor component.
  */
-AudioProcessorEditor* MatrixChannelProcessor::createEditor()
+AudioProcessorEditor* MatrixOutputProcessor::createEditor()
 {
-	AudioProcessorEditor* editor = new MatrixChannelProcessorEditor(*this);
+	AudioProcessorEditor* editor = new MatrixOutputProcessorEditor(*this);
 
 	// Initialize GUI with current IP address, etc.
 	SetParameterChanged(DCS_Host, (DCT_ProcessorInstanceConfig | DCT_CommunicationConfig | DCT_SoundobjectParameters));

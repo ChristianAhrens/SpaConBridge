@@ -79,7 +79,7 @@ enum DataChangeSource
 };
 
 /**
- * Soundobject parameter indeces
+ * Soundobject parameter indices
  */
 enum SoundobjectParameterIndex
 {
@@ -92,14 +92,25 @@ enum SoundobjectParameterIndex
 };
 
 /**
- * MatrixChannel parameter indeces
+ * MatrixInput parameter indices
  */
-enum MatrixChannelParameterIndex
+enum MatrixInputParameterIndex
 {
-	MCI_ParamIdx_LevelMeterPreMute = 0,
-	MCI_ParamIdx_Gain,
-	MCI_ParamIdx_Mute,
-	MCI_ParamIdx_MaxIndex
+	MII_ParamIdx_LevelMeterPreMute = 0,
+	MII_ParamIdx_Gain,
+	MII_ParamIdx_Mute,
+	MII_ParamIdx_MaxIndex
+};
+
+/**
+ * MatrixOutput parameter indices
+ */
+enum MatrixOutputParameterIndex
+{
+	MOI_ParamIdx_LevelMeterPostMute = 0,
+	MOI_ParamIdx_Gain,
+	MOI_ParamIdx_Mute,
+	MOI_ParamIdx_MaxIndex
 };
 
 /**

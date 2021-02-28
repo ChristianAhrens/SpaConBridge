@@ -37,6 +37,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
 #include "../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessorEditor.h"
+#include "../../CustomAudioProcessors/MatrixInputProcessor/MatrixInputProcessor.h"
+#include "../../CustomAudioProcessors/MatrixInputProcessor/MatrixInputProcessorEditor.h"
+#include "../../CustomAudioProcessors/MatrixOutputProcessor/MatrixOutputProcessor.h"
+#include "../../CustomAudioProcessors/MatrixOutputProcessor/MatrixOutputProcessorEditor.h"
 
 #include "../../SurfaceSlider.h"
 #include "../../Controller.h"
@@ -669,37 +673,87 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 
 	case CustomTableHeaderComponent::TC_InputEditor:
 		{
-			//MuteButtonContainer* muteButton = static_cast<MuteButtonContainer*> (existingComponentToUpdate);
-			//
-			//// If an existing component is being passed-in for updating, we'll re-use it, but
-			//// if not, we'll have to create one.
-			//if (muteButton == nullptr)
-			//	muteButton = new MuteButtonContainer(*this);
-			//
-			//// Ensure that the component knows which row number it is located at.
-			//muteButton->SetRow(rowNumber);
-			//muteButton->updateBridgingMuteButtons();
+			MatrixInputProcessorEditor* matrixInputEditor = static_cast<MatrixInputProcessorEditor*> (existingComponentToUpdate);
 			
-			// Return a pointer to the component.
-			ret = nullptr;// muteButton;
+			// If an existing component is being passed-in for updating, we'll re-use it, but
+			// if not, we'll have to create one.
+			if (matrixInputEditor == nullptr)
+			{
+				auto ctrl = Controller::GetInstance();
+				if (ctrl)
+				{
+					auto processor = ctrl->GetMatrixInputProcessor(GetProcessorIdForRow(rowNumber));
+					if (processor)
+					{
+						auto processorEditor = processor->createEditorIfNeeded();
+						auto mipEditor = dynamic_cast<MatrixInputProcessorEditor*>(processorEditor);
+						if (mipEditor)
+							matrixInputEditor = mipEditor;
+						//if (sspEditor != m_selectedProcessorInstanceEditor.get())
+						//{
+						//	removeChildComponent(m_selectedProcessorInstanceEditor.get());
+						//	m_selectedProcessorInstanceEditor.reset();
+						//	m_selectedProcessorInstanceEditor = std::unique_ptr<SoundobjectProcessorEditor>(sspEditor);
+						//	if (m_selectedProcessorInstanceEditor)
+						//	{
+						//		addAndMakeVisible(m_selectedProcessorInstanceEditor.get());
+						//		m_selectedProcessorInstanceEditor->UpdateGui(true);
+						//	}
+						//	resized();
+						//
+						//	// since we just added another editor, remove button can be enabled (regardless of if it already was enabled)
+						//	m_removeInstance->setEnabled(true);
+						//}
+					}
+				}
+			}
+
+			// Ensure that the component knows which row number it is located at.
+			//matrixInputEditor->SetRow(rowNumber);
+			matrixInputEditor->UpdateGui(true);
 		}
 		break;
 
 	case CustomTableHeaderComponent::TC_OutputEditor:
 		{
-			//MuteButtonContainer* muteButton = static_cast<MuteButtonContainer*> (existingComponentToUpdate);
-			//
-			//// If an existing component is being passed-in for updating, we'll re-use it, but
-			//// if not, we'll have to create one.
-			//if (muteButton == nullptr)
-			//	muteButton = new MuteButtonContainer(*this);
-			//
-			//// Ensure that the component knows which row number it is located at.
-			//muteButton->SetRow(rowNumber);
-			//muteButton->updateBridgingMuteButtons();
-			
-			// Return a pointer to the component.
-			ret = nullptr;// muteButton;
+		MatrixOutputProcessorEditor* matrixOutputEditor = static_cast<MatrixOutputProcessorEditor*> (existingComponentToUpdate);
+
+			// If an existing component is being passed-in for updating, we'll re-use it, but
+			// if not, we'll have to create one.
+			if (matrixOutputEditor == nullptr)
+			{
+				auto ctrl = Controller::GetInstance();
+				if (ctrl)
+				{
+					auto processor = ctrl->GetMatrixInputProcessor(GetProcessorIdForRow(rowNumber));
+					if (processor)
+					{
+						auto processorEditor = processor->createEditorIfNeeded();
+						auto mopEditor = dynamic_cast<MatrixOutputProcessorEditor*>(processorEditor);
+						if (mopEditor)
+							matrixOutputEditor = mopEditor;
+						//if (sspEditor != m_selectedProcessorInstanceEditor.get())
+						//{
+						//	removeChildComponent(m_selectedProcessorInstanceEditor.get());
+						//	m_selectedProcessorInstanceEditor.reset();
+						//	m_selectedProcessorInstanceEditor = std::unique_ptr<SoundobjectProcessorEditor>(sspEditor);
+						//	if (m_selectedProcessorInstanceEditor)
+						//	{
+						//		addAndMakeVisible(m_selectedProcessorInstanceEditor.get());
+						//		m_selectedProcessorInstanceEditor->UpdateGui(true);
+						//	}
+						//	resized();
+						//
+						//	// since we just added another editor, remove button can be enabled (regardless of if it already was enabled)
+						//	m_removeInstance->setEnabled(true);
+						//}
+					}
+				}
+			}
+
+			// Ensure that the component knows which row number it is located at.
+			//matrixOutputEditor->SetRow(rowNumber);
+			matrixOutputEditor->UpdateGui(true);
 		}
 		break;
 

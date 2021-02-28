@@ -1041,6 +1041,7 @@ void Controller::timerCallback()
 	if (m_soundobjectProcessors.size() > 0)
 	{
 		float newDualFloatValue[2];
+		int newIntValue;
 		RemoteObjectMessageData newMsgData;
 
 		for (auto const& soProcessor : m_soundobjectProcessors)
@@ -1245,90 +1246,65 @@ void Controller::timerCallback()
 			newMsgData._addrVal._first = static_cast<juce::uint16>(miProcessor->GetMatrixInputId());
 
 			// Iterate through all automation parameters.
-			for (int pIdx = SPI_ParamIdx_X; pIdx < SPI_ParamIdx_MaxIndex; ++pIdx)
+			for (int pIdx = MII_ParamIdx_LevelMeterPreMute; pIdx < MII_ParamIdx_MaxIndex; ++pIdx)
 			{
 				msgSent = false;
 
 				switch (pIdx)
 				{
-				case SPI_ParamIdx_X:
+				case MII_ParamIdx_LevelMeterPreMute:
 				{
 					// SET command is only sent out while in CM_Tx mode, provided that
 					// this parameter has been changed since the last timer tick.
-					if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCS_Protocol, DCT_SoundobjectPosition))
+					if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixInputLevelMeter))
 					{
-						newDualFloatValue[0] = miProcessor->GetParameterValue(SPI_ParamIdx_X);
-						newDualFloatValue[1] = miProcessor->GetParameterValue(SPI_ParamIdx_Y);
-
-						newMsgData._valCount = 2;
-						newMsgData._valType = ROVT_FLOAT;
-						newMsgData._payload = &newDualFloatValue;
-						newMsgData._payloadSize = 2 * sizeof(float);
-
-						msgSent = m_protocolBridge.SendMessage(ROI_CoordinateMapping_SourcePosition_XY, newMsgData);
-						paramSetsInTransit |= DCT_SoundobjectPosition;
-					}
-				}
-				break;
-
-				case SPI_ParamIdx_Y:
-					// Changes to ParamIdx_Y are handled together with ParamIdx_X, so skip it.
-					continue;
-					break;
-
-				case SPI_ParamIdx_ReverbSendGain:
-				{
-					// SET command is only sent out while in CM_Tx mode, provided that
-					// this parameter has been changed since the last timer tick.
-					if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCS_Protocol, DCT_ReverbSendGain))
-					{
-						newDualFloatValue[0] = miProcessor->GetParameterValue(SPI_ParamIdx_ReverbSendGain);
+						newDualFloatValue[0] = miProcessor->GetParameterValue(MII_ParamIdx_LevelMeterPreMute);
 
 						newMsgData._valCount = 1;
 						newMsgData._valType = ROVT_FLOAT;
 						newMsgData._payload = &newDualFloatValue;
 						newMsgData._payloadSize = sizeof(float);
 
-						msgSent = m_protocolBridge.SendMessage(ROI_MatrixInput_ReverbSendGain, newMsgData);
-						paramSetsInTransit |= DCT_ReverbSendGain;
+						msgSent = m_protocolBridge.SendMessage(ROI_MatrixInput_LevelMeterPreMute, newMsgData);
+						paramSetsInTransit |= DCT_MatrixInputLevelMeter;
 					}
 				}
 				break;
 
-				case SPI_ParamIdx_ObjectSpread:
+				case MII_ParamIdx_Gain:
 				{
 					// SET command is only sent out while in CM_Tx mode, provided that
 					// this parameter has been changed since the last timer tick.
-					if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCS_Protocol, DCT_SoundobjectSpread))
+					if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixInputGain))
 					{
-						newDualFloatValue[0] = miProcessor->GetParameterValue(SPI_ParamIdx_ObjectSpread);
+						newDualFloatValue[0] = miProcessor->GetParameterValue(MII_ParamIdx_Gain);
 
 						newMsgData._valCount = 1;
 						newMsgData._valType = ROVT_FLOAT;
 						newMsgData._payload = &newDualFloatValue;
 						newMsgData._payloadSize = sizeof(float);
 
-						msgSent = m_protocolBridge.SendMessage(ROI_Positioning_SourceSpread, newMsgData);
-						paramSetsInTransit |= DCT_SoundobjectSpread;
+						msgSent = m_protocolBridge.SendMessage(ROI_MatrixInput_Gain, newMsgData);
+						paramSetsInTransit |= DCT_MatrixInputGain;
 					}
 				}
 				break;
 
-				case SPI_ParamIdx_DelayMode:
+				case MII_ParamIdx_Mute:
 				{
 					// SET command is only sent out while in CM_Tx mode, provided that
 					// this parameter has been changed since the last timer tick.
-					if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCS_Protocol, DCT_DelayMode))
+					if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixInputMute))
 					{
-						newDualFloatValue[0] = miProcessor->GetParameterValue(SPI_ParamIdx_DelayMode);
+						newIntValue = miProcessor->GetParameterValue(MII_ParamIdx_Mute);
 
 						newMsgData._valCount = 1;
-						newMsgData._valType = ROVT_FLOAT;
-						newMsgData._payload = &newDualFloatValue;
-						newMsgData._payloadSize = sizeof(float);
+						newMsgData._valType = ROVT_INT;
+						newMsgData._payload = &newIntValue;
+						newMsgData._payloadSize = sizeof(int);
 
-						msgSent = m_protocolBridge.SendMessage(ROI_Positioning_SourceDelayMode, newMsgData);
-						paramSetsInTransit |= DCT_DelayMode;
+						msgSent = m_protocolBridge.SendMessage(ROI_MatrixInput_Mute, newMsgData);
+						paramSetsInTransit |= DCT_MatrixInputMute;
 					}
 				}
 				break;
@@ -1396,90 +1372,65 @@ void Controller::timerCallback()
 			newMsgData._addrVal._first = static_cast<juce::uint16>(moProcessor->GetMatrixOutputId());
 
 			// Iterate through all automation parameters.
-			for (int pIdx = SPI_ParamIdx_X; pIdx < SPI_ParamIdx_MaxIndex; ++pIdx)
+			for (int pIdx = MOI_ParamIdx_LevelMeterPostMute; pIdx < MOI_ParamIdx_MaxIndex; ++pIdx)
 			{
 				msgSent = false;
 
 				switch (pIdx)
 				{
-				case SPI_ParamIdx_X:
+				case MOI_ParamIdx_LevelMeterPostMute:
 				{
 					// SET command is only sent out while in CM_Tx mode, provided that
 					// this parameter has been changed since the last timer tick.
-					if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCS_Protocol, DCT_SoundobjectPosition))
+					if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixOutputLevelMeter))
 					{
-						newDualFloatValue[0] = moProcessor->GetParameterValue(SPI_ParamIdx_X);
-						newDualFloatValue[1] = moProcessor->GetParameterValue(SPI_ParamIdx_Y);
-
-						newMsgData._valCount = 2;
-						newMsgData._valType = ROVT_FLOAT;
-						newMsgData._payload = &newDualFloatValue;
-						newMsgData._payloadSize = 2 * sizeof(float);
-
-						msgSent = m_protocolBridge.SendMessage(ROI_CoordinateMapping_SourcePosition_XY, newMsgData);
-						paramSetsInTransit |= DCT_SoundobjectPosition;
-					}
-				}
-				break;
-
-				case SPI_ParamIdx_Y:
-					// Changes to ParamIdx_Y are handled together with ParamIdx_X, so skip it.
-					continue;
-					break;
-
-				case SPI_ParamIdx_ReverbSendGain:
-				{
-					// SET command is only sent out while in CM_Tx mode, provided that
-					// this parameter has been changed since the last timer tick.
-					if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCS_Protocol, DCT_ReverbSendGain))
-					{
-						newDualFloatValue[0] = moProcessor->GetParameterValue(SPI_ParamIdx_ReverbSendGain);
+						newDualFloatValue[0] = moProcessor->GetParameterValue(MOI_ParamIdx_LevelMeterPostMute);
 
 						newMsgData._valCount = 1;
 						newMsgData._valType = ROVT_FLOAT;
 						newMsgData._payload = &newDualFloatValue;
 						newMsgData._payloadSize = sizeof(float);
 
-						msgSent = m_protocolBridge.SendMessage(ROI_MatrixInput_ReverbSendGain, newMsgData);
-						paramSetsInTransit |= DCT_ReverbSendGain;
+						msgSent = m_protocolBridge.SendMessage(ROI_MatrixOutput_LevelMeterPostMute, newMsgData);
+						paramSetsInTransit |= DCT_MatrixOutputLevelMeter;
 					}
 				}
 				break;
 
-				case SPI_ParamIdx_ObjectSpread:
+				case MOI_ParamIdx_Gain:
 				{
 					// SET command is only sent out while in CM_Tx mode, provided that
 					// this parameter has been changed since the last timer tick.
-					if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCS_Protocol, DCT_SoundobjectSpread))
+					if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixOutputGain))
 					{
-						newDualFloatValue[0] = moProcessor->GetParameterValue(SPI_ParamIdx_ObjectSpread);
+						newDualFloatValue[0] = moProcessor->GetParameterValue(MOI_ParamIdx_Gain);
 
 						newMsgData._valCount = 1;
 						newMsgData._valType = ROVT_FLOAT;
 						newMsgData._payload = &newDualFloatValue;
 						newMsgData._payloadSize = sizeof(float);
 
-						msgSent = m_protocolBridge.SendMessage(ROI_Positioning_SourceSpread, newMsgData);
-						paramSetsInTransit |= DCT_SoundobjectSpread;
+						msgSent = m_protocolBridge.SendMessage(ROI_MatrixOutput_Gain, newMsgData);
+						paramSetsInTransit |= DCT_MatrixOutputGain;
 					}
 				}
 				break;
 
-				case SPI_ParamIdx_DelayMode:
+				case MOI_ParamIdx_Mute:
 				{
 					// SET command is only sent out while in CM_Tx mode, provided that
 					// this parameter has been changed since the last timer tick.
-					if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCS_Protocol, DCT_DelayMode))
+					if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixOutputMute))
 					{
-						newDualFloatValue[0] = moProcessor->GetParameterValue(SPI_ParamIdx_DelayMode);
+						newIntValue = moProcessor->GetParameterValue(MOI_ParamIdx_Mute);
 
 						newMsgData._valCount = 1;
-						newMsgData._valType = ROVT_FLOAT;
-						newMsgData._payload = &newDualFloatValue;
-						newMsgData._payloadSize = sizeof(float);
+						newMsgData._valType = ROVT_INT;
+						newMsgData._payload = &newIntValue;
+						newMsgData._payloadSize = sizeof(int);
 
-						msgSent = m_protocolBridge.SendMessage(ROI_Positioning_SourceDelayMode, newMsgData);
-						paramSetsInTransit |= DCT_DelayMode;
+						msgSent = m_protocolBridge.SendMessage(ROI_MatrixOutput_Mute, newMsgData);
+						paramSetsInTransit |= DCT_MatrixOutputMute;
 					}
 				}
 				break;

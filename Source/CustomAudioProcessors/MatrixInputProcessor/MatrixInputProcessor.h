@@ -64,8 +64,8 @@ public:
 	ComsMode GetComsMode() const;
 	void SetComsMode(DataChangeSource changeSource, ComsMode newMode);
 
-	float GetParameterValue(SoundobjectParameterIndex paramIdx, bool normalized = false) const;
-	void SetParameterValue(DataChangeSource changeSource, SoundobjectParameterIndex paramIdx, float newValue);
+	float GetParameterValue(MatrixInputParameterIndex paramIdx, bool normalized = false) const;
+	void SetParameterValue(DataChangeSource changeSource, MatrixInputParameterIndex paramIdx, float newValue);
 
 	bool GetParameterChanged(DataChangeSource changeSource, DataChangeType change);
 	bool PopParameterChanged(DataChangeSource changeSource, DataChangeType change);

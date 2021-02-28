@@ -127,6 +127,7 @@ void MatrixIOPageComponent::resized()
 	auto isPortrait = IsPortraitAspectRatio();
 
 	auto margin = 5;
+	auto fmargin = 5.0f;
 
 	// The layouting flexbox with parameters
 	FlexBox matrixIOFlex;
@@ -137,8 +138,8 @@ void MatrixIOPageComponent::resized()
 
 	matrixIOFlex.justifyContent = FlexBox::JustifyContent::center;
 
-	matrixIOFlex.items.add(FlexItem(*m_inputsComponent).withFlex(1).withMargin(FlexItem::Margin(margin, margin, margin, margin)));
-	matrixIOFlex.items.add(FlexItem(*m_outputsComponent).withFlex(1).withMargin(FlexItem::Margin(margin, margin, margin, margin)));
+	matrixIOFlex.items.add(FlexItem(*m_inputsComponent).withFlex(1).withMargin(FlexItem::Margin(fmargin, fmargin, fmargin, fmargin)));
+	matrixIOFlex.items.add(FlexItem(*m_outputsComponent).withFlex(1).withMargin(FlexItem::Margin(fmargin, fmargin, fmargin, fmargin)));
 
 	if (isPortrait)
 	{

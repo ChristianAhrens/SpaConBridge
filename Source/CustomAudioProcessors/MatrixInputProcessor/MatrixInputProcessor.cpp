@@ -166,27 +166,27 @@ void MatrixInputProcessor::SetParameterChanged(DataChangeSource changeSource, Da
  * @param normalized If true, the returned value will be normalized to a 0.0f to 1.0f range. False per default.
  * @return	The desired parameter value, as float.
  */
-float MatrixInputProcessor::GetParameterValue(SoundobjectParameterIndex paramIdx, bool normalized) const
+float MatrixInputProcessor::GetParameterValue(MatrixInputParameterIndex paramIdx, bool normalized) const
 {
 	float ret = 0.0f;
 
 	switch (paramIdx)
 	{
-		case MCI_ParamIdx_LevelMeterPreMute:
+		case MII_ParamIdx_LevelMeterPreMute:
 			{
 				ret = m_MatrixInputLevelMeter->get();
 				if (normalized)
 					ret = m_MatrixInputLevelMeter->getNormalisableRange().convertTo0to1(ret);
 			}
 			break;
-		case MCI_ParamIdx_Gain:
+		case MII_ParamIdx_Gain:
 			{
 				ret = m_MatrixInputGain->get();
 				if (normalized)
 					ret = m_MatrixInputGain->getNormalisableRange().convertTo0to1(ret);
 			}
 			break;
-		case MCI_ParamIdx_Mute:
+		case MII_ParamIdx_Mute:
 			{
 				ret = static_cast<float>(m_MatrixInputMute->get());
 				if (normalized)
@@ -207,7 +207,7 @@ float MatrixInputProcessor::GetParameterValue(SoundobjectParameterIndex paramIdx
  * @param paramIdx	The index of the desired parameter.
  * @param newValue	The new value as a float.
  */
-void MatrixInputProcessor::SetParameterValue(DataChangeSource changeSource, SoundobjectParameterIndex paramIdx, float newValue)
+void MatrixInputProcessor::SetParameterValue(DataChangeSource changeSource, MatrixInputParameterIndex paramIdx, float newValue)
 {
 	// The reimplemented method AudioProcessor::parameterValueChanged() will trigger a SetParameterChanged() call.
 	// We need to ensure that this change is registered to the correct source. 
@@ -216,13 +216,13 @@ void MatrixInputProcessor::SetParameterValue(DataChangeSource changeSource, Soun
 
 	switch (paramIdx)
 	{
-	case MCI_ParamIdx_LevelMeterPreMute:
+	case MII_ParamIdx_LevelMeterPreMute:
 		m_MatrixInputLevelMeter->SetParameterValue(newValue);
 		break;
-	case MCI_ParamIdx_Gain:
+	case MII_ParamIdx_Gain:
 		m_MatrixInputGain->SetParameterValue(newValue);
 		break;
-	case MCI_ParamIdx_Mute:
+	case MII_ParamIdx_Mute:
 		m_MatrixInputMute->SetParameterValue(static_cast<int>(newValue));
 		break;
 	default:
@@ -246,17 +246,17 @@ void MatrixInputProcessor::Tick()
 	// These flags are set during Controller::timerCallback() and queried in Controller::oscMessageReceived()
 	m_paramSetCommandsInTransit = DCT_None;
 
-	for (int pIdx = 0; pIdx < MCI_ParamIdx_MaxIndex; pIdx++)
+	for (int pIdx = 0; pIdx < MII_ParamIdx_MaxIndex; pIdx++)
 	{
 		switch (pIdx)
 		{
-		case MCI_ParamIdx_LevelMeterPreMute:
+		case MII_ParamIdx_LevelMeterPreMute:
 			m_MatrixInputLevelMeter->Tick();
 			break;
-		case MCI_ParamIdx_Gain:
+		case MII_ParamIdx_Gain:
 			m_MatrixInputGain->Tick();
 			break;
-		case MCI_ParamIdx_Mute:
+		case MII_ParamIdx_Mute:
 			m_MatrixInputMute->Tick();
 			break;
 		default:
@@ -474,19 +474,19 @@ void MatrixInputProcessor::parameterValueChanged(int parameterIndex, float newVa
 
 	switch (parameterIndex)
 	{
-		case MCI_ParamIdx_LevelMeterPreMute:
+		case MII_ParamIdx_LevelMeterPreMute:
 			{
 				if (m_MatrixInputLevelMeter->get() != m_MatrixInputLevelMeter->GetLastValue())
 					changed = DCT_MatrixInputLevelMeter;
 			}
 			break;
-		case MCI_ParamIdx_Gain:
+		case MII_ParamIdx_Gain:
 			{
 				if (m_MatrixInputGain->get() != m_MatrixInputGain->GetLastValue())
 					changed = DCT_MatrixInputGain;
 			}
 			break;
-		case MCI_ParamIdx_Mute:
+		case MII_ParamIdx_Mute:
 			{
 				int newValueDenorm = static_cast<int>(m_MatrixInputMute->getNormalisableRange().convertFrom0to1(newValue));
 				if (newValueDenorm != m_MatrixInputMute->GetLastValue())

@@ -19,7 +19,8 @@
 
 #pragma once
 
-#include "MatrixChannelsComponentBase.h"
+
+#include "../TableModelComponent.h"
 
 #include "../../../SoundscapeBridgeAppCommon.h"
 
@@ -29,26 +30,19 @@ namespace SoundscapeBridgeApp
 
 
 /**
- * MatrixInputsComponent class provides a rolling log to show protocol data.
+ * MatrixChannelTableComponentBase class provides a rolling log to show protocol data.
  */
-class MatrixInputsComponent :	public MatrixChannelsComponentBase
+class MatrixChannelTableComponentBase :	public TableModelComponent
 {
 public:
-	MatrixInputsComponent();
-	~MatrixInputsComponent() override;
-
-	//==========================================================================
-	void RecreateTableRowIds() override;
-	void UpdateTable() override;
-
-	//==========================================================================
-	int getNumRows() override;
+	MatrixChannelTableComponentBase();
+	virtual ~MatrixChannelTableComponentBase() override;
 
 protected:
 
 private:
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixInputsComponent)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixChannelTableComponentBase)
 };
 
 

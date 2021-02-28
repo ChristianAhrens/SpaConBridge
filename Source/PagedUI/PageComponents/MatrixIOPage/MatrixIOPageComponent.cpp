@@ -18,8 +18,8 @@
 
 #include "MatrixIOPageComponent.h"
 
-#include "MatrixInputsComponent.h"
-#include "MatrixOutputsComponent.h"
+#include "MatrixInputTableComponent.h"
+#include "MatrixOutputTableComponent.h"
 
 #include "../../../CustomAudioProcessors/MatrixInputProcessor/MatrixInputProcessor.h"
 #include "../../../CustomAudioProcessors/MatrixInputProcessor/MatrixInputProcessorEditor.h"
@@ -49,10 +49,10 @@ namespace SoundscapeBridgeApp
 MatrixIOPageComponent::MatrixIOPageComponent()
 	: PageComponentBase(PCT_MatrixIOs)
 {
-	m_inputsComponent = std::make_unique<MatrixInputsComponent>();
+	m_inputsComponent = std::make_unique<MatrixInputTableComponent>();
 	addAndMakeVisible(m_inputsComponent.get());
 
-	m_outputsComponent = std::make_unique<MatrixOutputsComponent>();
+	m_outputsComponent = std::make_unique<MatrixOutputTableComponent>();
 	addAndMakeVisible(m_outputsComponent.get());
 
 	m_addInput = std::make_unique<TextButton>();

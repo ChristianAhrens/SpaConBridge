@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "MatrixOutputsComponent.h"
+#include "MatrixInputTableComponent.h"
 
 #include "../../../Controller.h"
 
@@ -27,15 +27,15 @@ namespace SoundscapeBridgeApp
 
 /*
 ===============================================================================
-	Class MatrixOutputsComponent
+	Class MatrixInputTableComponent
 ===============================================================================
 */
 
 /**
  * Class constructor.
  */
-MatrixOutputsComponent::MatrixOutputsComponent()
-	: MatrixChannelsComponentBase()
+MatrixInputTableComponent::MatrixInputTableComponent()
+	: MatrixChannelTableComponentBase()
 {
 	// This fills m_ids.
 	RecreateTableRowIds();
@@ -45,7 +45,7 @@ MatrixOutputsComponent::MatrixOutputsComponent()
 	// collect required info for table columns
 	std::map<CustomTableHeaderComponent::TableColumn, CustomTableHeaderComponent::ColumnProperties> tableColumns;
 	int tableHeaderFlags = (TableHeaderComponent::visible | TableHeaderComponent::sortable);
-	tableColumns[CustomTableHeaderComponent::TC_OutputEditor] = CustomTableHeaderComponent::ColumnProperties("Matrix Output", 140, 140, -1, tableHeaderFlags);
+	tableColumns[CustomTableHeaderComponent::TC_InputEditor] = CustomTableHeaderComponent::ColumnProperties("Matrix Input", 140, 140, -1, tableHeaderFlags);
 	tableColumns[CustomTableHeaderComponent::TC_ComsMode] = CustomTableHeaderComponent::ColumnProperties("Mode", 90, 90, -1, tableHeaderFlags);
 	tableColumns[CustomTableHeaderComponent::TC_BridgingMute] = CustomTableHeaderComponent::ColumnProperties("", 90, 90, -1, tableHeaderFlags);
 
@@ -56,14 +56,14 @@ MatrixOutputsComponent::MatrixOutputsComponent()
 /**
  * Class destructor.
  */
-MatrixOutputsComponent::~MatrixOutputsComponent()
+MatrixInputTableComponent::~MatrixInputTableComponent()
 {
 }
 
 /**
  * This clears and re-fills m_processorIds.
  */
-void MatrixOutputsComponent::RecreateTableRowIds()
+void MatrixInputTableComponent::RecreateTableRowIds()
 {
 	GetProcessorIds().clear();
 	Controller* ctrl = Controller::GetInstance();
@@ -86,7 +86,7 @@ void MatrixOutputsComponent::RecreateTableRowIds()
 /**
  * This refreshes the table contents.
  */
-void MatrixOutputsComponent::UpdateTable()
+void MatrixInputTableComponent::UpdateTable()
 {
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
@@ -110,13 +110,13 @@ void MatrixOutputsComponent::UpdateTable()
  * This is overloaded from TableListBoxModel, and must return the total number of rows in our table.
  * @return	Number of rows on the table, equal to number of procssor instances.
  */
-int MatrixOutputsComponent::getNumRows()
+int MatrixInputTableComponent::getNumRows()
 {
 	int ret = 0;
 
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
-		ret = ctrl->GetMatrixOutputProcessorCount();
+		ret = ctrl->GetMatrixInputProcessorCount();
 
 	return ret;
 }

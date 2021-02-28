@@ -390,22 +390,22 @@
                   file="Source/PagedUI/PageComponents/MultisurfacePage/MultisurfacePageComponent.h"/>
           </GROUP>
           <GROUP id="{59435D02-8728-9CA1-282E-B7B15C7B9CAB}" name="MatrixIOPage">
-            <FILE id="KD60wJ" name="MatrixChannelsComponentBase.cpp" compile="1"
-                  resource="0" file="Source/PagedUI/PageComponents/MatrixIOPage/MatrixChannelsComponentBase.cpp"/>
-            <FILE id="g0wrao" name="MatrixChannelsComponentBase.h" compile="0"
-                  resource="0" file="Source/PagedUI/PageComponents/MatrixIOPage/MatrixChannelsComponentBase.h"/>
-            <FILE id="T2cIbl" name="MatrixInputsComponent.cpp" compile="1" resource="0"
-                  file="Source/PagedUI/PageComponents/MatrixIOPage/MatrixInputsComponent.cpp"/>
-            <FILE id="NIYAW5" name="MatrixInputsComponent.h" compile="0" resource="0"
-                  file="Source/PagedUI/PageComponents/MatrixIOPage/MatrixInputsComponent.h"/>
+            <FILE id="KD60wJ" name="MatrixChannelTableComponentBase.cpp" compile="1"
+                  resource="0" file="Source/PagedUI/PageComponents/MatrixIOPage/MatrixChannelTableComponentBase.cpp"/>
+            <FILE id="g0wrao" name="MatrixChannelTableComponentBase.h" compile="0"
+                  resource="0" file="Source/PagedUI/PageComponents/MatrixIOPage/MatrixChannelTableComponentBase.h"/>
+            <FILE id="T2cIbl" name="MatrixInputTableComponent.cpp" compile="1"
+                  resource="0" file="Source/PagedUI/PageComponents/MatrixIOPage/MatrixInputTableComponent.cpp"/>
+            <FILE id="NIYAW5" name="MatrixInputTableComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/MatrixIOPage/MatrixInputTableComponent.h"/>
             <FILE id="ZBB21m" name="MatrixIOPageComponent.cpp" compile="1" resource="0"
                   file="Source/PagedUI/PageComponents/MatrixIOPage/MatrixIOPageComponent.cpp"/>
             <FILE id="th9JeX" name="MatrixIOPageComponent.h" compile="0" resource="0"
                   file="Source/PagedUI/PageComponents/MatrixIOPage/MatrixIOPageComponent.h"/>
-            <FILE id="dapTBf" name="MatrixOutputsComponent.cpp" compile="1" resource="0"
-                  file="Source/PagedUI/PageComponents/MatrixIOPage/MatrixOutputsComponent.cpp"/>
-            <FILE id="SMQxKR" name="MatrixOutputsComponent.h" compile="0" resource="0"
-                  file="Source/PagedUI/PageComponents/MatrixIOPage/MatrixOutputsComponent.h"/>
+            <FILE id="dapTBf" name="MatrixOutputTableComponent.cpp" compile="1"
+                  resource="0" file="Source/PagedUI/PageComponents/MatrixIOPage/MatrixOutputTableComponent.cpp"/>
+            <FILE id="SMQxKR" name="MatrixOutputTableComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/MatrixIOPage/MatrixOutputTableComponent.h"/>
           </GROUP>
           <GROUP id="{EA1B1C28-C721-9683-BA42-F0893D802CB4}" name="AboutPage">
             <FILE id="Cee0pf" name="AboutPageComponent.cpp" compile="1" resource="0"

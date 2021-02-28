@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "MatrixChannelsComponentBase.h"
+#include "MatrixChannelTableComponentBase.h"
 
 #include "../../../SoundscapeBridgeAppCommon.h"
 
@@ -29,13 +29,13 @@ namespace SoundscapeBridgeApp
 
 
 /**
- * MatrixOutputsComponent class provides a rolling log to show protocol data.
+ * MatrixOutputTableComponent class provides a rolling log to show protocol data.
  */
-class MatrixOutputsComponent :	public MatrixChannelsComponentBase
+class MatrixOutputTableComponent :	public MatrixChannelTableComponentBase
 {
 public:
-	MatrixOutputsComponent();
-	~MatrixOutputsComponent() override;
+	MatrixOutputTableComponent();
+	~MatrixOutputTableComponent() override;
 
 	//==========================================================================
 	void RecreateTableRowIds() override;
@@ -48,7 +48,7 @@ protected:
 
 private:
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixOutputsComponent)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixOutputTableComponent)
 };
 
 

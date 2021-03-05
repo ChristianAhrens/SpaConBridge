@@ -55,29 +55,28 @@ MatrixIOPageComponent::MatrixIOPageComponent()
 	m_outputsComponent = std::make_unique<MatrixOutputTableComponent>();
 	addAndMakeVisible(m_outputsComponent.get());
 
-	m_addInput = std::make_unique<TextButton>();
+	m_addInput = std::make_unique<DrawableButton>("addInput", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_addInput->setClickingTogglesState(false);
-	m_addInput->setButtonText("Add");
 	m_addInput->addListener(this);
 	addAndMakeVisible(m_addInput.get());
-	m_removeInput = std::make_unique<TextButton>();
+	m_removeInput = std::make_unique<DrawableButton>("removeInput", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_removeInput->setClickingTogglesState(false);
-	m_removeInput->setButtonText("Remove");
 	m_removeInput->setEnabled(false);
 	m_removeInput->addListener(this);
 	addAndMakeVisible(m_removeInput.get());
 
-	m_addOutput = std::make_unique<TextButton>();
+	m_addOutput = std::make_unique<DrawableButton>("addOutput", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_addOutput->setClickingTogglesState(false);
-	m_addOutput->setButtonText("Add");
 	m_addOutput->addListener(this);
 	addAndMakeVisible(m_addOutput.get());
-	m_removeOutput = std::make_unique<TextButton>();
+	m_removeOutput = std::make_unique<DrawableButton>("removeOutput", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_removeOutput->setClickingTogglesState(false);
-	m_removeOutput->setButtonText("Remove");
 	m_removeOutput->setEnabled(false);
 	m_removeOutput->addListener(this);
 	addAndMakeVisible(m_removeOutput.get());
+
+	// trigger lookandfeel update
+	lookAndFeelChanged();
 
 	auto config = SoundscapeBridgeApp::AppConfiguration::getInstance();
 	if (config)
@@ -167,13 +166,13 @@ void MatrixIOPageComponent::resized()
 		auto outputsBarBounds = bottomBarBounds.reduced(4);
 		outputsBarBounds.removeFromLeft(margin);
 
-		m_addInput->setBounds(inputsBarBounds.removeFromLeft(40).toNearestInt());
+		m_addInput->setBounds(inputsBarBounds.removeFromLeft(30).toNearestInt());
 		inputsBarBounds.removeFromLeft(margin);
-		m_removeInput->setBounds(inputsBarBounds.removeFromLeft(60).toNearestInt());
+		m_removeInput->setBounds(inputsBarBounds.removeFromLeft(30).toNearestInt());
 
-		m_addOutput->setBounds(outputsBarBounds.removeFromLeft(40).toNearestInt());
+		m_addOutput->setBounds(outputsBarBounds.removeFromLeft(30).toNearestInt());
 		outputsBarBounds.removeFromLeft(margin);
-		m_removeOutput->setBounds(outputsBarBounds.removeFromLeft(60).toNearestInt());
+		m_removeOutput->setBounds(outputsBarBounds.removeFromLeft(30).toNearestInt());
 	}
 
 	matrixIOFlex.performLayout(bounds);
@@ -270,6 +269,52 @@ void MatrixIOPageComponent::buttonClicked(Button* button)
 void MatrixIOPageComponent::UpdateGui(bool init)
 {
 	ignoreUnused(init);
+}
+
+/**
+ * Reimplemented method to handle changed look and feel data.
+ * This makes shure the add/remove buttons' svg images are colored correctly.
+ */
+void MatrixIOPageComponent::lookAndFeelChanged()
+{
+	// first forward the call to base implementation
+	Component::lookAndFeelChanged();
+
+	// create the required button drawable images based on lookandfeel colours
+	String addImageName = BinaryData::add24px_svg;
+	String removeImageName = BinaryData::remove24px_svg;
+	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
+	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (dblookAndFeel)
+	{
+		// add images
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(addImageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+
+		m_addInput->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+		m_addOutput->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+
+		// remove images
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(removeImageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+
+		m_removeInput->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+		m_removeOutput->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+	}
 }
 
 /**

@@ -69,14 +69,12 @@ SoundobjectTablePageComponent::SoundobjectTablePageComponent()
 	addAndMakeVisible(m_pageContainerTable.get());
 
 	// Add/Remove Buttons
-	m_addInstance = std::make_unique<TextButton>();
+	m_addInstance = std::make_unique<DrawableButton>("add", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_addInstance->setClickingTogglesState(false);
-	m_addInstance->setButtonText("Add");
 	m_addInstance->addListener(this);
 	addAndMakeVisible(m_addInstance.get());
-	m_removeInstance = std::make_unique<TextButton>();
+	m_removeInstance = std::make_unique<DrawableButton>("remove", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_removeInstance->setClickingTogglesState(false);
-	m_removeInstance->setButtonText("Remove");
 	m_removeInstance->setEnabled(false);
 	m_removeInstance->addListener(this);
 	addAndMakeVisible(m_removeInstance.get());
@@ -99,6 +97,9 @@ SoundobjectTablePageComponent::SoundobjectTablePageComponent()
 	m_selectNone->setEnabled(true);
 	m_selectNone->addListener(this);
 	addAndMakeVisible(m_selectNone.get());
+
+	// trigger lookandfeel update
+	lookAndFeelChanged();
 
 	// register this object as config watcher
 	auto config = SoundscapeBridgeApp::AppConfiguration::getInstance();
@@ -184,8 +185,8 @@ void SoundobjectTablePageComponent::resized()
 	bottomBarFlex.justifyContent = FlexBox::JustifyContent::center;
 	bottomBarFlex.alignContent = FlexBox::AlignContent::center;
 	bottomBarFlex.items.addArray({
-		FlexItem(*m_addInstance.get()).withFlex(1).withMaxWidth(40).withMargin(FlexItem::Margin(2, 2, 3, 4)),
-		FlexItem(*m_removeInstance.get()).withFlex(1).withMaxWidth(60).withMargin(FlexItem::Margin(2, 2, 3, 2)),
+		FlexItem(*m_addInstance.get()).withFlex(1).withMaxWidth(30).withMargin(FlexItem::Margin(2, 2, 3, 4)),
+		FlexItem(*m_removeInstance.get()).withFlex(1).withMaxWidth(30).withMargin(FlexItem::Margin(2, 2, 3, 2)),
 		FlexItem().withFlex(2).withHeight(30),
 		FlexItem(*m_selectLabel.get()).withFlex(1).withMaxWidth(80),
 		FlexItem(*m_selectAll.get()).withFlex(1).withMaxWidth(40).withMargin(FlexItem::Margin(2, 2, 3, 2)),
@@ -334,6 +335,50 @@ void SoundobjectTablePageComponent::UpdateGui(bool init)
 				}
 			}
 		}
+	}
+}
+
+/**
+ * Reimplemented method to handle changed look and feel data.
+ * This makes shure the add/remove buttons' svg images are colored correctly.
+ */
+void SoundobjectTablePageComponent::lookAndFeelChanged()
+{
+	// first forward the call to base implementation
+	Component::lookAndFeelChanged();
+
+	// create the required button drawable images based on lookandfeel colours
+	String addImageName = BinaryData::add24px_svg;
+	String removeImageName = BinaryData::remove24px_svg;
+	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
+	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (dblookAndFeel)
+	{
+		// add images
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(addImageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+
+		m_addInstance->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+
+		// remove images
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(removeImageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+
+		m_removeInstance->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
 	}
 }
 

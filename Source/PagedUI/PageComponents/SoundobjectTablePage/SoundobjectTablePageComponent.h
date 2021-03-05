@@ -73,6 +73,9 @@ public:
 	void UpdateGui(bool init) override;
 
 	//==============================================================================
+	void lookAndFeelChanged() override;
+
+	//==============================================================================
 	void buttonClicked(Button*) override;
 
 	//==============================================================================
@@ -89,8 +92,8 @@ protected:
 private:
 	std::unique_ptr<SoundobjectTableComponent>	m_pageContainerTable;				/**> The actual table model / component inside this component. */
 	std::unique_ptr<SoundobjectProcessorEditor> m_selectedProcessorInstanceEditor;	/**> The processor editor component corresponding to the selected row */
-	std::unique_ptr<TextButton>					m_addInstance;						/**> Button to add a processor instance */
-	std::unique_ptr<TextButton>					m_removeInstance;					/**> Button to remove the selected processor instance */
+	std::unique_ptr<DrawableButton>				m_addInstance;						/**> Button to add a processor instance */
+	std::unique_ptr<DrawableButton>				m_removeInstance;					/**> Button to remove the selected processor instance */
 	std::unique_ptr<Label>						m_selectLabel;						/**> Quick select label */
 	std::unique_ptr<TextButton>					m_selectAll;						/**> Select all rows button. */
 	std::unique_ptr<TextButton>					m_selectNone;						/**> Select no rows button. */

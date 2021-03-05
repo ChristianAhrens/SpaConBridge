@@ -51,6 +51,9 @@ public:
 	void UpdateGui(bool init) override;
 
 	//==============================================================================
+	void lookAndFeelChanged() override;
+
+	//==============================================================================
 	void buttonClicked(Button*) override;
 
 	//==========================================================================
@@ -65,12 +68,12 @@ private:
 	bool	IsPortraitAspectRatio();
 
 	std::unique_ptr<MatrixInputTableComponent>	m_inputsComponent;	/**> Matrix input channelstrips component. */
-	std::unique_ptr<TextButton>				m_addInput;			/**> Button to add an input */
-	std::unique_ptr<TextButton>				m_removeInput;		/**> Button to remove the selected intput */
+	std::unique_ptr<DrawableButton>				m_addInput;			/**> Button to add an input */
+	std::unique_ptr<DrawableButton>				m_removeInput;		/**> Button to remove the selected intput */
 
 	std::unique_ptr<MatrixOutputTableComponent>	m_outputsComponent;	/**> Matrix output channelstrips component. */
-	std::unique_ptr<TextButton>				m_addOutput;		/**> Button to add an output*/
-	std::unique_ptr<TextButton>				m_removeOutput;		/**> Button to remove the selected output */
+	std::unique_ptr<DrawableButton>				m_addOutput;		/**> Button to add an output*/
+	std::unique_ptr<DrawableButton>				m_removeOutput;		/**> Button to remove the selected output */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixIOPageComponent)
 };

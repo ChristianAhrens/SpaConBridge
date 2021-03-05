@@ -141,7 +141,9 @@ public:
 	virtual void UpdateTable() = 0;
 
 	//==========================================================================
-	static bool LessThanSourceId(juce::int32 pId1, juce::int32 pId2);
+	static bool LessThanSoundobjectId(juce::int32 pId1, juce::int32 pId2);
+	static bool LessThanMatrixInputId(juce::int32 pId1, juce::int32 pId2);
+	static bool LessThanMatrixOutputId(juce::int32 pId1, juce::int32 pId2);
 	static bool LessThanMapping(juce::int32 pId1, juce::int32 pId2);
 	static bool LessThanComsMode(juce::int32 pId1, juce::int32 pId2);
 	static bool LessThanBridgingMute(juce::int32 pId1, juce::int32 pId2);
@@ -212,19 +214,71 @@ class TextEditorContainer : public Component,
 {
 public:
 	explicit TextEditorContainer(TableModelComponent& td);
-	~TextEditorContainer() override;
+	virtual ~TextEditorContainer() override;
 
-	void textEditorFocusLost(TextEditor &) override;
 	void textEditorReturnKeyPressed(TextEditor &) override;
 	void resized() override;
-	void SetRow(int newRow);
 
-private:
+	virtual void textEditorFocusLost(TextEditor&) = 0;
+	virtual void SetRow(int newRow) = 0;
+
+protected:
 	TableModelComponent&	m_owner;	/**> Table where this component is contained. */
 	TextEditor				m_editor;	/**> Actual text editor. */
 	int						m_row;		/**> Row number where this component is located inside the table. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TextEditorContainer)
+};
+
+/**
+ * Class SoundobjectTextEditorContainer is a container for the SoundobjectID TextEditor component used in the soundobjects table.
+ */
+class SoundobjectIdTextEditorContainer : public TextEditorContainer
+{
+public:
+	explicit SoundobjectIdTextEditorContainer(TableModelComponent& td);
+	virtual ~SoundobjectIdTextEditorContainer() override;
+
+	void textEditorFocusLost(TextEditor&) override;
+	void SetRow(int newRow) override;
+
+private:
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SoundobjectIdTextEditorContainer)
+};
+
+/**
+ * Class SoundobjectTextEditorContainer is a container for the SoundobjectID TextEditor component used in the soundobjects table.
+ */
+class MatrixInputIdTextEditorContainer : public TextEditorContainer
+{
+public:
+	explicit MatrixInputIdTextEditorContainer(TableModelComponent& td);
+	virtual ~MatrixInputIdTextEditorContainer() override;
+
+	void textEditorFocusLost(TextEditor&) override;
+	void SetRow(int newRow) override;
+
+private:
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixInputIdTextEditorContainer)
+};
+
+/**
+ * Class SoundobjectTextEditorContainer is a container for the SoundobjectID TextEditor component used in the soundobjects table.
+ */
+class MatrixOutputIdTextEditorContainer : public TextEditorContainer
+{
+public:
+	explicit MatrixOutputIdTextEditorContainer(TableModelComponent& td);
+	virtual ~MatrixOutputIdTextEditorContainer() override;
+
+	void textEditorFocusLost(TextEditor&) override;
+	void SetRow(int newRow) override;
+
+private:
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixOutputIdTextEditorContainer)
 };
 
 

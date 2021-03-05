@@ -319,12 +319,12 @@ void TableModelComponent::SelectAllRows(bool all)
 }
 
 /**
- * Helper sorting function used by std::sort(). This version is used to sort by procssor's SourceId.
+ * Helper sorting function used by std::sort(). This version is used to sort by procssor's SoundobjectId.
  * @param pId1	Id of the first processor.
  * @param pId2	Id of the second processor.
- * @return	True if the first procssor's SourceId is less than the second's.
+ * @return	True if the first procssor's SoundobjectId is less than the second's.
  */
-bool TableModelComponent::LessThanSourceId(juce::int32 pId1, juce::int32 pId2)
+bool TableModelComponent::LessThanSoundobjectId(juce::int32 pId1, juce::int32 pId2)
 {
 	auto ctrl = Controller::GetInstance();
 	if (!ctrl)
@@ -341,6 +341,64 @@ bool TableModelComponent::LessThanSourceId(juce::int32 pId1, juce::int32 pId2)
 		auto p2 = ctrl->GetSoundobjectProcessor(pId2);
 		if (p1 && p2)
 			return (p1->GetSoundobjectId() < p2->GetSoundobjectId());
+	}
+
+	jassertfalse; // Index out of range!
+	return false;
+}
+
+/**
+ * Helper sorting function used by std::sort(). This version is used to sort by procssor's MatrixInputId.
+ * @param pId1	Id of the first processor.
+ * @param pId2	Id of the second processor.
+ * @return	True if the first procssor's SoundobjectId is less than the second's.
+ */
+bool TableModelComponent::LessThanMatrixInputId(juce::int32 pId1, juce::int32 pId2)
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return false;
+
+	auto processorIds = ctrl->GetMatrixInputProcessorIds();
+	auto maxProcessorIdIter = std::max_element(processorIds.begin(), processorIds.end());
+	if (maxProcessorIdIter == processorIds.end())
+		return false;
+	auto maxProcessorId = *maxProcessorIdIter;
+	if ((pId1 <= maxProcessorId) && (pId2 <= maxProcessorId))
+	{
+		auto p1 = ctrl->GetMatrixInputProcessor(pId1);
+		auto p2 = ctrl->GetMatrixInputProcessor(pId2);
+		if (p1 && p2)
+			return (p1->GetMatrixInputId() < p2->GetMatrixInputId());
+	}
+
+	jassertfalse; // Index out of range!
+	return false;
+}
+
+/**
+ * Helper sorting function used by std::sort(). This version is used to sort by procssor's SoundobjectId.
+ * @param pId1	Id of the first processor.
+ * @param pId2	Id of the second processor.
+ * @return	True if the first procssor's SoundobjectId is less than the second's.
+ */
+bool TableModelComponent::LessThanMatrixOutputId(juce::int32 pId1, juce::int32 pId2)
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return false;
+
+	auto processorIds = ctrl->GetMatrixInputProcessorIds();
+	auto maxProcessorIdIter = std::max_element(processorIds.begin(), processorIds.end());
+	if (maxProcessorIdIter == processorIds.end())
+		return false;
+	auto maxProcessorId = *maxProcessorIdIter;
+	if ((pId1 <= maxProcessorId) && (pId2 <= maxProcessorId))
+	{
+		auto p1 = ctrl->GetMatrixOutputProcessor(pId1);
+		auto p2 = ctrl->GetMatrixOutputProcessor(pId2);
+		if (p1 && p2)
+			return (p1->GetMatrixOutputId() < p2->GetMatrixOutputId());
 	}
 
 	jassertfalse; // Index out of range!
@@ -531,7 +589,13 @@ void TableModelComponent::sortOrderChanged(int newSortColumnId, bool isForwards)
 		std::sort(m_processorIds.begin(), m_processorIds.end());
 		break;
 	case CustomTableHeaderComponent::TC_SoundobjectID:
-		std::sort(m_processorIds.begin(), m_processorIds.end(), TableModelComponent::LessThanSourceId);
+		std::sort(m_processorIds.begin(), m_processorIds.end(), TableModelComponent::LessThanSoundobjectId);
+		break;
+	case CustomTableHeaderComponent::TC_InputID:
+		std::sort(m_processorIds.begin(), m_processorIds.end(), TableModelComponent::LessThanMatrixInputId);
+		break;
+	case CustomTableHeaderComponent::TC_OutputID:
+		std::sort(m_processorIds.begin(), m_processorIds.end(), TableModelComponent::LessThanMatrixOutputId);
 		break;
 	case CustomTableHeaderComponent::TC_Mapping:
 		std::sort(m_processorIds.begin(), m_processorIds.end(), TableModelComponent::LessThanMapping);
@@ -620,7 +684,41 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 			// If an existing component is being passed-in for updating, we'll re-use it, but
 			// if not, we'll have to create one.
 			if (textEdit == nullptr)
-				textEdit = new TextEditorContainer(*this);
+				textEdit = new SoundobjectIdTextEditorContainer(*this);
+
+			// Ensure that the component knows which row number it is located at.
+			textEdit->SetRow(rowNumber);
+
+			// Return a pointer to the component.
+			ret = textEdit;
+		}
+		break;
+
+	case CustomTableHeaderComponent::TC_InputID:
+		{
+			TextEditorContainer* textEdit = static_cast<TextEditorContainer*> (existingComponentToUpdate);
+
+			// If an existing component is being passed-in for updating, we'll re-use it, but
+			// if not, we'll have to create one.
+			if (textEdit == nullptr)
+				textEdit = new MatrixInputIdTextEditorContainer(*this);
+
+			// Ensure that the component knows which row number it is located at.
+			textEdit->SetRow(rowNumber);
+
+			// Return a pointer to the component.
+			ret = textEdit;
+		}
+		break;
+
+	case CustomTableHeaderComponent::TC_OutputID:
+		{
+			TextEditorContainer* textEdit = static_cast<TextEditorContainer*> (existingComponentToUpdate);
+
+			// If an existing component is being passed-in for updating, we'll re-use it, but
+			// if not, we'll have to create one.
+			if (textEdit == nullptr)
+				textEdit = new MatrixOutputIdTextEditorContainer(*this);
 
 			// Ensure that the component knows which row number it is located at.
 			textEdit->SetRow(rowNumber);
@@ -745,13 +843,13 @@ int TableModelComponent::getColumnAutoSizeWidth(int columnId)
 	switch (columnId)
 	{
 	case CustomTableHeaderComponent::TC_TrackID:
-		return 50;
+		return 40;
 	case CustomTableHeaderComponent::TC_SoundobjectID:
 		return 80;
 	case CustomTableHeaderComponent::TC_InputID:
-		return 80;
+		return 70;
 	case CustomTableHeaderComponent::TC_OutputID:
-		return 80;
+		return 70;
 	case CustomTableHeaderComponent::TC_InputEditor:
 		return 190;
 	case CustomTableHeaderComponent::TC_OutputEditor:
@@ -992,6 +1090,229 @@ void TextEditorContainer::SetRow(int newRow)
 			m_editor.setText(String(processor->GetSoundobjectId()), false);
 	}
 }
+
+/*
+===============================================================================
+ Class SoundobjectIdTextEditorContainer
+===============================================================================
+*/
+
+/**
+ * Class constructor.
+ */
+SoundobjectIdTextEditorContainer::SoundobjectIdTextEditorContainer(TableModelComponent& td)
+	: TextEditorContainer(td)
+{
+}
+
+/**
+ * Class destructor.
+ */
+SoundobjectIdTextEditorContainer::~SoundobjectIdTextEditorContainer()
+{
+}
+
+/**
+ * Reimplemented from TextEditor::Listener, gets called whenever the TextEditor loses keyboard focus.
+ * @param textEditor	The textEditor which has been changed.
+ */
+void SoundobjectIdTextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
+{
+	// Get the list of rows which are currently selected on the table.
+	std::vector<int> selectedRows = m_owner.GetSelectedRows();
+	if ((selectedRows.size() < 2) ||
+		(std::find(selectedRows.begin(), selectedRows.end(), m_row) == selectedRows.end()))
+	{
+		// If this comboBoxes row (m_row) is NOT selected, or if no multi-selection was made 
+		// then modify the selectedRows list so that it only contains m_row.
+		selectedRows.clear();
+		selectedRows.push_back(m_row);
+	}
+
+	auto ctrl = Controller::GetInstance();
+	if (ctrl)
+	{
+		// New SourceID which should be applied to all procssors in the selected rows.
+		auto newSourceId = textEditor.getText().getIntValue();
+		for (auto const& processorId : m_owner.GetProcessorIdsForRows(selectedRows))
+		{
+			// Set the value of the combobox to the current MappingID of the corresponding procssor.
+			auto processor = ctrl->GetSoundobjectProcessor(processorId);
+			if (processor)
+				processor->SetSoundobjectId(DCS_SoundobjectTable, newSourceId);
+		}
+	}
+}
+
+/**
+ * Saves the row number where this component is located inside the overview table.
+ * It also updates the text inside the textEditor with the current SourceID
+ * @param newRow	The new row number.
+ */
+void SoundobjectIdTextEditorContainer::SetRow(int newRow)
+{
+	m_row = newRow;
+
+	// Find the procssor instance corresponding to the given row number.
+	auto processorId = m_owner.GetProcessorIdForRow(newRow);
+	auto ctrl = Controller::GetInstance();
+	if (ctrl)
+	{
+		// Set the value of the textEditor to the current SourceID of the corresponding procssor.
+		auto processor = ctrl->GetSoundobjectProcessor(processorId);
+		if (processor)
+			m_editor.setText(String(processor->GetSoundobjectId()), false);
+	}
+}
+
+/*
+===============================================================================
+ Class MatrixInputIdTextEditorContainer
+===============================================================================
+*/
+
+/**
+ * Class constructor.
+ */
+MatrixInputIdTextEditorContainer::MatrixInputIdTextEditorContainer(TableModelComponent& td)
+	: TextEditorContainer(td)
+{
+}
+
+/**
+ * Class destructor.
+ */
+MatrixInputIdTextEditorContainer::~MatrixInputIdTextEditorContainer()
+{
+}
+
+/**
+ * Reimplemented from TextEditor::Listener, gets called whenever the TextEditor loses keyboard focus.
+ * @param textEditor	The textEditor which has been changed.
+ */
+void MatrixInputIdTextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
+{
+	// Get the list of rows which are currently selected on the table.
+	std::vector<int> selectedRows = m_owner.GetSelectedRows();
+	if ((selectedRows.size() < 2) ||
+		(std::find(selectedRows.begin(), selectedRows.end(), m_row) == selectedRows.end()))
+	{
+		// If this comboBoxes row (m_row) is NOT selected, or if no multi-selection was made 
+		// then modify the selectedRows list so that it only contains m_row.
+		selectedRows.clear();
+		selectedRows.push_back(m_row);
+	}
+
+	auto ctrl = Controller::GetInstance();
+	if (ctrl)
+	{
+		// New SourceID which should be applied to all procssors in the selected rows.
+		auto newSourceId = textEditor.getText().getIntValue();
+		for (auto const& processorId : m_owner.GetProcessorIdsForRows(selectedRows))
+		{
+			// Set the value of the combobox to the current MappingID of the corresponding procssor.
+			auto processor = ctrl->GetMatrixInputProcessor(processorId);
+			if (processor)
+				processor->SetMatrixInputId(DCS_SoundobjectTable, newSourceId);
+		}
+	}
+}
+
+/**
+ * Saves the row number where this component is located inside the overview table.
+ * It also updates the text inside the textEditor with the current SourceID
+ * @param newRow	The new row number.
+ */
+void MatrixInputIdTextEditorContainer::SetRow(int newRow)
+{
+	m_row = newRow;
+
+	// Find the procssor instance corresponding to the given row number.
+	auto processorId = m_owner.GetProcessorIdForRow(newRow);
+	auto ctrl = Controller::GetInstance();
+	if (ctrl)
+	{
+		// Set the value of the textEditor to the current SourceID of the corresponding procssor.
+		auto processor = ctrl->GetMatrixInputProcessor(processorId);
+		if (processor)
+			m_editor.setText(String(processor->GetMatrixInputId()), false);
+	}
+}
+
+/*
+===============================================================================
+ Class MatrixOutputIdTextEditorContainer
+===============================================================================
+*/
+
+/**
+ * Class constructor.
+ */
+MatrixOutputIdTextEditorContainer::MatrixOutputIdTextEditorContainer(TableModelComponent& td)
+	: TextEditorContainer(td)
+{
+}
+
+/**
+ * Class destructor.
+ */
+MatrixOutputIdTextEditorContainer::~MatrixOutputIdTextEditorContainer()
+{
+}
+
+/**
+ * Reimplemented from TextEditor::Listener, gets called whenever the TextEditor loses keyboard focus.
+ * @param textEditor	The textEditor which has been changed.
+ */
+void MatrixOutputIdTextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
+{
+	// Get the list of rows which are currently selected on the table.
+	std::vector<int> selectedRows = m_owner.GetSelectedRows();
+	if ((selectedRows.size() < 2) ||
+		(std::find(selectedRows.begin(), selectedRows.end(), m_row) == selectedRows.end()))
+	{
+		// If this comboBoxes row (m_row) is NOT selected, or if no multi-selection was made 
+		// then modify the selectedRows list so that it only contains m_row.
+		selectedRows.clear();
+		selectedRows.push_back(m_row);
+	}
+
+	auto ctrl = Controller::GetInstance();
+	if (ctrl)
+	{
+		// New SourceID which should be applied to all procssors in the selected rows.
+		auto newSourceId = textEditor.getText().getIntValue();
+		for (auto const& processorId : m_owner.GetProcessorIdsForRows(selectedRows))
+		{
+			// Set the value of the combobox to the current MappingID of the corresponding procssor.
+			auto processor = ctrl->GetMatrixOutputProcessor(processorId);
+			if (processor)
+				processor->SetMatrixOutputId(DCS_SoundobjectTable, newSourceId);
+		}
+	}
+}
+
+/**
+ * Saves the row number where this component is located inside the overview table.
+ * It also updates the text inside the textEditor with the current SourceID
+ * @param newRow	The new row number.
+ */
+void MatrixOutputIdTextEditorContainer::SetRow(int newRow)
+{
+	m_row = newRow;
+
+	// Find the procssor instance corresponding to the given row number.
+	auto processorId = m_owner.GetProcessorIdForRow(newRow);
+	auto ctrl = Controller::GetInstance();
+	if (ctrl)
+	{
+		// Set the value of the textEditor to the current SourceID of the corresponding procssor.
+		auto processor = ctrl->GetMatrixOutputProcessor(processorId);
+		if (processor)
+			m_editor.setText(String(processor->GetMatrixOutputId()), false);
+	}
+}
+
 
 
 /*

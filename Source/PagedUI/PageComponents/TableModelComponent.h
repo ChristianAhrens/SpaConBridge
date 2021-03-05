@@ -69,11 +69,13 @@ public:
 		TC_None = 0,		//< Juce column IDs start at 1
 		TC_TrackID,
 		TC_SoundobjectID,
+		TC_InputID,
+		TC_OutputID,
+		TC_InputEditor,
+		TC_OutputEditor,
 		TC_Mapping,
 		TC_ComsMode,
 		TC_BridgingMute,
-		TC_InputEditor,
-		TC_OutputEditor,
 		TC_MAX_COLUMNS
 	};
 

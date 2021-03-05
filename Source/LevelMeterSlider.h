@@ -16,39 +16,42 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "MatrixChannelTableComponentBase.h"
 
-#include "../../../Controller.h"
+#pragma once
+
+#include <JuceHeader.h>
 
 
 namespace SoundscapeBridgeApp
 {
 
 
-/*
-===============================================================================
-	Class MatrixChannelTableComponentBase
-===============================================================================
-*/
-
 /**
- * Class constructor.
+ * LevelMeterSlider class provides a read-only slider that uses HorizontalBar Sliderstyle.
  */
-MatrixChannelTableComponentBase::MatrixChannelTableComponentBase()
-	: TableModelComponent()
+class LevelMeterSlider  : public Slider
 {
-	GetTable().setRowHeight(45);
-	GetTable().setOutlineThickness(1);
-	GetTable().setClickingTogglesRowSelection(false);
-	GetTable().setMultipleSelectionEnabled(true);
-}
+public:
+	enum LevelMeterMode
+	{
+		LMM_Invalid = 0,
+		LMM_ReadOnly,
+		LMM_Normal
+	};
 
-/**
-	* Class destructor.
-	*/
-MatrixChannelTableComponentBase::~MatrixChannelTableComponentBase()
-{
-}
+public:
+	LevelMeterSlider(const String& componentName, LevelMeterMode mode);
+	~LevelMeterSlider() override;
+
+	void mouseDown (const MouseEvent& e) override;
+	void mouseDrag (const MouseEvent& e) override;
+	void mouseUp (const MouseEvent& e) override;
+
+private:
+	LevelMeterMode m_levelMeterMode{ LMM_Invalid };
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LevelMeterSlider)
+};
 
 
 } // namespace SoundscapeBridgeApp

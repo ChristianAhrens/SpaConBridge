@@ -68,23 +68,22 @@ MatrixOutputProcessorEditor::MatrixOutputProcessorEditor(MatrixOutputProcessor& 
 	if (params.size() == 3)
 	{
 		auto fparam = dynamic_cast<AudioParameterFloat*> (params[MOI_ParamIdx_LevelMeterPostMute]);
-		m_MatrixOutputLevelMeterSlider = std::make_unique<Slider>(fparam->name);
+		m_MatrixOutputLevelMeterSlider = std::make_unique<LevelMeterSlider>(fparam->name, LevelMeterSlider::LMM_ReadOnly);
 		m_MatrixOutputLevelMeterSlider->setRange(fparam->range.start, fparam->range.end, fparam->range.interval);
-		m_MatrixOutputLevelMeterSlider->setSliderStyle(Slider::SliderStyle::LinearBar);
-		m_MatrixOutputLevelMeterSlider->setTextBoxStyle(Slider::TextBoxBelow, false, 80, 20);
 		m_MatrixOutputLevelMeterSlider->addListener(this);
 		addAndMakeVisible(m_MatrixOutputLevelMeterSlider.get());
 
 		fparam = dynamic_cast<AudioParameterFloat*> (params[MOI_ParamIdx_Gain]);
 		m_MatrixOutputGainSlider = std::make_unique<Slider>(fparam->name);
 		m_MatrixOutputGainSlider->setRange(fparam->range.start, fparam->range.end, fparam->range.interval);
-		m_MatrixOutputGainSlider->setSliderStyle(Slider::SliderStyle::LinearBar);
-		m_MatrixOutputGainSlider->setTextBoxStyle(Slider::TextBoxBelow, false, 80, 20);
+		m_MatrixOutputGainSlider->setSliderStyle(Slider::LinearHorizontal);
+		m_MatrixOutputGainSlider->setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
 		m_MatrixOutputGainSlider->addListener(this);
 		addAndMakeVisible(m_MatrixOutputGainSlider.get());
 
 		auto iparam = dynamic_cast<AudioParameterInt*> (params[MOI_ParamIdx_Mute]);
 		m_MatrixOutputMuteButton = std::make_unique<DrawableButton>(iparam->name, DrawableButton::ButtonStyle::ImageOnButtonBackground);
+		m_MatrixOutputMuteButton->setClickingTogglesState(true);
 		m_MatrixOutputMuteButton->setButtonText("Mute");
 		m_MatrixOutputMuteButton->addListener(this);
 		addAndMakeVisible(m_MatrixOutputMuteButton.get());
@@ -122,7 +121,7 @@ void MatrixOutputProcessorEditor::updateDrawableButtonImageColours()
 		return;
 
 	// create the required button drawable images based on lookandfeel colours
-	String imageName = BinaryData::mobiledata_off24px_svg;
+	String imageName = BinaryData::volume_off24px_svg;
 	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
 	JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
 		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
@@ -149,6 +148,15 @@ void MatrixOutputProcessorEditor::lookAndFeelChanged()
 {
 	Component::lookAndFeelChanged();
 	updateDrawableButtonImageColours();
+
+	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (dblookAndFeel)
+	{
+		// special handling for gain fader, since we have to deal with the same cell background colour as the slider track background
+		m_MatrixOutputGainSlider->setColour(Slider::backgroundColourId, dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkColor).darker());
+		m_MatrixOutputGainSlider->setColour(Slider::trackColourId, dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkColor).darker());
+		m_MatrixOutputGainSlider->setColour(Slider::thumbColourId, dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ThumbColor).brighter());
+	}
 }
 
 /**
@@ -218,84 +226,16 @@ void MatrixOutputProcessorEditor::sliderDragEnded(Slider* slider)
  */
 void MatrixOutputProcessorEditor::buttonClicked(Button* button)
 {
-	ignoreUnused(button);
+	auto moProcessor = dynamic_cast<MatrixOutputProcessor*>(getAudioProcessor());
+	if (moProcessor)
+	{
+		auto paramIdx = MOI_ParamIdx_MaxIndex;
+		if (button == m_MatrixOutputMuteButton.get())
+			paramIdx = MOI_ParamIdx_Mute;
 
-	// Remove keyboard focus from this editor. 
-	// Function textEditorFocusLost will then take care of setting values.
-	//m_surfaceSlider->grabKeyboardFocus();
+		moProcessor->SetParameterValue(DCS_MatrixOutputProcessor, paramIdx, static_cast<float>(button->getToggleState() ? 1 : 0));
+	}
 }
-
-/**
-* Method which gets called when a region of a component needs redrawing, either because the
-* component's repaint() method has been called, or because something has happened on the
-* screen that means a section of a window needs to be redrawn.
-* @param g		Graphics context that must be used to do the drawing operations.
-*/
-void MatrixOutputProcessorEditor::paint(Graphics& g)
-{
-	//Rectangle<int> twoDSurfaceArea = getLocalBounds();
-	//Rectangle<int> parameterEditArea = getLocalBounds();
-	//getResizePaintAreaSplit(twoDSurfaceArea, parameterEditArea);
-	//
-	//// Background of 2D slider area
-	//g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
-	//g.fillRect(twoDSurfaceArea);
-	//
-	//// Background of parameter edit elements
-	//g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId));
-	//g.fillRect(parameterEditArea);
-	
-	//// Frame
-	//g.setColour(getLookAndFeel().findColour(TableListBox::outlineColourId));
-	//g.drawRect(getLocalBounds().toFloat());
-
-	g.setColour(Colours::blue);
-	g.fillRect(getLocalBounds().toFloat());
-    
-    //// processor id (object #) in upper left corner
-    //MatrixOutputProcessor* pro = dynamic_cast<MatrixOutputProcessor*>(getAudioProcessor());
-    //if (pro)
-    //{
-    //    auto surfaceSliderLabelVisible = true;
-    //    if (twoDSurfaceArea.getWidth() < 250 || twoDSurfaceArea.getHeight() < 250)
-    //        surfaceSliderLabelVisible = false;
-    //    
-    //    auto objNumTitleText = (surfaceSliderLabelVisible ? String("Object #") : String("#")) + String(pro->GetMatrixOutputId());
-    //    auto titleTextWidth = surfaceSliderLabelVisible ? 73 : 33;
-    //    auto objNumTitleRect = twoDSurfaceArea.removeFromBottom(25).removeFromLeft(titleTextWidth + 7).removeFromRight(titleTextWidth);
-    //    
-    //    g.setColour(getLookAndFeel().findColour(TableListBox::textColourId));
-    //    g.drawText(objNumTitleText, objNumTitleRect, Justification::centredLeft);
-    //}
-}
-
-///**
-// * Minimal helper method to get the areas for parameter edits
-// * and 2D surface slider.
-// * This is to avoid code clones in paint and resize methods.
-// * @param twoDSurfaceArea	The area to be used for 2D surface controls
-// * @param parameterEditArea	The area to be used for parameter controls
-// * @return	True if the layout is to be done in portrait, false if in landscape orientation
-// */
-//bool MatrixOutputProcessorEditor::getResizePaintAreaSplit(Rectangle<int>& twoDSurfaceArea, Rectangle<int>& parameterEditArea)
-//{
-//	auto paramEditStripWidth = 90;
-//	auto paramEditStripHeight = 105;
-//	auto isPortrait = getLocalBounds().getHeight() > getLocalBounds().getWidth();
-//
-//	if (isPortrait)
-//	{
-//		twoDSurfaceArea.removeFromBottom(paramEditStripHeight);
-//		parameterEditArea.removeFromTop(twoDSurfaceArea.getHeight());
-//	}
-//	else
-//	{
-//		twoDSurfaceArea.removeFromRight(paramEditStripWidth);
-//		parameterEditArea.removeFromLeft(twoDSurfaceArea.getWidth());
-//	}
-//
-//	return isPortrait;
-//}
 
 /**
 * Called when this component's size has been changed.
@@ -305,11 +245,13 @@ void MatrixOutputProcessorEditor::resized()
 {
 	auto margin = 2;
 	auto bounds = getLocalBounds();
+	bounds.removeFromBottom(1);
+	bounds.reduce(margin, margin);
 
 	auto muteBounds = bounds.removeFromLeft(bounds.getHeight()).reduced(margin);
 	m_MatrixOutputMuteButton->setBounds(muteBounds);
 
-	auto meterBounds = bounds.removeFromTop(bounds.getHeight() / 2).reduced(margin);
+	auto meterBounds = bounds.removeFromTop(0.35f * bounds.getHeight()).reduced(margin);
 	m_MatrixOutputLevelMeterSlider->setBounds(meterBounds);
 
 	auto gainBounds = bounds.reduced(margin);

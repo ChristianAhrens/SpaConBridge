@@ -45,7 +45,8 @@ MatrixInputTableComponent::MatrixInputTableComponent()
 	// collect required info for table columns
 	std::map<CustomTableHeaderComponent::TableColumn, CustomTableHeaderComponent::ColumnProperties> tableColumns;
 	int tableHeaderFlags = (TableHeaderComponent::visible | TableHeaderComponent::sortable);
-	tableColumns[CustomTableHeaderComponent::TC_InputEditor] = CustomTableHeaderComponent::ColumnProperties("Matrix Input", 140, 140, -1, tableHeaderFlags);
+	tableColumns[CustomTableHeaderComponent::TC_InputID] = CustomTableHeaderComponent::ColumnProperties("Input #", 60, 60, -1, tableHeaderFlags);
+	tableColumns[CustomTableHeaderComponent::TC_InputEditor] = CustomTableHeaderComponent::ColumnProperties("Matrix Input", 190, 190, -1, tableHeaderFlags);
 	tableColumns[CustomTableHeaderComponent::TC_ComsMode] = CustomTableHeaderComponent::ColumnProperties("Mode", 90, 90, -1, tableHeaderFlags);
 	tableColumns[CustomTableHeaderComponent::TC_BridgingMute] = CustomTableHeaderComponent::ColumnProperties("", 90, 90, -1, tableHeaderFlags);
 

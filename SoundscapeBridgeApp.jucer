@@ -270,6 +270,8 @@
             <FILE id="nSAA4c" name="tune-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/tune-24px.svg"/>
             <FILE id="YFXXxo" name="vertical_split-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/vertical_split-24px.svg"/>
+            <FILE id="bmwxej" name="volume_off-24px.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/volume_off-24px.svg"/>
           </GROUP>
         </GROUP>
       </GROUP>
@@ -296,6 +298,10 @@
       <FILE id="Q7vthe" name="README.md" compile="0" resource="1" file="README.md"/>
     </GROUP>
     <GROUP id="{2B9DD386-1093-ADF5-E47F-5954774132B5}" name="Source">
+      <FILE id="PCeRVf" name="LevelMeterSlider.cpp" compile="1" resource="0"
+            file="Source/LevelMeterSlider.cpp"/>
+      <FILE id="rujf1F" name="LevelMeterSlider.h" compile="0" resource="0"
+            file="Source/LevelMeterSlider.h"/>
       <FILE id="hhaGim" name="SurfaceSlider.cpp" compile="1" resource="0"
             file="Source/SurfaceSlider.cpp"/>
       <FILE id="Ui13o2" name="SurfaceSlider.h" compile="0" resource="0" file="Source/SurfaceSlider.h"/>

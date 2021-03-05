@@ -21,7 +21,7 @@
 
 #include "MatrixInputProcessor.h"
 
-#include "../../SurfaceSlider.h"
+#include "../../LevelMeterSlider.h"
 
 
 namespace SoundscapeBridgeApp
@@ -41,7 +41,6 @@ public:
 	MatrixInputProcessorEditor(MatrixInputProcessor&);
 	~MatrixInputProcessorEditor() override;
 
-	void paint(Graphics&) override;
 	void resized() override;
 	void UpdateGui(bool init);
 
@@ -56,15 +55,15 @@ private:
 
 	void updateDrawableButtonImageColours();
 
-	std::unique_ptr<Slider>			m_MatrixInputLevelMeterSlider;	/**> Slider for ReverbSendGain */
-	std::unique_ptr<Slider>			m_MatrixInputGainSlider;		/**> Slider for SourceSpread */
-	std::unique_ptr<DrawableButton>	m_MatrixInputMuteButton;		/**> ComboBox for DelayMode */
+	std::unique_ptr<LevelMeterSlider>	m_MatrixInputLevelMeterSlider;	/**> LevelMeter for pre mute level */
+	std::unique_ptr<Slider>				m_MatrixInputGainSlider;		/**> Slider for input gain */
+	std::unique_ptr<DrawableButton>		m_MatrixInputMuteButton;		/**> Button for mute */
 
-	int								m_ticksSinceLastChange = 0;		/**> Used to allow some tolerance when switching between fast and slow refresh
-																	 * rates for the GUI.
-																	 * Once this counter reaches GUI_UPDATE_DELAY_TICKS, and no parameters have
-																	 * changed, the GUI will switch to GUI_UPDATE_RATE_SLOW. Switches to
-																	 * GUI_UPDATE_RATE_FAST happen immediately after any change. */
+	int									m_ticksSinceLastChange = 0;		/**> Used to allow some tolerance when switching between fast and slow refresh
+																		* rates for the GUI.
+																		* Once this counter reaches GUI_UPDATE_DELAY_TICKS, and no parameters have
+																		* changed, the GUI will switch to GUI_UPDATE_RATE_SLOW. Switches to
+																		* GUI_UPDATE_RATE_FAST happen immediately after any change. */
 
 	static constexpr int Mute_On = 1;
 

@@ -689,21 +689,6 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 						auto mipEditor = dynamic_cast<MatrixInputProcessorEditor*>(processorEditor);
 						if (mipEditor)
 							matrixInputEditor = mipEditor;
-						//if (sspEditor != m_selectedProcessorInstanceEditor.get())
-						//{
-						//	removeChildComponent(m_selectedProcessorInstanceEditor.get());
-						//	m_selectedProcessorInstanceEditor.reset();
-						//	m_selectedProcessorInstanceEditor = std::unique_ptr<SoundobjectProcessorEditor>(sspEditor);
-						//	if (m_selectedProcessorInstanceEditor)
-						//	{
-						//		addAndMakeVisible(m_selectedProcessorInstanceEditor.get());
-						//		m_selectedProcessorInstanceEditor->UpdateGui(true);
-						//	}
-						//	resized();
-						//
-						//	// since we just added another editor, remove button can be enabled (regardless of if it already was enabled)
-						//	m_removeInstance->setEnabled(true);
-						//}
 					}
 				}
 			}
@@ -711,6 +696,9 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 			// Ensure that the component knows which row number it is located at.
 			//matrixInputEditor->SetRow(rowNumber);
 			matrixInputEditor->UpdateGui(true);
+
+			// Return a pointer to the component.
+			ret = matrixInputEditor;
 		}
 		break;
 
@@ -725,28 +713,13 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 				auto ctrl = Controller::GetInstance();
 				if (ctrl)
 				{
-					auto processor = ctrl->GetMatrixInputProcessor(GetProcessorIdForRow(rowNumber));
+					auto processor = ctrl->GetMatrixOutputProcessor(GetProcessorIdForRow(rowNumber));
 					if (processor)
 					{
 						auto processorEditor = processor->createEditorIfNeeded();
 						auto mopEditor = dynamic_cast<MatrixOutputProcessorEditor*>(processorEditor);
 						if (mopEditor)
 							matrixOutputEditor = mopEditor;
-						//if (sspEditor != m_selectedProcessorInstanceEditor.get())
-						//{
-						//	removeChildComponent(m_selectedProcessorInstanceEditor.get());
-						//	m_selectedProcessorInstanceEditor.reset();
-						//	m_selectedProcessorInstanceEditor = std::unique_ptr<SoundobjectProcessorEditor>(sspEditor);
-						//	if (m_selectedProcessorInstanceEditor)
-						//	{
-						//		addAndMakeVisible(m_selectedProcessorInstanceEditor.get());
-						//		m_selectedProcessorInstanceEditor->UpdateGui(true);
-						//	}
-						//	resized();
-						//
-						//	// since we just added another editor, remove button can be enabled (regardless of if it already was enabled)
-						//	m_removeInstance->setEnabled(true);
-						//}
 					}
 				}
 			}
@@ -754,6 +727,9 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 			// Ensure that the component knows which row number it is located at.
 			//matrixOutputEditor->SetRow(rowNumber);
 			matrixOutputEditor->UpdateGui(true);
+
+			// Return a pointer to the component.
+			ret = matrixOutputEditor;
 		}
 		break;
 
@@ -778,16 +754,20 @@ int TableModelComponent::getColumnAutoSizeWidth(int columnId)
 		return 15;
 	case CustomTableHeaderComponent::TC_SoundobjectID:
 		return 40;
+	case CustomTableHeaderComponent::TC_InputID:
+		return 40;
+	case CustomTableHeaderComponent::TC_OutputID:
+		return 40;
+	case CustomTableHeaderComponent::TC_InputEditor:
+		return 190;
+	case CustomTableHeaderComponent::TC_OutputEditor:
+		return 190;
 	case CustomTableHeaderComponent::TC_Mapping:
 		return 40;
 	case CustomTableHeaderComponent::TC_ComsMode:
 		return 40;
 	case CustomTableHeaderComponent::TC_BridgingMute:
 		return 40;
-	case CustomTableHeaderComponent::TC_InputEditor:
-		return 140;
-	case CustomTableHeaderComponent::TC_OutputEditor:
-		return 140;
 	default:
 		break;
 	}

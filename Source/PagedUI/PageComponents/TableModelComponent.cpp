@@ -121,13 +121,7 @@ void CustomTableHeaderComponent::updateColumnWidths()
 	auto activeBridgingCount = ctrl->GetActiveProtocolBridgingCount();
 	auto itemWidth = 55;
 
-	setColumnWidth(TC_TrackID, itemWidth);
-	setColumnWidth(TC_SoundobjectID, static_cast<int>(1.5f * itemWidth));
-	setColumnWidth(TC_Mapping, static_cast<int>(1.5f * itemWidth));
-	setColumnWidth(TC_ComsMode, 2 * itemWidth);
 	setColumnWidth(TC_BridgingMute, activeBridgingCount * itemWidth);
-	setColumnWidth(TC_InputEditor, 2 * itemWidth);
-	setColumnWidth(TC_OutputEditor, 2 * itemWidth);
 }
 
 /**
@@ -751,23 +745,23 @@ int TableModelComponent::getColumnAutoSizeWidth(int columnId)
 	switch (columnId)
 	{
 	case CustomTableHeaderComponent::TC_TrackID:
-		return 15;
+		return 50;
 	case CustomTableHeaderComponent::TC_SoundobjectID:
-		return 40;
+		return 80;
 	case CustomTableHeaderComponent::TC_InputID:
-		return 40;
+		return 80;
 	case CustomTableHeaderComponent::TC_OutputID:
-		return 40;
+		return 80;
 	case CustomTableHeaderComponent::TC_InputEditor:
 		return 190;
 	case CustomTableHeaderComponent::TC_OutputEditor:
 		return 190;
 	case CustomTableHeaderComponent::TC_Mapping:
-		return 40;
+		return 80;
 	case CustomTableHeaderComponent::TC_ComsMode:
-		return 40;
+		return 110;
 	case CustomTableHeaderComponent::TC_BridgingMute:
-		return 40;
+		return 50;
 	default:
 		break;
 	}

@@ -1296,7 +1296,7 @@ void Controller::timerCallback()
 					// this parameter has been changed since the last timer tick.
 					if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixInputMute))
 					{
-						newIntValue = miProcessor->GetParameterValue(MII_ParamIdx_Mute);
+						newIntValue = static_cast<int>(miProcessor->GetParameterValue(MII_ParamIdx_Mute));
 
 						newMsgData._valCount = 1;
 						newMsgData._valType = ROVT_INT;
@@ -1422,7 +1422,7 @@ void Controller::timerCallback()
 					// this parameter has been changed since the last timer tick.
 					if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixOutputMute))
 					{
-						newIntValue = moProcessor->GetParameterValue(MOI_ParamIdx_Mute);
+						newIntValue = static_cast<int>(moProcessor->GetParameterValue(MOI_ParamIdx_Mute));
 
 						newMsgData._valCount = 1;
 						newMsgData._valType = ROVT_INT;

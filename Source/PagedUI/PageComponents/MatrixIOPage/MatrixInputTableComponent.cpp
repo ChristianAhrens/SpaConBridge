@@ -45,10 +45,11 @@ MatrixInputTableComponent::MatrixInputTableComponent()
 	// collect required info for table columns
 	std::map<CustomTableHeaderComponent::TableColumn, CustomTableHeaderComponent::ColumnProperties> tableColumns;
 	int tableHeaderFlags = (TableHeaderComponent::visible | TableHeaderComponent::sortable);
-	tableColumns[CustomTableHeaderComponent::TC_InputID] = CustomTableHeaderComponent::ColumnProperties("Input #", 60, 60, -1, tableHeaderFlags);
-	tableColumns[CustomTableHeaderComponent::TC_InputEditor] = CustomTableHeaderComponent::ColumnProperties("Matrix Input", 190, 190, -1, tableHeaderFlags);
-	tableColumns[CustomTableHeaderComponent::TC_ComsMode] = CustomTableHeaderComponent::ColumnProperties("Mode", 90, 90, -1, tableHeaderFlags);
-	tableColumns[CustomTableHeaderComponent::TC_BridgingMute] = CustomTableHeaderComponent::ColumnProperties("", 90, 90, -1, tableHeaderFlags);
+	tableColumns[CustomTableHeaderComponent::TC_TrackID] = CustomTableHeaderComponent::ColumnProperties("", getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_TrackID), getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_TrackID), -1, tableHeaderFlags);
+	tableColumns[CustomTableHeaderComponent::TC_InputID] = CustomTableHeaderComponent::ColumnProperties("Input #", getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_InputID), getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_InputID), -1, tableHeaderFlags);
+	tableColumns[CustomTableHeaderComponent::TC_InputEditor] = CustomTableHeaderComponent::ColumnProperties("Matrix Input", getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_InputEditor), getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_InputEditor), -1, tableHeaderFlags);
+	tableColumns[CustomTableHeaderComponent::TC_ComsMode] = CustomTableHeaderComponent::ColumnProperties("Mode", getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_ComsMode), getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_ComsMode), -1, tableHeaderFlags);
+	tableColumns[CustomTableHeaderComponent::TC_BridgingMute] = CustomTableHeaderComponent::ColumnProperties("", getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_BridgingMute), getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_BridgingMute), -1, tableHeaderFlags);
 
 	GetTable().setHeader(std::make_unique<CustomTableHeaderComponent>(tableColumns));
 

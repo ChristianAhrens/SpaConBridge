@@ -281,6 +281,20 @@ std::vector<int> TableModelComponent::GetRowsForProcessorIds(const std::vector<j
 }
 
 /**
+ * Helper method to set a new row height to internal tableListBox member
+ * and at the same time trigger resizing of the container component
+ * 
+ * @param	rowHeight	The new height value to set as row height.
+ */
+void TableModelComponent::SetRowHeight(int rowHeight)
+{
+	// set the new row height to tableListBox member 
+	m_table.setRowHeight(rowHeight);
+	// trigger overall resizing
+	resized();
+}
+
+/**
  * Get the list of rows which are currently selected on the table.
  * @return	A std::vector containing all selected row numbers.
  */

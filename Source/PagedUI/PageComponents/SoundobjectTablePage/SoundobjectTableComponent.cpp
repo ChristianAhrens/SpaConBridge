@@ -52,10 +52,11 @@ SoundobjectTableComponent::SoundobjectTableComponent()
 	tableColumns[CustomTableHeaderComponent::TC_BridgingMute] = CustomTableHeaderComponent::ColumnProperties("", getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_BridgingMute), getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_BridgingMute), -1, tableHeaderFlags);
 
 	GetTable().setHeader(std::make_unique<CustomTableHeaderComponent>(tableColumns, CustomTableHeaderComponent::TC_SoundobjectID));
-	GetTable().setRowHeight(33);
 	GetTable().setOutlineThickness(1);
 	GetTable().setClickingTogglesRowSelection(false);
 	GetTable().setMultipleSelectionEnabled(true);
+
+	SetRowHeight(33);
 }
 
 /**

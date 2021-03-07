@@ -53,6 +53,7 @@ MatrixOutputTableComponent::MatrixOutputTableComponent()
 
 	GetTable().setHeader(std::make_unique<CustomTableHeaderComponent>(tableColumns));
 
+	SetRowHeight(33);
 }
 
 /**

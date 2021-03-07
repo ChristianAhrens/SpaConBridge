@@ -79,6 +79,12 @@ SoundobjectTablePageComponent::SoundobjectTablePageComponent()
 	m_removeInstance->addListener(this);
 	addAndMakeVisible(m_removeInstance.get());
 
+	// row height slider
+	m_rowHeightSlider = std::make_unique<RowHeightSlider>("rowHeight");
+	m_rowHeightSlider->SetSliderRange(33, 66, 11);
+	m_rowHeightSlider->SetListener(this);
+	addAndMakeVisible(m_rowHeightSlider.get());
+
 	// Create quick selection buttons
 	m_selectLabel = std::make_unique<Label>("Select:", "Select:");
 	m_selectLabel->setJustificationType(Justification::centred);
@@ -188,6 +194,7 @@ void SoundobjectTablePageComponent::resized()
 		FlexItem(*m_addInstance.get()).withFlex(1).withMaxWidth(30).withMargin(FlexItem::Margin(2, 2, 3, 4)),
 		FlexItem(*m_removeInstance.get()).withFlex(1).withMaxWidth(30).withMargin(FlexItem::Margin(2, 2, 3, 2)),
 		FlexItem().withFlex(2).withHeight(30),
+		FlexItem(*m_rowHeightSlider.get()).withFlex(1).withMaxWidth(100).withMargin(FlexItem::Margin(2, 2, 3, 2)),
 		FlexItem(*m_selectLabel.get()).withFlex(1).withMaxWidth(80),
 		FlexItem(*m_selectAll.get()).withFlex(1).withMaxWidth(40).withMargin(FlexItem::Margin(2, 2, 3, 2)),
 		FlexItem(*m_selectNone.get()).withFlex(1).withMaxWidth(46).withMargin(FlexItem::Margin(2, 4, 3, 2)),
@@ -389,6 +396,16 @@ void SoundobjectTablePageComponent::lookAndFeelChanged()
 void SoundobjectTablePageComponent::onConfigUpdated()
 {
 	UpdateGui(false);
+}
+
+/**
+ * Reimplemented to handle the updated rowheightslider row height value changes
+ * @param	rowHeight	The new configured row height to set as new row height value into table memeber
+ */
+void SoundobjectTablePageComponent::rowHeightChanged(int rowHeight)
+{
+	if (m_pageContainerTable)
+		m_pageContainerTable->SetRowHeight(rowHeight);
 }
 
 

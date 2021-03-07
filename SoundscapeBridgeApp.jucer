@@ -259,6 +259,7 @@
             <FILE id="A3cgD8" name="folder_open-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/folder_open-24px.svg"/>
             <FILE id="N9NqBe" name="grain-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/grain-24px.svg"/>
+            <FILE id="ToZnzd" name="height-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/height-24px.svg"/>
             <FILE id="rlRTHW" name="help-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/help-24px.svg"/>
             <FILE id="Jc6pvI" name="mobiledata_off-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/mobiledata_off-24px.svg"/>
@@ -300,13 +301,6 @@
       <FILE id="Q7vthe" name="README.md" compile="0" resource="1" file="README.md"/>
     </GROUP>
     <GROUP id="{2B9DD386-1093-ADF5-E47F-5954774132B5}" name="Source">
-      <FILE id="PCeRVf" name="LevelMeterSlider.cpp" compile="1" resource="0"
-            file="Source/LevelMeterSlider.cpp"/>
-      <FILE id="rujf1F" name="LevelMeterSlider.h" compile="0" resource="0"
-            file="Source/LevelMeterSlider.h"/>
-      <FILE id="hhaGim" name="SurfaceSlider.cpp" compile="1" resource="0"
-            file="Source/SurfaceSlider.cpp"/>
-      <FILE id="Ui13o2" name="SurfaceSlider.h" compile="0" resource="0" file="Source/SurfaceSlider.h"/>
       <GROUP id="{A8ED2A1C-3C07-0E79-BDAB-3610B84A5477}" name="CustomAudioProcessors">
         <GROUP id="{4B509C1B-A792-E602-3BD1-999A7C1B208D}" name="MatrixInputProcessor">
           <FILE id="rj7WFi" name="MatrixInputProcessor.cpp" compile="1" resource="0"
@@ -341,16 +335,6 @@
         <FILE id="KxbyOS" name="Parameters.cpp" compile="1" resource="0" file="Source/CustomAudioProcessors/Parameters.cpp"/>
         <FILE id="pxRBX1" name="Parameters.h" compile="0" resource="0" file="Source/CustomAudioProcessors/Parameters.h"/>
       </GROUP>
-      <FILE id="YNojdV" name="LookAndFeel.cpp" compile="1" resource="0" file="Source/LookAndFeel.cpp"/>
-      <FILE id="DEBTf5" name="LookAndFeel.h" compile="0" resource="0" file="Source/LookAndFeel.h"/>
-      <FILE id="vQ5W43" name="ProtocolBridgingWrapper.cpp" compile="1" resource="0"
-            file="Source/ProtocolBridgingWrapper.cpp"/>
-      <FILE id="HbiWnW" name="ProtocolBridgingWrapper.h" compile="0" resource="0"
-            file="Source/ProtocolBridgingWrapper.h"/>
-      <FILE id="iiE5C7" name="AppConfiguration.cpp" compile="1" resource="0"
-            file="Source/AppConfiguration.cpp"/>
-      <FILE id="wLkJi4" name="AppConfiguration.h" compile="0" resource="0"
-            file="Source/AppConfiguration.h"/>
       <GROUP id="{ABC3680A-0C49-EE16-E766-E6ED89078A7C}" name="PagedUI">
         <GROUP id="{4680382C-A46A-B4C1-0D87-F92C4050063D}" name="PageComponents">
           <GROUP id="{49670C0C-DE7C-D21A-221C-9FD67169A2B2}" name="SoundobjectTablePage">
@@ -439,6 +423,27 @@
         <FILE id="H1EAfS" name="PageContainerComponent.h" compile="0" resource="0"
               file="Source/PagedUI/PageContainerComponent.h"/>
       </GROUP>
+      <FILE id="QSXwTE" name="RowHeightSlider.cpp" compile="1" resource="0"
+            file="Source/RowHeightSlider.cpp"/>
+      <FILE id="csLjVz" name="RowHeightSlider.h" compile="0" resource="0"
+            file="Source/RowHeightSlider.h"/>
+      <FILE id="PCeRVf" name="LevelMeterSlider.cpp" compile="1" resource="0"
+            file="Source/LevelMeterSlider.cpp"/>
+      <FILE id="rujf1F" name="LevelMeterSlider.h" compile="0" resource="0"
+            file="Source/LevelMeterSlider.h"/>
+      <FILE id="hhaGim" name="SurfaceSlider.cpp" compile="1" resource="0"
+            file="Source/SurfaceSlider.cpp"/>
+      <FILE id="Ui13o2" name="SurfaceSlider.h" compile="0" resource="0" file="Source/SurfaceSlider.h"/>
+      <FILE id="YNojdV" name="LookAndFeel.cpp" compile="1" resource="0" file="Source/LookAndFeel.cpp"/>
+      <FILE id="DEBTf5" name="LookAndFeel.h" compile="0" resource="0" file="Source/LookAndFeel.h"/>
+      <FILE id="vQ5W43" name="ProtocolBridgingWrapper.cpp" compile="1" resource="0"
+            file="Source/ProtocolBridgingWrapper.cpp"/>
+      <FILE id="HbiWnW" name="ProtocolBridgingWrapper.h" compile="0" resource="0"
+            file="Source/ProtocolBridgingWrapper.h"/>
+      <FILE id="iiE5C7" name="AppConfiguration.cpp" compile="1" resource="0"
+            file="Source/AppConfiguration.cpp"/>
+      <FILE id="wLkJi4" name="AppConfiguration.h" compile="0" resource="0"
+            file="Source/AppConfiguration.h"/>
       <FILE id="SKhSnW" name="MainSoundscapeBridgeAppComponent.cpp" compile="1"
             resource="0" file="Source/MainSoundscapeBridgeAppComponent.cpp"/>
       <FILE id="Z0i2A2" name="MainSoundscapeBridgeAppComponent.h" compile="0"

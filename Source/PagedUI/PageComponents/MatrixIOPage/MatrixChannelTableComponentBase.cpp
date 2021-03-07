@@ -37,7 +37,6 @@ namespace SoundscapeBridgeApp
 MatrixChannelTableComponentBase::MatrixChannelTableComponentBase()
 	: TableModelComponent()
 {
-	GetTable().setRowHeight(45);
 	GetTable().setOutlineThickness(1);
 	GetTable().setClickingTogglesRowSelection(false);
 	GetTable().setMultipleSelectionEnabled(true);

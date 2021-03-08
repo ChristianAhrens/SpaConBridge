@@ -405,6 +405,10 @@
             <FILE id="QfpD8D" name="AboutPageComponent.h" compile="0" resource="0"
                   file="Source/PagedUI/PageComponents/AboutPage/AboutPageComponent.h"/>
           </GROUP>
+          <FILE id="Kcj4KN" name="BridgingAwareTableHeaderComponent.cpp" compile="1"
+                resource="0" file="Source/PagedUI/PageComponents/BridgingAwareTableHeaderComponent.cpp"/>
+          <FILE id="RuCcki" name="BridgingAwareTableHeaderComponent.h" compile="0"
+                resource="0" file="Source/PagedUI/PageComponents/BridgingAwareTableHeaderComponent.h"/>
           <FILE id="n5XHjT" name="PageComponentBase.cpp" compile="1" resource="0"
                 file="Source/PagedUI/PageComponents/PageComponentBase.cpp"/>
           <FILE id="oNGL8i" name="PageComponentBase.h" compile="0" resource="0"

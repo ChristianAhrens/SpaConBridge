@@ -65,8 +65,6 @@ protected:
 	void resized() override;
 
 private:
-	bool	IsPortraitAspectRatio();
-
 	std::unique_ptr<MatrixInputTableComponent>	m_inputsComponent;	/**> Matrix input channelstrips component. */
 	std::unique_ptr<DrawableButton>				m_addInput;			/**> Button to add an input */
 	std::unique_ptr<DrawableButton>				m_removeInput;		/**> Button to remove the selected intput */

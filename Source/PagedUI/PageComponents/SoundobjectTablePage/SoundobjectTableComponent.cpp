@@ -18,6 +18,8 @@
 
 #include "SoundobjectTableComponent.h"
 
+#include "../BridgingAwareTableHeaderComponent.h"
+
 #include "../../../Controller.h"
 
 
@@ -43,15 +45,15 @@ SoundobjectTableComponent::SoundobjectTableComponent()
 	SetModel(this);
 
 	// collect required info for table columns
-	std::map<CustomTableHeaderComponent::TableColumn, CustomTableHeaderComponent::ColumnProperties> tableColumns;
+	std::map<BridgingAwareTableHeaderComponent::TableColumn, BridgingAwareTableHeaderComponent::ColumnProperties> tableColumns;
 	int tableHeaderFlags = (TableHeaderComponent::visible | TableHeaderComponent::sortable);
-	tableColumns[CustomTableHeaderComponent::TC_TrackID] = CustomTableHeaderComponent::ColumnProperties("", getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_TrackID), getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_TrackID), -1, tableHeaderFlags);
-	tableColumns[CustomTableHeaderComponent::TC_SoundobjectID] = CustomTableHeaderComponent::ColumnProperties("Object #", getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_SoundobjectID), getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_SoundobjectID), -1, tableHeaderFlags);
-	tableColumns[CustomTableHeaderComponent::TC_Mapping] = CustomTableHeaderComponent::ColumnProperties("Mapping", getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_Mapping), getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_Mapping), -1, tableHeaderFlags);
-	tableColumns[CustomTableHeaderComponent::TC_ComsMode] = CustomTableHeaderComponent::ColumnProperties("Mode", getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_ComsMode), getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_ComsMode), -1, tableHeaderFlags);
-	tableColumns[CustomTableHeaderComponent::TC_BridgingMute] = CustomTableHeaderComponent::ColumnProperties("", getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_BridgingMute), getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_BridgingMute), -1, tableHeaderFlags);
+	tableColumns[BridgingAwareTableHeaderComponent::TC_TrackID] = BridgingAwareTableHeaderComponent::ColumnProperties("", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_TrackID), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_TrackID), -1, tableHeaderFlags);
+	tableColumns[BridgingAwareTableHeaderComponent::TC_SoundobjectID] = BridgingAwareTableHeaderComponent::ColumnProperties("Object #", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_SoundobjectID), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_SoundobjectID), -1, tableHeaderFlags);
+	tableColumns[BridgingAwareTableHeaderComponent::TC_Mapping] = BridgingAwareTableHeaderComponent::ColumnProperties("Mapping", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_Mapping), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_Mapping), -1, tableHeaderFlags);
+	tableColumns[BridgingAwareTableHeaderComponent::TC_ComsMode] = BridgingAwareTableHeaderComponent::ColumnProperties("Mode", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_ComsMode), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_ComsMode), -1, tableHeaderFlags);
+	tableColumns[BridgingAwareTableHeaderComponent::TC_BridgingMute] = BridgingAwareTableHeaderComponent::ColumnProperties("", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_BridgingMute), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_BridgingMute), -1, tableHeaderFlags);
 
-	GetTable().setHeader(std::make_unique<CustomTableHeaderComponent>(tableColumns, CustomTableHeaderComponent::TC_SoundobjectID));
+	GetTable().setHeader(std::make_unique<BridgingAwareTableHeaderComponent>(tableColumns, BridgingAwareTableHeaderComponent::TC_SoundobjectID));
 	GetTable().setOutlineThickness(1);
 	GetTable().setClickingTogglesRowSelection(false);
 	GetTable().setMultipleSelectionEnabled(true);
@@ -108,7 +110,7 @@ void SoundobjectTableComponent::UpdateTable()
 	GetTable().updateContent();
 
 	// Refresh table header
-	auto customTableHeader = dynamic_cast<CustomTableHeaderComponent*>(&GetTable().getHeader());
+	auto customTableHeader = dynamic_cast<BridgingAwareTableHeaderComponent*>(&GetTable().getHeader());
 	if (customTableHeader)
 		customTableHeader->updateBridgingTitles();
 }

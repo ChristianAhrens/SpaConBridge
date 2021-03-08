@@ -49,7 +49,7 @@ namespace SoundscapeBridgeApp
 /**
  * Forward declarations
  */
-class CustomTableHeaderComponent;
+class BridgingAwareTableHeaderComponent;
 class SoundobjectTableComponent;
 class ComboBoxContainer;
 class TextEditorContainer;

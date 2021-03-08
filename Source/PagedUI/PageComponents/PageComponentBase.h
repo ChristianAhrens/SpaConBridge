@@ -57,6 +57,9 @@ public:
 	//==============================================================================
 	virtual void UpdateGui(bool init) = 0;
 
+protected:
+	bool	IsPortraitAspectRatio();
+
 private:
 	PageComponentType	m_pageComponentType;	/**> Type of page as specified by the PageComponentType enum. */
 

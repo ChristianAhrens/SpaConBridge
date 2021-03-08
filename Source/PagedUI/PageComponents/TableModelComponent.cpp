@@ -35,6 +35,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "TableModelComponent.h"
 
+#include "BridgingAwareTableHeaderComponent.h"
+
 #include "../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
 #include "../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessorEditor.h"
 #include "../../CustomAudioProcessors/MatrixInputProcessor/MatrixInputProcessor.h"
@@ -51,135 +53,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 namespace SoundscapeBridgeApp
 {
-
-
-/*
-===============================================================================
- Class CustomTableHeaderComponent
-===============================================================================
-*/
-
-/**
- * Class constructor.
- */
-CustomTableHeaderComponent::CustomTableHeaderComponent(const std::map<TableColumn, ColumnProperties>& tableColumns, TableColumn sortColumn)
-{
-	// Add columns to the table header
-	for (auto const& columnPropertiesKV : tableColumns)
-	{
-		addColumn(columnPropertiesKV.second._columnName,
-			columnPropertiesKV.first,
-			columnPropertiesKV.second._width,
-			columnPropertiesKV.second._minimumWidth,
-			columnPropertiesKV.second._maximumWidth,
-			columnPropertiesKV.second._propertyFlags,
-			columnPropertiesKV.second._insertIndex);
-	}
-	if (sortColumn != TC_None)
-		setSortColumnId(sortColumn, true);
-
-	updateBridgingTitles();
-	repaint();
-}
-
-/**
- * Class destructor.
- */
-CustomTableHeaderComponent::~CustomTableHeaderComponent()
-{
-}
-
-/**
- * Helper method to update the list of bridging titles by querying
- * data from controller. This should be called on configuration updates
- * that affect bridging protocol active state.
- */
-void CustomTableHeaderComponent::updateBridgingTitles()
-{
-	Controller* ctrl = Controller::GetInstance();
-	if (!ctrl)
-		return;
-
-	auto activeBridging = ctrl->GetActiveProtocolBridging();
-
-	for (auto protocolType : ProtocolBridgingTypes)
-		m_bridgingProtocolActive[protocolType] = ((activeBridging & protocolType) == protocolType);
-
-	resized();
-}
-
-/**
- * Helper method to update the sizing of columns.
- * This takes the overall available width and distributes it to the columns with a given ratio.
- */
-void CustomTableHeaderComponent::updateColumnWidths()
-{
-	Controller* ctrl = Controller::GetInstance();
-	if (!ctrl)
-		return;
-
-	auto activeBridgingCount = ctrl->GetActiveProtocolBridgingCount();
-	auto itemWidth = 55;
-
-	setColumnWidth(TC_BridgingMute, activeBridgingCount * itemWidth);
-}
-
-/**
- * Overridden to handle some special two-lined text arrangement
- * @param g The graphics object for painting
- */
-void CustomTableHeaderComponent::paint(Graphics& g)
-{
-	TableHeaderComponent::paint(g);
-
-	auto bridgingCellRect = getColumnPosition(getNumColumns(true)).reduced(3);
-
-	auto font = g.getCurrentFont();
-	font.setBold(true);
-	g.setFont(font);
-	g.setColour(getLookAndFeel().findColour(TableHeaderComponent::textColourId));
-
-	std::vector<ProtocolBridgingType> activeBridgingProtocols;
-	for (auto protocolActiveKV : m_bridgingProtocolActive)
-		if (protocolActiveKV.second)
-			activeBridgingProtocols.push_back(protocolActiveKV.first);
-
-	if (activeBridgingProtocols.empty())
-	{
-		g.drawText("Bridging", bridgingCellRect, Justification::centredLeft);
-	}
-	else
-	{
-		auto upperHalfCellRect = bridgingCellRect.removeFromTop(bridgingCellRect.getHeight() / 2).reduced(2);
-		g.drawText("Bridging", upperHalfCellRect, Justification::centred);
-
-		font.setBold(false);
-		auto fh = font.getHeight();
-		font.setHeight(fh - 2);
-		g.setFont(font);
-	
-		auto singleTitleWidth = static_cast<int>(bridgingCellRect.getWidth() / activeBridgingProtocols.size());
-
-		for (auto protocolActiveKV : m_bridgingProtocolActive)
-		{
-			if (protocolActiveKV.second)
-			{
-				auto titleRect = bridgingCellRect.removeFromLeft(singleTitleWidth).reduced(2);
-				g.drawText(GetProtocolBridgingShortName(protocolActiveKV.first), titleRect, Justification::centredLeft);
-			}
-		}
-	}
-}
-
-/**
- * Reimplemented to resize and re-postion controls on the overview window.
- */
-void CustomTableHeaderComponent::resized()
-{
-	TableHeaderComponent::resized();
-
-	updateColumnWidths();
-}
 
 
 /*
@@ -599,29 +472,29 @@ void TableModelComponent::sortOrderChanged(int newSortColumnId, bool isForwards)
 	// Use a different helper sorting function depending on which column is selected for sorting.
 	switch (newSortColumnId)
 	{
-	case CustomTableHeaderComponent::TC_TrackID:
+	case BridgingAwareTableHeaderComponent::TC_TrackID:
 		std::sort(m_processorIds.begin(), m_processorIds.end());
 		break;
-	case CustomTableHeaderComponent::TC_SoundobjectID:
+	case BridgingAwareTableHeaderComponent::TC_SoundobjectID:
 		std::sort(m_processorIds.begin(), m_processorIds.end(), TableModelComponent::LessThanSoundobjectId);
 		break;
-	case CustomTableHeaderComponent::TC_InputID:
+	case BridgingAwareTableHeaderComponent::TC_InputID:
+	case BridgingAwareTableHeaderComponent::TC_InputEditor:
 		std::sort(m_processorIds.begin(), m_processorIds.end(), TableModelComponent::LessThanMatrixInputId);
 		break;
-	case CustomTableHeaderComponent::TC_OutputID:
+	case BridgingAwareTableHeaderComponent::TC_OutputID:
+	case BridgingAwareTableHeaderComponent::TC_OutputEditor:
 		std::sort(m_processorIds.begin(), m_processorIds.end(), TableModelComponent::LessThanMatrixOutputId);
 		break;
-	case CustomTableHeaderComponent::TC_Mapping:
+	case BridgingAwareTableHeaderComponent::TC_Mapping:
 		std::sort(m_processorIds.begin(), m_processorIds.end(), TableModelComponent::LessThanMapping);
 		break;
-	case CustomTableHeaderComponent::TC_ComsMode:
+	case BridgingAwareTableHeaderComponent::TC_ComsMode:
 		std::sort(m_processorIds.begin(), m_processorIds.end(), TableModelComponent::LessThanComsMode);
 		break;
-	case CustomTableHeaderComponent::TC_BridgingMute:
+	case BridgingAwareTableHeaderComponent::TC_BridgingMute:
 		std::sort(m_processorIds.begin(), m_processorIds.end(), TableModelComponent::LessThanBridgingMute);
 		break;
-	case CustomTableHeaderComponent::TC_InputEditor:
-	case CustomTableHeaderComponent::TC_OutputEditor:
 	default:
 		break;
 	}
@@ -657,7 +530,7 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 
 	switch (columnId)
 	{
-	case CustomTableHeaderComponent::TC_TrackID:
+	case BridgingAwareTableHeaderComponent::TC_TrackID:
 		{
 			EditableLabelContainer* label = static_cast<EditableLabelContainer*> (existingComponentToUpdate);
 			
@@ -674,7 +547,7 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 		}
 		break;
 
-	case CustomTableHeaderComponent::TC_Mapping:
+	case BridgingAwareTableHeaderComponent::TC_Mapping:
 		{
 			ComboBoxContainer* comboBox = static_cast<ComboBoxContainer*> (existingComponentToUpdate);
 
@@ -691,7 +564,7 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 		}
 		break;
 
-	case CustomTableHeaderComponent::TC_SoundobjectID:
+	case BridgingAwareTableHeaderComponent::TC_SoundobjectID:
 		{
 			TextEditorContainer* textEdit = static_cast<TextEditorContainer*> (existingComponentToUpdate);
 
@@ -708,7 +581,7 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 		}
 		break;
 
-	case CustomTableHeaderComponent::TC_InputID:
+	case BridgingAwareTableHeaderComponent::TC_InputID:
 		{
 			TextEditorContainer* textEdit = static_cast<TextEditorContainer*> (existingComponentToUpdate);
 
@@ -725,7 +598,7 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 		}
 		break;
 
-	case CustomTableHeaderComponent::TC_OutputID:
+	case BridgingAwareTableHeaderComponent::TC_OutputID:
 		{
 			TextEditorContainer* textEdit = static_cast<TextEditorContainer*> (existingComponentToUpdate);
 
@@ -742,7 +615,7 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 		}
 		break;
 
-	case CustomTableHeaderComponent::TC_ComsMode:
+	case BridgingAwareTableHeaderComponent::TC_ComsMode:
 		{
 			RadioButtonContainer* radioButton = static_cast<RadioButtonContainer*> (existingComponentToUpdate);
 
@@ -759,7 +632,7 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 		}
 		break;
 
-	case CustomTableHeaderComponent::TC_BridgingMute:
+	case BridgingAwareTableHeaderComponent::TC_BridgingMute:
 		{
 			MuteButtonContainer* muteButton = static_cast<MuteButtonContainer*> (existingComponentToUpdate);
 
@@ -777,7 +650,7 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 		}
 		break;
 
-	case CustomTableHeaderComponent::TC_InputEditor:
+	case BridgingAwareTableHeaderComponent::TC_InputEditor:
 		{
 			MatrixInputProcessorEditor* matrixInputEditor = static_cast<MatrixInputProcessorEditor*> (existingComponentToUpdate);
 			
@@ -808,7 +681,7 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 		}
 		break;
 
-	case CustomTableHeaderComponent::TC_OutputEditor:
+	case BridgingAwareTableHeaderComponent::TC_OutputEditor:
 		{
 		MatrixOutputProcessorEditor* matrixOutputEditor = static_cast<MatrixOutputProcessorEditor*> (existingComponentToUpdate);
 
@@ -856,23 +729,23 @@ int TableModelComponent::getColumnAutoSizeWidth(int columnId)
 {
 	switch (columnId)
 	{
-	case CustomTableHeaderComponent::TC_TrackID:
+	case BridgingAwareTableHeaderComponent::TC_TrackID:
 		return 40;
-	case CustomTableHeaderComponent::TC_SoundobjectID:
+	case BridgingAwareTableHeaderComponent::TC_SoundobjectID:
 		return 80;
-	case CustomTableHeaderComponent::TC_InputID:
+	case BridgingAwareTableHeaderComponent::TC_InputID:
 		return 70;
-	case CustomTableHeaderComponent::TC_OutputID:
+	case BridgingAwareTableHeaderComponent::TC_OutputID:
 		return 70;
-	case CustomTableHeaderComponent::TC_InputEditor:
+	case BridgingAwareTableHeaderComponent::TC_InputEditor:
 		return 190;
-	case CustomTableHeaderComponent::TC_OutputEditor:
+	case BridgingAwareTableHeaderComponent::TC_OutputEditor:
 		return 190;
-	case CustomTableHeaderComponent::TC_Mapping:
+	case BridgingAwareTableHeaderComponent::TC_Mapping:
 		return 80;
-	case CustomTableHeaderComponent::TC_ComsMode:
+	case BridgingAwareTableHeaderComponent::TC_ComsMode:
 		return 110;
-	case CustomTableHeaderComponent::TC_BridgingMute:
+	case BridgingAwareTableHeaderComponent::TC_BridgingMute:
 		return 50;
 	default:
 		break;

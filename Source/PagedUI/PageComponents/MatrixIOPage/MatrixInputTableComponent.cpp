@@ -18,6 +18,8 @@
 
 #include "MatrixInputTableComponent.h"
 
+#include "../BridgingAwareTableHeaderComponent.h"
+
 #include "../../../Controller.h"
 
 
@@ -43,15 +45,15 @@ MatrixInputTableComponent::MatrixInputTableComponent()
 	SetModel(this);
 
 	// collect required info for table columns
-	std::map<CustomTableHeaderComponent::TableColumn, CustomTableHeaderComponent::ColumnProperties> tableColumns;
+	std::map<BridgingAwareTableHeaderComponent::TableColumn, BridgingAwareTableHeaderComponent::ColumnProperties> tableColumns;
 	int tableHeaderFlags = (TableHeaderComponent::visible | TableHeaderComponent::sortable);
-	tableColumns[CustomTableHeaderComponent::TC_TrackID] = CustomTableHeaderComponent::ColumnProperties("", getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_TrackID), getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_TrackID), -1, tableHeaderFlags);
-	tableColumns[CustomTableHeaderComponent::TC_InputID] = CustomTableHeaderComponent::ColumnProperties("Input #", getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_InputID), getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_InputID), -1, tableHeaderFlags);
-	tableColumns[CustomTableHeaderComponent::TC_InputEditor] = CustomTableHeaderComponent::ColumnProperties("Matrix Input", getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_InputEditor), getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_InputEditor), -1, tableHeaderFlags);
-	tableColumns[CustomTableHeaderComponent::TC_ComsMode] = CustomTableHeaderComponent::ColumnProperties("Mode", getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_ComsMode), getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_ComsMode), -1, tableHeaderFlags);
-	tableColumns[CustomTableHeaderComponent::TC_BridgingMute] = CustomTableHeaderComponent::ColumnProperties("", getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_BridgingMute), getColumnAutoSizeWidth(CustomTableHeaderComponent::TC_BridgingMute), -1, tableHeaderFlags);
+	tableColumns[BridgingAwareTableHeaderComponent::TC_TrackID] = BridgingAwareTableHeaderComponent::ColumnProperties("", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_TrackID), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_TrackID), -1, tableHeaderFlags);
+	tableColumns[BridgingAwareTableHeaderComponent::TC_InputID] = BridgingAwareTableHeaderComponent::ColumnProperties("Input #", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_InputID), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_InputID), -1, tableHeaderFlags);
+	tableColumns[BridgingAwareTableHeaderComponent::TC_InputEditor] = BridgingAwareTableHeaderComponent::ColumnProperties("Matrix Input", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_InputEditor), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_InputEditor), -1, tableHeaderFlags);
+	tableColumns[BridgingAwareTableHeaderComponent::TC_ComsMode] = BridgingAwareTableHeaderComponent::ColumnProperties("Mode", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_ComsMode), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_ComsMode), -1, tableHeaderFlags);
+	tableColumns[BridgingAwareTableHeaderComponent::TC_BridgingMute] = BridgingAwareTableHeaderComponent::ColumnProperties("", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_BridgingMute), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_BridgingMute), -1, tableHeaderFlags);
 
-	GetTable().setHeader(std::make_unique<CustomTableHeaderComponent>(tableColumns));
+	GetTable().setHeader(std::make_unique<BridgingAwareTableHeaderComponent>(tableColumns));
 
 	SetRowHeight(33);
 }
@@ -104,7 +106,7 @@ void MatrixInputTableComponent::UpdateTable()
 	GetTable().updateContent();
 	
 	// Refresh table header
-	auto customTableHeader = dynamic_cast<CustomTableHeaderComponent*>(&GetTable().getHeader());
+	auto customTableHeader = dynamic_cast<BridgingAwareTableHeaderComponent*>(&GetTable().getHeader());
 	if (customTableHeader)
 		customTableHeader->updateBridgingTitles();
 }

@@ -43,8 +43,12 @@ public:
 
 	//==========================================================================
 	int getNumRows() override;
+	void selectedRowsChanged(int lastRowSelected) override;
 
 protected:
+	//==============================================================================
+	void onAddProcessor() override;
+	void onRemoveProcessor() override;
 
 private:
 

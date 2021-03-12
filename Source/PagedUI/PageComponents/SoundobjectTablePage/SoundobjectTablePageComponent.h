@@ -39,7 +39,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../../../SoundscapeBridgeAppCommon.h"
 #include "../../../AppConfiguration.h"
-#include "../../../RowHeightSlider.h"
 
 
 namespace SoundscapeBridgeApp
@@ -63,9 +62,7 @@ class SoundobjectProcessorEditor;
  * and it's quick selection buttons.
  */
 class SoundobjectTablePageComponent :	public PageComponentBase,
-										public Button::Listener,
-										public AppConfiguration::Watcher,
-										public RowHeightSlider::RowHeightListener
+										public AppConfiguration::Watcher
 {
 public:
 	SoundobjectTablePageComponent();
@@ -75,19 +72,10 @@ public:
 	void UpdateGui(bool init) override;
 
 	//==============================================================================
-	void lookAndFeelChanged() override;
-
-	//==============================================================================
-	void buttonClicked(Button*) override;
-
-	//==============================================================================
-	void onCurrentSelectedProcessorChanged(SoundobjectProcessorId selectedProcessorId);
+	void SetSoundsourceProcessorEditorActive(SoundobjectProcessorId processorId);
 
 	//==========================================================================
 	void onConfigUpdated() override;
-
-	//==========================================================================
-	void rowHeightChanged(int rowHeight) override;
 
 protected:
 	//==============================================================================
@@ -95,14 +83,8 @@ protected:
 	void resized() override;
 
 private:
-	std::unique_ptr<SoundobjectTableComponent>	m_pageContainerTable;				/**> The actual table model / component inside this component. */
+	std::unique_ptr<SoundobjectTableComponent>	m_soundobjectsTable;				/**> The actual table model / component inside this component. */
 	std::unique_ptr<SoundobjectProcessorEditor> m_selectedProcessorInstanceEditor;	/**> The processor editor component corresponding to the selected row */
-	std::unique_ptr<DrawableButton>				m_addInstance;						/**> Button to add a processor instance */
-	std::unique_ptr<DrawableButton>				m_removeInstance;					/**> Button to remove the selected processor instance */
-	std::unique_ptr<RowHeightSlider>			m_rowHeightSlider;					/**> Special slider component instance to modify table row height. */
-	std::unique_ptr<Label>						m_selectLabel;						/**> Quick select label */
-	std::unique_ptr<TextButton>					m_selectAll;						/**> Select all rows button. */
-	std::unique_ptr<TextButton>					m_selectNone;						/**> Select no rows button. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SoundobjectTablePageComponent)
 };

@@ -21,6 +21,7 @@
 #include "../BridgingAwareTableHeaderComponent.h"
 
 #include "../../../Controller.h"
+#include "../../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
 
 
 namespace SoundscapeBridgeApp
@@ -53,11 +54,14 @@ SoundobjectTableComponent::SoundobjectTableComponent()
 	tableColumns[BridgingAwareTableHeaderComponent::TC_ComsMode] = BridgingAwareTableHeaderComponent::ColumnProperties("Mode", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_ComsMode), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_ComsMode), -1, tableHeaderFlags);
 	tableColumns[BridgingAwareTableHeaderComponent::TC_BridgingMute] = BridgingAwareTableHeaderComponent::ColumnProperties("", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_BridgingMute), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_BridgingMute), -1, tableHeaderFlags);
 
-	GetTable().setHeader(std::make_unique<BridgingAwareTableHeaderComponent>(tableColumns, BridgingAwareTableHeaderComponent::TC_SoundobjectID));
-	GetTable().setOutlineThickness(1);
-	GetTable().setClickingTogglesRowSelection(false);
-	GetTable().setMultipleSelectionEnabled(true);
-
+	auto table = GetTable();
+	if (table)
+	{
+		table->setHeader(std::make_unique<BridgingAwareTableHeaderComponent>(tableColumns, BridgingAwareTableHeaderComponent::TC_SoundobjectID));
+		table->setOutlineThickness(1);
+		table->setClickingTogglesRowSelection(false);
+		table->setMultipleSelectionEnabled(true);
+	}
 	SetRowHeight(33);
 }
 
@@ -83,12 +87,16 @@ void SoundobjectTableComponent::RecreateTableRowIds()
 			GetProcessorIds().push_back(processorId);
 	}
 
-	// Clear row selection, since rows may have changed.
-	auto currentSelectedRows = GetTable().getSelectedRows();
-	if (!currentSelectedRows.isEmpty())
+	auto table = GetTable();
+	if (table)
 	{
-		GetTable().deselectAllRows();
-		GetTable().selectRow(currentSelectedRows[currentSelectedRows.size() - 1]);
+		// Clear row selection, since rows may have changed.
+		auto currentSelectedRows = table->getSelectedRows();
+		if (!currentSelectedRows.isEmpty())
+		{
+			table->deselectAllRows();
+			table->selectRow(currentSelectedRows[currentSelectedRows.size() - 1]);
+		}
 	}
 }
 
@@ -106,13 +114,17 @@ void SoundobjectTableComponent::UpdateTable()
 			SetSelectedRows(selectedRows);
 	}
 
-	// Refresh table
-	GetTable().updateContent();
+	auto table = GetTable();
+	if (table)
+	{
+		// Refresh table
+		table->updateContent();
 
-	// Refresh table header
-	auto customTableHeader = dynamic_cast<BridgingAwareTableHeaderComponent*>(&GetTable().getHeader());
-	if (customTableHeader)
-		customTableHeader->updateBridgingTitles();
+		// Refresh table header
+		auto customTableHeader = dynamic_cast<BridgingAwareTableHeaderComponent*>(&table->getHeader());
+		if (customTableHeader)
+			customTableHeader->updateBridgingTitles();
+	}
 }
 
 /**
@@ -141,6 +153,50 @@ void SoundobjectTableComponent::selectedRowsChanged(int lastRowSelected)
 		ctrl->SetSelectedSoundobjectProcessorIds(GetProcessorIdsForRows(GetSelectedRows()), true);
 
 	TableModelComponent::selectedRowsChanged(lastRowSelected);
+}
+
+/**
+ * Reimplemented pure virtual method that is used as std::function callback in table control bar
+ */
+void SoundobjectTableComponent::onAddProcessor()
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
+	ctrl->createNewMatrixInputProcessor();
+}
+
+/**
+ * Reimplemented pure virtual method that is used as std::function callback in table control bar
+ */
+void SoundobjectTableComponent::onRemoveProcessor()
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
+	auto const& selectedProcessorIds = GetProcessorIdsForRows(GetSelectedRows());
+
+	if (ctrl->GetSoundobjectProcessorCount() <= selectedProcessorIds.size())
+	{
+		if (onCurrentSelectedProcessorChanged)
+			onCurrentSelectedProcessorChanged(INVALID_PROCESSOR_ID);
+	}
+	else
+	{
+		auto processorCount = ctrl->GetSoundobjectProcessorCount();
+		auto currentLastProcessorId = processorCount - 1;
+		auto selectedProcessorsToRemoveCount = selectedProcessorIds.size();
+		auto nextStillExistingId = static_cast<SoundobjectProcessorId>(currentLastProcessorId - selectedProcessorsToRemoveCount);
+		selectedRowsChanged(nextStillExistingId);
+	}
+
+	for (auto processorId : selectedProcessorIds)
+	{
+		if (ctrl->GetSoundobjectProcessorCount() >= 1)
+			auto processor = std::unique_ptr<SoundobjectProcessor>(ctrl->GetSoundobjectProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
+	}
 }
 
 

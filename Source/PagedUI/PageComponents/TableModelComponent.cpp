@@ -35,6 +35,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "TableModelComponent.h"
 
+#include "TableControlBarComponent.h"
 #include "BridgingAwareTableHeaderComponent.h"
 
 #include "../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
@@ -64,10 +65,21 @@ namespace SoundscapeBridgeApp
 /**
  * Class constructor.
  */
-TableModelComponent::TableModelComponent()
+TableModelComponent::TableModelComponent(ControlBarPosition pos)
 {
-	// Create our table component and add it to this component..
-	addAndMakeVisible(m_table);
+	// Create our table component and add it to this component.
+	m_table = std::make_unique<TableListBox>();
+	addAndMakeVisible(m_table.get());
+	m_tableControlBar = std::make_unique<TableControlBarComponent>();
+	addAndMakeVisible(m_tableControlBar.get());
+
+	m_tableControlBar->onAddClick = [=]{ onAddProcessor(); };
+	m_tableControlBar->onRemoveClick = [=] { onRemoveProcessor(); };
+	m_tableControlBar->onSelectAllClick = [=] { onSelectAllProcessors(); };
+	m_tableControlBar->onSelectNoneClick = [=] { onDeselectAllProcessors(); };
+	m_tableControlBar->onHeightChanged = [=](int height) { SetRowHeight(height); };
+
+	SetControlBarPosition(pos);
 }
 
 /**
@@ -83,7 +95,25 @@ TableModelComponent::~TableModelComponent()
 */
 void TableModelComponent::SetModel(TableListBoxModel* model)
 {
-	m_table.setModel(model);
+	if (m_table)
+		m_table->setModel(model);
+}
+
+/**
+ * Setter for the member defining where the table control bar shall be positioned when resizing
+ * @param	pos	The position relative to the table component where to put the control bar.
+ */
+void TableModelComponent::SetControlBarPosition(ControlBarPosition pos)
+{
+	m_controlBarPosition = pos;
+
+	if (m_tableControlBar)
+	{
+		if (pos == CBP_Bottom || pos == CBP_Top)
+			m_tableControlBar->SetLayoutDirection(TableControlBarComponent::LD_Horizontal);
+		else if (pos == CBP_Left || pos == CBP_Right)
+			m_tableControlBar->SetLayoutDirection(TableControlBarComponent::LD_Vertical);
+	}
 }
 
 /**
@@ -109,10 +139,10 @@ juce::int32 TableModelComponent::GetProcessorIdForRow(int rowNumber) const
  */
 std::vector<juce::int32> TableModelComponent::GetProcessorIdsForRows(const std::vector<int>& rowNumbers) const
 {
-	std::vector<SoundobjectProcessorId> ids;
+	std::vector<juce::int32> ids;
 	ids.reserve(rowNumbers.size());
-	for (std::size_t i = 0; i < rowNumbers.size(); ++i)
-		ids.push_back(GetProcessorIdForRow(rowNumbers[i]));
+	for (auto const& rowNumber : rowNumbers)
+		ids.push_back(GetProcessorIdForRow(rowNumber));
 
 	return ids;
 }
@@ -162,7 +192,8 @@ std::vector<int> TableModelComponent::GetRowsForProcessorIds(const std::vector<j
 void TableModelComponent::SetRowHeight(int rowHeight)
 {
 	// set the new row height to tableListBox member 
-	m_table.setRowHeight(rowHeight);
+	if (m_table)
+		m_table->setRowHeight(rowHeight);
 	// trigger overall resizing
 	resized();
 }
@@ -174,9 +205,13 @@ void TableModelComponent::SetRowHeight(int rowHeight)
 std::vector<int> TableModelComponent::GetSelectedRows() const
 {
 	std::vector<int> selectedRows;
-	selectedRows.reserve(m_table.getSelectedRows().size());
-	for (int i = 0; i < m_table.getSelectedRows().size(); ++i)
-		selectedRows.push_back(m_table.getSelectedRows()[i]);
+
+	if (m_table)
+	{
+		selectedRows.reserve(m_table->getSelectedRows().size());
+		for (int i = 0; i < m_table->getSelectedRows().size(); ++i)
+			selectedRows.push_back(m_table->getSelectedRows()[i]);
+	}
 
 	return selectedRows;
 }
@@ -187,10 +222,13 @@ std::vector<int> TableModelComponent::GetSelectedRows() const
  */
 void TableModelComponent::SetSelectedRows(const std::vector<int>& rows)
 {
-	m_table.deselectAllRows();
-	
-	for (auto const& row : rows)
-		m_table.selectRow(row, true, false);
+	if (m_table)
+	{
+		m_table->deselectAllRows();
+
+		for (auto const& row : rows)
+			m_table->selectRow(row, true, false);
+	}
 }
 
 /**
@@ -199,10 +237,13 @@ void TableModelComponent::SetSelectedRows(const std::vector<int>& rows)
  */
 void TableModelComponent::SelectAllRows(bool all)
 {
-	if (all)
-		m_table.selectRangeOfRows(0, m_table.getNumRows(), true /* Do not scroll */);
-	else
-		m_table.deselectAllRows();
+	if (m_table)
+	{
+		if (all)
+			m_table->selectRangeOfRows(0, m_table->getNumRows(), true /* Do not scroll */);
+		else
+			m_table->deselectAllRows();
+	}
 }
 
 /**
@@ -406,8 +447,11 @@ bool TableModelComponent::LessThanBridgingMute(juce::int32 pId1, juce::int32 pId
  */
 void TableModelComponent::backgroundClicked(const MouseEvent &event)
 {
-	// Clear selection
-	m_table.deselectAllRows();
+	if (m_table)
+	{
+		// Clear selection
+		m_table->deselectAllRows();
+	}
 
 	// Base class implementation.
 	TableListBoxModel::backgroundClicked(event);
@@ -467,7 +511,8 @@ void TableModelComponent::sortOrderChanged(int newSortColumnId, bool isForwards)
 {
 	// Remember row selection so it can be restored after sorting.
 	auto selectedProcessors = GetProcessorIdsForRows(GetSelectedRows());
-	m_table.deselectAllRows();
+	if (m_table)
+		m_table->deselectAllRows();
 
 	// Use a different helper sorting function depending on which column is selected for sorting.
 	switch (newSortColumnId)
@@ -503,14 +548,17 @@ void TableModelComponent::sortOrderChanged(int newSortColumnId, bool isForwards)
 	if (!isForwards)
 		std::reverse(m_processorIds.begin(), m_processorIds.end());
 
-	m_table.updateContent();
-
-	// Restore row selection after sorting order has been changed, BUT make sure that
-	// it is the same Processors which are selected after the sorting, NOT the same rows.
-	for (auto processorId : selectedProcessors)
+	if (m_table)
 	{
-		int rowNo = static_cast<int>(std::find(m_processorIds.begin(), m_processorIds.end(), processorId) - m_processorIds.begin());
-		m_table.selectRow(rowNo, true /* don't scroll */, false /* do not deselect other rows*/);
+		m_table->updateContent();
+
+		// Restore row selection after sorting order has been changed, BUT make sure that
+		// it is the same Processors which are selected after the sorting, NOT the same rows.
+		for (auto processorId : selectedProcessors)
+		{
+			int rowNo = static_cast<int>(std::find(m_processorIds.begin(), m_processorIds.end(), processorId) - m_processorIds.begin());
+			m_table->selectRow(rowNo, true /* don't scroll */, false /* do not deselect other rows*/);
+		}
 	}
 }
 
@@ -760,15 +808,17 @@ int TableModelComponent::getColumnAutoSizeWidth(int columnId)
  */
 void TableModelComponent::selectedRowsChanged(int lastRowSelected)
 {
-	if (currentSelectedProcessorChanged)
+	if (onCurrentSelectedProcessorChanged && m_table)
 	{
-		if (m_table.getSelectedRows().isEmpty() || m_table.getSelectedRows().size() > 1)
+		if (m_table->getSelectedRows().isEmpty() || m_table->getSelectedRows().size() > 1)
 		{
-			currentSelectedProcessorChanged(SoundscapeBridgeApp::INVALID_PROCESSOR_ID);
+			onCurrentSelectedProcessorChanged(SoundscapeBridgeApp::INVALID_PROCESSOR_ID);
+			m_tableControlBar->SetRemoveEnabled(false);
 		}
 		else
 		{
-			currentSelectedProcessorChanged(GetProcessorIdForRow(lastRowSelected));
+			onCurrentSelectedProcessorChanged(GetProcessorIdForRow(lastRowSelected));
+			m_tableControlBar->SetRemoveEnabled(true);
 		}
 	}
 }
@@ -778,7 +828,42 @@ void TableModelComponent::selectedRowsChanged(int lastRowSelected)
  */
 void TableModelComponent::resized()
 {
-	m_table.setBounds(getLocalBounds());
+	auto tableBounds = getLocalBounds();
+	auto tableControlBarBounds = juce::Rectangle<int>();
+
+	switch (m_controlBarPosition)
+	{
+	case CBP_Left:
+		tableControlBarBounds = tableBounds.removeFromLeft(32);
+		break;
+	case CBP_Right:
+		tableControlBarBounds = tableBounds.removeFromRight(32);
+		break;
+	case CBP_Top:
+		tableControlBarBounds = tableBounds.removeFromTop(32);
+		break;
+	case CBP_Bottom:
+	default:
+		tableControlBarBounds = tableBounds.removeFromBottom(32);
+		break;
+	}
+
+	if (m_table)
+		m_table->setBounds(tableBounds);
+
+	if (m_tableControlBar)
+		m_tableControlBar->setBounds(tableControlBarBounds);
+}
+
+
+void TableModelComponent::onSelectAllProcessors()
+{
+	SelectAllRows(true);
+}
+
+void TableModelComponent::onDeselectAllProcessors()
+{
+	SelectAllRows(false);
 }
 
 
@@ -1314,6 +1399,11 @@ void RadioButtonContainer::SetRow(int newRow)
 			m_txButton.setToggleState(((newMode & CM_Tx) == CM_Tx), dontSendNotification);
 			m_rxButton.setToggleState(((newMode & CM_Rx) == CM_Rx), dontSendNotification);
 		}
+		else
+		{
+			m_txButton.setEnabled(false);
+			m_rxButton.setEnabled(false);
+		}
 	}
 }
 
@@ -1620,11 +1710,15 @@ void EditableLabelContainer::mouseDown(const MouseEvent& event)
 	// Emulate R1 behaviour that is not standard for Juce: if multiple rows are selected
 	// and one of the selected rows is clicked, only this row should remain selected.
 	// So here we clear the selection and further down the clicked row is selected.
-	if ((m_owner.GetTable().getNumSelectedRows() > 1) && m_owner.GetTable().isRowSelected(m_row))
-		m_owner.GetTable().deselectAllRows();
+	auto table = m_owner.GetTable();
+	if (table != nullptr)
+	{
+		if ((table->getNumSelectedRows() > 1) && table->isRowSelected(m_row))
+			table->deselectAllRows();
 
-	// Single click on the label should simply select the row
-	m_owner.GetTable().selectRowsBasedOnModifierKeys(m_row, event.mods, false);
+		// Single click on the label should simply select the row
+		table->selectRowsBasedOnModifierKeys(m_row, event.mods, false);
+	}
 
 	// Base class implementation.
 	Label::mouseDown(event);

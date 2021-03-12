@@ -123,19 +123,48 @@ void RowHeightSlider::paint(Graphics& g)
  */
 void RowHeightSlider::resized()
 {
-	auto drawableWidth = static_cast<int>(0.8f * getLocalBounds().getHeight());
+	auto bounds = getLocalBounds();
 
-	if (m_arrowComponent)
+	auto isPortrait = bounds.getHeight() > bounds.getWidth();
+	if (isPortrait)
 	{
-		auto drawableBounds = getLocalBounds().removeFromLeft(drawableWidth).reduced(1);
-		drawableBounds.reduce(0, 2);
-		m_arrowComponent->setTransformToFit(drawableBounds.toFloat(), RectanglePlacement::fillDestination);
+		auto drawableHeight = static_cast<int>(0.8f * getLocalBounds().getWidth());
+
+		if (m_arrowComponent)
+		{
+			auto drawableBounds = getLocalBounds().removeFromTop(drawableHeight).reduced(1);
+			drawableBounds.reduce(2, 0);
+			m_arrowComponent->setTransformToFit(drawableBounds.toFloat(), RectanglePlacement::fillDestination);
+		}
+
+		if (m_slider)
+		{
+			if (m_slider->getSliderStyle() != Slider::LinearVertical)
+				m_slider->setSliderStyle(Slider::LinearVertical);
+
+			auto sliderBounds = getLocalBounds().removeFromBottom(getLocalBounds().getHeight() - (drawableHeight - 2));
+			m_slider->setBounds(sliderBounds);
+		}
 	}
-
-	if (m_slider)
+	else
 	{
-		auto sliderBounds = getLocalBounds().removeFromRight(getLocalBounds().getWidth() - (drawableWidth - 2));
-		m_slider->setBounds(sliderBounds);
+		auto drawableWidth = static_cast<int>(0.8f * getLocalBounds().getHeight());
+
+		if (m_arrowComponent)
+		{
+			auto drawableBounds = getLocalBounds().removeFromLeft(drawableWidth).reduced(1);
+			drawableBounds.reduce(0, 2);
+			m_arrowComponent->setTransformToFit(drawableBounds.toFloat(), RectanglePlacement::fillDestination);
+		}
+
+		if (m_slider)
+		{
+			if (m_slider->getSliderStyle() != Slider::LinearHorizontal)
+				m_slider->setSliderStyle(Slider::LinearHorizontal);
+
+			auto sliderBounds = getLocalBounds().removeFromRight(getLocalBounds().getWidth() - (drawableWidth - 2));
+			m_slider->setBounds(sliderBounds);
+		}
 	}
 }
 

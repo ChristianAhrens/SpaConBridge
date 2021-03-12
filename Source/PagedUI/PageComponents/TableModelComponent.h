@@ -53,6 +53,7 @@ class TextEditorContainer;
 class RadioButtonContainer;
 class EditableLabelContainer;
 class SoundobjectProcessorEditor;
+class TableControlBarComponent;
 
 
 /**
@@ -62,11 +63,21 @@ class TableModelComponent : public Component,
 							public TableListBoxModel
 {
 public:
+	enum ControlBarPosition
+	{
+		CBP_Top,
+		CBP_Bottom,
+		CBP_Left,
+		CBP_Right
+	};
 
-	TableModelComponent();
+public:
+
+	TableModelComponent(ControlBarPosition pos = ControlBarPosition::CBP_Bottom);
 	~TableModelComponent() override;
 
 	void SetModel(TableListBoxModel* model);
+	void SetControlBarPosition(ControlBarPosition pos);
 
 	//==========================================================================
 	virtual void RecreateTableRowIds() = 0;
@@ -85,7 +96,7 @@ public:
 	int GetRowForProcessorId(juce::int32 processorId) const;
 	std::vector<int> GetRowsForProcessorIds(const std::vector<juce::int32>& processorIds) const;
 
-	TableListBox& GetTable() { return m_table; }
+	TableListBox* GetTable() { return m_table.get(); }
 	std::vector<juce::int32>& GetProcessorIds() { return m_processorIds; }
 
 	void SetRowHeight(int rowHeight);
@@ -107,11 +118,22 @@ public:
 	void resized() override;
 
 	// Callback functions
-	std::function<void(juce::int32)>	currentSelectedProcessorChanged;
+	std::function<void(juce::int32)>	onCurrentSelectedProcessorChanged;
+
+protected:
+	//==============================================================================
+	virtual void onAddProcessor() = 0;
+	virtual void onRemoveProcessor() = 0;
+
+	//==============================================================================
+	void onSelectAllProcessors();
+	void onDeselectAllProcessors();
 
 private:
-	TableListBox				m_table;			/**> The table component itself. */
-	std::vector<juce::int32>	m_processorIds;		/**> Local list of Soundobject Processor instance IDs, one for each row in the table. */
+	std::unique_ptr<TableListBox>				m_table;				/**> The table component itself. */
+	std::unique_ptr<TableControlBarComponent>	m_tableControlBar;		/**> The control bottom bar. */
+	ControlBarPosition							m_controlBarPosition;	/**> The position of the control bar. */
+	std::vector<juce::int32>					m_processorIds;			/**> Local list of Soundobject Processor instance IDs, one for each row in the table. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TableModelComponent)
 };

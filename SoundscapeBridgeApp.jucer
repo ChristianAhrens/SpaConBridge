@@ -413,6 +413,10 @@
                 file="Source/PagedUI/PageComponents/PageComponentBase.cpp"/>
           <FILE id="oNGL8i" name="PageComponentBase.h" compile="0" resource="0"
                 file="Source/PagedUI/PageComponents/PageComponentBase.h"/>
+          <FILE id="u6GBvH" name="TableControlBarComponent.cpp" compile="1" resource="0"
+                file="Source/PagedUI/PageComponents/TableControlBarComponent.cpp"/>
+          <FILE id="irJvkq" name="TableControlBarComponent.h" compile="0" resource="0"
+                file="Source/PagedUI/PageComponents/TableControlBarComponent.h"/>
           <FILE id="QDmNPN" name="TableModelComponent.cpp" compile="1" resource="0"
                 file="Source/PagedUI/PageComponents/TableModelComponent.cpp"/>
           <FILE id="voDICu" name="TableModelComponent.h" compile="0" resource="0"

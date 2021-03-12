@@ -21,6 +21,7 @@
 #include "../BridgingAwareTableHeaderComponent.h"
 
 #include "../../../Controller.h"
+#include "../../../CustomAudioProcessors/MatrixOutputProcessor/MatrixOutputProcessor.h"
 
 
 namespace SoundscapeBridgeApp
@@ -53,7 +54,9 @@ MatrixOutputTableComponent::MatrixOutputTableComponent()
 	tableColumns[BridgingAwareTableHeaderComponent::TC_ComsMode] = BridgingAwareTableHeaderComponent::ColumnProperties("Mode", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_ComsMode), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_ComsMode), -1, tableHeaderFlags);
 	tableColumns[BridgingAwareTableHeaderComponent::TC_BridgingMute] = BridgingAwareTableHeaderComponent::ColumnProperties("", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_BridgingMute), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_BridgingMute), -1, tableHeaderFlags);
 
-	GetTable().setHeader(std::make_unique<BridgingAwareTableHeaderComponent>(tableColumns));
+	auto table = GetTable();
+	if (table)
+	table->setHeader(std::make_unique<BridgingAwareTableHeaderComponent>(tableColumns));
 
 	SetRowHeight(33);
 }
@@ -74,17 +77,21 @@ void MatrixOutputTableComponent::RecreateTableRowIds()
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
-		GetProcessorIds().reserve(ctrl->GetSoundobjectProcessorCount());
-		for (auto const& processorId : ctrl->GetSoundobjectProcessorIds())
+		GetProcessorIds().reserve(ctrl->GetMatrixOutputProcessorCount());
+		for (auto const& processorId : ctrl->GetMatrixOutputProcessorIds())
 			GetProcessorIds().push_back(processorId);
 	}
-	
-	// Clear row selection, since rows may have changed.
-	auto currentSelectedRows = GetTable().getSelectedRows();
-	if (!currentSelectedRows.isEmpty())
+
+	auto table = GetTable();
+	if (table)
 	{
-		GetTable().deselectAllRows();
-		GetTable().selectRow(currentSelectedRows[currentSelectedRows.size() - 1]);
+		// Clear row selection, since rows may have changed.
+		auto currentSelectedRows = table->getSelectedRows();
+		if (!currentSelectedRows.isEmpty())
+		{
+			table->deselectAllRows();
+			table->selectRow(currentSelectedRows[currentSelectedRows.size() - 1]);
+		}
 	}
 }
 
@@ -96,19 +103,23 @@ void MatrixOutputTableComponent::UpdateTable()
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
-		auto selectedProcessorIds = ctrl->GetSelectedSoundobjectProcessorIds();
+		auto selectedProcessorIds = ctrl->GetSelectedMatrixOutputProcessorIds();
 		auto selectedRows = GetRowsForProcessorIds(selectedProcessorIds);
 		if (GetSelectedRows() != selectedRows)
 			SetSelectedRows(selectedRows);
 	}
-	
-	// Refresh table
-	GetTable().updateContent();
-	
-	// Refresh table header
-	auto customTableHeader = dynamic_cast<BridgingAwareTableHeaderComponent*>(&GetTable().getHeader());
-	if (customTableHeader)
-		customTableHeader->updateBridgingTitles();
+
+	auto table = GetTable();
+	if (table)
+	{
+		// Refresh table
+		table->updateContent();
+
+		// Refresh table header
+		auto customTableHeader = dynamic_cast<BridgingAwareTableHeaderComponent*>(&table->getHeader());
+		if (customTableHeader)
+			customTableHeader->updateBridgingTitles();
+	}
 }
 
 /**
@@ -124,6 +135,60 @@ int MatrixOutputTableComponent::getNumRows()
 		ret = ctrl->GetMatrixOutputProcessorCount();
 
 	return ret;
+}
+
+/**
+ * This is overloaded from TableListBoxModel, and tells us that the row selection has changed.
+ * @param lastRowSelected	The last of the now selected rows.
+ */
+void MatrixOutputTableComponent::selectedRowsChanged(int lastRowSelected)
+{
+	Controller* ctrl = Controller::GetInstance();
+	if (ctrl)
+		ctrl->SetSelectedMatrixOutputProcessorIds(GetProcessorIdsForRows(GetSelectedRows()), true);
+
+	TableModelComponent::selectedRowsChanged(lastRowSelected);
+}
+
+/**
+ * Reimplemented pure virtual method that is used as std::function callback in table control bar
+ */
+void MatrixOutputTableComponent::onAddProcessor()
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
+	ctrl->createNewMatrixOutputProcessor();
+}
+
+/**
+ * Reimplemented pure virtual method that is used as std::function callback in table control bar
+ */
+void MatrixOutputTableComponent::onRemoveProcessor()
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
+	auto const& selectedProcessorIds = GetProcessorIdsForRows(GetSelectedRows());
+
+	//if (ctrl->GetSoundobjectProcessorCount() <= selectedProcessorIds.size())
+	//	onCurrentSelectedProcessorChanged(INVALID_PROCESSOR_ID);
+	//else
+	//{
+	//	auto processorCount = ctrl->GetSoundobjectProcessorCount();
+	//	auto currentLastProcessorId = processorCount - 1;
+	//	auto selectedProcessorsToRemoveCount = selectedProcessorIds.size();
+	//	auto nextStillExistingId = static_cast<SoundobjectProcessorId>(currentLastProcessorId - selectedProcessorsToRemoveCount);
+	//	m_pageContainerTable->selectedRowsChanged(nextStillExistingId);
+	//}
+
+	for (auto processorId : selectedProcessorIds)
+	{
+		if (ctrl->GetMatrixOutputProcessorCount() >= 1)
+			auto processor = std::unique_ptr<MatrixOutputProcessor>(ctrl->GetMatrixOutputProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
+	}
 }
 
 

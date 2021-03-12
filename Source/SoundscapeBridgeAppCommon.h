@@ -73,7 +73,9 @@ enum DataChangeSource
 	DCS_Protocol,					//< Change was caused by an incoming protocol message, or caused by internal operations by the Controller.
 	DCS_Init,						//< Change was caused by Application initialization process (defaults)
 	DCS_MatrixInputProcessor,		//< Change was caused by the MatrixInputProcessor UI, i.e. the user turning a knob to change a value.
+	DCS_MatrixInputTable,			//< Change was caused by the matrix inputs table
 	DCS_MatrixOutputProcessor,		//< Change was caused by the MatrixOutputProcessor UI, i.e. the user turning a knob to change a value.
+	DCS_MatrixOutputTable,			//< Change was caused by the matrix outputs table
 	DCS_MatrixIO,					//< Change was caused by the matrix io channel page
 	DCS_Max							//< Number of change sources.
 };

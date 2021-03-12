@@ -73,6 +73,8 @@ public:
 	bool PopParameterChanged(DataChangeSource changeSource, DataChangeType change);
 	void SetParameterChanged(DataChangeSource changeSource, DataChangeType changeTypes);
 
+	juce::int32 GetNextProcessorId();
+
 	//==========================================================================
 	void createNewSoundobjectProcessor();
 	SoundobjectProcessorId AddSoundobjectProcessor(DataChangeSource changeSource, SoundobjectProcessor* p);

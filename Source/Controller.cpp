@@ -230,6 +230,36 @@ bool Controller::PopParameterChanged(DataChangeSource changeSource, DataChangeTy
 }
 
 /**
+ * Helper method to get the next free processor id.
+ * The existing processor ids of all types (soundobject, matrixinput, matrixoutput)
+ * are taken into account.
+ */
+juce::int32 Controller::GetNextProcessorId()
+{
+	juce::int32					newProcessorId = 0;
+	std::vector<juce::int32>	processorIds;
+
+	processorIds.reserve(GetSoundobjectProcessorCount() + GetMatrixInputProcessorCount() + GetMatrixOutputProcessorCount());
+	for (auto const& sop : m_soundobjectProcessors)
+		processorIds.push_back(sop->GetProcessorId());
+	for (auto const& mip : m_matrixInputProcessors)
+		processorIds.push_back(mip->GetProcessorId());
+	for (auto const& mop : m_matrixOutputProcessors)
+		processorIds.push_back(mop->GetProcessorId());
+
+	std::sort(processorIds.begin(), processorIds.end());
+	for (auto const& processorId : processorIds)
+	{
+		if (processorId > newProcessorId) // we have found a gap in the list that we can use
+			break;
+		else
+			newProcessorId++;
+	}
+
+	return newProcessorId;
+}
+
+/**
  * Helper method to create a new processor incl. implicit triggering of
  * inserting it into xml config (by setting constructor bool flag to insertToConfig=true)
  */
@@ -258,16 +288,7 @@ SoundobjectProcessorId Controller::AddSoundobjectProcessor(DataChangeSource chan
 	}
 
 	// Get the next free processor id to use (can be one inbetween or the next after the last)
-	auto newProcessorId = SoundobjectProcessorId(0);
-	auto processorIds = GetSoundobjectProcessorIds();
-	std::sort(processorIds.begin(), processorIds.end());
-	for (auto const& processorId : processorIds)
-	{
-		if (processorId > newProcessorId) // we have found a gap in the list that we can use
-			break;
-		else
-			newProcessorId++;
-	}
+	auto newProcessorId = GetNextProcessorId();
 
 	// add the processor to list now, since we have taken all info we require from the so far untouched list
 	m_soundobjectProcessors.add(p);
@@ -324,7 +345,6 @@ SoundobjectProcessor* Controller::GetSoundobjectProcessor(SoundobjectProcessorId
 		if (processor->GetProcessorId() == processorId)
 			return processor;
 
-	jassertfalse; // id not existing!
 	return nullptr;
 }
 
@@ -371,16 +391,7 @@ MatrixInputProcessorId Controller::AddMatrixInputProcessor(DataChangeSource chan
 	}
 
 	// Get the next free processor id to use (can be one inbetween or the next after the last)
-	auto newProcessorId = MatrixInputProcessorId(0);
-	auto processorIds = GetMatrixInputProcessorIds();
-	std::sort(processorIds.begin(), processorIds.end());
-	for (auto const& processorId : processorIds)
-	{
-		if (processorId > newProcessorId) // we have found a gap in the list that we can use
-			break;
-		else
-			newProcessorId++;
-	}
+	auto newProcessorId = GetNextProcessorId();
 
 	// add the processor to list now, since we have taken all info we require from the so far untouched list
 	m_matrixInputProcessors.add(p);
@@ -484,16 +495,7 @@ MatrixOutputProcessorId Controller::AddMatrixOutputProcessor(DataChangeSource ch
 	}
 
 	// Get the next free processor id to use (can be one inbetween or the next after the last)
-	auto newProcessorId = MatrixOutputProcessorId(0);
-	auto processorIds = GetMatrixOutputProcessorIds();
-	std::sort(processorIds.begin(), processorIds.end());
-	for (auto const& processorId : processorIds)
-	{
-		if (processorId > newProcessorId) // we have found a gap in the list that we can use
-			break;
-		else
-			newProcessorId++;
-	}
+	auto newProcessorId = GetNextProcessorId();
 
 	// add the processor to list now, since we have taken all info we require from the so far untouched list
 	m_matrixOutputProcessors.add(p);
@@ -1202,34 +1204,34 @@ void Controller::timerCallback()
 
 			// Check if the processor configuration has changed
 			// and need to be updated in the bridging configuration
-			if (miProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_ProcessorInstanceConfig))
+			if (miProcessor->GetParameterChanged(DCS_MatrixInputTable, DCT_ProcessorInstanceConfig))
 			{
 				auto activateMIId = false;
 				auto deactivateMIId = false;
-				if (miProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_SoundobjectID))
+				if (miProcessor->GetParameterChanged(DCS_MatrixInputTable, DCT_SoundobjectID))
 				{
 					// SoundsourceID change means update is only required when
 					// remote object is currently activated. 
 					activateMIId = ((comsMode & CM_Rx) == CM_Rx);
 				}
-				miProcessor->PopParameterChanged(DCS_SoundobjectTable, DCT_SoundobjectID);
+				miProcessor->PopParameterChanged(DCS_MatrixInputTable, DCT_SoundobjectID);
 
-				if (miProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_MappingID))
+				if (miProcessor->GetParameterChanged(DCS_MatrixInputTable, DCT_MappingID))
 				{
 					// MappingID change means update is only required when
 					// remote object is currently activated. 
 					activateMIId = ((comsMode & CM_Rx) == CM_Rx);
 				}
-				miProcessor->PopParameterChanged(DCS_SoundobjectTable, DCT_MappingID);
+				miProcessor->PopParameterChanged(DCS_MatrixInputTable, DCT_MappingID);
 
-				if (miProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_ComsMode))
+				if (miProcessor->GetParameterChanged(DCS_MatrixInputTable, DCT_ComsMode))
 				{
 					// ComsMode change means toggling polling for the remote object,
 					// so one of the two activate/deactivate actions is required
 					activateMIId = ((comsMode & CM_Rx) == CM_Rx);
 					deactivateMIId = !activateMIId;
 				}
-				miProcessor->PopParameterChanged(DCS_SoundobjectTable, DCT_ComsMode);
+				miProcessor->PopParameterChanged(DCS_MatrixInputTable, DCT_ComsMode);
 
 				if (activateMIId)
 					ActivateMatrixInputId(miProcessor->GetMatrixInputId());
@@ -1328,34 +1330,34 @@ void Controller::timerCallback()
 
 			// Check if the processor configuration has changed
 			// and need to be updated in the bridging configuration
-			if (moProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_ProcessorInstanceConfig))
+			if (moProcessor->GetParameterChanged(DCS_MatrixOutputTable, DCT_ProcessorInstanceConfig))
 			{
 				auto activateMOId = false;
 				auto deactivateMOId = false;
-				if (moProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_SoundobjectID))
+				if (moProcessor->GetParameterChanged(DCS_MatrixOutputTable, DCT_SoundobjectID))
 				{
 					// SoundsourceID change means update is only required when
 					// remote object is currently activated. 
 					activateMOId = ((comsMode & CM_Rx) == CM_Rx);
 				}
-				moProcessor->PopParameterChanged(DCS_SoundobjectTable, DCT_SoundobjectID);
+				moProcessor->PopParameterChanged(DCS_MatrixOutputTable, DCT_SoundobjectID);
 
-				if (moProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_MappingID))
+				if (moProcessor->GetParameterChanged(DCS_MatrixOutputTable, DCT_MappingID))
 				{
 					// MappingID change means update is only required when
 					// remote object is currently activated. 
 					activateMOId = ((comsMode & CM_Rx) == CM_Rx);
 				}
-				moProcessor->PopParameterChanged(DCS_SoundobjectTable, DCT_MappingID);
+				moProcessor->PopParameterChanged(DCS_MatrixOutputTable, DCT_MappingID);
 
-				if (moProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_ComsMode))
+				if (moProcessor->GetParameterChanged(DCS_MatrixOutputTable, DCT_ComsMode))
 				{
 					// ComsMode change means toggling polling for the remote object,
 					// so one of the two activate/deactivate actions is required
 					activateMOId = ((comsMode & CM_Rx) == CM_Rx);
 					deactivateMOId = !activateMOId;
 				}
-				moProcessor->PopParameterChanged(DCS_SoundobjectTable, DCT_ComsMode);
+				moProcessor->PopParameterChanged(DCS_MatrixOutputTable, DCT_ComsMode);
 
 				if (activateMOId)
 					ActivateMatrixOutputId(moProcessor->GetMatrixOutputId());

@@ -251,7 +251,7 @@ void MatrixInputProcessorEditor::resized()
 	auto muteBounds = bounds.removeFromLeft(bounds.getHeight()).reduced(margin);
 	m_MatrixInputMuteButton->setBounds(muteBounds);
 
-	auto meterBounds = bounds.removeFromTop(0.35f * bounds.getHeight()).reduced(margin);
+	auto meterBounds = bounds.removeFromTop(static_cast<int>(0.35f * bounds.getHeight())).reduced(margin);
 	m_MatrixInputLevelMeterSlider->setBounds(meterBounds);
 
 	auto gainBounds = bounds.reduced(margin);

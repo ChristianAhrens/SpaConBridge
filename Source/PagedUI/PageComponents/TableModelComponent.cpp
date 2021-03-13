@@ -36,6 +36,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TableModelComponent.h"
 
 #include "TableControlBarComponent.h"
+#include "TableEditorComponents.h"
 #include "BridgingAwareTableHeaderComponent.h"
 
 #include "../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
@@ -87,6 +88,24 @@ TableModelComponent::TableModelComponent(ControlBarPosition pos)
  */
 TableModelComponent::~TableModelComponent()
 {
+}
+
+/**
+* Helper method to set the internal table type identifier.
+* @param	tt	The table type to set to internal member.
+*/
+void TableModelComponent::SetTableType(TableType tt)
+{
+	m_tableType = tt;
+}
+
+/**
+* Helper method to get the internal table type identifier.
+* @return	The internal table type value.
+*/
+TableType TableModelComponent::GetTableType()
+{
+	return m_tableType;
 }
 
 /**
@@ -517,9 +536,6 @@ void TableModelComponent::sortOrderChanged(int newSortColumnId, bool isForwards)
 	// Use a different helper sorting function depending on which column is selected for sorting.
 	switch (newSortColumnId)
 	{
-	case BridgingAwareTableHeaderComponent::TC_TrackID:
-		std::sort(m_processorIds.begin(), m_processorIds.end());
-		break;
 	case BridgingAwareTableHeaderComponent::TC_SoundobjectID:
 		std::sort(m_processorIds.begin(), m_processorIds.end(), TableModelComponent::LessThanSoundobjectId);
 		break;
@@ -578,21 +594,9 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 
 	switch (columnId)
 	{
-	case BridgingAwareTableHeaderComponent::TC_TrackID:
-		{
-			EditableLabelContainer* label = static_cast<EditableLabelContainer*> (existingComponentToUpdate);
-			
-			// If an existing component is being passed-in for updating, we'll re-use it, but
-			// if not, we'll have to create one.
-			if (label == nullptr)
-				label = new EditableLabelContainer(*this);
-			
-			// Ensure that the component knows which row number it is located at.
-			label->SetRow(rowNumber);
-			
-			// Return a pointer to the component.
-			ret = label;
-		}
+
+	case BridgingAwareTableHeaderComponent::TC_EmptyHandleCellID:
+		// empty cell does not use any component
 		break;
 
 	case BridgingAwareTableHeaderComponent::TC_Mapping:
@@ -619,7 +623,7 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 			// If an existing component is being passed-in for updating, we'll re-use it, but
 			// if not, we'll have to create one.
 			if (textEdit == nullptr)
-				textEdit = new SoundobjectIdTextEditorContainer(*this);
+				textEdit = new TextEditorContainer(*this);
 
 			// Ensure that the component knows which row number it is located at.
 			textEdit->SetRow(rowNumber);
@@ -636,7 +640,7 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 			// If an existing component is being passed-in for updating, we'll re-use it, but
 			// if not, we'll have to create one.
 			if (textEdit == nullptr)
-				textEdit = new MatrixInputIdTextEditorContainer(*this);
+				textEdit = new TextEditorContainer(*this);
 
 			// Ensure that the component knows which row number it is located at.
 			textEdit->SetRow(rowNumber);
@@ -653,7 +657,7 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 			// If an existing component is being passed-in for updating, we'll re-use it, but
 			// if not, we'll have to create one.
 			if (textEdit == nullptr)
-				textEdit = new MatrixOutputIdTextEditorContainer(*this);
+				textEdit = new TextEditorContainer(*this);
 
 			// Ensure that the component knows which row number it is located at.
 			textEdit->SetRow(rowNumber);
@@ -777,7 +781,7 @@ int TableModelComponent::getColumnAutoSizeWidth(int columnId)
 {
 	switch (columnId)
 	{
-	case BridgingAwareTableHeaderComponent::TC_TrackID:
+	case BridgingAwareTableHeaderComponent::TC_EmptyHandleCellID:
 		return 40;
 	case BridgingAwareTableHeaderComponent::TC_SoundobjectID:
 		return 80;
@@ -855,913 +859,22 @@ void TableModelComponent::resized()
 		m_tableControlBar->setBounds(tableControlBarBounds);
 }
 
-
+/**
+ * Helper method to be used as function callback to trigger selecting all rows of the member table
+ * by forwarding the call to SelectAllRows with parameter set to true.
+ */
 void TableModelComponent::onSelectAllProcessors()
 {
 	SelectAllRows(true);
 }
 
+/**
+ * Helper method to be used as function callback to trigger deselecting all rows of the member table
+ * by forwarding the call to SelectAllRows with parameter set to false.
+ */
 void TableModelComponent::onDeselectAllProcessors()
 {
 	SelectAllRows(false);
-}
-
-
-/*
-===============================================================================
- Class ComboBoxContainer
-===============================================================================
-*/
-
-/**
- * Class constructor.
- */
-ComboBoxContainer::ComboBoxContainer(TableModelComponent& td)
-	: m_owner(td)
-{
-	// Create and configure actual combo box component inside this container.
-	m_comboBox.setEditableText(false);
-	m_comboBox.addItem("1", 1);
-	m_comboBox.addItem("2", 2);
-	m_comboBox.addItem("3", 3);
-	m_comboBox.addItem("4", 4);
-	m_comboBox.addListener(this);
-	m_comboBox.setWantsKeyboardFocus(false);
-	addAndMakeVisible(m_comboBox);
-}
-
-/**
- * Class destructor.
- */
-ComboBoxContainer::~ComboBoxContainer()
-{
-}
-
-/**
- * Reimplemented from ComboBox::Listener, gets called whenever the selected combo box item is changed.
- * @param comboBox	The comboBox which has been changed.
- */
-void ComboBoxContainer::comboBoxChanged(ComboBox *comboBox)
-{
-	// Get the list of rows which are currently selected on the table.
-	std::vector<int> selectedRows = m_owner.GetSelectedRows();
-	if ((selectedRows.size() < 2) ||
-		(std::find(selectedRows.begin(), selectedRows.end(), m_row) == selectedRows.end()))
-	{
-		// If this comboBoxes row (m_row) is NOT selected, or if no multi-selection was made 
-		// then modify the selectedRows list so that it only contains m_row.
-		selectedRows.clear();
-		selectedRows.push_back(m_row);
-	}
-
-	// Get the IDs of the procssors on the selected rows.
-	auto processorIds = m_owner.GetProcessorIdsForRows(selectedRows);
-
-	Controller* ctrl = Controller::GetInstance();
-	if (ctrl)
-	{
-		// New MappingID which should be applied to all procssors in the selected rows.
-		auto newMapping = static_cast<MappingId>(comboBox->getSelectedId());
-		for (auto const& processorId : processorIds)
-		{
-			// Set the value of the combobox to the current MappingID of the corresponding procssor.
-			SoundobjectProcessor* processor = ctrl->GetSoundobjectProcessor(processorId);
-			if (processor)
-				processor->SetMappingId(DCS_SoundobjectTable, newMapping);
-		}
-	}
-}
-
-/**
- * Reimplemented from Component, used to resize the actual combo box component inside.
- */
-void ComboBoxContainer::resized()
-{
-	m_comboBox.setBoundsInset(BorderSize<int>(4, 4, 5, 4));
-}
-
-/**
- * Saves the row number where this component is located inside the overview table.
- * It also updated the combo box's selected item according to that procssor's MappingID.
- * @param newRow	The new row number.
- */
-void ComboBoxContainer::SetRow(int newRow)
-{
-	m_row = newRow;
-
-	// Find the procssor instance corresponding to the given row number.
-	auto processorId = m_owner.GetProcessorIdForRow(newRow);
-	auto ctrl = Controller::GetInstance();
-	if (ctrl)
-	{
-		// Set the value of the combobox to the current MappingID of the corresponding procssor.
-		auto processor = ctrl->GetSoundobjectProcessor(processorId);
-		if (processor)
-			m_comboBox.setSelectedId(processor->GetMappingId(), dontSendNotification);
-	}
-}
-
-
-/*
-===============================================================================
- Class TextEditorContainer
-===============================================================================
-*/
-
-/**
- * Class constructor.
- */
-TextEditorContainer::TextEditorContainer(TableModelComponent& td)
-	: m_owner(td)
-{
-	// Create and configure actual textEditor component inside this container.
-	m_editor.addListener(this);
-	addAndMakeVisible(m_editor);
-}
-
-/**
- * Class destructor.
- */
-TextEditorContainer::~TextEditorContainer()
-{
-}
-
-/**
- * Reimplemented from TextEditor::Listener, gets called whenever the TextEditor loses keyboard focus.
- * @param textEditor	The textEditor which has been changed.
- */
-void TextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
-{
-	// Get the list of rows which are currently selected on the table.
-	std::vector<int> selectedRows = m_owner.GetSelectedRows();
-	if ((selectedRows.size() < 2) ||
-		(std::find(selectedRows.begin(), selectedRows.end(), m_row) == selectedRows.end()))
-	{
-		// If this comboBoxes row (m_row) is NOT selected, or if no multi-selection was made 
-		// then modify the selectedRows list so that it only contains m_row.
-		selectedRows.clear();
-		selectedRows.push_back(m_row);
-	}
-
-	auto ctrl = Controller::GetInstance();
-	if (ctrl)
-	{
-		// New SourceID which should be applied to all procssors in the selected rows.
-		auto newSourceId = textEditor.getText().getIntValue();
-		for (auto const& processorId : m_owner.GetProcessorIdsForRows(selectedRows))
-		{
-			// Set the value of the combobox to the current MappingID of the corresponding procssor.
-			auto processor = ctrl->GetSoundobjectProcessor(processorId);
-			if (processor)
-				processor->SetSoundobjectId(DCS_SoundobjectTable, newSourceId);
-		}
-	}
-}
-
-/**
- * Callback function for Enter key presses on textEditors.
- * @param textEditor	The TextEditor object whose where enter key was pressed.
- */
-void TextEditorContainer::textEditorReturnKeyPressed(TextEditor& textEditor)
-{
-	ignoreUnused(textEditor);
-
-	// Remove keyboard focus from this editor. 
-	// Function textEditorFocusLost will then take care of setting values.
-	//m_owner.grabKeyboardFocus();
-
-	textEditor.unfocusAllComponents();
-	unfocusAllComponents();
-}
-
-/**
- * Reimplemented from Component, used to resize the actual component inside.
- */
-void TextEditorContainer::resized()
-{
-	m_editor.setBoundsInset(BorderSize<int>(4, 4, 5, 4));
-}
-
-/**
- * Saves the row number where this component is located inside the overview table.
- * It also updates the text inside the textEditor with the current SourceID
- * @param newRow	The new row number.
- */
-void TextEditorContainer::SetRow(int newRow)
-{
-	m_row = newRow;
-
-	// Find the procssor instance corresponding to the given row number.
-	auto processorId = m_owner.GetProcessorIdForRow(newRow);
-	auto ctrl = Controller::GetInstance();
-	if (ctrl)
-	{
-		// Set the value of the textEditor to the current SourceID of the corresponding procssor.
-		auto processor = ctrl->GetSoundobjectProcessor(processorId);
-		if (processor)
-			m_editor.setText(String(processor->GetSoundobjectId()), false);
-	}
-}
-
-/*
-===============================================================================
- Class SoundobjectIdTextEditorContainer
-===============================================================================
-*/
-
-/**
- * Class constructor.
- */
-SoundobjectIdTextEditorContainer::SoundobjectIdTextEditorContainer(TableModelComponent& td)
-	: TextEditorContainer(td)
-{
-}
-
-/**
- * Class destructor.
- */
-SoundobjectIdTextEditorContainer::~SoundobjectIdTextEditorContainer()
-{
-}
-
-/**
- * Reimplemented from TextEditor::Listener, gets called whenever the TextEditor loses keyboard focus.
- * @param textEditor	The textEditor which has been changed.
- */
-void SoundobjectIdTextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
-{
-	// Get the list of rows which are currently selected on the table.
-	std::vector<int> selectedRows = m_owner.GetSelectedRows();
-	if ((selectedRows.size() < 2) ||
-		(std::find(selectedRows.begin(), selectedRows.end(), m_row) == selectedRows.end()))
-	{
-		// If this comboBoxes row (m_row) is NOT selected, or if no multi-selection was made 
-		// then modify the selectedRows list so that it only contains m_row.
-		selectedRows.clear();
-		selectedRows.push_back(m_row);
-	}
-
-	auto ctrl = Controller::GetInstance();
-	if (ctrl)
-	{
-		// New SourceID which should be applied to all procssors in the selected rows.
-		auto newSourceId = textEditor.getText().getIntValue();
-		for (auto const& processorId : m_owner.GetProcessorIdsForRows(selectedRows))
-		{
-			// Set the value of the combobox to the current MappingID of the corresponding procssor.
-			auto processor = ctrl->GetSoundobjectProcessor(processorId);
-			if (processor)
-				processor->SetSoundobjectId(DCS_SoundobjectTable, newSourceId);
-		}
-	}
-}
-
-/**
- * Saves the row number where this component is located inside the overview table.
- * It also updates the text inside the textEditor with the current SourceID
- * @param newRow	The new row number.
- */
-void SoundobjectIdTextEditorContainer::SetRow(int newRow)
-{
-	m_row = newRow;
-
-	// Find the procssor instance corresponding to the given row number.
-	auto processorId = m_owner.GetProcessorIdForRow(newRow);
-	auto ctrl = Controller::GetInstance();
-	if (ctrl)
-	{
-		// Set the value of the textEditor to the current SourceID of the corresponding procssor.
-		auto processor = ctrl->GetSoundobjectProcessor(processorId);
-		if (processor)
-			m_editor.setText(String(processor->GetSoundobjectId()), false);
-	}
-}
-
-/*
-===============================================================================
- Class MatrixInputIdTextEditorContainer
-===============================================================================
-*/
-
-/**
- * Class constructor.
- */
-MatrixInputIdTextEditorContainer::MatrixInputIdTextEditorContainer(TableModelComponent& td)
-	: TextEditorContainer(td)
-{
-}
-
-/**
- * Class destructor.
- */
-MatrixInputIdTextEditorContainer::~MatrixInputIdTextEditorContainer()
-{
-}
-
-/**
- * Reimplemented from TextEditor::Listener, gets called whenever the TextEditor loses keyboard focus.
- * @param textEditor	The textEditor which has been changed.
- */
-void MatrixInputIdTextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
-{
-	// Get the list of rows which are currently selected on the table.
-	std::vector<int> selectedRows = m_owner.GetSelectedRows();
-	if ((selectedRows.size() < 2) ||
-		(std::find(selectedRows.begin(), selectedRows.end(), m_row) == selectedRows.end()))
-	{
-		// If this comboBoxes row (m_row) is NOT selected, or if no multi-selection was made 
-		// then modify the selectedRows list so that it only contains m_row.
-		selectedRows.clear();
-		selectedRows.push_back(m_row);
-	}
-
-	auto ctrl = Controller::GetInstance();
-	if (ctrl)
-	{
-		// New SourceID which should be applied to all procssors in the selected rows.
-		auto newSourceId = textEditor.getText().getIntValue();
-		for (auto const& processorId : m_owner.GetProcessorIdsForRows(selectedRows))
-		{
-			// Set the value of the combobox to the current MappingID of the corresponding procssor.
-			auto processor = ctrl->GetMatrixInputProcessor(processorId);
-			if (processor)
-				processor->SetMatrixInputId(DCS_SoundobjectTable, newSourceId);
-		}
-	}
-}
-
-/**
- * Saves the row number where this component is located inside the overview table.
- * It also updates the text inside the textEditor with the current SourceID
- * @param newRow	The new row number.
- */
-void MatrixInputIdTextEditorContainer::SetRow(int newRow)
-{
-	m_row = newRow;
-
-	// Find the procssor instance corresponding to the given row number.
-	auto processorId = m_owner.GetProcessorIdForRow(newRow);
-	auto ctrl = Controller::GetInstance();
-	if (ctrl)
-	{
-		// Set the value of the textEditor to the current SourceID of the corresponding procssor.
-		auto processor = ctrl->GetMatrixInputProcessor(processorId);
-		if (processor)
-			m_editor.setText(String(processor->GetMatrixInputId()), false);
-	}
-}
-
-/*
-===============================================================================
- Class MatrixOutputIdTextEditorContainer
-===============================================================================
-*/
-
-/**
- * Class constructor.
- */
-MatrixOutputIdTextEditorContainer::MatrixOutputIdTextEditorContainer(TableModelComponent& td)
-	: TextEditorContainer(td)
-{
-}
-
-/**
- * Class destructor.
- */
-MatrixOutputIdTextEditorContainer::~MatrixOutputIdTextEditorContainer()
-{
-}
-
-/**
- * Reimplemented from TextEditor::Listener, gets called whenever the TextEditor loses keyboard focus.
- * @param textEditor	The textEditor which has been changed.
- */
-void MatrixOutputIdTextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
-{
-	// Get the list of rows which are currently selected on the table.
-	std::vector<int> selectedRows = m_owner.GetSelectedRows();
-	if ((selectedRows.size() < 2) ||
-		(std::find(selectedRows.begin(), selectedRows.end(), m_row) == selectedRows.end()))
-	{
-		// If this comboBoxes row (m_row) is NOT selected, or if no multi-selection was made 
-		// then modify the selectedRows list so that it only contains m_row.
-		selectedRows.clear();
-		selectedRows.push_back(m_row);
-	}
-
-	auto ctrl = Controller::GetInstance();
-	if (ctrl)
-	{
-		// New SourceID which should be applied to all procssors in the selected rows.
-		auto newSourceId = textEditor.getText().getIntValue();
-		for (auto const& processorId : m_owner.GetProcessorIdsForRows(selectedRows))
-		{
-			// Set the value of the combobox to the current MappingID of the corresponding procssor.
-			auto processor = ctrl->GetMatrixOutputProcessor(processorId);
-			if (processor)
-				processor->SetMatrixOutputId(DCS_SoundobjectTable, newSourceId);
-		}
-	}
-}
-
-/**
- * Saves the row number where this component is located inside the overview table.
- * It also updates the text inside the textEditor with the current SourceID
- * @param newRow	The new row number.
- */
-void MatrixOutputIdTextEditorContainer::SetRow(int newRow)
-{
-	m_row = newRow;
-
-	// Find the procssor instance corresponding to the given row number.
-	auto processorId = m_owner.GetProcessorIdForRow(newRow);
-	auto ctrl = Controller::GetInstance();
-	if (ctrl)
-	{
-		// Set the value of the textEditor to the current SourceID of the corresponding procssor.
-		auto processor = ctrl->GetMatrixOutputProcessor(processorId);
-		if (processor)
-			m_editor.setText(String(processor->GetMatrixOutputId()), false);
-	}
-}
-
-
-
-/*
-===============================================================================
- Class RadioButtonContainer
-===============================================================================
-*/
-
-/**
- * Class constructor.
- */
-RadioButtonContainer::RadioButtonContainer(TableModelComponent& td): m_owner(td), 
-	m_txButton("Tx", DrawableButton::ButtonStyle::ImageOnButtonBackground), 
-	m_rxButton("Rx", DrawableButton::ButtonStyle::ImageOnButtonBackground)
-{
-	// Create and configure button components inside this container.
-	m_txButton.setClickingTogglesState(true);
-	m_txButton.setEnabled(true);
-	m_txButton.addListener(this);
-	addAndMakeVisible(m_txButton);
-
-	m_rxButton.setClickingTogglesState(true);
-	m_rxButton.setEnabled(true);
-	m_rxButton.addListener(this);
-	addAndMakeVisible(m_rxButton);
-
-	updateButtons();
-}
-
-/**
- * Class destructor.
- */
-RadioButtonContainer::~RadioButtonContainer()
-{
-}
-
-/**
- * Reimplemented from Button::Listener, gets called whenever the buttons are clicked.
- * @param button	The button which has been clicked.
- */
-void RadioButtonContainer::buttonClicked(Button *button)
-{
-	auto ctrl = Controller::GetInstance();
-	if (ctrl && 
-		((button == &m_txButton) || (button == &m_rxButton))) 
-	{
-		bool newToggleState = button->getToggleState();
-
-		// Get the list of rows which are currently selected on the table.
-		auto selectedRows = m_owner.GetSelectedRows();
-		if ((selectedRows.size() < 2) ||
-			(std::find(selectedRows.begin(), selectedRows.end(), m_row) == selectedRows.end()))
-		{
-			// If this button's row (m_row) is NOT selected, or if no multi-selection was made 
-			// then modify the selectedRows list so that it only contains m_row.
-			selectedRows.clear();
-			selectedRows.push_back(m_row);
-		}
-
-		for (auto const& processorId : m_owner.GetProcessorIdsForRows(selectedRows))
-		{
-			auto processor = ctrl->GetSoundobjectProcessor(processorId);
-			if (processor)
-			{
-				ComsMode oldMode = processor->GetComsMode();
-				ComsMode newFlag = (button == &m_txButton) ? CM_Tx : CM_Rx;
-
-				if (newToggleState == true)
-					oldMode |= newFlag;
-				else
-					oldMode &= ~newFlag;
-
-				processor->SetComsMode(DCS_SoundobjectTable, oldMode);
-			}
-		}
-	}
-}
-
-/**
- * Reimplemented from Component, used to resize the actual component inside.
- */
-void RadioButtonContainer::resized()
-{
-	auto bounds = getLocalBounds();
-	bounds.removeFromBottom(1);
-	auto singleButtonWidth = bounds.getWidth() / 2;
-
-	auto buttonRect = bounds.removeFromLeft(singleButtonWidth).reduced(4);
-	m_txButton.setBounds(buttonRect);
-	buttonRect = bounds.removeFromLeft(singleButtonWidth).reduced(4);
-	m_rxButton.setBounds(buttonRect);
-}
-
-/**
- * Saves the row number where this component is located inside the overview table.
- * It also updates the radio buttons with the current ComsMode.
- * @param newRow	The new row number.
- */
-void RadioButtonContainer::SetRow(int newRow)
-{
-	m_row = newRow;
-
-	// Find the procssor instance corresponding to the given row number.
-	auto ctrl = Controller::GetInstance();
-	if (ctrl)
-	{
-		// Toggle the correct radio buttons to the current ComsMode of the corresponding procssor.
-		auto processor = ctrl->GetSoundobjectProcessor(m_owner.GetProcessorIdForRow(newRow));
-		if (processor)
-		{
-			ComsMode newMode = processor->GetComsMode();
-			m_txButton.setToggleState(((newMode & CM_Tx) == CM_Tx), dontSendNotification);
-			m_rxButton.setToggleState(((newMode & CM_Rx) == CM_Rx), dontSendNotification);
-		}
-		else
-		{
-			m_txButton.setEnabled(false);
-			m_rxButton.setEnabled(false);
-		}
-	}
-}
-
-/**
- * 
- */
-void RadioButtonContainer::updateButtons()
-{
-	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
-	if (!dblookAndFeel)
-		return;
-
-	auto blueColour = dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonBlueColor);
-	String txImageName = BinaryData::call_made24px_svg;
-	String rxImageName = BinaryData::call_received24px_svg;
-	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
-
-	// create the required button drawable images based on lookandfeel colours
-	JUCEAppBasics::Image_utils::getDrawableButtonImages(txImageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-
-	m_txButton.setColour(TextButton::ColourIds::buttonOnColourId, blueColour.brighter(0.05f));
-	m_txButton.setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
-
-	// create the required button drawable images based on lookandfeel colours
-	JUCEAppBasics::Image_utils::getDrawableButtonImages(rxImageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-
-	m_rxButton.setColour(TextButton::ColourIds::buttonOnColourId, blueColour.brighter(0.05f));
-	m_rxButton.setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
-}
-
-/**
- *
- */
-void RadioButtonContainer::lookAndFeelChanged()
-{
-	Component::lookAndFeelChanged();
-	updateButtons();
-}
-
-
-/*
-===============================================================================
- Class MuteButtonContainer
-===============================================================================
-*/
-
-/**
- * Class constructor.
- */
-MuteButtonContainer::MuteButtonContainer(TableModelComponent& td)
-	: m_owner(td)
-{
-}
-
-/**
- * Class destructor.
- */
-MuteButtonContainer::~MuteButtonContainer()
-{
-}
-
-/**
- * Helper method to update the map of bridging mute buttons by querying
- * data from controller. This should be called on configuration updates
- * that affect bridging protocol active state.
- */
-void MuteButtonContainer::updateBridgingMuteButtons()
-{
-	Controller* ctrl = Controller::GetInstance();
-	if (!ctrl)
-		return;
-
-	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
-	if (!dblookAndFeel)
-		return;
-
-	// create the required button drawable images based on lookandfeel colours
-	String imageName = BinaryData::mobiledata_off24px_svg;
-	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
-	JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-
-	// collect what bridging modules are active
-	auto activeBridging = ctrl->GetActiveProtocolBridging();
-
-	// determine the right red colour from lookandfeel
-	auto redColour = dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonRedColor);
-
-	for (auto type : ProtocolBridgingTypes)
-	{
-		if (((activeBridging & type) == type) && (m_bridgingMutes.count(type) == 0))
-		{
-			m_bridgingMutes.insert(std::make_pair(type, std::make_unique<DrawableButton>("Mute", DrawableButton::ButtonStyle::ImageOnButtonBackground)));
-			m_bridgingMutes[type]->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
-			m_bridgingMutes[type]->setClickingTogglesState(true);
-			m_bridgingMutes[type]->setColour(TextButton::ColourIds::buttonOnColourId, redColour.brighter(0.05f));
-			m_bridgingMutes[type]->setEnabled(true);
-			m_bridgingMutes[type]->addListener(this);
-			addAndMakeVisible(m_bridgingMutes.at(type).get());
-		}
-		else if (((activeBridging & type) != type) && (m_bridgingMutes.count(type) > 0))
-		{
-			m_bridgingMutes.erase(type);
-		}
-	}
-
-	resized();
-}
-
-/**
- * Helper method to update the drawables used for buttons to match the text colour
- */
-void MuteButtonContainer::updateDrawableButtonImageColours()
-{
-	Controller* ctrl = Controller::GetInstance();
-	if (!ctrl)
-		return;
-
-	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
-	if (!dblookAndFeel)
-		return;
-
-	// create the required button drawable images based on lookandfeel colours
-	String imageName = BinaryData::mobiledata_off24px_svg;
-	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
-	JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-
-	// determine the right red colour from lookandfeel
-	auto redColour = dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonRedColor);
-
-	// set the images to button
-	for (auto type : ProtocolBridgingTypes)
-	{
-		if (m_bridgingMutes.count(type) != 0)
-		{
-			m_bridgingMutes[type]->setColour(TextButton::ColourIds::buttonOnColourId, redColour.brighter(0.05f));
-			m_bridgingMutes[type]->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
-		}
-	}
-}
-
-/**
- * 
- */
-void MuteButtonContainer::lookAndFeelChanged()
-{
-	Component::lookAndFeelChanged();
-	updateDrawableButtonImageColours();
-}
-
-/**
- * Reimplemented from Button::Listener, gets called whenever the buttons are clicked.
- * @param button	The button which has been clicked.
- */
-void MuteButtonContainer::buttonClicked(Button* button)
-{
-	Controller* ctrl = Controller::GetInstance();
-	if (!ctrl)
-		return;
-
-	for (auto type : ProtocolBridgingTypes)
-	{
-		if ((m_bridgingMutes.count(type) > 0) && (button == m_bridgingMutes.at(type).get()))
-		{
-			bool newToggleState = button->getToggleState();
-
-			// Get the list of rows which are currently selected on the table.
-			auto selectedRows = m_owner.GetSelectedRows();
-			if ((selectedRows.size() < 2) ||
-				(std::find(selectedRows.begin(), selectedRows.end(), m_row) == selectedRows.end()))
-			{
-				// If this button's row (m_row) is NOT selected, or if no multi-selection was made 
-				// then modify the selectedRows list so that it only contains m_row.
-				selectedRows.clear();
-				selectedRows.push_back(m_row);
-			}
-
-			// Get the IDs of the processors on the selected rows.
-			auto processorIds = m_owner.GetProcessorIdsForRows(selectedRows);
-			std::vector<SoundobjectId> soundobjectIds;
-			for (auto processorId : processorIds)
-			{
-				auto processor = ctrl->GetSoundobjectProcessor(processorId);
-				if (processor)
-					soundobjectIds.push_back(processor->GetSoundobjectId());
-			}
-
-			ctrl->SetMuteBridgingSoundobjectIds(type, soundobjectIds, newToggleState);
-
-			m_owner.UpdateTable();
-		}
-	}
-}
-
-/**
- * Reimplemented from Component, used to resize the actual component inside.
- */
-void MuteButtonContainer::resized()
-{
-	if (m_bridgingMutes.empty())
-		return;
-
-	auto bounds = getLocalBounds();
-	bounds.removeFromBottom(1);
-	auto singleButtonWidth = static_cast<int>(bounds.getWidth() / m_bridgingMutes.size());
-
-	for (auto& buttonKV : m_bridgingMutes)
-	{
-		auto buttonRect = bounds.removeFromLeft(singleButtonWidth).reduced(4);
-		buttonKV.second->setBounds(buttonRect);
-	}
-}
-
-/**
- * Saves the row number where this component is located inside the overview table.
- * It also updates the radio buttons with the current mute state.
- * @param newRow	The new row number.
- */
-void MuteButtonContainer::SetRow(int newRow)
-{
-	m_row = newRow;
-
-	// Find the procssor instance corresponding to the given row number.
-	auto processorId = m_owner.GetProcessorIdForRow(newRow);
-	auto ctrl = Controller::GetInstance();
-	if (ctrl)
-	{
-		for (auto type : ProtocolBridgingTypes)
-		{
-			if (m_bridgingMutes.count(type) > 0)
-			{
-				auto processor = ctrl->GetSoundobjectProcessor(processorId);
-				if (processor)
-					m_bridgingMutes.at(type)->setToggleState(ctrl->GetMuteBridgingSoundobjectId(type, processor->GetSoundobjectId()), dontSendNotification);
-			}
-		}
-	}
-}
-
-
-/*
-===============================================================================
- Class EditableLabelContainer
-===============================================================================
-*/
-
-/**
- * Class constructor.
- */
-EditableLabelContainer::EditableLabelContainer(TableModelComponent& td) 
-	: m_owner(td)
-{
-	// Here we set the 'editOnDoubleClick' to true, but then override the 
-	// mouseDoubleClick() method to prevent editing. This is to prevent the
-	// TextEdit components on the OC_SourceID column from getting keyboard 
-	// focus automatically when a row is selected.
-	setEditable(false, true, false);
-}
-
-/**
- * Class destructor.
- */
-EditableLabelContainer::~EditableLabelContainer()
-{
-}
-
-/**
- * Reimplemented from Label, gets called whenever the label is clicked.
- * @param event		The mouse event properties.
- */
-void EditableLabelContainer::mouseDown(const MouseEvent& event)
-{
-	// Emulate R1 behaviour that is not standard for Juce: if multiple rows are selected
-	// and one of the selected rows is clicked, only this row should remain selected.
-	// So here we clear the selection and further down the clicked row is selected.
-	auto table = m_owner.GetTable();
-	if (table != nullptr)
-	{
-		if ((table->getNumSelectedRows() > 1) && table->isRowSelected(m_row))
-			table->deselectAllRows();
-
-		// Single click on the label should simply select the row
-		table->selectRowsBasedOnModifierKeys(m_row, event.mods, false);
-	}
-
-	// Base class implementation.
-	Label::mouseDown(event);
-}
-
-/**
- * Reimplemented from Label to prevent label editing (see setEditable(..)).
- * @param event		The mouse event properties.
- */
-void EditableLabelContainer::mouseDoubleClick(const MouseEvent& event)
-{
-	ignoreUnused(event);
-
-	// Do nothing.
-}
-
-/**
- * Saves the row number where this component is located inside the overview table.
- * It also updates the text to the current processors name.
- * @param newRow	The new row number.
- */
-void EditableLabelContainer::SetRow(int newRow)
-{
-	m_row = newRow;
-	//String displayName;
-	//
-	//// Find the procssor instance corresponding to the given row number.
-	//ProcessorId ProcessorId = m_owner.GetProcessorIdForRow(newRow);
-	//Controller* ctrl = Controller::GetInstance();
-	//if (ctrl)
-	//{
-	//	// Set the value of the combobox to the current MappingID of the corresponding procssor.
-	//	SoundobjectProcessor* procssor = ctrl->GetProcessor(ProcessorId);
-	//	if (procssor)
-	//	{
-	//		displayName = procssor->getProgramName(0);
-	//		if (displayName.isEmpty())
-	//			displayName = String("Input ") + String(procssor->GetSourceId());
-	//
-	//	}
-	//}
-	//
-	//setText(displayName, dontSendNotification);
 }
 
 

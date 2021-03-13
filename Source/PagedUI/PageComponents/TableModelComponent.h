@@ -48,11 +48,6 @@ namespace SoundscapeBridgeApp
 /**
  * Forward declarations
  */
-class ComboBoxContainer;
-class TextEditorContainer;
-class RadioButtonContainer;
-class EditableLabelContainer;
-class SoundobjectProcessorEditor;
 class TableControlBarComponent;
 
 
@@ -78,6 +73,9 @@ public:
 
 	void SetModel(TableListBoxModel* model);
 	void SetControlBarPosition(ControlBarPosition pos);
+
+	void SetTableType(TableType tt);
+	TableType GetTableType();
 
 	//==========================================================================
 	virtual void RecreateTableRowIds() = 0;
@@ -130,187 +128,13 @@ protected:
 	void onDeselectAllProcessors();
 
 private:
-	std::unique_ptr<TableListBox>				m_table;				/**> The table component itself. */
-	std::unique_ptr<TableControlBarComponent>	m_tableControlBar;		/**> The control bottom bar. */
-	ControlBarPosition							m_controlBarPosition;	/**> The position of the control bar. */
-	std::vector<juce::int32>					m_processorIds;			/**> Local list of Soundobject Processor instance IDs, one for each row in the table. */
+	std::unique_ptr<TableListBox>				m_table;					/**> The table component itself. */
+	TableType									m_tableType{ TT_Invalid };	/**> The type of table component. */
+	std::unique_ptr<TableControlBarComponent>	m_tableControlBar;			/**> The control bottom bar. */
+	ControlBarPosition							m_controlBarPosition;		/**> The position of the control bar. */
+	std::vector<juce::int32>					m_processorIds;				/**> Local list of Soundobject Processor instance IDs, one for each row in the table. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TableModelComponent)
-};
-
-
-/**
- * Class ComboBoxContainer is a container for the MappingId Combo box component used in the Overview table.
- */
-class ComboBoxContainer : public Component,
-	public ComboBox::Listener
-{
-public:
-	explicit ComboBoxContainer(TableModelComponent& td);
-	~ComboBoxContainer() override;
-
-	void comboBoxChanged(ComboBox *comboBox) override;
-	void resized() override;
-	void SetRow(int newRow);
-
-private:
-	TableModelComponent&	m_owner;	/**> Table where this component is contained. */
-	ComboBox				m_comboBox;	/**> Actual combo box component. */
-	int						m_row;		/**< Row number where this component is located inside the table. */
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ComboBoxContainer)
-};
-
-
-/**
- * Class TextEditorContainer is a container for the SourceID TextEditor component used in the Overview table.
- */
-class TextEditorContainer : public Component,
-	public TextEditor::Listener
-{
-public:
-	explicit TextEditorContainer(TableModelComponent& td);
-	virtual ~TextEditorContainer() override;
-
-	void textEditorReturnKeyPressed(TextEditor &) override;
-	void resized() override;
-
-	virtual void textEditorFocusLost(TextEditor&) = 0;
-	virtual void SetRow(int newRow) = 0;
-
-protected:
-	TableModelComponent&	m_owner;	/**> Table where this component is contained. */
-	TextEditor				m_editor;	/**> Actual text editor. */
-	int						m_row;		/**> Row number where this component is located inside the table. */
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TextEditorContainer)
-};
-
-/**
- * Class SoundobjectTextEditorContainer is a container for the SoundobjectID TextEditor component used in the soundobjects table.
- */
-class SoundobjectIdTextEditorContainer : public TextEditorContainer
-{
-public:
-	explicit SoundobjectIdTextEditorContainer(TableModelComponent& td);
-	virtual ~SoundobjectIdTextEditorContainer() override;
-
-	void textEditorFocusLost(TextEditor&) override;
-	void SetRow(int newRow) override;
-
-private:
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SoundobjectIdTextEditorContainer)
-};
-
-/**
- * Class SoundobjectTextEditorContainer is a container for the SoundobjectID TextEditor component used in the soundobjects table.
- */
-class MatrixInputIdTextEditorContainer : public TextEditorContainer
-{
-public:
-	explicit MatrixInputIdTextEditorContainer(TableModelComponent& td);
-	virtual ~MatrixInputIdTextEditorContainer() override;
-
-	void textEditorFocusLost(TextEditor&) override;
-	void SetRow(int newRow) override;
-
-private:
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixInputIdTextEditorContainer)
-};
-
-/**
- * Class SoundobjectTextEditorContainer is a container for the SoundobjectID TextEditor component used in the soundobjects table.
- */
-class MatrixOutputIdTextEditorContainer : public TextEditorContainer
-{
-public:
-	explicit MatrixOutputIdTextEditorContainer(TableModelComponent& td);
-	virtual ~MatrixOutputIdTextEditorContainer() override;
-
-	void textEditorFocusLost(TextEditor&) override;
-	void SetRow(int newRow) override;
-
-private:
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixOutputIdTextEditorContainer)
-};
-
-
-/**
- * Class RadioButtonContainer is a container for the Tx/Rx buttons used in the Overview table.
- */
-class RadioButtonContainer : public Component,
-	public Button::Listener
-{
-public:
-	explicit RadioButtonContainer(TableModelComponent& td);
-	~RadioButtonContainer() override;
-
-	void lookAndFeelChanged() override;
-
-	void buttonClicked(Button*) override;
-	void resized() override;
-	void SetRow(int newRow);
-	void updateButtons();
-
-private:
-	TableModelComponent&	m_owner;	/**> Table where this component is contained. */
-	DrawableButton			m_txButton;	/**> Actual Tx button. */
-	DrawableButton			m_rxButton;	/**> Actual Rx button. */
-	int						m_row;		/**> Row number where this component is located inside the table. */
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RadioButtonContainer)
-};
-
-
-/**
- * Class MuteButtonContainer is a container for the Bridging Mute buttons used in the Overview table.
- */
-class MuteButtonContainer : public Component,
-	public Button::Listener
-{
-public:
-	explicit MuteButtonContainer(TableModelComponent& td);
-	~MuteButtonContainer() override;
-
-	void lookAndFeelChanged() override;
-
-	void buttonClicked(Button*) override;
-	void resized() override;
-	void SetRow(int newRow);
-	void updateBridgingMuteButtons();
-	void updateDrawableButtonImageColours();
-
-private:
-	TableModelComponent&											m_owner;			/**< Table where this component is contained. */
-	int																m_row;				/**< Row number where this component is located inside the table. */
-	std::map<ProtocolBridgingType, std::unique_ptr<DrawableButton>>	m_bridgingMutes;	/**< The mute buttons currently in use. */
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MuteButtonContainer)
-};
-
-
-/**
- * Class EditableLabelContainer is a container for editable labels used in the Overview table.
- */
-class EditableLabelContainer : public Label
-{
-public:
-	explicit EditableLabelContainer(TableModelComponent& td);
-	~EditableLabelContainer() override;
-
-	void mouseDown(const MouseEvent& event) override;
-	void mouseDoubleClick(const MouseEvent &) override;
-	void SetRow(int newRow);
-
-private:
-	
-	TableModelComponent&	m_owner;	/**> Table where this component is contained. */
-	int						m_row;		/**> Row number where this component is located inside the table. */
-
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EditableLabelContainer)
 };
 
 

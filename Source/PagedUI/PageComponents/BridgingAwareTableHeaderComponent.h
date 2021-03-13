@@ -38,7 +38,7 @@ public:
 	enum TableColumn
 	{
 		TC_None = 0,		//< Juce column IDs start at 1
-		TC_TrackID,
+		TC_EmptyHandleCellID,
 		TC_SoundobjectID,
 		TC_InputID,
 		TC_OutputID,

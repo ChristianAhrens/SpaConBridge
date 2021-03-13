@@ -40,6 +40,8 @@ namespace SoundscapeBridgeApp
 MatrixOutputTableComponent::MatrixOutputTableComponent()
 	: MatrixChannelTableComponentBase()
 {
+	SetTableType(TT_MatrixOutputs);
+
 	// This fills m_ids.
 	RecreateTableRowIds();
 
@@ -48,7 +50,7 @@ MatrixOutputTableComponent::MatrixOutputTableComponent()
 	// collect required info for table columns
 	std::map<BridgingAwareTableHeaderComponent::TableColumn, BridgingAwareTableHeaderComponent::ColumnProperties> tableColumns;
 	int tableHeaderFlags = (TableHeaderComponent::visible | TableHeaderComponent::sortable);
-	tableColumns[BridgingAwareTableHeaderComponent::TC_TrackID] = BridgingAwareTableHeaderComponent::ColumnProperties("", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_TrackID), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_TrackID), -1, tableHeaderFlags);
+	tableColumns[BridgingAwareTableHeaderComponent::TC_EmptyHandleCellID] = BridgingAwareTableHeaderComponent::ColumnProperties("", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_EmptyHandleCellID), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_EmptyHandleCellID), -1, tableHeaderFlags);
 	tableColumns[BridgingAwareTableHeaderComponent::TC_OutputID] = BridgingAwareTableHeaderComponent::ColumnProperties("Output #", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_OutputID), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_OutputID), -1, tableHeaderFlags);
 	tableColumns[BridgingAwareTableHeaderComponent::TC_OutputEditor] = BridgingAwareTableHeaderComponent::ColumnProperties("Matrix Output", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_OutputEditor), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_OutputEditor), -1, tableHeaderFlags);
 	tableColumns[BridgingAwareTableHeaderComponent::TC_ComsMode] = BridgingAwareTableHeaderComponent::ColumnProperties("Mode", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_ComsMode), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_ComsMode), -1, tableHeaderFlags);

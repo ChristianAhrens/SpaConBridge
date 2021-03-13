@@ -116,6 +116,17 @@ enum MatrixOutputParameterIndex
 };
 
 /**
+ * Enum to identify differen TableModelComponent derivates
+ */
+enum TableType
+{
+	TT_Invalid,
+	TT_Soundobjects,
+	TT_MatrixInputs,
+	TT_MatrixOutputs
+};
+
+/**
  * Data Change Type
  * Bitfields used to flag parameter changes.
  */

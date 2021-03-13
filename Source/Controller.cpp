@@ -2076,7 +2076,7 @@ void Controller::SetActiveProtocolBridging(ProtocolBridgingType bridgingTypes)
 
 /**
  * Gets the mute state of the given source via proxy bridge object
- * @param sourceId The id of the source for which the mute state shall be returned
+ * @param soundobjectId The id of the source for which the mute state shall be returned
  * @return The mute state
  */
 bool Controller::GetMuteBridgingSoundobjectId(ProtocolBridgingType bridgingType, SoundobjectId soundobjectId)
@@ -2133,7 +2133,7 @@ bool Controller::SetMuteBridgingSoundobjectId(ProtocolBridgingType bridgingType,
 
 /**
  * Sets the given sources to be (un-)muted in DiGiCo protocol via proxy bridge object
- * @param sourceIds The ids of the sources that shall be muted
+ * @param soundobjectId The ids of the sources that shall be muted
  * @param mute Set to true for mute and false for unmute
  * @return True on success, false on failure
  */
@@ -2158,6 +2158,184 @@ bool Controller::SetMuteBridgingSoundobjectIds(ProtocolBridgingType bridgingType
 		jassertfalse;
 		return false;
 	}
+}
+
+/**
+ * Gets the mute state of the given matrix input via proxy bridge object
+ * @param matrixInputId The id of the source for which the mute state shall be returned
+ * @return The mute state
+ */
+bool Controller::GetMuteBridgingMatrixInputId(ProtocolBridgingType bridgingType, MatrixInputId matrixInputId)
+{
+	//switch (bridgingType)
+	//{
+	//case PBT_DiGiCo:
+	//	return m_protocolBridge.GetMuteDiGiCoSoundobjectId(soundobjectId);
+	//case PBT_GenericOSC:
+	//	return m_protocolBridge.GetMuteGenericOSCSoundobjectId(soundobjectId);
+	//case PBT_BlacktraxRTTrPM:
+	//	return m_protocolBridge.GetMuteRTTrPMSoundobjectId(soundobjectId);
+	//case PBT_GenericMIDI:
+	//	return m_protocolBridge.GetMuteGenericMIDISoundobjectId(soundobjectId);
+	//case PBT_YamahaOSC:
+	//	return m_protocolBridge.GetMuteYamahaOSCSoundobjectId(soundobjectId);
+	//case PBT_YamahaSQ:
+	//case PBT_HUI:
+	//case PBT_DS100:
+	//default:
+	//	jassertfalse;
+	//	return false;
+	//}
+	return false;
+}
+
+/**
+ * Sets the given source to be (un-)muted in DiGiCo protocol via proxy bridge object
+ * @param matrixInputId The id of the matrix input that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool Controller::SetMuteBridgingMatrixInputId(ProtocolBridgingType bridgingType, MatrixInputId matrixInputId, bool mute)
+{
+	//switch (bridgingType)
+	//{
+	//case PBT_DiGiCo:
+	//	return m_protocolBridge.SetMuteDiGiCoSoundobjectId(soundobjectId, mute);
+	//case PBT_GenericOSC:
+	//	return m_protocolBridge.SetMuteGenericOSCSoundobjectId(soundobjectId, mute);
+	//case PBT_BlacktraxRTTrPM:
+	//	return m_protocolBridge.SetMuteRTTrPMSoundobjectId(soundobjectId, mute);
+	//case PBT_GenericMIDI:
+	//	return m_protocolBridge.SetMuteGenericMIDISoundobjectId(soundobjectId, mute);
+	//case PBT_YamahaOSC:
+	//	return m_protocolBridge.SetMuteYamahaOSCSoundobjectId(soundobjectId, mute);
+	//case PBT_YamahaSQ:
+	//case PBT_HUI:
+	//case PBT_DS100:
+	//default:
+	//	jassertfalse;
+	//	return false;
+	//}
+	return false;
+}
+
+/**
+ * Sets the given sources to be (un-)muted in DiGiCo protocol via proxy bridge object
+ * @param matrixInputIds The ids of the matrix Inputs that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool Controller::SetMuteBridgingMatrixInputIds(ProtocolBridgingType bridgingType, const std::vector<MatrixInputId>& matrixInputIds, bool mute)
+{
+	//switch (bridgingType)
+	//{
+	//case PBT_DiGiCo:
+	//	return m_protocolBridge.SetMuteDiGiCoSoundobjectIds(soundobjectIds, mute);
+	//case PBT_GenericOSC:
+	//	return m_protocolBridge.SetMuteGenericOSCSoundobjectIds(soundobjectIds, mute);
+	//case PBT_BlacktraxRTTrPM:
+	//	return m_protocolBridge.SetMuteRTTrPMSoundobjectIds(soundobjectIds, mute);
+	//case PBT_GenericMIDI:
+	//	return m_protocolBridge.SetMuteGenericMIDISoundobjectIds(soundobjectIds, mute);
+	//case PBT_YamahaOSC:
+	//	return m_protocolBridge.SetMuteYamahaOSCSoundobjectIds(soundobjectIds, mute);
+	//case PBT_YamahaSQ:
+	//case PBT_HUI:
+	//case PBT_DS100:
+	//default:
+	//	jassertfalse;
+	//	return false;
+	//}
+	return false;
+}
+
+/**
+ * Gets the mute state of the given source via proxy bridge object
+ * @param sourceId The id of the source for which the mute state shall be returned
+ * @return The mute state
+ */
+bool Controller::GetMuteBridgingMatrixOutputId(ProtocolBridgingType bridgingType, MatrixOutputId matrixOutputId)
+{
+	//switch (bridgingType)
+	//{
+	//case PBT_DiGiCo:
+	//	return m_protocolBridge.GetMuteDiGiCoSoundobjectId(soundobjectId);
+	//case PBT_GenericOSC:
+	//	return m_protocolBridge.GetMuteGenericOSCSoundobjectId(soundobjectId);
+	//case PBT_BlacktraxRTTrPM:
+	//	return m_protocolBridge.GetMuteRTTrPMSoundobjectId(soundobjectId);
+	//case PBT_GenericMIDI:
+	//	return m_protocolBridge.GetMuteGenericMIDISoundobjectId(soundobjectId);
+	//case PBT_YamahaOSC:
+	//	return m_protocolBridge.GetMuteYamahaOSCSoundobjectId(soundobjectId);
+	//case PBT_YamahaSQ:
+	//case PBT_HUI:
+	//case PBT_DS100:
+	//default:
+	//	jassertfalse;
+	//	return false;
+	//}
+	return false;
+}
+
+/**
+ * Sets the given source to be (un-)muted in DiGiCo protocol via proxy bridge object
+ * @param soundobjectId The id of the source that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool Controller::SetMuteBridgingMatrixOutputId(ProtocolBridgingType bridgingType, MatrixOutputId matrixOutputId, bool mute)
+{
+	//switch (bridgingType)
+	//{
+	//case PBT_DiGiCo:
+	//	return m_protocolBridge.SetMuteDiGiCoSoundobjectId(soundobjectId, mute);
+	//case PBT_GenericOSC:
+	//	return m_protocolBridge.SetMuteGenericOSCSoundobjectId(soundobjectId, mute);
+	//case PBT_BlacktraxRTTrPM:
+	//	return m_protocolBridge.SetMuteRTTrPMSoundobjectId(soundobjectId, mute);
+	//case PBT_GenericMIDI:
+	//	return m_protocolBridge.SetMuteGenericMIDISoundobjectId(soundobjectId, mute);
+	//case PBT_YamahaOSC:
+	//	return m_protocolBridge.SetMuteYamahaOSCSoundobjectId(soundobjectId, mute);
+	//case PBT_YamahaSQ:
+	//case PBT_HUI:
+	//case PBT_DS100:
+	//default:
+	//	jassertfalse;
+	//	return false;
+	//}
+	return false;
+}
+
+/**
+ * Sets the given sources to be (un-)muted in DiGiCo protocol via proxy bridge object
+ * @param matrixOutputIds The ids of the matrix outputs that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool Controller::SetMuteBridgingMatrixOutputIds(ProtocolBridgingType bridgingType, const std::vector<MatrixOutputId>& matrixOutputIds, bool mute)
+{
+	//switch (bridgingType)
+	//{
+	//case PBT_DiGiCo:
+	//	return m_protocolBridge.SetMuteDiGiCoSoundobjectIds(soundobjectIds, mute);
+	//case PBT_GenericOSC:
+	//	return m_protocolBridge.SetMuteGenericOSCSoundobjectIds(soundobjectIds, mute);
+	//case PBT_BlacktraxRTTrPM:
+	//	return m_protocolBridge.SetMuteRTTrPMSoundobjectIds(soundobjectIds, mute);
+	//case PBT_GenericMIDI:
+	//	return m_protocolBridge.SetMuteGenericMIDISoundobjectIds(soundobjectIds, mute);
+	//case PBT_YamahaOSC:
+	//	return m_protocolBridge.SetMuteYamahaOSCSoundobjectIds(soundobjectIds, mute);
+	//case PBT_YamahaSQ:
+	//case PBT_HUI:
+	//case PBT_DS100:
+	//default:
+	//	jassertfalse;
+	//	return false;
+	//}
+	return false;
 }
 
 String Controller::GetBridgingIpAddress(ProtocolBridgingType bridgingType)

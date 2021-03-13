@@ -106,6 +106,8 @@ Controller::~Controller()
 
 	const ScopedLock lock(m_mutex);
 	m_soundobjectProcessors.clearQuick();
+	m_matrixInputProcessors.clearQuick();
+	m_matrixOutputProcessors.clearQuick();
 
 	m_singleton = nullptr;
 }
@@ -1465,10 +1467,11 @@ bool Controller::setStateXml(XmlElement* stateXml)
 
 	bool retVal = true;
 
-	auto processorsXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDSOURCEPROCESSORS));
-	if (processorsXmlElement)
+	// create soundobject processors from xml
+	auto soundobjectProcessorsXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTPROCESSORS));
+	if (soundobjectProcessorsXmlElement)
 	{
-		forEachXmlChildElement(*processorsXmlElement, processorXmlElement)
+		forEachXmlChildElement(*soundobjectProcessorsXmlElement, processorXmlElement)
 		{
 			jassert(processorXmlElement->getTagName().contains(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE)));
 			int elementProcessorId = processorXmlElement->getTagName().getTrailingIntValue();
@@ -1489,17 +1492,76 @@ bool Controller::setStateXml(XmlElement* stateXml)
 				p->setStateXml(processorXmlElement);
 			}
 		}
+	}
+	else
+		retVal = false;
 
-		auto pageMgr = PageComponentManager::GetInstance();
-		if (pageMgr)
+	// create matrixinput processors from xml
+	auto matrixInputProcessorsXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXINPUTPROCESSORS));
+	if (matrixInputProcessorsXmlElement)
+	{
+		forEachXmlChildElement(*matrixInputProcessorsXmlElement, processorXmlElement)
 		{
-			auto pageContainer = pageMgr->GetPageContainer();
-			if (pageContainer)
-				pageContainer->UpdateGui(false);
+			jassert(processorXmlElement->getTagName().contains(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE)));
+			int elementProcessorId = processorXmlElement->getTagName().getTrailingIntValue();
+			bool alreadyExists = false;
+			for (auto processor : m_matrixInputProcessors)
+				if (processor->GetProcessorId() == elementProcessorId)
+				{
+					processor->setStateXml(processorXmlElement);
+					alreadyExists = true;
+				}
+
+			if (!alreadyExists)
+			{
+				auto newProcessor = std::make_unique<MatrixInputProcessor>(false);
+				newProcessor->SetProcessorId(DCS_Init, elementProcessorId);
+				auto p = newProcessor.release();
+				jassert(m_matrixInputProcessors.contains(p));
+				p->setStateXml(processorXmlElement);
+			}
 		}
 	}
 	else
 		retVal = false;
+
+	// create soundobject processors from xml
+	auto matrixOutputProcessorsXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXOUTPUTPROCESSORS));
+	if (matrixOutputProcessorsXmlElement)
+	{
+		forEachXmlChildElement(*matrixOutputProcessorsXmlElement, processorXmlElement)
+		{
+			jassert(processorXmlElement->getTagName().contains(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE)));
+			int elementProcessorId = processorXmlElement->getTagName().getTrailingIntValue();
+			bool alreadyExists = false;
+			for (auto processor : m_matrixOutputProcessors)
+				if (processor->GetProcessorId() == elementProcessorId)
+				{
+					processor->setStateXml(processorXmlElement);
+					alreadyExists = true;
+				}
+
+			if (!alreadyExists)
+			{
+				auto newProcessor = std::make_unique<MatrixOutputProcessor>(false);
+				newProcessor->SetProcessorId(DCS_Init, elementProcessorId);
+				auto p = newProcessor.release();
+				jassert(m_matrixOutputProcessors.contains(p));
+				p->setStateXml(processorXmlElement);
+			}
+		}
+	}
+	else
+		retVal = false;
+
+	// trigger UI update once after the processors have been created
+	auto pageMgr = PageComponentManager::GetInstance();
+	if (pageMgr)
+	{
+		auto pageContainer = pageMgr->GetPageContainer();
+		if (pageContainer)
+			pageContainer->UpdateGui(false);
+	}
 
 	auto bridgingXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::BRIDGING));
 	if (bridgingXmlElement)
@@ -1526,16 +1588,40 @@ std::unique_ptr<XmlElement> Controller::createStateXml()
 {
 	auto controllerXmlElement = std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER));
 
-	auto processorsXmlElement = controllerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDSOURCEPROCESSORS));
-	if (processorsXmlElement)
+	// create xml from soundobject processors
+	auto soundobjectProcessorsXmlElement = controllerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTPROCESSORS));
+	if (soundobjectProcessorsXmlElement)
 	{
 		for (auto processor : m_soundobjectProcessors)
 		{
 			jassert(processor->GetProcessorId() != -1);
-			processorsXmlElement->addChildElement(processor->createStateXml().release());
+			soundobjectProcessorsXmlElement->addChildElement(processor->createStateXml().release());
 		}
 	}
 
+	// create xml from matrix input processors
+	auto matrixInputProcessorsXmlElement = controllerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXINPUTPROCESSORS));
+	if (matrixInputProcessorsXmlElement)
+	{
+		for (auto processor : m_matrixInputProcessors)
+		{
+			jassert(processor->GetProcessorId() != -1);
+			matrixInputProcessorsXmlElement->addChildElement(processor->createStateXml().release());
+		}
+	}
+
+	// create xml from matrix output processors
+	auto matrixOutputProcessorsXmlElement = controllerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXOUTPUTPROCESSORS));
+	if (matrixOutputProcessorsXmlElement)
+	{
+		for (auto processor : m_matrixOutputProcessors)
+		{
+			jassert(processor->GetProcessorId() != -1);
+			matrixOutputProcessorsXmlElement->addChildElement(processor->createStateXml().release());
+		}
+	}
+
+	// create xml from bridging module
 	auto bridgingXmlElement = m_protocolBridge.createStateXml();
 	if (bridgingXmlElement)
 		controllerXmlElement->addChildElement(bridgingXmlElement.release());

@@ -164,7 +164,7 @@ void SoundobjectTableComponent::onAddProcessor()
 	if (!ctrl)
 		return;
 
-	ctrl->createNewMatrixInputProcessor();
+	ctrl->createNewSoundobjectProcessor();
 }
 
 /**

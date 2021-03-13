@@ -173,16 +173,16 @@ void MatrixOutputTableComponent::onRemoveProcessor()
 
 	auto const& selectedProcessorIds = GetProcessorIdsForRows(GetSelectedRows());
 
-	//if (ctrl->GetSoundobjectProcessorCount() <= selectedProcessorIds.size())
-	//	onCurrentSelectedProcessorChanged(INVALID_PROCESSOR_ID);
-	//else
-	//{
-	//	auto processorCount = ctrl->GetSoundobjectProcessorCount();
-	//	auto currentLastProcessorId = processorCount - 1;
-	//	auto selectedProcessorsToRemoveCount = selectedProcessorIds.size();
-	//	auto nextStillExistingId = static_cast<SoundobjectProcessorId>(currentLastProcessorId - selectedProcessorsToRemoveCount);
-	//	m_pageContainerTable->selectedRowsChanged(nextStillExistingId);
-	//}
+	if (ctrl->GetMatrixOutputProcessorCount() <= selectedProcessorIds.size())
+		onCurrentSelectedProcessorChanged(INVALID_PROCESSOR_ID);
+	else
+	{
+		auto processorCount = ctrl->GetSoundobjectProcessorCount();
+		auto currentLastProcessorId = processorCount - 1;
+		auto selectedProcessorsToRemoveCount = selectedProcessorIds.size();
+		auto nextStillExistingId = static_cast<MatrixOutputId>(currentLastProcessorId - selectedProcessorsToRemoveCount);
+		selectedRowsChanged(nextStillExistingId);
+	}
 
 	for (auto processorId : selectedProcessorIds)
 	{

@@ -34,8 +34,9 @@ public:
         OVERVIEW,
         ACTIVEOVRTAB,
         CONTROLLER,
-        SOUNDSOURCEPROCESSORS,
-        MATRIXCHANNELPROCESSORS,
+        SOUNDOBJECTPROCESSORS,
+        MATRIXINPUTPROCESSORS,
+        MATRIXOUTPUTPROCESSORS,
         PROCESSORINSTANCE,
 		BRIDGING,
         LOOKANDFEELTYPE,
@@ -50,10 +51,12 @@ public:
             return "ActiveTab";
         case CONTROLLER:
             return "Controller";
-        case SOUNDSOURCEPROCESSORS:
-            return "SoundsourceProcessors";
-        case MATRIXCHANNELPROCESSORS:
-            return "MatrixChannelProcessors";
+        case SOUNDOBJECTPROCESSORS:
+            return "SoundobjectProcessors";
+        case MATRIXINPUTPROCESSORS:
+            return "MatrixInputProcessors";
+        case MATRIXOUTPUTPROCESSORS:
+            return "MatrixOutputProcessors";
         case PROCESSORINSTANCE:
             return "Proc";
         case BRIDGING:
@@ -67,18 +70,18 @@ public:
 
 	enum AttributeID
 	{
-		PROCESSOROBJECTID,
-        PROCESSORMAPPINGID,
+		PROCESSORCHANNELID,
+        PROCESSORRECORDID,
         PROCESSORCOMSMODE,
 	};
 	static String getAttributeName(AttributeID Id)
 	{
 		switch (Id)
 		{
-        case PROCESSOROBJECTID:
-            return "ProcSrcId";
-        case PROCESSORMAPPINGID:
-            return "MappingId";
+        case PROCESSORCHANNELID:
+            return "ChannelId";
+        case PROCESSORRECORDID:
+            return "RecordId";
         case PROCESSORCOMSMODE:
             return "ComsMode";
 		default:

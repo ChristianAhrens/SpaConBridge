@@ -71,8 +71,14 @@ bool AppConfiguration::isValid(const std::unique_ptr<XmlElement>& xmlConfig)
 	auto ctrlSectionElement = xmlConfig->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER));
 	if (ctrlSectionElement)
 	{
-		auto soundSourceProcessorsSectionElement = ctrlSectionElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDSOURCEPROCESSORS));
+		auto soundSourceProcessorsSectionElement = ctrlSectionElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTPROCESSORS));
 		if (!soundSourceProcessorsSectionElement)
+			return false;
+		auto matrixInputProcessorsSectionElement = ctrlSectionElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXINPUTPROCESSORS));
+		if (!matrixInputProcessorsSectionElement)
+			return false;
+		auto matrixOutputProcessorsSectionElement = ctrlSectionElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXOUTPUTPROCESSORS));
+		if (!matrixOutputProcessorsSectionElement)
 			return false;
 		auto bridgingSectionElement = ctrlSectionElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::BRIDGING));
 		if (!bridgingSectionElement)

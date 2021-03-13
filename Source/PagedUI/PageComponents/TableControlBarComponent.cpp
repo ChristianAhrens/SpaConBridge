@@ -53,30 +53,22 @@ TableControlBarComponent::TableControlBarComponent(const String& componentName)
 	m_removeInstance->addListener(this);
 	addAndMakeVisible(m_removeInstance.get());
 
+	// Create quick selection buttons
+	m_selectAll = std::make_unique<DrawableButton>("all", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	m_selectAll->setClickingTogglesState(false);
+	m_selectAll->addListener(this);
+	addAndMakeVisible(m_selectAll.get());
+
+	m_selectNone = std::make_unique<DrawableButton>("none", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	m_selectNone->setClickingTogglesState(false);
+	m_selectNone->addListener(this);
+	addAndMakeVisible(m_selectNone.get());
+
 	// row height slider
 	m_heightSlider = std::make_unique<RowHeightSlider>("rowHeight");
 	m_heightSlider->SetSliderRange(33, 66, 11);
 	m_heightSlider->SetListener(this);
 	addAndMakeVisible(m_heightSlider.get());
-
-	// Create quick selection buttons
-	m_selectLabel = std::make_unique<Label>("Select:", "Select:");
-	m_selectLabel->setJustificationType(Justification::centred);
-	addAndMakeVisible(m_selectLabel.get());
-
-	m_selectAll = std::make_unique<TextButton>();
-	m_selectAll->setClickingTogglesState(false);
-	m_selectAll->setButtonText("All");
-	m_selectAll->setEnabled(true);
-	m_selectAll->addListener(this);
-	addAndMakeVisible(m_selectAll.get());
-
-	m_selectNone = std::make_unique<TextButton>();
-	m_selectNone->setClickingTogglesState(false);
-	m_selectNone->setButtonText("None");
-	m_selectNone->setEnabled(true);
-	m_selectNone->addListener(this);
-	addAndMakeVisible(m_selectNone.get());
 
 	// trigger lookandfeel update
 	lookAndFeelChanged();
@@ -118,14 +110,12 @@ void TableControlBarComponent::lookAndFeelChanged()
 	Component::lookAndFeelChanged();
 
 	// create the required button drawable images based on lookandfeel colours
-	String addImageName = BinaryData::add24px_svg;
-	String removeImageName = BinaryData::remove24px_svg;
 	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
 	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
 	if (dblookAndFeel)
 	{
 		// add images
-		JUCEAppBasics::Image_utils::getDrawableButtonImages(addImageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(BinaryData::add24px_svg, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
 			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
 			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
 			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
@@ -138,7 +128,7 @@ void TableControlBarComponent::lookAndFeelChanged()
 		m_addInstance->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
 
 		// remove images
-		JUCEAppBasics::Image_utils::getDrawableButtonImages(removeImageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(BinaryData::remove24px_svg, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
 			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
 			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
 			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
@@ -149,6 +139,32 @@ void TableControlBarComponent::lookAndFeelChanged()
 			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
 
 		m_removeInstance->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+
+		// select all images
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(BinaryData::rule_checked24px_svg, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+
+		m_selectAll->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+
+		// select none images
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(BinaryData::rule_unchecked24px_svg, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+
+		m_selectNone->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
 	}
 }
 
@@ -240,13 +256,12 @@ void TableControlBarComponent::resized()
 		mainFB.justifyContent = FlexBox::JustifyContent::center;
 		mainFB.alignContent = FlexBox::AlignContent::center;
 		mainFB.items.addArray({
-			FlexItem(*m_addInstance.get()).withFlex(1).withMaxWidth(30).withMargin(FlexItem::Margin(2, 2, 3, 4)),
-			FlexItem(*m_removeInstance.get()).withFlex(1).withMaxWidth(30).withMargin(FlexItem::Margin(2, 2, 3, 2)),
-			FlexItem().withFlex(2).withHeight(30),
-			FlexItem(*m_heightSlider.get()).withFlex(1).withMaxWidth(100).withMargin(FlexItem::Margin(2, 2, 3, 2)),
-			FlexItem(*m_selectLabel.get()).withFlex(1).withMaxWidth(80),
-			FlexItem(*m_selectAll.get()).withFlex(1).withMaxWidth(40).withMargin(FlexItem::Margin(2, 2, 3, 2)),
-			FlexItem(*m_selectNone.get()).withFlex(1).withMaxWidth(46).withMargin(FlexItem::Margin(2, 4, 3, 2)),
+			FlexItem(*m_addInstance.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 4)),
+			FlexItem(*m_removeInstance.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
+			FlexItem().withFlex(1).withHeight(30),
+			FlexItem(*m_selectAll.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
+			FlexItem(*m_selectNone.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
+			FlexItem(*m_heightSlider.get()).withWidth(90).withMargin(FlexItem::Margin(2, 4, 3, 2)),
 			});
 
 		mainFB.performLayout(bounds.reduced(0, 1));
@@ -259,13 +274,12 @@ void TableControlBarComponent::resized()
 		mainFB.justifyContent = FlexBox::JustifyContent::center;
 		mainFB.alignContent = FlexBox::AlignContent::center;
 		mainFB.items.addArray({
-			FlexItem(*m_addInstance.get()).withFlex(1).withMaxHeight(30).withMargin(FlexItem::Margin(2, 2, 3, 4)),
-			FlexItem(*m_removeInstance.get()).withFlex(1).withMaxHeight(30).withMargin(FlexItem::Margin(2, 2, 3, 2)),
-			FlexItem().withFlex(2).withWidth(30),
-			FlexItem(*m_heightSlider.get()).withFlex(1).withMaxHeight(100).withMargin(FlexItem::Margin(2, 2, 3, 2)),
-			FlexItem(*m_selectLabel.get()).withFlex(1).withMaxHeight(80),
-			FlexItem(*m_selectAll.get()).withFlex(1).withMaxHeight(40).withMargin(FlexItem::Margin(2, 2, 3, 2)),
-			FlexItem(*m_selectNone.get()).withFlex(1).withMaxHeight(46).withMargin(FlexItem::Margin(2, 4, 3, 2)),
+			FlexItem(*m_addInstance.get()).withHeight(25).withMargin(FlexItem::Margin(4, 2, 2, 3)),
+			FlexItem(*m_removeInstance.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
+			FlexItem().withFlex(1).withWidth(30),
+			FlexItem(*m_selectAll.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
+			FlexItem(*m_selectNone.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
+			FlexItem(*m_heightSlider.get()).withHeight(90).withMargin(FlexItem::Margin(2, 2, 4, 3)),
 			});
 
 		mainFB.performLayout(bounds.reduced(1, 0));

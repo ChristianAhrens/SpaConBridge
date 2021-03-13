@@ -72,9 +72,8 @@ private:
 	std::unique_ptr<DrawableButton>		m_addInstance;		/**> Button to add a processor instance */
 	std::unique_ptr<DrawableButton>		m_removeInstance;	/**> Button to remove the selected processor instance */
 	std::unique_ptr<RowHeightSlider>	m_heightSlider;		/**> Special slider component instance to modify table row height. */
-	std::unique_ptr<Label>				m_selectLabel;		/**> Quick select label */
-	std::unique_ptr<TextButton>			m_selectAll;		/**> Select all rows button. */
-	std::unique_ptr<TextButton>			m_selectNone;		/**> Select no rows button. */
+	std::unique_ptr<DrawableButton>		m_selectAll;		/**> Select all rows button. */
+	std::unique_ptr<DrawableButton>		m_selectNone;		/**> Select no rows button. */
 
 	LayoutDirection						m_layoutDirection;	/**> Determines if elements should be arranged in a vertical or horizontal layout. */
 

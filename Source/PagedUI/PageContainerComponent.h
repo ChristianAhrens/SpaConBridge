@@ -154,6 +154,14 @@ public:
 	void SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType);
 	DbLookAndFeelBase::LookAndFeelType GetLookAndFeelType();
 
+	//==============================================================================
+	int GetSoundobjectTableRowHeight();
+	void SetSoundobjectTableRowHeight(int height);
+	int GetMatrixInputTableRowHeight();
+	void SetMatrixInputTableRowHeight(int height);
+	int GetMatrixOutputTableRowHeight();
+	void SetMatrixOutputTableRowHeight(int height);
+
 private:
 	//==============================================================================
 	void toggleAboutPage();
@@ -178,7 +186,7 @@ private:
 	std::unique_ptr<LedComponent>					m_onlineLed1st;			/**> Button used as Online indicator LED for first DS100. */
 	std::unique_ptr<LedComponent>					m_onlineLed2nd;			/**> Button used as Online indicator LED for second DS100. */
 	std::unique_ptr<CustomButtonTabbedComponent>	m_tabbedComponent;		/**> A container for tabs. */
-	std::unique_ptr<SoundobjectTablePageComponent>	m_tablePage;			/**> The actual table container inside this component. */
+	std::unique_ptr<SoundobjectTablePageComponent>	m_soundobjectsPage;		/**> The actual table container inside this component. */
 	std::unique_ptr<MultiSurfacePageComponent>		m_multiSliderPage;		/**> Container for multi-slider. */
     std::unique_ptr<MatrixIOPageComponent>          m_matrixIOPage;         /**> Container for matrix inputs/outputs. */
 	std::unique_ptr<SettingsPageComponent>			m_settingsPage;			/**> Container for settings component. */

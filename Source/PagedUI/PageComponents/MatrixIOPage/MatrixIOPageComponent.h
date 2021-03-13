@@ -46,6 +46,11 @@ public:
 	MatrixIOPageComponent();
 	~MatrixIOPageComponent() override;
 
+	void SetInputsRowHeight(int height);
+	int GetInputsRowHeight();
+	void SetOutputsRowHeight(int height);
+	int GetOutputsRowHeight();
+
 	//==============================================================================
 	void UpdateGui(bool init) override;
 

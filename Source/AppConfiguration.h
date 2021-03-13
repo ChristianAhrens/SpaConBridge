@@ -31,8 +31,11 @@ class AppConfiguration : public JUCEAppBasics::AppConfigurationBase
 public:
     enum TagID
     {
-        OVERVIEW,
-        ACTIVEOVRTAB,
+        UICONFIG,
+        ACTIVETAB,
+        SOUNDOBJECTROWHEIGHT,
+        MATRIXINPUTROWHEIGHT,
+        MATRIXOUTPUTROWHEIGHT,
         CONTROLLER,
         SOUNDOBJECTPROCESSORS,
         MATRIXINPUTPROCESSORS,
@@ -45,10 +48,16 @@ public:
     {
         switch(ID)
         {
-        case OVERVIEW:
-            return "Overview";
-        case ACTIVEOVRTAB:
+        case UICONFIG:
+            return "UIConfig";
+        case ACTIVETAB:
             return "ActiveTab";
+        case SOUNDOBJECTROWHEIGHT:
+            return "SoundObjectRowHeight";
+        case MATRIXINPUTROWHEIGHT:
+            return "MatrixInputRowHeight";
+        case MATRIXOUTPUTROWHEIGHT:
+            return "MatrixOutputRowHeight";
         case CONTROLLER:
             return "Controller";
         case SOUNDOBJECTPROCESSORS:

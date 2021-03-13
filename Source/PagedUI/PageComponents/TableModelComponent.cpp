@@ -203,6 +203,20 @@ std::vector<int> TableModelComponent::GetRowsForProcessorIds(const std::vector<j
 }
 
 /**
+ * Helper method to get the row height of internal tableListBox member.
+ *
+ * @return	The row height of internal table member
+ */
+int TableModelComponent::GetRowHeight()
+{
+	// set the new row height to tableListBox member 
+	if (m_table)
+		m_table->getRowHeight();
+	else
+		return 0;
+}
+
+/**
  * Helper method to set a new row height to internal tableListBox member
  * and at the same time trigger resizing of the container component
  * 

@@ -142,7 +142,7 @@ void MainSoundscapeBridgeAppComponent::onConfigUpdated()
 {
     // get all the modules' configs first, because the initialization process might already trigger dumping, that would override data
     auto ctrlConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER));
-    auto ovrConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW));
+    auto uiCfgState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::UICONFIG));
 
     // set the controller modules' config
     auto ctrl = SoundscapeBridgeApp::Controller::GetInstance();
@@ -152,12 +152,12 @@ void MainSoundscapeBridgeAppComponent::onConfigUpdated()
     // set the overview manager modules' config
     auto pageMgr = SoundscapeBridgeApp::PageComponentManager::GetInstance();
     if (pageMgr)
-        pageMgr->setStateXml(ovrConfigState.get());
+        pageMgr->setStateXml(uiCfgState.get());
 
     // set the lookandfeel config (forwards to MainWindow where the magic happens)
-    if (ovrConfigState)
+    if (uiCfgState)
     {
-        auto lookAndFeelXmlElement = ovrConfigState->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::LOOKANDFEELTYPE));
+        auto lookAndFeelXmlElement = uiCfgState->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::LOOKANDFEELTYPE));
         if (lookAndFeelXmlElement)
         {
             auto lookAndFeelTextElement = lookAndFeelXmlElement->getFirstChildElement();

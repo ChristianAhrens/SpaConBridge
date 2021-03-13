@@ -97,6 +97,7 @@ public:
 	TableListBox* GetTable() { return m_table.get(); }
 	std::vector<juce::int32>& GetProcessorIds() { return m_processorIds; }
 
+	int GetRowHeight();
 	void SetRowHeight(int rowHeight);
 
 	std::vector<int> GetSelectedRows() const;

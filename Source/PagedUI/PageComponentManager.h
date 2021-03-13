@@ -75,6 +75,14 @@ public:
 	void SetSelectedMapping(int mapping);
 
 	//==============================================================================
+	int GetSoundobjectTableRowHeight();
+	void SetSoundobjectTableRowHeight(int height);
+	int GetMatrixInputTableRowHeight();
+	void SetMatrixInputTableRowHeight(int height);
+	int GetMatrixOutputTableRowHeight();
+	void SetMatrixOutputTableRowHeight(int height);
+
+	//==============================================================================
 	DbLookAndFeelBase::LookAndFeelType GetLookAndFeelType() const;
 	void SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType, bool dontSendNotification);
 

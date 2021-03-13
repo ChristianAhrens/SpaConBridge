@@ -297,9 +297,9 @@ void SettingsPageComponent::onApplyClicked()
 			if (controllerXmlElement)
 				config->setConfigState(std::make_unique<XmlElement>(*controllerXmlElement));
 
-			auto overviewXmlElement = configXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW));
-			if (overviewXmlElement)
-				config->setConfigState(std::make_unique<XmlElement>(*overviewXmlElement));
+			auto uiCfgXmlElement = configXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::UICONFIG));
+			if (uiCfgXmlElement)
+				config->setConfigState(std::make_unique<XmlElement>(*uiCfgXmlElement));
 
 			config->triggerWatcherUpdate();
 		}

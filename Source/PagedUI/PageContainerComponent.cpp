@@ -111,7 +111,7 @@ PageContainerComponent::PageContainerComponent()
 	addAndMakeVisible(m_versionStringLabel.get());
 
 	// Create the pages.
-	m_tablePage = std::make_unique<SoundobjectTablePageComponent>();
+	m_soundobjectsPage = std::make_unique<SoundobjectTablePageComponent>();
 	m_multiSliderPage = std::make_unique<MultiSurfacePageComponent>();
     m_matrixIOPage = std::make_unique<MatrixIOPageComponent>();
 	m_settingsPage = std::make_unique<SettingsPageComponent>();
@@ -128,7 +128,7 @@ PageContainerComponent::PageContainerComponent()
 
 	// Add the page tabs.
 	m_tabbedComponent->SetIsHandlingChanges(false);
-	m_tabbedComponent->addTab("Table", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_tablePage.get(), false, CustomButtonTabbedComponent::OTI_Table);
+	m_tabbedComponent->addTab("Table", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_soundobjectsPage.get(), false, CustomButtonTabbedComponent::OTI_Table);
 	m_tabbedComponent->addTab("Slider", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSliderPage.get(), false, CustomButtonTabbedComponent::OTI_MultiSlider);
 	m_tabbedComponent->addTab("Matrix IOs", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_matrixIOPage.get(), false, CustomButtonTabbedComponent::OTI_MatrixIOs);
     m_tabbedComponent->addTab("Statistics", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_statisticsPage.get(), false, CustomButtonTabbedComponent::OTI_Statistics);
@@ -228,7 +228,7 @@ void PageContainerComponent::resized()
 
 	// Resize overview table container.
 	auto rect = Rectangle<int>(0, 44, w, getLocalBounds().getHeight() - 89);
-	m_tablePage->setBounds(rect);
+	m_soundobjectsPage->setBounds(rect);
 	m_multiSliderPage->setBounds(rect);
     m_matrixIOPage->setBounds(rect);
 	m_settingsPage->setBounds(rect);
@@ -321,8 +321,8 @@ void PageContainerComponent::UpdateGui(bool init)
 	// Save some performance: only update the component inside the currently active tab.
 	if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_Table)
 	{
-		if (m_tablePage)
-			m_tablePage->UpdateGui(init);
+		if (m_soundobjectsPage)
+			m_soundobjectsPage->UpdateGui(init);
 
 		// When the overview table is active, no need to refresh GUI very quickly
 		if (getTimerInterval() == GUI_UPDATE_RATE_FAST)
@@ -412,6 +412,72 @@ void PageContainerComponent::lookAndFeelChanged()
 
 		m_helpButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
 	}
+}
+
+/**
+ * Getter for the row height in sound objects table
+ * @return	The table row height.
+ */
+int PageContainerComponent::GetSoundobjectTableRowHeight()
+{
+	if (m_soundobjectsPage)
+		return m_soundobjectsPage->GetRowHeight();
+	else
+		return 0;
+}
+
+/**
+ * Setter for the row height in sound objects table
+ * @param height	The table row height.
+ */
+void PageContainerComponent::SetSoundobjectTableRowHeight(int height)
+{
+	if (m_soundobjectsPage)
+		return m_soundobjectsPage->SetRowHeight(height);
+}
+
+/**
+ * Getter for the row height in matrix inputs table
+ * @return	The table row height.
+ */
+int PageContainerComponent::GetMatrixInputTableRowHeight()
+{
+	if (m_matrixIOPage)
+		return m_matrixIOPage->GetOutputsRowHeight();
+	else
+		return 0;
+}
+
+/**
+ * Setter for the row height in matrix inputs table
+ * @param height	The table row height.
+ */
+void PageContainerComponent::SetMatrixInputTableRowHeight(int height)
+{
+	if (m_matrixIOPage)
+		return m_matrixIOPage->SetOutputsRowHeight(height);
+}
+
+/**
+ * Getter for the row height in matrix outputs table
+ * @return	The table row height.
+ */
+int PageContainerComponent::GetMatrixOutputTableRowHeight()
+{
+	if (m_matrixIOPage)
+		return m_matrixIOPage->GetInputsRowHeight();
+	else
+		return 0;
+}
+
+/**
+ * Setter for the row height in matrix outputs table
+ * @param height	The table row height.
+ */
+void PageContainerComponent::SetMatrixOutputTableRowHeight(int height)
+{
+	if (m_matrixIOPage)
+		return m_matrixIOPage->SetOutputsRowHeight(height);
 }
 
 

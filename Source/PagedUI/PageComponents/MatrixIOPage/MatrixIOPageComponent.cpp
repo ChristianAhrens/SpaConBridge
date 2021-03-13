@@ -69,6 +69,50 @@ MatrixIOPageComponent::~MatrixIOPageComponent()
 }
 
 /**
+ * Setter for the row height of internal matrix inputs table component
+ * @param	height  The height value to set.
+ */
+void MatrixIOPageComponent::SetInputsRowHeight(int height)
+{
+	if (m_inputsComponent)
+		m_inputsComponent->SetRowHeight(height);
+}
+
+/**
+ * Getter for the current row height of internal matrix inputs table component
+ * @return	The current height value.
+ */
+int MatrixIOPageComponent::GetInputsRowHeight()
+{
+	if (m_inputsComponent)
+		return m_inputsComponent->GetRowHeight();
+	else
+		return 0;
+}
+
+/**
+ * Setter for the row height of internal matrix outputs table component
+ * @param	height  The height value to set.
+ */
+void MatrixIOPageComponent::SetOutputsRowHeight(int height)
+{
+	if (m_outputsComponent)
+		m_outputsComponent->SetRowHeight(height);
+}
+
+/**
+ * Getter for the current row height of internal matrix outputs table component
+ * @return	The current height value.
+ */
+int MatrixIOPageComponent::GetOutputsRowHeight()
+{
+	if (m_outputsComponent)
+		return m_outputsComponent->GetRowHeight();
+	else
+		return 0;
+}
+
+/**
  * Reimplemented to paint background and frame.
  * @param g		Graphics context that must be used to do the drawing operations.
  */

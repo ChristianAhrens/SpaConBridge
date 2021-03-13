@@ -82,6 +82,28 @@ SoundobjectTablePageComponent::~SoundobjectTablePageComponent()
 }
 
 /**
+ * Setter for the row height of internal soundobjects table component
+ * @param	height  The height value to set.
+ */
+void SoundobjectTablePageComponent::SetRowHeight(int height)
+{
+	if (m_soundobjectsTable)
+		m_soundobjectsTable->SetRowHeight(height);
+}
+
+/**
+ * Getter for the current row height of internal sound objects table component
+ * @return	The current height value.
+ */
+int SoundobjectTablePageComponent::GetRowHeight()
+{
+	if (m_soundobjectsTable)
+		return m_soundobjectsTable->GetRowHeight();
+	else
+		return 0;
+}
+
+/**
  * Reimplemented to paint background and frame.
  * @param g		Graphics context that must be used to do the drawing operations.
  */

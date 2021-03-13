@@ -68,6 +68,9 @@ public:
 	SoundobjectTablePageComponent();
 	~SoundobjectTablePageComponent() override;
 
+	void SetRowHeight(int height);
+	int GetRowHeight();
+
 	//==============================================================================
 	void UpdateGui(bool init) override;
 

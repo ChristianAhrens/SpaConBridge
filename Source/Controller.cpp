@@ -1042,273 +1042,146 @@ void Controller::Reconnect()
 void Controller::timerCallback()
 {
 	const ScopedLock lock(m_mutex);
-	if (m_soundobjectProcessors.size() > 0)
+
+	float newDualFloatValue[2];
+	int newIntValue;
+	RemoteObjectMessageData newMsgData;
+
+	for (auto const& soProcessor : m_soundobjectProcessors)
 	{
-		float newDualFloatValue[2];
-		int newIntValue;
-		RemoteObjectMessageData newMsgData;
+		auto comsMode = soProcessor->GetComsMode();
 
-		for (auto const& soProcessor : m_soundobjectProcessors)
+		// Check if the processor configuration has changed
+		// and need to be updated in the bridging configuration
+		if (soProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_ProcessorInstanceConfig))
 		{
-			auto comsMode = soProcessor->GetComsMode();
-
-			// Check if the processor configuration has changed
-			// and need to be updated in the bridging configuration
-			if (soProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_ProcessorInstanceConfig))
+			auto activateSSId = false;
+			auto deactivateSSId = false;
+			if (soProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_SoundobjectID))
 			{
-				auto activateSSId = false;
-				auto deactivateSSId = false;
-				if (soProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_SoundobjectID))
-				{
-					// SoundsourceID change means update is only required when
-					// remote object is currently activated. 
-					activateSSId = ((comsMode & CM_Rx) == CM_Rx);
-				}
-				soProcessor->PopParameterChanged(DCS_SoundobjectTable, DCT_SoundobjectID);
-
-				if (soProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_MappingID))
-				{
-					// MappingID change means update is only required when
-					// remote object is currently activated. 
-					activateSSId = ((comsMode & CM_Rx) == CM_Rx);
-				}
-				soProcessor->PopParameterChanged(DCS_SoundobjectTable, DCT_MappingID);
-
-				if (soProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_ComsMode))
-				{
-					// ComsMode change means toggling polling for the remote object,
-					// so one of the two activate/deactivate actions is required
-					activateSSId = ((comsMode & CM_Rx) == CM_Rx);
-					deactivateSSId = !activateSSId;
-				}
-				soProcessor->PopParameterChanged(DCS_SoundobjectTable, DCT_ComsMode);
-
-				if (activateSSId)
-					ActivateSoundobjectId(soProcessor->GetSoundobjectId(), soProcessor->GetMappingId());
-				else if (deactivateSSId)
-					DeactivateSoundobjectId(soProcessor->GetSoundobjectId(), soProcessor->GetMappingId());
+				// SoundsourceID change means update is only required when
+				// remote object is currently activated. 
+				activateSSId = ((comsMode & CM_Rx) == CM_Rx);
 			}
+			soProcessor->PopParameterChanged(DCS_SoundobjectTable, DCT_SoundobjectID);
 
-			// Signal every timer tick to each processor instance.
-			soProcessor->Tick();
-
-			bool msgSent;
-			DataChangeType paramSetsInTransit = DCT_None;
-
-			newMsgData._addrVal._first = static_cast<juce::uint16>(soProcessor->GetSoundobjectId());
-			newMsgData._addrVal._second = static_cast<juce::uint16>(soProcessor->GetMappingId());
-
-			// Iterate through all automation parameters.
-			for (int pIdx = SPI_ParamIdx_X; pIdx < SPI_ParamIdx_MaxIndex; ++pIdx)
+			if (soProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_MappingID))
 			{
-				msgSent = false;
-
-				switch (pIdx)
-				{
-					case SPI_ParamIdx_X:
-					{
-						// SET command is only sent out while in CM_Tx mode, provided that
-						// this parameter has been changed since the last timer tick.
-						if (((comsMode & CM_Tx) == CM_Tx) && soProcessor->GetParameterChanged(DCS_Protocol, DCT_SoundobjectPosition))
-						{
-							newDualFloatValue[0] = soProcessor->GetParameterValue(SPI_ParamIdx_X);
-							newDualFloatValue[1] = soProcessor->GetParameterValue(SPI_ParamIdx_Y);
-
-							newMsgData._valCount = 2;
-							newMsgData._valType = ROVT_FLOAT;
-							newMsgData._payload = &newDualFloatValue;
-							newMsgData._payloadSize = 2 * sizeof(float);
-
-							msgSent = m_protocolBridge.SendMessage(ROI_CoordinateMapping_SourcePosition_XY, newMsgData);
-							paramSetsInTransit |= DCT_SoundobjectPosition;
-						}
-					}
-					break;
-
-					case SPI_ParamIdx_Y:
-						// Changes to ParamIdx_Y are handled together with ParamIdx_X, so skip it.
-						continue;
-						break;
-
-					case SPI_ParamIdx_ReverbSendGain:
-					{
-						// SET command is only sent out while in CM_Tx mode, provided that
-						// this parameter has been changed since the last timer tick.
-						if (((comsMode & CM_Tx) == CM_Tx) && soProcessor->GetParameterChanged(DCS_Protocol, DCT_ReverbSendGain))
-						{
-							newDualFloatValue[0] = soProcessor->GetParameterValue(SPI_ParamIdx_ReverbSendGain);
-
-							newMsgData._valCount = 1;
-							newMsgData._valType = ROVT_FLOAT;
-							newMsgData._payload = &newDualFloatValue;
-							newMsgData._payloadSize = sizeof(float);
-
-							msgSent = m_protocolBridge.SendMessage(ROI_MatrixInput_ReverbSendGain, newMsgData);
-							paramSetsInTransit |= DCT_ReverbSendGain;
-						}
-					}
-					break;
-
-					case SPI_ParamIdx_ObjectSpread:
-					{
-						// SET command is only sent out while in CM_Tx mode, provided that
-						// this parameter has been changed since the last timer tick.
-						if (((comsMode & CM_Tx) == CM_Tx) && soProcessor->GetParameterChanged(DCS_Protocol, DCT_SoundobjectSpread))
-						{
-							newDualFloatValue[0] = soProcessor->GetParameterValue(SPI_ParamIdx_ObjectSpread);
-
-							newMsgData._valCount = 1;
-							newMsgData._valType = ROVT_FLOAT;
-							newMsgData._payload = &newDualFloatValue;
-							newMsgData._payloadSize = sizeof(float);
-
-							msgSent = m_protocolBridge.SendMessage(ROI_Positioning_SourceSpread, newMsgData);
-							paramSetsInTransit |= DCT_SoundobjectSpread;
-						}
-					}
-					break;
-
-					case SPI_ParamIdx_DelayMode:
-					{
-						// SET command is only sent out while in CM_Tx mode, provided that
-						// this parameter has been changed since the last timer tick.
-						if (((comsMode & CM_Tx) == CM_Tx) && soProcessor->GetParameterChanged(DCS_Protocol, DCT_DelayMode))
-						{
-							newDualFloatValue[0] = soProcessor->GetParameterValue(SPI_ParamIdx_DelayMode);
-
-							newMsgData._valCount = 1;
-							newMsgData._valType = ROVT_FLOAT;
-							newMsgData._payload = &newDualFloatValue;
-							newMsgData._payloadSize = sizeof(float);
-
-							msgSent = m_protocolBridge.SendMessage(ROI_Positioning_SourceDelayMode, newMsgData);
-							paramSetsInTransit |= DCT_DelayMode;
-						}
-					}
-					break;
-
-					default:
-						jassertfalse;
-						break;
-				}
+				// MappingID change means update is only required when
+				// remote object is currently activated. 
+				activateSSId = ((comsMode & CM_Rx) == CM_Rx);
 			}
+			soProcessor->PopParameterChanged(DCS_SoundobjectTable, DCT_MappingID);
 
-			// Flag the parameters for which we just sent a SET command out.
-			soProcessor->SetParamInTransit(paramSetsInTransit);
+			if (soProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_ComsMode))
+			{
+				// ComsMode change means toggling polling for the remote object,
+				// so one of the two activate/deactivate actions is required
+				activateSSId = ((comsMode & CM_Rx) == CM_Rx);
+				deactivateSSId = !activateSSId;
+			}
+			soProcessor->PopParameterChanged(DCS_SoundobjectTable, DCT_ComsMode);
 
-			// All changed parameters were sent out, so we can reset their flags now.
-			soProcessor->PopParameterChanged(DCS_Protocol, DCT_SoundobjectParameters);
+			if (activateSSId)
+				ActivateSoundobjectId(soProcessor->GetSoundobjectId(), soProcessor->GetMappingId());
+			else if (deactivateSSId)
+				DeactivateSoundobjectId(soProcessor->GetSoundobjectId(), soProcessor->GetMappingId());
 		}
 
-		for (auto const& miProcessor : m_matrixInputProcessors)
+		// Signal every timer tick to each processor instance.
+		soProcessor->Tick();
+
+		bool msgSent;
+		DataChangeType paramSetsInTransit = DCT_None;
+
+		newMsgData._addrVal._first = static_cast<juce::uint16>(soProcessor->GetSoundobjectId());
+		newMsgData._addrVal._second = static_cast<juce::uint16>(soProcessor->GetMappingId());
+
+		// Iterate through all automation parameters.
+		for (int pIdx = SPI_ParamIdx_X; pIdx < SPI_ParamIdx_MaxIndex; ++pIdx)
 		{
-			auto comsMode = miProcessor->GetComsMode();
+			msgSent = false;
 
-			// Check if the processor configuration has changed
-			// and need to be updated in the bridging configuration
-			if (miProcessor->GetParameterChanged(DCS_MatrixInputTable, DCT_ProcessorInstanceConfig))
+			switch (pIdx)
 			{
-				auto activateMIId = false;
-				auto deactivateMIId = false;
-				if (miProcessor->GetParameterChanged(DCS_MatrixInputTable, DCT_SoundobjectID))
-				{
-					// SoundsourceID change means update is only required when
-					// remote object is currently activated. 
-					activateMIId = ((comsMode & CM_Rx) == CM_Rx);
-				}
-				miProcessor->PopParameterChanged(DCS_MatrixInputTable, DCT_SoundobjectID);
-
-				if (miProcessor->GetParameterChanged(DCS_MatrixInputTable, DCT_MappingID))
-				{
-					// MappingID change means update is only required when
-					// remote object is currently activated. 
-					activateMIId = ((comsMode & CM_Rx) == CM_Rx);
-				}
-				miProcessor->PopParameterChanged(DCS_MatrixInputTable, DCT_MappingID);
-
-				if (miProcessor->GetParameterChanged(DCS_MatrixInputTable, DCT_ComsMode))
-				{
-					// ComsMode change means toggling polling for the remote object,
-					// so one of the two activate/deactivate actions is required
-					activateMIId = ((comsMode & CM_Rx) == CM_Rx);
-					deactivateMIId = !activateMIId;
-				}
-				miProcessor->PopParameterChanged(DCS_MatrixInputTable, DCT_ComsMode);
-
-				if (activateMIId)
-					ActivateMatrixInputId(miProcessor->GetMatrixInputId());
-				else if (deactivateMIId)
-					DeactivateMatrixInputId(miProcessor->GetMatrixInputId());
-			}
-
-			// Signal every timer tick to each processor instance.
-			miProcessor->Tick();
-
-			bool msgSent;
-			DataChangeType paramSetsInTransit = DCT_None;
-
-			newMsgData._addrVal._first = static_cast<juce::uint16>(miProcessor->GetMatrixInputId());
-
-			// Iterate through all automation parameters.
-			for (int pIdx = MII_ParamIdx_LevelMeterPreMute; pIdx < MII_ParamIdx_MaxIndex; ++pIdx)
-			{
-				msgSent = false;
-
-				switch (pIdx)
-				{
-				case MII_ParamIdx_LevelMeterPreMute:
+				case SPI_ParamIdx_X:
 				{
 					// SET command is only sent out while in CM_Tx mode, provided that
 					// this parameter has been changed since the last timer tick.
-					if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixInputLevelMeter))
+					if (((comsMode & CM_Tx) == CM_Tx) && soProcessor->GetParameterChanged(DCS_Protocol, DCT_SoundobjectPosition))
 					{
-						newDualFloatValue[0] = miProcessor->GetParameterValue(MII_ParamIdx_LevelMeterPreMute);
+						newDualFloatValue[0] = soProcessor->GetParameterValue(SPI_ParamIdx_X);
+						newDualFloatValue[1] = soProcessor->GetParameterValue(SPI_ParamIdx_Y);
+
+						newMsgData._valCount = 2;
+						newMsgData._valType = ROVT_FLOAT;
+						newMsgData._payload = &newDualFloatValue;
+						newMsgData._payloadSize = 2 * sizeof(float);
+
+						msgSent = m_protocolBridge.SendMessage(ROI_CoordinateMapping_SourcePosition_XY, newMsgData);
+						paramSetsInTransit |= DCT_SoundobjectPosition;
+					}
+				}
+				break;
+
+				case SPI_ParamIdx_Y:
+					// Changes to ParamIdx_Y are handled together with ParamIdx_X, so skip it.
+					continue;
+					break;
+
+				case SPI_ParamIdx_ReverbSendGain:
+				{
+					// SET command is only sent out while in CM_Tx mode, provided that
+					// this parameter has been changed since the last timer tick.
+					if (((comsMode & CM_Tx) == CM_Tx) && soProcessor->GetParameterChanged(DCS_Protocol, DCT_ReverbSendGain))
+					{
+						newDualFloatValue[0] = soProcessor->GetParameterValue(SPI_ParamIdx_ReverbSendGain);
 
 						newMsgData._valCount = 1;
 						newMsgData._valType = ROVT_FLOAT;
 						newMsgData._payload = &newDualFloatValue;
 						newMsgData._payloadSize = sizeof(float);
 
-						msgSent = m_protocolBridge.SendMessage(ROI_MatrixInput_LevelMeterPreMute, newMsgData);
-						paramSetsInTransit |= DCT_MatrixInputLevelMeter;
+						msgSent = m_protocolBridge.SendMessage(ROI_MatrixInput_ReverbSendGain, newMsgData);
+						paramSetsInTransit |= DCT_ReverbSendGain;
 					}
 				}
 				break;
 
-				case MII_ParamIdx_Gain:
+				case SPI_ParamIdx_ObjectSpread:
 				{
 					// SET command is only sent out while in CM_Tx mode, provided that
 					// this parameter has been changed since the last timer tick.
-					if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixInputGain))
+					if (((comsMode & CM_Tx) == CM_Tx) && soProcessor->GetParameterChanged(DCS_Protocol, DCT_SoundobjectSpread))
 					{
-						newDualFloatValue[0] = miProcessor->GetParameterValue(MII_ParamIdx_Gain);
+						newDualFloatValue[0] = soProcessor->GetParameterValue(SPI_ParamIdx_ObjectSpread);
 
 						newMsgData._valCount = 1;
 						newMsgData._valType = ROVT_FLOAT;
 						newMsgData._payload = &newDualFloatValue;
 						newMsgData._payloadSize = sizeof(float);
 
-						msgSent = m_protocolBridge.SendMessage(ROI_MatrixInput_Gain, newMsgData);
-						paramSetsInTransit |= DCT_MatrixInputGain;
+						msgSent = m_protocolBridge.SendMessage(ROI_Positioning_SourceSpread, newMsgData);
+						paramSetsInTransit |= DCT_SoundobjectSpread;
 					}
 				}
 				break;
 
-				case MII_ParamIdx_Mute:
+				case SPI_ParamIdx_DelayMode:
 				{
 					// SET command is only sent out while in CM_Tx mode, provided that
 					// this parameter has been changed since the last timer tick.
-					if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixInputMute))
+					if (((comsMode & CM_Tx) == CM_Tx) && soProcessor->GetParameterChanged(DCS_Protocol, DCT_DelayMode))
 					{
-						newIntValue = static_cast<int>(miProcessor->GetParameterValue(MII_ParamIdx_Mute));
+						newDualFloatValue[0] = soProcessor->GetParameterValue(SPI_ParamIdx_DelayMode);
 
 						newMsgData._valCount = 1;
-						newMsgData._valType = ROVT_INT;
-						newMsgData._payload = &newIntValue;
-						newMsgData._payloadSize = sizeof(int);
+						newMsgData._valType = ROVT_FLOAT;
+						newMsgData._payload = &newDualFloatValue;
+						newMsgData._payloadSize = sizeof(float);
 
-						msgSent = m_protocolBridge.SendMessage(ROI_MatrixInput_Mute, newMsgData);
-						paramSetsInTransit |= DCT_MatrixInputMute;
+						msgSent = m_protocolBridge.SendMessage(ROI_Positioning_SourceDelayMode, newMsgData);
+						paramSetsInTransit |= DCT_DelayMode;
 					}
 				}
 				break;
@@ -1316,142 +1189,268 @@ void Controller::timerCallback()
 				default:
 					jassertfalse;
 					break;
-				}
 			}
-
-			// Flag the parameters for which we just sent a SET command out.
-			miProcessor->SetParamInTransit(paramSetsInTransit);
-
-			// All changed parameters were sent out, so we can reset their flags now.
-			miProcessor->PopParameterChanged(DCS_Protocol, DCT_MatrixOutputParameters);
 		}
 
-		for (auto const& moProcessor : m_matrixOutputProcessors)
-		{
-			auto comsMode = moProcessor->GetComsMode();
+		// Flag the parameters for which we just sent a SET command out.
+		soProcessor->SetParamInTransit(paramSetsInTransit);
 
-			// Check if the processor configuration has changed
-			// and need to be updated in the bridging configuration
-			if (moProcessor->GetParameterChanged(DCS_MatrixOutputTable, DCT_ProcessorInstanceConfig))
-			{
-				auto activateMOId = false;
-				auto deactivateMOId = false;
-				if (moProcessor->GetParameterChanged(DCS_MatrixOutputTable, DCT_SoundobjectID))
-				{
-					// SoundsourceID change means update is only required when
-					// remote object is currently activated. 
-					activateMOId = ((comsMode & CM_Rx) == CM_Rx);
-				}
-				moProcessor->PopParameterChanged(DCS_MatrixOutputTable, DCT_SoundobjectID);
-
-				if (moProcessor->GetParameterChanged(DCS_MatrixOutputTable, DCT_MappingID))
-				{
-					// MappingID change means update is only required when
-					// remote object is currently activated. 
-					activateMOId = ((comsMode & CM_Rx) == CM_Rx);
-				}
-				moProcessor->PopParameterChanged(DCS_MatrixOutputTable, DCT_MappingID);
-
-				if (moProcessor->GetParameterChanged(DCS_MatrixOutputTable, DCT_ComsMode))
-				{
-					// ComsMode change means toggling polling for the remote object,
-					// so one of the two activate/deactivate actions is required
-					activateMOId = ((comsMode & CM_Rx) == CM_Rx);
-					deactivateMOId = !activateMOId;
-				}
-				moProcessor->PopParameterChanged(DCS_MatrixOutputTable, DCT_ComsMode);
-
-				if (activateMOId)
-					ActivateMatrixOutputId(moProcessor->GetMatrixOutputId());
-				else if (deactivateMOId)
-					DeactivateMatrixOutputId(moProcessor->GetMatrixOutputId());
-			}
-
-			// Signal every timer tick to each processor instance.
-			moProcessor->Tick();
-
-			bool msgSent;
-			DataChangeType paramSetsInTransit = DCT_None;
-
-			newMsgData._addrVal._first = static_cast<juce::uint16>(moProcessor->GetMatrixOutputId());
-
-			// Iterate through all automation parameters.
-			for (int pIdx = MOI_ParamIdx_LevelMeterPostMute; pIdx < MOI_ParamIdx_MaxIndex; ++pIdx)
-			{
-				msgSent = false;
-
-				switch (pIdx)
-				{
-				case MOI_ParamIdx_LevelMeterPostMute:
-				{
-					// SET command is only sent out while in CM_Tx mode, provided that
-					// this parameter has been changed since the last timer tick.
-					if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixOutputLevelMeter))
-					{
-						newDualFloatValue[0] = moProcessor->GetParameterValue(MOI_ParamIdx_LevelMeterPostMute);
-
-						newMsgData._valCount = 1;
-						newMsgData._valType = ROVT_FLOAT;
-						newMsgData._payload = &newDualFloatValue;
-						newMsgData._payloadSize = sizeof(float);
-
-						msgSent = m_protocolBridge.SendMessage(ROI_MatrixOutput_LevelMeterPostMute, newMsgData);
-						paramSetsInTransit |= DCT_MatrixOutputLevelMeter;
-					}
-				}
-				break;
-
-				case MOI_ParamIdx_Gain:
-				{
-					// SET command is only sent out while in CM_Tx mode, provided that
-					// this parameter has been changed since the last timer tick.
-					if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixOutputGain))
-					{
-						newDualFloatValue[0] = moProcessor->GetParameterValue(MOI_ParamIdx_Gain);
-
-						newMsgData._valCount = 1;
-						newMsgData._valType = ROVT_FLOAT;
-						newMsgData._payload = &newDualFloatValue;
-						newMsgData._payloadSize = sizeof(float);
-
-						msgSent = m_protocolBridge.SendMessage(ROI_MatrixOutput_Gain, newMsgData);
-						paramSetsInTransit |= DCT_MatrixOutputGain;
-					}
-				}
-				break;
-
-				case MOI_ParamIdx_Mute:
-				{
-					// SET command is only sent out while in CM_Tx mode, provided that
-					// this parameter has been changed since the last timer tick.
-					if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixOutputMute))
-					{
-						newIntValue = static_cast<int>(moProcessor->GetParameterValue(MOI_ParamIdx_Mute));
-
-						newMsgData._valCount = 1;
-						newMsgData._valType = ROVT_INT;
-						newMsgData._payload = &newIntValue;
-						newMsgData._payloadSize = sizeof(int);
-
-						msgSent = m_protocolBridge.SendMessage(ROI_MatrixOutput_Mute, newMsgData);
-						paramSetsInTransit |= DCT_MatrixOutputMute;
-					}
-				}
-				break;
-
-				default:
-					jassertfalse;
-					break;
-				}
-			}
-
-			// Flag the parameters for which we just sent a SET command out.
-			moProcessor->SetParamInTransit(paramSetsInTransit);
-
-			// All changed parameters were sent out, so we can reset their flags now.
-			moProcessor->PopParameterChanged(DCS_Protocol, DCT_MatrixOutputParameters);
-		}
+		// All changed parameters were sent out, so we can reset their flags now.
+		soProcessor->PopParameterChanged(DCS_Protocol, DCT_SoundobjectParameters);
 	}
+
+	for (auto const& miProcessor : m_matrixInputProcessors)
+	{
+		auto comsMode = miProcessor->GetComsMode();
+
+		// Check if the processor configuration has changed
+		// and need to be updated in the bridging configuration
+		if (miProcessor->GetParameterChanged(DCS_MatrixInputTable, DCT_ProcessorInstanceConfig))
+		{
+			auto activateMIId = false;
+			auto deactivateMIId = false;
+			if (miProcessor->GetParameterChanged(DCS_MatrixInputTable, DCT_SoundobjectID))
+			{
+				// SoundsourceID change means update is only required when
+				// remote object is currently activated. 
+				activateMIId = ((comsMode & CM_Rx) == CM_Rx);
+			}
+			miProcessor->PopParameterChanged(DCS_MatrixInputTable, DCT_SoundobjectID);
+
+			if (miProcessor->GetParameterChanged(DCS_MatrixInputTable, DCT_MappingID))
+			{
+				// MappingID change means update is only required when
+				// remote object is currently activated. 
+				activateMIId = ((comsMode & CM_Rx) == CM_Rx);
+			}
+			miProcessor->PopParameterChanged(DCS_MatrixInputTable, DCT_MappingID);
+
+			if (miProcessor->GetParameterChanged(DCS_MatrixInputTable, DCT_ComsMode))
+			{
+				// ComsMode change means toggling polling for the remote object,
+				// so one of the two activate/deactivate actions is required
+				activateMIId = ((comsMode & CM_Rx) == CM_Rx);
+				deactivateMIId = !activateMIId;
+			}
+			miProcessor->PopParameterChanged(DCS_MatrixInputTable, DCT_ComsMode);
+
+			if (activateMIId)
+				ActivateMatrixInputId(miProcessor->GetMatrixInputId());
+			else if (deactivateMIId)
+				DeactivateMatrixInputId(miProcessor->GetMatrixInputId());
+		}
+
+		// Signal every timer tick to each processor instance.
+		miProcessor->Tick();
+		
+		bool msgSent;
+		DataChangeType paramSetsInTransit = DCT_None;
+
+		newMsgData._addrVal._first = static_cast<juce::uint16>(miProcessor->GetMatrixInputId());
+
+		// Iterate through all automation parameters.
+		for (int pIdx = MII_ParamIdx_LevelMeterPreMute; pIdx < MII_ParamIdx_MaxIndex; ++pIdx)
+		{
+			msgSent = false;
+
+			switch (pIdx)
+			{
+			case MII_ParamIdx_LevelMeterPreMute:
+			{
+				// SET command is only sent out while in CM_Tx mode, provided that
+				// this parameter has been changed since the last timer tick.
+				if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixInputLevelMeter))
+				{
+					newDualFloatValue[0] = miProcessor->GetParameterValue(MII_ParamIdx_LevelMeterPreMute);
+
+					newMsgData._valCount = 1;
+					newMsgData._valType = ROVT_FLOAT;
+					newMsgData._payload = &newDualFloatValue;
+					newMsgData._payloadSize = sizeof(float);
+
+					msgSent = m_protocolBridge.SendMessage(ROI_MatrixInput_LevelMeterPreMute, newMsgData);
+					paramSetsInTransit |= DCT_MatrixInputLevelMeter;
+				}
+			}
+			break;
+
+			case MII_ParamIdx_Gain:
+			{
+				// SET command is only sent out while in CM_Tx mode, provided that
+				// this parameter has been changed since the last timer tick.
+				if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixInputGain))
+				{
+					newDualFloatValue[0] = miProcessor->GetParameterValue(MII_ParamIdx_Gain);
+
+					newMsgData._valCount = 1;
+					newMsgData._valType = ROVT_FLOAT;
+					newMsgData._payload = &newDualFloatValue;
+					newMsgData._payloadSize = sizeof(float);
+
+					msgSent = m_protocolBridge.SendMessage(ROI_MatrixInput_Gain, newMsgData);
+					paramSetsInTransit |= DCT_MatrixInputGain;
+				}
+			}
+			break;
+
+			case MII_ParamIdx_Mute:
+			{
+				// SET command is only sent out while in CM_Tx mode, provided that
+				// this parameter has been changed since the last timer tick.
+				if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixInputMute))
+				{
+					newIntValue = static_cast<int>(miProcessor->GetParameterValue(MII_ParamIdx_Mute));
+
+					newMsgData._valCount = 1;
+					newMsgData._valType = ROVT_INT;
+					newMsgData._payload = &newIntValue;
+					newMsgData._payloadSize = sizeof(int);
+
+					msgSent = m_protocolBridge.SendMessage(ROI_MatrixInput_Mute, newMsgData);
+					paramSetsInTransit |= DCT_MatrixInputMute;
+				}
+			}
+			break;
+
+			default:
+				jassertfalse;
+				break;
+			}
+		}
+
+		// Flag the parameters for which we just sent a SET command out.
+		miProcessor->SetParamInTransit(paramSetsInTransit);
+
+		// All changed parameters were sent out, so we can reset their flags now.
+		miProcessor->PopParameterChanged(DCS_Protocol, DCT_MatrixOutputParameters);
+	}
+
+	for (auto const& moProcessor : m_matrixOutputProcessors)
+	{
+		auto comsMode = moProcessor->GetComsMode();
+
+		// Check if the processor configuration has changed
+		// and need to be updated in the bridging configuration
+		if (moProcessor->GetParameterChanged(DCS_MatrixOutputTable, DCT_ProcessorInstanceConfig))
+		{
+			auto activateMOId = false;
+			auto deactivateMOId = false;
+			if (moProcessor->GetParameterChanged(DCS_MatrixOutputTable, DCT_SoundobjectID))
+			{
+				// SoundsourceID change means update is only required when
+				// remote object is currently activated. 
+				activateMOId = ((comsMode & CM_Rx) == CM_Rx);
+			}
+			moProcessor->PopParameterChanged(DCS_MatrixOutputTable, DCT_SoundobjectID);
+
+			if (moProcessor->GetParameterChanged(DCS_MatrixOutputTable, DCT_MappingID))
+			{
+				// MappingID change means update is only required when
+				// remote object is currently activated. 
+				activateMOId = ((comsMode & CM_Rx) == CM_Rx);
+			}
+			moProcessor->PopParameterChanged(DCS_MatrixOutputTable, DCT_MappingID);
+
+			if (moProcessor->GetParameterChanged(DCS_MatrixOutputTable, DCT_ComsMode))
+			{
+				// ComsMode change means toggling polling for the remote object,
+				// so one of the two activate/deactivate actions is required
+				activateMOId = ((comsMode & CM_Rx) == CM_Rx);
+				deactivateMOId = !activateMOId;
+			}
+			moProcessor->PopParameterChanged(DCS_MatrixOutputTable, DCT_ComsMode);
+
+			if (activateMOId)
+				ActivateMatrixOutputId(moProcessor->GetMatrixOutputId());
+			else if (deactivateMOId)
+				DeactivateMatrixOutputId(moProcessor->GetMatrixOutputId());
+		}
+
+		// Signal every timer tick to each processor instance.
+		moProcessor->Tick();
+
+		bool msgSent;
+		DataChangeType paramSetsInTransit = DCT_None;
+
+		newMsgData._addrVal._first = static_cast<juce::uint16>(moProcessor->GetMatrixOutputId());
+
+		// Iterate through all automation parameters.
+		for (int pIdx = MOI_ParamIdx_LevelMeterPostMute; pIdx < MOI_ParamIdx_MaxIndex; ++pIdx)
+		{
+			msgSent = false;
+
+			switch (pIdx)
+			{
+			case MOI_ParamIdx_LevelMeterPostMute:
+			{
+				// SET command is only sent out while in CM_Tx mode, provided that
+				// this parameter has been changed since the last timer tick.
+				if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixOutputLevelMeter))
+				{
+					newDualFloatValue[0] = moProcessor->GetParameterValue(MOI_ParamIdx_LevelMeterPostMute);
+
+					newMsgData._valCount = 1;
+					newMsgData._valType = ROVT_FLOAT;
+					newMsgData._payload = &newDualFloatValue;
+					newMsgData._payloadSize = sizeof(float);
+
+					msgSent = m_protocolBridge.SendMessage(ROI_MatrixOutput_LevelMeterPostMute, newMsgData);
+					paramSetsInTransit |= DCT_MatrixOutputLevelMeter;
+				}
+			}
+			break;
+
+			case MOI_ParamIdx_Gain:
+			{
+				// SET command is only sent out while in CM_Tx mode, provided that
+				// this parameter has been changed since the last timer tick.
+				if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixOutputGain))
+				{
+					newDualFloatValue[0] = moProcessor->GetParameterValue(MOI_ParamIdx_Gain);
+
+					newMsgData._valCount = 1;
+					newMsgData._valType = ROVT_FLOAT;
+					newMsgData._payload = &newDualFloatValue;
+					newMsgData._payloadSize = sizeof(float);
+
+					msgSent = m_protocolBridge.SendMessage(ROI_MatrixOutput_Gain, newMsgData);
+					paramSetsInTransit |= DCT_MatrixOutputGain;
+				}
+			}
+			break;
+
+			case MOI_ParamIdx_Mute:
+			{
+				// SET command is only sent out while in CM_Tx mode, provided that
+				// this parameter has been changed since the last timer tick.
+				if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixOutputMute))
+				{
+					newIntValue = static_cast<int>(moProcessor->GetParameterValue(MOI_ParamIdx_Mute));
+
+					newMsgData._valCount = 1;
+					newMsgData._valType = ROVT_INT;
+					newMsgData._payload = &newIntValue;
+					newMsgData._payloadSize = sizeof(int);
+
+					msgSent = m_protocolBridge.SendMessage(ROI_MatrixOutput_Mute, newMsgData);
+					paramSetsInTransit |= DCT_MatrixOutputMute;
+				}
+			}
+			break;
+
+			default:
+				jassertfalse;
+				break;
+			}
+		}
+
+		// Flag the parameters for which we just sent a SET command out.
+		moProcessor->SetParamInTransit(paramSetsInTransit);
+
+		// All changed parameters were sent out, so we can reset their flags now.
+		moProcessor->PopParameterChanged(DCS_Protocol, DCT_MatrixOutputParameters);
+	}
+
 }
 
 /**

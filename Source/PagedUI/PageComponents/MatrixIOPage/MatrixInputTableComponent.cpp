@@ -176,7 +176,10 @@ void MatrixInputTableComponent::onRemoveProcessor()
 	auto const& selectedProcessorIds = GetProcessorIdsForRows(GetSelectedRows());
 
 	if (ctrl->GetMatrixInputProcessorCount() <= selectedProcessorIds.size())
-		onCurrentSelectedProcessorChanged(INVALID_PROCESSOR_ID);
+	{
+		if (onCurrentSelectedProcessorChanged)
+			onCurrentSelectedProcessorChanged(INVALID_PROCESSOR_ID);
+	}
 	else
 	{
 		auto processorCount = ctrl->GetSoundobjectProcessorCount();

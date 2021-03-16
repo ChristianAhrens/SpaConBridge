@@ -826,16 +826,18 @@ int TableModelComponent::getColumnAutoSizeWidth(int columnId)
  */
 void TableModelComponent::selectedRowsChanged(int lastRowSelected)
 {
-	if (onCurrentSelectedProcessorChanged && m_table)
+	if (m_table)
 	{
 		if (m_table->getSelectedRows().isEmpty() || m_table->getSelectedRows().size() > 1)
 		{
-			onCurrentSelectedProcessorChanged(SoundscapeBridgeApp::INVALID_PROCESSOR_ID);
+			if (onCurrentSelectedProcessorChanged)
+				onCurrentSelectedProcessorChanged(SoundscapeBridgeApp::INVALID_PROCESSOR_ID);
 			m_tableControlBar->SetRemoveEnabled(false);
 		}
 		else
 		{
-			onCurrentSelectedProcessorChanged(GetProcessorIdForRow(lastRowSelected));
+			if (onCurrentSelectedProcessorChanged)
+				onCurrentSelectedProcessorChanged(GetProcessorIdForRow(lastRowSelected));
 			m_tableControlBar->SetRemoveEnabled(true);
 		}
 	}

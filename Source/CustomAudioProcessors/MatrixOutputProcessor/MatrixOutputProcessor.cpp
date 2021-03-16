@@ -452,7 +452,10 @@ void MatrixOutputProcessor::InitializeSettings(MatrixOutputId MatrixOutputId, St
  */
 const std::vector<RemoteObjectIdentifier>	MatrixOutputProcessor::GetUsedRemoteObjects()
 {
-	return std::vector<RemoteObjectIdentifier>{ROI_CoordinateMapping_SourcePosition_XY, ROI_CoordinateMapping_SourcePosition_X, ROI_CoordinateMapping_SourcePosition_Y, ROI_MatrixInput_ReverbSendGain, ROI_Positioning_SourceSpread, ROI_Positioning_SourceDelayMode};
+	return std::vector<RemoteObjectIdentifier>{
+		ROI_MatrixOutput_LevelMeterPreMute,
+		ROI_MatrixOutput_Gain,
+		ROI_MatrixOutput_Gain };
 };
 
 

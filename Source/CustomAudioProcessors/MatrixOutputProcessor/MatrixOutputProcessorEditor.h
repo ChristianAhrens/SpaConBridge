@@ -60,10 +60,10 @@ private:
 	std::unique_ptr<DrawableButton>		m_MatrixOutputMuteButton;		/**> Button for mute */
 																	
 	int									m_ticksSinceLastChange = 0;		/**> Used to allow some tolerance when switching between fast and slow refresh
-																		/* rates for the GUI.
-																		/* Once this counter reaches GUI_UPDATE_DELAY_TICKS, and no parameters have
-																		/* changed, the GUI will switch to GUI_UPDATE_RATE_SLOW. Switches to
-																		/* GUI_UPDATE_RATE_FAST happen immediately after any change. */
+                                                                         * rates for the GUI.
+                                                                         * Once this counter reaches GUI_UPDATE_DELAY_TICKS, and no parameters have
+                                                                         * changed, the GUI will switch to GUI_UPDATE_RATE_SLOW. Switches to
+                                                                         * GUI_UPDATE_RATE_FAST happen immediately after any change. */
 
 	static constexpr int Mute_On = 1;
 

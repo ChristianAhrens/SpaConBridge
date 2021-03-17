@@ -211,7 +211,7 @@ int TableModelComponent::GetRowHeight()
 {
 	// set the new row height to tableListBox member 
 	if (m_table)
-		m_table->getRowHeight();
+		return m_table->getRowHeight();
 	else
 		return 0;
 }

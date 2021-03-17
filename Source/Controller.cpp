@@ -2166,26 +2166,25 @@ bool Controller::SetMuteBridgingSoundobjectIds(ProtocolBridgingType bridgingType
  */
 bool Controller::GetMuteBridgingMatrixInputId(ProtocolBridgingType bridgingType, MatrixInputId matrixInputId)
 {
-	//switch (bridgingType)
-	//{
-	//case PBT_DiGiCo:
-	//	return m_protocolBridge.GetMuteDiGiCoSoundobjectId(soundobjectId);
-	//case PBT_GenericOSC:
-	//	return m_protocolBridge.GetMuteGenericOSCSoundobjectId(soundobjectId);
-	//case PBT_BlacktraxRTTrPM:
-	//	return m_protocolBridge.GetMuteRTTrPMSoundobjectId(soundobjectId);
-	//case PBT_GenericMIDI:
-	//	return m_protocolBridge.GetMuteGenericMIDISoundobjectId(soundobjectId);
-	//case PBT_YamahaOSC:
-	//	return m_protocolBridge.GetMuteYamahaOSCSoundobjectId(soundobjectId);
-	//case PBT_YamahaSQ:
-	//case PBT_HUI:
-	//case PBT_DS100:
-	//default:
-	//	jassertfalse;
-	//	return false;
-	//}
-	return false;
+	switch (bridgingType)
+	{
+	case PBT_DiGiCo:
+		return m_protocolBridge.GetMuteDiGiCoMatrixInputId(matrixInputId);
+	case PBT_GenericOSC:
+		return m_protocolBridge.GetMuteGenericOSCMatrixInputId(matrixInputId);
+	case PBT_BlacktraxRTTrPM:
+		return m_protocolBridge.GetMuteRTTrPMMatrixInputId(matrixInputId);
+	case PBT_GenericMIDI:
+		return m_protocolBridge.GetMuteGenericMIDIMatrixInputId(matrixInputId);
+	case PBT_YamahaOSC:
+		return m_protocolBridge.GetMuteYamahaOSCMatrixInputId(matrixInputId);
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return false;
+	}
 }
 
 /**
@@ -2196,26 +2195,25 @@ bool Controller::GetMuteBridgingMatrixInputId(ProtocolBridgingType bridgingType,
  */
 bool Controller::SetMuteBridgingMatrixInputId(ProtocolBridgingType bridgingType, MatrixInputId matrixInputId, bool mute)
 {
-	//switch (bridgingType)
-	//{
-	//case PBT_DiGiCo:
-	//	return m_protocolBridge.SetMuteDiGiCoSoundobjectId(soundobjectId, mute);
-	//case PBT_GenericOSC:
-	//	return m_protocolBridge.SetMuteGenericOSCSoundobjectId(soundobjectId, mute);
-	//case PBT_BlacktraxRTTrPM:
-	//	return m_protocolBridge.SetMuteRTTrPMSoundobjectId(soundobjectId, mute);
-	//case PBT_GenericMIDI:
-	//	return m_protocolBridge.SetMuteGenericMIDISoundobjectId(soundobjectId, mute);
-	//case PBT_YamahaOSC:
-	//	return m_protocolBridge.SetMuteYamahaOSCSoundobjectId(soundobjectId, mute);
-	//case PBT_YamahaSQ:
-	//case PBT_HUI:
-	//case PBT_DS100:
-	//default:
-	//	jassertfalse;
-	//	return false;
-	//}
-	return false;
+	switch (bridgingType)
+	{
+	case PBT_DiGiCo:
+		return m_protocolBridge.SetMuteDiGiCoMatrixInputId(matrixInputId, mute);
+	case PBT_GenericOSC:
+		return m_protocolBridge.SetMuteGenericOSCMatrixInputId(matrixInputId, mute);
+	case PBT_BlacktraxRTTrPM:
+		return m_protocolBridge.SetMuteRTTrPMMatrixInputId(matrixInputId, mute);
+	case PBT_GenericMIDI:
+		return m_protocolBridge.SetMuteGenericMIDIMatrixInputId(matrixInputId, mute);
+	case PBT_YamahaOSC:
+		return m_protocolBridge.SetMuteYamahaOSCMatrixInputId(matrixInputId, mute);
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return false;
+	}
 }
 
 /**
@@ -2226,26 +2224,25 @@ bool Controller::SetMuteBridgingMatrixInputId(ProtocolBridgingType bridgingType,
  */
 bool Controller::SetMuteBridgingMatrixInputIds(ProtocolBridgingType bridgingType, const std::vector<MatrixInputId>& matrixInputIds, bool mute)
 {
-	//switch (bridgingType)
-	//{
-	//case PBT_DiGiCo:
-	//	return m_protocolBridge.SetMuteDiGiCoSoundobjectIds(soundobjectIds, mute);
-	//case PBT_GenericOSC:
-	//	return m_protocolBridge.SetMuteGenericOSCSoundobjectIds(soundobjectIds, mute);
-	//case PBT_BlacktraxRTTrPM:
-	//	return m_protocolBridge.SetMuteRTTrPMSoundobjectIds(soundobjectIds, mute);
-	//case PBT_GenericMIDI:
-	//	return m_protocolBridge.SetMuteGenericMIDISoundobjectIds(soundobjectIds, mute);
-	//case PBT_YamahaOSC:
-	//	return m_protocolBridge.SetMuteYamahaOSCSoundobjectIds(soundobjectIds, mute);
-	//case PBT_YamahaSQ:
-	//case PBT_HUI:
-	//case PBT_DS100:
-	//default:
-	//	jassertfalse;
-	//	return false;
-	//}
-	return false;
+	switch (bridgingType)
+	{
+	case PBT_DiGiCo:
+		return m_protocolBridge.SetMuteDiGiCoMatrixInputIds(matrixInputIds, mute);
+	case PBT_GenericOSC:
+		return m_protocolBridge.SetMuteGenericOSCMatrixInputIds(matrixInputIds, mute);
+	case PBT_BlacktraxRTTrPM:
+		return m_protocolBridge.SetMuteRTTrPMMatrixInputIds(matrixInputIds, mute);
+	case PBT_GenericMIDI:
+		return m_protocolBridge.SetMuteGenericMIDIMatrixInputIds(matrixInputIds, mute);
+	case PBT_YamahaOSC:
+		return m_protocolBridge.SetMuteYamahaOSCMatrixInputIds(matrixInputIds, mute);
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return false;
+	}
 }
 
 /**
@@ -2255,26 +2252,25 @@ bool Controller::SetMuteBridgingMatrixInputIds(ProtocolBridgingType bridgingType
  */
 bool Controller::GetMuteBridgingMatrixOutputId(ProtocolBridgingType bridgingType, MatrixOutputId matrixOutputId)
 {
-	//switch (bridgingType)
-	//{
-	//case PBT_DiGiCo:
-	//	return m_protocolBridge.GetMuteDiGiCoSoundobjectId(soundobjectId);
-	//case PBT_GenericOSC:
-	//	return m_protocolBridge.GetMuteGenericOSCSoundobjectId(soundobjectId);
-	//case PBT_BlacktraxRTTrPM:
-	//	return m_protocolBridge.GetMuteRTTrPMSoundobjectId(soundobjectId);
-	//case PBT_GenericMIDI:
-	//	return m_protocolBridge.GetMuteGenericMIDISoundobjectId(soundobjectId);
-	//case PBT_YamahaOSC:
-	//	return m_protocolBridge.GetMuteYamahaOSCSoundobjectId(soundobjectId);
-	//case PBT_YamahaSQ:
-	//case PBT_HUI:
-	//case PBT_DS100:
-	//default:
-	//	jassertfalse;
-	//	return false;
-	//}
-	return false;
+	switch (bridgingType)
+	{
+	case PBT_DiGiCo:
+		return m_protocolBridge.GetMuteDiGiCoMatrixOutputId(matrixOutputId);
+	case PBT_GenericOSC:
+		return m_protocolBridge.GetMuteGenericOSCMatrixOutputId(matrixOutputId);
+	case PBT_BlacktraxRTTrPM:
+		return m_protocolBridge.GetMuteRTTrPMMatrixOutputId(matrixOutputId);
+	case PBT_GenericMIDI:
+		return m_protocolBridge.GetMuteGenericMIDIMatrixOutputId(matrixOutputId);
+	case PBT_YamahaOSC:
+		return m_protocolBridge.GetMuteYamahaOSCMatrixOutputId(matrixOutputId);
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return false;
+	}
 }
 
 /**
@@ -2285,26 +2281,25 @@ bool Controller::GetMuteBridgingMatrixOutputId(ProtocolBridgingType bridgingType
  */
 bool Controller::SetMuteBridgingMatrixOutputId(ProtocolBridgingType bridgingType, MatrixOutputId matrixOutputId, bool mute)
 {
-	//switch (bridgingType)
-	//{
-	//case PBT_DiGiCo:
-	//	return m_protocolBridge.SetMuteDiGiCoSoundobjectId(soundobjectId, mute);
-	//case PBT_GenericOSC:
-	//	return m_protocolBridge.SetMuteGenericOSCSoundobjectId(soundobjectId, mute);
-	//case PBT_BlacktraxRTTrPM:
-	//	return m_protocolBridge.SetMuteRTTrPMSoundobjectId(soundobjectId, mute);
-	//case PBT_GenericMIDI:
-	//	return m_protocolBridge.SetMuteGenericMIDISoundobjectId(soundobjectId, mute);
-	//case PBT_YamahaOSC:
-	//	return m_protocolBridge.SetMuteYamahaOSCSoundobjectId(soundobjectId, mute);
-	//case PBT_YamahaSQ:
-	//case PBT_HUI:
-	//case PBT_DS100:
-	//default:
-	//	jassertfalse;
-	//	return false;
-	//}
-	return false;
+	switch (bridgingType)
+	{
+	case PBT_DiGiCo:
+		return m_protocolBridge.SetMuteDiGiCoMatrixOutputId(matrixOutputId, mute);
+	case PBT_GenericOSC:
+		return m_protocolBridge.SetMuteGenericOSCMatrixOutputId(matrixOutputId, mute);
+	case PBT_BlacktraxRTTrPM:
+		return m_protocolBridge.SetMuteRTTrPMMatrixOutputId(matrixOutputId, mute);
+	case PBT_GenericMIDI:
+		return m_protocolBridge.SetMuteGenericMIDIMatrixOutputId(matrixOutputId, mute);
+	case PBT_YamahaOSC:
+		return m_protocolBridge.SetMuteYamahaOSCMatrixOutputId(matrixOutputId, mute);
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return false;
+	}
 }
 
 /**
@@ -2315,26 +2310,25 @@ bool Controller::SetMuteBridgingMatrixOutputId(ProtocolBridgingType bridgingType
  */
 bool Controller::SetMuteBridgingMatrixOutputIds(ProtocolBridgingType bridgingType, const std::vector<MatrixOutputId>& matrixOutputIds, bool mute)
 {
-	//switch (bridgingType)
-	//{
-	//case PBT_DiGiCo:
-	//	return m_protocolBridge.SetMuteDiGiCoSoundobjectIds(soundobjectIds, mute);
-	//case PBT_GenericOSC:
-	//	return m_protocolBridge.SetMuteGenericOSCSoundobjectIds(soundobjectIds, mute);
-	//case PBT_BlacktraxRTTrPM:
-	//	return m_protocolBridge.SetMuteRTTrPMSoundobjectIds(soundobjectIds, mute);
-	//case PBT_GenericMIDI:
-	//	return m_protocolBridge.SetMuteGenericMIDISoundobjectIds(soundobjectIds, mute);
-	//case PBT_YamahaOSC:
-	//	return m_protocolBridge.SetMuteYamahaOSCSoundobjectIds(soundobjectIds, mute);
-	//case PBT_YamahaSQ:
-	//case PBT_HUI:
-	//case PBT_DS100:
-	//default:
-	//	jassertfalse;
-	//	return false;
-	//}
-	return false;
+	switch (bridgingType)
+	{
+	case PBT_DiGiCo:
+		return m_protocolBridge.SetMuteDiGiCoMatrixOutputIds(matrixOutputIds, mute);
+	case PBT_GenericOSC:
+		return m_protocolBridge.SetMuteGenericOSCMatrixOutputIds(matrixOutputIds, mute);
+	case PBT_BlacktraxRTTrPM:
+		return m_protocolBridge.SetMuteRTTrPMMatrixOutputIds(matrixOutputIds, mute);
+	case PBT_GenericMIDI:
+		return m_protocolBridge.SetMuteGenericMIDIMatrixOutputIds(matrixOutputIds, mute);
+	case PBT_YamahaOSC:
+		return m_protocolBridge.SetMuteYamahaOSCMatrixOutputIds(matrixOutputIds, mute);
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return false;
+	}
 }
 
 String Controller::GetBridgingIpAddress(ProtocolBridgingType bridgingType)

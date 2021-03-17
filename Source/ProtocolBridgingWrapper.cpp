@@ -673,6 +673,264 @@ bool ProtocolBridgingWrapper::SetUnmuteProtocolSoundobjectIds(ProtocolId protoco
 }
 
 /**
+ * Gets the mute state of the given matrixInput of given protocol
+ * @param protocolId The id of the protocol the muted state shall be returned of
+ * @param matrixInputId The id of the matrixInput that shall be muted
+ * @return True if mute is active, false if not
+ */
+bool ProtocolBridgingWrapper::GetMuteProtocolMatrixInputId(ProtocolId protocolId, MatrixInputId matrixInputId)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto mutedObjChsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDCHANNELS));
+			Array<int> mutedChannels;
+			ProcessingEngineConfig::ReadMutedObjectChannels(mutedObjChsXmlElement, mutedChannels);
+	
+			return mutedChannels.contains(matrixInputId);
+		}
+	}
+	
+	return false;
+}
+
+/**
+ * Sets the given matrixInput of given protocol to be muted
+ * @param protocolId The id of the protocol the matrixInput shall be muted of
+ * @param matrixInputId The id of the matrixInput that shall be muted
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteProtocolMatrixInputId(ProtocolId protocolId, MatrixInputId matrixInputId)
+{
+	std::vector<MatrixInputId> matrixInputIds{ matrixInputId };
+	return SetMuteProtocolSoundobjectIds(protocolId, matrixInputIds);
+}
+
+/**
+ * Sets the given matrixInputs of given protocol to be muted
+ * @param protocolId The id of the protocol the matrixInput shall be muted of
+ * @param matrixInputIds The ids of the matrixInputs that shall be muted
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteProtocolMatrixInputIds(ProtocolId protocolId, const std::vector<MatrixInputId>& matrixInputIds)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto mutedObjChsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDCHANNELS));
+			Array<int> mutedChannels;
+			ProcessingEngineConfig::ReadMutedObjectChannels(mutedObjChsXmlElement, mutedChannels);
+			auto oldMutedChannels = mutedChannels;
+			for (auto matrixInputId : matrixInputIds)
+				if (!mutedChannels.contains(matrixInputId))
+					mutedChannels.add(matrixInputId);
+	
+			if (oldMutedChannels != mutedChannels)
+			{
+				ProcessingEngineConfig::WriteMutedObjectChannels(mutedObjChsXmlElement, mutedChannels);
+	
+				SetBridgingNodeStateXml(nodeXmlElement, true);
+	
+				Controller* ctrl = Controller::GetInstance();
+				if (ctrl)
+					ctrl->SetParameterChanged(DCS_Host, DCT_MuteState);
+	
+				return true;
+			}
+		}
+	}
+	
+	return false;
+}
+
+/**
+ * Sets the given matrixInput of given protocol to be unmuted
+ * @param protocolId The id of the protocol the matrixInput shall be unmuted of
+ * @param matrixInputId The id of the matrixInput that shall be unmuted
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetUnmuteProtocolMatrixInputId(ProtocolId protocolId, MatrixInputId matrixInputId)
+{
+	std::vector<MatrixInputId> matrixInputIds{ matrixInputId };
+	return SetUnmuteProtocolSoundobjectIds(protocolId, matrixInputIds);
+}
+
+/**
+ * Sets the given matrixInputs of given protocol to be unmuted
+ * @param protocolId The id of the protocol the matrixInputs shall be unmuted of
+ * @param matrixInputIds The ids of the matrixInputs that shall be unmuted
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetUnmuteProtocolMatrixInputIds(ProtocolId protocolId, const std::vector<MatrixInputId>& matrixInputIds)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto mutedObjChsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDCHANNELS));
+			Array<int> mutedChannels;
+			ProcessingEngineConfig::ReadMutedObjectChannels(mutedObjChsXmlElement, mutedChannels);
+			auto oldMutedChannels = mutedChannels;
+			for (auto matrixInputId : matrixInputIds)
+				if (mutedChannels.contains(matrixInputId))
+					mutedChannels.removeAllInstancesOf(matrixInputId);
+	
+			if (oldMutedChannels != mutedChannels)
+			{
+				ProcessingEngineConfig::WriteMutedObjectChannels(mutedObjChsXmlElement, mutedChannels);
+	
+				SetBridgingNodeStateXml(nodeXmlElement, true);
+	
+				Controller* ctrl = Controller::GetInstance();
+				if (ctrl)
+					ctrl->SetParameterChanged(DCS_Host, DCT_MuteState);
+	
+				return true;
+			}
+		}
+	}
+	
+	return false;
+}
+
+/**
+ * Gets the mute state of the given matrixOutput of given protocol
+ * @param protocolId The id of the protocol the muted state shall be returned of
+ * @param matrixOutputId The id of the matrixOutput that shall be muted
+ * @return True if mute is active, false if not
+ */
+bool ProtocolBridgingWrapper::GetMuteProtocolMatrixOutputId(ProtocolId protocolId, MatrixOutputId matrixOutputId)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto mutedObjChsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDCHANNELS));
+			Array<int> mutedChannels;
+			ProcessingEngineConfig::ReadMutedObjectChannels(mutedObjChsXmlElement, mutedChannels);
+	
+			return mutedChannels.contains(matrixOutputId);
+		}
+	}
+	
+	return false;
+}
+
+/**
+ * Sets the given matrixOutput of given protocol to be muted
+ * @param protocolId The id of the protocol the matrixOutput shall be muted of
+ * @param matrixOutputId The id of the matrixOutput that shall be muted
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteProtocolMatrixOutputId(ProtocolId protocolId, MatrixOutputId matrixOutputId)
+{
+	std::vector<MatrixOutputId> matrixOutputIds{ matrixOutputId };
+	return SetMuteProtocolSoundobjectIds(protocolId, matrixOutputIds);
+}
+
+/**
+ * Sets the given matrixOutputs of given protocol to be muted
+ * @param protocolId The id of the protocol the matrixOutput shall be muted of
+ * @param matrixOutputIds The ids of the matrixOutputs that shall be muted
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteProtocolMatrixOutputIds(ProtocolId protocolId, const std::vector<MatrixOutputId>& matrixOutputIds)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto mutedObjChsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDCHANNELS));
+			Array<int> mutedChannels;
+			ProcessingEngineConfig::ReadMutedObjectChannels(mutedObjChsXmlElement, mutedChannels);
+			auto oldMutedChannels = mutedChannels;
+			for (auto matrixOutputId : matrixOutputIds)
+				if (!mutedChannels.contains(matrixOutputId))
+					mutedChannels.add(matrixOutputId);
+	
+			if (oldMutedChannels != mutedChannels)
+			{
+				ProcessingEngineConfig::WriteMutedObjectChannels(mutedObjChsXmlElement, mutedChannels);
+	
+				SetBridgingNodeStateXml(nodeXmlElement, true);
+	
+				Controller* ctrl = Controller::GetInstance();
+				if (ctrl)
+					ctrl->SetParameterChanged(DCS_Host, DCT_MuteState);
+	
+				return true;
+			}
+		}
+	}
+	
+	return false;
+}
+
+/**
+ * Sets the given matrixOutput of given protocol to be unmuted
+ * @param protocolId The id of the protocol the matrixOutput shall be unmuted of
+ * @param matrixOutputId The id of the matrixOutput that shall be unmuted
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetUnmuteProtocolMatrixOutputId(ProtocolId protocolId, MatrixOutputId matrixOutputId)
+{
+	std::vector<MatrixOutputId> matrixOutputIds{ matrixOutputId };
+	return SetUnmuteProtocolSoundobjectIds(protocolId, matrixOutputIds);
+}
+
+/**
+ * Sets the given matrixOutputs of given protocol to be unmuted
+ * @param protocolId The id of the protocol the matrixOutputs shall be unmuted of
+ * @param matrixOutputIds The ids of the matrixOutputs that shall be unmuted
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetUnmuteProtocolMatrixOutputIds(ProtocolId protocolId, const std::vector<MatrixOutputId>& matrixOutputIds)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto mutedObjChsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDCHANNELS));
+			Array<int> mutedChannels;
+			ProcessingEngineConfig::ReadMutedObjectChannels(mutedObjChsXmlElement, mutedChannels);
+			auto oldMutedChannels = mutedChannels;
+			for (auto matrixOutputId : matrixOutputIds)
+				if (mutedChannels.contains(matrixOutputId))
+					mutedChannels.removeAllInstancesOf(matrixOutputId);
+	
+			if (oldMutedChannels != mutedChannels)
+			{
+				ProcessingEngineConfig::WriteMutedObjectChannels(mutedObjChsXmlElement, mutedChannels);
+	
+				SetBridgingNodeStateXml(nodeXmlElement, true);
+	
+				Controller* ctrl = Controller::GetInstance();
+				if (ctrl)
+					ctrl->SetParameterChanged(DCS_Host, DCT_MuteState);
+	
+				return true;
+			}
+		}
+	}
+	
+	return false;
+}
+
+/**
  * Gets the protocol's currently set client ip address.
  * @param protocolId The id of the protocol for which to get the currently configured ip address
  * @return	The ip address string
@@ -1792,6 +2050,82 @@ bool ProtocolBridgingWrapper::SetMuteDiGiCoSoundobjectIds(const std::vector<Soun
 }
 
 /**
+ * Gets the mute state of the given MatrixInput
+ * @param matrixInputId The id of the matrixInput for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteDiGiCoMatrixInputId(MatrixInputId matrixInputId)
+{
+	return GetMuteProtocolMatrixInputId(DIGICO_PROCESSINGPROTOCOL_ID, matrixInputId);
+}
+
+/**
+ * Sets the given MatrixInput to be (un-)muted
+ * @param matrixInputId The id of the matrixInput that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteDiGiCoMatrixInputId(MatrixInputId matrixInputId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixInputId(DIGICO_PROCESSINGPROTOCOL_ID, matrixInputId);
+	else
+		return SetUnmuteProtocolMatrixInputId(DIGICO_PROCESSINGPROTOCOL_ID, matrixInputId);
+}
+
+/**
+ * Sets the given MatrixInputs to be (un-)muted
+ * @param matrixInputIds The ids of the matrixInputs that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteDiGiCoMatrixInputIds(const std::vector<MatrixInputId>& matrixInputIds, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixInputIds(DIGICO_PROCESSINGPROTOCOL_ID, matrixInputIds);
+	else
+		return SetUnmuteProtocolMatrixInputIds(DIGICO_PROCESSINGPROTOCOL_ID, matrixInputIds);
+}
+
+/**
+ * Gets the mute state of the given matrixOutput
+ * @param matrixInputId The id of the matrixInput for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteDiGiCoMatrixOutputId(MatrixOutputId matrixOutputId)
+{
+	return GetMuteProtocolMatrixOutputId(DIGICO_PROCESSINGPROTOCOL_ID, matrixOutputId);
+}
+
+/**
+ * Sets the given MatrixInput to be (un-)muted
+ * @param matrixOutputId The id of the matrixOutput that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteDiGiCoMatrixOutputId(MatrixOutputId matrixOutputId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixOutputId(DIGICO_PROCESSINGPROTOCOL_ID, matrixOutputId);
+	else
+		return SetUnmuteProtocolMatrixOutputId(DIGICO_PROCESSINGPROTOCOL_ID, matrixOutputId);
+}
+
+/**
+ * Sets the given MatrixInputs to be (un-)muted
+ * @param matrixOutputIds The ids of the matrixOutput that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteDiGiCoMatrixOutputIds(const std::vector<MatrixOutputId>& matrixOutputIds, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixOutputIds(DIGICO_PROCESSINGPROTOCOL_ID, matrixOutputIds);
+	else
+		return SetUnmuteProtocolMatrixOutputIds(DIGICO_PROCESSINGPROTOCOL_ID, matrixOutputIds);
+}
+
+/**
  * Gets the currently set DiGiCo client ip address.
  * This method forwards the call to the generic implementation.
  * @return	The ip address string
@@ -1891,6 +2225,82 @@ bool ProtocolBridgingWrapper::SetMuteRTTrPMSoundobjectIds(const std::vector<Soun
 		return SetMuteProtocolSoundobjectIds(RTTRPM_PROCESSINGPROTOCOL_ID, soundobjectIds);
 	else
 		return SetUnmuteProtocolSoundobjectIds(RTTRPM_PROCESSINGPROTOCOL_ID, soundobjectIds);
+}
+
+/**
+ * Gets the mute state of the given MatrixInput
+ * @param matrixInputId The id of the matrixInput for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteRTTrPMMatrixInputId(MatrixInputId matrixInputId)
+{
+	return GetMuteProtocolMatrixInputId(RTTRPM_PROCESSINGPROTOCOL_ID, matrixInputId);
+}
+
+/**
+ * Sets the given MatrixInput to be (un-)muted
+ * @param matrixInputId The id of the matrixInput that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteRTTrPMMatrixInputId(MatrixInputId matrixInputId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixInputId(RTTRPM_PROCESSINGPROTOCOL_ID, matrixInputId);
+	else
+		return SetUnmuteProtocolMatrixInputId(RTTRPM_PROCESSINGPROTOCOL_ID, matrixInputId);
+}
+
+/**
+ * Sets the given MatrixInputs to be (un-)muted
+ * @param matrixInputIds The ids of the matrixInputs that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteRTTrPMMatrixInputIds(const std::vector<MatrixInputId>& matrixInputIds, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixInputIds(RTTRPM_PROCESSINGPROTOCOL_ID, matrixInputIds);
+	else
+		return SetUnmuteProtocolMatrixInputIds(RTTRPM_PROCESSINGPROTOCOL_ID, matrixInputIds);
+}
+
+/**
+ * Gets the mute state of the given matrixOutput
+ * @param matrixInputId The id of the matrixInput for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteRTTrPMMatrixOutputId(MatrixOutputId matrixOutputId)
+{
+	return GetMuteProtocolMatrixOutputId(RTTRPM_PROCESSINGPROTOCOL_ID, matrixOutputId);
+}
+
+/**
+ * Sets the given MatrixInput to be (un-)muted
+ * @param matrixOutputId The id of the matrixOutput that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteRTTrPMMatrixOutputId(MatrixOutputId matrixOutputId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixOutputId(RTTRPM_PROCESSINGPROTOCOL_ID, matrixOutputId);
+	else
+		return SetUnmuteProtocolMatrixOutputId(RTTRPM_PROCESSINGPROTOCOL_ID, matrixOutputId);
+}
+
+/**
+ * Sets the given MatrixInputs to be (un-)muted
+ * @param matrixOutputIds The ids of the matrixOutput that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteRTTrPMMatrixOutputIds(const std::vector<MatrixOutputId>& matrixOutputIds, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixOutputIds(RTTRPM_PROCESSINGPROTOCOL_ID, matrixOutputIds);
+	else
+		return SetUnmuteProtocolMatrixOutputIds(RTTRPM_PROCESSINGPROTOCOL_ID, matrixOutputIds);
 }
 
 /**
@@ -2017,6 +2427,82 @@ bool ProtocolBridgingWrapper::SetMuteGenericOSCSoundobjectIds(const std::vector<
 }
 
 /**
+ * Gets the mute state of the given MatrixInput
+ * @param matrixInputId The id of the matrixInput for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteGenericOSCMatrixInputId(MatrixInputId matrixInputId)
+{
+	return GetMuteProtocolMatrixInputId(GENERICOSC_PROCESSINGPROTOCOL_ID, matrixInputId);
+}
+
+/**
+ * Sets the given MatrixInput to be (un-)muted
+ * @param matrixInputId The id of the matrixInput that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteGenericOSCMatrixInputId(MatrixInputId matrixInputId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixInputId(GENERICOSC_PROCESSINGPROTOCOL_ID, matrixInputId);
+	else
+		return SetUnmuteProtocolMatrixInputId(GENERICOSC_PROCESSINGPROTOCOL_ID, matrixInputId);
+}
+
+/**
+ * Sets the given MatrixInputs to be (un-)muted
+ * @param matrixInputIds The ids of the matrixInputs that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteGenericOSCMatrixInputIds(const std::vector<MatrixInputId>& matrixInputIds, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixInputIds(GENERICOSC_PROCESSINGPROTOCOL_ID, matrixInputIds);
+	else
+		return SetUnmuteProtocolMatrixInputIds(GENERICOSC_PROCESSINGPROTOCOL_ID, matrixInputIds);
+}
+
+/**
+ * Gets the mute state of the given matrixOutput
+ * @param matrixInputId The id of the matrixInput for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteGenericOSCMatrixOutputId(MatrixOutputId matrixOutputId)
+{
+	return GetMuteProtocolMatrixOutputId(GENERICOSC_PROCESSINGPROTOCOL_ID, matrixOutputId);
+}
+
+/**
+ * Sets the given MatrixInput to be (un-)muted
+ * @param matrixOutputId The id of the matrixOutput that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteGenericOSCMatrixOutputId(MatrixOutputId matrixOutputId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixOutputId(GENERICOSC_PROCESSINGPROTOCOL_ID, matrixOutputId);
+	else
+		return SetUnmuteProtocolMatrixOutputId(GENERICOSC_PROCESSINGPROTOCOL_ID, matrixOutputId);
+}
+
+/**
+ * Sets the given MatrixInputs to be (un-)muted
+ * @param matrixOutputIds The ids of the matrixOutput that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteGenericOSCMatrixOutputIds(const std::vector<MatrixOutputId>& matrixOutputIds, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixOutputIds(GENERICOSC_PROCESSINGPROTOCOL_ID, matrixOutputIds);
+	else
+		return SetUnmuteProtocolMatrixOutputIds(GENERICOSC_PROCESSINGPROTOCOL_ID, matrixOutputIds);
+}
+
+/**
  * Gets the currently set GenericOSC client ip address.
  * This method forwards the call to the generic implementation.
  * @return	The ip address string
@@ -2118,6 +2604,82 @@ bool ProtocolBridgingWrapper::SetMuteGenericMIDISoundobjectIds(const std::vector
 		return SetMuteProtocolSoundobjectIds(GENERICMIDI_PROCESSINGPROTOCOL_ID, soundobjectIds);
 	else
 		return SetUnmuteProtocolSoundobjectIds(GENERICMIDI_PROCESSINGPROTOCOL_ID, soundobjectIds);
+}
+
+/**
+ * Gets the mute state of the given MatrixInput
+ * @param matrixInputId The id of the matrixInput for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteGenericMIDIMatrixInputId(MatrixInputId matrixInputId)
+{
+	return GetMuteProtocolMatrixInputId(GENERICMIDI_PROCESSINGPROTOCOL_ID, matrixInputId);
+}
+
+/**
+ * Sets the given MatrixInput to be (un-)muted
+ * @param matrixInputId The id of the matrixInput that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteGenericMIDIMatrixInputId(MatrixInputId matrixInputId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixInputId(GENERICMIDI_PROCESSINGPROTOCOL_ID, matrixInputId);
+	else
+		return SetUnmuteProtocolMatrixInputId(GENERICMIDI_PROCESSINGPROTOCOL_ID, matrixInputId);
+}
+
+/**
+ * Sets the given MatrixInputs to be (un-)muted
+ * @param matrixInputIds The ids of the matrixInputs that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteGenericMIDIMatrixInputIds(const std::vector<MatrixInputId>& matrixInputIds, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixInputIds(GENERICMIDI_PROCESSINGPROTOCOL_ID, matrixInputIds);
+	else
+		return SetUnmuteProtocolMatrixInputIds(GENERICMIDI_PROCESSINGPROTOCOL_ID, matrixInputIds);
+}
+
+/**
+ * Gets the mute state of the given matrixOutput
+ * @param matrixInputId The id of the matrixInput for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteGenericMIDIMatrixOutputId(MatrixOutputId matrixOutputId)
+{
+	return GetMuteProtocolMatrixOutputId(GENERICMIDI_PROCESSINGPROTOCOL_ID, matrixOutputId);
+}
+
+/**
+ * Sets the given MatrixInput to be (un-)muted
+ * @param matrixOutputId The id of the matrixOutput that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteGenericMIDIMatrixOutputId(MatrixOutputId matrixOutputId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixOutputId(GENERICMIDI_PROCESSINGPROTOCOL_ID, matrixOutputId);
+	else
+		return SetUnmuteProtocolMatrixOutputId(GENERICMIDI_PROCESSINGPROTOCOL_ID, matrixOutputId);
+}
+
+/**
+ * Sets the given MatrixInputs to be (un-)muted
+ * @param matrixOutputIds The ids of the matrixOutput that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteGenericMIDIMatrixOutputIds(const std::vector<MatrixOutputId>& matrixOutputIds, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixOutputIds(GENERICMIDI_PROCESSINGPROTOCOL_ID, matrixOutputIds);
+	else
+		return SetUnmuteProtocolMatrixOutputIds(GENERICMIDI_PROCESSINGPROTOCOL_ID, matrixOutputIds);
 }
 
 /**
@@ -2245,6 +2807,82 @@ bool ProtocolBridgingWrapper::SetMuteYamahaOSCSoundobjectIds(const std::vector<S
 		return SetMuteProtocolSoundobjectIds(YAMAHAOSC_PROCESSINGPROTOCOL_ID, soundobjectIds);
 	else
 		return SetUnmuteProtocolSoundobjectIds(YAMAHAOSC_PROCESSINGPROTOCOL_ID, soundobjectIds);
+}
+
+/**
+ * Gets the mute state of the given MatrixInput
+ * @param matrixInputId The id of the matrixInput for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteYamahaOSCMatrixInputId(MatrixInputId matrixInputId)
+{
+	return GetMuteProtocolMatrixInputId(YAMAHAOSC_PROCESSINGPROTOCOL_ID, matrixInputId);
+}
+
+/**
+ * Sets the given MatrixInput to be (un-)muted
+ * @param matrixInputId The id of the matrixInput that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteYamahaOSCMatrixInputId(MatrixInputId matrixInputId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixInputId(YAMAHAOSC_PROCESSINGPROTOCOL_ID, matrixInputId);
+	else
+		return SetUnmuteProtocolMatrixInputId(YAMAHAOSC_PROCESSINGPROTOCOL_ID, matrixInputId);
+}
+
+/**
+ * Sets the given MatrixInputs to be (un-)muted
+ * @param matrixInputIds The ids of the matrixInputs that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteYamahaOSCMatrixInputIds(const std::vector<MatrixInputId>& matrixInputIds, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixInputIds(YAMAHAOSC_PROCESSINGPROTOCOL_ID, matrixInputIds);
+	else
+		return SetUnmuteProtocolMatrixInputIds(YAMAHAOSC_PROCESSINGPROTOCOL_ID, matrixInputIds);
+}
+
+/**
+ * Gets the mute state of the given matrixOutput
+ * @param matrixInputId The id of the matrixInput for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteYamahaOSCMatrixOutputId(MatrixOutputId matrixOutputId)
+{
+	return GetMuteProtocolMatrixOutputId(YAMAHAOSC_PROCESSINGPROTOCOL_ID, matrixOutputId);
+}
+
+/**
+ * Sets the given MatrixInput to be (un-)muted
+ * @param matrixOutputId The id of the matrixOutput that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteYamahaOSCMatrixOutputId(MatrixOutputId matrixOutputId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixOutputId(YAMAHAOSC_PROCESSINGPROTOCOL_ID, matrixOutputId);
+	else
+		return SetUnmuteProtocolMatrixOutputId(YAMAHAOSC_PROCESSINGPROTOCOL_ID, matrixOutputId);
+}
+
+/**
+ * Sets the given MatrixInputs to be (un-)muted
+ * @param matrixOutputIds The ids of the matrixOutput that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteYamahaOSCMatrixOutputIds(const std::vector<MatrixOutputId>& matrixOutputIds, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixOutputIds(YAMAHAOSC_PROCESSINGPROTOCOL_ID, matrixOutputIds);
+	else
+		return SetUnmuteProtocolMatrixOutputIds(YAMAHAOSC_PROCESSINGPROTOCOL_ID, matrixOutputIds);
 }
 
 /**

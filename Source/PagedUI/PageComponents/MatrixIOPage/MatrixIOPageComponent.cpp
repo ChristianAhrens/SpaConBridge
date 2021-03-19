@@ -48,9 +48,11 @@ MatrixIOPageComponent::MatrixIOPageComponent()
 	: PageComponentBase(PCT_MatrixIOs)
 {
 	m_inputsComponent = std::make_unique<MatrixInputTableComponent>();
+	m_inputsComponent->onCurrentCollapseStateChanged = [=](bool collapsed) { ignoreUnused(collapsed); resized(); };
 	addAndMakeVisible(m_inputsComponent.get());
 
 	m_outputsComponent = std::make_unique<MatrixOutputTableComponent>();
+	m_outputsComponent->onCurrentCollapseStateChanged = [=](bool collapsed) { ignoreUnused(collapsed); resized(); };
 	addAndMakeVisible(m_outputsComponent.get());
 
 	// trigger lookandfeel update
@@ -113,6 +115,54 @@ int MatrixIOPageComponent::GetOutputsRowHeight()
 }
 
 /**
+ * Setter for the collapsed state of internal matrix inputs table component
+ * @param	height  The collapsed state value to set.
+ */
+void MatrixIOPageComponent::SetInputsCollapsed(bool collapsed)
+{
+	if (m_inputsComponent)
+		m_inputsComponent->SetCollapsed(collapsed);
+
+	resized();
+}
+
+/**
+ * Getter for the current collapsed state of internal matrix inputs table component
+ * @return	The current collapsed state value.
+ */
+bool MatrixIOPageComponent::GetInputsCollapsed()
+{
+	if (m_inputsComponent)
+		return m_inputsComponent->IsCollapsed();
+	else
+		return false;
+}
+
+/**
+ * Setter for the collapsed state of internal matrix outputs table component
+ * @param	height  The collapsed state value to set.
+ */
+void MatrixIOPageComponent::SetOutputsCollapsed(bool collapsed)
+{
+	if (m_outputsComponent)
+		m_outputsComponent->SetCollapsed(collapsed);
+
+	resized();
+}
+
+/**
+ * Getter for the current collapsed state of internal matrix outputs table component
+ * @return	The current collapsed state value.
+ */
+bool MatrixIOPageComponent::GetOutputsCollapsed()
+{
+	if (m_outputsComponent)
+		return m_outputsComponent->IsCollapsed();
+	else
+		return false;
+}
+
+/**
  * Reimplemented to paint background and frame.
  * @param g		Graphics context that must be used to do the drawing operations.
  */
@@ -130,6 +180,9 @@ void MatrixIOPageComponent::paint(Graphics& g)
  */
 void MatrixIOPageComponent::resized()
 {
+	if (!m_inputsComponent || !m_outputsComponent)
+		return;
+
 	auto bounds = getLocalBounds().toFloat().reduced(3);
 	auto isPortrait = IsPortraitAspectRatio();
 
@@ -144,8 +197,25 @@ void MatrixIOPageComponent::resized()
 
 	matrixIOFlex.justifyContent = FlexBox::JustifyContent::center;
 
-	matrixIOFlex.items.add(FlexItem(*m_inputsComponent).withFlex(1).withMargin(FlexItem::Margin(fmargin, fmargin, fmargin, fmargin)));
-	matrixIOFlex.items.add(FlexItem(*m_outputsComponent).withFlex(1).withMargin(FlexItem::Margin(fmargin, fmargin, fmargin, fmargin)));
+	if (m_inputsComponent->IsCollapsed())
+	{
+		if (isPortrait)
+			matrixIOFlex.items.add(FlexItem(*m_inputsComponent).withHeight(33).withMargin(FlexItem::Margin(fmargin, fmargin, fmargin, fmargin)));
+		else
+			matrixIOFlex.items.add(FlexItem(*m_inputsComponent).withWidth(33).withMargin(FlexItem::Margin(fmargin, fmargin, fmargin, fmargin)));
+	}
+	else
+		matrixIOFlex.items.add(FlexItem(*m_inputsComponent).withFlex(1).withMargin(FlexItem::Margin(fmargin, fmargin, fmargin, fmargin)));
+
+	if (m_outputsComponent->IsCollapsed())
+	{
+		if (isPortrait)
+			matrixIOFlex.items.add(FlexItem(*m_outputsComponent).withHeight(33).withMargin(FlexItem::Margin(fmargin, fmargin, fmargin, fmargin)));
+		else
+			matrixIOFlex.items.add(FlexItem(*m_outputsComponent).withWidth(33).withMargin(FlexItem::Margin(fmargin, fmargin, fmargin, fmargin)));
+	}
+	else
+		matrixIOFlex.items.add(FlexItem(*m_outputsComponent).withFlex(1).withMargin(FlexItem::Margin(fmargin, fmargin, fmargin, fmargin)));
 
 	if (isPortrait)
 	{

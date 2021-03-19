@@ -37,10 +37,19 @@ namespace SoundscapeBridgeApp
 /**
  * Object constructor.
  */
-TableControlBarComponent::TableControlBarComponent(const String& componentName)
+TableControlBarComponent::TableControlBarComponent(bool canCollapse, const String& componentName)
 	: Component(componentName)
 {
-	m_layoutDirection = LD_Horizontal;
+	m_canCollapse = canCollapse;
+
+	// optional Collapse Button
+	if (m_canCollapse)
+	{
+		m_toggleCollapse = std::make_unique<DrawableButton>("collapse", DrawableButton::ButtonStyle::ImageFitted);
+		m_toggleCollapse->setClickingTogglesState(false);
+		m_toggleCollapse->addListener(this);
+		addAndMakeVisible(m_toggleCollapse.get());
+	}
 
 	// Add/Remove Buttons
 	m_addInstance = std::make_unique<DrawableButton>("add", DrawableButton::ButtonStyle::ImageOnButtonBackground);
@@ -87,7 +96,14 @@ TableControlBarComponent::~TableControlBarComponent()
  */
 void TableControlBarComponent::SetLayoutDirection(LayoutDirection direction)
 {
+	if (m_layoutDirection == direction)
+		return;
+
 	m_layoutDirection = direction;
+
+	UpdateCollapsedButton();
+
+	resized();
 }
 
 /**
@@ -98,6 +114,28 @@ void TableControlBarComponent::SetRemoveEnabled(bool enabled)
 {
 	if (m_removeInstance)
 		m_removeInstance->setEnabled(enabled);
+}
+
+/**
+ * Helper method to set the remove button to enabled/disabled
+ * @param	enabled		Determines if the remove button should be set to enabled or disabled
+ */
+void TableControlBarComponent::SetCollapsed(bool collapsed)
+{
+	if (!m_canCollapse)
+		return;
+
+	m_collapsed = collapsed;
+	UpdateCollapsedButton();
+}
+
+/**
+ * Helper method to get the collapsed state
+ * @return	The internal collapsed state value (True for collapsed, false for not collapsed)
+ */
+bool TableControlBarComponent::GetCollapsed()
+{
+	return m_collapsed;
 }
 
 /**
@@ -165,6 +203,54 @@ void TableControlBarComponent::lookAndFeelChanged()
 			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
 
 		m_selectNone->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+
+		UpdateCollapsedButton();
+	}
+}
+
+/**
+ * Helper method to recreate svg drawable contents of collapsed button
+ * depending on the collapsed and layoutdirection state of the control bar.
+ */
+void TableControlBarComponent::UpdateCollapsedButton()
+{
+	// create the required button drawable images based on lookandfeel colours
+	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
+	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (dblookAndFeel)
+	{
+		if (m_canCollapse && m_toggleCollapse)
+		{
+			auto imageName = String();
+
+			if (m_layoutDirection == LD_Horizontal)
+			{
+				if (m_collapsed)
+					imageName = BinaryData::keyboard_arrow_right24px_svg;
+				else
+					imageName = BinaryData::keyboard_arrow_up24px_svg;
+			}
+			else if (m_layoutDirection == LD_Vertical)
+			{
+				if (m_collapsed)
+					imageName = BinaryData::keyboard_arrow_down24px_svg;
+				else
+					imageName = BinaryData::keyboard_arrow_right24px_svg;
+			}
+
+			// collapse/expand images
+			JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+				dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+				dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+				dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+				dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+				dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+				dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+				dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+				dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+
+			m_toggleCollapse->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+		}
 	}
 }
 
@@ -193,6 +279,15 @@ void TableControlBarComponent::buttonClicked(Button* button)
 	{
 		if (onRemoveClick)
 			onRemoveClick();
+	}
+	else if (button == m_toggleCollapse.get())
+	{
+		m_collapsed = !m_collapsed;
+
+		UpdateCollapsedButton();
+
+		if (onCollapsClick)
+			onCollapsClick(m_collapsed);
 	}
 }
 
@@ -255,8 +350,18 @@ void TableControlBarComponent::resized()
 		mainFB.flexDirection = FlexBox::Direction::row;
 		mainFB.justifyContent = FlexBox::JustifyContent::center;
 		mainFB.alignContent = FlexBox::AlignContent::center;
+
+		if (m_canCollapse && m_toggleCollapse)
+		{
+			mainFB.items.addArray({
+				FlexItem(*m_toggleCollapse.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 4)),
+				FlexItem(*m_addInstance.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
+				});
+		}
+		else
+			mainFB.items.add(FlexItem(*m_addInstance.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 4)));
+
 		mainFB.items.addArray({
-			FlexItem(*m_addInstance.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 4)),
 			FlexItem(*m_removeInstance.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
 			FlexItem().withFlex(1).withHeight(30),
 			FlexItem(*m_selectAll.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
@@ -273,8 +378,18 @@ void TableControlBarComponent::resized()
 		mainFB.flexDirection = FlexBox::Direction::column;
 		mainFB.justifyContent = FlexBox::JustifyContent::center;
 		mainFB.alignContent = FlexBox::AlignContent::center;
+
+		if (m_canCollapse && m_toggleCollapse)
+		{
+			mainFB.items.addArray({
+				FlexItem(*m_toggleCollapse.get()).withHeight(25).withMargin(FlexItem::Margin(4, 2, 2, 3)),
+				FlexItem(*m_addInstance.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
+				});
+		}
+		else
+			mainFB.items.add(FlexItem(*m_addInstance.get()).withHeight(25).withMargin(FlexItem::Margin(4, 2, 2, 3)));
+
 		mainFB.items.addArray({
-			FlexItem(*m_addInstance.get()).withHeight(25).withMargin(FlexItem::Margin(4, 2, 2, 3)),
 			FlexItem(*m_removeInstance.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
 			FlexItem().withFlex(1).withWidth(30),
 			FlexItem(*m_selectAll.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),

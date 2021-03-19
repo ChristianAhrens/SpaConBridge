@@ -51,6 +51,11 @@ public:
 	void SetOutputsRowHeight(int height);
 	int GetOutputsRowHeight();
 
+	void SetInputsCollapsed(bool collapsed);
+	bool GetInputsCollapsed();
+	void SetOutputsCollapsed(bool collapsed);
+	bool GetOutputsCollapsed();
+
 	//==============================================================================
 	void UpdateGui(bool init) override;
 

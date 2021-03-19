@@ -480,6 +480,50 @@ void PageContainerComponent::SetMatrixOutputTableRowHeight(int height)
 		return m_matrixIOPage->SetOutputsRowHeight(height);
 }
 
+/**
+ * Getter for the collapsed state of matrix inputs table
+ * @return	The table row height.
+ */
+bool PageContainerComponent::GetMatrixInputTableCollapsed()
+{
+	if (m_matrixIOPage)
+		return m_matrixIOPage->GetOutputsCollapsed();
+	else
+		return 0;
+}
+
+/**
+ * Setter for the collapsed state of matrix inputs table
+ * @param height	The table row height.
+ */
+void PageContainerComponent::SetMatrixInputTableCollapsed(bool collapsed)
+{
+	if (m_matrixIOPage)
+		return m_matrixIOPage->SetOutputsCollapsed(collapsed);
+}
+
+/**
+ * Getter for the collapsed state of matrix outputs table
+ * @return	The table row height.
+ */
+bool PageContainerComponent::GetMatrixOutputTableCollapsed()
+{
+	if (m_matrixIOPage)
+		return m_matrixIOPage->GetInputsCollapsed();
+	else
+		return 0;
+}
+
+/**
+ * Setter for the collapsed state of matrix outputs table
+ * @param height	The table row height.
+ */
+void PageContainerComponent::SetMatrixOutputTableCollapsed(bool collapsed)
+{
+	if (m_matrixIOPage)
+		return m_matrixIOPage->SetOutputsCollapsed(collapsed);
+}
+
 
 /*
 ===============================================================================

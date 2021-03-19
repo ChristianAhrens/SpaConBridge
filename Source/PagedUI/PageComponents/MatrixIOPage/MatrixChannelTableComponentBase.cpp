@@ -35,7 +35,7 @@ namespace SoundscapeBridgeApp
  * Class constructor.
  */
 MatrixChannelTableComponentBase::MatrixChannelTableComponentBase()
-	: TableModelComponent()
+	: TableModelComponent(ControlBarPosition::CBP_Bottom, true)
 {
 	auto table = GetTable();
 	if (table)

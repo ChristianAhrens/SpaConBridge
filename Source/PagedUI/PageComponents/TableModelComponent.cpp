@@ -66,19 +66,20 @@ namespace SoundscapeBridgeApp
 /**
  * Class constructor.
  */
-TableModelComponent::TableModelComponent(ControlBarPosition pos)
-{
-	// Create our table component and add it to this component.
-	m_table = std::make_unique<TableListBox>();
-	addAndMakeVisible(m_table.get());
-	m_tableControlBar = std::make_unique<TableControlBarComponent>();
-	addAndMakeVisible(m_tableControlBar.get());
+	TableModelComponent::TableModelComponent(ControlBarPosition pos, bool tableCanCollapse)
+	{
+		// Create our table component and add it to this component.
+		m_table = std::make_unique<TableListBox>();
+		addAndMakeVisible(m_table.get());
+		m_tableControlBar = std::make_unique<TableControlBarComponent>(tableCanCollapse);
+		addAndMakeVisible(m_tableControlBar.get());
 
-	m_tableControlBar->onAddClick = [=]{ onAddProcessor(); };
-	m_tableControlBar->onRemoveClick = [=] { onRemoveProcessor(); };
-	m_tableControlBar->onSelectAllClick = [=] { onSelectAllProcessors(); };
-	m_tableControlBar->onSelectNoneClick = [=] { onDeselectAllProcessors(); };
-	m_tableControlBar->onHeightChanged = [=](int height) { SetRowHeight(height); };
+		m_tableControlBar->onAddClick = [=] { onAddProcessor(); };
+		m_tableControlBar->onRemoveClick = [=] { onRemoveProcessor(); };
+		m_tableControlBar->onSelectAllClick = [=] { onSelectAllProcessors(); };
+		m_tableControlBar->onSelectNoneClick = [=] { onDeselectAllProcessors(); };
+		m_tableControlBar->onHeightChanged = [=](int height) { SetRowHeight(height); };
+		m_tableControlBar->onCollapsClick = [=](bool collapsed) { onCollapseToggled(collapsed); };
 
 	SetControlBarPosition(pos);
 }
@@ -227,6 +228,32 @@ void TableModelComponent::SetRowHeight(int rowHeight)
 	// set the new row height to tableListBox member 
 	if (m_table)
 		m_table->setRowHeight(rowHeight);
+	// trigger overall resizing
+	resized();
+}
+
+/**
+ * Helper method to get the collapsed state of the internal table & control bar components.
+ *
+ * @return	True if collapsed, false if not
+ */
+bool TableModelComponent::IsCollapsed()
+{
+	return m_tableControlBar->GetCollapsed();
+}
+
+/**
+ * Helper method to set a new collapsed state of the internal table & control bar components
+ * and at the same time trigger resizing of the container component
+ *
+ * @param	collapsed	The new collapsed state of the internal table & control bar components
+ */
+void TableModelComponent::SetCollapsed(bool collapsed)
+{
+	m_tableControlBar->SetCollapsed(collapsed);
+
+	onCollapseToggled(collapsed);
+
 	// trigger overall resizing
 	resized();
 }
@@ -891,6 +918,15 @@ void TableModelComponent::onSelectAllProcessors()
 void TableModelComponent::onDeselectAllProcessors()
 {
 	SelectAllRows(false);
+}
+
+/**
+ * Helper method to be used as function callback to trigger toggling the collapsed state (table visibility).
+ */
+void TableModelComponent::onCollapseToggled(bool collapsed)
+{
+	if (onCurrentCollapseStateChanged)
+		onCurrentCollapseStateChanged(collapsed);
 }
 
 

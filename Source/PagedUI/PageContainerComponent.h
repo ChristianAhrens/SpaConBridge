@@ -162,6 +162,12 @@ public:
 	int GetMatrixOutputTableRowHeight();
 	void SetMatrixOutputTableRowHeight(int height);
 
+	//==============================================================================
+	bool GetMatrixInputTableCollapsed();
+	void SetMatrixInputTableCollapsed(bool collapsed);
+	bool GetMatrixOutputTableCollapsed();
+	void SetMatrixOutputTableCollapsed(bool collapsed);
+
 private:
 	//==============================================================================
 	void toggleAboutPage();

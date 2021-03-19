@@ -261,6 +261,14 @@
             <FILE id="N9NqBe" name="grain-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/grain-24px.svg"/>
             <FILE id="ToZnzd" name="height-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/height-24px.svg"/>
             <FILE id="rlRTHW" name="help-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/help-24px.svg"/>
+            <FILE id="hDIVdB" name="keyboard_arrow_down-24px.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/keyboard_arrow_down-24px.svg"/>
+            <FILE id="AJZAbu" name="keyboard_arrow_left-24px.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/keyboard_arrow_left-24px.svg"/>
+            <FILE id="QLJ7TU" name="keyboard_arrow_right-24px.svg" compile="0"
+                  resource="1" file="submodules/JUCE-AppBasics/Resources/Images/keyboard_arrow_right-24px.svg"/>
+            <FILE id="y6pBYT" name="keyboard_arrow_up-24px.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/keyboard_arrow_up-24px.svg"/>
             <FILE id="Jc6pvI" name="mobiledata_off-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/mobiledata_off-24px.svg"/>
             <FILE id="UWlhHT" name="remove-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/remove-24px.svg"/>

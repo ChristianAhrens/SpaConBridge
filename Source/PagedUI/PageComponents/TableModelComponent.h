@@ -68,7 +68,7 @@ public:
 
 public:
 
-	TableModelComponent(ControlBarPosition pos = ControlBarPosition::CBP_Bottom);
+	TableModelComponent(ControlBarPosition pos = ControlBarPosition::CBP_Bottom, bool tableCanCollapse = false);
 	~TableModelComponent() override;
 
 	void SetModel(TableListBoxModel* model);
@@ -100,6 +100,9 @@ public:
 	int GetRowHeight();
 	void SetRowHeight(int rowHeight);
 
+	bool IsCollapsed();
+	void SetCollapsed(bool collapsed);
+
 	std::vector<int> GetSelectedRows() const;
 	void SetSelectedRows(const std::vector<int>& rows);
 	void SelectAllRows(bool all);
@@ -118,6 +121,7 @@ public:
 
 	// Callback functions
 	std::function<void(juce::int32)>	onCurrentSelectedProcessorChanged;
+	std::function<void(bool)>	onCurrentCollapseStateChanged;
 
 protected:
 	//==============================================================================
@@ -127,6 +131,7 @@ protected:
 	//==============================================================================
 	void onSelectAllProcessors();
 	void onDeselectAllProcessors();
+	void onCollapseToggled(bool collapsed);
 
 private:
 	std::unique_ptr<TableListBox>				m_table;					/**> The table component itself. */

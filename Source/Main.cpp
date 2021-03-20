@@ -1,6 +1,6 @@
 /* Copyright (c) 2020-2021, Christian Ahrens
  *
- * This file is part of SoundscapeBridgeApp <https://github.com/ChristianAhrens/SoundscapeBridgeApp>
+ * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -18,19 +18,19 @@
 
 #include <JuceHeader.h>
 
-#include "MainSoundscapeBridgeAppComponent.h"
+#include "MainSpaConBridgeComponent.h"
 
 #include "LookAndFeel.h"
 
-namespace SoundscapeBridgeApp
+namespace SpaConBridge
 {
 
 //==============================================================================
-class SoundscapeBridgeAppApplication : public JUCEApplication
+class SpaConBridgeApplication : public JUCEApplication
 {
 public:
     //==============================================================================
-    SoundscapeBridgeAppApplication() {}
+    SpaConBridgeApplication() {}
 
     const String getApplicationName() override { return ProjectInfo::projectName; }
     const String getApplicationVersion() override { return ProjectInfo::versionString; }
@@ -75,7 +75,7 @@ public:
         {
             updateLookAndFeel();
 
-            m_mainComponent = std::make_unique<MainSoundscapeBridgeAppComponent>([=](DbLookAndFeelBase::LookAndFeelType type) { updateLookAndFeel(type); });
+            m_mainComponent = std::make_unique<MainSpaConBridgeComponent>([=](DbLookAndFeelBase::LookAndFeelType type) { updateLookAndFeel(type); });
 
             setUsingNativeTitleBar(true);
             setContentOwned(m_mainComponent.get(), true);
@@ -126,7 +126,7 @@ public:
 
     private:
         std::unique_ptr<LookAndFeel>	                    m_customLookAndFeel; // our own look and feel implementation instance
-        std::unique_ptr<MainSoundscapeBridgeAppComponent>   m_mainComponent;
+        std::unique_ptr<MainSpaConBridgeComponent>   m_mainComponent;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainWindow)
     };
@@ -139,4 +139,4 @@ private:
 
 //==============================================================================
 // This macro generates the main() routine that launches the app.
-START_JUCE_APPLICATION (SoundscapeBridgeApp::SoundscapeBridgeAppApplication)
+START_JUCE_APPLICATION (SpaConBridge::SpaConBridgeApplication)

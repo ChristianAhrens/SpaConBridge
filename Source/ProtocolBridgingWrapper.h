@@ -1,6 +1,6 @@
 /* Copyright (c) 2020-2021, Christian Ahrens
  *
- * This file is part of SoundscapeBridgeApp <https://github.com/ChristianAhrens/SoundscapeBridgeApp>
+ * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "SoundscapeBridgeAppCommon.h"
+#include "SpaConBridgeCommon.h"
 #include "AppConfiguration.h"
 
 #include <ProcessingEngine/ProcessingEngineNode.h>
@@ -29,7 +29,7 @@
 #include <JuceHeader.h>
 
 
-namespace SoundscapeBridgeApp
+namespace SpaConBridge
 {
 
 static const String PROTOCOL_DEFAULT_IP("127.0.0.1");	//< Default IP Address

@@ -4,7 +4,7 @@
 Copyright (C) 2019 d&b audiotechnik GmbH & Co. KG. All Rights Reserved.
 
 This file was originally part of the Soundscape VST, AU, and AAX Plug-in
-and now in a derived version is part of SoundscapeBridgeApp.
+and now in a derived version is part of SpaConBridge.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -49,7 +49,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Image_utils.h>
 
 
-namespace SoundscapeBridgeApp
+namespace SpaConBridge
 {
 
 
@@ -95,7 +95,7 @@ PageContainerComponent::PageContainerComponent()
 	// app logo button and Plugin version label
 	m_logoButton = std::make_unique<ImageButton>("LogoButton");
 	m_logoButton->setImages(false, true, true,
-		ImageCache::getFromMemory(BinaryData::SoundscapeBridgeApp_png, BinaryData::SoundscapeBridgeApp_pngSize), 1.0f, Colours::transparentWhite,
+		ImageCache::getFromMemory(BinaryData::SpaConBridge_png, BinaryData::SpaConBridge_pngSize), 1.0f, Colours::transparentWhite,
 		Image(), 1.0f, Colours::transparentWhite,
 		Image(), 1.0f, Colours::transparentWhite);
 	m_logoButton->addListener(this);
@@ -662,4 +662,4 @@ bool CustomDrawableTabBarButton::setVisibleDrawable(Drawable* visibleDrawable)
 }
 
 
-} // namespace SoundscapeBridgeApp
+} // namespace SpaConBridge

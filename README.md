@@ -1,6 +1,6 @@
-![Showreel.001.png](Resources/Documentation/Showreel/Showreel.001.png "SoundscapeBridgeApp Headline Icons")
+![Showreel.001.png](Resources/Documentation/Showreel/Showreel.001.png "SpaConBridge Headline Icons")
 
-SoundscapeBridgeApp is currently in **EXPERIMENTAL** development.
+SpaConBridge is currently in **EXPERIMENTAL** development.
 
 Its sourcecode and prebuilt binaries are made publicly available to enable interested users to experiment, extend and create own adaptations.
 
@@ -8,9 +8,11 @@ There is no guarantee for compatibility inbetween versions or for the implemente
 
 See [LATEST RELEASE](../../releases/latest) for available binary packages.
 
-SoundscapeBridgeApp is created with the idea in mind to have both a simple ui to monitor or control Sound Object parameters of a d&b audiotechnik Soundscape system, esp. the DS100 Signal Engine, via OSC protocol and at the same time the possibility of controlling interfacing with external control data input (MIDI device, OSC control app, ...).
+SpaConBridge was created with the idea in mind to have both a simple ui to monitor or control Sound Object parameters of a d&b audiotechnik Soundscape system, esp. the DS100 Signal Engine, via OSC protocol and at the same time the possibility of controlling interfacing with external control data input (MIDI device, OSC control app, ...).
 
-SoundscapeBridgeApp is a project inspired by d&b audiotechnik GmbH & Co. KG's own "Soundscape DAW Plugin" made publicly available at https://github.com/dbaudio-soundscape/db-Soundscape-DAW-Plugins and "Soundscape Control with DiGiCo SD consoles" made publicly available at https://github.com/dbaudio-soundscape/db-Soundscape-control-with-DiGiCo-SD-Consoles.
+SpaConBridge is a PRIVATELY created and driven project.
+It was originally inspired by d&b audiotechnik GmbH & Co. KG's own "Soundscape DAW Plugin" made publicly available at https://github.com/dbaudio-soundscape/db-Soundscape-DAW-Plugins and "Soundscape Control with DiGiCo SD consoles" made publicly available at https://github.com/dbaudio-soundscape/db-Soundscape-control-with-DiGiCo-SD-Consoles.
+It is neither suppported nor driven by official d&b activities.
 
 
 **Known Issues:**
@@ -47,7 +49,7 @@ __Note:__ Needs to be implemented...
 ## Quick Start
 
 1. If no DS100 is available, the minimal simulation tool [SoundscapeOSCSim](https://github.com/ChristianAhrens/SoundscapeOSCSim) or the generic bridging tool [RemoteProtocolBridgeUI](https://github.com/ChristianAhrens/RemoteProtocolBridgeUI) can be used for testing and debugging.
-2. Launch SoundscapeBridgeApp
+2. Launch SpaConBridge
     * Sound Object table has no entries, no bridging protocol is active
     * App is 'offline' since no Sound Object is active
 3. Add some Sound Objects by clicking the 'Add' button
@@ -96,9 +98,9 @@ Table multiselection allows editing of mute state for multiple Sound Objects and
 ![Showreel.004.png](Resources/Documentation/Showreel/Showreel.004.png "Sound Object Table Selection")
 
 Following the selection in Sound Object table, the corresponding Soundscape parameters are shown in an editing area.
-The UI layout is designed to adapt to the available screen real estate of the device SoundscapeBridgeApp is used on. Depending on the screen geometry a vertical or horizontal layout of table and parameter editing area is used. On small screens, legend annotation and control value displays are hidden. (useful for Tablet landscape vs. portrait rotation, small Smartphone screens, embedded device touchscreens, ...)
+The UI layout is designed to adapt to the available screen real estate of the device SpaConBridge is used on. Depending on the screen geometry a vertical or horizontal layout of table and parameter editing area is used. On small screens, legend annotation and control value displays are hidden. (useful for Tablet landscape vs. portrait rotation, small Smartphone screens, embedded device touchscreens, ...)
 
-The selection in Sound Object table and the currently active tab can be externally controlled by bridging protocols that support the commands 'SoundscapeBridgeApp Sound Object Select' and 'SoundscapeBridgeApp UI Element Index Select'.
+The selection in Sound Object table and the currently active tab can be externally controlled by bridging protocols that support the commands 'SpaConBridge Sound Object Select' and 'SpaConBridge UI Element Index Select'.
 
 
 <a name="twodimensionalpositionslider" />
@@ -130,7 +132,7 @@ Both plot and log are refreshed at a small rate to keep the performance impact o
 <a name="appsettingsprotocols" />
 
 Settings page is structured in protocol sections.
-DS100 OSC communication protocol is always active. The IP address can be manually configured or, if the build of SoundscapeBridgeApp for the host system supports this, zeroconf discovery button can be used to select on of the discovered devices. OSC UDP communication ports are hardcoded to match the ones used by DS100.
+DS100 OSC communication protocol is always active. The IP address can be manually configured or, if the build of SpaConBridge for the host system supports this, zeroconf discovery button can be used to select on of the discovered devices. OSC UDP communication ports are hardcoded to match the ones used by DS100.
 
 For details on the settings for the implemented protocols, see the individual documentation
   * [d&b DS100 signal bridge communication](Resources/Documentation/BridgingProtocols/DS100.md)
@@ -142,7 +144,7 @@ For details on the settings for the implemented protocols, see the individual do
   
   &ast; Implemented using simulation only, entirely untested with real ones.
 
-The bottom bar of settings page contains buttons to save and load entire SoundscapeBridgeApp configurations, as well as a button to show the raw current configuration in a text editor overlay. The latter is mainly useful for debugging purposes.
+The bottom bar of settings page contains buttons to save and load entire SpaConBridge configurations, as well as a button to show the raw current configuration in a text editor overlay. The latter is mainly useful for debugging purposes.
 Depending on the available horizontal UI resolution, buttons are hidden. 'Show raw config' disappears first, since it is least relevant for use. On host devices as smartphones, rotating from portrait to landscape mode can help to make the buttons visible, in case they are hidden in portrait mode.
 
 ![Showreel.014.png](Resources/Documentation/Showreel/Showreel.014.png "Light LookAndFeel")

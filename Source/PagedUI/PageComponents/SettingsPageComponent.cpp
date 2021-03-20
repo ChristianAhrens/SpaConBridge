@@ -1,6 +1,6 @@
 /* Copyright (c) 2020-2021, Christian Ahrens
  *
- * This file is part of SoundscapeBridgeApp <https://github.com/ChristianAhrens/SoundscapeBridgeApp>
+ * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -25,7 +25,7 @@
 #include <Image_utils.h>
 
 
-namespace SoundscapeBridgeApp
+namespace SpaConBridge
 {
 
 
@@ -1299,7 +1299,7 @@ SettingsPageComponent::SettingsPageComponent()
 	addAndMakeVisible(m_settingsViewport.get());
 
 	// register this object as config watcher
-	auto config = SoundscapeBridgeApp::AppConfiguration::getInstance();
+	auto config = SpaConBridge::AppConfiguration::getInstance();
 	if (config)
 	{
 		config->addWatcher(this);
@@ -1497,7 +1497,7 @@ void SettingsPageComponent::onConfigUpdated()
  */
 void SettingsPageComponent::onApplyClicked()
 {
-	auto config = SoundscapeBridgeApp::AppConfiguration::getInstance();
+	auto config = SpaConBridge::AppConfiguration::getInstance();
 	if (config != nullptr)
 	{
 		XmlDocument configXmlDocument(m_settingsRawEditor->getText());
@@ -1595,10 +1595,10 @@ void SettingsPageComponent::onToggleRawConfigVisible()
  */
 void SettingsPageComponent::onSelectedLookAndFeelChanged()
 {
-	auto config = SoundscapeBridgeApp::AppConfiguration::getInstance();
+	auto config = SpaConBridge::AppConfiguration::getInstance();
 	if (config)
 		config->triggerConfigurationDump(true);
 }
 
 
-} // namespace SoundscapeBridgeApp
+} // namespace SpaConBridge

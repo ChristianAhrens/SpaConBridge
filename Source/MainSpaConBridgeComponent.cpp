@@ -1,6 +1,6 @@
 /* Copyright (c) 2020-2021, Christian Ahrens
  *
- * This file is part of SoundscapeBridgeApp <https://github.com/ChristianAhrens/SoundscapeBridgeApp>
+ * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -16,7 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "MainSoundscapeBridgeAppComponent.h"
+#include "MainSpaConBridgeComponent.h"
 
 #include "Controller.h"
 
@@ -29,16 +29,16 @@
 
 #include <JuceHeader.h>
 
-namespace SoundscapeBridgeApp
+namespace SpaConBridge
 {
 
 //==============================================================================
-MainSoundscapeBridgeAppComponent::MainSoundscapeBridgeAppComponent()
-    : MainSoundscapeBridgeAppComponent(nullptr)
+MainSpaConBridgeComponent::MainSpaConBridgeComponent()
+    : MainSpaConBridgeComponent(nullptr)
 {
 }
 
-MainSoundscapeBridgeAppComponent::MainSoundscapeBridgeAppComponent(std::function<void(DbLookAndFeelBase::LookAndFeelType)> lafUpdateCallback)
+MainSpaConBridgeComponent::MainSpaConBridgeComponent(std::function<void(DbLookAndFeelBase::LookAndFeelType)> lafUpdateCallback)
     : onUpdateLookAndFeel(lafUpdateCallback)
 {
     m_config = std::make_unique<AppConfiguration>(JUCEAppBasics::AppConfigurationBase::getDefaultConfigFilePath());
@@ -59,11 +59,11 @@ MainSoundscapeBridgeAppComponent::MainSoundscapeBridgeAppComponent(std::function
     m_config->triggerWatcherUpdate();
 
     // enshure the controller singleton is created
-    auto ctrl = SoundscapeBridgeApp::Controller::GetInstance();
+    auto ctrl = SpaConBridge::Controller::GetInstance();
     ignoreUnused(ctrl);
 
     // enshure the overviewmanager singleton is created
-    auto pageMgr = SoundscapeBridgeApp::PageComponentManager::GetInstance();
+    auto pageMgr = SpaConBridge::PageComponentManager::GetInstance();
     if (pageMgr)
     {
         // get the overview component from manager to use as central element for app ui
@@ -74,7 +74,7 @@ MainSoundscapeBridgeAppComponent::MainSoundscapeBridgeAppComponent(std::function
     setSize(896, 414);
 }
 
-MainSoundscapeBridgeAppComponent::~MainSoundscapeBridgeAppComponent()
+MainSpaConBridgeComponent::~MainSpaConBridgeComponent()
 {
     if (m_config)
     {
@@ -82,7 +82,7 @@ MainSoundscapeBridgeAppComponent::~MainSoundscapeBridgeAppComponent()
         m_config->clearWatchers();
     }
 
-    auto pageMgr = SoundscapeBridgeApp::PageComponentManager::GetInstance();
+    auto pageMgr = SpaConBridge::PageComponentManager::GetInstance();
     if (pageMgr)
     {
         auto pageContainer = pageMgr->GetPageContainer();
@@ -90,7 +90,7 @@ MainSoundscapeBridgeAppComponent::~MainSoundscapeBridgeAppComponent()
         pageMgr->ClosePageContainer(true);
     }
 
-    auto ctrl = SoundscapeBridgeApp::Controller::GetInstance();
+    auto ctrl = SpaConBridge::Controller::GetInstance();
     if (ctrl)
     {
         // Delete the processor instances held in controller externally,
@@ -103,13 +103,13 @@ MainSoundscapeBridgeAppComponent::~MainSoundscapeBridgeAppComponent()
     }
 }
 
-void MainSoundscapeBridgeAppComponent::paint(juce::Graphics& g)
+void MainSpaConBridgeComponent::paint(juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
 }
 
-void MainSoundscapeBridgeAppComponent::resized()
+void MainSpaConBridgeComponent::resized()
 {
     auto safety = JUCEAppBasics::iOS_utils::getDeviceSafetyMargins();
     auto safeBounds = getLocalBounds();
@@ -118,7 +118,7 @@ void MainSoundscapeBridgeAppComponent::resized()
     safeBounds.removeFromLeft(safety._left);
     safeBounds.removeFromRight(safety._right);
 
-    auto pageMgr = SoundscapeBridgeApp::PageComponentManager::GetInstance();
+    auto pageMgr = SpaConBridge::PageComponentManager::GetInstance();
     if (pageMgr)
     {
         auto pageContainer = pageMgr->GetPageContainer();
@@ -127,30 +127,30 @@ void MainSoundscapeBridgeAppComponent::resized()
     }
 }
 
-void MainSoundscapeBridgeAppComponent::performConfigurationDump()
+void MainSpaConBridgeComponent::performConfigurationDump()
 {
-    auto ctrl = SoundscapeBridgeApp::Controller::GetInstance();
+    auto ctrl = SpaConBridge::Controller::GetInstance();
     if (ctrl)
         m_config->setConfigState(ctrl->createStateXml());
 
-    auto pageMgr = SoundscapeBridgeApp::PageComponentManager::GetInstance();
+    auto pageMgr = SpaConBridge::PageComponentManager::GetInstance();
     if (pageMgr)
         m_config->setConfigState(pageMgr->createStateXml());
 }
 
-void MainSoundscapeBridgeAppComponent::onConfigUpdated()
+void MainSpaConBridgeComponent::onConfigUpdated()
 {
     // get all the modules' configs first, because the initialization process might already trigger dumping, that would override data
     auto ctrlConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER));
     auto ovrConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW));
 
     // set the controller modules' config
-    auto ctrl = SoundscapeBridgeApp::Controller::GetInstance();
+    auto ctrl = SpaConBridge::Controller::GetInstance();
     if (ctrl)
         ctrl->setStateXml(ctrlConfigState.get());
 
     // set the overview manager modules' config
-    auto pageMgr = SoundscapeBridgeApp::PageComponentManager::GetInstance();
+    auto pageMgr = SpaConBridge::PageComponentManager::GetInstance();
     if (pageMgr)
         pageMgr->setStateXml(ovrConfigState.get());
 

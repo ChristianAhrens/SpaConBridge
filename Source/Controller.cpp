@@ -4,7 +4,7 @@
 Copyright (C) 2019 d&b audiotechnik GmbH & Co. KG. All Rights Reserved.
 
 This file was originally part of the Soundscape VST, AU, and AAX Plug-in
-and now in a derived version is part of SoundscapeBridgeApp.
+and now in a derived version is part of SpaConBridge.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -41,7 +41,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "SoundsourceProcessor/SoundsourceProcessor.h"
 
 
-namespace SoundscapeBridgeApp
+namespace SpaConBridge
 {
 
 
@@ -221,7 +221,7 @@ bool Controller::PopParameterChanged(DataChangeSource changeSource, DataChangeTy
  */
 void Controller::createNewProcessor()
 {
-	auto processor = std::make_unique<SoundscapeBridgeApp::SoundsourceProcessor>(true);
+	auto processor = std::make_unique<SpaConBridge::SoundsourceProcessor>(true);
 	processor.release(); // let go of the instance here, we do not want to destroy it, since it lives as member of CCOntroller when constructed
 }
 
@@ -1620,14 +1620,14 @@ bool Controller::SetBridgingMidiAssignmentMapping(ProtocolBridgingType bridgingT
  */
 bool Controller::LoadConfigurationFile(const File& fileToLoadFrom)
 {
-	auto config = SoundscapeBridgeApp::AppConfiguration::getInstance();
+	auto config = SpaConBridge::AppConfiguration::getInstance();
 	auto xmlConfig = juce::parseXML(fileToLoadFrom);
 
 	if (!config)
 		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Error", "Loading failed du to internal error.");
 	else if (!xmlConfig)
 		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Invalid config", "Loading failed du to invalid selected configuration file.");
-	else if (!SoundscapeBridgeApp::AppConfiguration::isValid(xmlConfig))
+	else if (!SpaConBridge::AppConfiguration::isValid(xmlConfig))
 		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed du to invalid configuration file contents.");
 	else if (!config->resetConfigState(std::move(xmlConfig)))
 		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed du to internal loading error.");
@@ -1648,7 +1648,7 @@ bool Controller::LoadConfigurationFile(const File& fileToLoadFrom)
  */
 bool Controller::SaveConfigurationFile(const File& fileToSaveTo)
 {
-	auto config = SoundscapeBridgeApp::AppConfiguration::getInstance();
+	auto config = SpaConBridge::AppConfiguration::getInstance();
 	auto xmlConfig = config->getConfigState();
 
 	if (!config)
@@ -1663,4 +1663,4 @@ bool Controller::SaveConfigurationFile(const File& fileToSaveTo)
 	return false;
 }
 
-} // namespace SoundscapeBridgeApp
+} // namespace SpaConBridge

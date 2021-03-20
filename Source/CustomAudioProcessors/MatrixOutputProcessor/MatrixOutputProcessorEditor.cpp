@@ -70,12 +70,14 @@ MatrixOutputProcessorEditor::MatrixOutputProcessorEditor(MatrixOutputProcessor& 
 		auto fparam = dynamic_cast<AudioParameterFloat*> (params[MOI_ParamIdx_LevelMeterPostMute]);
 		m_MatrixOutputLevelMeterSlider = std::make_unique<LevelMeterSlider>(fparam->name, LevelMeterSlider::LMM_ReadOnly);
 		m_MatrixOutputLevelMeterSlider->setRange(fparam->range.start, fparam->range.end, fparam->range.interval);
+		m_MatrixOutputLevelMeterSlider->setValue(fparam->get(), dontSendNotification);
 		m_MatrixOutputLevelMeterSlider->addListener(this);
 		addAndMakeVisible(m_MatrixOutputLevelMeterSlider.get());
 
 		fparam = dynamic_cast<AudioParameterFloat*> (params[MOI_ParamIdx_Gain]);
 		m_MatrixOutputGainSlider = std::make_unique<Slider>(fparam->name);
 		m_MatrixOutputGainSlider->setRange(fparam->range.start, fparam->range.end, fparam->range.interval);
+		m_MatrixOutputGainSlider->setValue(fparam->get(), dontSendNotification);
 		m_MatrixOutputGainSlider->setSliderStyle(Slider::LinearHorizontal);
 		m_MatrixOutputGainSlider->setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
 		m_MatrixOutputGainSlider->addListener(this);
@@ -84,6 +86,7 @@ MatrixOutputProcessorEditor::MatrixOutputProcessorEditor(MatrixOutputProcessor& 
 		auto iparam = dynamic_cast<AudioParameterInt*> (params[MOI_ParamIdx_Mute]);
 		m_MatrixOutputMuteButton = std::make_unique<DrawableButton>(iparam->name, DrawableButton::ButtonStyle::ImageOnButtonBackground);
 		m_MatrixOutputMuteButton->setClickingTogglesState(true);
+		m_MatrixOutputMuteButton->setToggleState(iparam->get() == 1 ? true : false, dontSendNotification);
 		m_MatrixOutputMuteButton->setButtonText("Mute");
 		m_MatrixOutputMuteButton->addListener(this);
 		addAndMakeVisible(m_MatrixOutputMuteButton.get());

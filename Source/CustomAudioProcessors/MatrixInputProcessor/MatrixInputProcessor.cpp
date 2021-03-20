@@ -49,19 +49,19 @@ MatrixInputProcessor::MatrixInputProcessor(bool insertToConfig)
 	// Automation parameters.
 	// level meter param
 	auto lmR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_LevelMeterPreMute);
-	m_MatrixInputLevelMeter = new GestureManagedAudioParameterFloat("MatrixInput_LevelMeterPreMute", "levelMeter", lmR.getStart(), lmR.getEnd(), 0.1f, 0.0f);
+	m_MatrixInputLevelMeter = new GestureManagedAudioParameterFloat("MatrixInput_LevelMeterPreMute", "levelMeter", lmR.getStart(), lmR.getEnd(), 0.1f, lmR.getStart());
 	m_MatrixInputLevelMeter->addListener(this);
 	addParameter(m_MatrixInputLevelMeter);
 
 	// gain param
 	auto gR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_Gain);
-	m_MatrixInputGain = new GestureManagedAudioParameterFloat("MatrixInput_Gain", "gain", gR.getStart(), gR.getEnd(), 0.1f, 0.0f);
+	m_MatrixInputGain = new GestureManagedAudioParameterFloat("MatrixInput_Gain", "gain", gR.getStart(), gR.getEnd(), 0.1f, 0.0f); // exception: dont use the min range as default - for a gain fader, 0dB is nicer
 	m_MatrixInputGain->addListener(this);
 	addParameter(m_MatrixInputGain);
 
 	// mute param
 	auto mR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_Mute);
-	m_MatrixInputMute = new GestureManagedAudioParameterInt("MatrixInput_mute", "mute", static_cast<int>(mR.getStart()), static_cast<int>(mR.getEnd()), 0);
+	m_MatrixInputMute = new GestureManagedAudioParameterInt("MatrixInput_mute", "mute", static_cast<int>(mR.getStart()), static_cast<int>(mR.getEnd()), static_cast<int>(mR.getStart()));
 	m_MatrixInputMute->addListener(this);
 	addParameter(m_MatrixInputMute);
 

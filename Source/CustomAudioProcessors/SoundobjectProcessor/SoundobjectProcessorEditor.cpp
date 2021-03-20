@@ -4,7 +4,7 @@
 Copyright (C) 2019 d&b audiotechnik GmbH & Co. KG. All Rights Reserved.
 
 This file was originally part of the Soundscape VST, AU, and AAX Plug-in
-and now in a derived version is part of SoundscapeBridgeApp.
+and now in a derived version is part of SpaConBridge.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -43,7 +43,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../../PagedUI/PageContainerComponent.h"
 
 
-namespace SoundscapeBridgeApp
+namespace SpaConBridge
 {
 
 
@@ -566,4 +566,4 @@ void SoundobjectProcessorEditor::UpdateGui(bool init)
 }
 
 
-} // namespace SoundscapeBridgeApp
+} // namespace SpaConBridge

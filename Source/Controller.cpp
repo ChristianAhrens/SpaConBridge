@@ -4,7 +4,7 @@
 Copyright (C) 2019 d&b audiotechnik GmbH & Co. KG. All Rights Reserved.
 
 This file was originally part of the Soundscape VST, AU, and AAX Plug-in
-and now in a derived version is part of SoundscapeBridgeApp.
+and now in a derived version is part of SpaConBridge.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -43,7 +43,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "CustomAudioProcessors/MatrixOutputProcessor/MatrixOutputProcessor.h"
 
 
-namespace SoundscapeBridgeApp
+namespace SpaConBridge
 {
 
 
@@ -267,7 +267,7 @@ juce::int32 Controller::GetNextProcessorId()
  */
 void Controller::createNewSoundobjectProcessor()
 {
-	auto processor = std::make_unique<SoundscapeBridgeApp::SoundobjectProcessor>(true);
+	auto processor = std::make_unique<SpaConBridge::SoundobjectProcessor>(true);
 	processor.release(); // let go of the instance here, we do not want to destroy it, since it lives as member of CCOntroller when constructed
 }
 
@@ -370,7 +370,7 @@ std::vector<SoundobjectProcessorId> Controller::GetSoundobjectProcessorIds() con
  */
 void Controller::createNewMatrixInputProcessor()
 {
-	auto processor = std::make_unique<SoundscapeBridgeApp::MatrixInputProcessor>(true);
+	auto processor = std::make_unique<SpaConBridge::MatrixInputProcessor>(true);
 	processor.release(); // let go of the instance here, we do not want to destroy it, since it lives as member of controller when constructed
 }
 
@@ -474,7 +474,7 @@ std::vector<MatrixInputProcessorId> Controller::GetMatrixInputProcessorIds() con
  */
 void Controller::createNewMatrixOutputProcessor()
 {
-	auto processor = std::make_unique<SoundscapeBridgeApp::MatrixOutputProcessor>(true);
+	auto processor = std::make_unique<SpaConBridge::MatrixOutputProcessor>(true);
 	processor.release(); // let go of the instance here, we do not want to destroy it, since it lives as member of controller when constructed
 }
 
@@ -2737,14 +2737,14 @@ bool Controller::SetBridgingMidiAssignmentMapping(ProtocolBridgingType bridgingT
  */
 bool Controller::LoadConfigurationFile(const File& fileToLoadFrom)
 {
-	auto config = SoundscapeBridgeApp::AppConfiguration::getInstance();
+	auto config = SpaConBridge::AppConfiguration::getInstance();
 	auto xmlConfig = juce::parseXML(fileToLoadFrom);
 
 	if (!config)
 		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Error", "Loading failed du to internal error.");
 	else if (!xmlConfig)
 		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Invalid config", "Loading failed du to invalid selected configuration file.");
-	else if (!SoundscapeBridgeApp::AppConfiguration::isValid(xmlConfig))
+	else if (!SpaConBridge::AppConfiguration::isValid(xmlConfig))
 		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed du to invalid configuration file contents.");
 	else if (!config->resetConfigState(std::move(xmlConfig)))
 		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed du to internal loading error.");
@@ -2765,7 +2765,7 @@ bool Controller::LoadConfigurationFile(const File& fileToLoadFrom)
  */
 bool Controller::SaveConfigurationFile(const File& fileToSaveTo)
 {
-	auto config = SoundscapeBridgeApp::AppConfiguration::getInstance();
+	auto config = SpaConBridge::AppConfiguration::getInstance();
 	auto xmlConfig = config->getConfigState();
 
 	if (!config)
@@ -2780,4 +2780,4 @@ bool Controller::SaveConfigurationFile(const File& fileToSaveTo)
 	return false;
 }
 
-} // namespace SoundscapeBridgeApp
+} // namespace SpaConBridge

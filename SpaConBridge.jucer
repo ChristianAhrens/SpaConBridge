@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="MFvkL5" name="SoundscapeBridgeApp" projectType="guiapp" version="0.2.6"
-              bundleIdentifier="com.ChristianAhrens.SoundscapeBridgeApp" companyName="Christian Ahrens"
+<JUCERPROJECT id="MFvkL5" name="SpaConBridge" projectType="guiapp" version="0.2.6"
+              bundleIdentifier="com.ChristianAhrens.SpaConBridge" companyName="Christian Ahrens"
               companyEmail="christianahrens@me.com" displaySplashScreen="0"
               reportAppUsage="0" companyCopyright="2021" jucerFormatVersion="1"
               headerPath="../../submodules/RemoteProtocolBridgeCore/Source&#10;../../submodules/JUCE-AppBasics/Source&#10;../../submodules/Servus/"
-              defines="SERVUS_STATIC" companyWebsite="https://github.com/ChristianAhrens/SoundscapeBridgeApp">
-  <MAINGROUP id="cS7SrP" name="SoundscapeBridgeApp">
+              defines="SERVUS_STATIC" companyWebsite="https://github.com/ChristianAhrens/SpaConBridge">
+  <MAINGROUP id="cS7SrP" name="SpaConBridge">
     <GROUP id="{F93FDF74-FF39-A47E-E403-31E5ADA7ADD3}" name="submodules">
       <GROUP id="{9CCE33BC-DFA0-AFFB-5206-C2377252AD64}" name="RemoteProtocolBridgeCore">
         <GROUP id="{F0157EC5-9555-900E-531F-BF6E4749BCDB}" name="Source">
@@ -298,12 +298,12 @@
         <FILE id="bSDxmA" name="logo_juce.svg" compile="0" resource="1" file="Resources/Images/logo_juce.svg"/>
         <FILE id="vQJzrZ" name="MaterialDesignLogo.png" compile="0" resource="1"
               file="Resources/Images/MaterialDesignLogo.png"/>
-        <FILE id="ZgXgfh" name="SoundscapeBridgeApp.png" compile="0" resource="1"
-              file="Resources/Images/SoundscapeBridgeApp.png" xcodeResource="1"/>
-        <FILE id="ljOsyU" name="SoundscapeBridgeAppCanvas.png" compile="0"
-              resource="1" file="Resources/Images/SoundscapeBridgeAppCanvas.png"/>
-        <FILE id="qJTuNs" name="SoundscapeBridgeAppRect.png" compile="0" resource="1"
-              file="Resources/Images/SoundscapeBridgeAppRect.png"/>
+        <FILE id="ZgXgfh" name="SpaConBridge.png" compile="0" resource="1"
+              file="Resources/Images/SpaConBridge.png" xcodeResource="1"/>
+        <FILE id="ljOsyU" name="SpaConBridgeCanvas.png" compile="0" resource="1"
+              file="Resources/Images/SpaConBridgeCanvas.png"/>
+        <FILE id="qJTuNs" name="SpaConBridgeRect.png" compile="0" resource="1"
+              file="Resources/Images/SpaConBridgeRect.png"/>
       </GROUP>
       <FILE id="YgUWvM" name="COPYING" compile="0" resource="1" file="COPYING"/>
       <FILE id="txUcgc" name="COPYING.apachev2" compile="0" resource="1"
@@ -468,17 +468,17 @@
             file="Source/AppConfiguration.cpp"/>
       <FILE id="wLkJi4" name="AppConfiguration.h" compile="0" resource="0"
             file="Source/AppConfiguration.h"/>
-      <FILE id="SKhSnW" name="MainSoundscapeBridgeAppComponent.cpp" compile="1"
-            resource="0" file="Source/MainSoundscapeBridgeAppComponent.cpp"/>
-      <FILE id="Z0i2A2" name="MainSoundscapeBridgeAppComponent.h" compile="0"
-            resource="0" file="Source/MainSoundscapeBridgeAppComponent.h"/>
+      <FILE id="iutHtS" name="MainSpaConBridgeComponent.cpp" compile="1"
+            resource="0" file="Source/MainSpaConBridgeComponent.cpp"/>
+      <FILE id="vWazv3" name="MainSpaConBridgeComponent.h" compile="0" resource="0"
+            file="Source/MainSpaConBridgeComponent.h"/>
       <FILE id="g0nbLB" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
       <FILE id="Kqvnes" name="Controller.cpp" compile="1" resource="0" file="Source/Controller.cpp"/>
       <FILE id="dObTPr" name="Controller.h" compile="0" resource="0" file="Source/Controller.h"/>
-      <FILE id="rfsqrd" name="SoundscapeBridgeAppCommon.cpp" compile="1"
-            resource="0" file="Source/SoundscapeBridgeAppCommon.cpp"/>
-      <FILE id="c3j7aS" name="SoundscapeBridgeAppCommon.h" compile="0" resource="0"
-            file="Source/SoundscapeBridgeAppCommon.h"/>
+      <FILE id="BcPgTN" name="SpaConBridgeCommon.cpp" compile="1" resource="0"
+            file="Source/SpaConBridgeCommon.cpp"/>
+      <FILE id="ldU6tr" name="SpaConBridgeCommon.h" compile="0" resource="0"
+            file="Source/SpaConBridgeCommon.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
@@ -526,7 +526,7 @@
                   iosScreenOrientation="UIInterfaceOrientationLandscapeLeft,UIInterfaceOrientationLandscapeRight,UIInterfaceOrientationPortrait"
                   iPadScreenOrientation="UIInterfaceOrientationLandscapeLeft,UIInterfaceOrientationLandscapeRight,UIInterfaceOrientationPortrait"
                   customLaunchStoryboard="Resources/Deployment/iOS/Launchscreen.storyboard"
-                  customPList="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&#10;&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;&#10;&lt;plist&gt;&#10;  &lt;dict&gt;&#10;    &lt;key&gt;NSLocalNetworkUsageDescription&lt;/key&gt;&#10;    &lt;string&gt;SoundscapeBridgeApp uses bonjour to discover IP Addresses of relevant devices on the network.&lt;/string&gt;&#10;    &lt;key&gt;NSBonjourServices&lt;/key&gt;&#10;    &lt;array&gt;&#10;&#9;  &lt;string&gt;_osc._udp&lt;/string&gt;&#10;    &lt;/array&gt;&#10;    &lt;key&gt;NSDocumentsFolderUsageDescription&lt;/key&gt;&#10;    &lt;string&gt;SoundscapeBridgeApp accesses the document folder to load or save the app configuration.&lt;/string&gt;&#10;    &lt;key&gt;NSDownloadsFolderUsageDescription&lt;/key&gt;&#10;    &lt;string&gt;SoundscapeBridgeApp accesses the downloads folder to load or save the app configuration.&lt;/string&gt;&#10;    &lt;key&gt;NSDesktopFolderUsageDescription&lt;/key&gt;&#10;    &lt;string&gt;SoundscapeBridgeApp accesses the desktop folder to load or save the app configuration.&lt;/string&gt;&#10;  &lt;/dict&gt;&#10;&lt;/plist&gt;"
+                  customPList="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&#10;&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;&#10;&lt;plist&gt;&#10;  &lt;dict&gt;&#10;    &lt;key&gt;NSLocalNetworkUsageDescription&lt;/key&gt;&#10;    &lt;string&gt;SpaConBridge uses bonjour to discover IP Addresses of relevant devices on the network.&lt;/string&gt;&#10;    &lt;key&gt;NSBonjourServices&lt;/key&gt;&#10;    &lt;array&gt;&#10;&#9;  &lt;string&gt;_osc._udp&lt;/string&gt;&#10;    &lt;/array&gt;&#10;    &lt;key&gt;NSDocumentsFolderUsageDescription&lt;/key&gt;&#10;    &lt;string&gt;SpaConBridge accesses the document folder to load or save the app configuration.&lt;/string&gt;&#10;    &lt;key&gt;NSDownloadsFolderUsageDescription&lt;/key&gt;&#10;    &lt;string&gt;SpaConBridge accesses the downloads folder to load or save the app configuration.&lt;/string&gt;&#10;    &lt;key&gt;NSDesktopFolderUsageDescription&lt;/key&gt;&#10;    &lt;string&gt;SpaConBridge accesses the desktop folder to load or save the app configuration.&lt;/string&gt;&#10;  &lt;/dict&gt;&#10;&lt;/plist&gt;"
                   UIFileSharingEnabled="1" iCloudPermissions="1">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug"/>

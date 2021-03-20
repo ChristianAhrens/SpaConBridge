@@ -3,7 +3,7 @@
 
 Copyright (C) 2019 d&b audiotechnik GmbH & Co. KG. All Rights Reserved.
 
-This file was originally part of the Soundscape VST, AU, and AAX Plug-in and now in a derived version is part of SoundscapeBridgeApp.
+This file was originally part of the Soundscape VST, AU, and AAX Plug-in and now in a derived version is part of SpaConBridge.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -53,7 +53,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Image_utils.h>
 
 
-namespace SoundscapeBridgeApp
+namespace SpaConBridge
 {
 
 
@@ -858,7 +858,7 @@ void TableModelComponent::selectedRowsChanged(int lastRowSelected)
 		if (m_table->getSelectedRows().isEmpty() || m_table->getSelectedRows().size() > 1)
 		{
 			if (onCurrentSelectedProcessorChanged)
-				onCurrentSelectedProcessorChanged(SoundscapeBridgeApp::INVALID_PROCESSOR_ID);
+				onCurrentSelectedProcessorChanged(SpaConBridge::INVALID_PROCESSOR_ID);
 			m_tableControlBar->SetRemoveEnabled(false);
 		}
 		else
@@ -930,4 +930,4 @@ void TableModelComponent::onCollapseToggled(bool collapsed)
 }
 
 
-} // namespace SoundscapeBridgeApp
+} // namespace SpaConBridge

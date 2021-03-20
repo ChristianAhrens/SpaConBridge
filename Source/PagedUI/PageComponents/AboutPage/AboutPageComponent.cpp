@@ -1,6 +1,6 @@
 /* Copyright (c) 2020-2021, Christian Ahrens
  *
- * This file is part of SoundscapeBridgeApp <https://github.com/ChristianAhrens/SoundscapeBridgeApp>
+ * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -20,12 +20,12 @@
 #include "AboutPageComponent.h"
 
 #include "../../../LookAndFeel.h"
-#include "../../../SoundscapeBridgeAppCommon.h"
+#include "../../../SpaConBridgeCommon.h"
 
 #include <Image_utils.h>
 
 
-namespace SoundscapeBridgeApp
+namespace SpaConBridge
 {
 
 
@@ -41,7 +41,7 @@ namespace SoundscapeBridgeApp
 AboutPageContentComponent::AboutPageContentComponent()
 {
 	// App icon drawable
-	m_appIconDrawable = Drawable::createFromImageData(BinaryData::SoundscapeBridgeApp_png, BinaryData::SoundscapeBridgeApp_pngSize);
+	m_appIconDrawable = Drawable::createFromImageData(BinaryData::SpaConBridge_png, BinaryData::SpaConBridge_pngSize);
 	addAndMakeVisible(m_appIconDrawable.get());
 	// App info label
 	String infoString = JUCEApplication::getInstance()->getApplicationName() + String(" V") + String(JUCE_STRINGIFY(JUCE_APP_VERSION)) + String("\n")
@@ -53,7 +53,7 @@ AboutPageContentComponent::AboutPageContentComponent()
 	addAndMakeVisible(m_appInfoLabel.get());
 
 	// Hyperlink to dbaudio.com
-	m_appInfoLink = std::make_unique<HyperlinkButton>(JUCEApplication::getInstance()->getApplicationName() + String(" on GitHub"), URL("https://www.github.com/ChristianAhrens/SoundscapeBridgeApp"));
+	m_appInfoLink = std::make_unique<HyperlinkButton>(JUCEApplication::getInstance()->getApplicationName() + String(" on GitHub"), URL("https://www.github.com/ChristianAhrens/SpaConBridge"));
 	m_appInfoLink->setFont(Font(13.0, Font::plain), false /* do not resize */);
     m_appInfoLink->setJustificationType(Justification::centredLeft);
 	addAndMakeVisible(m_appInfoLink.get());
@@ -380,4 +380,4 @@ void AboutPageComponent::mouseUp(const MouseEvent& e)
 }
 
 
-} // namespace SoundscapeBridgeApp
+} // namespace SpaConBridge

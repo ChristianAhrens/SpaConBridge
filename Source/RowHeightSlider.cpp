@@ -1,6 +1,6 @@
 /* Copyright (c) 2020-2021, Christian Ahrens
  *
- * This file is part of SoundscapeBridgeApp <https://github.com/ChristianAhrens/SoundscapeBridgeApp>
+ * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -22,7 +22,7 @@
 #include "LookAndFeel.h"
 
 
-namespace SoundscapeBridgeApp
+namespace SpaConBridge
 {
 
 
@@ -169,4 +169,4 @@ void RowHeightSlider::resized()
 }
 
 
-} // namespace SoundscapeBridgeApp
+} // namespace SpaConBridge

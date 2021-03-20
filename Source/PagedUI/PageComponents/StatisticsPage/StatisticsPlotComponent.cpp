@@ -1,6 +1,6 @@
 /* Copyright (c) 2020-2021, Christian Ahrens
  *
- * This file is part of SoundscapeBridgeApp <https://github.com/ChristianAhrens/SoundscapeBridgeApp>
+ * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -21,7 +21,7 @@
 #include "../../../Controller.h"
 
 
-namespace SoundscapeBridgeApp
+namespace SpaConBridge
 {
 
 
@@ -181,7 +181,7 @@ void StatisticsPlot::ResetStatisticsPlot()
 	m_plotData.clear();
 	m_plottedBridgingTypes.clear();
 
-	auto ctrl = SoundscapeBridgeApp::Controller::GetInstance();
+	auto ctrl = SpaConBridge::Controller::GetInstance();
 	if (!ctrl)
 		return;
 
@@ -277,4 +277,4 @@ void StatisticsPlot::mouseUp(const MouseEvent& e)
 }
 
 
-} // namespace SoundscapeBridgeApp
+} // namespace SpaConBridge

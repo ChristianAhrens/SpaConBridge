@@ -4,7 +4,7 @@
 Copyright (C) 2019 d&b audiotechnik GmbH & Co. KG. All Rights Reserved.
 
 This file was originally part of the Soundscape VST, AU, and AAX Plug-in
-and now in a derived version is part of SoundscapeBridgeApp.
+and now in a derived version is part of SpaConBridge.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -41,10 +41,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../Controller.h"						//<USE Controller
 #include "../PagedUI/PageComponentManager.h"	//<USE PageComponentManager
-#include "../SoundscapeBridgeAppCommon.h"
+#include "../SpaConBridgeCommon.h"
 
 
-namespace SoundscapeBridgeApp
+namespace SpaConBridge
 {
 
 
@@ -847,7 +847,7 @@ AudioProcessorEditor* SoundsourceProcessor::createEditor()
 }
 
 
-} // namespace SoundscapeBridgeApp
+} // namespace SpaConBridge
 
 
 /**
@@ -856,5 +856,5 @@ AudioProcessorEditor* SoundsourceProcessor::createEditor()
  */
 AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-	return new SoundscapeBridgeApp::SoundsourceProcessor();
+	return new SpaConBridge::SoundsourceProcessor();
 }

@@ -1,6 +1,6 @@
 /* Copyright (c) 2020-2021, Christian Ahrens
  *
- * This file is part of SoundscapeBridgeApp <https://github.com/ChristianAhrens/SoundscapeBridgeApp>
+ * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -27,7 +27,7 @@
 #include <Image_utils.h>
 
 
-namespace SoundscapeBridgeApp
+namespace SpaConBridge
 {
 
 
@@ -187,7 +187,7 @@ void StatisticsPlot::ResetStatisticsPlot()
 	m_plotData.clear();
 	m_plottedBridgingTypes.clear();
 
-	auto ctrl = SoundscapeBridgeApp::Controller::GetInstance();
+	auto ctrl = SpaConBridge::Controller::GetInstance();
 	if (!ctrl)
 		return;
 
@@ -603,11 +603,11 @@ StatisticsPageComponent::StatisticsPageComponent()
 
 	m_plotComponent->toggleShowDS100Traffic = [=](bool show) { m_logComponent->SetShowDS100Traffic(show); };
 
-	auto ctrl = SoundscapeBridgeApp::Controller::GetInstance();
+	auto ctrl = SpaConBridge::Controller::GetInstance();
 	if (ctrl)
 		ctrl->AddProtocolBridgingWrapperListener(this);
 
-	auto config = SoundscapeBridgeApp::AppConfiguration::getInstance();
+	auto config = SpaConBridge::AppConfiguration::getInstance();
 	if (config)
 		config->addWatcher(this);
 }
@@ -735,4 +735,4 @@ void StatisticsPageComponent::HandleMessageData(NodeId nodeId, ProtocolId sender
 }
 
 
-} // namespace SoundscapeBridgeApp
+} // namespace SpaConBridge

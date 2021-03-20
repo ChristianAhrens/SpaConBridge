@@ -3,7 +3,7 @@
 
 Copyright (C) 2019 d&b audiotechnik GmbH & Co. KG. All Rights Reserved.
 
-This file was originally part of the Soundscape VST, AU, and AAX Plug-in and now in a derived version is part of SoundscapeBridgeApp.
+This file was originally part of the Soundscape VST, AU, and AAX Plug-in and now in a derived version is part of SpaConBridge.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -35,12 +35,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "../SoundscapeBridgeAppCommon.h"
+#include "../SpaConBridgeCommon.h"
 #include "../AppConfiguration.h"
 #include "../LookAndFeel.h"
 
 
-namespace SoundscapeBridgeApp
+namespace SpaConBridge
 {
 
 
@@ -93,4 +93,4 @@ protected:
 };
 
 
-} // namespace SoundscapeBridgeApp
+} // namespace SpaConBridge

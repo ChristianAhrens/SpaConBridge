@@ -1,6 +1,6 @@
 /* Copyright (c) 2020-2021, Christian Ahrens
  *
- * This file is part of SoundscapeBridgeApp <https://github.com/ChristianAhrens/SoundscapeBridgeApp>
+ * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
  *
  * This library is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License version 3.0 as published
@@ -24,21 +24,21 @@
 #include <JuceHeader.h>
 
 
-namespace SoundscapeBridgeApp
+namespace SpaConBridge
 {
 
 
 //==============================================================================
 /*
  */
-class MainSoundscapeBridgeAppComponent :    public juce::Component,
+class MainSpaConBridgeComponent :    public juce::Component,
                                             public AppConfiguration::Dumper,
                                             public AppConfiguration::Watcher
 {
 public:
-    MainSoundscapeBridgeAppComponent();
-    MainSoundscapeBridgeAppComponent(std::function<void(DbLookAndFeelBase::LookAndFeelType)> lafUpdateCallback);
-    ~MainSoundscapeBridgeAppComponent() override;
+    MainSpaConBridgeComponent();
+    MainSpaConBridgeComponent(std::function<void(DbLookAndFeelBase::LookAndFeelType)> lafUpdateCallback);
+    ~MainSpaConBridgeComponent() override;
 
     //==========================================================================
     void paint(juce::Graphics&) override;
@@ -56,7 +56,7 @@ public:
 private:
     std::unique_ptr<AppConfiguration>           m_config;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainSoundscapeBridgeAppComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainSpaConBridgeComponent)
 };
 
 };

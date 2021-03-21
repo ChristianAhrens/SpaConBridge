@@ -48,16 +48,41 @@ MatrixIOPageComponent::MatrixIOPageComponent()
 	: PageComponentBase(PCT_MatrixIOs)
 {
 	m_inputsComponent = std::make_unique<MatrixInputTableComponent>();
-	m_inputsComponent->onCurrentCollapseStateChanged = [=](bool collapsed) { ignoreUnused(collapsed); resized(); };
+	m_inputsComponent->onCurrentCollapseStateChanged = [=](bool collapsed) {
+		ignoreUnused(collapsed);
+		resized();
+		auto config = SpaConBridge::AppConfiguration::getInstance();
+		if (config)
+			config->triggerConfigurationDump(false);
+	};
+	m_inputsComponent->onCurrentRowHeightChanged = [=](int rowHeight) {
+		ignoreUnused(rowHeight);
+		auto config = SpaConBridge::AppConfiguration::getInstance();
+		if (config)
+			config->triggerConfigurationDump(false);
+	};
 	addAndMakeVisible(m_inputsComponent.get());
 
 	m_outputsComponent = std::make_unique<MatrixOutputTableComponent>();
-	m_outputsComponent->onCurrentCollapseStateChanged = [=](bool collapsed) { ignoreUnused(collapsed); resized(); };
+	m_outputsComponent->onCurrentCollapseStateChanged = [=](bool collapsed) {
+		ignoreUnused(collapsed);
+		resized();
+		auto config = SpaConBridge::AppConfiguration::getInstance();
+		if (config)
+			config->triggerConfigurationDump(false);
+	};
+	m_outputsComponent->onCurrentRowHeightChanged = [=](int rowHeight) {
+		ignoreUnused(rowHeight);
+		auto config = SpaConBridge::AppConfiguration::getInstance();
+		if (config)
+			config->triggerConfigurationDump(false);
+	};
 	addAndMakeVisible(m_outputsComponent.get());
 
 	// trigger lookandfeel update
 	lookAndFeelChanged();
 
+	// register this object as config watcher
 	auto config = SpaConBridge::AppConfiguration::getInstance();
 	if (config)
 		config->addWatcher(this);
@@ -135,7 +160,10 @@ bool MatrixIOPageComponent::GetInputsCollapsed()
 	if (m_inputsComponent)
 		return m_inputsComponent->IsCollapsed();
 	else
+	{
+		jassertfalse;
 		return false;
+	}
 }
 
 /**
@@ -159,7 +187,10 @@ bool MatrixIOPageComponent::GetOutputsCollapsed()
 	if (m_outputsComponent)
 		return m_outputsComponent->IsCollapsed();
 	else
+	{
+		jassertfalse;
 		return false;
+	}
 }
 
 /**
@@ -301,7 +332,7 @@ void MatrixIOPageComponent::UpdateGui(bool init)
  */
 void MatrixIOPageComponent::onConfigUpdated()
 {
-
+	UpdateGui(false);
 }
 
 

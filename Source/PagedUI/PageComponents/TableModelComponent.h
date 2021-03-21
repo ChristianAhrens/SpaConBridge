@@ -121,7 +121,8 @@ public:
 
 	// Callback functions
 	std::function<void(juce::int32)>	onCurrentSelectedProcessorChanged;
-	std::function<void(bool)>	onCurrentCollapseStateChanged;
+	std::function<void(int)>			onCurrentRowHeightChanged;
+	std::function<void(bool)>			onCurrentCollapseStateChanged;
 
 protected:
 	//==============================================================================
@@ -131,6 +132,7 @@ protected:
 	//==============================================================================
 	void onSelectAllProcessors();
 	void onDeselectAllProcessors();
+	void onRowHeightSlided(int height);
 	void onCollapseToggled(bool collapsed);
 
 private:

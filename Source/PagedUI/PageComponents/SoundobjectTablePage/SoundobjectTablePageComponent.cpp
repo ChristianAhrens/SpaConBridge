@@ -65,7 +65,18 @@ SoundobjectTablePageComponent::SoundobjectTablePageComponent()
 {
 	// Create the table model/component.
 	m_soundobjectsTable = std::make_unique<SoundobjectTableComponent>();
-	m_soundobjectsTable->onCurrentSelectedProcessorChanged = [=](SoundobjectProcessorId id) { SetSoundsourceProcessorEditorActive(id); };
+	m_soundobjectsTable->onCurrentSelectedProcessorChanged = [=](SoundobjectProcessorId id) { 
+		SetSoundsourceProcessorEditorActive(id);
+		auto config = SpaConBridge::AppConfiguration::getInstance();
+		if (config)
+			config->triggerConfigurationDump(false);
+	};
+	m_soundobjectsTable->onCurrentRowHeightChanged = [=](int rowHeight) { 
+		ignoreUnused(rowHeight);
+		auto config = SpaConBridge::AppConfiguration::getInstance();
+		if (config)
+			config->triggerConfigurationDump(false);
+	};
 	addAndMakeVisible(m_soundobjectsTable.get());
 
 	// register this object as config watcher

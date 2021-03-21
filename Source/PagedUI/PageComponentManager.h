@@ -82,6 +82,11 @@ public:
 	int GetMatrixOutputTableRowHeight();
 	void SetMatrixOutputTableRowHeight(int height);
 
+	bool IsMatrixInputTableCollapsed();
+	void SetMatrixInputTableCollapsed(bool collapsed);
+	bool IsMatrixOutputTableCollapsed();
+	void SetMatrixOutputTableCollapsed(bool collapsed);
+
 	//==============================================================================
 	DbLookAndFeelBase::LookAndFeelType GetLookAndFeelType() const;
 	void SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType, bool dontSendNotification);

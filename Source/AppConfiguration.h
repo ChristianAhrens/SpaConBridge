@@ -33,9 +33,11 @@ public:
     {
         UICONFIG,
         ACTIVETAB,
-        SOUNDOBJECTROWHEIGHT,
-        MATRIXINPUTROWHEIGHT,
-        MATRIXOUTPUTROWHEIGHT,
+        SOUNDOBJECTTABLE,
+        MATRIXINPUTTABLE,
+        MATRIXOUTPUTTABLE,
+        ROWHEIGHT,
+        COLLAPSED,
         CONTROLLER,
         SOUNDOBJECTPROCESSORS,
         MATRIXINPUTPROCESSORS,
@@ -52,12 +54,16 @@ public:
             return "UIConfig";
         case ACTIVETAB:
             return "ActiveTab";
-        case SOUNDOBJECTROWHEIGHT:
-            return "SoundObjectRowHeight";
-        case MATRIXINPUTROWHEIGHT:
-            return "MatrixInputRowHeight";
-        case MATRIXOUTPUTROWHEIGHT:
-            return "MatrixOutputRowHeight";
+        case SOUNDOBJECTTABLE:
+            return "SoundObjectTable";
+        case MATRIXINPUTTABLE:
+            return "MatrixInputTable";
+        case MATRIXOUTPUTTABLE:
+            return "MatrixOutputTable";
+        case ROWHEIGHT:
+            return "RowHeight";
+        case COLLAPSED:
+            return "Collapsed";
         case CONTROLLER:
             return "Controller";
         case SOUNDOBJECTPROCESSORS:

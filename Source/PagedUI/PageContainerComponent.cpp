@@ -423,7 +423,10 @@ int PageContainerComponent::GetSoundobjectTableRowHeight()
 	if (m_soundobjectsPage)
 		return m_soundobjectsPage->GetRowHeight();
 	else
+	{
+		jassertfalse;
 		return 0;
+	}
 }
 
 /**
@@ -445,7 +448,10 @@ int PageContainerComponent::GetMatrixInputTableRowHeight()
 	if (m_matrixIOPage)
 		return m_matrixIOPage->GetOutputsRowHeight();
 	else
+	{
+		jassertfalse;
 		return 0;
+	}
 }
 
 /**
@@ -467,7 +473,10 @@ int PageContainerComponent::GetMatrixOutputTableRowHeight()
 	if (m_matrixIOPage)
 		return m_matrixIOPage->GetInputsRowHeight();
 	else
+	{
+		jassertfalse;
 		return 0;
+	}
 }
 
 /**
@@ -487,9 +496,12 @@ void PageContainerComponent::SetMatrixOutputTableRowHeight(int height)
 bool PageContainerComponent::GetMatrixInputTableCollapsed()
 {
 	if (m_matrixIOPage)
-		return m_matrixIOPage->GetOutputsCollapsed();
+		return m_matrixIOPage->GetInputsCollapsed();
 	else
-		return 0;
+	{
+		jassertfalse;
+		return false;
+	}
 }
 
 /**
@@ -499,7 +511,7 @@ bool PageContainerComponent::GetMatrixInputTableCollapsed()
 void PageContainerComponent::SetMatrixInputTableCollapsed(bool collapsed)
 {
 	if (m_matrixIOPage)
-		return m_matrixIOPage->SetOutputsCollapsed(collapsed);
+		return m_matrixIOPage->SetInputsCollapsed(collapsed);
 }
 
 /**
@@ -509,9 +521,12 @@ void PageContainerComponent::SetMatrixInputTableCollapsed(bool collapsed)
 bool PageContainerComponent::GetMatrixOutputTableCollapsed()
 {
 	if (m_matrixIOPage)
-		return m_matrixIOPage->GetInputsCollapsed();
+		return m_matrixIOPage->GetOutputsCollapsed();
 	else
-		return 0;
+	{
+		jassertfalse;
+		return false;
+	}
 }
 
 /**

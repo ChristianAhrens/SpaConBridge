@@ -192,7 +192,8 @@ void PageComponentManager::SetSelectedMapping(int mapping)
 }
 
 /**
- * Getter for the row height in sound objects table
+ * Proxy Getter for the row height in sound objects table.
+ * Forwards call to PageContainerComponent.
  * @return	The table row height.
  */
 int PageComponentManager::GetSoundobjectTableRowHeight()
@@ -200,11 +201,15 @@ int PageComponentManager::GetSoundobjectTableRowHeight()
 	if (m_pageContainer)
 		return m_pageContainer->GetSoundobjectTableRowHeight();
 	else
+	{
+		jassertfalse;
 		return 0;
+	}
 }
 
 /**
- * Setter for the row height in sound objects table
+ * Proxy Setter for the row height in sound objects table.
+ * Forwards call to PageContainerComponent.
  * @param height	The table row height.
  */
 void PageComponentManager::SetSoundobjectTableRowHeight(int height)
@@ -214,7 +219,8 @@ void PageComponentManager::SetSoundobjectTableRowHeight(int height)
 }
 
 /**
- * Getter for the row height in matrix inputs table
+ * Getter for the row height in matrix inputs table.
+ * Forwards call to PageContainerComponent.
  * @return	The table row height.
  */
 int PageComponentManager::GetMatrixInputTableRowHeight()
@@ -226,7 +232,8 @@ int PageComponentManager::GetMatrixInputTableRowHeight()
 }
 
 /**
- * Setter for the row height in matrix inputs table
+ * Proxy Setter for the row height in matrix inputs table.
+ * Forwards call to PageContainerComponent.
  * @param height	The table row height.
  */
 void PageComponentManager::SetMatrixInputTableRowHeight(int height)
@@ -236,7 +243,8 @@ void PageComponentManager::SetMatrixInputTableRowHeight(int height)
 }
 
 /**
- * Getter for the row height in matrix outputs table
+ * Proxy Getter for the row height in matrix outputs table.
+ * Forwards call to PageContainerComponent.
  * @return	The table row height.
  */
 int PageComponentManager::GetMatrixOutputTableRowHeight()
@@ -244,17 +252,75 @@ int PageComponentManager::GetMatrixOutputTableRowHeight()
 	if (m_pageContainer)
 		return m_pageContainer->GetMatrixOutputTableRowHeight();
 	else
+	{
+		jassertfalse;
 		return 0;
+	}
 }
 
 /**
- * Setter for the row height in matrix outputs table
+ * Proxy Setter for the row height in matrix outputs table.
+ * Forwards call to PageContainerComponent.
  * @param height	The table row height.
  */
 void PageComponentManager::SetMatrixOutputTableRowHeight(int height)
 {
 	if (m_pageContainer)
 		m_pageContainer->SetMatrixOutputTableRowHeight(height);
+}
+
+/**
+ * Proxy Getter for the row height in matrix outputs table.
+ * Forwards call to PageContainerComponent.
+ * @return	The table row height.
+ */
+bool PageComponentManager::IsMatrixInputTableCollapsed()
+{
+	if (m_pageContainer)
+		return m_pageContainer->GetMatrixInputTableCollapsed();
+	else
+	{
+		jassertfalse;
+		return false;
+	}
+}
+
+/**
+ * Proxy Setter for the collapsed state in matrix inputs table.
+ * Forwards call to PageContainerComponent.
+ * @param collapsed	The table collapsed state.
+ */
+void PageComponentManager::SetMatrixInputTableCollapsed(bool collapsed)
+{
+	if (m_pageContainer)
+		m_pageContainer->SetMatrixInputTableCollapsed(collapsed);
+}
+
+/**
+ * Proxy Getter for the row height in matrix outputs table.
+ * Forwards call to PageContainerComponent.
+ * @return	The table row height.
+ */
+bool PageComponentManager::IsMatrixOutputTableCollapsed()
+{
+	if (m_pageContainer)
+		return m_pageContainer->GetMatrixOutputTableCollapsed();
+	else
+	{
+		jassertfalse;
+		return false;
+	}
+}
+
+/**
+ * Proxy Setter for the collapsed state in matrix outputs table.
+ * Forwards call to PageContainerComponent.
+ * @param collapsed	The table collapsed state.
+ */
+void PageComponentManager::SetMatrixOutputTableCollapsed(bool collapsed)
+{
+	if (m_pageContainer)
+		m_pageContainer->SetMatrixOutputTableCollapsed(collapsed);
 }
 
 /**
@@ -340,54 +406,90 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
 		}
 	}
 
-	auto soundobjectRowHeightXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTROWHEIGHT));
-	if (soundobjectRowHeightXmlElement)
+	auto soundobjectTableXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTTABLE));
+	if (soundobjectTableXmlElement)
 	{
-		auto soundobjectRowHeightTextXmlElement = soundobjectRowHeightXmlElement->getFirstChildElement();
-		if (soundobjectRowHeightTextXmlElement && soundobjectRowHeightTextXmlElement->isTextElement())
+		auto rowHeightXmlElement = soundobjectTableXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::ROWHEIGHT));
+		if (rowHeightXmlElement)
 		{
-			auto rowHeight = soundobjectRowHeightTextXmlElement->getText().getIntValue();
-
-			if (rowHeight > 0)
+			auto rowHeightTextXmlElement = rowHeightXmlElement->getFirstChildElement();
+			if (rowHeightTextXmlElement && rowHeightTextXmlElement->isTextElement())
 			{
-				SetSoundobjectTableRowHeight(rowHeight);
+				auto rowHeight = rowHeightTextXmlElement->getText().getIntValue();
+
+				if (rowHeight > 0)
+				{
+					SetSoundobjectTableRowHeight(rowHeight);
+				}
+				else
+					retVal = false;
 			}
-			else
-				retVal = false;
 		}
 	}
 
-	auto matrixInputRowHeightXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXINPUTROWHEIGHT));
-	if (matrixInputRowHeightXmlElement)
+	auto matrixInputTableXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXINPUTTABLE));
+	if (matrixInputTableXmlElement)
 	{
-		auto matrixInputRowHeightTextXmlElement = matrixInputRowHeightXmlElement->getFirstChildElement();
-		if (matrixInputRowHeightTextXmlElement && matrixInputRowHeightTextXmlElement->isTextElement())
+		auto rowHeightXmlElement = matrixInputTableXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::ROWHEIGHT));
+		if (rowHeightXmlElement)
 		{
-			auto rowHeight = matrixInputRowHeightTextXmlElement->getText().getIntValue();
-
-			if (rowHeight > 0)
+			auto rowHeightTextXmlElement = rowHeightXmlElement->getFirstChildElement();
+			if (rowHeightTextXmlElement && rowHeightTextXmlElement->isTextElement())
 			{
-				SetMatrixInputTableRowHeight(rowHeight);
+				auto rowHeight = rowHeightTextXmlElement->getText().getIntValue();
+
+				if (rowHeight > 0)
+				{
+					SetMatrixInputTableRowHeight(rowHeight);
+				}
+				else
+					retVal = false;
 			}
-			else
-				retVal = false;
+		}
+
+		auto tableCollapsedXmlElement = matrixInputTableXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::COLLAPSED));
+		if (tableCollapsedXmlElement)
+		{
+			auto tableCollapsedTextXmlElement = tableCollapsedXmlElement->getFirstChildElement();
+			if (tableCollapsedTextXmlElement && tableCollapsedTextXmlElement->isTextElement())
+			{
+				auto collapsed = (tableCollapsedTextXmlElement->getText().getIntValue() == 1);;
+
+				SetMatrixInputTableCollapsed(collapsed);
+			}
 		}
 	}
 
-	auto matrixOutputRowHeightXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXOUTPUTROWHEIGHT));
-	if (matrixOutputRowHeightXmlElement)
+	auto matrixOutputTableXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXOUTPUTTABLE));
+	if (matrixOutputTableXmlElement)
 	{
-		auto matrixOutputRowHeightTextXmlElement = matrixOutputRowHeightXmlElement->getFirstChildElement();
-		if (matrixOutputRowHeightTextXmlElement && matrixOutputRowHeightTextXmlElement->isTextElement())
+		auto rowHeightXmlElement = matrixOutputTableXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::ROWHEIGHT));
+		if (rowHeightXmlElement)
 		{
-			auto rowHeight = matrixOutputRowHeightTextXmlElement->getText().getIntValue();
-
-			if (rowHeight > 0)
+			auto rowHeightTextXmlElement = rowHeightXmlElement->getFirstChildElement();
+			if (rowHeightTextXmlElement && rowHeightTextXmlElement->isTextElement())
 			{
-				SetMatrixOutputTableRowHeight(rowHeight);
+				auto rowHeight = rowHeightTextXmlElement->getText().getIntValue();
+
+				if (rowHeight > 0)
+				{
+					SetMatrixOutputTableRowHeight(rowHeight);
+				}
+				else
+					retVal = false;
 			}
-			else
-				retVal = false;
+		}
+
+		auto tableCollapsedXmlElement = matrixOutputTableXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::COLLAPSED));
+		if (tableCollapsedXmlElement)
+		{
+			auto tableCollapsedTextXmlElement = tableCollapsedXmlElement->getFirstChildElement();
+			if (tableCollapsedTextXmlElement && tableCollapsedTextXmlElement->isTextElement())
+			{
+				auto collapsed = (tableCollapsedTextXmlElement->getText().getIntValue() == 1);
+
+				SetMatrixOutputTableCollapsed(collapsed);
+			}
 		}
 	}
 
@@ -413,17 +515,37 @@ std::unique_ptr<XmlElement> PageComponentManager::createStateXml()
 		if (lookAndFeelXmlElement)
 			lookAndFeelXmlElement->addTextElement(String((GetLookAndFeelType() == DbLookAndFeelBase::LAFT_InvalidFirst) ? DbLookAndFeelBase::LAFT_Dark : GetLookAndFeelType()));
 
-		auto soundobjectRowHeightXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTROWHEIGHT));
-		if (soundobjectRowHeightXmlElement)
-			soundobjectRowHeightXmlElement->addTextElement(String(GetSoundobjectTableRowHeight()));
+		auto soundobjectTableXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTTABLE));
+		if (soundobjectTableXmlElement)
+		{
+			auto rowHeightXmlElement = soundobjectTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::ROWHEIGHT));
+			if (rowHeightXmlElement)
+				rowHeightXmlElement->addTextElement(String(GetSoundobjectTableRowHeight()));
+		}
 
-		auto matrixInputRowHeightXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXINPUTROWHEIGHT));
-		if (matrixInputRowHeightXmlElement)
-			matrixInputRowHeightXmlElement->addTextElement(String(GetMatrixInputTableRowHeight()));
+		auto matrixInputTableXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXINPUTTABLE));
+		if (matrixInputTableXmlElement)
+		{
+			auto rowHeightXmlElement = matrixInputTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::ROWHEIGHT));
+			if (rowHeightXmlElement)
+				rowHeightXmlElement->addTextElement(String(GetMatrixInputTableRowHeight()));
 
-		auto matrixOutputRowHeightXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXOUTPUTROWHEIGHT));
-		if (matrixOutputRowHeightXmlElement)
-			matrixOutputRowHeightXmlElement->addTextElement(String(GetMatrixOutputTableRowHeight()));
+			auto collapsedXmlElement = matrixInputTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::COLLAPSED));
+			if (collapsedXmlElement)
+				collapsedXmlElement->addTextElement(String(IsMatrixInputTableCollapsed() ? 1 : 0));
+		}
+
+		auto matrixOutputTableXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXOUTPUTTABLE));
+		if (matrixOutputTableXmlElement)
+		{
+			auto rowHeightXmlElement = matrixOutputTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::ROWHEIGHT));
+			if (rowHeightXmlElement)
+				rowHeightXmlElement->addTextElement(String(GetMatrixOutputTableRowHeight()));
+
+			auto collapsedXmlElement = matrixOutputTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::COLLAPSED));
+			if (collapsedXmlElement)
+				collapsedXmlElement->addTextElement(String(IsMatrixOutputTableCollapsed() ? 1 : 0));
+		}
 	}
 
     return uiCfgXmlElement;

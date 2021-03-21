@@ -78,7 +78,7 @@ namespace SpaConBridge
 		m_tableControlBar->onRemoveClick = [=] { onRemoveProcessor(); };
 		m_tableControlBar->onSelectAllClick = [=] { onSelectAllProcessors(); };
 		m_tableControlBar->onSelectNoneClick = [=] { onDeselectAllProcessors(); };
-		m_tableControlBar->onHeightChanged = [=](int height) { SetRowHeight(height); };
+		m_tableControlBar->onHeightChanged = [=](int height) { onRowHeightSlided(height); };
 		m_tableControlBar->onCollapsClick = [=](bool collapsed) { onCollapseToggled(collapsed); };
 
 	SetControlBarPosition(pos);
@@ -921,7 +921,20 @@ void TableModelComponent::onDeselectAllProcessors()
 }
 
 /**
+ * Helper method to be used as function callback to trigger applying new row height value.
+ * @param	rowHeight	The new row height.
+ */
+void TableModelComponent::onRowHeightSlided(int rowHeight)
+{
+	SetRowHeight(rowHeight);
+
+	if (onCurrentRowHeightChanged)
+		onCurrentRowHeightChanged(rowHeight);
+}
+
+/**
  * Helper method to be used as function callback to trigger toggling the collapsed state (table visibility).
+ * @param	collapsed	The new collapsed state (true=collapsed, false=expanded)
  */
 void TableModelComponent::onCollapseToggled(bool collapsed)
 {

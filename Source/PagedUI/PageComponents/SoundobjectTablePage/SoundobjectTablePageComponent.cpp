@@ -138,7 +138,7 @@ void SoundobjectTablePageComponent::resized()
 	FlexBox tableAndEditorFlex;
 	FlexItem::Margin tableMargin{ 8 };
 	FlexItem::Margin editorMargin{ 8 };
-	auto isPortrait = bounds.getHeight() > bounds.getWidth();
+	auto isPortrait = IsPortraitAspectRatio();
 	if (isPortrait)
 	{
 		tableAndEditorFlex.flexDirection = FlexBox::Direction::column;

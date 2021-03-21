@@ -189,6 +189,9 @@ void MatrixOutputTableComponent::onRemoveProcessor()
 		selectedRowsChanged(nextStillExistingId);
 	}
 
+	// when processors are being deleted in next step, the current selection will be queried, which is why clearing the selection before is neccessary
+	SetSelectedRows(std::vector<juce::int32>());
+
 	for (auto processorId : selectedProcessorIds)
 	{
 		if (ctrl->GetMatrixOutputProcessorCount() >= 1)

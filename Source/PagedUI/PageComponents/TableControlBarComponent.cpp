@@ -117,6 +117,16 @@ void TableControlBarComponent::SetRemoveEnabled(bool enabled)
 }
 
 /**
+ * Helper method to set the current value of row height slider
+ * @param	rowHeight		The row height value to set as current
+ */
+void TableControlBarComponent::SetRowHeightSliderValue(int rowHeight)
+{
+	if (m_heightSlider)
+		m_heightSlider->SetSliderValue(rowHeight);
+}
+
+/**
  * Helper method to set the remove button to enabled/disabled
  * @param	enabled		Determines if the remove button should be set to enabled or disabled
  */

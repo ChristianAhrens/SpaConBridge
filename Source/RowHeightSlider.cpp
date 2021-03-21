@@ -63,10 +63,26 @@ void RowHeightSlider::SetListener(RowHeightListener* listener)
 	m_listener = listener;
 }
 
+/**
+ * Setter method for the internal slider member's value range.
+ * @param	min	The new range min value.
+ * @param	max	The new range max value.
+ * @param	interval	The new range interval value.
+ */
 void RowHeightSlider::SetSliderRange(double min, double max, double interval)
 {
 	if (m_slider)
 		m_slider->setRange(min, max, interval);
+}
+
+/**
+ * Setter method for the internal slider member's current value.
+ * @param	value	The new value.
+ */
+void RowHeightSlider::SetSliderValue(int value)
+{
+	if (m_slider)
+		m_slider->setValue(static_cast<int>(value), dontSendNotification);
 }
 
 /**

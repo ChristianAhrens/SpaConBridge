@@ -46,6 +46,7 @@ public:
 
 	void SetLayoutDirection(LayoutDirection direction);
 	void SetRemoveEnabled(bool enabled);
+	void SetRowHeightSliderValue(int rowHeight);
 	void SetCollapsed(bool collapsed);
 	bool GetCollapsed();
 

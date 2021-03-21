@@ -53,6 +53,7 @@ public:
 
 	void SetListener(RowHeightListener* listener);
 	void SetSliderRange(double min, double max, double interval);
+	void SetSliderValue(int value);
 
 	//==============================================================================
 	void sliderValueChanged(Slider* slider) override;

@@ -228,6 +228,11 @@ void TableModelComponent::SetRowHeight(int rowHeight)
 	// set the new row height to tableListBox member 
 	if (m_table)
 		m_table->setRowHeight(rowHeight);
+
+	// set the new row height to rowheight slider member 
+	if (m_tableControlBar)
+		m_tableControlBar->SetRowHeightSliderValue(rowHeight);
+
 	// trigger overall resizing
 	resized();
 }
@@ -926,10 +931,14 @@ void TableModelComponent::onDeselectAllProcessors()
  */
 void TableModelComponent::onRowHeightSlided(int rowHeight)
 {
-	SetRowHeight(rowHeight);
+	// set the new row height to tableListBox member 
+	if (m_table)
+		m_table->setRowHeight(rowHeight);
 
 	if (onCurrentRowHeightChanged)
 		onCurrentRowHeightChanged(rowHeight);
+
+	resized();
 }
 
 /**

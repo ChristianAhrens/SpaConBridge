@@ -446,7 +446,7 @@ void PageContainerComponent::SetSoundobjectTableRowHeight(int height)
 int PageContainerComponent::GetMatrixInputTableRowHeight()
 {
 	if (m_matrixIOPage)
-		return m_matrixIOPage->GetOutputsRowHeight();
+		return m_matrixIOPage->GetInputsRowHeight();
 	else
 	{
 		jassertfalse;
@@ -461,7 +461,7 @@ int PageContainerComponent::GetMatrixInputTableRowHeight()
 void PageContainerComponent::SetMatrixInputTableRowHeight(int height)
 {
 	if (m_matrixIOPage)
-		return m_matrixIOPage->SetOutputsRowHeight(height);
+		return m_matrixIOPage->SetInputsRowHeight(height);
 }
 
 /**
@@ -471,7 +471,7 @@ void PageContainerComponent::SetMatrixInputTableRowHeight(int height)
 int PageContainerComponent::GetMatrixOutputTableRowHeight()
 {
 	if (m_matrixIOPage)
-		return m_matrixIOPage->GetInputsRowHeight();
+		return m_matrixIOPage->GetOutputsRowHeight();
 	else
 	{
 		jassertfalse;

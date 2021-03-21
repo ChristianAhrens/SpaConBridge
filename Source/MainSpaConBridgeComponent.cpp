@@ -24,6 +24,8 @@
 #include "PagedUI/PageComponentManager.h"
 
 #include "CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
+#include "CustomAudioProcessors/MatrixInputProcessor/MatrixInputProcessor.h"
+#include "CustomAudioProcessors/MatrixOutputProcessor/MatrixOutputProcessor.h"
 
 #include <iOS_utils.h>
 
@@ -96,8 +98,15 @@ MainSpaConBridgeComponent::~MainSpaConBridgeComponent()
         // Delete the processor instances held in controller externally,
         // since we otherwise would run into a loop ~Controller -> Controller::RemoveProcessor -> 
         // ~SoundobjectProcessor -> Controller::RemoveProcessor
-        for (auto const& processorId : ctrl->GetSoundobjectProcessorIds())
-            delete ctrl->GetSoundobjectProcessor(processorId);
+
+        for (auto const& sopId : ctrl->GetSoundobjectProcessorIds())
+            delete ctrl->GetSoundobjectProcessor(sopId);
+
+        for (auto const& mipId : ctrl->GetMatrixInputProcessorIds())
+            delete ctrl->GetMatrixInputProcessor(mipId);
+        
+        for (auto const& mopId : ctrl->GetMatrixOutputProcessorIds())
+            delete ctrl->GetMatrixOutputProcessor(mopId);
 
         ctrl->DestroyInstance();
     }

@@ -273,9 +273,10 @@ std::vector<int> TableModelComponent::GetSelectedRows() const
 
 	if (m_table)
 	{
-		selectedRows.reserve(m_table->getSelectedRows().size());
-		for (int i = 0; i < m_table->getSelectedRows().size(); ++i)
-			selectedRows.push_back(m_table->getSelectedRows()[i]);
+		auto sr = m_table->getSelectedRows();
+		selectedRows.reserve(sr.size());
+		for (int i = 0; i < sr.size(); ++i)
+			selectedRows.push_back(sr[i]);
 	}
 
 	return selectedRows;
@@ -781,7 +782,7 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 
 	case BridgingAwareTableHeaderComponent::TC_OutputEditor:
 		{
-		MatrixOutputProcessorEditor* matrixOutputEditor = static_cast<MatrixOutputProcessorEditor*> (existingComponentToUpdate);
+			MatrixOutputProcessorEditor* matrixOutputEditor = static_cast<MatrixOutputProcessorEditor*> (existingComponentToUpdate);
 
 			// If an existing component is being passed-in for updating, we'll re-use it, but
 			// if not, we'll have to create one.

@@ -24,7 +24,6 @@
 #include "../../../CustomAudioProcessors/MatrixInputProcessor/MatrixInputProcessor.h"
 #include "../../../CustomAudioProcessors/MatrixInputProcessor/MatrixInputProcessorEditor.h"
 #include "../../../CustomAudioProcessors/MatrixOutputProcessor/MatrixOutputProcessor.h"
-#include "../../../CustomAudioProcessors/MatrixOutputProcessor/MatrixOutputProcessorEditor.h"
 
 #include "../../PageComponentManager.h"
 

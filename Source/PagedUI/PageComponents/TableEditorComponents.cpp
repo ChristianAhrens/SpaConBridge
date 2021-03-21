@@ -38,11 +38,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "TableModelComponent.h"
 
 #include "../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
-#include "../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessorEditor.h"
 #include "../../CustomAudioProcessors/MatrixInputProcessor/MatrixInputProcessor.h"
-#include "../../CustomAudioProcessors/MatrixInputProcessor/MatrixInputProcessorEditor.h"
 #include "../../CustomAudioProcessors/MatrixOutputProcessor/MatrixOutputProcessor.h"
-#include "../../CustomAudioProcessors/MatrixOutputProcessor/MatrixOutputProcessorEditor.h"
 
 #include "../../Controller.h"
 #include "../../LookAndFeel.h"

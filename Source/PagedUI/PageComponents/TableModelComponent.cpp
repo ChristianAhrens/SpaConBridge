@@ -382,7 +382,7 @@ bool TableModelComponent::LessThanMatrixOutputId(juce::int32 pId1, juce::int32 p
 	if (!ctrl)
 		return false;
 
-	auto processorIds = ctrl->GetMatrixInputProcessorIds();
+	auto processorIds = ctrl->GetMatrixOutputProcessorIds();
 	auto maxProcessorIdIter = std::max_element(processorIds.begin(), processorIds.end());
 	if (maxProcessorIdIter == processorIds.end())
 		return false;

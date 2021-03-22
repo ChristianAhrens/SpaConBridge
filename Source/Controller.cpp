@@ -1579,7 +1579,7 @@ bool Controller::setStateXml(XmlElement* stateXml)
 	auto soundobjectProcessorsXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTPROCESSORS));
 	if (soundobjectProcessorsXmlElement)
 	{
-		forEachXmlChildElement(*soundobjectProcessorsXmlElement, processorXmlElement)
+		for (auto processorXmlElement : soundobjectProcessorsXmlElement->getChildIterator())
 		{
 			jassert(processorXmlElement->getTagName().contains(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE)));
 			int elementProcessorId = processorXmlElement->getTagName().getTrailingIntValue();
@@ -1608,7 +1608,7 @@ bool Controller::setStateXml(XmlElement* stateXml)
 	auto matrixInputProcessorsXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXINPUTPROCESSORS));
 	if (matrixInputProcessorsXmlElement)
 	{
-		forEachXmlChildElement(*matrixInputProcessorsXmlElement, processorXmlElement)
+		for (auto processorXmlElement : matrixInputProcessorsXmlElement->getChildIterator())
 		{
 			jassert(processorXmlElement->getTagName().contains(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE)));
 			int elementProcessorId = processorXmlElement->getTagName().getTrailingIntValue();
@@ -1637,7 +1637,7 @@ bool Controller::setStateXml(XmlElement* stateXml)
 	auto matrixOutputProcessorsXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXOUTPUTPROCESSORS));
 	if (matrixOutputProcessorsXmlElement)
 	{
-		forEachXmlChildElement(*matrixOutputProcessorsXmlElement, processorXmlElement)
+		for (auto processorXmlElement : matrixOutputProcessorsXmlElement->getChildIterator())
 		{
 			jassert(processorXmlElement->getTagName().contains(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE)));
 			int elementProcessorId = processorXmlElement->getTagName().getTrailingIntValue();

@@ -453,7 +453,7 @@ void MatrixOutputProcessor::InitializeSettings(MatrixOutputId MatrixOutputId, St
 const std::vector<RemoteObjectIdentifier>	MatrixOutputProcessor::GetUsedRemoteObjects()
 {
 	return std::vector<RemoteObjectIdentifier>{
-		ROI_MatrixOutput_LevelMeterPreMute,
+		ROI_MatrixOutput_LevelMeterPostMute,
 		ROI_MatrixOutput_Gain,
 		ROI_MatrixOutput_Mute };
 };

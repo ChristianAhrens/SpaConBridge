@@ -290,7 +290,7 @@ void MatrixIOPageComponent::UpdateGui(bool init)
 			for (auto const& processorId : ctrl->GetMatrixInputProcessorIds())
 			{
 				auto processor = ctrl->GetMatrixInputProcessor(processorId);
-				if (processor && processor->GetParameterChanged(DCS_MatrixInputTable, DCT_ProcessorInstanceConfig))
+				if (processor && processor->GetParameterChanged(DCS_MatrixInputTable, DCT_MatrixInputProcessorConfig))
 				{
 					m_inputsComponent->UpdateTable();
 				}
@@ -316,7 +316,7 @@ void MatrixIOPageComponent::UpdateGui(bool init)
 			for (auto const& processorId : ctrl->GetMatrixOutputProcessorIds())
 			{
 				auto processor = ctrl->GetMatrixOutputProcessor(processorId);
-				if (processor && processor->GetParameterChanged(DCS_MatrixOutputTable, DCT_ProcessorInstanceConfig))
+				if (processor && processor->GetParameterChanged(DCS_MatrixOutputTable, DCT_MatrixOutputProcessorConfig))
 				{
 					m_outputsComponent->UpdateTable();
 				}

@@ -685,7 +685,7 @@ AudioProcessorEditor* MatrixInputProcessor::createEditor()
 	AudioProcessorEditor* editor = new MatrixInputProcessorEditor(*this);
 
 	// Initialize GUI with current IP address, etc.
-	SetParameterChanged(DCS_Host, (DCT_ProcessorInstanceConfig | DCT_CommunicationConfig | DCT_SoundobjectParameters));
+	SetParameterChanged(DCS_Host, (DCT_MatrixInputProcessorConfig | DCT_CommunicationConfig | DCT_MatrixInputParameters));
 
 	return editor;
 }

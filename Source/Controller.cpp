@@ -171,7 +171,9 @@ void Controller::SetParameterChanged(DataChangeSource changeSource, DataChangeTy
 	case DCT_MatrixOutputID:
 	case DCT_MappingID:
 	case DCT_ComsMode:
-	case DCT_ProcessorInstanceConfig:
+	case DCT_SoundobjectProcessorConfig:
+	case DCT_MatrixInputProcessorConfig:
+	case DCT_MatrixOutputProcessorConfig:
 		if (changeSource != DCS_Init)
 			triggerConfigurationUpdate(true);
 		break;
@@ -1160,7 +1162,7 @@ void Controller::timerCallback()
 
 		// Check if the processor configuration has changed
 		// and need to be updated in the bridging configuration
-		if (soProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_ProcessorInstanceConfig))
+		if (soProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_SoundobjectProcessorConfig))
 		{
 			auto activateSSId = false;
 			auto deactivateSSId = false;
@@ -1312,7 +1314,7 @@ void Controller::timerCallback()
 
 		// Check if the processor configuration has changed
 		// and need to be updated in the bridging configuration
-		if (miProcessor->GetParameterChanged(DCS_MatrixInputTable, DCT_ProcessorInstanceConfig))
+		if (miProcessor->GetParameterChanged(DCS_MatrixInputTable, DCT_MatrixInputProcessorConfig))
 		{
 			auto activateMIId = false;
 			auto deactivateMIId = false;
@@ -1438,7 +1440,7 @@ void Controller::timerCallback()
 
 		// Check if the processor configuration has changed
 		// and need to be updated in the bridging configuration
-		if (moProcessor->GetParameterChanged(DCS_MatrixOutputTable, DCT_ProcessorInstanceConfig))
+		if (moProcessor->GetParameterChanged(DCS_MatrixOutputTable, DCT_MatrixOutputProcessorConfig))
 		{
 			auto activateMOId = false;
 			auto deactivateMOId = false;

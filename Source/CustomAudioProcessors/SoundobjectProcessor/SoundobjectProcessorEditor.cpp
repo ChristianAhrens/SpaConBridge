@@ -484,7 +484,7 @@ void SoundobjectProcessorEditor::UpdateGui(bool init)
 
 		// See if any parameters changed since the last timer callback.
 		somethingChanged = (pro->GetParameterChanged(DCS_SoundobjectProcessor, DCT_SoundobjectParameters) ||
-							pro->GetParameterChanged(DCS_SoundobjectProcessor, DCT_ProcessorInstanceConfig) ||
+							pro->GetParameterChanged(DCS_SoundobjectProcessor, DCT_SoundobjectProcessorConfig) ||
 							pro->GetParameterChanged(DCS_SoundobjectProcessor, DCT_CommunicationConfig));
 
 		if (pro->PopParameterChanged(DCS_SoundobjectProcessor, DCT_SoundobjectPosition))

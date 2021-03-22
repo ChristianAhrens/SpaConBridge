@@ -159,7 +159,7 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 					cachedPositions.insert(std::make_pair(processorId, SurfaceMultiSlider::SoundobjectPosition(soundobjectId, p, ctrl->IsSoundobjectIdSelected(soundobjectId))));
 				}
 
-				if (processor->GetParameterChanged(DCS_SoundobjectTable, (DCT_ProcessorInstanceConfig | DCT_SoundobjectPosition)))
+				if (processor->GetParameterChanged(DCS_SoundobjectTable, (DCT_SoundobjectProcessorConfig | DCT_SoundobjectPosition)))
 					update = true;
 			}
 		}

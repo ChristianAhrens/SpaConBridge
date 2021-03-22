@@ -242,7 +242,7 @@ void SoundobjectTablePageComponent::UpdateGui(bool init)
 			for (auto const& processorId : ctrl->GetSoundobjectProcessorIds())
 			{
 				auto processor = ctrl->GetSoundobjectProcessor(processorId);
-				if (processor && processor->GetParameterChanged(DCS_SoundobjectTable, DCT_ProcessorInstanceConfig))
+				if (processor && processor->GetParameterChanged(DCS_SoundobjectTable, DCT_SoundobjectProcessorConfig))
 				{
 					m_soundobjectsTable->UpdateTable();
 				}

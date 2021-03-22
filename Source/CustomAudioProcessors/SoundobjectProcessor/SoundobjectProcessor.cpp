@@ -799,7 +799,7 @@ AudioProcessorEditor* SoundobjectProcessor::createEditor()
 	AudioProcessorEditor* editor = new SoundobjectProcessorEditor(*this);
 
 	// Initialize GUI with current IP address, etc.
-	SetParameterChanged(DCS_Host, (DCT_ProcessorInstanceConfig | DCT_CommunicationConfig | DCT_SoundobjectParameters));
+	SetParameterChanged(DCS_Host, (DCT_SoundobjectProcessorConfig | DCT_CommunicationConfig | DCT_SoundobjectParameters));
 
 	return editor;
 }

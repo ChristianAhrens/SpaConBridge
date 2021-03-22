@@ -291,7 +291,7 @@ void MatrixOutputProcessorEditor::UpdateGui(bool init)
 
 		// See if any parameters changed since the last timer callback.
 		somethingChanged = (pro->GetParameterChanged(DCS_MatrixOutputProcessor, DCT_MatrixOutputParameters) ||
-							pro->GetParameterChanged(DCS_MatrixOutputProcessor, DCT_ProcessorInstanceConfig) ||
+							pro->GetParameterChanged(DCS_MatrixOutputProcessor, DCT_MatrixOutputProcessorConfig) ||
 							pro->GetParameterChanged(DCS_MatrixOutputProcessor, DCT_CommunicationConfig));
 
 		if (pro->PopParameterChanged(DCS_MatrixOutputProcessor, DCT_MatrixOutputLevelMeter))

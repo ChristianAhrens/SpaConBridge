@@ -291,7 +291,7 @@ void MatrixInputProcessorEditor::UpdateGui(bool init)
 
 		// See if any parameters changed since the last timer callback.
 		somethingChanged = (pro->GetParameterChanged(DCS_MatrixInputProcessor, DCT_MatrixInputParameters) ||
-							pro->GetParameterChanged(DCS_MatrixInputProcessor, DCT_ProcessorInstanceConfig) ||
+							pro->GetParameterChanged(DCS_MatrixInputProcessor, DCT_MatrixInputProcessorConfig) ||
 							pro->GetParameterChanged(DCS_MatrixInputProcessor, DCT_CommunicationConfig));
 
 		if (m_MatrixInputLevelMeterSlider && pro->PopParameterChanged(DCS_MatrixInputProcessor, DCT_MatrixInputLevelMeter))

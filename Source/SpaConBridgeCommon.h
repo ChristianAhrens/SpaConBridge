@@ -60,24 +60,24 @@ typedef juce::uint32 ProtocolBridgingType;
 typedef juce::uint8 ComsMode;
 
 /**
- * Data Change Source
- * Enum used to define where a parameter or property change has originated.
+ * Data Change Participant (Source or Sink)
+ * Enum used to define where a parameter or property change has originated or is processed in.
  */
-enum DataChangeSource
+enum DataChangeParticipant
 {
-	DCS_SoundobjectProcessor = 0,	//< Change was caused by the SoundobjectProcessor UI, i.e. the user turning a knob to change a value.
-	DCS_SoundobjectTable,			//< Change was caused by the soundsource overview table
-	DCS_MultiSlider,				//< Change was caused by the multislider
-	DCS_Settings,					//< Change was caused by the SettingsPage UI.	
-	DCS_Host,						//< Change was caused by the VST/AU/AAX host, i.e. a project was loaded or a DAW preset was recalled.
-	DCS_Protocol,					//< Change was caused by an incoming protocol message, or caused by internal operations by the Controller.
-	DCS_Init,						//< Change was caused by Application initialization process (defaults)
-	DCS_MatrixInputProcessor,		//< Change was caused by the MatrixInputProcessor UI, i.e. the user turning a knob to change a value.
-	DCS_MatrixInputTable,			//< Change was caused by the matrix inputs table
-	DCS_MatrixOutputProcessor,		//< Change was caused by the MatrixOutputProcessor UI, i.e. the user turning a knob to change a value.
-	DCS_MatrixOutputTable,			//< Change was caused by the matrix outputs table
-	DCS_MatrixIO,					//< Change was caused by the matrix io channel page
-	DCS_Max							//< Number of change sources.
+	DCP_SoundobjectProcessor = 0,	//< Change was caused or is queried by the SoundobjectProcessor UI, i.e. the user turning a knob to change a value.
+	DCP_SoundobjectTable,			//< Change was caused or is queried by the soundsource overview table
+	DCP_MultiSlider,				//< Change was caused or is queried by the multislider
+	DCP_Settings,					//< Change was caused or is queried by the SettingsPage UI.	
+	DCP_Host,						//< Change was caused or is queried by the VST/AU/AAX host, i.e. a project was loaded or a DAW preset was recalled.
+	DCP_Protocol,					//< Change was caused or is queried by an incoming protocol message, or caused by internal operations by the Controller.
+	DCP_Init,						//< Change was caused or is queried by Application initialization process (defaults)
+	DCP_MatrixInputProcessor,		//< Change was caused or is queried by the MatrixInputProcessor UI, i.e. the user turning a knob to change a value.
+	DCP_MatrixInputTable,			//< Change was caused or is queried by the matrix inputs table
+	DCP_MatrixOutputProcessor,		//< Change was caused or is queried by the MatrixOutputProcessor UI, i.e. the user turning a knob to change a value.
+	DCP_MatrixOutputTable,			//< Change was caused or is queried by the matrix outputs table
+	DCP_MatrixIO,					//< Change was caused or is queried by the matrix io channel page
+	DCP_Max							//< Number of change sources.
 };
 
 /**

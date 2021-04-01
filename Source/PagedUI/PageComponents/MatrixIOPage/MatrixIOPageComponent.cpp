@@ -274,13 +274,13 @@ void MatrixIOPageComponent::UpdateGui(bool init)
 
 	if (m_inputsComponent)
 	{
-		if (ctrl->PopParameterChanged(DCS_MatrixInputTable, DCT_NumProcessors) || init)
+		if (ctrl->PopParameterChanged(DCP_MatrixInputTable, DCT_NumProcessors) || init)
 		{
 			m_inputsComponent->RecreateTableRowIds();
 			m_inputsComponent->UpdateTable();
 		}
-		else if (ctrl->PopParameterChanged(DCS_Protocol, DCT_ProcessorSelection) ||
-			ctrl->PopParameterChanged(DCS_Host, DCT_BridgingConfig))
+		else if (ctrl->PopParameterChanged(DCP_Protocol, DCT_ProcessorSelection) ||
+			ctrl->PopParameterChanged(DCP_Host, DCT_BridgingConfig))
 		{
 			m_inputsComponent->UpdateTable();
 		}
@@ -290,7 +290,7 @@ void MatrixIOPageComponent::UpdateGui(bool init)
 			for (auto const& processorId : ctrl->GetMatrixInputProcessorIds())
 			{
 				auto processor = ctrl->GetMatrixInputProcessor(processorId);
-				if (processor && processor->GetParameterChanged(DCS_MatrixInputTable, DCT_MatrixInputProcessorConfig))
+				if (processor && processor->PopParameterChanged(DCP_MatrixInputTable, DCT_MatrixInputProcessorConfig))
 				{
 					m_inputsComponent->UpdateTable();
 				}
@@ -300,13 +300,13 @@ void MatrixIOPageComponent::UpdateGui(bool init)
 
 	if (m_outputsComponent)
 	{
-		if (ctrl->PopParameterChanged(DCS_MatrixOutputTable, DCT_NumProcessors) || init)
+		if (ctrl->PopParameterChanged(DCP_MatrixOutputTable, DCT_NumProcessors) || init)
 		{
 			m_outputsComponent->RecreateTableRowIds();
 			m_outputsComponent->UpdateTable();
 		}
-		else if (ctrl->PopParameterChanged(DCS_Protocol, DCT_ProcessorSelection) ||
-			ctrl->PopParameterChanged(DCS_Host, DCT_BridgingConfig))
+		else if (ctrl->PopParameterChanged(DCP_Protocol, DCT_ProcessorSelection) ||
+			ctrl->PopParameterChanged(DCP_Host, DCT_BridgingConfig))
 		{
 			m_outputsComponent->UpdateTable();
 		}
@@ -316,7 +316,7 @@ void MatrixIOPageComponent::UpdateGui(bool init)
 			for (auto const& processorId : ctrl->GetMatrixOutputProcessorIds())
 			{
 				auto processor = ctrl->GetMatrixOutputProcessor(processorId);
-				if (processor && processor->GetParameterChanged(DCS_MatrixOutputTable, DCT_MatrixOutputProcessorConfig))
+				if (processor && processor->PopParameterChanged(DCP_MatrixOutputTable, DCT_MatrixOutputProcessorConfig))
 				{
 					m_outputsComponent->UpdateTable();
 				}

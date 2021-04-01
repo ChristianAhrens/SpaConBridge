@@ -224,7 +224,7 @@ void SoundobjectProcessorEditor::sliderValueChanged(Slider* slider)
 		else if (slider == m_soundobjectSpreadSlider.get())
 			paramIdx = SPI_ParamIdx_ObjectSpread;
 
-		soProcessor->SetParameterValue(DCS_SoundobjectProcessor, paramIdx, static_cast<float>(slider->getValue()));
+		soProcessor->SetParameterValue(DCP_SoundobjectProcessor, paramIdx, static_cast<float>(slider->getValue()));
 	}
 }
 
@@ -274,7 +274,7 @@ void SoundobjectProcessorEditor::comboBoxChanged(ComboBox *comboBox)
 	{
 		if (comboBox == m_delayModeComboBox.get())
 		{
-			pro->SetParameterValue(DCS_SoundobjectProcessor, SPI_ParamIdx_DelayMode, float(comboBox->getSelectedId() - 1));
+			pro->SetParameterValue(DCP_SoundobjectProcessor, SPI_ParamIdx_DelayMode, float(comboBox->getSelectedId() - 1));
 		}
 	}
 }
@@ -483,11 +483,11 @@ void SoundobjectProcessorEditor::UpdateGui(bool init)
 		AudioParameterFloat* fParam;
 
 		// See if any parameters changed since the last timer callback.
-		somethingChanged = (pro->GetParameterChanged(DCS_SoundobjectProcessor, DCT_SoundobjectParameters) ||
-							pro->GetParameterChanged(DCS_SoundobjectProcessor, DCT_SoundobjectProcessorConfig) ||
-							pro->GetParameterChanged(DCS_SoundobjectProcessor, DCT_CommunicationConfig));
+		somethingChanged = (pro->GetParameterChanged(DCP_SoundobjectProcessor, DCT_SoundobjectParameters) ||
+							pro->GetParameterChanged(DCP_SoundobjectProcessor, DCT_SoundobjectProcessorConfig) ||
+							pro->GetParameterChanged(DCP_SoundobjectProcessor, DCT_CommunicationConfig));
 
-		if (pro->PopParameterChanged(DCS_SoundobjectProcessor, DCT_SoundobjectPosition))
+		if (pro->PopParameterChanged(DCP_SoundobjectProcessor, DCT_SoundobjectPosition))
 		{
 			// Update position of X slider.
 			fParam = dynamic_cast<AudioParameterFloat*>(params[SPI_ParamIdx_X]);
@@ -503,7 +503,7 @@ void SoundobjectProcessorEditor::UpdateGui(bool init)
 			m_surfaceSlider->repaint();
 		}
 
-		if (pro->PopParameterChanged(DCS_SoundobjectProcessor, DCT_ReverbSendGain))
+		if (pro->PopParameterChanged(DCP_SoundobjectProcessor, DCT_ReverbSendGain))
 		{
 			// Update ReverbSendGain slider
 			fParam = dynamic_cast<AudioParameterFloat*>(params[SPI_ParamIdx_ReverbSendGain]);
@@ -511,7 +511,7 @@ void SoundobjectProcessorEditor::UpdateGui(bool init)
 				m_reverbSendGainSlider->setValue(fParam->get(), dontSendNotification);
 		}
 
-		if (pro->PopParameterChanged(DCS_SoundobjectProcessor, DCT_SoundobjectSpread))
+		if (pro->PopParameterChanged(DCP_SoundobjectProcessor, DCT_SoundobjectSpread))
 		{
 			// Update SourceSpread slider
 			fParam = dynamic_cast<AudioParameterFloat*>(params[SPI_ParamIdx_ObjectSpread]);
@@ -519,7 +519,7 @@ void SoundobjectProcessorEditor::UpdateGui(bool init)
 				m_soundobjectSpreadSlider->setValue(fParam->get(), dontSendNotification);
 		}
 
-		if (pro->PopParameterChanged(DCS_SoundobjectProcessor, DCT_DelayMode))
+		if (pro->PopParameterChanged(DCP_SoundobjectProcessor, DCT_DelayMode))
 		{
 			// Update DelayMode combo box
 			AudioParameterChoice* cParam = dynamic_cast<AudioParameterChoice*>(params[SPI_ParamIdx_DelayMode]);
@@ -530,7 +530,7 @@ void SoundobjectProcessorEditor::UpdateGui(bool init)
 			}
 		}
 
-		if (pro->PopParameterChanged(DCS_SoundobjectProcessor, DCT_SoundobjectID))
+		if (pro->PopParameterChanged(DCP_SoundobjectProcessor, DCT_SoundobjectID))
 		{
 			// Update the displayName (Host probably called updateTrackProperties or changeProgramName)
 			m_displayNameLabel->setText(pro->getProgramName(0), dontSendNotification);

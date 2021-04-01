@@ -49,27 +49,27 @@ public:
 	~MatrixInputProcessor() override;
 
 	int GetProcessorId() const;
-	void SetProcessorId(DataChangeSource changeSource, int processorId);
+	void SetProcessorId(DataChangeParticipant changeSource, int processorId);
 
 	void InitializeSettings(MatrixInputId channelId, String ipAddress, ComsMode newMode);
 
 	static const std::vector<RemoteObjectIdentifier>	GetUsedRemoteObjects();
 
 	MatrixInputId GetMatrixInputId() const;
-	void SetMatrixInputId(DataChangeSource changeSource, MatrixInputId MatrixInputId);
+	void SetMatrixInputId(DataChangeParticipant changeSource, MatrixInputId MatrixInputId);
 
 	int GetMessageRate() const;
-	void SetMessageRate(DataChangeSource changeSource, int oscMsgRate);
+	void SetMessageRate(DataChangeParticipant changeSource, int oscMsgRate);
 
 	ComsMode GetComsMode() const;
-	void SetComsMode(DataChangeSource changeSource, ComsMode newMode);
+	void SetComsMode(DataChangeParticipant changeSource, ComsMode newMode);
 
 	float GetParameterValue(MatrixInputParameterIndex paramIdx, bool normalized = false) const;
-	void SetParameterValue(DataChangeSource changeSource, MatrixInputParameterIndex paramIdx, float newValue);
+	void SetParameterValue(DataChangeParticipant changeSource, MatrixInputParameterIndex paramIdx, float newValue);
 
-	bool GetParameterChanged(DataChangeSource changeSource, DataChangeType change);
-	bool PopParameterChanged(DataChangeSource changeSource, DataChangeType change);
-	void SetParameterChanged(DataChangeSource changeSource, DataChangeType changeTypes);
+	bool GetParameterChanged(DataChangeParticipant changeTarget, DataChangeType change);
+	bool PopParameterChanged(DataChangeParticipant changeTarget, DataChangeType change);
+	void SetParameterChanged(DataChangeParticipant changeSource, DataChangeType changeTypes);
 
 	void Tick();
 	void SetParamInTransit(DataChangeType paramsChanged);
@@ -139,7 +139,7 @@ protected:
 	 * Keep track of which automation parameters have changed recently. 
 	 * The array has one entry for each application module (see enum DataChangeSource).
 	 */
-	DataChangeType				m_parametersChanged[DCS_Max];
+	DataChangeType				m_parametersChanged[DCP_Max];
 
 	/**
 	 * Flags used to indicate when a SET command for a parameter is currently out on the network.
@@ -158,7 +158,7 @@ protected:
 	 * Member used to ensure that property changes are registered to the correct source.
 	 * See MainProcessor::SetParameterValue().
 	 */
-	DataChangeSource			m_currentChangeSource = DCS_Host;
+	DataChangeParticipant		m_currentChangeSource = DCP_Host;
 
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixInputProcessor)

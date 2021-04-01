@@ -233,7 +233,7 @@ bool ProtocolBridgingWrapper::SetBridgingNodeStateXml(XmlElement* stateXml, bool
 	{
 		Controller* ctrl = Controller::GetInstance();
 		if (ctrl)
-			ctrl->SetParameterChanged(DCS_Host, DCT_BridgingConfig);
+			ctrl->SetParameterChanged(DCP_Host, DCT_BridgingConfig);
 	}
 
 	if (m_processingNode.setStateXml(stateXml))
@@ -610,7 +610,7 @@ bool ProtocolBridgingWrapper::SetMuteProtocolSoundobjectIds(ProtocolId protocolI
 
 				Controller* ctrl = Controller::GetInstance();
 				if (ctrl)
-					ctrl->SetParameterChanged(DCS_Host, DCT_MuteState);
+					ctrl->SetParameterChanged(DCP_Host, DCT_MuteState);
 
 				return true;
 			}
@@ -662,7 +662,7 @@ bool ProtocolBridgingWrapper::SetUnmuteProtocolSoundobjectIds(ProtocolId protoco
 
 				Controller* ctrl = Controller::GetInstance();
 				if (ctrl)
-					ctrl->SetParameterChanged(DCS_Host, DCT_MuteState);
+					ctrl->SetParameterChanged(DCP_Host, DCT_MuteState);
 
 				return true;
 			}
@@ -739,7 +739,7 @@ bool ProtocolBridgingWrapper::SetMuteProtocolMatrixInputIds(ProtocolId protocolI
 	
 				Controller* ctrl = Controller::GetInstance();
 				if (ctrl)
-					ctrl->SetParameterChanged(DCS_Host, DCT_MuteState);
+					ctrl->SetParameterChanged(DCP_Host, DCT_MuteState);
 	
 				return true;
 			}
@@ -791,7 +791,7 @@ bool ProtocolBridgingWrapper::SetUnmuteProtocolMatrixInputIds(ProtocolId protoco
 	
 				Controller* ctrl = Controller::GetInstance();
 				if (ctrl)
-					ctrl->SetParameterChanged(DCS_Host, DCT_MuteState);
+					ctrl->SetParameterChanged(DCP_Host, DCT_MuteState);
 	
 				return true;
 			}
@@ -868,7 +868,7 @@ bool ProtocolBridgingWrapper::SetMuteProtocolMatrixOutputIds(ProtocolId protocol
 	
 				Controller* ctrl = Controller::GetInstance();
 				if (ctrl)
-					ctrl->SetParameterChanged(DCS_Host, DCT_MuteState);
+					ctrl->SetParameterChanged(DCP_Host, DCT_MuteState);
 	
 				return true;
 			}
@@ -920,7 +920,7 @@ bool ProtocolBridgingWrapper::SetUnmuteProtocolMatrixOutputIds(ProtocolId protoc
 	
 				Controller* ctrl = Controller::GetInstance();
 				if (ctrl)
-					ctrl->SetParameterChanged(DCS_Host, DCT_MuteState);
+					ctrl->SetParameterChanged(DCP_Host, DCT_MuteState);
 	
 				return true;
 			}
@@ -1377,7 +1377,7 @@ void ProtocolBridgingWrapper::SetProtocolState(ProtocolId protocolId, ObjectHand
 
 	auto ctrl = Controller::GetInstance();
 	if (ctrl)
-		ctrl->SetParameterChanged(DCS_Protocol, DCT_Online);
+		ctrl->SetParameterChanged(DCP_Protocol, DCT_Online);
 }
 
 /**
@@ -1514,7 +1514,7 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 
 			Controller* ctrl = Controller::GetInstance();
 			if (ctrl)
-				ctrl->SetParameterChanged(DCS_Host, DCT_NumBridgingModules);
+				ctrl->SetParameterChanged(DCP_Host, DCT_NumBridgingModules);
 		}
 	}
 }
@@ -1938,7 +1938,7 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 
 				auto ctrl = Controller::GetInstance();
 				if (ctrl)
-					ctrl->SetSecondDS100IpAddress(DCS_Host, "", dontSendNotification);
+					ctrl->SetSecondDS100IpAddress(DCP_Host, "", dontSendNotification);
 			}
 			break;
 			case EM_Extend:
@@ -1954,7 +1954,7 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 
 					auto ctrl = Controller::GetInstance();
 					if (ctrl)
-						ctrl->SetSecondDS100IpAddress(DCS_Host, PROTOCOL_DEFAULT2_IP, dontSendNotification);
+						ctrl->SetSecondDS100IpAddress(DCP_Host, PROTOCOL_DEFAULT2_IP, dontSendNotification);
 				}
 			}
 			break;

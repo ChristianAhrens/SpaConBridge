@@ -168,7 +168,7 @@ void ComboBoxContainer::comboBoxChanged(ComboBox *comboBox)
 				{
 					auto processor = ctrl->GetSoundobjectProcessor(processorId);
 					if (processor)
-						processor->SetMappingId(DCS_SoundobjectTable, newMapping);
+						processor->SetMappingId(DCP_SoundobjectTable, newMapping);
 				}
 				break;
 			}
@@ -271,14 +271,14 @@ void TextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
 				{
 					auto processor = ctrl->GetMatrixInputProcessor(processorId);
 					if (processor)
-						processor->SetMatrixInputId(DCS_MatrixInputTable, newSourceId);
+						processor->SetMatrixInputId(DCP_MatrixInputTable, newSourceId);
 				}
 				break;
 			case TT_MatrixOutputs:
 				{
 					auto processor = ctrl->GetMatrixOutputProcessor(processorId);
 					if (processor)
-						processor->SetMatrixOutputId(DCS_MatrixOutputTable, newSourceId);
+						processor->SetMatrixOutputId(DCP_MatrixOutputTable, newSourceId);
 				}
 				break;
 			case TT_Soundobjects:
@@ -286,7 +286,7 @@ void TextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
 				{
 					auto processor = ctrl->GetSoundobjectProcessor(processorId);
 					if (processor)
-						processor->SetSoundobjectId(DCS_SoundobjectTable, newSourceId);
+						processor->SetSoundobjectId(DCP_SoundobjectTable, newSourceId);
 				}
 				break;
 			}
@@ -436,7 +436,7 @@ void RadioButtonContainer::buttonClicked(Button *button)
 						else
 							oldMode &= ~newFlag;
 
-						processor->SetComsMode(DCS_MatrixInputTable, oldMode);
+						processor->SetComsMode(DCP_MatrixInputTable, oldMode);
 					}
 				}
 				break;
@@ -453,7 +453,7 @@ void RadioButtonContainer::buttonClicked(Button *button)
 						else
 							oldMode &= ~newFlag;
 
-						processor->SetComsMode(DCS_MatrixOutputTable, oldMode);
+						processor->SetComsMode(DCP_MatrixOutputTable, oldMode);
 					}
 				}
 				break;
@@ -472,7 +472,7 @@ void RadioButtonContainer::buttonClicked(Button *button)
 						else
 							oldMode &= ~newFlag;
 
-						processor->SetComsMode(DCS_SoundobjectTable, oldMode);
+						processor->SetComsMode(DCP_SoundobjectTable, oldMode);
 					}
 				}
 				break;

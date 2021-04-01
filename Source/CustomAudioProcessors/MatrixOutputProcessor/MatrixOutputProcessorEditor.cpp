@@ -197,7 +197,7 @@ void MatrixOutputProcessorEditor::sliderValueChanged(Slider* slider)
 		else if (slider == m_MatrixOutputGainSlider.get())
 			paramIdx = MOI_ParamIdx_Gain;
 
-		moProcessor->SetParameterValue(DCS_MatrixOutputProcessor, paramIdx, static_cast<float>(slider->getValue()));
+		moProcessor->SetParameterValue(DCP_MatrixOutputProcessor, paramIdx, static_cast<float>(slider->getValue()));
 	}
 }
 
@@ -236,7 +236,7 @@ void MatrixOutputProcessorEditor::buttonClicked(Button* button)
 		if (button == m_MatrixOutputMuteButton.get())
 			paramIdx = MOI_ParamIdx_Mute;
 
-		moProcessor->SetParameterValue(DCS_MatrixOutputProcessor, paramIdx, static_cast<float>(button->getToggleState() ? 1 : 0));
+		moProcessor->SetParameterValue(DCP_MatrixOutputProcessor, paramIdx, static_cast<float>(button->getToggleState() ? 1 : 0));
 	}
 }
 
@@ -290,11 +290,11 @@ void MatrixOutputProcessorEditor::UpdateGui(bool init)
 		AudioParameterInt* iParam;
 
 		// See if any parameters changed since the last timer callback.
-		somethingChanged = (pro->GetParameterChanged(DCS_MatrixOutputProcessor, DCT_MatrixOutputParameters) ||
-							pro->GetParameterChanged(DCS_MatrixOutputProcessor, DCT_MatrixOutputProcessorConfig) ||
-							pro->GetParameterChanged(DCS_MatrixOutputProcessor, DCT_CommunicationConfig));
+		somethingChanged = (pro->GetParameterChanged(DCP_MatrixOutputProcessor, DCT_MatrixOutputParameters) ||
+							pro->GetParameterChanged(DCP_MatrixOutputProcessor, DCT_MatrixOutputProcessorConfig) ||
+							pro->GetParameterChanged(DCP_MatrixOutputProcessor, DCT_CommunicationConfig));
 
-		if (pro->PopParameterChanged(DCS_MatrixOutputProcessor, DCT_MatrixOutputLevelMeter))
+		if (pro->PopParameterChanged(DCP_MatrixOutputProcessor, DCT_MatrixOutputLevelMeter))
 		{
 			// Update level meter.
 			fParam = dynamic_cast<AudioParameterFloat*>(params[MOI_ParamIdx_LevelMeterPostMute]);
@@ -302,7 +302,7 @@ void MatrixOutputProcessorEditor::UpdateGui(bool init)
 				m_MatrixOutputLevelMeterSlider->setValue(fParam->get(), dontSendNotification);
 		}
 
-		if (pro->PopParameterChanged(DCS_MatrixOutputProcessor, DCT_MatrixOutputGain))
+		if (pro->PopParameterChanged(DCP_MatrixOutputProcessor, DCT_MatrixOutputGain))
 		{
 			// Update gain slider
 			fParam = dynamic_cast<AudioParameterFloat*>(params[MOI_ParamIdx_Gain]);
@@ -310,7 +310,7 @@ void MatrixOutputProcessorEditor::UpdateGui(bool init)
 				m_MatrixOutputGainSlider->setValue(fParam->get(), dontSendNotification);
 		}
 
-		if (pro->PopParameterChanged(DCS_MatrixOutputProcessor, DCT_MatrixOutputMute))
+		if (pro->PopParameterChanged(DCP_MatrixOutputProcessor, DCT_MatrixOutputMute))
 		{
 			// Update mute button
 			iParam = dynamic_cast<AudioParameterInt*>(params[MOI_ParamIdx_Mute]);

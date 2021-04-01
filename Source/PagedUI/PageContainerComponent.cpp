@@ -302,7 +302,7 @@ void PageContainerComponent::UpdateGui(bool init)
 			m_onlineLed2nd->setVisible(secondDS100Used);
 			resized();
 		}
-		if (ctrl->PopParameterChanged(DCS_Protocol, DCT_Online) || init)
+		if (ctrl->PopParameterChanged(DCP_Protocol, DCT_Online) || init)
 		{
 			auto online1 = ctrl->IsFirstDS100Online();
 			auto mm1 = ctrl->IsFirstDS100MirrorMaster();

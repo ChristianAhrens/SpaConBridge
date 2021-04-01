@@ -477,19 +477,19 @@ void SettingsSectionsComponent::buttonClicked(JUCEAppBasics::SplitButtonComponen
 	{
 		if (m_SecondDS100ModeButtonIds[m_SecondDS100Modes[0]] == buttonId) // Off
 		{
-			ctrl->SetExtensionMode(DCS_Settings, EM_Off);
+			ctrl->SetExtensionMode(DCP_Settings, EM_Off);
 		}
 		else if (m_SecondDS100ModeButtonIds[m_SecondDS100Modes[1]] == buttonId) // Extend
 		{
-			ctrl->SetExtensionMode(DCS_Settings, EM_Extend);
+			ctrl->SetExtensionMode(DCP_Settings, EM_Extend);
 		}
 		else if (m_SecondDS100ModeButtonIds[m_SecondDS100Modes[2]] == buttonId) // Parallel
 		{
-			ctrl->SetExtensionMode(DCS_Settings, EM_Parallel);
+			ctrl->SetExtensionMode(DCP_Settings, EM_Parallel);
 		}
 		else if (m_SecondDS100ModeButtonIds[m_SecondDS100Modes[3]] == buttonId) // Mirror
 		{
-			ctrl->SetExtensionMode(DCS_Settings, EM_Mirror);
+			ctrl->SetExtensionMode(DCP_Settings, EM_Mirror);
 		}
 	}
 
@@ -547,11 +547,11 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 
 	// DS100 settings section
 	if (m_DS100IntervalEdit && m_DS100IntervalEdit.get() == &editor)
-		ctrl->SetRate(DCS_Settings, m_DS100IntervalEdit->getText().getIntValue());
+		ctrl->SetRate(DCP_Settings, m_DS100IntervalEdit->getText().getIntValue());
 	else if (m_DS100IpAddressEdit && m_DS100IpAddressEdit.get() == &editor)
-		ctrl->SetDS100IpAddress(DCS_Settings, m_DS100IpAddressEdit->getText());
+		ctrl->SetDS100IpAddress(DCP_Settings, m_DS100IpAddressEdit->getText());
 	else if (m_SecondDS100IpAddressEdit && m_SecondDS100IpAddressEdit.get() == &editor)
-		ctrl->SetSecondDS100IpAddress(DCS_Settings, m_SecondDS100IpAddressEdit->getText());
+		ctrl->SetSecondDS100IpAddress(DCP_Settings, m_SecondDS100IpAddressEdit->getText());
 
 	// DiGiCo settings section
 	else if (m_DiGiCoIpAddressEdit && m_DiGiCoIpAddressEdit.get() == &editor)
@@ -903,7 +903,7 @@ void SettingsSectionsComponent::handleDS100ServiceSelected(JUCEAppBasics::Zeroco
         
         Controller* ctrl = Controller::GetInstance();
         if (ctrl)
-            ctrl->SetDS100IpAddress(DCS_Settings, info->ip);
+            ctrl->SetDS100IpAddress(DCP_Settings, info->ip);
 	}
 }
 
@@ -922,7 +922,7 @@ void SettingsSectionsComponent::handleSecondDS100ServiceSelected(JUCEAppBasics::
 
 		Controller* ctrl = Controller::GetInstance();
 		if (ctrl)
-			ctrl->SetSecondDS100IpAddress(DCS_Settings, info->ip);
+			ctrl->SetSecondDS100IpAddress(DCP_Settings, info->ip);
 	}
 }
 

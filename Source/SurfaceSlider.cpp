@@ -135,11 +135,11 @@ void SurfaceSlider::mouseDown(const MouseEvent& e)
 		GestureManagedAudioParameterFloat* param;
 		param = dynamic_cast<GestureManagedAudioParameterFloat*>(m_parent->getParameters()[SPI_ParamIdx_X]);
 		param->BeginGuiGesture();
-		processor->SetParameterValue(DCS_SoundobjectProcessor, SPI_ParamIdx_X, x);
+		processor->SetParameterValue(DCP_SoundobjectProcessor, SPI_ParamIdx_X, x);
 		
 		param = dynamic_cast<GestureManagedAudioParameterFloat*>(m_parent->getParameters()[SPI_ParamIdx_Y]);
 		param->BeginGuiGesture();
-		processor->SetParameterValue(DCS_SoundobjectProcessor, SPI_ParamIdx_Y, y);
+		processor->SetParameterValue(DCP_SoundobjectProcessor, SPI_ParamIdx_Y, y);
 	}
 }
 
@@ -161,8 +161,8 @@ void SurfaceSlider::mouseDrag(const MouseEvent& e)
 	if (procssor)
 	{
 		// Set new X and Y values
-		procssor->SetParameterValue(DCS_SoundobjectProcessor, SPI_ParamIdx_X, x);
-		procssor->SetParameterValue(DCS_SoundobjectProcessor, SPI_ParamIdx_Y, y);
+		procssor->SetParameterValue(DCP_SoundobjectProcessor, SPI_ParamIdx_X, x);
+		procssor->SetParameterValue(DCP_SoundobjectProcessor, SPI_ParamIdx_Y, y);
 	}
 }
 
@@ -346,8 +346,8 @@ void SurfaceMultiSlider::mouseDrag(const MouseEvent& e)
 				float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / getLocalBounds().getWidth())));
 				float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / getLocalBounds().getHeight())));
 
-				processor->SetParameterValue(DCS_MultiSlider, SPI_ParamIdx_X, x);
-				processor->SetParameterValue(DCS_MultiSlider, SPI_ParamIdx_Y, y);
+				processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, x);
+				processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, y);
 			}
 		}
 	}
@@ -378,8 +378,8 @@ void SurfaceMultiSlider::mouseUp(const MouseEvent& e)
 				float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / getLocalBounds().getWidth())));
 				float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / getLocalBounds().getHeight())));
 
-				processor->SetParameterValue(DCS_MultiSlider, SPI_ParamIdx_X, x);
-				processor->SetParameterValue(DCS_MultiSlider, SPI_ParamIdx_Y, y);
+				processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, x);
+				processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, y);
 			}
 		}
 

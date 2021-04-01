@@ -73,7 +73,7 @@ Controller::Controller()
 	m_singleton = this;
 
 	// Clear all changed flags initially
-	for (int cs = 0; cs < DCS_Max; cs++)
+	for (int cs = 0; cs < DCP_Max; cs++)
 		m_parametersChanged[cs] = DCT_None;
 
 	// Controller derives from ProcessingEngineNode::Listener
@@ -81,9 +81,9 @@ Controller::Controller()
 
 	// Default OSC server settings. These might become overwritten 
 	// by setStateInformation()
-	SetRate(DCS_Init, PROTOCOL_INTERVAL_DEF, true);
-	SetDS100IpAddress(DCS_Init, PROTOCOL_DEFAULT_IP, true);
-	SetExtensionMode(DCS_Init, EM_Off, true);
+	SetRate(DCP_Init, PROTOCOL_INTERVAL_DEF, true);
+	SetDS100IpAddress(DCP_Init, PROTOCOL_DEFAULT_IP, true);
+	SetExtensionMode(DCP_Init, EM_Off, true);
 }
 
 /**
@@ -134,12 +134,12 @@ void Controller::DestroyInstance()
  * @param changeSource	The application module which is causing the property change.
  * @param changeTypes	Defines which parameter or property has been changed.
  */
-void Controller::SetParameterChanged(DataChangeSource changeSource, DataChangeType changeTypes)
+void Controller::SetParameterChanged(DataChangeParticipant changeSource, DataChangeType changeTypes)
 {
 	const ScopedLock lock(m_mutex);
 
-	// Set the specified change flag for all DataChangeSources, except for the one causing the change.
-	for (int cs = 0; cs < DCS_Max; cs++)
+	// Set the specified change flag for all DataChangeParticipants, except for the one causing the change.
+	for (int cs = 0; cs < DCP_Max; cs++)
 	{
 		m_parametersChanged[cs] |= changeTypes;
 	}
@@ -174,16 +174,16 @@ void Controller::SetParameterChanged(DataChangeSource changeSource, DataChangeTy
 	case DCT_SoundobjectProcessorConfig:
 	case DCT_MatrixInputProcessorConfig:
 	case DCT_MatrixOutputProcessorConfig:
-		if (changeSource != DCS_Init)
+		if (changeSource != DCP_Init)
 			triggerConfigurationUpdate(true);
 		break;
 	case DCT_BridgingConfig:
 	case DCT_MuteState:
-		if (changeSource != DCS_Init)
+		if (changeSource != DCP_Init)
 			triggerConfigurationUpdate(false);
 		break;
 	case DCT_NumBridgingModules:
-		if (changeSource != DCS_Init)
+		if (changeSource != DCP_Init)
 			triggerConfigurationUpdate(true);
 		break;
 	case DCT_Online:
@@ -202,29 +202,29 @@ void Controller::SetParameterChanged(DataChangeSource changeSource, DataChangeTy
 
 /**
  * Get the state of the desired flag (or flags) for the desired change source.
- * @param changeSource	The application module querying the change flag.
+ * @param changeTarget	The application module querying the change flag.
  * @param change		The desired parameter (or parameters).
  * @return	True if any of the given parameters has changed it's value 
  *			since the last time PopParameterChanged() was called.
  */
-bool Controller::GetParameterChanged(DataChangeSource changeSource, DataChangeType change)
+bool Controller::GetParameterChanged(DataChangeParticipant changeTarget, DataChangeType change)
 {
 	const ScopedLock lock(m_mutex);
-	return ((m_parametersChanged[changeSource] & change) != 0);
+	return ((m_parametersChanged[changeTarget] & change) != 0);
 }
 
 /**
  * Reset the state of the desired flag (or flags) for the desired change source.
  * Will return the state of the flag before the resetting.
- * @param changeSource	The application module querying the change flag.
+ * @param changeTarget	The application module querying the change flag.
  * @param change		The desired parameter (or parameters).
  * @return	The state of the flag before the resetting.
  */
-bool Controller::PopParameterChanged(DataChangeSource changeSource, DataChangeType change)
+bool Controller::PopParameterChanged(DataChangeParticipant changeTarget, DataChangeType change)
 {
 	const ScopedLock lock(m_mutex);
-	bool ret((m_parametersChanged[changeSource] & change) != 0);
-	m_parametersChanged[changeSource] &= ~change; // Reset flag.
+	bool ret((m_parametersChanged[changeTarget] & change) != 0);
+	m_parametersChanged[changeTarget] &= ~change; // Reset flag.
 	return ret;
 }
 
@@ -274,7 +274,7 @@ void Controller::createNewSoundobjectProcessor()
  * @param p				Pointer to newly crated processor processor object.
  * @return				The ProcessorId of the newly added processor.
  */
-SoundobjectProcessorId Controller::AddSoundobjectProcessor(DataChangeSource changeSource, SoundobjectProcessor* p)
+SoundobjectProcessorId Controller::AddSoundobjectProcessor(DataChangeParticipant changeSource, SoundobjectProcessor* p)
 {
 	const ScopedLock lock(m_mutex);
 
@@ -318,7 +318,7 @@ void Controller::RemoveSoundobjectProcessor(SoundobjectProcessor* p)
 		const ScopedLock lock(m_mutex);
 		m_soundobjectProcessors.remove(idx);
 
-		SetParameterChanged(DCS_Protocol, DCT_NumProcessors);
+		SetParameterChanged(DCP_Protocol, DCT_NumProcessors);
 	}
 }
 
@@ -377,7 +377,7 @@ void Controller::createNewMatrixInputProcessor()
  * @param p				Pointer to newly crated processor processor object.
  * @return				The ProcessorId of the newly added processor.
  */
-MatrixInputProcessorId Controller::AddMatrixInputProcessor(DataChangeSource changeSource, MatrixInputProcessor* p)
+MatrixInputProcessorId Controller::AddMatrixInputProcessor(DataChangeParticipant changeSource, MatrixInputProcessor* p)
 {
 	const ScopedLock lock(m_mutex);
 
@@ -421,7 +421,7 @@ void Controller::RemoveMatrixInputProcessor(MatrixInputProcessor* p)
 		const ScopedLock lock(m_mutex);
 		m_matrixInputProcessors.remove(idx);
 
-		SetParameterChanged(DCS_Protocol, DCT_NumProcessors);
+		SetParameterChanged(DCP_Protocol, DCT_NumProcessors);
 	}
 }
 
@@ -481,7 +481,7 @@ void Controller::createNewMatrixOutputProcessor()
  * @param p				Pointer to newly crated processor processor object.
  * @return				The ProcessorId of the newly added processor.
  */
-MatrixOutputProcessorId Controller::AddMatrixOutputProcessor(DataChangeSource changeSource, MatrixOutputProcessor* p)
+MatrixOutputProcessorId Controller::AddMatrixOutputProcessor(DataChangeParticipant changeSource, MatrixOutputProcessor* p)
 {
 	const ScopedLock lock(m_mutex);
 
@@ -525,7 +525,7 @@ void Controller::RemoveMatrixOutputProcessor(MatrixOutputProcessor* p)
 		const ScopedLock lock(m_mutex);
 		m_matrixOutputProcessors.remove(idx);
 
-		SetParameterChanged(DCS_Protocol, DCT_NumProcessors);
+		SetParameterChanged(DCP_Protocol, DCT_NumProcessors);
 	}
 }
 
@@ -594,7 +594,7 @@ String Controller::GetDefaultDS100IpAddress()
  * @param ipAddress		New IP address.
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  */
-void Controller::SetDS100IpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification)
+void Controller::SetDS100IpAddress(DataChangeParticipant changeSource, String ipAddress, bool dontSendNotification)
 {
 	if (m_DS100IpAddress != ipAddress)
 	{
@@ -627,7 +627,7 @@ String Controller::GetSecondDS100IpAddress() const
  * @param ipAddress		New IP address.
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  */
-void Controller::SetSecondDS100IpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification)
+void Controller::SetSecondDS100IpAddress(DataChangeParticipant changeSource, String ipAddress, bool dontSendNotification)
 {
 	if (m_SecondDS100IpAddress != ipAddress)
 	{
@@ -720,7 +720,7 @@ int Controller::GetRate() const
  * @param rate	New messaging rate, in milliseconds.
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  */
-void Controller::SetRate(DataChangeSource changeSource, int rate, bool dontSendNotification)
+void Controller::SetRate(DataChangeParticipant changeSource, int rate, bool dontSendNotification)
 {
 	if (rate != m_oscMsgRate)
 	{
@@ -767,7 +767,7 @@ ExtensionMode Controller::GetExtensionMode() const
  * @param ipAddress		New IP address.
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  */
-void Controller::SetExtensionMode(DataChangeSource changeSource, ExtensionMode mode, bool dontSendNotification)
+void Controller::SetExtensionMode(DataChangeParticipant changeSource, ExtensionMode mode, bool dontSendNotification)
 {
 	if (m_DS100ExtensionMode != mode)
 	{
@@ -790,7 +790,7 @@ void Controller::SetExtensionMode(DataChangeSource changeSource, ExtensionMode m
  * @param ipAddress		New IP address.
  * @param rate			New messaging rate, in milliseconds.
  */
-void Controller::InitGlobalSettings(DataChangeSource changeSource, String ipAddress, int rate)
+void Controller::InitGlobalSettings(DataChangeParticipant changeSource, String ipAddress, int rate)
 {
 	SetDS100IpAddress(changeSource, ipAddress);
 	SetRate(changeSource, rate);
@@ -971,7 +971,7 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 			if (IsSoundobjectIdSelected(soundobjectId) != newSelectState)
 			{
 				SetSoundobjectIdSelectState(soundobjectId, newSelectState);
-				SetParameterChanged(DCS_Protocol, DCT_ProcessorSelection);
+				SetParameterChanged(DCP_Protocol, DCT_ProcessorSelection);
 			}
 		}
 	}
@@ -1002,7 +1002,7 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 
 				// Only pass on new positions to processors that are in RX mode.
 				// Also, ignore all incoming messages for properties which this processor wants to send a set command.
-				if (!ignoreResponse && ((mode & (CM_Rx | CM_PollOnce)) != 0) && (processor->GetParameterChanged(DCS_Protocol, change) == false))
+				if (!ignoreResponse && ((mode & (CM_Rx | CM_PollOnce)) != 0) && (processor->GetParameterChanged(DCP_Protocol, change) == false))
 				{
 					// Special handling for X/Y position, since message contains two parameters and MappingID needs to match too.
 					if (sopIdx == SPI_ParamIdx_X)
@@ -1011,15 +1011,15 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 						{
 							jassert(msgData._valCount == 2 && msgData._valType == RemoteObjectValueType::ROVT_FLOAT);
 							// Set the processor's new position.
-							processor->SetParameterValue(DCS_Protocol, SPI_ParamIdx_X, static_cast<float*>(msgData._payload)[0]);
-							processor->SetParameterValue(DCS_Protocol, SPI_ParamIdx_Y, static_cast<float*>(msgData._payload)[1]);
+							processor->SetParameterValue(DCP_Protocol, SPI_ParamIdx_X, static_cast<float*>(msgData._payload)[0]);
+							processor->SetParameterValue(DCP_Protocol, SPI_ParamIdx_Y, static_cast<float*>(msgData._payload)[1]);
 
 							// A request was sent to the DS100 by the Controller because this processor was in CM_PollOnce mode.
 							// Since the response was now processed, set the processor back into it's original mode.
 							if ((mode & CM_PollOnce) == CM_PollOnce)
 							{
 								mode &= ~CM_PollOnce;
-								processor->SetComsMode(DCS_Host, mode);
+								processor->SetComsMode(DCP_Host, mode);
 							}
 						}
 					}
@@ -1045,7 +1045,7 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 							break;
 						}
 
-						processor->SetParameterValue(DCS_Protocol, sopIdx, newValue);
+						processor->SetParameterValue(DCP_Protocol, sopIdx, newValue);
 					}
 				}
 			}
@@ -1062,7 +1062,7 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 
 				// Only pass on new positions to processors that are in RX mode.
 				// Also, ignore all incoming messages for properties which this processor wants to send a set command.
-				if (!ignoreResponse && ((mode & (CM_Rx | CM_PollOnce)) != 0) && (processor->GetParameterChanged(DCS_Protocol, change) == false))
+				if (!ignoreResponse && ((mode & (CM_Rx | CM_PollOnce)) != 0) && (processor->GetParameterChanged(DCP_Protocol, change) == false))
 				{
 					float newValue;
 					switch (msgData._valType)
@@ -1082,7 +1082,7 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 						break;
 					}
 
-					processor->SetParameterValue(DCS_Protocol, mipIdx, newValue);
+					processor->SetParameterValue(DCP_Protocol, mipIdx, newValue);
 				}
 			}
 		}
@@ -1098,7 +1098,7 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 
 				// Only pass on new positions to processors that are in RX mode.
 				// Also, ignore all incoming messages for properties which this processor wants to send a set command.
-				if (!ignoreResponse && ((mode & (CM_Rx | CM_PollOnce)) != 0) && (processor->GetParameterChanged(DCS_Protocol, change) == false))
+				if (!ignoreResponse && ((mode & (CM_Rx | CM_PollOnce)) != 0) && (processor->GetParameterChanged(DCP_Protocol, change) == false))
 				{
 					float newValue;
 					switch (msgData._valType)
@@ -1118,7 +1118,7 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 						break;
 					}
 
-					processor->SetParameterValue(DCS_Protocol, mopIdx, newValue);
+					processor->SetParameterValue(DCP_Protocol, mopIdx, newValue);
 				}
 			}
 		}
@@ -1162,34 +1162,34 @@ void Controller::timerCallback()
 
 		// Check if the processor configuration has changed
 		// and need to be updated in the bridging configuration
-		if (soProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_SoundobjectProcessorConfig))
+		if (soProcessor->GetParameterChanged(DCP_SoundobjectTable, DCT_SoundobjectProcessorConfig))
 		{
 			auto activateSSId = false;
 			auto deactivateSSId = false;
-			if (soProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_SoundobjectID))
+			if (soProcessor->GetParameterChanged(DCP_SoundobjectTable, DCT_SoundobjectID))
 			{
 				// SoundsourceID change means update is only required when
 				// remote object is currently activated. 
 				activateSSId = ((comsMode & CM_Rx) == CM_Rx);
 			}
-			soProcessor->PopParameterChanged(DCS_SoundobjectTable, DCT_SoundobjectID);
+			soProcessor->PopParameterChanged(DCP_SoundobjectTable, DCT_SoundobjectID);
 
-			if (soProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_MappingID))
+			if (soProcessor->GetParameterChanged(DCP_SoundobjectTable, DCT_MappingID))
 			{
 				// MappingID change means update is only required when
 				// remote object is currently activated. 
 				activateSSId = ((comsMode & CM_Rx) == CM_Rx);
 			}
-			soProcessor->PopParameterChanged(DCS_SoundobjectTable, DCT_MappingID);
+			soProcessor->PopParameterChanged(DCP_SoundobjectTable, DCT_MappingID);
 
-			if (soProcessor->GetParameterChanged(DCS_SoundobjectTable, DCT_ComsMode))
+			if (soProcessor->GetParameterChanged(DCP_SoundobjectTable, DCT_ComsMode))
 			{
 				// ComsMode change means toggling polling for the remote object,
 				// so one of the two activate/deactivate actions is required
 				activateSSId = ((comsMode & CM_Rx) == CM_Rx);
 				deactivateSSId = !activateSSId;
 			}
-			soProcessor->PopParameterChanged(DCS_SoundobjectTable, DCT_ComsMode);
+			soProcessor->PopParameterChanged(DCP_SoundobjectTable, DCT_ComsMode);
 
 			if (activateSSId)
 				ActivateSoundobjectId(soProcessor->GetSoundobjectId(), soProcessor->GetMappingId());
@@ -1217,7 +1217,7 @@ void Controller::timerCallback()
 				{
 					// SET command is only sent out while in CM_Tx mode, provided that
 					// this parameter has been changed since the last timer tick.
-					if (((comsMode & CM_Tx) == CM_Tx) && soProcessor->GetParameterChanged(DCS_Protocol, DCT_SoundobjectPosition))
+					if (((comsMode & CM_Tx) == CM_Tx) && soProcessor->GetParameterChanged(DCP_Protocol, DCT_SoundobjectPosition))
 					{
 						newDualFloatValue[0] = soProcessor->GetParameterValue(SPI_ParamIdx_X);
 						newDualFloatValue[1] = soProcessor->GetParameterValue(SPI_ParamIdx_Y);
@@ -1242,7 +1242,7 @@ void Controller::timerCallback()
 				{
 					// SET command is only sent out while in CM_Tx mode, provided that
 					// this parameter has been changed since the last timer tick.
-					if (((comsMode & CM_Tx) == CM_Tx) && soProcessor->GetParameterChanged(DCS_Protocol, DCT_ReverbSendGain))
+					if (((comsMode & CM_Tx) == CM_Tx) && soProcessor->GetParameterChanged(DCP_Protocol, DCT_ReverbSendGain))
 					{
 						newDualFloatValue[0] = soProcessor->GetParameterValue(SPI_ParamIdx_ReverbSendGain);
 
@@ -1261,7 +1261,7 @@ void Controller::timerCallback()
 				{
 					// SET command is only sent out while in CM_Tx mode, provided that
 					// this parameter has been changed since the last timer tick.
-					if (((comsMode & CM_Tx) == CM_Tx) && soProcessor->GetParameterChanged(DCS_Protocol, DCT_SoundobjectSpread))
+					if (((comsMode & CM_Tx) == CM_Tx) && soProcessor->GetParameterChanged(DCP_Protocol, DCT_SoundobjectSpread))
 					{
 						newDualFloatValue[0] = soProcessor->GetParameterValue(SPI_ParamIdx_ObjectSpread);
 
@@ -1280,7 +1280,7 @@ void Controller::timerCallback()
 				{
 					// SET command is only sent out while in CM_Tx mode, provided that
 					// this parameter has been changed since the last timer tick.
-					if (((comsMode & CM_Tx) == CM_Tx) && soProcessor->GetParameterChanged(DCS_Protocol, DCT_DelayMode))
+					if (((comsMode & CM_Tx) == CM_Tx) && soProcessor->GetParameterChanged(DCP_Protocol, DCT_DelayMode))
 					{
 						newDualFloatValue[0] = soProcessor->GetParameterValue(SPI_ParamIdx_DelayMode);
 
@@ -1305,7 +1305,7 @@ void Controller::timerCallback()
 		soProcessor->SetParamInTransit(paramSetsInTransit);
 
 		// All changed parameters were sent out, so we can reset their flags now.
-		soProcessor->PopParameterChanged(DCS_Protocol, DCT_SoundobjectParameters);
+		soProcessor->PopParameterChanged(DCP_Protocol, DCT_SoundobjectParameters);
 	}
 
 	for (auto const& miProcessor : m_matrixInputProcessors)
@@ -1314,34 +1314,34 @@ void Controller::timerCallback()
 
 		// Check if the processor configuration has changed
 		// and need to be updated in the bridging configuration
-		if (miProcessor->GetParameterChanged(DCS_MatrixInputTable, DCT_MatrixInputProcessorConfig))
+		if (miProcessor->GetParameterChanged(DCP_MatrixInputTable, DCT_MatrixInputProcessorConfig))
 		{
 			auto activateMIId = false;
 			auto deactivateMIId = false;
-			if (miProcessor->GetParameterChanged(DCS_MatrixInputTable, DCT_SoundobjectID))
+			if (miProcessor->GetParameterChanged(DCP_MatrixInputTable, DCT_SoundobjectID))
 			{
 				// SoundsourceID change means update is only required when
 				// remote object is currently activated. 
 				activateMIId = ((comsMode & CM_Rx) == CM_Rx);
 			}
-			miProcessor->PopParameterChanged(DCS_MatrixInputTable, DCT_SoundobjectID);
+			miProcessor->PopParameterChanged(DCP_MatrixInputTable, DCT_SoundobjectID);
 
-			if (miProcessor->GetParameterChanged(DCS_MatrixInputTable, DCT_MappingID))
+			if (miProcessor->GetParameterChanged(DCP_MatrixInputTable, DCT_MappingID))
 			{
 				// MappingID change means update is only required when
 				// remote object is currently activated. 
 				activateMIId = ((comsMode & CM_Rx) == CM_Rx);
 			}
-			miProcessor->PopParameterChanged(DCS_MatrixInputTable, DCT_MappingID);
+			miProcessor->PopParameterChanged(DCP_MatrixInputTable, DCT_MappingID);
 
-			if (miProcessor->GetParameterChanged(DCS_MatrixInputTable, DCT_ComsMode))
+			if (miProcessor->GetParameterChanged(DCP_MatrixInputTable, DCT_ComsMode))
 			{
 				// ComsMode change means toggling polling for the remote object,
 				// so one of the two activate/deactivate actions is required
 				activateMIId = ((comsMode & CM_Rx) == CM_Rx);
 				deactivateMIId = !activateMIId;
 			}
-			miProcessor->PopParameterChanged(DCS_MatrixInputTable, DCT_ComsMode);
+			miProcessor->PopParameterChanged(DCP_MatrixInputTable, DCT_ComsMode);
 
 			if (activateMIId)
 				ActivateMatrixInputId(miProcessor->GetMatrixInputId());
@@ -1368,7 +1368,7 @@ void Controller::timerCallback()
 			{
 				// SET command is only sent out while in CM_Tx mode, provided that
 				// this parameter has been changed since the last timer tick.
-				if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixInputLevelMeter))
+				if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCP_Protocol, DCT_MatrixInputLevelMeter))
 				{
 					newDualFloatValue[0] = miProcessor->GetParameterValue(MII_ParamIdx_LevelMeterPreMute);
 
@@ -1387,7 +1387,7 @@ void Controller::timerCallback()
 			{
 				// SET command is only sent out while in CM_Tx mode, provided that
 				// this parameter has been changed since the last timer tick.
-				if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixInputGain))
+				if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCP_Protocol, DCT_MatrixInputGain))
 				{
 					newDualFloatValue[0] = miProcessor->GetParameterValue(MII_ParamIdx_Gain);
 
@@ -1406,7 +1406,7 @@ void Controller::timerCallback()
 			{
 				// SET command is only sent out while in CM_Tx mode, provided that
 				// this parameter has been changed since the last timer tick.
-				if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixInputMute))
+				if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCP_Protocol, DCT_MatrixInputMute))
 				{
 					newIntValue = static_cast<int>(miProcessor->GetParameterValue(MII_ParamIdx_Mute));
 
@@ -1431,7 +1431,7 @@ void Controller::timerCallback()
 		miProcessor->SetParamInTransit(paramSetsInTransit);
 
 		// All changed parameters were sent out, so we can reset their flags now.
-		miProcessor->PopParameterChanged(DCS_Protocol, DCT_MatrixOutputParameters);
+		miProcessor->PopParameterChanged(DCP_Protocol, DCT_MatrixOutputParameters);
 	}
 
 	for (auto const& moProcessor : m_matrixOutputProcessors)
@@ -1440,34 +1440,34 @@ void Controller::timerCallback()
 
 		// Check if the processor configuration has changed
 		// and need to be updated in the bridging configuration
-		if (moProcessor->GetParameterChanged(DCS_MatrixOutputTable, DCT_MatrixOutputProcessorConfig))
+		if (moProcessor->GetParameterChanged(DCP_MatrixOutputTable, DCT_MatrixOutputProcessorConfig))
 		{
 			auto activateMOId = false;
 			auto deactivateMOId = false;
-			if (moProcessor->GetParameterChanged(DCS_MatrixOutputTable, DCT_SoundobjectID))
+			if (moProcessor->GetParameterChanged(DCP_MatrixOutputTable, DCT_SoundobjectID))
 			{
 				// SoundsourceID change means update is only required when
 				// remote object is currently activated. 
 				activateMOId = ((comsMode & CM_Rx) == CM_Rx);
 			}
-			moProcessor->PopParameterChanged(DCS_MatrixOutputTable, DCT_SoundobjectID);
+			moProcessor->PopParameterChanged(DCP_MatrixOutputTable, DCT_SoundobjectID);
 
-			if (moProcessor->GetParameterChanged(DCS_MatrixOutputTable, DCT_MappingID))
+			if (moProcessor->GetParameterChanged(DCP_MatrixOutputTable, DCT_MappingID))
 			{
 				// MappingID change means update is only required when
 				// remote object is currently activated. 
 				activateMOId = ((comsMode & CM_Rx) == CM_Rx);
 			}
-			moProcessor->PopParameterChanged(DCS_MatrixOutputTable, DCT_MappingID);
+			moProcessor->PopParameterChanged(DCP_MatrixOutputTable, DCT_MappingID);
 
-			if (moProcessor->GetParameterChanged(DCS_MatrixOutputTable, DCT_ComsMode))
+			if (moProcessor->GetParameterChanged(DCP_MatrixOutputTable, DCT_ComsMode))
 			{
 				// ComsMode change means toggling polling for the remote object,
 				// so one of the two activate/deactivate actions is required
 				activateMOId = ((comsMode & CM_Rx) == CM_Rx);
 				deactivateMOId = !activateMOId;
 			}
-			moProcessor->PopParameterChanged(DCS_MatrixOutputTable, DCT_ComsMode);
+			moProcessor->PopParameterChanged(DCP_MatrixOutputTable, DCT_ComsMode);
 
 			if (activateMOId)
 				ActivateMatrixOutputId(moProcessor->GetMatrixOutputId());
@@ -1494,7 +1494,7 @@ void Controller::timerCallback()
 			{
 				// SET command is only sent out while in CM_Tx mode, provided that
 				// this parameter has been changed since the last timer tick.
-				if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixOutputLevelMeter))
+				if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCP_Protocol, DCT_MatrixOutputLevelMeter))
 				{
 					newDualFloatValue[0] = moProcessor->GetParameterValue(MOI_ParamIdx_LevelMeterPostMute);
 
@@ -1513,7 +1513,7 @@ void Controller::timerCallback()
 			{
 				// SET command is only sent out while in CM_Tx mode, provided that
 				// this parameter has been changed since the last timer tick.
-				if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixOutputGain))
+				if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCP_Protocol, DCT_MatrixOutputGain))
 				{
 					newDualFloatValue[0] = moProcessor->GetParameterValue(MOI_ParamIdx_Gain);
 
@@ -1532,7 +1532,7 @@ void Controller::timerCallback()
 			{
 				// SET command is only sent out while in CM_Tx mode, provided that
 				// this parameter has been changed since the last timer tick.
-				if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCS_Protocol, DCT_MatrixOutputMute))
+				if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCP_Protocol, DCT_MatrixOutputMute))
 				{
 					newIntValue = static_cast<int>(moProcessor->GetParameterValue(MOI_ParamIdx_Mute));
 
@@ -1557,7 +1557,7 @@ void Controller::timerCallback()
 		moProcessor->SetParamInTransit(paramSetsInTransit);
 
 		// All changed parameters were sent out, so we can reset their flags now.
-		moProcessor->PopParameterChanged(DCS_Protocol, DCT_MatrixOutputParameters);
+		moProcessor->PopParameterChanged(DCP_Protocol, DCT_MatrixOutputParameters);
 	}
 
 }
@@ -1594,7 +1594,7 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			if (!alreadyExists)
 			{
 				auto newProcessor =	std::make_unique<SoundobjectProcessor>(false);
-				newProcessor->SetProcessorId(DCS_Init, elementProcessorId);
+				newProcessor->SetProcessorId(DCP_Init, elementProcessorId);
 				auto p = newProcessor.release();
 				jassert(m_soundobjectProcessors.contains(p));
 				p->setStateXml(processorXmlElement);
@@ -1623,7 +1623,7 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			if (!alreadyExists)
 			{
 				auto newProcessor = std::make_unique<MatrixInputProcessor>(false);
-				newProcessor->SetProcessorId(DCS_Init, elementProcessorId);
+				newProcessor->SetProcessorId(DCP_Init, elementProcessorId);
 				auto p = newProcessor.release();
 				jassert(m_matrixInputProcessors.contains(p));
 				p->setStateXml(processorXmlElement);
@@ -1652,7 +1652,7 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			if (!alreadyExists)
 			{
 				auto newProcessor = std::make_unique<MatrixOutputProcessor>(false);
-				newProcessor->SetProcessorId(DCS_Init, elementProcessorId);
+				newProcessor->SetProcessorId(DCP_Init, elementProcessorId);
 				auto p = newProcessor.release();
 				jassert(m_matrixOutputProcessors.contains(p));
 				p->setStateXml(processorXmlElement);
@@ -1676,10 +1676,10 @@ bool Controller::setStateXml(XmlElement* stateXml)
 	{
 		if (m_protocolBridge.setStateXml(bridgingXmlElement))
 		{
-			SetExtensionMode(DataChangeSource::DCS_Init, m_protocolBridge.GetDS100ExtensionMode(), true);
-			SetDS100IpAddress(DataChangeSource::DCS_Init, m_protocolBridge.GetDS100IpAddress(), true);
-			SetSecondDS100IpAddress(DataChangeSource::DCS_Init, m_protocolBridge.GetSecondDS100IpAddress(), true);
-			SetRate(DataChangeSource::DCS_Init, m_protocolBridge.GetDS100MsgRate(), true);
+			SetExtensionMode(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100ExtensionMode(), true);
+			SetDS100IpAddress(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100IpAddress(), true);
+			SetSecondDS100IpAddress(DataChangeParticipant::DCP_Init, m_protocolBridge.GetSecondDS100IpAddress(), true);
+			SetRate(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100MsgRate(), true);
 		}
 	}
 
@@ -2747,7 +2747,7 @@ bool Controller::LoadConfigurationFile(const File& fileToLoadFrom)
 		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed du to internal loading error.");
 	else
 	{
-		SetParameterChanged(DCS_Init, DCT_AllConfigParameters);
+		SetParameterChanged(DCP_Init, DCT_AllConfigParameters);
 		return true;
 	}
 

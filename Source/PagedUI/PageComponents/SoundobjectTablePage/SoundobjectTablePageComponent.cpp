@@ -226,13 +226,13 @@ void SoundobjectTablePageComponent::UpdateGui(bool init)
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl && m_soundobjectsTable)
 	{
-		if (ctrl->PopParameterChanged(DCS_SoundobjectTable, DCT_NumProcessors) || init)
+		if (ctrl->PopParameterChanged(DCP_SoundobjectTable, DCT_NumProcessors) || init)
 		{
 			m_soundobjectsTable->RecreateTableRowIds();
 			m_soundobjectsTable->UpdateTable();
 		}
-		else if (ctrl->PopParameterChanged(DCS_Protocol, DCT_ProcessorSelection) ||
-			ctrl->PopParameterChanged(DCS_Host, DCT_BridgingConfig))
+		else if (ctrl->PopParameterChanged(DCP_Protocol, DCT_ProcessorSelection) ||
+			ctrl->PopParameterChanged(DCP_Host, DCT_BridgingConfig))
 		{
 			m_soundobjectsTable->UpdateTable();
 		}
@@ -242,7 +242,7 @@ void SoundobjectTablePageComponent::UpdateGui(bool init)
 			for (auto const& processorId : ctrl->GetSoundobjectProcessorIds())
 			{
 				auto processor = ctrl->GetSoundobjectProcessor(processorId);
-				if (processor && processor->GetParameterChanged(DCS_SoundobjectTable, DCT_SoundobjectProcessorConfig))
+				if (processor && processor->PopParameterChanged(DCP_SoundobjectTable, DCT_SoundobjectProcessorConfig))
 				{
 					m_soundobjectsTable->UpdateTable();
 				}

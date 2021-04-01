@@ -107,13 +107,13 @@ SoundobjectProcessor::SoundobjectProcessor(bool insertToConfig)
 
 	// Start with all parameter changed flags cleared. Function setStateInformation() 
 	// will check whether or not we should initialize parameters when starting up.
-	for (int cs = 0; cs < DCS_Max; cs++)
+	for (int cs = 0; cs < DCP_Max; cs++)
 		m_parametersChanged[cs] = DCT_None;
 
 	// Register this new procssor instance to the singleton Controller object's internal list.
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
-		m_processorId = ctrl->AddSoundobjectProcessor(insertToConfig ? DCS_Host : DCS_Init, this);
+		m_processorId = ctrl->AddSoundobjectProcessor(insertToConfig ? DCP_Host : DCP_Init, this);
 }
 
 /**
@@ -140,7 +140,7 @@ int SoundobjectProcessor::GetProcessorId() const
  * @param changeSource	The application module which is causing the property change.
  * @param processorId	The new ID
  */
-void SoundobjectProcessor::SetProcessorId(DataChangeSource changeSource, SoundobjectProcessorId processorId)
+void SoundobjectProcessor::SetProcessorId(DataChangeParticipant changeSource, SoundobjectProcessorId processorId)
 {
 	ignoreUnused(changeSource);
 	if (m_processorId != processorId && processorId != INVALID_PROCESSOR_ID)
@@ -151,28 +151,28 @@ void SoundobjectProcessor::SetProcessorId(DataChangeSource changeSource, Soundob
 
 /**
  * Get the state of the desired flag (or flags) for the desired change source.
- * @param changeSource	The application module querying the change flag.
+ * @param changeTarget	The application module querying the change flag.
  * @param change	The desired parameter (or parameters).
  * @return	True if any of the given parameters has changed it's value 
  *			since the last time PopParameterChanged() was called.
  */
-bool SoundobjectProcessor::GetParameterChanged(DataChangeSource changeSource, DataChangeType change)
+bool SoundobjectProcessor::GetParameterChanged(DataChangeParticipant changeTarget, DataChangeType change)
 {
-	return ((m_parametersChanged[changeSource] & change) != 0);
+	return ((m_parametersChanged[changeTarget] & change) != 0);
 }
 
 /**
  * Reset the state of the desired flag (or flags) for the desired change source.
  * Will return the state of the flag before the resetting.
- * @param changeSource	The application module querying the change flag.
+ * @param changeTarget	The application module querying the change flag.
  * @param change	The desired parameter (or parameters).
  * @return	True if any of the given parameters has changed it's value 
  *			since the last time PopParameterChanged() was called.
  */
-bool SoundobjectProcessor::PopParameterChanged(DataChangeSource changeSource, DataChangeType change)
+bool SoundobjectProcessor::PopParameterChanged(DataChangeParticipant changeTarget, DataChangeType change)
 {
-	bool ret((m_parametersChanged[changeSource] & change) != 0);
-	m_parametersChanged[changeSource] &= ~change; // Reset flag.
+	bool ret((m_parametersChanged[changeTarget] & change) != 0);
+	m_parametersChanged[changeTarget] &= ~change; // Reset flag.
 	return ret;
 }
 
@@ -181,15 +181,15 @@ bool SoundobjectProcessor::PopParameterChanged(DataChangeSource changeSource, Da
  * @param changeSource	The application module which is causing the property change.
  * @param changeTypes	Defines which parameter or property has been changed.
  */
-void SoundobjectProcessor::SetParameterChanged(DataChangeSource changeSource, DataChangeType changeTypes)
+void SoundobjectProcessor::SetParameterChanged(DataChangeParticipant changeSource, DataChangeType changeTypes)
 {
 	// Set the specified change flag for all DataChangeSources.
-	for (int cs = 0; cs < DCS_Max; cs++)
+	for (int cs = 0; cs < DCP_Max; cs++)
 	{
 		// If the change came from OSC (received message with new param value), 
 		// do not set the specified change flag for OSC. This would trigger an 
 		// OSC Set command to go out for every received message.
-		if ((changeSource != DCS_Protocol) || (cs != DCS_Protocol))
+		if ((changeSource != DCP_Protocol) || (cs != DCP_Protocol))
 			m_parametersChanged[cs] |= changeTypes;
 	}
 }
@@ -256,7 +256,7 @@ float SoundobjectProcessor::GetParameterValue(SoundobjectParameterIndex paramIdx
  * @param paramIdx	The index of the desired parameter.
  * @param newValue	The new value as a float.
  */
-void SoundobjectProcessor::SetParameterValue(DataChangeSource changeSource, SoundobjectParameterIndex paramIdx, float newValue)
+void SoundobjectProcessor::SetParameterValue(DataChangeParticipant changeSource, SoundobjectParameterIndex paramIdx, float newValue)
 {
 	// The reimplemented method AudioProcessor::parameterValueChanged() will trigger a SetParameterChanged() call.
 	// We need to ensure that this change is registered to the correct source. 
@@ -288,7 +288,7 @@ void SoundobjectProcessor::SetParameterValue(DataChangeSource changeSource, Soun
 	// After the SetParameterChanged() call has been triggered, set the change source to the default.
 	// The host is the only one which can call parameterValueChanged directly. All other modules of the
 	// application do it over this method.
-	m_currentChangeSource = DCS_Host;
+	m_currentChangeSource = DCP_Host;
 }
 
 /**
@@ -375,9 +375,9 @@ bool SoundobjectProcessor::setStateXml(XmlElement* stateXml)
 	if (!stateXml || (stateXml->getTagName() != (AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE) + String(GetProcessorId()))))
 		return false;
 
-	SetSoundobjectId(DCS_Init, static_cast<SoundobjectId>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORCHANNELID))));
-    SetMappingId(DCS_Init, static_cast<MappingId>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORRECORDID))));
-    SetComsMode(DCS_Init, static_cast<ComsMode>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORCOMSMODE))));
+	SetSoundobjectId(DCP_Init, static_cast<SoundobjectId>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORCHANNELID))));
+    SetMappingId(DCP_Init, static_cast<MappingId>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORRECORDID))));
+    SetComsMode(DCP_Init, static_cast<ComsMode>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORCOMSMODE))));
 
 	return true;
 }
@@ -412,7 +412,7 @@ void SoundobjectProcessor::setStateInformation(const void* data, int sizeInBytes
  * @param changeSource	The application module which is causing the property change.
  * @param newMode	The new OSC communication mode.
  */
-void SoundobjectProcessor::SetComsMode(DataChangeSource changeSource, ComsMode newMode)
+void SoundobjectProcessor::SetComsMode(DataChangeParticipant changeSource, ComsMode newMode)
 {
 	if (m_comsMode != newMode)
 	{
@@ -440,7 +440,7 @@ ComsMode SoundobjectProcessor::GetComsMode() const
  * @param changeSource	The application module which is causing the property change.
  * @param mappingId		The new coordinate mapping ID
  */
-void SoundobjectProcessor::SetMappingId(DataChangeSource changeSource, MappingId mappingId)
+void SoundobjectProcessor::SetMappingId(DataChangeParticipant changeSource, MappingId mappingId)
 {
 	if (m_mappingId != mappingId)
 	{
@@ -461,7 +461,7 @@ void SoundobjectProcessor::SetMappingId(DataChangeSource changeSource, MappingId
 		SetParameterChanged(changeSource, dct);
         
         // finally trigger config update
-        if (changeSource != DCS_Init)
+        if (changeSource != DCP_Init)
             triggerConfigurationUpdate(false);
 	}
 }
@@ -480,7 +480,7 @@ MappingId SoundobjectProcessor::GetMappingId() const
  * @param changeSource	The application module which is causing the property change.
  * @param soundobjectId	The new ID
  */
-void SoundobjectProcessor::SetSoundobjectId(DataChangeSource changeSource, SoundobjectId soundobjectId)
+void SoundobjectProcessor::SetSoundobjectId(DataChangeParticipant changeSource, SoundobjectId soundobjectId)
 {
 	if (m_soundobjectId != soundobjectId)
 	{
@@ -491,7 +491,7 @@ void SoundobjectProcessor::SetSoundobjectId(DataChangeSource changeSource, Sound
 		SetParameterChanged(changeSource, DCT_SoundobjectID);
         
         // finally trigger config update
-        if (changeSource != DCS_Init)
+        if (changeSource != DCP_Init)
             triggerConfigurationUpdate(false);
 	}
 }
@@ -510,7 +510,7 @@ SoundobjectId SoundobjectProcessor::GetSoundobjectId() const
  * @param changeSource	The application module which is causing the property change.
  * @param oscMsgRate	The interval at which OSC messages are sent, in ms.
  */
-void SoundobjectProcessor::SetMessageRate(DataChangeSource changeSource, int oscMsgRate)
+void SoundobjectProcessor::SetMessageRate(DataChangeParticipant changeSource, int oscMsgRate)
 {
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
@@ -544,10 +544,10 @@ void SoundobjectProcessor::InitializeSettings(SoundobjectId soundobjectId, Mappi
 	if (ctrl)
 	{
 		jassert(soundobjectId > 128);
-		SetSoundobjectId(DCS_Init, soundobjectId);
+		SetSoundobjectId(DCP_Init, soundobjectId);
 		jassert(mappingId > 4);
-		SetMappingId(DCS_Init, mappingId);
-		SetComsMode(DCS_Init, newMode);
+		SetMappingId(DCP_Init, mappingId);
+		SetComsMode(DCP_Init, newMode);
 	}
 }
 
@@ -737,7 +737,7 @@ void SoundobjectProcessor::changeProgramName(int index, const String& newName)
 	m_processorDisplayName = newName;
 
 	// Signal change to other modules in the procssor.
-	SetParameterChanged(DCS_Host, DCT_SoundobjectID);
+	SetParameterChanged(DCP_Host, DCT_SoundobjectID);
 }
 
 /**
@@ -799,7 +799,7 @@ AudioProcessorEditor* SoundobjectProcessor::createEditor()
 	AudioProcessorEditor* editor = new SoundobjectProcessorEditor(*this);
 
 	// Initialize GUI with current IP address, etc.
-	SetParameterChanged(DCS_Host, (DCT_SoundobjectProcessorConfig | DCT_CommunicationConfig | DCT_SoundobjectParameters));
+	SetParameterChanged(DCP_Host, (DCT_SoundobjectProcessorConfig | DCT_CommunicationConfig | DCT_SoundobjectParameters));
 
 	return editor;
 }

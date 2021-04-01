@@ -69,15 +69,15 @@ public:
 	static Controller* GetInstance();
 	void DestroyInstance();
 
-	bool GetParameterChanged(DataChangeSource changeSource, DataChangeType change);
-	bool PopParameterChanged(DataChangeSource changeSource, DataChangeType change);
-	void SetParameterChanged(DataChangeSource changeSource, DataChangeType changeTypes);
+	bool GetParameterChanged(DataChangeParticipant changeTarget, DataChangeType change);
+	bool PopParameterChanged(DataChangeParticipant changeTarget, DataChangeType change);
+	void SetParameterChanged(DataChangeParticipant changeSource, DataChangeType changeTypes);
 
 	juce::int32 GetNextProcessorId();
 
 	//==========================================================================
 	void createNewSoundobjectProcessor();
-	SoundobjectProcessorId AddSoundobjectProcessor(DataChangeSource changeSource, SoundobjectProcessor* p);
+	SoundobjectProcessorId AddSoundobjectProcessor(DataChangeParticipant changeSource, SoundobjectProcessor* p);
 	void RemoveSoundobjectProcessor(SoundobjectProcessor* p);
 	int GetSoundobjectProcessorCount() const;
 	SoundobjectProcessor* GetSoundobjectProcessor(SoundobjectProcessorId processorId) const;
@@ -93,7 +93,7 @@ public:
 
 	//==========================================================================
 	void createNewMatrixInputProcessor();
-	MatrixInputProcessorId AddMatrixInputProcessor(DataChangeSource changeSource, MatrixInputProcessor* p);
+	MatrixInputProcessorId AddMatrixInputProcessor(DataChangeParticipant changeSource, MatrixInputProcessor* p);
 	void RemoveMatrixInputProcessor(MatrixInputProcessor* p);
 	int GetMatrixInputProcessorCount() const;
 	MatrixInputProcessor* GetMatrixInputProcessor(MatrixInputProcessorId processorId) const;
@@ -109,7 +109,7 @@ public:
 
 	//==========================================================================
 	void createNewMatrixOutputProcessor();
-	MatrixOutputProcessorId AddMatrixOutputProcessor(DataChangeSource changeSource, MatrixOutputProcessor* p);
+	MatrixOutputProcessorId AddMatrixOutputProcessor(DataChangeParticipant changeSource, MatrixOutputProcessor* p);
 	void RemoveMatrixOutputProcessor(MatrixOutputProcessor* p);
 	int GetMatrixOutputProcessorCount() const;
 	MatrixOutputProcessor* GetMatrixOutputProcessor(MatrixOutputProcessorId processorId) const;
@@ -126,18 +126,18 @@ public:
 	//==========================================================================
 	static String GetDefaultDS100IpAddress();
 	String GetDS100IpAddress() const;
-	void SetDS100IpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification = false);
+	void SetDS100IpAddress(DataChangeParticipant changeSource, String ipAddress, bool dontSendNotification = false);
 	String GetSecondDS100IpAddress() const;
-	void SetSecondDS100IpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification = false);
+	void SetSecondDS100IpAddress(DataChangeParticipant changeSource, String ipAddress, bool dontSendNotification = false);
 
 	//==========================================================================
 	int GetRate() const;
-	void SetRate(DataChangeSource changeSource, int rate, bool dontSendNotification = false);
+	void SetRate(DataChangeParticipant changeSource, int rate, bool dontSendNotification = false);
 	static std::pair<int, int> GetSupportedRateRange();
 
 	//==========================================================================
 	ExtensionMode GetExtensionMode() const;
-	void SetExtensionMode(DataChangeSource changeSource, ExtensionMode mode, bool dontSendNotification = false);
+	void SetExtensionMode(DataChangeParticipant changeSource, ExtensionMode mode, bool dontSendNotification = false);
 
 	//==========================================================================
 	const std::vector<RemoteObject> GetActivatedSoundObjectRemoteObjects();
@@ -177,7 +177,7 @@ public:
 	bool SetBridgingMidiAssignmentMapping(ProtocolBridgingType bridgingType, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification = false);
 
 	//==========================================================================
-	void InitGlobalSettings(DataChangeSource changeSource, String ipAddress, int rate);
+	void InitGlobalSettings(DataChangeParticipant changeSource, String ipAddress, int rate);
 
 	//==========================================================================
 	void Disconnect();
@@ -221,7 +221,7 @@ protected:
 	ExtensionMode					m_DS100ExtensionMode;			/**< Current extension mode. This has impact on if second DS100 is active or not. */
 	String							m_SecondDS100IpAddress;			/**< IP Address where OSC messages will be sent to / received from. */
 	int								m_oscMsgRate;					/**< Interval at which OSC messages are sent to the host, in ms. */
-	DataChangeType					m_parametersChanged[DCS_Max];	/**< Keep track of which OSC parameters have changed recently.
+	DataChangeType					m_parametersChanged[DCP_Max];	/**< Keep track of which OSC parameters have changed recently.
 																	 * The array has one entry for each application module (see enum DataChangeSource). */
 	CriticalSection					m_mutex;						/**< A re-entrant mutex. Safety first. */
 	std::map<SoundobjectId, bool>	m_soundObjectSelection;			/**< The current select state of sound objects. */

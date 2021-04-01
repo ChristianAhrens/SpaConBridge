@@ -73,13 +73,13 @@ MatrixInputProcessor::MatrixInputProcessor(bool insertToConfig)
 
 	// Start with all parameter changed flags cleared. Function setStateInformation() 
 	// will check whether or not we should initialize parameters when starting up.
-	for (int cs = 0; cs < DCS_Max; cs++)
+	for (int cs = 0; cs < DCP_Max; cs++)
 		m_parametersChanged[cs] = DCT_None;
 
 	// Register this new processor instance to the singleton Controller object's internal list.
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
-		m_processorId = ctrl->AddMatrixInputProcessor(insertToConfig ? DCS_Host : DCS_Init, this);
+		m_processorId = ctrl->AddMatrixInputProcessor(insertToConfig ? DCP_Host : DCP_Init, this);
 }
 
 /**
@@ -106,7 +106,7 @@ int MatrixInputProcessor::GetProcessorId() const
  * @param changeSource	The application module which is causing the property change.
  * @param processorId	The new ID
  */
-void MatrixInputProcessor::SetProcessorId(DataChangeSource changeSource, MatrixInputProcessorId processorId)
+void MatrixInputProcessor::SetProcessorId(DataChangeParticipant changeSource, MatrixInputProcessorId processorId)
 {
 	ignoreUnused(changeSource);
 	if (m_processorId != processorId && processorId != INVALID_PROCESSOR_ID)
@@ -117,28 +117,28 @@ void MatrixInputProcessor::SetProcessorId(DataChangeSource changeSource, MatrixI
 
 /**
  * Get the state of the desired flag (or flags) for the desired change source.
- * @param changeSource	The application module querying the change flag.
+ * @param changeTarget	The application module querying the change flag.
  * @param change	The desired parameter (or parameters).
  * @return	True if any of the given parameters has changed it's value 
  *			since the last time PopParameterChanged() was called.
  */
-bool MatrixInputProcessor::GetParameterChanged(DataChangeSource changeSource, DataChangeType change)
+bool MatrixInputProcessor::GetParameterChanged(DataChangeParticipant changeTarget, DataChangeType change)
 {
-	return ((m_parametersChanged[changeSource] & change) != 0);
+	return ((m_parametersChanged[changeTarget] & change) != 0);
 }
 
 /**
  * Reset the state of the desired flag (or flags) for the desired change source.
  * Will return the state of the flag before the resetting.
- * @param changeSource	The application module querying the change flag.
+ * @param changeTarget	The application module querying the change flag.
  * @param change	The desired parameter (or parameters).
  * @return	True if any of the given parameters has changed it's value 
  *			since the last time PopParameterChanged() was called.
  */
-bool MatrixInputProcessor::PopParameterChanged(DataChangeSource changeSource, DataChangeType change)
+bool MatrixInputProcessor::PopParameterChanged(DataChangeParticipant changeTarget, DataChangeType change)
 {
-	bool ret((m_parametersChanged[changeSource] & change) != 0);
-	m_parametersChanged[changeSource] &= ~change; // Reset flag.
+	bool ret((m_parametersChanged[changeTarget] & change) != 0);
+	m_parametersChanged[changeTarget] &= ~change; // Reset flag.
 	return ret;
 }
 
@@ -147,15 +147,15 @@ bool MatrixInputProcessor::PopParameterChanged(DataChangeSource changeSource, Da
  * @param changeSource	The application module which is causing the property change.
  * @param changeTypes	Defines which parameter or property has been changed.
  */
-void MatrixInputProcessor::SetParameterChanged(DataChangeSource changeSource, DataChangeType changeTypes)
+void MatrixInputProcessor::SetParameterChanged(DataChangeParticipant changeSource, DataChangeType changeTypes)
 {
 	// Set the specified change flag for all DataChangeSources.
-	for (int cs = 0; cs < DCS_Max; cs++)
+	for (int cs = 0; cs < DCP_Max; cs++)
 	{
 		// If the change came from OSC (received message with new param value), 
 		// do not set the specified change flag for OSC. This would trigger an 
 		// OSC Set command to go out for every received message.
-		if ((changeSource != DCS_Protocol) || (cs != DCS_Protocol))
+		if ((changeSource != DCP_Protocol) || (cs != DCP_Protocol))
 			m_parametersChanged[cs] |= changeTypes;
 	}
 }
@@ -207,7 +207,7 @@ float MatrixInputProcessor::GetParameterValue(MatrixInputParameterIndex paramIdx
  * @param paramIdx	The index of the desired parameter.
  * @param newValue	The new value as a float.
  */
-void MatrixInputProcessor::SetParameterValue(DataChangeSource changeSource, MatrixInputParameterIndex paramIdx, float newValue)
+void MatrixInputProcessor::SetParameterValue(DataChangeParticipant changeSource, MatrixInputParameterIndex paramIdx, float newValue)
 {
 	// The reimplemented method AudioProcessor::parameterValueChanged() will trigger a SetParameterChanged() call.
 	// We need to ensure that this change is registered to the correct source. 
@@ -233,7 +233,7 @@ void MatrixInputProcessor::SetParameterValue(DataChangeSource changeSource, Matr
 	// After the SetParameterChanged() call has been triggered, set the change source to the default.
 	// The host is the only one which can call parameterValueChanged directly. All other modules of the
 	// application do it over this method.
-	m_currentChangeSource = DCS_Host;
+	m_currentChangeSource = DCP_Host;
 }
 
 /**
@@ -313,8 +313,8 @@ bool MatrixInputProcessor::setStateXml(XmlElement* stateXml)
 	if (!stateXml || (stateXml->getTagName() != (AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE) + String(GetProcessorId()))))
 		return false;
 
-	SetMatrixInputId(DCS_Init, static_cast<MatrixInputId>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORCHANNELID))));
-    SetComsMode(DCS_Init, static_cast<ComsMode>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORCOMSMODE))));
+	SetMatrixInputId(DCP_Init, static_cast<MatrixInputId>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORCHANNELID))));
+    SetComsMode(DCP_Init, static_cast<ComsMode>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORCOMSMODE))));
 
 	return true;
 }
@@ -349,7 +349,7 @@ void MatrixInputProcessor::setStateInformation(const void* data, int sizeInBytes
  * @param changeSource	The application module which is causing the property change.
  * @param newMode	The new OSC communication mode.
  */
-void MatrixInputProcessor::SetComsMode(DataChangeSource changeSource, ComsMode newMode)
+void MatrixInputProcessor::SetComsMode(DataChangeParticipant changeSource, ComsMode newMode)
 {
 	if (m_comsMode != newMode)
 	{
@@ -377,7 +377,7 @@ ComsMode MatrixInputProcessor::GetComsMode() const
  * @param changeSource	The application module which is causing the property change.
  * @param MatrixInputId	The new ID
  */
-void MatrixInputProcessor::SetMatrixInputId(DataChangeSource changeSource, MatrixInputId MatrixInputId)
+void MatrixInputProcessor::SetMatrixInputId(DataChangeParticipant changeSource, MatrixInputId MatrixInputId)
 {
 	if (m_MatrixInputId != MatrixInputId)
 	{
@@ -388,7 +388,7 @@ void MatrixInputProcessor::SetMatrixInputId(DataChangeSource changeSource, Matri
 		SetParameterChanged(changeSource, DCT_MatrixInputID);
         
         // finally trigger config update
-        if (changeSource != DCS_Init)
+        if (changeSource != DCP_Init)
             triggerConfigurationUpdate(false);
 	}
 }
@@ -407,7 +407,7 @@ MatrixInputId MatrixInputProcessor::GetMatrixInputId() const
  * @param changeSource	The application module which is causing the property change.
  * @param oscMsgRate	The interval at which OSC messages are sent, in ms.
  */
-void MatrixInputProcessor::SetMessageRate(DataChangeSource changeSource, int oscMsgRate)
+void MatrixInputProcessor::SetMessageRate(DataChangeParticipant changeSource, int oscMsgRate)
 {
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
@@ -441,8 +441,8 @@ void MatrixInputProcessor::InitializeSettings(MatrixInputId MatrixInputId, Strin
 	if (ctrl)
 	{
 		jassert(MatrixInputId > 128);
-		SetMatrixInputId(DCS_Init, MatrixInputId);
-		SetComsMode(DCS_Init, newMode);
+		SetMatrixInputId(DCP_Init, MatrixInputId);
+		SetComsMode(DCP_Init, newMode);
 	}
 }
 
@@ -623,7 +623,7 @@ void MatrixInputProcessor::changeProgramName(int index, const String& newName)
 	m_processorDisplayName = newName;
 
 	// Signal change to other modules in the procssor.
-	SetParameterChanged(DCS_Host, DCT_MatrixInputID);
+	SetParameterChanged(DCP_Host, DCT_MatrixInputID);
 }
 
 /**
@@ -685,7 +685,7 @@ AudioProcessorEditor* MatrixInputProcessor::createEditor()
 	AudioProcessorEditor* editor = new MatrixInputProcessorEditor(*this);
 
 	// Initialize GUI with current IP address, etc.
-	SetParameterChanged(DCS_Host, (DCT_MatrixInputProcessorConfig | DCT_CommunicationConfig | DCT_MatrixInputParameters));
+	SetParameterChanged(DCP_Host, (DCT_MatrixInputProcessorConfig | DCT_CommunicationConfig | DCT_MatrixInputParameters));
 
 	return editor;
 }

@@ -140,7 +140,7 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 	auto ctrl = Controller::GetInstance();
 	if (ctrl && m_multiSliderSurface)
 	{
-		if (ctrl->GetParameterChanged(DCS_SoundobjectTable, DCT_NumProcessors) || (ctrl->GetParameterChanged(DCS_Protocol, DCT_ProcessorSelection)))
+		if (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_NumProcessors) || (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_ProcessorSelection)))
 			update = true;
 		
 		// Iterate through all procssor instances and see if anything changed there.
@@ -159,7 +159,7 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 					cachedPositions.insert(std::make_pair(processorId, SurfaceMultiSlider::SoundobjectPosition(soundobjectId, p, ctrl->IsSoundobjectIdSelected(soundobjectId))));
 				}
 
-				if (processor->GetParameterChanged(DCS_SoundobjectTable, (DCT_SoundobjectProcessorConfig | DCT_SoundobjectPosition)))
+				if (processor->PopParameterChanged(DCP_MultiSlider, (DCT_SoundobjectProcessorConfig | DCT_SoundobjectPosition)))
 					update = true;
 			}
 		}

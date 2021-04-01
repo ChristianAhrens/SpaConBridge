@@ -318,7 +318,7 @@ void Controller::RemoveSoundobjectProcessor(SoundobjectProcessor* p)
 		const ScopedLock lock(m_mutex);
 		m_soundobjectProcessors.remove(idx);
 
-		SetParameterChanged(DCP_Protocol, DCT_NumProcessors);
+		SetParameterChanged(DCP_Host, DCT_NumProcessors);
 	}
 }
 
@@ -421,7 +421,7 @@ void Controller::RemoveMatrixInputProcessor(MatrixInputProcessor* p)
 		const ScopedLock lock(m_mutex);
 		m_matrixInputProcessors.remove(idx);
 
-		SetParameterChanged(DCP_Protocol, DCT_NumProcessors);
+		SetParameterChanged(DCP_Host, DCT_NumProcessors);
 	}
 }
 
@@ -525,7 +525,7 @@ void Controller::RemoveMatrixOutputProcessor(MatrixOutputProcessor* p)
 		const ScopedLock lock(m_mutex);
 		m_matrixOutputProcessors.remove(idx);
 
-		SetParameterChanged(DCP_Protocol, DCT_NumProcessors);
+		SetParameterChanged(DCP_Host, DCT_NumProcessors);
 	}
 }
 
@@ -995,14 +995,17 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 			// Check for matching Input number.
 			if (soundobjectId == processor->GetSoundobjectId())
 			{
+				ComsMode mode = processor->GetComsMode();
+
 				// Check if a SET command was recently sent out and might currently be on transit to the device.
 				// If so, ignore the incoming message so that our local data does not jump back to a now outdated value.
 				bool ignoreResponse = processor->IsParamInTransit(change);
-				ComsMode mode = processor->GetComsMode();
+				bool isReceiveMode = ((mode & (CM_Rx | CM_PollOnce)) != 0);
+				bool processorIsAttentive = !(processor->PopParameterChanged(DCP_Host, change));
 
 				// Only pass on new positions to processors that are in RX mode.
 				// Also, ignore all incoming messages for properties which this processor wants to send a set command.
-				if (!ignoreResponse && ((mode & (CM_Rx | CM_PollOnce)) != 0) && (processor->GetParameterChanged(DCP_Protocol, change) == false))
+				if (!ignoreResponse && isReceiveMode && processorIsAttentive)
 				{
 					// Special handling for X/Y position, since message contains two parameters and MappingID needs to match too.
 					if (sopIdx == SPI_ParamIdx_X)
@@ -1055,14 +1058,17 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 			// Check for matching Input number.
 			if (matrixInputId == processor->GetMatrixInputId())
 			{
+				ComsMode mode = processor->GetComsMode();
+
 				// Check if a SET command was recently sent out and might currently be on transit to the device.
 				// If so, ignore the incoming message so that our local data does not jump back to a now outdated value.
 				bool ignoreResponse = processor->IsParamInTransit(change);
-				ComsMode mode = processor->GetComsMode();
+				bool isReceiveMode = ((mode & (CM_Rx | CM_PollOnce)) != 0);
+				bool processorIsAttentive = !(processor->PopParameterChanged(DCP_Host, change));
 
 				// Only pass on new positions to processors that are in RX mode.
 				// Also, ignore all incoming messages for properties which this processor wants to send a set command.
-				if (!ignoreResponse && ((mode & (CM_Rx | CM_PollOnce)) != 0) && (processor->GetParameterChanged(DCP_Protocol, change) == false))
+				if (!ignoreResponse && isReceiveMode && processorIsAttentive)
 				{
 					float newValue;
 					switch (msgData._valType)
@@ -1091,14 +1097,17 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 			// Check for matching Output number.
 			if (matrixOutputId == processor->GetMatrixOutputId())
 			{
+				ComsMode mode = processor->GetComsMode();
+
 				// Check if a SET command was recently sent out and might currently be on transit to the device.
 				// If so, ignore the incoming message so that our local data does not jump back to a now outdated value.
 				bool ignoreResponse = processor->IsParamInTransit(change);
-				ComsMode mode = processor->GetComsMode();
+				bool isReceiveMode = ((mode & (CM_Rx | CM_PollOnce)) != 0);
+				bool processorIsAttentive = !(processor->PopParameterChanged(DCP_Host, change));
 
 				// Only pass on new positions to processors that are in RX mode.
 				// Also, ignore all incoming messages for properties which this processor wants to send a set command.
-				if (!ignoreResponse && ((mode & (CM_Rx | CM_PollOnce)) != 0) && (processor->GetParameterChanged(DCP_Protocol, change) == false))
+				if (!ignoreResponse && isReceiveMode && processorIsAttentive)
 				{
 					float newValue;
 					switch (msgData._valType)
@@ -1162,34 +1171,34 @@ void Controller::timerCallback()
 
 		// Check if the processor configuration has changed
 		// and need to be updated in the bridging configuration
-		if (soProcessor->GetParameterChanged(DCP_SoundobjectTable, DCT_SoundobjectProcessorConfig))
+		if (soProcessor->GetParameterChanged(DCP_Host, DCT_SoundobjectProcessorConfig))
 		{
 			auto activateSSId = false;
 			auto deactivateSSId = false;
-			if (soProcessor->GetParameterChanged(DCP_SoundobjectTable, DCT_SoundobjectID))
+			if (soProcessor->GetParameterChanged(DCP_Host, DCT_SoundobjectID))
 			{
 				// SoundsourceID change means update is only required when
 				// remote object is currently activated. 
 				activateSSId = ((comsMode & CM_Rx) == CM_Rx);
 			}
-			soProcessor->PopParameterChanged(DCP_SoundobjectTable, DCT_SoundobjectID);
+			soProcessor->PopParameterChanged(DCP_Host, DCT_SoundobjectID);
 
-			if (soProcessor->GetParameterChanged(DCP_SoundobjectTable, DCT_MappingID))
+			if (soProcessor->GetParameterChanged(DCP_Host, DCT_MappingID))
 			{
 				// MappingID change means update is only required when
 				// remote object is currently activated. 
 				activateSSId = ((comsMode & CM_Rx) == CM_Rx);
 			}
-			soProcessor->PopParameterChanged(DCP_SoundobjectTable, DCT_MappingID);
+			soProcessor->PopParameterChanged(DCP_Host, DCT_MappingID);
 
-			if (soProcessor->GetParameterChanged(DCP_SoundobjectTable, DCT_ComsMode))
+			if (soProcessor->GetParameterChanged(DCP_Host, DCT_ComsMode))
 			{
 				// ComsMode change means toggling polling for the remote object,
 				// so one of the two activate/deactivate actions is required
 				activateSSId = ((comsMode & CM_Rx) == CM_Rx);
 				deactivateSSId = !activateSSId;
 			}
-			soProcessor->PopParameterChanged(DCP_SoundobjectTable, DCT_ComsMode);
+			soProcessor->PopParameterChanged(DCP_Host, DCT_ComsMode);
 
 			if (activateSSId)
 				ActivateSoundobjectId(soProcessor->GetSoundobjectId(), soProcessor->GetMappingId());
@@ -1314,34 +1323,34 @@ void Controller::timerCallback()
 
 		// Check if the processor configuration has changed
 		// and need to be updated in the bridging configuration
-		if (miProcessor->GetParameterChanged(DCP_MatrixInputTable, DCT_MatrixInputProcessorConfig))
+		if (miProcessor->GetParameterChanged(DCP_Host, DCT_MatrixInputProcessorConfig))
 		{
 			auto activateMIId = false;
 			auto deactivateMIId = false;
-			if (miProcessor->GetParameterChanged(DCP_MatrixInputTable, DCT_SoundobjectID))
+			if (miProcessor->GetParameterChanged(DCP_Host, DCT_SoundobjectID))
 			{
 				// SoundsourceID change means update is only required when
 				// remote object is currently activated. 
 				activateMIId = ((comsMode & CM_Rx) == CM_Rx);
 			}
-			miProcessor->PopParameterChanged(DCP_MatrixInputTable, DCT_SoundobjectID);
+			miProcessor->PopParameterChanged(DCP_Host, DCT_SoundobjectID);
 
-			if (miProcessor->GetParameterChanged(DCP_MatrixInputTable, DCT_MappingID))
+			if (miProcessor->GetParameterChanged(DCP_Host, DCT_MappingID))
 			{
 				// MappingID change means update is only required when
 				// remote object is currently activated. 
 				activateMIId = ((comsMode & CM_Rx) == CM_Rx);
 			}
-			miProcessor->PopParameterChanged(DCP_MatrixInputTable, DCT_MappingID);
+			miProcessor->PopParameterChanged(DCP_Host, DCT_MappingID);
 
-			if (miProcessor->GetParameterChanged(DCP_MatrixInputTable, DCT_ComsMode))
+			if (miProcessor->GetParameterChanged(DCP_Host, DCT_ComsMode))
 			{
 				// ComsMode change means toggling polling for the remote object,
 				// so one of the two activate/deactivate actions is required
 				activateMIId = ((comsMode & CM_Rx) == CM_Rx);
 				deactivateMIId = !activateMIId;
 			}
-			miProcessor->PopParameterChanged(DCP_MatrixInputTable, DCT_ComsMode);
+			miProcessor->PopParameterChanged(DCP_Host, DCT_ComsMode);
 
 			if (activateMIId)
 				ActivateMatrixInputId(miProcessor->GetMatrixInputId());
@@ -1440,34 +1449,34 @@ void Controller::timerCallback()
 
 		// Check if the processor configuration has changed
 		// and need to be updated in the bridging configuration
-		if (moProcessor->GetParameterChanged(DCP_MatrixOutputTable, DCT_MatrixOutputProcessorConfig))
+		if (moProcessor->GetParameterChanged(DCP_Host, DCT_MatrixOutputProcessorConfig))
 		{
 			auto activateMOId = false;
 			auto deactivateMOId = false;
-			if (moProcessor->GetParameterChanged(DCP_MatrixOutputTable, DCT_SoundobjectID))
+			if (moProcessor->GetParameterChanged(DCP_Host, DCT_SoundobjectID))
 			{
 				// SoundsourceID change means update is only required when
 				// remote object is currently activated. 
 				activateMOId = ((comsMode & CM_Rx) == CM_Rx);
 			}
-			moProcessor->PopParameterChanged(DCP_MatrixOutputTable, DCT_SoundobjectID);
+			moProcessor->PopParameterChanged(DCP_Host, DCT_SoundobjectID);
 
-			if (moProcessor->GetParameterChanged(DCP_MatrixOutputTable, DCT_MappingID))
+			if (moProcessor->GetParameterChanged(DCP_Host, DCT_MappingID))
 			{
 				// MappingID change means update is only required when
 				// remote object is currently activated. 
 				activateMOId = ((comsMode & CM_Rx) == CM_Rx);
 			}
-			moProcessor->PopParameterChanged(DCP_MatrixOutputTable, DCT_MappingID);
+			moProcessor->PopParameterChanged(DCP_Host, DCT_MappingID);
 
-			if (moProcessor->GetParameterChanged(DCP_MatrixOutputTable, DCT_ComsMode))
+			if (moProcessor->GetParameterChanged(DCP_Host, DCT_ComsMode))
 			{
 				// ComsMode change means toggling polling for the remote object,
 				// so one of the two activate/deactivate actions is required
 				activateMOId = ((comsMode & CM_Rx) == CM_Rx);
 				deactivateMOId = !activateMOId;
 			}
-			moProcessor->PopParameterChanged(DCP_MatrixOutputTable, DCT_ComsMode);
+			moProcessor->PopParameterChanged(DCP_Host, DCT_ComsMode);
 
 			if (activateMOId)
 				ActivateMatrixOutputId(moProcessor->GetMatrixOutputId());

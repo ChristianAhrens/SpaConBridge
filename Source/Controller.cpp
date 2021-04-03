@@ -1440,7 +1440,7 @@ void Controller::timerCallback()
 		miProcessor->SetParamInTransit(paramSetsInTransit);
 
 		// All changed parameters were sent out, so we can reset their flags now.
-		miProcessor->PopParameterChanged(DCP_Protocol, DCT_MatrixOutputParameters);
+		miProcessor->PopParameterChanged(DCP_Protocol, DCT_MatrixInputParameters);
 	}
 
 	for (auto const& moProcessor : m_matrixOutputProcessors)

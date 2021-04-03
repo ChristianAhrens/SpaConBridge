@@ -1327,13 +1327,13 @@ void Controller::timerCallback()
 		{
 			auto activateMIId = false;
 			auto deactivateMIId = false;
-			if (miProcessor->GetParameterChanged(DCP_Host, DCT_SoundobjectID))
+			if (miProcessor->GetParameterChanged(DCP_Host, DCT_MatrixInputID))
 			{
-				// SoundsourceID change means update is only required when
+				// MatrixInputID change means update is only required when
 				// remote object is currently activated. 
 				activateMIId = ((comsMode & CM_Rx) == CM_Rx);
 			}
-			miProcessor->PopParameterChanged(DCP_Host, DCT_SoundobjectID);
+			miProcessor->PopParameterChanged(DCP_Host, DCT_MatrixInputID);
 
 			if (miProcessor->GetParameterChanged(DCP_Host, DCT_MappingID))
 			{
@@ -1453,13 +1453,13 @@ void Controller::timerCallback()
 		{
 			auto activateMOId = false;
 			auto deactivateMOId = false;
-			if (moProcessor->GetParameterChanged(DCP_Host, DCT_SoundobjectID))
+			if (moProcessor->GetParameterChanged(DCP_Host, DCT_MatrixOutputID))
 			{
-				// SoundsourceID change means update is only required when
+				// MatrixOutputID change means update is only required when
 				// remote object is currently activated. 
 				activateMOId = ((comsMode & CM_Rx) == CM_Rx);
 			}
-			moProcessor->PopParameterChanged(DCP_Host, DCT_SoundobjectID);
+			moProcessor->PopParameterChanged(DCP_Host, DCT_MatrixOutputID);
 
 			if (moProcessor->GetParameterChanged(DCP_Host, DCT_MappingID))
 			{

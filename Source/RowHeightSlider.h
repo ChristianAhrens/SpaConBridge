@@ -65,6 +65,11 @@ public:
 	void paint(Graphics&) override;
 	void resized() override;
 
+	//==============================================================================
+	static constexpr int _Min = 33;
+	static constexpr int _Max = 66;
+	static constexpr int _Interval = 11;
+
 private:
 	std::unique_ptr<Drawable>	m_arrowComponent;	// the drawable arrow icon
 	std::unique_ptr<Slider>		m_slider;			// the slider component

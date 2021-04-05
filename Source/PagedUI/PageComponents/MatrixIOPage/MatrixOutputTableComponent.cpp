@@ -22,6 +22,7 @@
 
 #include "../../../Controller.h"
 #include "../../../CustomAudioProcessors/MatrixOutputProcessor/MatrixOutputProcessor.h"
+#include "../../../RowHeightSlider.h"
 
 
 namespace SpaConBridge
@@ -58,9 +59,9 @@ MatrixOutputTableComponent::MatrixOutputTableComponent()
 
 	auto table = GetTable();
 	if (table)
-	table->setHeader(std::make_unique<BridgingAwareTableHeaderComponent>(tableColumns));
+		table->setHeader(std::make_unique<BridgingAwareTableHeaderComponent>(tableColumns));
 
-	SetRowHeight(33);
+	SetRowHeight(RowHeightSlider::_Min + RowHeightSlider::_Interval);
 }
 
 /**

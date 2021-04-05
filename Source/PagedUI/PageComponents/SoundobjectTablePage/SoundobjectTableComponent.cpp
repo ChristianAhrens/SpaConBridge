@@ -22,6 +22,7 @@
 
 #include "../../../Controller.h"
 #include "../../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
+#include "../../../RowHeightSlider.h"
 
 
 namespace SpaConBridge
@@ -64,7 +65,8 @@ SoundobjectTableComponent::SoundobjectTableComponent()
 		table->setClickingTogglesRowSelection(false);
 		table->setMultipleSelectionEnabled(true);
 	}
-	SetRowHeight(33);
+	
+	SetRowHeight(RowHeightSlider::_Min);
 }
 
 /**

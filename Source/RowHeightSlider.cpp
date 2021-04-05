@@ -42,6 +42,8 @@ RowHeightSlider::RowHeightSlider(const String& componentName)
 	m_slider->addListener(this);
 	addAndMakeVisible(m_slider.get());
 
+	SetSliderRange(_Min, _Max, _Interval);
+
 	lookAndFeelChanged();
 }
 

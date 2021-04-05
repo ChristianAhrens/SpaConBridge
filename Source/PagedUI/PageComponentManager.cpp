@@ -228,7 +228,10 @@ int PageComponentManager::GetMatrixInputTableRowHeight()
 	if (m_pageContainer)
 		return m_pageContainer->GetMatrixInputTableRowHeight();
 	else
+	{
+		jassertfalse;
 		return 0;
+	}
 }
 
 /**

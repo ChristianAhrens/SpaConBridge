@@ -75,7 +75,6 @@ TableControlBarComponent::TableControlBarComponent(bool canCollapse, const Strin
 
 	// row height slider
 	m_heightSlider = std::make_unique<RowHeightSlider>("rowHeight");
-	m_heightSlider->SetSliderRange(33, 66, 11);
 	m_heightSlider->SetListener(this);
 	addAndMakeVisible(m_heightSlider.get());
 

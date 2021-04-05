@@ -279,8 +279,8 @@ void MatrixIOPageComponent::UpdateGui(bool init)
 			m_inputsComponent->RecreateTableRowIds();
 			m_inputsComponent->UpdateTable();
 		}
-		else if (ctrl->PopParameterChanged(DCP_Protocol, DCT_ProcessorSelection) ||
-			ctrl->PopParameterChanged(DCP_Host, DCT_BridgingConfig))
+		else if (ctrl->PopParameterChanged(DCP_MatrixInputTable, DCT_ProcessorSelection) ||
+			ctrl->PopParameterChanged(DCP_MatrixInputTable, DCT_BridgingConfig))
 		{
 			m_inputsComponent->UpdateTable();
 		}
@@ -305,8 +305,8 @@ void MatrixIOPageComponent::UpdateGui(bool init)
 			m_outputsComponent->RecreateTableRowIds();
 			m_outputsComponent->UpdateTable();
 		}
-		else if (ctrl->PopParameterChanged(DCP_Protocol, DCT_ProcessorSelection) ||
-			ctrl->PopParameterChanged(DCP_Host, DCT_BridgingConfig))
+		else if (ctrl->PopParameterChanged(DCP_MatrixOutputTable, DCT_ProcessorSelection) ||
+			ctrl->PopParameterChanged(DCP_MatrixOutputTable, DCT_BridgingConfig))
 		{
 			m_outputsComponent->UpdateTable();
 		}

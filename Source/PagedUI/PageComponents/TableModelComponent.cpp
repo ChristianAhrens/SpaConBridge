@@ -845,7 +845,7 @@ int TableModelComponent::getColumnAutoSizeWidth(int columnId)
 	case BridgingAwareTableHeaderComponent::TC_ComsMode:
 		return 110;
 	case BridgingAwareTableHeaderComponent::TC_BridgingMute:
-		return 50;
+		return 70;
 	default:
 		break;
 	}

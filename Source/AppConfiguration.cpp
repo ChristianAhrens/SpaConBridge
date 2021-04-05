@@ -41,10 +41,10 @@ bool AppConfiguration::isValid(const std::unique_ptr<XmlElement>& xmlConfig)
 	if (!JUCEAppBasics::AppConfigurationBase::isValid(xmlConfig))
 		return false;
 
-	auto ovrSectionElement = xmlConfig->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW));
-	if (ovrSectionElement)
+	auto uiCfgSectionElement = xmlConfig->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::UICONFIG));
+	if (uiCfgSectionElement)
 	{
-		auto activeTabXmlElement = ovrSectionElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::ACTIVEOVRTAB));
+		auto activeTabXmlElement = uiCfgSectionElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::ACTIVETAB));
 		if (activeTabXmlElement)
 		{
 			auto activeTabTextElement = activeTabXmlElement->getFirstChildElement();
@@ -54,7 +54,7 @@ bool AppConfiguration::isValid(const std::unique_ptr<XmlElement>& xmlConfig)
 		else
 			return false;
 
-		auto lookAndFeelTypeXmlElement = ovrSectionElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::LOOKANDFEELTYPE));
+		auto lookAndFeelTypeXmlElement = uiCfgSectionElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::LOOKANDFEELTYPE));
 		if (lookAndFeelTypeXmlElement)
 		{
 			auto lookAndFeelTypeTextElement = lookAndFeelTypeXmlElement->getFirstChildElement();
@@ -71,8 +71,14 @@ bool AppConfiguration::isValid(const std::unique_ptr<XmlElement>& xmlConfig)
 	auto ctrlSectionElement = xmlConfig->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER));
 	if (ctrlSectionElement)
 	{
-		auto soundSourceProcessorsSectionElement = ctrlSectionElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDSOURCEPROCESSORS));
+		auto soundSourceProcessorsSectionElement = ctrlSectionElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTPROCESSORS));
 		if (!soundSourceProcessorsSectionElement)
+			return false;
+		auto matrixInputProcessorsSectionElement = ctrlSectionElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXINPUTPROCESSORS));
+		if (!matrixInputProcessorsSectionElement)
+			return false;
+		auto matrixOutputProcessorsSectionElement = ctrlSectionElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXOUTPUTPROCESSORS));
+		if (!matrixOutputProcessorsSectionElement)
 			return false;
 		auto bridgingSectionElement = ctrlSectionElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::BRIDGING));
 		if (!bridgingSectionElement)

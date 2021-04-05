@@ -16,8 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "MatrixChannelTableComponentBase.h"
 
-#include "PageComponentBase.h"
+#include "../../../Controller.h"
 
 
 namespace SpaConBridge
@@ -26,50 +27,30 @@ namespace SpaConBridge
 
 /*
 ===============================================================================
- Class PageComponentBase
+	Class MatrixChannelTableComponentBase
 ===============================================================================
 */
 
 /**
  * Class constructor.
  */
-PageComponentBase::PageComponentBase(PageComponentType type)
-	: Component()
+MatrixChannelTableComponentBase::MatrixChannelTableComponentBase()
+	: TableModelComponent(ControlBarPosition::CBP_Bottom, true)
 {
-	m_pageComponentType = type;
+	auto table = GetTable();
+	if (table)
+	{
+		table->setOutlineThickness(1);
+		table->setClickingTogglesRowSelection(false);
+		table->setMultipleSelectionEnabled(true);
+	}
 }
 
 /**
- * Class destructor.
- */
-PageComponentBase::~PageComponentBase()
+	* Class destructor.
+	*/
+MatrixChannelTableComponentBase::~MatrixChannelTableComponentBase()
 {
-}
-
-/**
- * Get this PageComponent's type.
- */
-PageComponentBase::PageComponentType PageComponentBase::GetPageComponentType() const
-{
-	return m_pageComponentType;
-}
-
-/**
- * Minimal helper method to determine if aspect ratio of currently
- * available screen realestate suggests we are in portrait or landscape orientation
- * and be able to use the same determination code in multiple places.
- *
- * @return	True if we are in portrait, false if in landscape aspect ratio.
- */
-bool PageComponentBase::IsPortraitAspectRatio()
-{
-	// determine the layout direction (we want a ratio of 0.75 to be the switching point)
-	auto layoutSwitchAspectRatio = 0.75f;
-	auto w = getLocalBounds().getWidth();
-	auto h = getLocalBounds().getHeight();
-	auto aspectRatio = h / (w != 0.0f ? w : 1.0f);
-
-	return layoutSwitchAspectRatio < aspectRatio;
 }
 
 

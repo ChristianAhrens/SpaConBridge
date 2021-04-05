@@ -19,7 +19,10 @@
 
 #pragma once
 
-#include <JuceHeader.h>
+
+#include "../TableModelComponent.h"
+
+#include "../../../SpaConBridgeCommon.h"
 
 
 namespace SpaConBridge
@@ -27,43 +30,19 @@ namespace SpaConBridge
 
 
 /**
- * Abstract class PageComponentBase.
- * Must be reimplemented to provide a component for an app page.
+ * MatrixChannelTableComponentBase class provides a rolling log to show protocol data.
  */
-class PageComponentBase : public Component
+class MatrixChannelTableComponentBase :	public TableModelComponent
 {
 public:
-
-	/**
-	 * Overlay types. There can only be one active at the time.
-	 */
-	enum PageComponentType
-	{
-		PCT_Unknown = 0,
-		PCT_Overview,
-		PCT_MultiSlide,
-        PCT_MatrixIOs,
-		PCT_Settings,
-		PCT_Statistics,
-		PCT_About
-	};
-
-	explicit PageComponentBase(PageComponentType type);
-	~PageComponentBase() override;
-
-	//==============================================================================
-	PageComponentType GetPageComponentType() const;
-
-	//==============================================================================
-	virtual void UpdateGui(bool init) = 0;
+	MatrixChannelTableComponentBase();
+	virtual ~MatrixChannelTableComponentBase() override;
 
 protected:
-	bool	IsPortraitAspectRatio();
 
 private:
-	PageComponentType	m_pageComponentType;	/**> Type of page as specified by the PageComponentType enum. */
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PageComponentBase)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixChannelTableComponentBase)
 };
 
 

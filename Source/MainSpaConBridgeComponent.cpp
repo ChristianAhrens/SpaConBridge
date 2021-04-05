@@ -23,7 +23,9 @@
 #include "PagedUI/PageContainerComponent.h"
 #include "PagedUI/PageComponentManager.h"
 
-#include "SoundsourceProcessor/SoundsourceProcessor.h"
+#include "CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
+#include "CustomAudioProcessors/MatrixInputProcessor/MatrixInputProcessor.h"
+#include "CustomAudioProcessors/MatrixOutputProcessor/MatrixOutputProcessor.h"
 
 #include <iOS_utils.h>
 
@@ -95,9 +97,16 @@ MainSpaConBridgeComponent::~MainSpaConBridgeComponent()
     {
         // Delete the processor instances held in controller externally,
         // since we otherwise would run into a loop ~Controller -> Controller::RemoveProcessor -> 
-        // ~SoundsourceProcessor -> Controller::RemoveProcessor
-        for (auto const& processorId : ctrl->GetProcessorIds())
-            delete ctrl->GetProcessor(processorId);
+        // ~SoundobjectProcessor -> Controller::RemoveProcessor
+
+        for (auto const& sopId : ctrl->GetSoundobjectProcessorIds())
+            delete ctrl->GetSoundobjectProcessor(sopId);
+
+        for (auto const& mipId : ctrl->GetMatrixInputProcessorIds())
+            delete ctrl->GetMatrixInputProcessor(mipId);
+        
+        for (auto const& mopId : ctrl->GetMatrixOutputProcessorIds())
+            delete ctrl->GetMatrixOutputProcessor(mopId);
 
         ctrl->DestroyInstance();
     }
@@ -142,7 +151,7 @@ void MainSpaConBridgeComponent::onConfigUpdated()
 {
     // get all the modules' configs first, because the initialization process might already trigger dumping, that would override data
     auto ctrlConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER));
-    auto ovrConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::OVERVIEW));
+    auto uiCfgState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::UICONFIG));
 
     // set the controller modules' config
     auto ctrl = SpaConBridge::Controller::GetInstance();
@@ -152,12 +161,12 @@ void MainSpaConBridgeComponent::onConfigUpdated()
     // set the overview manager modules' config
     auto pageMgr = SpaConBridge::PageComponentManager::GetInstance();
     if (pageMgr)
-        pageMgr->setStateXml(ovrConfigState.get());
+        pageMgr->setStateXml(uiCfgState.get());
 
     // set the lookandfeel config (forwards to MainWindow where the magic happens)
-    if (ovrConfigState)
+    if (uiCfgState)
     {
-        auto lookAndFeelXmlElement = ovrConfigState->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::LOOKANDFEELTYPE));
+        auto lookAndFeelXmlElement = uiCfgState->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::LOOKANDFEELTYPE));
         if (lookAndFeelXmlElement)
         {
             auto lookAndFeelTextElement = lookAndFeelXmlElement->getFirstChildElement();

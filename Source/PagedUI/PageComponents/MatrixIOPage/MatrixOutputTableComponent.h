@@ -19,7 +19,9 @@
 
 #pragma once
 
-#include <JuceHeader.h>
+#include "MatrixChannelTableComponentBase.h"
+
+#include "../../../SpaConBridgeCommon.h"
 
 
 namespace SpaConBridge
@@ -27,43 +29,30 @@ namespace SpaConBridge
 
 
 /**
- * Abstract class PageComponentBase.
- * Must be reimplemented to provide a component for an app page.
+ * MatrixOutputTableComponent class provides a rolling log to show protocol data.
  */
-class PageComponentBase : public Component
+class MatrixOutputTableComponent :	public MatrixChannelTableComponentBase
 {
 public:
+	MatrixOutputTableComponent();
+	~MatrixOutputTableComponent() override;
 
-	/**
-	 * Overlay types. There can only be one active at the time.
-	 */
-	enum PageComponentType
-	{
-		PCT_Unknown = 0,
-		PCT_Overview,
-		PCT_MultiSlide,
-        PCT_MatrixIOs,
-		PCT_Settings,
-		PCT_Statistics,
-		PCT_About
-	};
+	//==========================================================================
+	void RecreateTableRowIds() override;
+	void UpdateTable() override;
 
-	explicit PageComponentBase(PageComponentType type);
-	~PageComponentBase() override;
-
-	//==============================================================================
-	PageComponentType GetPageComponentType() const;
-
-	//==============================================================================
-	virtual void UpdateGui(bool init) = 0;
+	//==========================================================================
+	int getNumRows() override;
+	void selectedRowsChanged(int lastRowSelected) override;
 
 protected:
-	bool	IsPortraitAspectRatio();
+	//==============================================================================
+	void onAddProcessor() override;
+	void onRemoveProcessor() override;
 
 private:
-	PageComponentType	m_pageComponentType;	/**> Type of page as specified by the PageComponentType enum. */
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PageComponentBase)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixOutputTableComponent)
 };
 
 

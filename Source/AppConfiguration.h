@@ -31,10 +31,17 @@ class AppConfiguration : public JUCEAppBasics::AppConfigurationBase
 public:
     enum TagID
     {
-        OVERVIEW,
-        ACTIVEOVRTAB,
+        UICONFIG,
+        ACTIVETAB,
+        SOUNDOBJECTTABLE,
+        MATRIXINPUTTABLE,
+        MATRIXOUTPUTTABLE,
+        ROWHEIGHT,
+        COLLAPSED,
         CONTROLLER,
-        SOUNDSOURCEPROCESSORS,
+        SOUNDOBJECTPROCESSORS,
+        MATRIXINPUTPROCESSORS,
+        MATRIXOUTPUTPROCESSORS,
         PROCESSORINSTANCE,
 		BRIDGING,
         LOOKANDFEELTYPE,
@@ -43,14 +50,28 @@ public:
     {
         switch(ID)
         {
-        case OVERVIEW:
-            return "Overview";
-        case ACTIVEOVRTAB:
+        case UICONFIG:
+            return "UIConfig";
+        case ACTIVETAB:
             return "ActiveTab";
+        case SOUNDOBJECTTABLE:
+            return "SoundObjectTable";
+        case MATRIXINPUTTABLE:
+            return "MatrixInputTable";
+        case MATRIXOUTPUTTABLE:
+            return "MatrixOutputTable";
+        case ROWHEIGHT:
+            return "RowHeight";
+        case COLLAPSED:
+            return "Collapsed";
         case CONTROLLER:
             return "Controller";
-        case SOUNDSOURCEPROCESSORS:
-            return "SoundsourceProcessors";
+        case SOUNDOBJECTPROCESSORS:
+            return "SoundobjectProcessors";
+        case MATRIXINPUTPROCESSORS:
+            return "MatrixInputProcessors";
+        case MATRIXOUTPUTPROCESSORS:
+            return "MatrixOutputProcessors";
         case PROCESSORINSTANCE:
             return "Proc";
         case BRIDGING:
@@ -64,18 +85,18 @@ public:
 
 	enum AttributeID
 	{
-		PROCESSORSOURCEID,
-        PROCESSORMAPPINGID,
+		PROCESSORCHANNELID,
+        PROCESSORRECORDID,
         PROCESSORCOMSMODE,
 	};
 	static String getAttributeName(AttributeID Id)
 	{
 		switch (Id)
 		{
-        case PROCESSORSOURCEID:
-            return "ProcSrcId";
-        case PROCESSORMAPPINGID:
-            return "MappingId";
+        case PROCESSORCHANNELID:
+            return "ChannelId";
+        case PROCESSORRECORDID:
+            return "RecordId";
         case PROCESSORCOMSMODE:
             return "ComsMode";
 		default:

@@ -87,7 +87,9 @@ public:
 	static bool LessThanMatrixOutputId(juce::int32 pId1, juce::int32 pId2);
 	static bool LessThanMapping(juce::int32 pId1, juce::int32 pId2);
 	static bool LessThanComsMode(juce::int32 pId1, juce::int32 pId2);
-	static bool LessThanBridgingMute(juce::int32 pId1, juce::int32 pId2);
+	static bool LessThanSoundobjectBridgingMute(juce::int32 pId1, juce::int32 pId2);
+	static bool LessThanMatrixInputBridgingMute(juce::int32 pId1, juce::int32 pId2);
+	static bool LessThanMatrixOutputBridgingMute(juce::int32 pId1, juce::int32 pId2);
 
 	juce::int32 GetProcessorIdForRow(int rowNumber) const;
 	std::vector<juce::int32> GetProcessorIdsForRows(const std::vector<int>& rowNumbers) const;

@@ -458,12 +458,12 @@ bool TableModelComponent::LessThanComsMode(juce::int32 pId1, juce::int32 pId2)
 }
 
 /**
- * Helper sorting function used by std::sort(). This version is used to sort by procssor's ComsMode.
+ * Helper sorting function used by std::sort(). This version is used to sort by mute states.
  * @param pId1	Id of the first processor.
  * @param pId2	Id of the second processor.
- * @return	True if the first procssor's ComsMode is less than the second's.
+ * @return	True if the first procssor's mute states are 'muted' for more protocols than the second's.
  */
-bool TableModelComponent::LessThanBridgingMute(juce::int32 pId1, juce::int32 pId2)
+bool TableModelComponent::LessThanSoundobjectBridgingMute(juce::int32 pId1, juce::int32 pId2)
 {
 	auto ctrl = Controller::GetInstance();
 	if (!ctrl)
@@ -502,10 +502,111 @@ bool TableModelComponent::LessThanBridgingMute(juce::int32 pId1, juce::int32 pId
 			return (mutedProtocolCountP1 < mutedProtocolCountP2);
 		}
 	}
+	
+	jassertfalse;
+	return false;
+}
+
+/**
+ * Helper sorting function used by std::sort(). This version is used to sort by mute states.
+ * @param pId1	Id of the first processor.
+ * @param pId2	Id of the second processor.
+ * @return	True if the first procssor's mute states are 'muted' for more protocols than the second's.
+ */
+bool TableModelComponent::LessThanMatrixInputBridgingMute(juce::int32 pId1, juce::int32 pId2)
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return false;
+
+	// Comparing mutes does not make too much sense.
+	// Nevertheless, to have some defined behaviour, we use the collected 
+	// count of muted briding protocols of every soundsource for this.
+	// (Nothing muted < some protocols muted < all protocols muted)
+	auto processorIds = ctrl->GetMatrixInputProcessorIds();
+	auto maxProcessorIdIter = std::max_element(processorIds.begin(), processorIds.end());
+	if (maxProcessorIdIter == processorIds.end())
+		return false;
+	auto maxProcessorId = *maxProcessorIdIter;
+	if ((pId1 <= maxProcessorId) && (pId2 <= maxProcessorId))
+	{
+		auto p1 = ctrl->GetMatrixInputProcessor(pId1);
+		auto p2 = ctrl->GetMatrixInputProcessor(pId2);
+		if (p1 && p2)
+		{
+			auto mutedProtocolCountP1 = 0;
+			auto mutedProtocolCountP2 = 0;
+
+			auto matrixInputId1 = p1->GetMatrixInputId();
+			auto matrixInputId2 = p2->GetMatrixInputId();
+			for (auto bridgingType : ProtocolBridgingTypes)
+			{
+				auto activeBridging = ctrl->GetActiveProtocolBridging();
+				if ((activeBridging & bridgingType) == bridgingType)
+				{
+					mutedProtocolCountP1 += ctrl->GetMuteBridgingMatrixInputId(bridgingType, matrixInputId1) ? 1 : 0;
+					mutedProtocolCountP2 += ctrl->GetMuteBridgingMatrixInputId(bridgingType, matrixInputId2) ? 1 : 0;
+				}
+			}
+
+			return (mutedProtocolCountP1 < mutedProtocolCountP2);
+		}
+	}
 
 	jassertfalse;
 	return false;
 }
+
+/**
+ * Helper sorting function used by std::sort(). This version is used to sort by mute states.
+ * @param pId1	Id of the first processor.
+ * @param pId2	Id of the second processor.
+ * @return	True if the first procssor's mute states are 'muted' for more protocols than the second's.
+ */
+bool TableModelComponent::LessThanMatrixOutputBridgingMute(juce::int32 pId1, juce::int32 pId2)
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return false;
+
+	// Comparing mutes does not make too much sense.
+	// Nevertheless, to have some defined behaviour, we use the collected 
+	// count of muted briding protocols of every soundsource for this.
+	// (Nothing muted < some protocols muted < all protocols muted)
+	auto processorIds = ctrl->GetMatrixOutputProcessorIds();
+	auto maxProcessorIdIter = std::max_element(processorIds.begin(), processorIds.end());
+	if (maxProcessorIdIter == processorIds.end())
+		return false;
+	auto maxProcessorId = *maxProcessorIdIter;
+	if ((pId1 <= maxProcessorId) && (pId2 <= maxProcessorId))
+	{
+		auto p1 = ctrl->GetMatrixOutputProcessor(pId1);
+		auto p2 = ctrl->GetMatrixOutputProcessor(pId2);
+		if (p1 && p2)
+		{
+			auto mutedProtocolCountP1 = 0;
+			auto mutedProtocolCountP2 = 0;
+
+			auto matrixOutputId1 = p1->GetMatrixOutputId();
+			auto matrixOutputId2 = p2->GetMatrixOutputId();
+			for (auto bridgingType : ProtocolBridgingTypes)
+			{
+				auto activeBridging = ctrl->GetActiveProtocolBridging();
+				if ((activeBridging & bridgingType) == bridgingType)
+				{
+					mutedProtocolCountP1 += ctrl->GetMuteBridgingMatrixOutputId(bridgingType, matrixOutputId1) ? 1 : 0;
+					mutedProtocolCountP2 += ctrl->GetMuteBridgingMatrixOutputId(bridgingType, matrixOutputId2) ? 1 : 0;
+				}
+			}
+
+			return (mutedProtocolCountP1 < mutedProtocolCountP2);
+		}
+	}
+
+	jassertfalse;
+	return false;
+}
+
 
 /**
  * This can be overridden to react to the user double-clicking on a part of the list where there are no rows. 
@@ -601,7 +702,12 @@ void TableModelComponent::sortOrderChanged(int newSortColumnId, bool isForwards)
 		std::sort(m_processorIds.begin(), m_processorIds.end(), TableModelComponent::LessThanComsMode);
 		break;
 	case BridgingAwareTableHeaderComponent::TC_BridgingMute:
-		std::sort(m_processorIds.begin(), m_processorIds.end(), TableModelComponent::LessThanBridgingMute);
+		if (GetTableType() == TT_Soundobjects)
+			std::sort(m_processorIds.begin(), m_processorIds.end(), TableModelComponent::LessThanSoundobjectBridgingMute);
+		else if (GetTableType() == TT_MatrixInputs)
+			std::sort(m_processorIds.begin(), m_processorIds.end(), TableModelComponent::LessThanMatrixInputBridgingMute);
+		else if (GetTableType() == TT_MatrixOutputs)
+			std::sort(m_processorIds.begin(), m_processorIds.end(), TableModelComponent::LessThanMatrixOutputBridgingMute);
 		break;
 	default:
 		break;

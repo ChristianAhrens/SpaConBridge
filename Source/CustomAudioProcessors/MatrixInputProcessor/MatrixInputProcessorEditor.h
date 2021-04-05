@@ -41,6 +41,8 @@ public:
 	MatrixInputProcessorEditor(MatrixInputProcessor&);
 	~MatrixInputProcessorEditor() override;
 
+	MatrixInputId	GetMatrixInputId();
+
 	void resized() override;
 	void UpdateGui(bool init);
 

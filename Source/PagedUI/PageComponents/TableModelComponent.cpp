@@ -859,15 +859,15 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 		{
 			MatrixInputProcessorEditor* matrixInputEditor = static_cast<MatrixInputProcessorEditor*> (existingComponentToUpdate);
 			
-			// If an existing component is being passed-in for updating, we'll re-use it, but
-			// if not, we'll have to create one.
-			if (matrixInputEditor == nullptr)
+			auto ctrl = Controller::GetInstance();
+			if (ctrl)
 			{
-				auto ctrl = Controller::GetInstance();
-				if (ctrl)
+				auto processor = ctrl->GetMatrixInputProcessor(GetProcessorIdForRow(rowNumber));
+				if (processor)
 				{
-					auto processor = ctrl->GetMatrixInputProcessor(GetProcessorIdForRow(rowNumber));
-					if (processor)
+					// If an existing component is being passed-in for updating, we'll re-use it, but
+					// if not, we'll have to create one.
+					if ((matrixInputEditor == nullptr) || (processor->GetMatrixInputId() != matrixInputEditor->GetMatrixInputId()))
 					{
 						auto processorEditor = processor->createEditorIfNeeded();
 						auto mipEditor = dynamic_cast<MatrixInputProcessorEditor*>(processorEditor);
@@ -877,9 +877,8 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 				}
 			}
 
-			// Ensure that the component knows which row number it is located at.
-			//matrixInputEditor->SetRow(rowNumber);
-			matrixInputEditor->UpdateGui(true);
+			if (matrixInputEditor)
+				matrixInputEditor->UpdateGui(true);
 
 			// Return a pointer to the component.
 			ret = matrixInputEditor;
@@ -890,15 +889,15 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 		{
 			MatrixOutputProcessorEditor* matrixOutputEditor = static_cast<MatrixOutputProcessorEditor*> (existingComponentToUpdate);
 
-			// If an existing component is being passed-in for updating, we'll re-use it, but
-			// if not, we'll have to create one.
-			if (matrixOutputEditor == nullptr)
+			auto ctrl = Controller::GetInstance();
+			if (ctrl)
 			{
-				auto ctrl = Controller::GetInstance();
-				if (ctrl)
+				auto processor = ctrl->GetMatrixOutputProcessor(GetProcessorIdForRow(rowNumber));
+				if (processor)
 				{
-					auto processor = ctrl->GetMatrixOutputProcessor(GetProcessorIdForRow(rowNumber));
-					if (processor)
+					// If an existing component is being passed-in for updating, we'll re-use it, but
+					// if not, we'll have to create one.
+					if ((matrixOutputEditor == nullptr) || (processor->GetMatrixOutputId() != matrixOutputEditor->GetMatrixOutputId()))
 					{
 						auto processorEditor = processor->createEditorIfNeeded();
 						auto mopEditor = dynamic_cast<MatrixOutputProcessorEditor*>(processorEditor);
@@ -908,9 +907,8 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 				}
 			}
 
-			// Ensure that the component knows which row number it is located at.
-			//matrixOutputEditor->SetRow(rowNumber);
-			matrixOutputEditor->UpdateGui(true);
+			if (matrixOutputEditor)
+				matrixOutputEditor->UpdateGui(true);
 
 			// Return a pointer to the component.
 			ret = matrixOutputEditor;

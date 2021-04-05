@@ -111,6 +111,19 @@ MatrixOutputProcessorEditor::~MatrixOutputProcessorEditor()
 }
 
 /**
+ * Helper getter method for the parent matrixoutput processor's output id
+ * @return	The matrixoutput id of the parent processor or invalid if no parent processor is present.
+ */
+MatrixOutputId MatrixOutputProcessorEditor::GetMatrixOutputId()
+{
+	MatrixOutputProcessor* pro = dynamic_cast<MatrixOutputProcessor*>(getAudioProcessor());
+	if (pro)
+		return pro->GetMatrixOutputId();
+
+	return INVALID_ADDRESS_VALUE;
+}
+
+/**
  * Helper method to update the drawables used for buttons to match the text colour
  */
 void MatrixOutputProcessorEditor::updateDrawableButtonImageColours()

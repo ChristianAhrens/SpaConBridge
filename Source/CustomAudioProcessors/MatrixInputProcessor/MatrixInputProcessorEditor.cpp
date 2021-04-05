@@ -111,6 +111,19 @@ MatrixInputProcessorEditor::~MatrixInputProcessorEditor()
 }
 
 /**
+ * Helper getter method for the parent matrixinput processor's input id
+ * @return	The matrixinput id of the parent processor or invalid if no parent processor is present.
+ */
+MatrixInputId MatrixInputProcessorEditor::GetMatrixInputId()
+{
+	MatrixInputProcessor* pro = dynamic_cast<MatrixInputProcessor*>(getAudioProcessor());
+	if (pro)
+		return pro->GetMatrixInputId();
+
+	return INVALID_ADDRESS_VALUE;
+}
+
+/**
  * Helper method to update the drawables used for buttons to match the text colour
  */
 void MatrixInputProcessorEditor::updateDrawableButtonImageColours()

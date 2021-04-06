@@ -965,7 +965,7 @@ void TableModelComponent::selectedRowsChanged(int lastRowSelected)
 {
 	if (m_table)
 	{
-		if (m_table->getSelectedRows().isEmpty() || m_table->getSelectedRows().size() > 1)
+		if (m_table->getSelectedRows().isEmpty())
 		{
 			if (onCurrentSelectedProcessorChanged)
 				onCurrentSelectedProcessorChanged(SpaConBridge::INVALID_PROCESSOR_ID);

@@ -55,22 +55,26 @@ TableControlBarComponent::TableControlBarComponent(bool canCollapse, const Strin
 	m_addInstance = std::make_unique<DrawableButton>("add", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_addInstance->setClickingTogglesState(false);
 	m_addInstance->addListener(this);
+	m_addInstance->setTooltip("Add row");
 	addAndMakeVisible(m_addInstance.get());
 	m_removeInstance = std::make_unique<DrawableButton>("remove", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_removeInstance->setClickingTogglesState(false);
 	m_removeInstance->setEnabled(false);
 	m_removeInstance->addListener(this);
+	m_removeInstance->setTooltip("Remove selected row(s)");
 	addAndMakeVisible(m_removeInstance.get());
 
 	// Create quick selection buttons
 	m_selectAll = std::make_unique<DrawableButton>("all", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_selectAll->setClickingTogglesState(false);
 	m_selectAll->addListener(this);
+	m_selectAll->setTooltip("Select all rows");
 	addAndMakeVisible(m_selectAll.get());
 
 	m_selectNone = std::make_unique<DrawableButton>("none", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_selectNone->setClickingTogglesState(false);
 	m_selectNone->addListener(this);
+	m_selectNone->setTooltip("Deselect all rows");
 	addAndMakeVisible(m_selectNone.get());
 
 	// row height slider

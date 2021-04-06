@@ -43,6 +43,8 @@ MainSpaConBridgeComponent::MainSpaConBridgeComponent()
 MainSpaConBridgeComponent::MainSpaConBridgeComponent(std::function<void(DbLookAndFeelBase::LookAndFeelType)> lafUpdateCallback)
     : onUpdateLookAndFeel(lafUpdateCallback)
 {
+    m_toolTipWindowInstance = std::make_unique<TooltipWindow>();
+
     m_config = std::make_unique<AppConfiguration>(JUCEAppBasics::AppConfigurationBase::getDefaultConfigFilePath());
     m_config->addDumper(this);
     m_config->addWatcher(this);

@@ -174,8 +174,8 @@ void MatrixOutputTableComponent::onRemoveProcessor()
 	if (!ctrl)
 		return;
 
-	auto const& selectedProcessorIds = GetProcessorIdsForRows(GetSelectedRows());
-
+    auto const& selectedProcessorIds = GetProcessorIdsForRows(GetSelectedRows());
+    
 	if (ctrl->GetMatrixOutputProcessorCount() <= selectedProcessorIds.size())
 	{
 		if (onCurrentSelectedProcessorChanged)
@@ -192,11 +192,28 @@ void MatrixOutputTableComponent::onRemoveProcessor()
 
 	// when processors are being deleted in next step, the current selection will be queried, which is why clearing the selection before is neccessary
 	SetSelectedRows(std::vector<juce::int32>());
+    
+    // Iterate through selected an therefor scheduled for destruction processors and clean the corresponding table rows from model
+    // This in consequence destroys the processor editors used in those rows and allows clean destruction of the processors in a second iteration step.
+    for (auto processorId : selectedProcessorIds)
+    {
+        auto processorIter = std::find(GetProcessorIds().begin(), GetProcessorIds().end(), processorId);
+        if (processorIter != GetProcessorIds().end())
+            GetProcessorIds().erase(processorIter);
+        else
+            jassertfalse;
+    }
+    RecreateTableRowIds();
+    UpdateTable();
 
+    // Iterate through the processor ids once more to destroy the selected processors themselves.
 	for (auto processorId : selectedProcessorIds)
 	{
 		if (ctrl->GetMatrixOutputProcessorCount() >= 1)
+        {
 			auto processor = std::unique_ptr<MatrixOutputProcessor>(ctrl->GetMatrixOutputProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
+            processor->releaseResources();
+        }
 	}
 }
 

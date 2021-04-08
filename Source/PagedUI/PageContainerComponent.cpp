@@ -38,7 +38,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "PageComponentManager.h"
 #include "PageComponents/SoundobjectTablePage/SoundobjectTablePageComponent.h"
-#include "PageComponents/MultisurfacePage/MultisurfacePageComponent.h"
+#include "PageComponents/MultiSurfacePage/MultisurfacePageComponent.h"
 #include "PageComponents/MatrixIOPage/MatrixIOPageComponent.h"
 #include "PageComponents/SettingsPage/SettingsPageComponent.h"
 #include "PageComponents/StatisticsPage/StatisticsPageComponent.h"

@@ -66,20 +66,20 @@ namespace SpaConBridge
 /**
  * Class constructor.
  */
-	TableModelComponent::TableModelComponent(ControlBarPosition pos, bool tableCanCollapse)
-	{
-		// Create our table component and add it to this component.
-		m_table = std::make_unique<TableListBox>();
-		addAndMakeVisible(m_table.get());
-		m_tableControlBar = std::make_unique<TableControlBarComponent>(tableCanCollapse);
-		addAndMakeVisible(m_tableControlBar.get());
+TableModelComponent::TableModelComponent(ControlBarPosition pos, bool tableCanCollapse)
+{
+    // Create our table component and add it to this component.
+    m_table = std::make_unique<TableListBox>();
+    addAndMakeVisible(m_table.get());
+    m_tableControlBar = std::make_unique<TableControlBarComponent>(tableCanCollapse);
+    addAndMakeVisible(m_tableControlBar.get());
 
-		m_tableControlBar->onAddClick = [=] { onAddProcessor(); };
-		m_tableControlBar->onRemoveClick = [=] { onRemoveProcessor(); };
-		m_tableControlBar->onSelectAllClick = [=] { onSelectAllProcessors(); };
-		m_tableControlBar->onSelectNoneClick = [=] { onDeselectAllProcessors(); };
-		m_tableControlBar->onHeightChanged = [=](int height) { onRowHeightSlided(height); };
-		m_tableControlBar->onCollapsClick = [=](bool collapsed) { onCollapseToggled(collapsed); };
+    m_tableControlBar->onAddClick = [=] { onAddProcessor(); };
+    m_tableControlBar->onRemoveClick = [=] { onRemoveProcessor(); };
+    m_tableControlBar->onSelectAllClick = [=] { onSelectAllProcessors(); };
+    m_tableControlBar->onSelectNoneClick = [=] { onDeselectAllProcessors(); };
+    m_tableControlBar->onHeightChanged = [=](int height) { onRowHeightSlided(height); };
+    m_tableControlBar->onCollapsClick = [=](bool collapsed) { onCollapseToggled(collapsed); };
 
 	SetControlBarPosition(pos);
 }

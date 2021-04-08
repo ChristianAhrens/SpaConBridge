@@ -102,13 +102,25 @@ MainSpaConBridgeComponent::~MainSpaConBridgeComponent()
         // ~SoundobjectProcessor -> Controller::RemoveProcessor
 
         for (auto const& sopId : ctrl->GetSoundobjectProcessorIds())
-            delete ctrl->GetSoundobjectProcessor(sopId);
+        {
+            auto processor = std::unique_ptr<SoundobjectProcessor>(ctrl->GetSoundobjectProcessor(sopId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
+            std::unique_ptr<AudioProcessorEditor>(processor->getActiveEditor()).reset();
+            processor->releaseResources();
+        }
 
         for (auto const& mipId : ctrl->GetMatrixInputProcessorIds())
-            delete ctrl->GetMatrixInputProcessor(mipId);
+        {
+            auto processor = std::unique_ptr<MatrixInputProcessor>(ctrl->GetMatrixInputProcessor(mipId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
+            std::unique_ptr<AudioProcessorEditor>(processor->getActiveEditor()).reset();
+            processor->releaseResources();
+        }
         
         for (auto const& mopId : ctrl->GetMatrixOutputProcessorIds())
-            delete ctrl->GetMatrixOutputProcessor(mopId);
+        {
+            auto processor = std::unique_ptr<MatrixOutputProcessor>(ctrl->GetMatrixOutputProcessor(mopId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
+            std::unique_ptr<AudioProcessorEditor>(processor->getActiveEditor()).reset();
+            processor->releaseResources();
+        }
 
         ctrl->DestroyInstance();
     }

@@ -142,7 +142,7 @@ private:
 	TableType									m_tableType{ TT_Invalid };	/**> The type of table component. */
 	std::unique_ptr<TableControlBarComponent>	m_tableControlBar;			/**> The control bottom bar. */
 	ControlBarPosition							m_controlBarPosition;		/**> The position of the control bar. */
-	std::vector<juce::int32>					m_processorIds;				/**> Local list of Soundobject Processor instance IDs, one for each row in the table. */
+	std::vector<juce::int32>					m_processorIds;				/**> Local list of Processor instance IDs, one for each row in the table. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TableModelComponent)
 };

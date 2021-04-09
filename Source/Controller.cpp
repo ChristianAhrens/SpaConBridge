@@ -174,6 +174,7 @@ void Controller::SetParameterChanged(DataChangeParticipant changeSource, DataCha
 	case DCT_SoundobjectProcessorConfig:
 	case DCT_MatrixInputProcessorConfig:
 	case DCT_MatrixOutputProcessorConfig:
+	case DCT_NumBridgingModules:
 		if (changeSource != DCP_Init)
 			triggerConfigurationUpdate(true);
 		break;
@@ -181,10 +182,6 @@ void Controller::SetParameterChanged(DataChangeParticipant changeSource, DataCha
 	case DCT_MuteState:
 		if (changeSource != DCP_Init)
 			triggerConfigurationUpdate(false);
-		break;
-	case DCT_NumBridgingModules:
-		if (changeSource != DCP_Init)
-			triggerConfigurationUpdate(true);
 		break;
 	case DCT_Online:
 	case DCT_SoundobjectPosition:

@@ -381,10 +381,7 @@ void TextEditorContainer::SetRow(int newRow)
 		{
 			auto processor = ctrl->GetMatrixOutputProcessor(processorId);
 			if (processor)
-			{
 				m_editor.setText(String(processor->GetMatrixOutputId()), false);
-				DBG(String(__FUNCTION__) + " row" + String(newRow) + " TT_MatrixOutputs PId" + String(processorId) + " MPId" + String(processor->GetProcessorId()) + " MOId" + String(processor->GetMatrixOutputId()));
-			}
 		}
 		break;
 	case TT_Soundobjects:

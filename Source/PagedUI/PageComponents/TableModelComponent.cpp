@@ -867,12 +867,16 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 				{
 					// If an existing component is being passed-in for updating, we'll re-use it, but
 					// if not, we'll have to create one.
-					if ((matrixInputEditor == nullptr) || (processor->GetMatrixInputId() != matrixInputEditor->GetMatrixInputId()))
+					if (matrixInputEditor == nullptr)
 					{
-						auto processorEditor = processor->createEditorIfNeeded();
-						auto mipEditor = dynamic_cast<MatrixInputProcessorEditor*>(processorEditor);
+						auto mipEditor = dynamic_cast<MatrixInputProcessorEditor*>(processor->createEditorIfNeeded());
 						if (mipEditor)
 							matrixInputEditor = mipEditor;
+					}
+					else if (processor->GetMatrixInputId() != matrixInputEditor->GetMatrixInputId())
+					{
+						std::unique_ptr<MatrixInputProcessorEditor> miePtr(matrixInputEditor); // wrap the editor pointer in a unique_ptr to have it being deleted when leaving this scope
+						matrixInputEditor = nullptr;
 					}
 				}
 			}
@@ -897,12 +901,16 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 				{
 					// If an existing component is being passed-in for updating, we'll re-use it, but
 					// if not, we'll have to create one.
-					if ((matrixOutputEditor == nullptr) || (processor->GetMatrixOutputId() != matrixOutputEditor->GetMatrixOutputId()))
+					if (matrixOutputEditor == nullptr)
 					{
-						auto processorEditor = processor->createEditorIfNeeded();
-						auto mopEditor = dynamic_cast<MatrixOutputProcessorEditor*>(processorEditor);
+						auto mopEditor = dynamic_cast<MatrixOutputProcessorEditor*>(processor->createEditorIfNeeded());
 						if (mopEditor)
 							matrixOutputEditor = mopEditor;
+					}
+					else if (processor->GetMatrixOutputId() != matrixOutputEditor->GetMatrixOutputId())
+					{
+						std::unique_ptr<MatrixOutputProcessorEditor> moePtr(matrixOutputEditor); // wrap the editor pointer in a unique_ptr to have it being deleted when leaving this scope
+						matrixOutputEditor = nullptr;
 					}
 				}
 			}

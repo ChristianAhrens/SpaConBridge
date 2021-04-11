@@ -103,7 +103,7 @@ public:
 	void SetActiveBridgingProtocols(ProtocolBridgingType desiredActiveBridgingTypes);
 
 	//==========================================================================
-	bool UpdateActiveDS100SourceIds();
+	bool UpdateActiveDS100RemoteObjectIds();
 
 	String GetDS100IpAddress();
 	bool SetDS100IpAddress(String ipAddress, bool dontSendNotification = false);
@@ -123,9 +123,17 @@ public:
 	void SetSecondDS100State(ObjectHandlingState state);
 
 	//==========================================================================
-	bool GetMuteDiGiCoSourceId(SourceId sourceId);
-	bool SetMuteDiGiCoSourceId(SourceId sourceId, bool mute = true);
-	bool SetMuteDiGiCoSourceIds(const std::vector<SourceId>& sourceIds, bool mute = true);
+	bool GetMuteDiGiCoSoundobjectId(SoundobjectId soundobjectId);
+	bool SetMuteDiGiCoSoundobjectId(SoundobjectId soundobjectId, bool mute = true);
+	bool SetMuteDiGiCoSoundobjectIds(const std::vector<SoundobjectId>& soundobjectIds, bool mute = true);
+
+	bool GetMuteDiGiCoMatrixInputId(MatrixInputId matrixInputId);
+	bool SetMuteDiGiCoMatrixInputId(MatrixInputId matrixInputId, bool mute = true);
+	bool SetMuteDiGiCoMatrixInputIds(const std::vector<MatrixInputId>& matrixInputIds, bool mute = true);
+
+	bool GetMuteDiGiCoMatrixOutputId(MatrixOutputId matrixOutputId);
+	bool SetMuteDiGiCoMatrixOutputId(MatrixOutputId matrixOutputId, bool mute = true);
+	bool SetMuteDiGiCoMatrixOutputIds(const std::vector<MatrixOutputId>& matrixOutputIds, bool mute = true);
 
 	String GetDiGiCoIpAddress();
 	bool SetDiGiCoIpAddress(String ipAddress, bool dontSendNotification = false);
@@ -135,9 +143,17 @@ public:
 	bool SetDiGiCoRemotePort(int remotePort, bool dontSendNotification = false);
 
 	//==========================================================================
-	bool GetMuteRTTrPMSourceId(SourceId sourceId);
-	bool SetMuteRTTrPMSourceId(SourceId sourceId, bool mute = true);
-	bool SetMuteRTTrPMSourceIds(const std::vector<SourceId>& sourceIds, bool mute = true);
+	bool GetMuteRTTrPMSoundobjectId(SoundobjectId soundobjectId);
+	bool SetMuteRTTrPMSoundobjectId(SoundobjectId sourceId, bool mute = true);
+	bool SetMuteRTTrPMSoundobjectIds(const std::vector<SoundobjectId>& soundobjectIds, bool mute = true);
+
+	bool GetMuteRTTrPMMatrixInputId(MatrixInputId matrixInputId);
+	bool SetMuteRTTrPMMatrixInputId(MatrixInputId matrixInputId, bool mute = true);
+	bool SetMuteRTTrPMMatrixInputIds(const std::vector<MatrixInputId>& matrixInputIds, bool mute = true);
+				
+	bool GetMuteRTTrPMMatrixOutputId(MatrixOutputId matrixOutputId);
+	bool SetMuteRTTrPMMatrixOutputId(MatrixOutputId matrixOutputId, bool mute = true);
+	bool SetMuteRTTrPMMatrixOutputIds(const std::vector<MatrixOutputId>& matrixOutputIds, bool mute = true);
 
 	String GetRTTrPMIpAddress();
 	bool SetRTTrPMIpAddress(String ipAddress, bool dontSendNotification = false);
@@ -149,9 +165,17 @@ public:
 	bool SetRTTrPMMappingArea(int mappingAreaId, bool dontSendNotification = false);
 
 	//==========================================================================
-	bool GetMuteGenericOSCSourceId(SourceId sourceId);
-	bool SetMuteGenericOSCSourceId(SourceId sourceId, bool mute = true);
-	bool SetMuteGenericOSCSourceIds(const std::vector<SourceId>& sourceIds, bool mute = true);
+	bool GetMuteGenericOSCSoundobjectId(SoundobjectId soundobjectId);
+	bool SetMuteGenericOSCSoundobjectId(SoundobjectId soundobjectId, bool mute = true);
+	bool SetMuteGenericOSCSoundobjectIds(const std::vector<SoundobjectId>& soundobjectIds, bool mute = true);
+
+	bool GetMuteGenericOSCMatrixInputId(MatrixInputId matrixInputId);
+	bool SetMuteGenericOSCMatrixInputId(MatrixInputId matrixInputId, bool mute = true);
+	bool SetMuteGenericOSCMatrixInputIds(const std::vector<MatrixInputId>& matrixInputIds, bool mute = true);
+				
+	bool GetMuteGenericOSCMatrixOutputId(MatrixOutputId matrixOutputId);
+	bool SetMuteGenericOSCMatrixOutputId(MatrixOutputId matrixOutputId, bool mute = true);
+	bool SetMuteGenericOSCMatrixOutputIds(const std::vector<MatrixOutputId>& matrixOutputIds, bool mute = true);
 
 	String GetGenericOSCIpAddress();
 	bool SetGenericOSCIpAddress(String ipAddress, bool dontSendNotification = false);
@@ -161,9 +185,17 @@ public:
 	bool SetGenericOSCRemotePort(int remotePort, bool dontSendNotification = false);
 
 	//==========================================================================
-	bool GetMuteGenericMIDISourceId(SourceId sourceId);
-	bool SetMuteGenericMIDISourceId(SourceId sourceId, bool mute = true);
-	bool SetMuteGenericMIDISourceIds(const std::vector<SourceId>& sourceIds, bool mute = true);
+	bool GetMuteGenericMIDISoundobjectId(SoundobjectId soundobjectId);
+	bool SetMuteGenericMIDISoundobjectId(SoundobjectId soundobjectId, bool mute = true);
+	bool SetMuteGenericMIDISoundobjectIds(const std::vector<SoundobjectId>& soundobjectIds, bool mute = true);
+
+	bool GetMuteGenericMIDIMatrixInputId(MatrixInputId matrixInputId);
+	bool SetMuteGenericMIDIMatrixInputId(MatrixInputId matrixInputId, bool mute = true);
+	bool SetMuteGenericMIDIMatrixInputIds(const std::vector<MatrixInputId>& matrixInputIds, bool mute = true);
+				
+	bool GetMuteGenericMIDIMatrixOutputId(MatrixOutputId matrixOutputId);
+	bool SetMuteGenericMIDIMatrixOutputId(MatrixOutputId matrixOutputId, bool mute = true);
+	bool SetMuteGenericMIDIMatrixOutputIds(const std::vector<MatrixOutputId>& matrixOutputIds, bool mute = true);
 
 	String GetGenericMIDIInputDeviceIdentifier();
 	bool SetGenericMIDIInputDeviceIdentifier(const String& MIDIInputDeviceIdentifier, bool dontSendNotification = false);
@@ -175,9 +207,17 @@ public:
 	bool SetGenericMIDIMappingArea(int mappingAreaId, bool dontSendNotification = false);
 
 	//==========================================================================
-	bool GetMuteYamahaOSCSourceId(SourceId sourceId);
-	bool SetMuteYamahaOSCSourceId(SourceId sourceId, bool mute = true);
-	bool SetMuteYamahaOSCSourceIds(const std::vector<SourceId>& sourceIds, bool mute = true);
+	bool GetMuteYamahaOSCSoundobjectId(SoundobjectId soundobjectId);
+	bool SetMuteYamahaOSCSoundobjectId(SoundobjectId soundobjectId, bool mute = true);
+	bool SetMuteYamahaOSCSoundobjectIds(const std::vector<SoundobjectId>& soundobjectIds, bool mute = true);
+
+	bool GetMuteYamahaOSCMatrixInputId(MatrixInputId matrixInputId);
+	bool SetMuteYamahaOSCMatrixInputId(MatrixInputId matrixInputId, bool mute = true);
+	bool SetMuteYamahaOSCMatrixInputIds(const std::vector<MatrixInputId>& matrixInputIds, bool mute = true);
+				
+	bool GetMuteYamahaOSCMatrixOutputId(MatrixInputId matrixOutputId);
+	bool SetMuteYamahaOSCMatrixOutputId(MatrixInputId matrixOutputId, bool mute = true);
+	bool SetMuteYamahaOSCMatrixOutputIds(const std::vector<MatrixOutputId>& matrixOutputIds, bool mute = true);
 
 	String GetYamahaOSCIpAddress();
 	bool SetYamahaOSCIpAddress(String ipAddress, bool dontSendNotification = false);
@@ -204,11 +244,23 @@ public:
 
 private:
 	//==========================================================================
-	bool GetMuteProtocolSourceId(ProtocolId protocolId, SourceId sourceId);
-	bool SetMuteProtocolSourceId(ProtocolId protocolId, SourceId sourceId);
-	bool SetMuteProtocolSourceIds(ProtocolId protocolId, const std::vector<SourceId>& sourceIds);
-	bool SetUnmuteProtocolSourceId(ProtocolId protocolId, SourceId sourceId);
-	bool SetUnmuteProtocolSourceIds(ProtocolId protocolId, const std::vector<SourceId>& sourceIds);
+	bool GetMuteProtocolSoundobjectId(ProtocolId protocolId, SoundobjectId soundobjectId);
+	bool SetMuteProtocolSoundobjectId(ProtocolId protocolId, SoundobjectId soundobjectId);
+	bool SetMuteProtocolSoundobjectIds(ProtocolId protocolId, const std::vector<SoundobjectId>& soundobjectIds);
+	bool SetUnmuteProtocolSoundobjectId(ProtocolId protocolId, SoundobjectId soundobjectId);
+	bool SetUnmuteProtocolSoundobjectIds(ProtocolId protocolId, const std::vector<SoundobjectId>& soundobjectIds);
+
+	bool GetMuteProtocolMatrixInputId(ProtocolId protocolId, MatrixInputId matrixInputId);
+	bool SetMuteProtocolMatrixInputId(ProtocolId protocolId, MatrixInputId matrixInputId);
+	bool SetMuteProtocolMatrixInputIds(ProtocolId protocolId, const std::vector<MatrixInputId>& matrixInputIds);
+	bool SetUnmuteProtocolMatrixInputId(ProtocolId protocolId, MatrixInputId matrixInputId);
+	bool SetUnmuteProtocolMatrixInputIds(ProtocolId protocolId, const std::vector<MatrixInputId>& matrixInputIds);
+
+	bool GetMuteProtocolMatrixOutputId(ProtocolId protocolId, MatrixOutputId matrixOutputId);
+	bool SetMuteProtocolMatrixOutputId(ProtocolId protocolId, MatrixOutputId matrixOutputId);
+	bool SetMuteProtocolMatrixOutputIds(ProtocolId protocolId, const std::vector<MatrixOutputId>& matrixOutputIds);
+	bool SetUnmuteProtocolMatrixOutputId(ProtocolId protocolId, MatrixOutputId matrixOutputId);
+	bool SetUnmuteProtocolMatrixOutputIds(ProtocolId protocolId, const std::vector<MatrixOutputId>& matrixOutputIds);
 
 	String GetProtocolIpAddress(ProtocolId protocolId);
 	bool SetProtocolIpAddress(ProtocolId protocolId, String ipAddress, bool dontSendNotification = false);

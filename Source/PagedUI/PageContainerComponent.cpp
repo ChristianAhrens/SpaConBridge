@@ -37,14 +37,15 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PageContainerComponent.h"
 
 #include "PageComponentManager.h"
-#include "PageComponents/TablePageComponent.h"
-#include "PageComponents/MultisurfacePageComponent.h"
-#include "PageComponents/SettingsPageComponent.h"
-#include "PageComponents/StatisticsPageComponent.h"
-#include "PageComponents/AboutPageComponent.h"
+#include "PageComponents/SoundobjectTablePage/SoundobjectTablePageComponent.h"
+#include "PageComponents/MultiSurfacePage/MultisurfacePageComponent.h"
+#include "PageComponents/MatrixIOPage/MatrixIOPageComponent.h"
+#include "PageComponents/SettingsPage/SettingsPageComponent.h"
+#include "PageComponents/StatisticsPage/StatisticsPageComponent.h"
+#include "PageComponents/AboutPage/AboutPageComponent.h"
 
 #include "../Controller.h"
-#include "../SoundsourceProcessor/SurfaceSlider.h"
+#include "../SurfaceSlider.h"
 
 #include <Image_utils.h>
 
@@ -92,7 +93,7 @@ PageContainerComponent::PageContainerComponent()
 	m_onlineLed2nd->setEnabled(false);
 	addAndMakeVisible(m_onlineLed2nd.get());
 
-	// app logo button and Plugin version label
+	// app logo button and procssor version label
 	m_logoButton = std::make_unique<ImageButton>("LogoButton");
 	m_logoButton->setImages(false, true, true,
 		ImageCache::getFromMemory(BinaryData::SpaConBridge_png, BinaryData::SpaConBridge_pngSize), 1.0f, Colours::transparentWhite,
@@ -110,8 +111,9 @@ PageContainerComponent::PageContainerComponent()
 	addAndMakeVisible(m_versionStringLabel.get());
 
 	// Create the pages.
-	m_tablePage = std::make_unique<TablePageComponent>();
+	m_soundobjectsPage = std::make_unique<SoundobjectTablePageComponent>();
 	m_multiSliderPage = std::make_unique<MultiSurfacePageComponent>();
+    m_matrixIOPage = std::make_unique<MatrixIOPageComponent>();
 	m_settingsPage = std::make_unique<SettingsPageComponent>();
 	m_statisticsPage = std::make_unique<StatisticsPageComponent>();
 	m_aboutPage = std::make_unique<AboutPageComponent>();
@@ -126,9 +128,10 @@ PageContainerComponent::PageContainerComponent()
 
 	// Add the page tabs.
 	m_tabbedComponent->SetIsHandlingChanges(false);
-	m_tabbedComponent->addTab("Table", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_tablePage.get(), false, CustomButtonTabbedComponent::OTI_Table);
+	m_tabbedComponent->addTab("Table", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_soundobjectsPage.get(), false, CustomButtonTabbedComponent::OTI_Table);
 	m_tabbedComponent->addTab("Slider", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSliderPage.get(), false, CustomButtonTabbedComponent::OTI_MultiSlider);
-	m_tabbedComponent->addTab("Statistics", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_statisticsPage.get(), false, CustomButtonTabbedComponent::OTI_Statistics);
+	m_tabbedComponent->addTab("Matrix IOs", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_matrixIOPage.get(), false, CustomButtonTabbedComponent::OTI_MatrixIOs);
+    m_tabbedComponent->addTab("Statistics", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_statisticsPage.get(), false, CustomButtonTabbedComponent::OTI_Statistics);
 	m_tabbedComponent->addTab("Settings", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_settingsPage.get(), false, CustomButtonTabbedComponent::OTI_Settings);
 	m_tabbedComponent->SetIsHandlingChanges(true);
 
@@ -225,8 +228,9 @@ void PageContainerComponent::resized()
 
 	// Resize overview table container.
 	auto rect = Rectangle<int>(0, 44, w, getLocalBounds().getHeight() - 89);
-	m_tablePage->setBounds(rect);
+	m_soundobjectsPage->setBounds(rect);
 	m_multiSliderPage->setBounds(rect);
+    m_matrixIOPage->setBounds(rect);
 	m_settingsPage->setBounds(rect);
 	m_statisticsPage->setBounds(rect);
 
@@ -298,7 +302,7 @@ void PageContainerComponent::UpdateGui(bool init)
 			m_onlineLed2nd->setVisible(secondDS100Used);
 			resized();
 		}
-		if (ctrl->PopParameterChanged(DCS_Protocol, DCT_Online) || init)
+		if (ctrl->PopParameterChanged(DCP_Protocol, DCT_Online) || init)
 		{
 			auto online1 = ctrl->IsFirstDS100Online();
 			auto mm1 = ctrl->IsFirstDS100MirrorMaster();
@@ -317,8 +321,8 @@ void PageContainerComponent::UpdateGui(bool init)
 	// Save some performance: only update the component inside the currently active tab.
 	if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_Table)
 	{
-		if (m_tablePage)
-			m_tablePage->UpdateGui(init);
+		if (m_soundobjectsPage)
+			m_soundobjectsPage->UpdateGui(init);
 
 		// When the overview table is active, no need to refresh GUI very quickly
 		if (getTimerInterval() == GUI_UPDATE_RATE_FAST)
@@ -339,6 +343,18 @@ void PageContainerComponent::UpdateGui(bool init)
 			startTimer(GUI_UPDATE_RATE_FAST);
 		}
 	}
+    else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_MatrixIOs)
+    {
+        if (m_matrixIOPage)
+            m_matrixIOPage->UpdateGui(init);
+
+        // When multi-slider is active, we refresh the GUI faster
+        if (getTimerInterval() == GUI_UPDATE_RATE_SLOW)
+        {
+            //DBG("PageContainerComponent::timerCallback: Switching to GUI_UPDATE_RATE_FAST");
+            startTimer(GUI_UPDATE_RATE_FAST);
+        }
+    }
 }
 
 /**
@@ -396,6 +412,131 @@ void PageContainerComponent::lookAndFeelChanged()
 
 		m_helpButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
 	}
+}
+
+/**
+ * Getter for the row height in sound objects table
+ * @return	The table row height.
+ */
+int PageContainerComponent::GetSoundobjectTableRowHeight()
+{
+	if (m_soundobjectsPage)
+		return m_soundobjectsPage->GetRowHeight();
+	else
+	{
+		jassertfalse;
+		return 0;
+	}
+}
+
+/**
+ * Setter for the row height in sound objects table
+ * @param height	The table row height.
+ */
+void PageContainerComponent::SetSoundobjectTableRowHeight(int height)
+{
+	if (m_soundobjectsPage)
+		return m_soundobjectsPage->SetRowHeight(height);
+}
+
+/**
+ * Getter for the row height in matrix inputs table
+ * @return	The table row height.
+ */
+int PageContainerComponent::GetMatrixInputTableRowHeight()
+{
+	if (m_matrixIOPage)
+		return m_matrixIOPage->GetInputsRowHeight();
+	else
+	{
+		jassertfalse;
+		return 0;
+	}
+}
+
+/**
+ * Setter for the row height in matrix inputs table
+ * @param height	The table row height.
+ */
+void PageContainerComponent::SetMatrixInputTableRowHeight(int height)
+{
+	if (m_matrixIOPage)
+		return m_matrixIOPage->SetInputsRowHeight(height);
+}
+
+/**
+ * Getter for the row height in matrix outputs table
+ * @return	The table row height.
+ */
+int PageContainerComponent::GetMatrixOutputTableRowHeight()
+{
+	if (m_matrixIOPage)
+		return m_matrixIOPage->GetOutputsRowHeight();
+	else
+	{
+		jassertfalse;
+		return 0;
+	}
+}
+
+/**
+ * Setter for the row height in matrix outputs table
+ * @param height	The table row height.
+ */
+void PageContainerComponent::SetMatrixOutputTableRowHeight(int height)
+{
+	if (m_matrixIOPage)
+		return m_matrixIOPage->SetOutputsRowHeight(height);
+}
+
+/**
+ * Getter for the collapsed state of matrix inputs table
+ * @return	The table row height.
+ */
+bool PageContainerComponent::GetMatrixInputTableCollapsed()
+{
+	if (m_matrixIOPage)
+		return m_matrixIOPage->GetInputsCollapsed();
+	else
+	{
+		jassertfalse;
+		return false;
+	}
+}
+
+/**
+ * Setter for the collapsed state of matrix inputs table
+ * @param height	The table row height.
+ */
+void PageContainerComponent::SetMatrixInputTableCollapsed(bool collapsed)
+{
+	if (m_matrixIOPage)
+		return m_matrixIOPage->SetInputsCollapsed(collapsed);
+}
+
+/**
+ * Getter for the collapsed state of matrix outputs table
+ * @return	The table row height.
+ */
+bool PageContainerComponent::GetMatrixOutputTableCollapsed()
+{
+	if (m_matrixIOPage)
+		return m_matrixIOPage->GetOutputsCollapsed();
+	else
+	{
+		jassertfalse;
+		return false;
+	}
+}
+
+/**
+ * Setter for the collapsed state of matrix outputs table
+ * @param height	The table row height.
+ */
+void PageContainerComponent::SetMatrixOutputTableCollapsed(bool collapsed)
+{
+	if (m_matrixIOPage)
+		return m_matrixIOPage->SetOutputsCollapsed(collapsed);
 }
 
 
@@ -522,6 +663,9 @@ void CustomDrawableTabBarButton::updateDrawableButtonImageColours()
 	case CustomButtonTabbedComponent::OTI_MultiSlider:
 		imageName = BinaryData::grain24px_svg;
 		break;
+    case CustomButtonTabbedComponent::OTI_MatrixIOs:
+        imageName = BinaryData::tune24px_svg;
+        break;
 	case CustomButtonTabbedComponent::OTI_Settings:
 		imageName = BinaryData::settings24px_svg;
 		break;

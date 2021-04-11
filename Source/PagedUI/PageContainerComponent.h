@@ -48,8 +48,9 @@ namespace SpaConBridge
  * Forward declarations
  */
 class CustomButtonTabbedComponent;
-class TablePageComponent;
+class SoundobjectTablePageComponent;
 class MultiSurfacePageComponent;
+class MatrixIOPageComponent;
 class SettingsPageComponent;
 class StatisticsPageComponent;
 class AboutPageComponent;
@@ -153,6 +154,20 @@ public:
 	void SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType);
 	DbLookAndFeelBase::LookAndFeelType GetLookAndFeelType();
 
+	//==============================================================================
+	int GetSoundobjectTableRowHeight();
+	void SetSoundobjectTableRowHeight(int height);
+	int GetMatrixInputTableRowHeight();
+	void SetMatrixInputTableRowHeight(int height);
+	int GetMatrixOutputTableRowHeight();
+	void SetMatrixOutputTableRowHeight(int height);
+
+	//==============================================================================
+	bool GetMatrixInputTableCollapsed();
+	void SetMatrixInputTableCollapsed(bool collapsed);
+	bool GetMatrixOutputTableCollapsed();
+	void SetMatrixOutputTableCollapsed(bool collapsed);
+
 private:
 	//==============================================================================
 	void toggleAboutPage();
@@ -177,8 +192,9 @@ private:
 	std::unique_ptr<LedComponent>					m_onlineLed1st;			/**> Button used as Online indicator LED for first DS100. */
 	std::unique_ptr<LedComponent>					m_onlineLed2nd;			/**> Button used as Online indicator LED for second DS100. */
 	std::unique_ptr<CustomButtonTabbedComponent>	m_tabbedComponent;		/**> A container for tabs. */
-	std::unique_ptr<TablePageComponent>				m_tablePage;			/**> The actual table container inside this component. */
+	std::unique_ptr<SoundobjectTablePageComponent>	m_soundobjectsPage;		/**> The actual table container inside this component. */
 	std::unique_ptr<MultiSurfacePageComponent>		m_multiSliderPage;		/**> Container for multi-slider. */
+    std::unique_ptr<MatrixIOPageComponent>          m_matrixIOPage;         /**> Container for matrix inputs/outputs. */
 	std::unique_ptr<SettingsPageComponent>			m_settingsPage;			/**> Container for settings component. */
 	std::unique_ptr<StatisticsPageComponent>		m_statisticsPage;		/**> Container for statistics component. */
 	std::unique_ptr<AboutPageComponent>				m_aboutPage;			/**> Container for about component. */
@@ -202,6 +218,7 @@ public:
 	{
 		OTI_Table = 0,
 		OTI_MultiSlider,
+        OTI_MatrixIOs,
 		OTI_Statistics,
 		OTI_Settings,
 	};

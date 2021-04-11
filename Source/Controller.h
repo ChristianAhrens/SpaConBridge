@@ -48,7 +48,9 @@ namespace SpaConBridge
 /**
  * Forward declarations.
  */
-class SoundsourceProcessor;
+class SoundobjectProcessor;
+class MatrixInputProcessor;
+class MatrixOutputProcessor;
 
 
 /**
@@ -67,54 +69,97 @@ public:
 	static Controller* GetInstance();
 	void DestroyInstance();
 
-	bool GetParameterChanged(DataChangeSource changeSource, DataChangeType change);
-	bool PopParameterChanged(DataChangeSource changeSource, DataChangeType change);
-	void SetParameterChanged(DataChangeSource changeSource, DataChangeType changeTypes);
+	bool GetParameterChanged(DataChangeParticipant changeTarget, DataChangeType change);
+	bool PopParameterChanged(DataChangeParticipant changeTarget, DataChangeType change);
+	void SetParameterChanged(DataChangeParticipant changeSource, DataChangeType changeTypes);
 
-	void createNewProcessor();
-	ProcessorId AddProcessor(DataChangeSource changeSource, SoundsourceProcessor* p);
-	void RemoveProcessor(SoundsourceProcessor* p);
-	int GetProcessorCount() const;
-	SoundsourceProcessor* GetProcessor(ProcessorId processorId) const;
-	std::vector<ProcessorId> GetProcessorIds() const;
+	juce::int32 GetNextProcessorId();
+
+	//==========================================================================
+	void createNewSoundobjectProcessor();
+	SoundobjectProcessorId AddSoundobjectProcessor(DataChangeParticipant changeSource, SoundobjectProcessor* p);
+	void RemoveSoundobjectProcessor(SoundobjectProcessor* p);
+	int GetSoundobjectProcessorCount() const;
+	SoundobjectProcessor* GetSoundobjectProcessor(SoundobjectProcessorId processorId) const;
+	std::vector<SoundobjectProcessorId> GetSoundobjectProcessorIds() const;
+
+	void ActivateSoundobjectId(SoundobjectId soundobjectId, MappingId mappingId);
+	void DeactivateSoundobjectId(SoundobjectId soundobjectId, MappingId mappingId);
+
+	void SetSelectedSoundobjectProcessorIds(const std::vector<SoundobjectProcessorId>& processorIds, bool clearPrevSelection);
+	const std::vector<SoundobjectProcessorId> GetSelectedSoundobjectProcessorIds();
+	void SetSoundobjectIdSelectState(SoundobjectId soundobjectId, bool selected);
+	bool IsSoundobjectIdSelected(SoundobjectId soundobjectId);
+
+	//==========================================================================
+	void createNewMatrixInputProcessor();
+	MatrixInputProcessorId AddMatrixInputProcessor(DataChangeParticipant changeSource, MatrixInputProcessor* p);
+	void RemoveMatrixInputProcessor(MatrixInputProcessor* p);
+	int GetMatrixInputProcessorCount() const;
+	MatrixInputProcessor* GetMatrixInputProcessor(MatrixInputProcessorId processorId) const;
+	std::vector<MatrixInputProcessorId> GetMatrixInputProcessorIds() const;
+
+	void ActivateMatrixInputId(MatrixInputId matrixInputId);
+	void DeactivateMatrixInputId(MatrixInputId matrixInputId);
+
+	void SetSelectedMatrixInputProcessorIds(const std::vector<MatrixInputProcessorId>& processorIds, bool clearPrevSelection);
+	const std::vector<MatrixInputProcessorId> GetSelectedMatrixInputProcessorIds();
+	void SetMatrixInputIdSelectState(MatrixInputId matrixInputId, bool selected);
+	bool IsMatrixInputIdSelected(MatrixInputId matrixInputId);
+
+	//==========================================================================
+	void createNewMatrixOutputProcessor();
+	MatrixOutputProcessorId AddMatrixOutputProcessor(DataChangeParticipant changeSource, MatrixOutputProcessor* p);
+	void RemoveMatrixOutputProcessor(MatrixOutputProcessor* p);
+	int GetMatrixOutputProcessorCount() const;
+	MatrixOutputProcessor* GetMatrixOutputProcessor(MatrixOutputProcessorId processorId) const;
+	std::vector<MatrixOutputProcessorId> GetMatrixOutputProcessorIds() const;
+
+	void ActivateMatrixOutputId(MatrixOutputId matrixOutputId);
+	void DeactivateMatrixOutputId(MatrixOutputId matrixOutputId);
+
+	void SetSelectedMatrixOutputProcessorIds(const std::vector<MatrixOutputProcessorId>& processorIds, bool clearPrevSelection);
+	const std::vector<MatrixOutputProcessorId> GetSelectedMatrixOutputProcessorIds();
+	void SetMatrixOutputIdSelectState(MatrixOutputId matrixOutputId, bool selected);
+	bool IsMatrixOutputIdSelected(MatrixOutputId matrixOutputId);
 
 	//==========================================================================
 	static String GetDefaultDS100IpAddress();
 	String GetDS100IpAddress() const;
-	void SetDS100IpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification = false);
+	void SetDS100IpAddress(DataChangeParticipant changeSource, String ipAddress, bool dontSendNotification = false);
 	String GetSecondDS100IpAddress() const;
-	void SetSecondDS100IpAddress(DataChangeSource changeSource, String ipAddress, bool dontSendNotification = false);
+	void SetSecondDS100IpAddress(DataChangeParticipant changeSource, String ipAddress, bool dontSendNotification = false);
 
 	//==========================================================================
 	int GetRate() const;
-	void SetRate(DataChangeSource changeSource, int rate, bool dontSendNotification = false);
+	void SetRate(DataChangeParticipant changeSource, int rate, bool dontSendNotification = false);
 	static std::pair<int, int> GetSupportedRateRange();
 
 	//==========================================================================
 	ExtensionMode GetExtensionMode() const;
-	void SetExtensionMode(DataChangeSource changeSource, ExtensionMode mode, bool dontSendNotification = false);
+	void SetExtensionMode(DataChangeParticipant changeSource, ExtensionMode mode, bool dontSendNotification = false);
 
 	//==========================================================================
-	const std::vector<RemoteObject> GetActivatedRemoteObjects();
-
-	//==========================================================================
-	void ActivateSoundSourceId(SourceId sourceId, MappingId mappingId);
-	void DeactivateSoundSourceId(SourceId sourceId, MappingId mappingId);
-
-	//==========================================================================
-	void SetSelectedProcessorIds(const std::vector<ProcessorId>& processorIds, bool clearPrevSelection);
-	const std::vector<ProcessorId> GetSelectedProcessorIds();
-	void SetSoundSourceIdSelectState(SourceId sourceId, bool selected);
-	bool IsSoundSourceIdSelected(SourceId sourceId);
+	const std::vector<RemoteObject> GetActivatedSoundObjectRemoteObjects();
+	const std::vector<RemoteObject> GetActivatedMatrixInputRemoteObjects();
+	const std::vector<RemoteObject> GetActivatedMatrixOutputRemoteObjects();
 
 	//==========================================================================
 	ProtocolBridgingType GetActiveProtocolBridging();
 	void SetActiveProtocolBridging(ProtocolBridgingType bridgingType);
 	int GetActiveProtocolBridgingCount();
 	
-	bool GetMuteBridgingSourceId(ProtocolBridgingType bridgingType, SourceId sourceId);
-	bool SetMuteBridgingSourceId(ProtocolBridgingType bridgingType, SourceId sourceId, bool mute);
-	bool SetMuteBridgingSourceIds(ProtocolBridgingType bridgingType, const std::vector<SourceId>& sourceIds, bool mute);
+	bool GetMuteBridgingSoundobjectId(ProtocolBridgingType bridgingType, SoundobjectId soundobjectId);
+	bool SetMuteBridgingSoundobjectId(ProtocolBridgingType bridgingType, SoundobjectId soundobjectId, bool mute);
+	bool SetMuteBridgingSoundobjectIds(ProtocolBridgingType bridgingType, const std::vector<SoundobjectId>& soundobjectIds, bool mute);
+
+	bool GetMuteBridgingMatrixInputId(ProtocolBridgingType bridgingType, MatrixInputId matrixInputId);
+	bool SetMuteBridgingMatrixInputId(ProtocolBridgingType bridgingType, MatrixInputId matrixInputId, bool mute);
+	bool SetMuteBridgingMatrixInputIds(ProtocolBridgingType bridgingType, const std::vector<MatrixInputId>& matrixInputIds, bool mute);
+
+	bool GetMuteBridgingMatrixOutputId(ProtocolBridgingType bridgingType, MatrixOutputId matrixOutputId);
+	bool SetMuteBridgingMatrixOutputId(ProtocolBridgingType bridgingType, MatrixOutputId matrixOutputId, bool mute);
+	bool SetMuteBridgingMatrixOutputIds(ProtocolBridgingType bridgingType, const std::vector<MatrixOutputId>& matrixOutputIds, bool mute);
 
 	String GetBridgingIpAddress(ProtocolBridgingType bridgingType);
 	bool SetBridgingIpAddress(ProtocolBridgingType bridgingType, String ipAddress, bool dontSendNotification = false);
@@ -132,7 +177,7 @@ public:
 	bool SetBridgingMidiAssignmentMapping(ProtocolBridgingType bridgingType, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification = false);
 
 	//==========================================================================
-	void InitGlobalSettings(DataChangeSource changeSource, String ipAddress, int rate);
+	void InitGlobalSettings(DataChangeParticipant changeSource, String ipAddress, int rate);
 
 	//==========================================================================
 	void Disconnect();
@@ -162,22 +207,26 @@ private:
 
 protected:
 	
-	static Controller				*m_singleton;			/**< The one and only instance of CController. */
-	Array<SoundsourceProcessor*>	m_processors;			/**< List of registered Plug-in processor instances.
-															 * Incoming OSC messages will be forwarded to all processors on the list.
-															 * When adding Plug-in instances to a project (i.e. one for each DAW track), this list will grow.
-															 * When removing Plug-in instances from a project, this list will shrink. When the list becomes empty,
-															 * The Controller singleton object is no longer necessary and will destruct itself.
-															 */
-	ProtocolBridgingWrapper			m_protocolBridge;		/**< The wrapper for protocol bridging node, allowing to easily interface with it. */
-	String							m_DS100IpAddress;		/**< IP Address where OSC messages will be sent to / received from. */
-	ExtensionMode					m_DS100ExtensionMode;	/**< Current extension mode. This has impact on if second DS100 is active or not. */
-	String							m_SecondDS100IpAddress;	/**< IP Address where OSC messages will be sent to / received from. */
-	int								m_oscMsgRate;			/**< Interval at which OSC messages are sent to the host, in ms. */
-	DataChangeType					m_parametersChanged[DCS_Max];	/**< Keep track of which OSC parameters have changed recently.
+	static Controller				*m_singleton;					/**< The one and only instance of CController. */
+	Array<SoundobjectProcessor*>	m_soundobjectProcessors;		/**< List of registered processor instances.
+																	 * Incoming OSC messages will be forwarded to all processors on the list.
+																	 * When adding Plug-in instances to a project (i.e. one for each DAW track), this list will grow.
+																	 * When removing Plug-in instances from a project, this list will shrink. When the list becomes empty,
+																	 * The Controller singleton object is no longer necessary and will destruct itself.
+																	 */
+	Array<MatrixInputProcessor*>	m_matrixInputProcessors;		/**< List of registered processor instances. */
+	Array<MatrixOutputProcessor*>	m_matrixOutputProcessors;		/**< List of registered processor instances. */
+	ProtocolBridgingWrapper			m_protocolBridge;				/**< The wrapper for protocol bridging node, allowing to easily interface with it. */
+	String							m_DS100IpAddress;				/**< IP Address where OSC messages will be sent to / received from. */
+	ExtensionMode					m_DS100ExtensionMode;			/**< Current extension mode. This has impact on if second DS100 is active or not. */
+	String							m_SecondDS100IpAddress;			/**< IP Address where OSC messages will be sent to / received from. */
+	int								m_oscMsgRate;					/**< Interval at which OSC messages are sent to the host, in ms. */
+	DataChangeType					m_parametersChanged[DCP_Max];	/**< Keep track of which OSC parameters have changed recently.
 																	 * The array has one entry for each application module (see enum DataChangeSource). */
-	CriticalSection					m_mutex;				/**< A re-entrant mutex. Safety first. */
-	std::map<SourceId, bool>		m_soundObjectSelection;	/**< The current select state of sound objects. */
+	CriticalSection					m_mutex;						/**< A re-entrant mutex. Safety first. */
+	std::map<SoundobjectId, bool>	m_soundObjectSelection;			/**< The current select state of sound objects. */
+	std::map<MatrixInputId, bool>	m_matrixInputSelection;			/**< The current select state of matrix inputs. */
+	std::map<MatrixOutputId, bool>	m_matrixOutputSelection;		/**< The current select state of matrix outputs. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Controller)
 };

@@ -54,5 +54,23 @@ PageComponentBase::PageComponentType PageComponentBase::GetPageComponentType() c
 	return m_pageComponentType;
 }
 
+/**
+ * Minimal helper method to determine if aspect ratio of currently
+ * available screen realestate suggests we are in portrait or landscape orientation
+ * and be able to use the same determination code in multiple places.
+ *
+ * @return	True if we are in portrait, false if in landscape aspect ratio.
+ */
+bool PageComponentBase::IsPortraitAspectRatio()
+{
+	// determine the layout direction (we want a ratio of 0.75 to be the switching point)
+	auto layoutSwitchAspectRatio = 0.75f;
+	auto w = getLocalBounds().getWidth();
+	auto h = getLocalBounds().getHeight();
+	auto aspectRatio = h / (w != 0.0f ? w : 1.0f);
+
+	return layoutSwitchAspectRatio < aspectRatio;
+}
+
 
 } // namespace SpaConBridge

@@ -54,7 +54,9 @@ public:
     std::function<void(DbLookAndFeelBase::LookAndFeelType)>	onUpdateLookAndFeel;
 
 private:
-    std::unique_ptr<AppConfiguration>           m_config;
+    std::unique_ptr<AppConfiguration>   m_config;
+
+    std::unique_ptr<TooltipWindow>      m_toolTipWindowInstance;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainSpaConBridgeComponent)
 };

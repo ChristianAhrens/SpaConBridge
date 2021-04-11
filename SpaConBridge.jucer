@@ -248,6 +248,7 @@
         </GROUP>
         <GROUP id="{A1501CBC-FDBD-6A07-19CE-0B89ABD08D89}" name="Resources">
           <GROUP id="{49230987-3CBC-5512-5852-2C92F74CB3FC}" name="Images">
+            <FILE id="TAkUW8" name="add-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/add-24px.svg"/>
             <FILE id="yuy29J" name="call_made-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/call_made-24px.svg"/>
             <FILE id="lbzD6a" name="call_received-24px.svg" compile="0" resource="1"
@@ -258,17 +259,34 @@
             <FILE id="A3cgD8" name="folder_open-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/folder_open-24px.svg"/>
             <FILE id="N9NqBe" name="grain-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/grain-24px.svg"/>
+            <FILE id="ToZnzd" name="height-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/height-24px.svg"/>
             <FILE id="rlRTHW" name="help-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/help-24px.svg"/>
+            <FILE id="hDIVdB" name="keyboard_arrow_down-24px.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/keyboard_arrow_down-24px.svg"/>
+            <FILE id="AJZAbu" name="keyboard_arrow_left-24px.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/keyboard_arrow_left-24px.svg"/>
+            <FILE id="QLJ7TU" name="keyboard_arrow_right-24px.svg" compile="0"
+                  resource="1" file="submodules/JUCE-AppBasics/Resources/Images/keyboard_arrow_right-24px.svg"/>
+            <FILE id="y6pBYT" name="keyboard_arrow_up-24px.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/keyboard_arrow_up-24px.svg"/>
             <FILE id="Jc6pvI" name="mobiledata_off-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/mobiledata_off-24px.svg"/>
+            <FILE id="UWlhHT" name="remove-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/remove-24px.svg"/>
+            <FILE id="eGKYMH" name="rule_checked-24px.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/rule_checked-24px.svg"/>
+            <FILE id="NIoQ4P" name="rule_unchecked-24px.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/rule_unchecked-24px.svg"/>
             <FILE id="f9cDvj" name="save-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/save-24px.svg"/>
             <FILE id="Hiyloc" name="school-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/school-24px.svg"/>
             <FILE id="vVMBfg" name="settings-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/settings-24px.svg"/>
             <FILE id="N7oVfc" name="show_chart-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/show_chart-24px.svg"/>
+            <FILE id="nSAA4c" name="tune-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/tune-24px.svg"/>
             <FILE id="YFXXxo" name="vertical_split-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/vertical_split-24px.svg"/>
+            <FILE id="bmwxej" name="volume_off-24px.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/volume_off-24px.svg"/>
           </GROUP>
         </GROUP>
       </GROUP>
@@ -295,57 +313,130 @@
       <FILE id="Q7vthe" name="README.md" compile="0" resource="1" file="README.md"/>
     </GROUP>
     <GROUP id="{2B9DD386-1093-ADF5-E47F-5954774132B5}" name="Source">
-      <FILE id="YNojdV" name="LookAndFeel.cpp" compile="1" resource="0" file="Source/LookAndFeel.cpp"/>
-      <FILE id="DEBTf5" name="LookAndFeel.h" compile="0" resource="0" file="Source/LookAndFeel.h"/>
-      <FILE id="vQ5W43" name="ProtocolBridgingWrapper.cpp" compile="1" resource="0"
-            file="Source/ProtocolBridgingWrapper.cpp"/>
-      <FILE id="HbiWnW" name="ProtocolBridgingWrapper.h" compile="0" resource="0"
-            file="Source/ProtocolBridgingWrapper.h"/>
-      <FILE id="iiE5C7" name="AppConfiguration.cpp" compile="1" resource="0"
-            file="Source/AppConfiguration.cpp"/>
-      <FILE id="wLkJi4" name="AppConfiguration.h" compile="0" resource="0"
-            file="Source/AppConfiguration.h"/>
-      <GROUP id="{E52BF071-97A9-96F9-9009-172CD007BA20}" name="SoundsourceProcessor">
-        <FILE id="awtecl" name="Parameters.cpp" compile="1" resource="0" file="Source/SoundsourceProcessor/Parameters.cpp"/>
-        <FILE id="YLVW46" name="Parameters.h" compile="0" resource="0" file="Source/SoundsourceProcessor/Parameters.h"/>
-        <FILE id="HvUfDT" name="SoundsourceProcessor.cpp" compile="1" resource="0"
-              file="Source/SoundsourceProcessor/SoundsourceProcessor.cpp"/>
-        <FILE id="ZprKu0" name="SoundsourceProcessor.h" compile="0" resource="0"
-              file="Source/SoundsourceProcessor/SoundsourceProcessor.h"/>
-        <FILE id="WPv7hF" name="SoundsourceProcessorEditor.cpp" compile="1"
-              resource="0" file="Source/SoundsourceProcessor/SoundsourceProcessorEditor.cpp"/>
-        <FILE id="dDbadl" name="SoundsourceProcessorEditor.h" compile="0" resource="0"
-              file="Source/SoundsourceProcessor/SoundsourceProcessorEditor.h"/>
-        <FILE id="od9Z4l" name="SurfaceSlider.cpp" compile="1" resource="0"
-              file="Source/SoundsourceProcessor/SurfaceSlider.cpp"/>
-        <FILE id="iNu0u2" name="SurfaceSlider.h" compile="0" resource="0" file="Source/SoundsourceProcessor/SurfaceSlider.h"/>
+      <GROUP id="{A8ED2A1C-3C07-0E79-BDAB-3610B84A5477}" name="CustomAudioProcessors">
+        <GROUP id="{4B509C1B-A792-E602-3BD1-999A7C1B208D}" name="MatrixInputProcessor">
+          <FILE id="rj7WFi" name="MatrixInputProcessor.cpp" compile="1" resource="0"
+                file="Source/CustomAudioProcessors/MatrixInputProcessor/MatrixInputProcessor.cpp"/>
+          <FILE id="yu1EC7" name="MatrixInputProcessor.h" compile="0" resource="0"
+                file="Source/CustomAudioProcessors/MatrixInputProcessor/MatrixInputProcessor.h"/>
+          <FILE id="XHBKbw" name="MatrixInputProcessorEditor.cpp" compile="1"
+                resource="0" file="Source/CustomAudioProcessors/MatrixInputProcessor/MatrixInputProcessorEditor.cpp"/>
+          <FILE id="o3Exid" name="MatrixInputProcessorEditor.h" compile="0" resource="0"
+                file="Source/CustomAudioProcessors/MatrixInputProcessor/MatrixInputProcessorEditor.h"/>
+        </GROUP>
+        <GROUP id="{DDD08CEF-3384-65B9-E910-E33B1C6EC895}" name="MatrixOutputProcessor">
+          <FILE id="daumZf" name="MatrixOutputProcessor.cpp" compile="1" resource="0"
+                file="Source/CustomAudioProcessors/MatrixOutputProcessor/MatrixOutputProcessor.cpp"/>
+          <FILE id="bHbcVj" name="MatrixOutputProcessor.h" compile="0" resource="0"
+                file="Source/CustomAudioProcessors/MatrixOutputProcessor/MatrixOutputProcessor.h"/>
+          <FILE id="mXsxMO" name="MatrixOutputProcessorEditor.cpp" compile="1"
+                resource="0" file="Source/CustomAudioProcessors/MatrixOutputProcessor/MatrixOutputProcessorEditor.cpp"/>
+          <FILE id="CI4Gjf" name="MatrixOutputProcessorEditor.h" compile="0"
+                resource="0" file="Source/CustomAudioProcessors/MatrixOutputProcessor/MatrixOutputProcessorEditor.h"/>
+        </GROUP>
+        <GROUP id="{8ABA8DAF-F1DA-A229-34AD-FCB9BEB371BB}" name="SoundobjectProcessor">
+          <FILE id="pAerq1" name="SoundobjectProcessor.cpp" compile="1" resource="0"
+                file="Source/CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.cpp"/>
+          <FILE id="dCn34c" name="SoundobjectProcessor.h" compile="0" resource="0"
+                file="Source/CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"/>
+          <FILE id="NIwjf9" name="SoundobjectProcessorEditor.cpp" compile="1"
+                resource="0" file="Source/CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessorEditor.cpp"/>
+          <FILE id="QxpAzP" name="SoundobjectProcessorEditor.h" compile="0" resource="0"
+                file="Source/CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessorEditor.h"/>
+        </GROUP>
+        <FILE id="KxbyOS" name="Parameters.cpp" compile="1" resource="0" file="Source/CustomAudioProcessors/Parameters.cpp"/>
+        <FILE id="pxRBX1" name="Parameters.h" compile="0" resource="0" file="Source/CustomAudioProcessors/Parameters.h"/>
       </GROUP>
       <GROUP id="{ABC3680A-0C49-EE16-E766-E6ED89078A7C}" name="PagedUI">
         <GROUP id="{4680382C-A46A-B4C1-0D87-F92C4050063D}" name="PageComponents">
-          <FILE id="HhvbAy" name="AboutPageComponent.cpp" compile="1" resource="0"
-                file="Source/PagedUI/PageComponents/AboutPageComponent.cpp"/>
-          <FILE id="swNf0J" name="AboutPageComponent.h" compile="0" resource="0"
-                file="Source/PagedUI/PageComponents/AboutPageComponent.h"/>
-          <FILE id="bcX4Ju" name="MultisurfacePageComponent.cpp" compile="1"
-                resource="0" file="Source/PagedUI/PageComponents/MultisurfacePageComponent.cpp"/>
-          <FILE id="GPUSzO" name="MultisurfacePageComponent.h" compile="0" resource="0"
-                file="Source/PagedUI/PageComponents/MultisurfacePageComponent.h"/>
+          <GROUP id="{49670C0C-DE7C-D21A-221C-9FD67169A2B2}" name="SoundobjectTablePage">
+            <FILE id="f5Ls1u" name="SoundobjectTableComponent.cpp" compile="1"
+                  resource="0" file="Source/PagedUI/PageComponents/SoundobjectTablePage/SoundobjectTableComponent.cpp"/>
+            <FILE id="NFoXD0" name="SoundobjectTableComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/SoundobjectTablePage/SoundobjectTableComponent.h"/>
+            <FILE id="QdViFe" name="SoundobjectTablePageComponent.cpp" compile="1"
+                  resource="0" file="Source/PagedUI/PageComponents/SoundobjectTablePage/SoundobjectTablePageComponent.cpp"/>
+            <FILE id="TlVqRW" name="SoundobjectTablePageComponent.h" compile="0"
+                  resource="0" file="Source/PagedUI/PageComponents/SoundobjectTablePage/SoundobjectTablePageComponent.h"/>
+          </GROUP>
+          <GROUP id="{1FBC281E-3196-9A1A-451F-E510FF2D2902}" name="StatisticsPage">
+            <FILE id="go3nU7" name="StatisticsLogComponent.cpp" compile="1" resource="0"
+                  file="Source/PagedUI/PageComponents/StatisticsPage/StatisticsLogComponent.cpp"/>
+            <FILE id="lLk4QW" name="StatisticsLogComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/StatisticsPage/StatisticsLogComponent.h"/>
+            <FILE id="yZ5iQO" name="StatisticsPageComponent.cpp" compile="1" resource="0"
+                  file="Source/PagedUI/PageComponents/StatisticsPage/StatisticsPageComponent.cpp"/>
+            <FILE id="qijggL" name="StatisticsPageComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/StatisticsPage/StatisticsPageComponent.h"/>
+            <FILE id="ceiDPW" name="StatisticsPlotComponent.cpp" compile="1" resource="0"
+                  file="Source/PagedUI/PageComponents/StatisticsPage/StatisticsPlotComponent.cpp"/>
+            <FILE id="UibXv0" name="StatisticsPlotComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/StatisticsPage/StatisticsPlotComponent.h"/>
+          </GROUP>
+          <GROUP id="{811EF1A2-3AD2-5387-1DC2-32ED14213B13}" name="SettingsPage">
+            <FILE id="csxZSv" name="HeaderWithElmListComponent.cpp" compile="1"
+                  resource="0" file="Source/PagedUI/PageComponents/SettingsPage/HeaderWithElmListComponent.cpp"/>
+            <FILE id="YBHy5N" name="HeaderWithElmListComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/SettingsPage/HeaderWithElmListComponent.h"/>
+            <FILE id="XTyWNE" name="SettingsPageComponent.cpp" compile="1" resource="0"
+                  file="Source/PagedUI/PageComponents/SettingsPage/SettingsPageComponent.cpp"/>
+            <FILE id="DKcTjc" name="SettingsPageComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/SettingsPage/SettingsPageComponent.h"/>
+            <FILE id="Dobam7" name="SettingsSectionsComponent.cpp" compile="1"
+                  resource="0" file="Source/PagedUI/PageComponents/SettingsPage/SettingsSectionsComponent.cpp"/>
+            <FILE id="RwWyr9" name="SettingsSectionsComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/SettingsPage/SettingsSectionsComponent.h"/>
+          </GROUP>
+          <GROUP id="{AE87B67F-F38C-02B1-7766-C315A14B1AA5}" name="MultisurfacePage">
+            <FILE id="iZVABT" name="MultisurfacePageComponent.cpp" compile="1"
+                  resource="0" file="Source/PagedUI/PageComponents/MultisurfacePage/MultisurfacePageComponent.cpp"/>
+            <FILE id="g1pfot" name="MultisurfacePageComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/MultisurfacePage/MultisurfacePageComponent.h"/>
+          </GROUP>
+          <GROUP id="{59435D02-8728-9CA1-282E-B7B15C7B9CAB}" name="MatrixIOPage">
+            <FILE id="KD60wJ" name="MatrixChannelTableComponentBase.cpp" compile="1"
+                  resource="0" file="Source/PagedUI/PageComponents/MatrixIOPage/MatrixChannelTableComponentBase.cpp"/>
+            <FILE id="g0wrao" name="MatrixChannelTableComponentBase.h" compile="0"
+                  resource="0" file="Source/PagedUI/PageComponents/MatrixIOPage/MatrixChannelTableComponentBase.h"/>
+            <FILE id="T2cIbl" name="MatrixInputTableComponent.cpp" compile="1"
+                  resource="0" file="Source/PagedUI/PageComponents/MatrixIOPage/MatrixInputTableComponent.cpp"/>
+            <FILE id="NIYAW5" name="MatrixInputTableComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/MatrixIOPage/MatrixInputTableComponent.h"/>
+            <FILE id="ZBB21m" name="MatrixIOPageComponent.cpp" compile="1" resource="0"
+                  file="Source/PagedUI/PageComponents/MatrixIOPage/MatrixIOPageComponent.cpp"/>
+            <FILE id="th9JeX" name="MatrixIOPageComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/MatrixIOPage/MatrixIOPageComponent.h"/>
+            <FILE id="dapTBf" name="MatrixOutputTableComponent.cpp" compile="1"
+                  resource="0" file="Source/PagedUI/PageComponents/MatrixIOPage/MatrixOutputTableComponent.cpp"/>
+            <FILE id="SMQxKR" name="MatrixOutputTableComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/MatrixIOPage/MatrixOutputTableComponent.h"/>
+          </GROUP>
+          <GROUP id="{EA1B1C28-C721-9683-BA42-F0893D802CB4}" name="AboutPage">
+            <FILE id="Cee0pf" name="AboutPageComponent.cpp" compile="1" resource="0"
+                  file="Source/PagedUI/PageComponents/AboutPage/AboutPageComponent.cpp"/>
+            <FILE id="QfpD8D" name="AboutPageComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/AboutPage/AboutPageComponent.h"/>
+          </GROUP>
+          <FILE id="Kcj4KN" name="BridgingAwareTableHeaderComponent.cpp" compile="1"
+                resource="0" file="Source/PagedUI/PageComponents/BridgingAwareTableHeaderComponent.cpp"/>
+          <FILE id="RuCcki" name="BridgingAwareTableHeaderComponent.h" compile="0"
+                resource="0" file="Source/PagedUI/PageComponents/BridgingAwareTableHeaderComponent.h"/>
           <FILE id="n5XHjT" name="PageComponentBase.cpp" compile="1" resource="0"
                 file="Source/PagedUI/PageComponents/PageComponentBase.cpp"/>
           <FILE id="oNGL8i" name="PageComponentBase.h" compile="0" resource="0"
                 file="Source/PagedUI/PageComponents/PageComponentBase.h"/>
-          <FILE id="xOisB1" name="SettingsPageComponent.cpp" compile="1" resource="0"
-                file="Source/PagedUI/PageComponents/SettingsPageComponent.cpp"/>
-          <FILE id="xe3MKR" name="SettingsPageComponent.h" compile="0" resource="0"
-                file="Source/PagedUI/PageComponents/SettingsPageComponent.h"/>
-          <FILE id="IjyBqv" name="StatisticsPageComponent.cpp" compile="1" resource="0"
-                file="Source/PagedUI/PageComponents/StatisticsPageComponent.cpp"/>
-          <FILE id="qVOhP7" name="StatisticsPageComponent.h" compile="0" resource="0"
-                file="Source/PagedUI/PageComponents/StatisticsPageComponent.h"/>
-          <FILE id="fOhomW" name="TablePageComponent.cpp" compile="1" resource="0"
-                file="Source/PagedUI/PageComponents/TablePageComponent.cpp"/>
-          <FILE id="oQheIw" name="TablePageComponent.h" compile="0" resource="0"
-                file="Source/PagedUI/PageComponents/TablePageComponent.h"/>
+          <FILE id="jHT3Ge" name="TableEditorComponents.cpp" compile="1" resource="0"
+                file="Source/PagedUI/PageComponents/TableEditorComponents.cpp"/>
+          <FILE id="zBDbsv" name="TableEditorComponents.h" compile="0" resource="0"
+                file="Source/PagedUI/PageComponents/TableEditorComponents.h"/>
+          <FILE id="u6GBvH" name="TableControlBarComponent.cpp" compile="1" resource="0"
+                file="Source/PagedUI/PageComponents/TableControlBarComponent.cpp"/>
+          <FILE id="irJvkq" name="TableControlBarComponent.h" compile="0" resource="0"
+                file="Source/PagedUI/PageComponents/TableControlBarComponent.h"/>
+          <FILE id="QDmNPN" name="TableModelComponent.cpp" compile="1" resource="0"
+                file="Source/PagedUI/PageComponents/TableModelComponent.cpp"/>
+          <FILE id="voDICu" name="TableModelComponent.h" compile="0" resource="0"
+                file="Source/PagedUI/PageComponents/TableModelComponent.h"/>
         </GROUP>
         <FILE id="mIIIv5" name="PageComponentManager.cpp" compile="1" resource="0"
               file="Source/PagedUI/PageComponentManager.cpp"/>
@@ -356,16 +447,37 @@
         <FILE id="H1EAfS" name="PageContainerComponent.h" compile="0" resource="0"
               file="Source/PagedUI/PageContainerComponent.h"/>
       </GROUP>
-      <FILE id="SKhSnW" name="MainSpaConBridgeComponent.cpp" compile="1"
+      <FILE id="QSXwTE" name="RowHeightSlider.cpp" compile="1" resource="0"
+            file="Source/RowHeightSlider.cpp"/>
+      <FILE id="csLjVz" name="RowHeightSlider.h" compile="0" resource="0"
+            file="Source/RowHeightSlider.h"/>
+      <FILE id="PCeRVf" name="LevelMeterSlider.cpp" compile="1" resource="0"
+            file="Source/LevelMeterSlider.cpp"/>
+      <FILE id="rujf1F" name="LevelMeterSlider.h" compile="0" resource="0"
+            file="Source/LevelMeterSlider.h"/>
+      <FILE id="hhaGim" name="SurfaceSlider.cpp" compile="1" resource="0"
+            file="Source/SurfaceSlider.cpp"/>
+      <FILE id="Ui13o2" name="SurfaceSlider.h" compile="0" resource="0" file="Source/SurfaceSlider.h"/>
+      <FILE id="YNojdV" name="LookAndFeel.cpp" compile="1" resource="0" file="Source/LookAndFeel.cpp"/>
+      <FILE id="DEBTf5" name="LookAndFeel.h" compile="0" resource="0" file="Source/LookAndFeel.h"/>
+      <FILE id="vQ5W43" name="ProtocolBridgingWrapper.cpp" compile="1" resource="0"
+            file="Source/ProtocolBridgingWrapper.cpp"/>
+      <FILE id="HbiWnW" name="ProtocolBridgingWrapper.h" compile="0" resource="0"
+            file="Source/ProtocolBridgingWrapper.h"/>
+      <FILE id="iiE5C7" name="AppConfiguration.cpp" compile="1" resource="0"
+            file="Source/AppConfiguration.cpp"/>
+      <FILE id="wLkJi4" name="AppConfiguration.h" compile="0" resource="0"
+            file="Source/AppConfiguration.h"/>
+      <FILE id="iutHtS" name="MainSpaConBridgeComponent.cpp" compile="1"
             resource="0" file="Source/MainSpaConBridgeComponent.cpp"/>
-      <FILE id="Z0i2A2" name="MainSpaConBridgeComponent.h" compile="0" resource="0"
+      <FILE id="vWazv3" name="MainSpaConBridgeComponent.h" compile="0" resource="0"
             file="Source/MainSpaConBridgeComponent.h"/>
       <FILE id="g0nbLB" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
       <FILE id="Kqvnes" name="Controller.cpp" compile="1" resource="0" file="Source/Controller.cpp"/>
       <FILE id="dObTPr" name="Controller.h" compile="0" resource="0" file="Source/Controller.h"/>
-      <FILE id="rfsqrd" name="SpaConBridgeCommon.cpp" compile="1" resource="0"
+      <FILE id="BcPgTN" name="SpaConBridgeCommon.cpp" compile="1" resource="0"
             file="Source/SpaConBridgeCommon.cpp"/>
-      <FILE id="c3j7aS" name="SpaConBridgeCommon.h" compile="0" resource="0"
+      <FILE id="ldU6tr" name="SpaConBridgeCommon.h" compile="0" resource="0"
             file="Source/SpaConBridgeCommon.h"/>
     </GROUP>
   </MAINGROUP>
@@ -390,7 +502,7 @@
       </MODULEPATHS>
     </VS2019>
     <XCODE_MAC targetFolder="Builds/MacOSX" smallIcon="qJTuNs" bigIcon="qJTuNs"
-               hardenedRuntime="1" appSandbox="1" appSandboxOptions="com.apple.security.device.bluetooth,com.apple.security.device.usb,com.apple.security.files.downloads.read-write,com.apple.security.files.user-selected.read-write,com.apple.security.network.client,com.apple.security.network.server,com.apple.security.temporary-exception.files.home-relative-path.read-write">
+               hardenedRuntime="1" appSandbox="1" appSandboxOptions="com.apple.security.assets.movies.read-write,com.apple.security.assets.music.read-write,com.apple.security.device.bluetooth,com.apple.security.device.usb,com.apple.security.files.downloads.read-write,com.apple.security.files.pictures.read-write,com.apple.security.files.user-selected.read-write,com.apple.security.network.client,com.apple.security.network.server,com.apple.security.temporary-exception.files.absolute-path.read-write,com.apple.security.temporary-exception.files.home-relative-path.read-write">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug"/>
         <CONFIGURATION isDebug="0" name="Release"/>
@@ -411,11 +523,12 @@
     </XCODE_MAC>
     <XCODE_IPHONE targetFolder="Builds/iOS" smallIcon="ljOsyU" bigIcon="ljOsyU"
                   UISupportsDocumentBrowser="1" iosDevelopmentTeamID="SB7Q3PP4FQ"
-                  iosScreenOrientation="UIInterfaceOrientationLandscapeLeft,UIInterfaceOrientationLandscapeRight,UIInterfaceOrientationPortrait"
-                  iPadScreenOrientation="UIInterfaceOrientationLandscapeLeft,UIInterfaceOrientationLandscapeRight,UIInterfaceOrientationPortrait"
+                  iosScreenOrientation="UIInterfaceOrientationLandscapeLeft,UIInterfaceOrientationLandscapeRight,UIInterfaceOrientationPortrait,UIInterfaceOrientationPortraitUpsideDown"
+                  iPadScreenOrientation="UIInterfaceOrientationLandscapeLeft,UIInterfaceOrientationLandscapeRight,UIInterfaceOrientationPortrait,UIInterfaceOrientationPortraitUpsideDown"
                   customLaunchStoryboard="Resources/Deployment/iOS/Launchscreen.storyboard"
-                  customPList="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&#10;&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;&#10;&lt;plist&gt;&#10;  &lt;dict&gt;&#10;    &lt;key&gt;NSLocalNetworkUsageDescription&lt;/key&gt;&#10;    &lt;string&gt;SpaConBridge uses bonjour to discover IP Addresses of relevant devices on the network.&lt;/string&gt;&#10;    &lt;key&gt;NSBonjourServices&lt;/key&gt;&#10;    &lt;array&gt;&#10;&#9;  &lt;string&gt;_osc._udp&lt;/string&gt;&#10;    &lt;/array&gt;&#10;    &lt;key&gt;NSDocumentsFolderUsageDescription&lt;/key&gt;&#10;    &lt;string&gt;SpaConBridge accesses the document folder to load or save the app configuration.&lt;/string&gt;&#10;    &lt;key&gt;NSDownloadsFolderUsageDescription&lt;/key&gt;&#10;    &lt;string&gt;SpaConBridge accesses the downloads folder to load or save the app configuration.&lt;/string&gt;&#10;    &lt;key&gt;NSDesktopFolderUsageDescription&lt;/key&gt;&#10;    &lt;string&gt;SpaConBridge accesses the desktop folder to load or save the app configuration.&lt;/string&gt;&#10;  &lt;/dict&gt;&#10;&lt;/plist&gt;"
-                  UIFileSharingEnabled="1" iCloudPermissions="1">
+                  customPList="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&#10;&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;&#10;&lt;plist&gt;&#10;  &lt;dict&gt;&#10;    &lt;key&gt;NSLocalNetworkUsageDescription&lt;/key&gt;&#10;    &lt;string&gt;SpaConBridge uses bonjour to discover IP Addresses of relevant devices on the network.&lt;/string&gt;&#10;    &lt;key&gt;NSBonjourServices&lt;/key&gt;&#10;    &lt;array&gt;&#10;&#9;      &lt;string&gt;_osc._udp&lt;/string&gt;&#10;    &lt;/array&gt;&#10;    &#9;&lt;key&gt;UIBackgroundModes&lt;/key&gt;&#10;    &#9;&lt;array&gt;&#10;&#9;      &#9;&lt;string&gt;processing&lt;/string&gt;&#10;    &#9;&lt;/array&gt;&#10;    &lt;key&gt;NSDocumentsFolderUsageDescription&lt;/key&gt;&#10;    &lt;string&gt;SpaConBridge accesses the document folder to load or save the app configuration.&lt;/string&gt;&#10;    &lt;key&gt;NSDownloadsFolderUsageDescription&lt;/key&gt;&#10;    &lt;string&gt;SpaConBridge accesses the downloads folder to load or save the app configuration.&lt;/string&gt;&#10;    &lt;key&gt;NSDesktopFolderUsageDescription&lt;/key&gt;&#10;    &lt;string&gt;SpaConBridge accesses the desktop folder to load or save the app configuration.&lt;/string&gt;&#10;  &lt;/dict&gt;&#10;&lt;/plist&gt;"
+                  UIFileSharingEnabled="1" iCloudPermissions="1" UIStatusBarHidden="1"
+                  UIRequiresFullScreen="0">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug"/>
         <CONFIGURATION isDebug="0" name="Release"/>

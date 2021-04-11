@@ -42,6 +42,7 @@ public:
 		PCT_Unknown = 0,
 		PCT_Overview,
 		PCT_MultiSlide,
+        PCT_MatrixIOs,
 		PCT_Settings,
 		PCT_Statistics,
 		PCT_About
@@ -55,6 +56,9 @@ public:
 
 	//==============================================================================
 	virtual void UpdateGui(bool init) = 0;
+
+protected:
+	bool	IsPortraitAspectRatio();
 
 private:
 	PageComponentType	m_pageComponentType;	/**> Type of page as specified by the PageComponentType enum. */

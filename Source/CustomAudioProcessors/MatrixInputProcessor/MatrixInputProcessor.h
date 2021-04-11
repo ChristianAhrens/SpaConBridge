@@ -51,12 +51,12 @@ public:
 	int GetProcessorId() const;
 	void SetProcessorId(DataChangeParticipant changeSource, int processorId);
 
-	void InitializeSettings(MatrixInputId channelId, String ipAddress, ComsMode newMode);
+	void InitializeSettings(MatrixInputId matrixInputId, String ipAddress, ComsMode newMode);
 
 	static const std::vector<RemoteObjectIdentifier>	GetUsedRemoteObjects();
 
 	MatrixInputId GetMatrixInputId() const;
-	void SetMatrixInputId(DataChangeParticipant changeSource, MatrixInputId MatrixInputId);
+	void SetMatrixInputId(DataChangeParticipant changeSource, MatrixInputId matrixInputId);
 
 	int GetMessageRate() const;
 	void SetMessageRate(DataChangeParticipant changeSource, int oscMsgRate);
@@ -107,17 +107,17 @@ protected:
 	/**
 	 * Matrix input En-Space gain.
 	 */
-	GestureManagedAudioParameterFloat*	m_MatrixInputLevelMeter;
+	GestureManagedAudioParameterFloat*	m_matrixInputLevelMeter;
 
 	/**
 	 * Sound object spread.
 	 */
-	GestureManagedAudioParameterFloat*	m_MatrixInputGain;
+	GestureManagedAudioParameterFloat*	m_matrixInputGain;
 
 	/**
 	 * Sound object delay mode (Off, Tight, Full).
 	 */
-	GestureManagedAudioParameterInt*	m_MatrixInputMute;
+	GestureManagedAudioParameterInt*	m_matrixInputMute;
 
 	/**
 	 * Current OSC communication mode, sending and/or receiving.
@@ -127,7 +127,7 @@ protected:
 	/*
 	 * MatrixInputProcessor, or matrix input number.
 	 */
-	MatrixInputProcessorId	m_MatrixInputId;
+	MatrixInputProcessorId	m_matrixInputId;
 
 	/**
 	 * Unique ID of this Processor instance. 

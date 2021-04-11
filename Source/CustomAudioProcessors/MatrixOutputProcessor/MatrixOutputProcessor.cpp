@@ -49,23 +49,23 @@ MatrixOutputProcessor::MatrixOutputProcessor(bool insertToConfig)
 	// Automation parameters.
 	// level meter param
 	auto lmR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixOutput_LevelMeterPostMute);
-	m_MatrixOutputLevelMeter = new GestureManagedAudioParameterFloat("MatrixOutput_LevelMeterPostMute", "levelMeter", lmR.getStart(), lmR.getEnd(), 0.1f, lmR.getStart());
-	m_MatrixOutputLevelMeter->addListener(this);
-	addParameter(m_MatrixOutputLevelMeter);
+	m_matrixOutputLevelMeter = new GestureManagedAudioParameterFloat("MatrixOutput_LevelMeterPostMute", "levelMeter", lmR.getStart(), lmR.getEnd(), 0.1f, lmR.getStart());
+	m_matrixOutputLevelMeter->addListener(this);
+	addParameter(m_matrixOutputLevelMeter);
 
 	// gain param
 	auto gR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixOutput_Gain);
-	m_MatrixOutputGain = new GestureManagedAudioParameterFloat("MatrixOutput_Gain", "gain", gR.getStart(), gR.getEnd(), 0.1f, 0.0f); // exception: dont use the min range as default - for a gain fader, 0dB is nicer
-	m_MatrixOutputGain->addListener(this);
-	addParameter(m_MatrixOutputGain);
+	m_matrixOutputGain = new GestureManagedAudioParameterFloat("MatrixOutput_Gain", "gain", gR.getStart(), gR.getEnd(), 0.1f, 0.0f); // exception: dont use the min range as default - for a gain fader, 0dB is nicer
+	m_matrixOutputGain->addListener(this);
+	addParameter(m_matrixOutputGain);
 
 	// mute param
 	auto mR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixOutput_Mute);
-	m_MatrixOutputMute = new GestureManagedAudioParameterInt("MatrixOutput_mute", "mute", static_cast<int>(mR.getStart()), static_cast<int>(mR.getEnd()), static_cast<int>(mR.getStart()));
-	m_MatrixOutputMute->addListener(this);
-	addParameter(m_MatrixOutputMute);
+	m_matrixOutputMute = new GestureManagedAudioParameterInt("MatrixOutput_mute", "mute", static_cast<int>(mR.getStart()), static_cast<int>(mR.getEnd()), static_cast<int>(mR.getStart()));
+	m_matrixOutputMute->addListener(this);
+	addParameter(m_matrixOutputMute);
 
-	m_MatrixOutputId = MatrixOutput_ID_MIN; // This default sourceId will be overwritten by ctrl->AddProcessor() below.
+	m_matrixOutputId = MatrixOutput_ID_MIN; // This default sourceId will be overwritten by ctrl->AddProcessor() below.
 	m_processorId = INVALID_PROCESSOR_ID;
 
 	// Default OSC communication mode.
@@ -174,23 +174,23 @@ float MatrixOutputProcessor::GetParameterValue(MatrixOutputParameterIndex paramI
 	{
 		case MOI_ParamIdx_LevelMeterPostMute:
 			{
-				ret = m_MatrixOutputLevelMeter->get();
+				ret = m_matrixOutputLevelMeter->get();
 				if (normalized)
-					ret = m_MatrixOutputLevelMeter->getNormalisableRange().convertTo0to1(ret);
+					ret = m_matrixOutputLevelMeter->getNormalisableRange().convertTo0to1(ret);
 			}
 			break;
 		case MOI_ParamIdx_Gain:
 			{
-				ret = m_MatrixOutputGain->get();
+				ret = m_matrixOutputGain->get();
 				if (normalized)
-					ret = m_MatrixOutputGain->getNormalisableRange().convertTo0to1(ret);
+					ret = m_matrixOutputGain->getNormalisableRange().convertTo0to1(ret);
 			}
 			break;
 		case MOI_ParamIdx_Mute:
 			{
-				ret = static_cast<float>(m_MatrixOutputMute->get());
+				ret = static_cast<float>(m_matrixOutputMute->get());
 				if (normalized)
-					ret = m_MatrixOutputMute->getNormalisableRange().convertTo0to1(ret);
+					ret = m_matrixOutputMute->getNormalisableRange().convertTo0to1(ret);
 			}
 			break;
 		default:
@@ -217,13 +217,13 @@ void MatrixOutputProcessor::SetParameterValue(DataChangeParticipant changeSource
 	switch (paramIdx)
 	{
 	case MOI_ParamIdx_LevelMeterPostMute:
-		m_MatrixOutputLevelMeter->SetParameterValue(newValue);
+		m_matrixOutputLevelMeter->SetParameterValue(newValue);
 		break;
 	case MOI_ParamIdx_Gain:
-		m_MatrixOutputGain->SetParameterValue(newValue);
+		m_matrixOutputGain->SetParameterValue(newValue);
 		break;
 	case MOI_ParamIdx_Mute:
-		m_MatrixOutputMute->SetParameterValue(static_cast<int>(newValue));
+		m_matrixOutputMute->SetParameterValue(static_cast<int>(newValue));
 		break;
 	default:
 		jassertfalse; // Unknown parameter index!
@@ -251,13 +251,13 @@ void MatrixOutputProcessor::Tick()
 		switch (pIdx)
 		{
 		case MOI_ParamIdx_LevelMeterPostMute:
-			m_MatrixOutputLevelMeter->Tick();
+			m_matrixOutputLevelMeter->Tick();
 			break;
 		case MOI_ParamIdx_Gain:
-			m_MatrixOutputGain->Tick();
+			m_matrixOutputGain->Tick();
 			break;
 		case MOI_ParamIdx_Mute:
-			m_MatrixOutputMute->Tick();
+			m_matrixOutputMute->Tick();
 			break;
 		default:
 			jassert(false); // missing implementation!
@@ -375,14 +375,15 @@ ComsMode MatrixOutputProcessor::GetComsMode() const
 /**
  * Setter function for the MatrixOutput Id
  * @param changeSource	The application module which is causing the property change.
- * @param MatrixOutputId	The new ID
+ * @param matrixOutputId	The new ID
  */
-void MatrixOutputProcessor::SetMatrixOutputId(DataChangeParticipant changeSource, MatrixOutputId MatrixOutputId)
+void MatrixOutputProcessor::SetMatrixOutputId(DataChangeParticipant changeSource, MatrixOutputId matrixOutputId)
 {
-	if (m_MatrixOutputId != MatrixOutputId)
+
+	if (m_matrixOutputId != matrixOutputId)
 	{
 		// Ensure it's within allowed range.
-		m_MatrixOutputId = jmin(MatrixOutput_ID_MAX, jmax(MatrixOutput_ID_MIN, MatrixOutputId));
+		m_matrixOutputId = jmin(MatrixOutput_ID_MAX, jmax(MatrixOutput_ID_MIN, matrixOutputId));
 
 		// Signal change to other modules in the processor.
 		SetParameterChanged(changeSource, DCT_MatrixOutputID);
@@ -399,7 +400,7 @@ void MatrixOutputProcessor::SetMatrixOutputId(DataChangeParticipant changeSource
  */
 MatrixOutputId MatrixOutputProcessor::GetMatrixOutputId() const
 {
-	return m_MatrixOutputId;
+	return m_matrixOutputId;
 }
 
 /**
@@ -479,20 +480,20 @@ void MatrixOutputProcessor::parameterValueChanged(int parameterIndex, float newV
 	{
 		case MOI_ParamIdx_LevelMeterPostMute:
 			{
-				if (m_MatrixOutputLevelMeter->get() != m_MatrixOutputLevelMeter->GetLastValue())
+				if (m_matrixOutputLevelMeter->get() != m_matrixOutputLevelMeter->GetLastValue())
 					changed = DCT_MatrixOutputLevelMeter;
 			}
 			break;
 		case MOI_ParamIdx_Gain:
 			{
-				if (m_MatrixOutputGain->get() != m_MatrixOutputGain->GetLastValue())
+				if (m_matrixOutputGain->get() != m_matrixOutputGain->GetLastValue())
 					changed = DCT_MatrixOutputGain;
 			}
 			break;
 		case MOI_ParamIdx_Mute:
 			{
-				int newValueDenorm = static_cast<int>(m_MatrixOutputMute->getNormalisableRange().convertFrom0to1(newValue));
-				if (newValueDenorm != m_MatrixOutputMute->GetLastValue())
+				int newValueDenorm = static_cast<int>(m_matrixOutputMute->getNormalisableRange().convertFrom0to1(newValue));
+				if (newValueDenorm != m_matrixOutputMute->GetLastValue())
 					changed = DCT_MatrixOutputMute;
 			}
 			break;

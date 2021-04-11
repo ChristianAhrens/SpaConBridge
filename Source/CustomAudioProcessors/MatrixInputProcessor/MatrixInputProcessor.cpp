@@ -49,23 +49,23 @@ MatrixInputProcessor::MatrixInputProcessor(bool insertToConfig)
 	// Automation parameters.
 	// level meter param
 	auto lmR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_LevelMeterPreMute);
-	m_MatrixInputLevelMeter = new GestureManagedAudioParameterFloat("MatrixInput_LevelMeterPreMute", "levelMeter", lmR.getStart(), lmR.getEnd(), 0.1f, lmR.getStart());
-	m_MatrixInputLevelMeter->addListener(this);
-	addParameter(m_MatrixInputLevelMeter);
+	m_matrixInputLevelMeter = new GestureManagedAudioParameterFloat("MatrixInput_LevelMeterPreMute", "levelMeter", lmR.getStart(), lmR.getEnd(), 0.1f, lmR.getStart());
+	m_matrixInputLevelMeter->addListener(this);
+	addParameter(m_matrixInputLevelMeter);
 
 	// gain param
 	auto gR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_Gain);
-	m_MatrixInputGain = new GestureManagedAudioParameterFloat("MatrixInput_Gain", "gain", gR.getStart(), gR.getEnd(), 0.1f, 0.0f); // exception: dont use the min range as default - for a gain fader, 0dB is nicer
-	m_MatrixInputGain->addListener(this);
-	addParameter(m_MatrixInputGain);
+	m_matrixInputGain = new GestureManagedAudioParameterFloat("MatrixInput_Gain", "gain", gR.getStart(), gR.getEnd(), 0.1f, 0.0f); // exception: dont use the min range as default - for a gain fader, 0dB is nicer
+	m_matrixInputGain->addListener(this);
+	addParameter(m_matrixInputGain);
 
 	// mute param
 	auto mR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_Mute);
-	m_MatrixInputMute = new GestureManagedAudioParameterInt("MatrixInput_mute", "mute", static_cast<int>(mR.getStart()), static_cast<int>(mR.getEnd()), static_cast<int>(mR.getStart()));
-	m_MatrixInputMute->addListener(this);
-	addParameter(m_MatrixInputMute);
+	m_matrixInputMute = new GestureManagedAudioParameterInt("MatrixInput_mute", "mute", static_cast<int>(mR.getStart()), static_cast<int>(mR.getEnd()), static_cast<int>(mR.getStart()));
+	m_matrixInputMute->addListener(this);
+	addParameter(m_matrixInputMute);
 
-	m_MatrixInputId = MatrixInput_ID_MIN; // This default sourceId will be overwritten by ctrl->AddProcessor() below.
+	m_matrixInputId = MatrixInput_ID_MIN; // This default sourceId will be overwritten by ctrl->AddProcessor() below.
 	m_processorId = INVALID_PROCESSOR_ID;
 
 	// Default OSC communication mode.
@@ -174,23 +174,23 @@ float MatrixInputProcessor::GetParameterValue(MatrixInputParameterIndex paramIdx
 	{
 		case MII_ParamIdx_LevelMeterPreMute:
 			{
-				ret = m_MatrixInputLevelMeter->get();
+				ret = m_matrixInputLevelMeter->get();
 				if (normalized)
-					ret = m_MatrixInputLevelMeter->getNormalisableRange().convertTo0to1(ret);
+					ret = m_matrixInputLevelMeter->getNormalisableRange().convertTo0to1(ret);
 			}
 			break;
 		case MII_ParamIdx_Gain:
 			{
-				ret = m_MatrixInputGain->get();
+				ret = m_matrixInputGain->get();
 				if (normalized)
-					ret = m_MatrixInputGain->getNormalisableRange().convertTo0to1(ret);
+					ret = m_matrixInputGain->getNormalisableRange().convertTo0to1(ret);
 			}
 			break;
 		case MII_ParamIdx_Mute:
 			{
-				ret = static_cast<float>(m_MatrixInputMute->get());
+				ret = static_cast<float>(m_matrixInputMute->get());
 				if (normalized)
-					ret = m_MatrixInputMute->getNormalisableRange().convertTo0to1(ret);
+					ret = m_matrixInputMute->getNormalisableRange().convertTo0to1(ret);
 			}
 			break;
 		default:
@@ -217,13 +217,13 @@ void MatrixInputProcessor::SetParameterValue(DataChangeParticipant changeSource,
 	switch (paramIdx)
 	{
 	case MII_ParamIdx_LevelMeterPreMute:
-		m_MatrixInputLevelMeter->SetParameterValue(newValue);
+		m_matrixInputLevelMeter->SetParameterValue(newValue);
 		break;
 	case MII_ParamIdx_Gain:
-		m_MatrixInputGain->SetParameterValue(newValue);
+		m_matrixInputGain->SetParameterValue(newValue);
 		break;
 	case MII_ParamIdx_Mute:
-		m_MatrixInputMute->SetParameterValue(static_cast<int>(newValue));
+		m_matrixInputMute->SetParameterValue(static_cast<int>(newValue));
 		break;
 	default:
 		jassertfalse; // Unknown parameter index!
@@ -251,13 +251,13 @@ void MatrixInputProcessor::Tick()
 		switch (pIdx)
 		{
 		case MII_ParamIdx_LevelMeterPreMute:
-			m_MatrixInputLevelMeter->Tick();
+			m_matrixInputLevelMeter->Tick();
 			break;
 		case MII_ParamIdx_Gain:
-			m_MatrixInputGain->Tick();
+			m_matrixInputGain->Tick();
 			break;
 		case MII_ParamIdx_Mute:
-			m_MatrixInputMute->Tick();
+			m_matrixInputMute->Tick();
 			break;
 		default:
 			jassert(false); // missing implementation!
@@ -375,14 +375,14 @@ ComsMode MatrixInputProcessor::GetComsMode() const
 /**
  * Setter function for the MatrixInput Id
  * @param changeSource	The application module which is causing the property change.
- * @param MatrixInputId	The new ID
+ * @param matrixInputId	The new ID
  */
-void MatrixInputProcessor::SetMatrixInputId(DataChangeParticipant changeSource, MatrixInputId MatrixInputId)
+void MatrixInputProcessor::SetMatrixInputId(DataChangeParticipant changeSource, MatrixInputId matrixInputId)
 {
-	if (m_MatrixInputId != MatrixInputId)
+	if (m_matrixInputId != matrixInputId)
 	{
 		// Ensure it's within allowed range.
-		m_MatrixInputId = jmin(MatrixInput_ID_MAX, jmax(MatrixInput_ID_MIN, MatrixInputId));
+		m_matrixInputId = jmin(MatrixInput_ID_MAX, jmax(MatrixInput_ID_MIN, matrixInputId));
 
 		// Signal change to other modules in the processor.
 		SetParameterChanged(changeSource, DCT_MatrixInputID);
@@ -399,7 +399,7 @@ void MatrixInputProcessor::SetMatrixInputId(DataChangeParticipant changeSource, 
  */
 MatrixInputId MatrixInputProcessor::GetMatrixInputId() const
 {
-	return m_MatrixInputId;
+	return m_matrixInputId;
 }
 
 /**
@@ -430,18 +430,18 @@ int MatrixInputProcessor::GetMessageRate() const
 
 /**
  * Method to initialize config setting, without risking overwriting with the defaults.
- * @param MatrixInputId		New SourceID or matrix input number to use for this processor instance.
+ * @param matrixInputId		New SourceID or matrix input number to use for this processor instance.
  * @param mappingId		New coordinate mapping to use for this procssor instance.
  * @param ipAddress		New IP address of the DS100 device.
  * @param newMode		New OSC communication mode (Rx/Tx).
  */
-void MatrixInputProcessor::InitializeSettings(MatrixInputId MatrixInputId, String ipAddress, ComsMode newMode)
+void MatrixInputProcessor::InitializeSettings(MatrixInputId matrixInputId, String ipAddress, ComsMode newMode)
 {
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
-		jassert(MatrixInputId > 128);
-		SetMatrixInputId(DCP_Init, MatrixInputId);
+		jassert(matrixInputId > 128);
+		SetMatrixInputId(DCP_Init, matrixInputId);
 		SetComsMode(DCP_Init, newMode);
 	}
 }
@@ -479,20 +479,20 @@ void MatrixInputProcessor::parameterValueChanged(int parameterIndex, float newVa
 	{
 		case MII_ParamIdx_LevelMeterPreMute:
 			{
-				if (m_MatrixInputLevelMeter->get() != m_MatrixInputLevelMeter->GetLastValue())
+				if (m_matrixInputLevelMeter->get() != m_matrixInputLevelMeter->GetLastValue())
 					changed = DCT_MatrixInputLevelMeter;
 			}
 			break;
 		case MII_ParamIdx_Gain:
 			{
-				if (m_MatrixInputGain->get() != m_MatrixInputGain->GetLastValue())
+				if (m_matrixInputGain->get() != m_matrixInputGain->GetLastValue())
 					changed = DCT_MatrixInputGain;
 			}
 			break;
 		case MII_ParamIdx_Mute:
 			{
-				int newValueDenorm = static_cast<int>(m_MatrixInputMute->getNormalisableRange().convertFrom0to1(newValue));
-				if (newValueDenorm != m_MatrixInputMute->GetLastValue())
+				int newValueDenorm = static_cast<int>(m_matrixInputMute->getNormalisableRange().convertFrom0to1(newValue));
+				if (newValueDenorm != m_matrixInputMute->GetLastValue())
 					changed = DCT_MatrixInputMute;
 			}
 			break;

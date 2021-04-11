@@ -107,17 +107,17 @@ protected:
 	/**
 	 * Matrix input En-Space gain.
 	 */
-	GestureManagedAudioParameterFloat*	m_MatrixOutputLevelMeter;
+	GestureManagedAudioParameterFloat*	m_matrixOutputLevelMeter;
 
 	/**
 	 * Sound object spread.
 	 */
-	GestureManagedAudioParameterFloat*	m_MatrixOutputGain;
+	GestureManagedAudioParameterFloat*	m_matrixOutputGain;
 
 	/**
 	 * Sound object delay mode (Off, Tight, Full).
 	 */
-	GestureManagedAudioParameterInt*	m_MatrixOutputMute;
+	GestureManagedAudioParameterInt*	m_matrixOutputMute;
 
 	/**
 	 * Current OSC communication mode, sending and/or receiving.
@@ -127,7 +127,7 @@ protected:
 	/*
 	 * MatrixOutputProcessor, or matrix input number.
 	 */
-	MatrixOutputProcessorId	m_MatrixOutputId;
+	MatrixOutputProcessorId	m_matrixOutputId;
 
 	/**
 	 * Unique ID of this Processor instance. 

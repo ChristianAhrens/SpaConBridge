@@ -258,6 +258,49 @@ void TextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
 	if (!ctrl)
 		return;
 
+	// New SourceID which should be applied to all procssors in the selected rows.
+	auto newSourceId = textEditor.getText().getIntValue();
+	auto processorId = GetParentTable().GetProcessorIdForRow(GetRow());
+	switch (GetParentTable().GetTableType())
+	{
+	case TT_MatrixInputs:
+		{
+			auto processor = ctrl->GetMatrixInputProcessor(processorId);
+			if (processor)
+				processor->SetMatrixInputId(DCP_MatrixInputTable, newSourceId);
+		}
+		break;
+	case TT_MatrixOutputs:
+		{
+			auto processor = ctrl->GetMatrixOutputProcessor(processorId);
+			if (processor)
+				processor->SetMatrixOutputId(DCP_MatrixOutputTable, newSourceId);
+		}
+		break;
+	case TT_Soundobjects:
+	default:
+		{
+			auto processor = ctrl->GetSoundobjectProcessor(processorId);
+			if (processor)
+				processor->SetSoundobjectId(DCP_SoundobjectTable, newSourceId);
+		}
+		break;
+	}
+}
+
+/**
+ * Callback function for Enter key presses on textEditors.
+ * @param textEditor	The TextEditor object whose where enter key was pressed.
+ */
+void TextEditorContainer::textEditorReturnKeyPressed(TextEditor& textEditor)
+{
+	if (&m_editor != &textEditor)
+		return;
+
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
 	// Get the list of rows which are currently selected on the table.
 	std::vector<int> selectedRows = GetParentTable().GetSelectedRows();
 	if ((selectedRows.size() < 2) ||
@@ -276,46 +319,29 @@ void TextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
 		switch (GetParentTable().GetTableType())
 		{
 		case TT_MatrixInputs:
-			{
-				auto processor = ctrl->GetMatrixInputProcessor(processorId);
-				if (processor)
-					processor->SetMatrixInputId(DCP_MatrixInputTable, newSourceId);
-			}
-			break;
+		{
+			auto processor = ctrl->GetMatrixInputProcessor(processorId);
+			if (processor)
+				processor->SetMatrixInputId(DCP_MatrixInputTable, newSourceId);
+		}
+		break;
 		case TT_MatrixOutputs:
-			{
-				auto processor = ctrl->GetMatrixOutputProcessor(processorId);
-				if (processor)
-					processor->SetMatrixOutputId(DCP_MatrixOutputTable, newSourceId);
-			}
-			break;
+		{
+			auto processor = ctrl->GetMatrixOutputProcessor(processorId);
+			if (processor)
+				processor->SetMatrixOutputId(DCP_MatrixOutputTable, newSourceId);
+		}
+		break;
 		case TT_Soundobjects:
 		default:
-			{
-				auto processor = ctrl->GetSoundobjectProcessor(processorId);
-				if (processor)
-					processor->SetSoundobjectId(DCP_SoundobjectTable, newSourceId);
-			}
-			break;
+		{
+			auto processor = ctrl->GetSoundobjectProcessor(processorId);
+			if (processor)
+				processor->SetSoundobjectId(DCP_SoundobjectTable, newSourceId);
+		}
+		break;
 		}
 	}
-}
-
-/**
- * Callback function for Enter key presses on textEditors.
- * @param textEditor	The TextEditor object whose where enter key was pressed.
- */
-void TextEditorContainer::textEditorReturnKeyPressed(TextEditor& textEditor)
-{
-	if (&m_editor != &textEditor)
-		return;
-
-	// Remove keyboard focus from this editor. 
-	// Function textEditorFocusLost will then take care of setting values.
-	GetParentTable().grabKeyboardFocus();
-
-	textEditor.unfocusAllComponents();
-	unfocusAllComponents();
 }
 
 /**

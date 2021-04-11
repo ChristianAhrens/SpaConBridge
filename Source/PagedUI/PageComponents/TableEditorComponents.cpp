@@ -136,6 +136,13 @@ ComboBoxContainer::~ComboBoxContainer()
  */
 void ComboBoxContainer::comboBoxChanged(ComboBox *comboBox)
 {
+	if (&m_comboBox != comboBox)
+		return;
+
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
 	// Get the list of rows which are currently selected on the table.
 	std::vector<int> selectedRows = GetParentTable().GetSelectedRows();
 	if ((selectedRows.size() < 2) ||
@@ -150,28 +157,24 @@ void ComboBoxContainer::comboBoxChanged(ComboBox *comboBox)
 	// Get the IDs of the procssors on the selected rows.
 	auto processorIds = GetParentTable().GetProcessorIdsForRows(selectedRows);
 
-	Controller* ctrl = Controller::GetInstance();
-	if (ctrl)
+	// New MappingID which should be applied to all procssors in the selected rows.
+	auto newMapping = static_cast<MappingId>(comboBox->getSelectedId());
+	for (auto const& processorId : processorIds)
 	{
-		// New MappingID which should be applied to all procssors in the selected rows.
-		auto newMapping = static_cast<MappingId>(comboBox->getSelectedId());
-		for (auto const& processorId : processorIds)
+		switch (GetParentTable().GetTableType())
 		{
-			switch (GetParentTable().GetTableType())
+		case TT_MatrixInputs:
+		case TT_MatrixOutputs:
+			jassertfalse;
+			break;
+		case TT_Soundobjects:
+		default:
 			{
-			case TT_MatrixInputs:
-			case TT_MatrixOutputs:
-				jassertfalse;
-				break;
-			case TT_Soundobjects:
-			default:
-				{
-					auto processor = ctrl->GetSoundobjectProcessor(processorId);
-					if (processor)
-						processor->SetMappingId(DCP_SoundobjectTable, newMapping);
-				}
-				break;
+				auto processor = ctrl->GetSoundobjectProcessor(processorId);
+				if (processor)
+					processor->SetMappingId(DCP_SoundobjectTable, newMapping);
 			}
+			break;
 		}
 	}
 }
@@ -192,27 +195,28 @@ void ComboBoxContainer::resized()
 void ComboBoxContainer::SetRow(int newRow)
 {
 	TableEditorComponent::SetRow(newRow);
+	
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
 
 	// Find the procssor instance corresponding to the given row number.
 	auto processorId = GetParentTable().GetProcessorIdForRow(newRow);
-	auto ctrl = Controller::GetInstance();
-	if (ctrl)
+
+	switch (GetParentTable().GetTableType())
 	{
-		switch (GetParentTable().GetTableType())
+	case TT_MatrixInputs:
+	case TT_MatrixOutputs:
+		jassertfalse;
+		break;
+	case TT_Soundobjects:
+	default:
 		{
-		case TT_MatrixInputs:
-		case TT_MatrixOutputs:
-			jassertfalse;
-			break;
-		case TT_Soundobjects:
-		default:
-			{
-				auto processor = ctrl->GetSoundobjectProcessor(processorId);
-				if (processor)
-					m_comboBox.setSelectedId(processor->GetMappingId(), dontSendNotification);
-			}
-			break;
+			auto processor = ctrl->GetSoundobjectProcessor(processorId);
+			if (processor)
+				m_comboBox.setSelectedId(processor->GetMappingId(), dontSendNotification);
 		}
+		break;
 	}
 }
 
@@ -247,6 +251,13 @@ TextEditorContainer::~TextEditorContainer()
  */
 void TextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
 {
+	if (&m_editor != &textEditor)
+		return;
+
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
 	// Get the list of rows which are currently selected on the table.
 	std::vector<int> selectedRows = GetParentTable().GetSelectedRows();
 	if ((selectedRows.size() < 2) ||
@@ -258,38 +269,34 @@ void TextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
 		selectedRows.push_back(GetRow());
 	}
 
-	auto ctrl = Controller::GetInstance();
-	if (ctrl)
+	// New SourceID which should be applied to all procssors in the selected rows.
+	auto newSourceId = textEditor.getText().getIntValue();
+	for (auto const& processorId : GetParentTable().GetProcessorIdsForRows(selectedRows))
 	{
-		// New SourceID which should be applied to all procssors in the selected rows.
-		auto newSourceId = textEditor.getText().getIntValue();
-		for (auto const& processorId : GetParentTable().GetProcessorIdsForRows(selectedRows))
+		switch (GetParentTable().GetTableType())
 		{
-			switch (GetParentTable().GetTableType())
+		case TT_MatrixInputs:
 			{
-			case TT_MatrixInputs:
-				{
-					auto processor = ctrl->GetMatrixInputProcessor(processorId);
-					if (processor)
-						processor->SetMatrixInputId(DCP_MatrixInputTable, newSourceId);
-				}
-				break;
-			case TT_MatrixOutputs:
-				{
-					auto processor = ctrl->GetMatrixOutputProcessor(processorId);
-					if (processor)
-						processor->SetMatrixOutputId(DCP_MatrixOutputTable, newSourceId);
-				}
-				break;
-			case TT_Soundobjects:
-			default:
-				{
-					auto processor = ctrl->GetSoundobjectProcessor(processorId);
-					if (processor)
-						processor->SetSoundobjectId(DCP_SoundobjectTable, newSourceId);
-				}
-				break;
+				auto processor = ctrl->GetMatrixInputProcessor(processorId);
+				if (processor)
+					processor->SetMatrixInputId(DCP_MatrixInputTable, newSourceId);
 			}
+			break;
+		case TT_MatrixOutputs:
+			{
+				auto processor = ctrl->GetMatrixOutputProcessor(processorId);
+				if (processor)
+					processor->SetMatrixOutputId(DCP_MatrixOutputTable, newSourceId);
+			}
+			break;
+		case TT_Soundobjects:
+		default:
+			{
+				auto processor = ctrl->GetSoundobjectProcessor(processorId);
+				if (processor)
+					processor->SetSoundobjectId(DCP_SoundobjectTable, newSourceId);
+			}
+			break;
 		}
 	}
 }
@@ -300,7 +307,8 @@ void TextEditorContainer::textEditorFocusLost(TextEditor& textEditor)
  */
 void TextEditorContainer::textEditorReturnKeyPressed(TextEditor& textEditor)
 {
-	ignoreUnused(textEditor);
+	if (&m_editor != &textEditor)
+		return;
 
 	// Remove keyboard focus from this editor. 
 	// Function textEditorFocusLost will then take care of setting values.
@@ -326,37 +334,41 @@ void TextEditorContainer::resized()
 void TextEditorContainer::SetRow(int newRow)
 {
 	TableEditorComponent::SetRow(newRow);
+	
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
 
 	// Find the procssor instance corresponding to the given row number.
 	auto processorId = GetParentTable().GetProcessorIdForRow(newRow);
-	auto ctrl = Controller::GetInstance();
-	if (ctrl)
+
+	switch (GetParentTable().GetTableType())
 	{
-		switch (GetParentTable().GetTableType())
+	case TT_MatrixInputs:
 		{
-		case TT_MatrixInputs:
-			{
-				auto processor = ctrl->GetMatrixInputProcessor(processorId);
-				if (processor)
-					m_editor.setText(String(processor->GetMatrixInputId()), false);
-			}
-			break;
-		case TT_MatrixOutputs:
-			{
-				auto processor = ctrl->GetMatrixOutputProcessor(processorId);
-				if (processor)
-					m_editor.setText(String(processor->GetMatrixOutputId()), false);
-			}
-			break;
-		case TT_Soundobjects:
-		default:
-			{
-				auto processor = ctrl->GetSoundobjectProcessor(processorId);
-				if (processor)
-					m_editor.setText(String(processor->GetSoundobjectId()), false);
-			}
-			break;
+			auto processor = ctrl->GetMatrixInputProcessor(processorId);
+			if (processor)
+				m_editor.setText(String(processor->GetMatrixInputId()), false);
 		}
+		break;
+	case TT_MatrixOutputs:
+		{
+			auto processor = ctrl->GetMatrixOutputProcessor(processorId);
+			if (processor)
+			{
+				m_editor.setText(String(processor->GetMatrixOutputId()), false);
+				DBG(String(__FUNCTION__) + " row" + String(newRow) + " TT_MatrixOutputs PId" + String(processorId) + " MPId" + String(processor->GetProcessorId()) + " MOId" + String(processor->GetMatrixOutputId()));
+			}
+		}
+		break;
+	case TT_Soundobjects:
+	default:
+		{
+			auto processor = ctrl->GetSoundobjectProcessor(processorId);
+			if (processor)
+				m_editor.setText(String(processor->GetSoundobjectId()), false);
+		}
+		break;
 	}
 }
 
@@ -402,83 +414,85 @@ RadioButtonContainer::~RadioButtonContainer()
  */
 void RadioButtonContainer::buttonClicked(Button *button)
 {
+	if ((button != &m_txButton) && (button != &m_rxButton))
+		return;
+
 	auto ctrl = Controller::GetInstance();
-	if (ctrl && 
-		((button == &m_txButton) || (button == &m_rxButton))) 
+	if (!ctrl)
+		return;
+
+	bool newToggleState = button->getToggleState();
+
+	// Get the list of rows which are currently selected on the table.
+	auto selectedRows = GetParentTable().GetSelectedRows();
+	if ((selectedRows.size() < 2) ||
+		(std::find(selectedRows.begin(), selectedRows.end(), GetRow()) == selectedRows.end()))
 	{
-		bool newToggleState = button->getToggleState();
+		// If this button's row (m_row) is NOT selected, or if no multi-selection was made 
+		// then modify the selectedRows list so that it only contains m_row.
+		selectedRows.clear();
+		selectedRows.push_back(GetRow());
+	}
 
-		// Get the list of rows which are currently selected on the table.
-		auto selectedRows = GetParentTable().GetSelectedRows();
-		if ((selectedRows.size() < 2) ||
-			(std::find(selectedRows.begin(), selectedRows.end(), GetRow()) == selectedRows.end()))
+	for (auto const& processorId : GetParentTable().GetProcessorIdsForRows(selectedRows))
+	{
+		switch (GetParentTable().GetTableType())
 		{
-			// If this button's row (m_row) is NOT selected, or if no multi-selection was made 
-			// then modify the selectedRows list so that it only contains m_row.
-			selectedRows.clear();
-			selectedRows.push_back(GetRow());
-		}
-
-		for (auto const& processorId : GetParentTable().GetProcessorIdsForRows(selectedRows))
-		{
-			switch (GetParentTable().GetTableType())
+		case TT_MatrixInputs:
 			{
-			case TT_MatrixInputs:
+				auto processor = ctrl->GetMatrixInputProcessor(processorId);
+				if (processor)
 				{
-					auto processor = ctrl->GetMatrixInputProcessor(processorId);
-					if (processor)
-					{
-						ComsMode oldMode = processor->GetComsMode();
-						ComsMode newFlag = (button == &m_txButton) ? CM_Tx : CM_Rx;
+					ComsMode oldMode = processor->GetComsMode();
+					ComsMode newFlag = (button == &m_txButton) ? CM_Tx : CM_Rx;
 
-						if (newToggleState == true)
-							oldMode |= newFlag;
-						else
-							oldMode &= ~newFlag;
+					if (newToggleState == true)
+						oldMode |= newFlag;
+					else
+						oldMode &= ~newFlag;
 
-						processor->SetComsMode(DCP_MatrixInputTable, oldMode);
-					}
+					processor->SetComsMode(DCP_MatrixInputTable, oldMode);
 				}
-				break;
-			case TT_MatrixOutputs:
-				{
-					auto processor = ctrl->GetMatrixOutputProcessor(processorId);
-					if (processor)
-					{
-						ComsMode oldMode = processor->GetComsMode();
-						ComsMode newFlag = (button == &m_txButton) ? CM_Tx : CM_Rx;
-
-						if (newToggleState == true)
-							oldMode |= newFlag;
-						else
-							oldMode &= ~newFlag;
-
-						processor->SetComsMode(DCP_MatrixOutputTable, oldMode);
-					}
-				}
-				break;
-				break;
-			case TT_Soundobjects:
-			default:
-				{
-					auto processor = ctrl->GetSoundobjectProcessor(processorId);
-					if (processor)
-					{
-						ComsMode oldMode = processor->GetComsMode();
-						ComsMode newFlag = (button == &m_txButton) ? CM_Tx : CM_Rx;
-
-						if (newToggleState == true)
-							oldMode |= newFlag;
-						else
-							oldMode &= ~newFlag;
-
-						processor->SetComsMode(DCP_SoundobjectTable, oldMode);
-					}
-				}
-				break;
 			}
+			break;
+		case TT_MatrixOutputs:
+			{
+				auto processor = ctrl->GetMatrixOutputProcessor(processorId);
+				if (processor)
+				{
+					ComsMode oldMode = processor->GetComsMode();
+					ComsMode newFlag = (button == &m_txButton) ? CM_Tx : CM_Rx;
 
+					if (newToggleState == true)
+						oldMode |= newFlag;
+					else
+						oldMode &= ~newFlag;
+
+					processor->SetComsMode(DCP_MatrixOutputTable, oldMode);
+				}
+			}
+			break;
+			break;
+		case TT_Soundobjects:
+		default:
+			{
+				auto processor = ctrl->GetSoundobjectProcessor(processorId);
+				if (processor)
+				{
+					ComsMode oldMode = processor->GetComsMode();
+					ComsMode newFlag = (button == &m_txButton) ? CM_Tx : CM_Rx;
+
+					if (newToggleState == true)
+						oldMode |= newFlag;
+					else
+						oldMode &= ~newFlag;
+
+					processor->SetComsMode(DCP_SoundobjectTable, oldMode);
+				}
+			}
+			break;
 		}
+
 	}
 }
 
@@ -508,60 +522,60 @@ void RadioButtonContainer::SetRow(int newRow)
 
 	// Find the procssor instance corresponding to the given row number.
 	auto ctrl = Controller::GetInstance();
-	if (ctrl)
+	if (!ctrl)
+		return;
+
+	switch (GetParentTable().GetTableType())
 	{
-		switch (GetParentTable().GetTableType())
+	case TT_MatrixInputs:
 		{
-		case TT_MatrixInputs:
+			auto processor = ctrl->GetMatrixInputProcessor(GetParentTable().GetProcessorIdForRow(newRow));
+			if (processor)
 			{
-				auto processor = ctrl->GetMatrixInputProcessor(GetParentTable().GetProcessorIdForRow(newRow));
-				if (processor)
-				{
-					ComsMode newMode = processor->GetComsMode();
-					m_txButton.setToggleState(((newMode & CM_Tx) == CM_Tx), dontSendNotification);
-					m_rxButton.setToggleState(((newMode & CM_Rx) == CM_Rx), dontSendNotification);
-				}
-				else
-				{
-					m_txButton.setEnabled(false);
-					m_rxButton.setEnabled(false);
-				}
+				ComsMode newMode = processor->GetComsMode();
+				m_txButton.setToggleState(((newMode & CM_Tx) == CM_Tx), dontSendNotification);
+				m_rxButton.setToggleState(((newMode & CM_Rx) == CM_Rx), dontSendNotification);
 			}
-			break;
-		case TT_MatrixOutputs:
+			else
 			{
-				auto processor = ctrl->GetMatrixOutputProcessor(GetParentTable().GetProcessorIdForRow(newRow));
-				if (processor)
-				{
-					ComsMode newMode = processor->GetComsMode();
-					m_txButton.setToggleState(((newMode & CM_Tx) == CM_Tx), dontSendNotification);
-					m_rxButton.setToggleState(((newMode & CM_Rx) == CM_Rx), dontSendNotification);
-				}
-				else
-				{
-					m_txButton.setEnabled(false);
-					m_rxButton.setEnabled(false);
-				}
+				m_txButton.setEnabled(false);
+				m_rxButton.setEnabled(false);
 			}
-			break;
-		case TT_Soundobjects:
-		default:
-			{
-				auto processor = ctrl->GetSoundobjectProcessor(GetParentTable().GetProcessorIdForRow(newRow));
-				if (processor)
-				{
-					ComsMode newMode = processor->GetComsMode();
-					m_txButton.setToggleState(((newMode & CM_Tx) == CM_Tx), dontSendNotification);
-					m_rxButton.setToggleState(((newMode & CM_Rx) == CM_Rx), dontSendNotification);
-				}
-				else
-				{
-					m_txButton.setEnabled(false);
-					m_rxButton.setEnabled(false);
-				}
-			}
-			break;
 		}
+		break;
+	case TT_MatrixOutputs:
+		{
+			auto processor = ctrl->GetMatrixOutputProcessor(GetParentTable().GetProcessorIdForRow(newRow));
+			if (processor)
+			{
+				ComsMode newMode = processor->GetComsMode();
+				m_txButton.setToggleState(((newMode & CM_Tx) == CM_Tx), dontSendNotification);
+				m_rxButton.setToggleState(((newMode & CM_Rx) == CM_Rx), dontSendNotification);
+			}
+			else
+			{
+				m_txButton.setEnabled(false);
+				m_rxButton.setEnabled(false);
+			}
+		}
+		break;
+	case TT_Soundobjects:
+	default:
+		{
+			auto processor = ctrl->GetSoundobjectProcessor(GetParentTable().GetProcessorIdForRow(newRow));
+			if (processor)
+			{
+				ComsMode newMode = processor->GetComsMode();
+				m_txButton.setToggleState(((newMode & CM_Tx) == CM_Tx), dontSendNotification);
+				m_rxButton.setToggleState(((newMode & CM_Rx) == CM_Rx), dontSendNotification);
+			}
+			else
+			{
+				m_txButton.setEnabled(false);
+				m_rxButton.setEnabled(false);
+			}
+		}
+		break;
 	}
 }
 

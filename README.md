@@ -1,6 +1,6 @@
 ![Showreel.001.png](Resources/Documentation/Showreel/Showreel.001.png "SpaConBridge Headline Icons")
 
-SpaConBridge is currently in **EXPERIMENTAL** development.
+SpaConSim is a **PRIVATELY** created and driven project. It currently is in **EXPERIMENTAL** development.
 
 Its sourcecode and prebuilt binaries are made publicly available to enable interested users to experiment, extend and create own adaptations.
 
@@ -10,14 +10,14 @@ See [LATEST RELEASE](../../releases/latest) for available binary packages.
 
 SpaConBridge was created with the idea in mind to have both a simple ui to monitor or control Sound Object parameters of a d&b audiotechnik Soundscape system, esp. the DS100 Signal Engine, via OSC protocol and at the same time the possibility of controlling interfacing with external control data input (MIDI device, OSC control app, ...).
 
-SpaConBridge is a PRIVATELY created and driven project.
-It was originally inspired by d&b audiotechnik GmbH & Co. KG's own "Soundscape DAW Plugin" made publicly available at https://github.com/dbaudio-soundscape/db-Soundscape-DAW-Plugins and "Soundscape Control with DiGiCo SD consoles" made publicly available at https://github.com/dbaudio-soundscape/db-Soundscape-control-with-DiGiCo-SD-Consoles.
 It is neither suppported nor driven by official d&b activities.
+
+It was originally inspired by "Soundscape DAW Plugin" made publicly available at https://github.com/dbaudio-soundscape/db-Soundscape-DAW-Plugins and "Soundscape Control with DiGiCo SD consoles" made publicly available at https://github.com/dbaudio-soundscape/db-Soundscape-control-with-DiGiCo-SD-Consoles.
 
 
 **Known Issues:**
 
-* The app freezes when configuration is changed while data is received (freezes the longer, the more Sound Objects are active)  
+* The app freezes / performs poorly when configuration is changed while data is received (freezes the longer, the more Sound Objects are active)  
 __Note:__ Major code refactoring is required to solve this
 * Zeroconf is not working in builds for Windows OS  
 __Note:__ Needs to be implemented...
@@ -40,32 +40,34 @@ __Note:__ In consequence, devices being plugged in / coming online while app is 
   * [Matrix IO Table](#matrixiotable)
   * [Statistics](#protocolbridgingtrafficloggingandplotting)
   * [Settings](#appsettings)
-* [Supported Sound Object parameters on UI](#uiparameters)
+* [Supported Sound Object parameters on UI](#soundobjectuiparameters)
+* [Supported Matrix Input parameters on UI](#matrixinputuiparameters)
+* [Supported Matrix Output parameters on UI](#matrixoutputuiparameters)
 
 
 <a name="quicksetup" />
 
 ## Quick Start
 
-1. If no DS100 is available, the minimal simulation tool [SoundscapeOSCSim](https://github.com/ChristianAhrens/SoundscapeOSCSim) or the generic bridging tool [RemoteProtocolBridgeUI](https://github.com/ChristianAhrens/RemoteProtocolBridgeUI) can be used for testing and debugging.
+1. If no DS100 is available, the minimal simulation tool [SpaConSim](https://github.com/ChristianAhrens/SpaConSim) or the generic bridging tool [RemoteProtocolBridgeUI](https://github.com/ChristianAhrens/RemoteProtocolBridgeUI) can be used for testing and debugging.
 2. Launch SpaConBridge
     * Sound Object table has no entries, no bridging protocol is active
     * App is 'offline' since no Sound Object is active
 3. Add some Sound Objects by clicking the 'Add' button
 4. Enable receiving object values from DS100 by toggling the button with 'incoming' arrow symbol for at least one Sound Object in the table
 5. Go to [Settings](#appsettings) tab
-    * If you do not have a DS100 at hand, now is the time to launch [SoundscapeOSCSim](https://github.com/ChristianAhrens/SoundscapeOSCSim) simulation tool
+    * If you do not have a DS100 at hand, now is the time to launch [SpaConSim](https://github.com/ChristianAhrens/SpaConSim) simulation tool
 6. Set up the DS100 connection
-    * iPhoneOS/iPadOS/macOS: Click on discovery button below IP address text edit field to get a list of devices that announce _osc._udp zeroconf service and choose the DS100 or [SoundscapeOSCSim](https://github.com/ChristianAhrens/SoundscapeOSCSim) simulation tool you want to connect to
-    * Windows: Enter the IP address of the DS100 or [SoundscapeOSCSim](https://github.com/ChristianAhrens/SoundscapeOSCSim) simulation tool you want to connect to manually
+    * iPhoneOS/iPadOS/macOS: Click on discovery button below IP address text edit field to get a list of devices that announce _osc._udp zeroconf service and choose the DS100 or [SpaConSim](https://github.com/ChristianAhrens/SpaConSim) simulation tool you want to connect to
+    * Windows: Enter the IP address of the DS100 or [SpaConSim](https://github.com/ChristianAhrens/SpaConSim) simulation tool you want to connect to manually
 7. 'Online' inidicator on bottom right of the UI becomes active
-    * If using SoundscapeOSCSim, adjust the refresh rate slider on the tool's UI to the desired interval (= object value change speed). The tool's UI displays current object value polling rate in the performance metering.
+    * If using SpaConSim, adjust the refresh rate slider on the tool's UI to the desired interval (= object value change speed). The tool's UI displays current object value polling rate in the performance metering.
 8. Go to [Statistics](#protocolbridgingtrafficloggingandplotting) tab and click on DS100 legend item to activate DS100 protocol traffic plotting/logging.
 9. Go to [Sound Object Table](#soundobjecttable) tab and select one of the Sound Objects for which you previously activated receiving object values (button with 'incoming' arrow symbol)
 10. Details editor is opened for the Sound Object and shows live object value changes
 11. Go to [Multi Sound Object XY Pad](#twodimensionalpositionslider) tab to see the live object value changes for all objects with activated value receiving
 13. Go to [Sound Object Table](#soundobjecttable) tab, select a Sound Object and enable sending object values to DS100 by toggling the button with 'outgoing' arrow symbol
-    * When modifying the x, y, Reverb, Spread and Mode values through UI, they are now sent to DS100. Note: When using [SoundscapeOSCSim](https://github.com/ChristianAhrens/SoundscapeOSCSim), set its update interval to 0, otherwise it will immediately update the just sent value with a new simulated value.
+    * When modifying the x, y, Reverb, Spread and Mode values through UI, they are now sent to DS100. Note: When using [SpaConSim](https://github.com/ChristianAhrens/SpaConSim), set its update interval to 0, otherwise it will immediately update the just sent value with a new simulated value.
 14. You now can set up a bridging protocol in [Settings](#appsettings) tab if you like, following instructions provided for each individual [implemented protocol](#appsettingprotocols)
     * Keep in mind that incoming protocol values are only forwarded to DS100 and not directly shown on UI. The updated values are shown on UI as soon as values are reflected by DS100. Without a working connection to DS100 device or simulation, the UI will not show the changes.
     * [Statistics](#protocolbridgingtrafficloggingandplotting) tab shows bridging traffic and therefor can be used to monitor incoming protocl values without a working connection to DS100 device or simulation.
@@ -160,7 +162,7 @@ Depending on the available horizontal UI resolution, buttons are hidden. 'Show r
 ![Showreel.014.png](Resources/Documentation/Showreel/Showreel.014.png "Light LookAndFeel")
 
 
-<a name="uiparameters" />
+<a name="soundobjectuiparameters" />
 
 ## Supported Soundscape parameters on UI
 
@@ -168,3 +170,21 @@ Depending on the available horizontal UI resolution, buttons are hidden. 'Show r
 - Matrix Input ReverbSendGain
 - Sound Object Spread
 - Sound Object Delay Mode
+
+
+<a name="matrixinputuiparameters" />
+
+## Supported Matrix Input parameters on UI
+
+- Matrix Input Level (pre mute)
+- Matrix Input Gain
+- Matrix Input Mute
+
+
+<a name="martixoutputuiparameters" />
+
+## Supported Matrix Output parameters on UI
+
+- Matrix Output Level (post mute)
+- Matrix Output Gain
+- Matrix Output Mute

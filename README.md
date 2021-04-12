@@ -25,8 +25,6 @@ __Note:__ Needs to be implemented...
 __Note:__ Suspicion: Underlying UI framework issue is the cause for this
 * MIDI device listing is not updated during runtime  
 __Note:__ In consequence, devices being plugged in / coming online while app is running cannot be used unless app is restarted
-* Removal of multiselection of Sound Objects in table is not possible  
-__Note:__ Needs to be implemented...
 
 
 <a name="toc" />
@@ -39,6 +37,7 @@ __Note:__ Needs to be implemented...
     * [Selective Sound Object muting](#soundobjectmuting)
     * [Sound Object Parameter editing](#soundobjectparameterediting)
   * [Multi Sound Object XY Pad](#twodimensionalpositionslider)
+  * [Matrix IO Table](#matrixiotable)
   * [Statistics](#protocolbridgingtrafficloggingandplotting)
   * [Settings](#appsettings)
 * [Supported Sound Object parameters on UI](#uiparameters)
@@ -111,6 +110,17 @@ The selection in Sound Object table and the currently active tab can be external
 
 All Sound Objects assigned to the selected DS100 mapping area are shown simultaneously. The dropdown on the bottom can be used to switch the selection to one of the four available mapping areas.
 The selection / multiselection in Sound Object table is followed here and reflected in Sound Object circle sizing - selected objects are shown enlarged.
+
+
+<a name="matrixiotable" />
+
+### Matrix Inputs/Outputs Table
+
+![Showreel.015.png](Resources/Documentation/Showreel/Showreel.015.png "Matrix IO Table Overview")
+
+On the left side (landscape) or top (portrait) of the page, a table for visualization and control of DS100 matrix input channels is shown and on the right side or bottom of the page, a table for matrix outputs.
+Every row in both of the tables corresponds to an active Matrix Input or Output, meaning that it is shown on UI and its values can be received from DS100. This does not affect the pure protocol bridging in underlying module. E.g. in case an external OSC input sends new gain values for a channel that is not present in the table, the values will still be bridged to DS100. This needs to be kept in mind if muting the input data from a protocol for a Matrix Input/Output is desired!
+
 
 
 <a name="protocolbridgingtrafficloggingandplotting" />

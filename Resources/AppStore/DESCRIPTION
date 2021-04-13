@@ -1,11 +1,13 @@
-SpaConBridge is a PRIVATE project inspired by d&b audiotechnik GmbH & Co. KG's "Soundscape DAW Plugin" made publicly available at https://github.com/dbaudio-soundscape/db-Soundscape-DAW-Plugins and d&b audiotechnik GmbH & Co. KG's "Soundscape Control with DiGiCo SD consoles" made publicly available at https://github.com/dbaudio-soundscape/db-Soundscape-control-with-DiGiCo-SD-Consoles.
-This project is neither supported, maintained or initiated by d&b audiotechnik and and entirely unofficial open source project.
+SpaConBridge was created with the idea in mind to have both a simple ui to monitor or control Sound Object parameters of a d&b audiotechnik Soundscape system, esp. the DS100 Signal Engine, via OSC protocol and at the same time the possibility of controlling interfacing with external control data input (MIDI device, OSC control app, ...).
 
-The idea is to have a user interface that allows viewing and editing of Sound Object parameters of a d&b audiotechnik Soundscape system based on DS100 signal bridge, while also integrating the capability of third party control translation to d&b audiotechnik OSC protocol to externally control Sound Object parameters.
+It is neither suppported nor driven by official d&b activities.
+
+It was originally inspired by "Soundscape DAW Plugin" made publicly available at https://github.com/dbaudio-soundscape/db-Soundscape-DAW-Plugins and "Soundscape Control with DiGiCo SD consoles" made publicly available at https://github.com/dbaudio-soundscape/db-Soundscape-control-with-DiGiCo-SD-Consoles.
 
 Features
 
 - Monitoring of Soundscape Sound Object parameters
+- Monitoring of Matrix Input and Output level/gain/mute parameters
 - Protocol bridging from 3rd party devices/applications to d&b DS100 signal bridge
 - Monitoring of protocol bridging performance in graphical and textual representation
 - Tab based user interface containing tabs for

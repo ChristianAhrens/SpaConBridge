@@ -84,6 +84,7 @@ Controller::Controller()
 	SetRate(DCP_Init, PROTOCOL_INTERVAL_DEF, true);
 	SetDS100IpAddress(DCP_Init, PROTOCOL_DEFAULT_IP, true);
 	SetExtensionMode(DCP_Init, EM_Off, true);
+	SetActiveParallelModeDS100(DCP_Init, APM_None, true);
 }
 
 /**
@@ -749,7 +750,7 @@ std::pair<int, int> Controller::GetSupportedRateRange()
 }
 
 /**
- * Getter function for the IP address to which m_oscSender and m_oscReceiver are connected.
+ * Getter function for the DS100 extension mode currently used.
  * @return	Current IP address.
  */
 ExtensionMode Controller::GetExtensionMode() const
@@ -758,10 +759,9 @@ ExtensionMode Controller::GetExtensionMode() const
 }
 
 /**
- * Setter function for the IP address to which m_oscSender and m_oscReceiver are connected.
- * NOTE: changing ip address will disconnect m_oscSender and m_oscReceiver.
+ * Setter function for the DS100 extension mode to be used.
  * @param changeSource	The application module which is causing the property change.
- * @param ipAddress		New IP address.
+ * @param mode		New extension mode.
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  */
 void Controller::SetExtensionMode(DataChangeParticipant changeSource, ExtensionMode mode, bool dontSendNotification)
@@ -773,6 +773,38 @@ void Controller::SetExtensionMode(DataChangeParticipant changeSource, ExtensionM
 		m_DS100ExtensionMode = mode;
 
 		m_protocolBridge.SetDS100ExtensionMode(mode, dontSendNotification);
+
+		// Signal the change to all Processors. 
+		SetParameterChanged(changeSource, (DCT_ExtensionMode | DCT_Online));
+
+		Reconnect();
+	}
+}
+
+/**
+ * Getter function for the DS100 currently active in extension mode "parallel".
+ * @return	Current parallel mode DS100 active.
+ */
+ActiveParallelModeDS100 Controller::GetActiveParallelModeDS100() const
+{
+	return m_DS100ActiveParallelModeDS100;
+}
+
+/**
+ * Setter function for the DS100 to be currently active in extension mode "parallel".
+ * @param changeSource	The application module which is causing the property change.
+ * @param activeParallelModeDS100		New active DS100 in parallel extension mode.
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ */
+void Controller::SetActiveParallelModeDS100(DataChangeParticipant changeSource, ActiveParallelModeDS100 activeParallelModeDS100, bool dontSendNotification)
+{
+	if (m_DS100ActiveParallelModeDS100 != activeParallelModeDS100)
+	{
+		const ScopedLock lock(m_mutex);
+
+		m_DS100ActiveParallelModeDS100 = activeParallelModeDS100;
+
+		m_protocolBridge.SetActiveParallelModeDS100(activeParallelModeDS100, dontSendNotification);
 
 		// Signal the change to all Processors. 
 		SetParameterChanged(changeSource, (DCT_ExtensionMode | DCT_Online));

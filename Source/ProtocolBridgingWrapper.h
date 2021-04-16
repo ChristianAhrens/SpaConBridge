@@ -117,6 +117,9 @@ public:
 	ExtensionMode GetDS100ExtensionMode();
 	bool SetDS100ExtensionMode(ExtensionMode mode, bool dontSendNotification = false);
 
+	ActiveParallelModeDS100 GetActiveParallelModeDS100();
+	bool SetActiveParallelModeDS100(ActiveParallelModeDS100 activeParallelModeDS100, bool dontSendNotification = false);
+
 	ObjectHandlingState GetDS100State() const;
 	void SetDS100State(ObjectHandlingState state);
 	ObjectHandlingState GetSecondDS100State() const;

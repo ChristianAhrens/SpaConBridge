@@ -233,6 +233,16 @@ enum ExtensionMode
 };
 
 /**
+ * Possibilities of active DS100 devices in parallel bridging mode
+ */
+enum ActiveParallelModeDS100
+{
+	APM_None = 0,
+	APM_1st,
+	APM_2nd
+};
+
+/**
  * Helper method to query web repository and documentation base urls (on gitub).
  */
 String GetRepositoryBaseWebUrl();

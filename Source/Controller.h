@@ -140,6 +140,10 @@ public:
 	void SetExtensionMode(DataChangeParticipant changeSource, ExtensionMode mode, bool dontSendNotification = false);
 
 	//==========================================================================
+	ActiveParallelModeDS100 GetActiveParallelModeDS100() const;
+	void SetActiveParallelModeDS100(DataChangeParticipant changeSource, ActiveParallelModeDS100 activeParallelModeDS100, bool dontSendNotification = false);
+
+	//==========================================================================
 	const std::vector<RemoteObject> GetActivatedSoundObjectRemoteObjects();
 	const std::vector<RemoteObject> GetActivatedMatrixInputRemoteObjects();
 	const std::vector<RemoteObject> GetActivatedMatrixOutputRemoteObjects();
@@ -219,6 +223,7 @@ protected:
 	ProtocolBridgingWrapper			m_protocolBridge;				/**< The wrapper for protocol bridging node, allowing to easily interface with it. */
 	String							m_DS100IpAddress;				/**< IP Address where OSC messages will be sent to / received from. */
 	ExtensionMode					m_DS100ExtensionMode;			/**< Current extension mode. This has impact on if second DS100 is active or not. */
+	ActiveParallelModeDS100			m_DS100ActiveParallelModeDS100;	/**< Currently active DS100 when in extension mode "parallel". */
 	String							m_SecondDS100IpAddress;			/**< IP Address where OSC messages will be sent to / received from. */
 	int								m_oscMsgRate;					/**< Interval at which OSC messages are sent to the host, in ms. */
 	DataChangeType					m_parametersChanged[DCP_Max];	/**< Keep track of which OSC parameters have changed recently.

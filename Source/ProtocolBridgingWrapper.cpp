@@ -1765,6 +1765,8 @@ ExtensionMode ProtocolBridgingWrapper::GetDS100ExtensionMode()
 			case OHM_Mux_nA_to_mB_withValFilter:
 				return EM_Extend;
 			case OHM_Forward_only_valueChanges:
+			case OHM_A1active_withValFilter:
+			case OHM_A2active_withValFilter:
 				{
 				auto protocol1XmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
 				auto protocol2XmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_2_PROCESSINGPROTOCOL_ID));
@@ -1817,7 +1819,8 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 			case EM_Parallel:
 			{
 				// EM_Off refers to valuechange forwarding object handling mode without any channelcount parameter attributes
-				objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Forward_only_valueChanges));
+				auto parallelObjectHandlingMode = (GetActiveParallelModeDS100() == APM_2nd ? OHM_A2active_withValFilter : OHM_A1active_withValFilter);
+				objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(parallelObjectHandlingMode));
 
 				// remove elements that are not used by this ohm
 				auto protocolAChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
@@ -1966,6 +1969,90 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 			return false;
 
 		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
+}
+
+/**
+ * Getter method for active DS100 in extension mode "parallel".
+ * This does not return a member variable value but contains logic to derive the mode from internal cached xml element configuration.
+ * @return The DS100 currently set as active one for extension mode "parallel" in cached xml config.
+ */
+ActiveParallelModeDS100 ProtocolBridgingWrapper::GetActiveParallelModeDS100()
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto objectHandlingXmlElement = nodeXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OBJECTHANDLING));
+		if (objectHandlingXmlElement)
+		{
+			auto objectHandlingMode = ProcessingEngineConfig::ObjectHandlingModeFromString(objectHandlingXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE)));
+			switch (objectHandlingMode)
+			{
+			case OHM_A1active_withValFilter:
+				return APM_1st;
+			case OHM_A2active_withValFilter:
+				return APM_2nd;
+			case OHM_Mirror_dualA_withValFilter:
+			case OHM_Mux_nA_to_mB_withValFilter:
+			case OHM_Forward_only_valueChanges:
+			case OHM_Bypass:
+			case OHM_Invalid:
+			case OHM_Mux_nA_to_mB:
+			case OHM_Remap_A_X_Y_to_B_XY:
+			case OHM_DS100_DeviceSimulation:
+			case OHM_Forward_A_to_B_only:
+			case OHM_Reverse_B_to_A_only:
+				return APM_None;
+			case OHM_UserMAX:
+			default:
+				jassertfalse;
+				return APM_None;
+			}
+		}
+	}
+
+	return APM_None;
+}
+
+/**
+ * Setter method for active DS100 in extension mode "parallel".
+ * This does not set a member variable but contains logic to reconfigure the cached xml element according to the given mode value.
+ * @param activeParallelModeDS100	The DS100 to set as active one.
+ * @param dontSendNotification	-Ignored-
+ * @return	True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetActiveParallelModeDS100(ActiveParallelModeDS100 activeParallelModeDS100, bool dontSendNotification)
+{
+	ignoreUnused(dontSendNotification);
+
+	// chicken exit - no changes to cached xml element and still successful return if no activeParallelMode shall be set
+	if (activeParallelModeDS100 == APM_None)
+		return true;
+
+	if (GetDS100ExtensionMode() != EM_Parallel)
+	{
+		// makes no sense to set the details of parallel extension mode when parallel mode itself is not active
+		jassertfalse;
+		SetDS100ExtensionMode(EM_Parallel);
+	}
+
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto objectHandlingXmlElement = nodeXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OBJECTHANDLING));
+		if (objectHandlingXmlElement)
+		{
+			if (activeParallelModeDS100 == APM_2nd)
+				objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_A2active_withValFilter));
+			else
+				objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_A1active_withValFilter));
+
+			return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+		}
+		else
+			return false;
 	}
 	else
 		return false;

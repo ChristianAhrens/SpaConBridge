@@ -95,14 +95,19 @@ private:
 	std::unique_ptr<TextEditor>									m_DS100IpAddressEdit;
 	std::unique_ptr<Label>										m_DS100IpAddressLabel;
 	std::unique_ptr<JUCEAppBasics::ZeroconfDiscoverComponent>	m_DS100ZeroconfDiscovery;
+
 	std::unique_ptr<JUCEAppBasics::SplitButtonComponent>		m_SecondDS100ModeButton;
 	std::unique_ptr<Label>										m_SecondDS100ModeLabel;
 	const std::vector<std::string>								m_SecondDS100Modes{ "Off", "Extend", "Parallel", "Mirror" };
 	std::map<std::string, uint64>								m_SecondDS100ModeButtonIds;
-
 	std::unique_ptr<TextEditor>									m_SecondDS100IpAddressEdit;
 	std::unique_ptr<Label>										m_SecondDS100IpAddressLabel;
 	std::unique_ptr<JUCEAppBasics::ZeroconfDiscoverComponent>	m_SecondDS100ZeroconfDiscovery;
+
+	std::unique_ptr<JUCEAppBasics::SplitButtonComponent>		m_SecondDS100ParallelModeButton;
+	std::unique_ptr<Label>										m_SecondDS100ParallelModeLabel;
+	const std::vector<std::string>								m_SecondDS100ParallelModes{ "1st", "2nd" };
+	std::map<std::string, uint64>								m_SecondDS100ParallelModeButtonIds;
 
 	// DiGiCo settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_DiGiCoBridgingSettings;

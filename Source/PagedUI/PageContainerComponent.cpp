@@ -83,15 +83,17 @@ PageContainerComponent::PageContainerComponent()
 	lookAndFeelChanged();
 
 	// Online
-	m_onlineLabel = std::make_unique<Label>("Online Label", "Online:");
-	m_onlineLabel->setJustificationType(Justification::centred);
-	addAndMakeVisible(m_onlineLabel.get());
-	m_onlineLed1st = std::make_unique<LedComponent>();
-	m_onlineLed1st->setEnabled(false);
-	addAndMakeVisible(m_onlineLed1st.get());
-	m_onlineLed2nd = std::make_unique<LedComponent>();
-	m_onlineLed2nd->setEnabled(false);
-	addAndMakeVisible(m_onlineLed2nd.get());
+	m_onlineButton = std::make_unique<TextButton>("Online");
+	//m_onlineButton->setJustificationType(Justification::centred);
+	m_onlineButton->setClickingTogglesState(true);
+	m_onlineButton->addListener(this);
+	addAndMakeVisible(m_onlineButton.get());
+	m_connectedLed1st = std::make_unique<LedComponent>();
+	m_connectedLed1st->setEnabled(false);
+	addAndMakeVisible(m_connectedLed1st.get());
+	m_connectedLed2nd = std::make_unique<LedComponent>();
+	m_connectedLed2nd->setEnabled(false);
+	addAndMakeVisible(m_connectedLed2nd.get());
 
 	// app logo button and procssor version label
 	m_logoButton = std::make_unique<ImageButton>("LogoButton");
@@ -197,19 +199,20 @@ void PageContainerComponent::resized()
 		FlexItem().withFlex(1),
 		});
 
-	if (Controller* ctrl = Controller::GetInstance())
+	auto ctrl = Controller::GetInstance();
+	if (ctrl)
 	{
 		// Online
-		bottomBarFB.items.add(FlexItem(*m_onlineLabel.get()).withWidth(65).withHeight(25).withMargin(FlexItem::Margin(5, 0, 5, 0)));
+		bottomBarFB.items.add(FlexItem(*m_onlineButton.get()).withWidth(65).withHeight(25).withMargin(FlexItem::Margin(5, 5, 5, 0)));
 		// depending on controller extension mode, we use one or two leds
 		if (ctrl->GetExtensionMode() == ExtensionMode::EM_Off)
 		{
-			bottomBarFB.items.add(FlexItem(*m_onlineLed1st.get()).withWidth(24).withHeight(24).withMargin(FlexItem::Margin(5, 10, 5, 0)));
+			bottomBarFB.items.add(FlexItem(*m_connectedLed1st.get()).withWidth(24).withHeight(24).withMargin(FlexItem::Margin(5, 10, 5, 0)));
 		}
 		else
 		{
-			bottomBarFB.items.add(FlexItem(*m_onlineLed1st.get()).withWidth(24).withHeight(24).withMargin(FlexItem::Margin(5, 0, 5, 0)));
-			bottomBarFB.items.add(FlexItem(*m_onlineLed2nd.get()).withWidth(24).withHeight(24).withMargin(FlexItem::Margin(5, 10, 5, 0)));
+			bottomBarFB.items.add(FlexItem(*m_connectedLed1st.get()).withWidth(24).withHeight(24).withMargin(FlexItem::Margin(5, 0, 5, 0)));
+			bottomBarFB.items.add(FlexItem(*m_connectedLed2nd.get()).withWidth(24).withHeight(24).withMargin(FlexItem::Margin(5, 10, 5, 0)));
 		}
 	}
 
@@ -248,11 +251,17 @@ void PageContainerComponent::resized()
  */
 void PageContainerComponent::buttonClicked(Button* button)
 {
-	if (m_logoButton && m_logoButton.get() == button && m_aboutPage)
+	if (m_onlineButton && m_onlineButton.get() == button)
+	{
+		auto ctrl = Controller::GetInstance();
+		if (ctrl)
+			ctrl->SetOnline(DCP_PageContainer, m_onlineButton->getToggleState());
+	}
+	else if (m_logoButton && m_logoButton.get() == button && m_aboutPage)
 	{
 		toggleAboutPage();
 	}
-	if (m_helpButton && m_helpButton.get() == button)
+	else if (m_helpButton && m_helpButton.get() == button)
 	{
 		auto helpURLString = GetRepositoryBaseWebUrl() + "README.md";
 		URL(helpURLString).launchInDefaultBrowser();
@@ -293,27 +302,35 @@ void PageContainerComponent::timerCallback()
 void PageContainerComponent::UpdateGui(bool init)
 {
 	auto ctrl = Controller::GetInstance();
-	if (ctrl && m_onlineLed1st && m_onlineLed2nd)
+
+	if (ctrl && m_onlineButton)
+	{
+		auto online = ctrl->IsOnline();
+		if (m_onlineButton->getToggleState() != online)
+			m_onlineButton->setToggleState(online, dontSendNotification);
+	}
+
+	if (ctrl && m_connectedLed1st && m_connectedLed2nd)
 	{
 		auto secondDS100Used = (ctrl->GetExtensionMode() != ExtensionMode::EM_Off);
-		auto secondDS100Visible = m_onlineLed2nd->isVisible();
+		auto secondDS100Visible = m_connectedLed2nd->isVisible();
 		if (secondDS100Used != secondDS100Visible)
 		{
-			m_onlineLed2nd->setVisible(secondDS100Used);
+			m_connectedLed2nd->setVisible(secondDS100Used);
 			resized();
 		}
-		if (ctrl->PopParameterChanged(DCP_Protocol, DCT_Online) || init)
+		if (ctrl->PopParameterChanged(DCP_PageContainer, DCT_Connected) || init)
 		{
-			auto online1 = ctrl->IsFirstDS100Online();
+			auto connected1 = ctrl->IsFirstDS100Connected();
 			auto mm1 = ctrl->IsFirstDS100MirrorMaster();
-			m_onlineLed1st->SetOn(online1);
-			m_onlineLed1st->SetHighlightOn(online1 && mm1);
+			m_connectedLed1st->SetOn(connected1);
+			m_connectedLed1st->SetHighlightOn(connected1 && mm1);
 			if (secondDS100Used)
 			{
-				auto online2 = ctrl->IsSecondDS100Online();
+				auto connected2 = ctrl->IsSecondDS100Connected();
 				auto mm2 = ctrl->IsSecondDS100MirrorMaster();
-				m_onlineLed2nd->SetOn(online2);
-				m_onlineLed2nd->SetHighlightOn(online2 && mm2);
+				m_connectedLed2nd->SetOn(connected2);
+				m_connectedLed2nd->SetHighlightOn(connected2 && mm2);
 			}
 		}
 	}

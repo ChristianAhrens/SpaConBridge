@@ -120,15 +120,22 @@ void ProtocolBridgingWrapper::Disconnect()
 
 /**
  * Disconnect and re-connect the OSCSender to a host specified by the current ip settings.
+ * @return	True if the reconnection was triggered, false if controller state is offline and therefor no reconnection is allowed
  */
-void ProtocolBridgingWrapper::Reconnect()
+bool ProtocolBridgingWrapper::Reconnect()
 {
+	auto ctrl = Controller::GetInstance();
+	if (ctrl && !ctrl->IsOnline()) // dont execute the reconnection if controller state suggests that the application shall be offline
+		return false;
+
 	Disconnect();
 
 	auto nodeXmlElement = m_bridgingXml.getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::NODE));
 	if (nodeXmlElement)
 		SetBridgingNodeStateXml(nodeXmlElement, true);
 	m_processingNode.Start();
+
+	return true;
 }
 
 /**
@@ -1377,7 +1384,15 @@ void ProtocolBridgingWrapper::SetProtocolState(ProtocolId protocolId, ObjectHand
 
 	auto ctrl = Controller::GetInstance();
 	if (ctrl)
-		ctrl->SetParameterChanged(DCP_Protocol, DCT_Online);
+		ctrl->SetParameterChanged(DCP_Protocol, DCT_Connected);
+}
+
+void ProtocolBridgingWrapper::SetOnline(bool online)
+{
+	if (online)
+		Reconnect();
+	else
+		Disconnect();
 }
 
 /**

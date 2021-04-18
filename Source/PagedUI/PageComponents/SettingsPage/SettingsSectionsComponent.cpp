@@ -573,7 +573,7 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 
 	// DS100 settings section
 	if (m_DS100IntervalEdit && m_DS100IntervalEdit.get() == &editor)
-		ctrl->SetRate(DCP_Settings, m_DS100IntervalEdit->getText().getIntValue());
+		ctrl->SetRefreshInterval(DCP_Settings, m_DS100IntervalEdit->getText().getIntValue());
 	else if (m_DS100IpAddressEdit && m_DS100IpAddressEdit.get() == &editor)
 		ctrl->SetDS100IpAddress(DCP_Settings, m_DS100IpAddressEdit->getText());
 	else if (m_SecondDS100IpAddressEdit && m_SecondDS100IpAddressEdit.get() == &editor)
@@ -759,7 +759,7 @@ void SettingsSectionsComponent::processUpdatedConfig()
 
 	// DS100 settings section
 	if (m_DS100IntervalEdit)
-		m_DS100IntervalEdit->setText(String(ctrl->GetRate()) + UNIT_MILLISECOND);
+		m_DS100IntervalEdit->setText(String(ctrl->GetRefreshInterval()) + UNIT_MILLISECOND);
 	if (m_DS100IpAddressEdit)
 		m_DS100IpAddressEdit->setText(ctrl->GetDS100IpAddress());
 	if (m_SecondDS100ModeButton)

@@ -188,9 +188,9 @@ private:
 	std::unique_ptr<Label>							m_versionStringLabel;	/**> "Version" string. */
 	std::unique_ptr<ImageButton>					m_logoButton;			/**> App logo button triggering about page. */
 	std::unique_ptr<DrawableButton>					m_helpButton;			/**< Button to open the github readme url. */
-	std::unique_ptr<Label>							m_onlineLabel;			/**> Online indicator label. */
-	std::unique_ptr<LedComponent>					m_onlineLed1st;			/**> Button used as Online indicator LED for first DS100. */
-	std::unique_ptr<LedComponent>					m_onlineLed2nd;			/**> Button used as Online indicator LED for second DS100. */
+	std::unique_ptr<TextButton>						m_onlineButton;			/**> Online/Offline toggle button. */
+	std::unique_ptr<LedComponent>					m_connectedLed1st;		/**> Button used as Connected indicator LED for first DS100. */
+	std::unique_ptr<LedComponent>					m_connectedLed2nd;		/**> Button used as Connected indicator LED for second DS100. */
 	std::unique_ptr<CustomButtonTabbedComponent>	m_tabbedComponent;		/**> A container for tabs. */
 	std::unique_ptr<SoundobjectTablePageComponent>	m_soundobjectsPage;		/**> The actual table container inside this component. */
 	std::unique_ptr<MultiSurfacePageComponent>		m_multiSliderPage;		/**> Container for multi-slider. */

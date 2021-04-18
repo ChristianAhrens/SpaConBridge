@@ -45,6 +45,7 @@ public:
         PROCESSORINSTANCE,
 		BRIDGING,
         LOOKANDFEELTYPE,
+        ONLINESTATE,
     };
     static String getTagName(TagID ID)
     {
@@ -78,6 +79,8 @@ public:
             return "Bridging";
         case LOOKANDFEELTYPE:
             return "LookAndFeelType";
+        case ONLINESTATE:
+            return "Online";
 		default:
 			return "INVALID";
         }

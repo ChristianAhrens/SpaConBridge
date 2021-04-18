@@ -77,6 +77,7 @@ enum DataChangeParticipant
 	DCP_MatrixOutputProcessor,		//< Change was caused or is queried by the MatrixOutputProcessor UI, i.e. the user turning a knob to change a value.
 	DCP_MatrixOutputTable,			//< Change was caused or is queried by the matrix outputs table
 	DCP_MatrixIO,					//< Change was caused or is queried by the matrix io channel page
+	DCP_PageContainer,				//< Change was caused or is queried by the page container base component
 	DCP_Max							//< Number of change sources.
 };
 

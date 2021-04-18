@@ -193,7 +193,7 @@ public:
 	bool IsSecondDS100MirrorMaster() const;
 
 	//==========================================================================
-	void SetOnline(bool online);
+	void SetOnline(DataChangeParticipant changeSource, bool online);
 	bool IsOnline() const;
 
 	//==========================================================================
@@ -216,23 +216,26 @@ private:
 protected:
 	
 	static Controller				*m_singleton;					/**< The one and only instance of CController. */
-	Array<SoundobjectProcessor*>	m_soundobjectProcessors;		/**< List of registered processor instances.
-																	 * Incoming OSC messages will be forwarded to all processors on the list.
-																	 * When adding Plug-in instances to a project (i.e. one for each DAW track), this list will grow.
-																	 * When removing Plug-in instances from a project, this list will shrink. When the list becomes empty,
-																	 * The Controller singleton object is no longer necessary and will destruct itself.
-																	 */
+
+	int								m_refreshInterval;				/**< Interval at which the controller internal update is triggered, in ms. */
+	bool							m_onlineState{ false };			/**< State of the protocol bridging/communication. This is only the expected state, not the actual connected state. */
+
+	Array<SoundobjectProcessor*>	m_soundobjectProcessors;		/**< List of registered processor instances. */
 	Array<MatrixInputProcessor*>	m_matrixInputProcessors;		/**< List of registered processor instances. */
 	Array<MatrixOutputProcessor*>	m_matrixOutputProcessors;		/**< List of registered processor instances. */
+
 	ProtocolBridgingWrapper			m_protocolBridge;				/**< The wrapper for protocol bridging node, allowing to easily interface with it. */
+
 	String							m_DS100IpAddress;				/**< IP Address where OSC messages will be sent to / received from. */
 	ExtensionMode					m_DS100ExtensionMode;			/**< Current extension mode. This has impact on if second DS100 is active or not. */
 	ActiveParallelModeDS100			m_DS100ActiveParallelModeDS100;	/**< Currently active DS100 when in extension mode "parallel". */
 	String							m_SecondDS100IpAddress;			/**< IP Address where OSC messages will be sent to / received from. */
-	int								m_refreshInterval;				/**< Interval at which the controller internal update is triggered, in ms. */
+
 	DataChangeType					m_parametersChanged[DCP_Max];	/**< Keep track of which OSC parameters have changed recently.
 																	 * The array has one entry for each application module (see enum DataChangeSource). */
-	CriticalSection					m_mutex;						/**< A re-entrant mutex. Safety first. */
+
+	CriticalSection					m_mutex;						/**< A re-entrant mutex. */
+
 	std::map<SoundobjectId, bool>	m_soundObjectSelection;			/**< The current select state of sound objects. */
 	std::map<MatrixInputId, bool>	m_matrixInputSelection;			/**< The current select state of matrix inputs. */
 	std::map<MatrixOutputId, bool>	m_matrixOutputSelection;		/**< The current select state of matrix outputs. */

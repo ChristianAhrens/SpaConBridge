@@ -705,11 +705,21 @@ bool Controller::IsSecondDS100MirrorMaster() const
 
 /**
  * Setter for the DS100 bridging online state.
+ * @param changeSource	The application module which is causing the property change.
  * @param online	The online activated state to be set.
  */
-void Controller::SetOnline(bool online)
+void Controller::SetOnline(DataChangeParticipant changeSource, bool online)
 {
-	//m_protocolBridge.
+	if (online != m_onlineState)
+	{
+		const ScopedLock lock(m_mutex);
+
+		m_onlineState = online;
+
+		m_protocolBridge.SetOnline(online);
+
+		SetParameterChanged(changeSource, DCT_RefreshInterval);
+	}
 }
 
 /**
@@ -718,8 +728,7 @@ void Controller::SetOnline(bool online)
  */
 bool Controller::IsOnline() const
 {
-	return false;
-	//return m_protocolBridge.
+	return m_onlineState;
 }
 
 /**

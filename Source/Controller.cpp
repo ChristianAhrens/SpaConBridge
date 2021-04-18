@@ -165,7 +165,7 @@ void Controller::SetParameterChanged(DataChangeParticipant changeSource, DataCha
 	case DCT_NumProcessors:
 	case DCT_None:
 	case DCT_IPAddress:
-	case DCT_MessageRate:
+	case DCT_RefreshInterval:
 	case DCT_CommunicationConfig:
 	case DCT_SoundobjectID:
 	case DCT_MatrixInputID:
@@ -751,7 +751,7 @@ void Controller::SetRefreshInterval(DataChangeParticipant changeSource, int refr
 		m_protocolBridge.SetDS100MsgRate(refreshInterval, dontSendNotification);
 
 		// Signal the change to all Processors.
-		SetParameterChanged(changeSource, DCT_MessageRate);
+		SetParameterChanged(changeSource, DCT_RefreshInterval);
 
 		// Reset timer to the new interval.
 		startTimer(m_refreshInterval);

@@ -644,18 +644,18 @@ void Controller::SetSecondDS100IpAddress(DataChangeParticipant changeSource, Str
 
 /**
  * Getter function for the DS100 bridging communication state.
- * @return		True if all communication channels are online.
+ * @return		True if all communication channels are connected.
  */
-bool Controller::IsOnline() const
+bool Controller::IsConnected() const
 {
 	switch (GetExtensionMode())
 	{
 	case ExtensionMode::EM_Off:
-		return IsFirstDS100Online();
+		return IsFirstDS100Connected();
 	case ExtensionMode::EM_Extend:
 	case ExtensionMode::EM_Mirror:
 	case ExtensionMode::EM_Parallel:
-		return (IsFirstDS100Online() && IsSecondDS100Online());
+		return (IsFirstDS100Connected() && IsSecondDS100Connected());
 	default:
 		return false;
 	}
@@ -663,9 +663,9 @@ bool Controller::IsOnline() const
 
 /**
  * Getter function for the DS100 bridging communication state.
- * @return		True if communication channel with first DS100 is online.
+ * @return		True if communication channel with first DS100 is connected.
  */
-bool Controller::IsFirstDS100Online() const
+bool Controller::IsFirstDS100Connected() const
 {
 	return ((m_protocolBridge.GetDS100State() & OHS_Protocol_Up) == OHS_Protocol_Up);
 }
@@ -684,9 +684,9 @@ bool Controller::IsFirstDS100MirrorMaster() const
 
 /**
  * Getter function for the DS100 bridging communication state.
- * @return		True if communication channel with second DS100 is online.
+ * @return		True if communication channel with second DS100 is connected.
  */
-bool Controller::IsSecondDS100Online() const
+bool Controller::IsSecondDS100Connected() const
 {
 	return ((m_protocolBridge.GetSecondDS100State() & OHS_Protocol_Up) == OHS_Protocol_Up);
 }
@@ -701,6 +701,25 @@ bool Controller::IsSecondDS100MirrorMaster() const
 		return false;
 
 	return ((m_protocolBridge.GetSecondDS100State() & OHS_Protocol_Master) == OHS_Protocol_Master);
+}
+
+/**
+ * Setter for the DS100 bridging online state.
+ * @param online	The online activated state to be set.
+ */
+void Controller::SetOnline(bool online)
+{
+	//m_protocolBridge.
+}
+
+/**
+ * Getter function for the DS100 bridging online state.
+ * @return		True if communication channel with DS100 is online (activated, not neccessarily connected).
+ */
+bool Controller::IsOnline() const
+{
+	return false;
+	//return m_protocolBridge.
 }
 
 /**

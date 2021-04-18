@@ -186,11 +186,15 @@ public:
 	//==========================================================================
 	void Disconnect();
 	void Reconnect();
-	bool IsOnline() const;
-	bool IsFirstDS100Online() const;
+	bool IsConnected() const;
+	bool IsFirstDS100Connected() const;
 	bool IsFirstDS100MirrorMaster() const;
-	bool IsSecondDS100Online() const;
+	bool IsSecondDS100Connected() const;
 	bool IsSecondDS100MirrorMaster() const;
+
+	//==========================================================================
+	void SetOnline(bool online);
+	bool IsOnline() const;
 
 	//==========================================================================
 	bool LoadConfigurationFile(const File& fileToLoadFrom);

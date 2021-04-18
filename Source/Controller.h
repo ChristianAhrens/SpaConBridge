@@ -131,9 +131,9 @@ public:
 	void SetSecondDS100IpAddress(DataChangeParticipant changeSource, String ipAddress, bool dontSendNotification = false);
 
 	//==========================================================================
-	int GetRate() const;
-	void SetRate(DataChangeParticipant changeSource, int rate, bool dontSendNotification = false);
-	static std::pair<int, int> GetSupportedRateRange();
+	int GetRefreshInterval() const;
+	void SetRefreshInterval(DataChangeParticipant changeSource, int refreshInterval, bool dontSendNotification = false);
+	static std::pair<int, int> GetSupportedRefreshIntervalRange();
 
 	//==========================================================================
 	ExtensionMode GetExtensionMode() const;
@@ -229,7 +229,7 @@ protected:
 	ExtensionMode					m_DS100ExtensionMode;			/**< Current extension mode. This has impact on if second DS100 is active or not. */
 	ActiveParallelModeDS100			m_DS100ActiveParallelModeDS100;	/**< Currently active DS100 when in extension mode "parallel". */
 	String							m_SecondDS100IpAddress;			/**< IP Address where OSC messages will be sent to / received from. */
-	int								m_oscMsgRate;					/**< Interval at which OSC messages are sent to the host, in ms. */
+	int								m_refreshInterval;				/**< Interval at which the controller internal update is triggered, in ms. */
 	DataChangeType					m_parametersChanged[DCP_Max];	/**< Keep track of which OSC parameters have changed recently.
 																	 * The array has one entry for each application module (see enum DataChangeSource). */
 	CriticalSection					m_mutex;						/**< A re-entrant mutex. Safety first. */

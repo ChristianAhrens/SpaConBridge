@@ -81,7 +81,7 @@ Controller::Controller()
 
 	// Default OSC server settings. These might become overwritten 
 	// by setStateInformation()
-	SetRate(DCP_Init, PROTOCOL_INTERVAL_DEF, true);
+	SetRefreshInterval(DCP_Init, PROTOCOL_INTERVAL_DEF, true);
 	SetDS100IpAddress(DCP_Init, PROTOCOL_DEFAULT_IP, true);
 	SetExtensionMode(DCP_Init, EM_Off, true);
 	SetActiveParallelModeDS100(DCP_Init, APM_None, true);
@@ -723,38 +723,38 @@ bool Controller::IsOnline() const
 }
 
 /**
- * Getter for the rate at which OSC messages are being sent out.
- * @return	Messaging rate, in milliseconds.
+ * Getter for the interval at which the controller internal update is triggered.
+ * @return	Refresh Interval, in milliseconds.
  */
-int Controller::GetRate() const
+int Controller::GetRefreshInterval() const
 {
-	return m_oscMsgRate;
+	return m_refreshInterval;
 }
 
 /**
  * Setter for the rate at which OSC messages are being sent out.
  * @param changeSource	The application module which is causing the property change.
- * @param rate	New messaging rate, in milliseconds.
+ * @param refreshInterval	New refresh interval, in milliseconds.
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  */
-void Controller::SetRate(DataChangeParticipant changeSource, int rate, bool dontSendNotification)
+void Controller::SetRefreshInterval(DataChangeParticipant changeSource, int refreshInterval, bool dontSendNotification)
 {
-	if (rate != m_oscMsgRate)
+	if (refreshInterval != m_refreshInterval)
 	{
 		const ScopedLock lock(m_mutex);
 
 		// Clip rate to the allowed range.
-		rate = jmin(PROTOCOL_INTERVAL_MAX, jmax(PROTOCOL_INTERVAL_MIN, rate));
+		refreshInterval = jmin(PROTOCOL_INTERVAL_MAX, jmax(PROTOCOL_INTERVAL_MIN, refreshInterval));
 
-		m_oscMsgRate = rate;
+		m_refreshInterval = refreshInterval;
 
-		m_protocolBridge.SetDS100MsgRate(rate, dontSendNotification);
+		m_protocolBridge.SetDS100MsgRate(refreshInterval, dontSendNotification);
 
 		// Signal the change to all Processors.
 		SetParameterChanged(changeSource, DCT_MessageRate);
 
 		// Reset timer to the new interval.
-		startTimer(m_oscMsgRate);
+		startTimer(m_refreshInterval);
 	}
 }
 
@@ -763,7 +763,7 @@ void Controller::SetRate(DataChangeParticipant changeSource, int rate, bool dont
  * @return	Returns a std::pair<int, int> where the first number is the minimum supported rate, 
  *			and the second number is the maximum.
  */
-std::pair<int, int> Controller::GetSupportedRateRange()
+std::pair<int, int> Controller::GetSupportedRefreshIntervalRange()
 {
 	return std::pair<int, int>(PROTOCOL_INTERVAL_MIN, PROTOCOL_INTERVAL_MAX);
 }
@@ -834,14 +834,14 @@ void Controller::SetActiveParallelModeDS100(DataChangeParticipant changeSource, 
 
 /**
  * Method to initialize IP address and polling rate.
- * @param changeSource	The application module which is causing the property change.
- * @param ipAddress		New IP address.
- * @param rate			New messaging rate, in milliseconds.
+ * @param changeSource			The application module which is causing the property change.
+ * @param ipAddress				New IP address.
+ * @param rarefreshIntervalte	New refresh interval, in milliseconds.
  */
-void Controller::InitGlobalSettings(DataChangeParticipant changeSource, String ipAddress, int rate)
+void Controller::InitGlobalSettings(DataChangeParticipant changeSource, String ipAddress, int refreshInterval)
 {
 	SetDS100IpAddress(changeSource, ipAddress);
-	SetRate(changeSource, rate);
+	SetRefreshInterval(changeSource, refreshInterval);
 }
 
 /**
@@ -1736,7 +1736,7 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			SetExtensionMode(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100ExtensionMode(), true);
 			SetDS100IpAddress(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100IpAddress(), true);
 			SetSecondDS100IpAddress(DataChangeParticipant::DCP_Init, m_protocolBridge.GetSecondDS100IpAddress(), true);
-			SetRate(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100MsgRate(), true);
+			SetRefreshInterval(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100MsgRate(), true);
 		}
 	}
 

@@ -1632,6 +1632,15 @@ bool Controller::setStateXml(XmlElement* stateXml)
 
 	bool retVal = true;
 
+	// set online state from xml
+	auto onlineStateXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::ONLINESTATE));
+	if (onlineStateXmlElement)
+	{
+		auto onlineStateTextXmlElement = onlineStateXmlElement->getFirstChildElement();
+		if (onlineStateTextXmlElement && onlineStateTextXmlElement->isTextElement())
+			SetOnline(DCP_Init, onlineStateTextXmlElement->getAllSubText().getIntValue() == 1);
+	}
+
 	// create soundobject processors from xml
 	auto soundobjectProcessorsXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTPROCESSORS));
 	if (soundobjectProcessorsXmlElement)
@@ -1752,6 +1761,15 @@ bool Controller::setStateXml(XmlElement* stateXml)
 std::unique_ptr<XmlElement> Controller::createStateXml()
 {
 	auto controllerXmlElement = std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER));
+
+	auto onlineStateXmlElement = controllerXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::ONLINESTATE));
+	if (!onlineStateXmlElement)
+		onlineStateXmlElement = controllerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::ONLINESTATE));
+	auto onlineStateTextXmlElement = onlineStateXmlElement->getFirstChildElement();
+	if (onlineStateTextXmlElement && onlineStateTextXmlElement->isTextElement())
+		onlineStateTextXmlElement->setText(String(IsOnline() ? 1 : 0));
+	else
+		onlineStateXmlElement->addTextElement(String(IsOnline() ? 1 : 0));
 
 	// create xml from soundobject processors
 	auto soundobjectProcessorsXmlElement = controllerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTPROCESSORS));

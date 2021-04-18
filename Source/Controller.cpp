@@ -184,7 +184,7 @@ void Controller::SetParameterChanged(DataChangeParticipant changeSource, DataCha
 		if (changeSource != DCP_Init)
 			triggerConfigurationUpdate(false);
 		break;
-	case DCT_Online:
+	case DCT_Connected:
 	case DCT_SoundobjectPosition:
 	case DCT_ReverbSendGain:
 	case DCT_SoundobjectSpread:
@@ -603,7 +603,7 @@ void Controller::SetDS100IpAddress(DataChangeParticipant changeSource, String ip
 		m_protocolBridge.SetDS100IpAddress(ipAddress, dontSendNotification);
 
 		// Signal the change to all Processors. 
-		SetParameterChanged(changeSource, (DCT_IPAddress | DCT_Online));
+		SetParameterChanged(changeSource, (DCT_IPAddress | DCT_Connected));
 
 		Reconnect();
 	}
@@ -636,7 +636,7 @@ void Controller::SetSecondDS100IpAddress(DataChangeParticipant changeSource, Str
 		m_protocolBridge.SetSecondDS100IpAddress(ipAddress, dontSendNotification);
 
 		// Signal the change to all Processors. 
-		SetParameterChanged(changeSource, (DCT_IPAddress | DCT_Online));
+		SetParameterChanged(changeSource, (DCT_IPAddress | DCT_Connected));
 
 		Reconnect();
 	}
@@ -794,7 +794,7 @@ void Controller::SetExtensionMode(DataChangeParticipant changeSource, ExtensionM
 		m_protocolBridge.SetDS100ExtensionMode(mode, dontSendNotification);
 
 		// Signal the change to all Processors. 
-		SetParameterChanged(changeSource, (DCT_ExtensionMode | DCT_Online));
+		SetParameterChanged(changeSource, (DCT_ExtensionMode | DCT_Connected));
 
 		Reconnect();
 	}
@@ -826,7 +826,7 @@ void Controller::SetActiveParallelModeDS100(DataChangeParticipant changeSource, 
 		m_protocolBridge.SetActiveParallelModeDS100(activeParallelModeDS100, dontSendNotification);
 
 		// Signal the change to all Processors. 
-		SetParameterChanged(changeSource, (DCT_ExtensionMode | DCT_Online));
+		SetParameterChanged(changeSource, (DCT_ExtensionMode | DCT_Connected));
 
 		Reconnect();
 	}

@@ -1377,7 +1377,7 @@ void ProtocolBridgingWrapper::SetProtocolState(ProtocolId protocolId, ObjectHand
 
 	auto ctrl = Controller::GetInstance();
 	if (ctrl)
-		ctrl->SetParameterChanged(DCP_Protocol, DCT_Online);
+		ctrl->SetParameterChanged(DCP_Protocol, DCT_Connected);
 }
 
 /**

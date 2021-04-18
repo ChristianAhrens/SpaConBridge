@@ -507,7 +507,7 @@ void SettingsSectionsComponent::buttonClicked(JUCEAppBasics::SplitButtonComponen
 	}
 
 	// DS100 parallel mode active DS100 1st/2nd selection
-	if (m_SecondDS100ParallelModeButton && m_SecondDS100ParallelModeButton.get() == button)
+	else if (m_SecondDS100ParallelModeButton && m_SecondDS100ParallelModeButton.get() == button)
 	{
 		if (m_SecondDS100ParallelModeButtonIds[m_SecondDS100ParallelModes[0]] == buttonId) // 1st DS100 active
 		{

@@ -80,7 +80,7 @@ bool ProtocolBridgingWrapper::SendMessage(RemoteObjectIdentifier Id, RemoteObjec
 		else
 			return false;
 	}
-	else
+	else if (GetDS100ExtensionMode() == EM_Extend)
 	{
 		if (msgData._addrVal._first > DS100_CHANNELCOUNT)
 		{
@@ -93,6 +93,18 @@ bool ProtocolBridgingWrapper::SendMessage(RemoteObjectIdentifier Id, RemoteObjec
 		}
 		else
 			return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
+	}
+	else if (GetDS100ExtensionMode() == EM_Parallel)
+	{
+		auto sendSuccess = true;
+		sendSuccess = sendSuccess && m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
+		sendSuccess = sendSuccess && m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData);
+
+		return sendSuccess;
+	}
+	else
+	{
+		return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
 	}
 }
 
@@ -120,15 +132,22 @@ void ProtocolBridgingWrapper::Disconnect()
 
 /**
  * Disconnect and re-connect the OSCSender to a host specified by the current ip settings.
+ * @return	True if the reconnection was triggered, false if controller state is offline and therefor no reconnection is allowed
  */
-void ProtocolBridgingWrapper::Reconnect()
+bool ProtocolBridgingWrapper::Reconnect()
 {
+	auto ctrl = Controller::GetInstance();
+	if (ctrl && !ctrl->IsOnline()) // dont execute the reconnection if controller state suggests that the application shall be offline
+		return false;
+
 	Disconnect();
 
 	auto nodeXmlElement = m_bridgingXml.getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::NODE));
 	if (nodeXmlElement)
 		SetBridgingNodeStateXml(nodeXmlElement, true);
 	m_processingNode.Start();
+
+	return true;
 }
 
 /**
@@ -1377,7 +1396,15 @@ void ProtocolBridgingWrapper::SetProtocolState(ProtocolId protocolId, ObjectHand
 
 	auto ctrl = Controller::GetInstance();
 	if (ctrl)
-		ctrl->SetParameterChanged(DCP_Protocol, DCT_Online);
+		ctrl->SetParameterChanged(DCP_Protocol, DCT_Connected);
+}
+
+void ProtocolBridgingWrapper::SetOnline(bool online)
+{
+	if (online)
+		Reconnect();
+	else
+		Disconnect();
 }
 
 /**
@@ -1765,6 +1792,8 @@ ExtensionMode ProtocolBridgingWrapper::GetDS100ExtensionMode()
 			case OHM_Mux_nA_to_mB_withValFilter:
 				return EM_Extend;
 			case OHM_Forward_only_valueChanges:
+			case OHM_A1active_withValFilter:
+			case OHM_A2active_withValFilter:
 				{
 				auto protocol1XmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
 				auto protocol2XmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_2_PROCESSINGPROTOCOL_ID));
@@ -1814,108 +1843,135 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 			switch (mode)
 			{
 			case EM_Off:
+				{
+					// EM_Off refers to valuechange forwarding object handling mode without any channelcount parameter attributes
+					objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Forward_only_valueChanges));
+
+					// remove elements that are not used by this ohm
+					auto protocolAChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
+					if (protocolAChCntXmlElement)
+						objectHandlingXmlElement->removeChildElement(protocolAChCntXmlElement, true);
+					auto protocolBChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLBCHCNT));
+					if (protocolBChCntXmlElement)
+						objectHandlingXmlElement->removeChildElement(protocolBChCntXmlElement, true);
+					auto protoFailoverTimeXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::FAILOVERTIME));
+					if (protoFailoverTimeXmlElement)
+						objectHandlingXmlElement->removeChildElement(protoFailoverTimeXmlElement, true);
+
+					// update precision element
+					auto precisionXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
+					if (!precisionXmlElement)
+						precisionXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
+					auto precisionTextXmlElement = precisionXmlElement->getFirstChildElement();
+					if (precisionTextXmlElement && precisionTextXmlElement->isTextElement())
+						precisionTextXmlElement->setText(String(DS100_VALUCHANGE_SENSITIVITY));
+					else
+						precisionXmlElement->addTextElement(String(DS100_VALUCHANGE_SENSITIVITY));
+				}
+				break;
 			case EM_Parallel:
-			{
-				// EM_Off refers to valuechange forwarding object handling mode without any channelcount parameter attributes
-				objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Forward_only_valueChanges));
+				{
+					// EM_Parallel refers to valuechange forwarding object handling mode, restricted to either A1 or A2 poll request answer forwarding, without any channelcount parameter attributes
+					auto parallelObjectHandlingMode = (GetActiveParallelModeDS100() == APM_2nd ? OHM_A2active_withValFilter : OHM_A1active_withValFilter);
+					objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(parallelObjectHandlingMode));
 
-				// remove elements that are not used by this ohm
-				auto protocolAChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
-				if (protocolAChCntXmlElement)
-					objectHandlingXmlElement->removeChildElement(protocolAChCntXmlElement, true);
-				auto protocolBChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLBCHCNT));
-				if (protocolBChCntXmlElement)
-					objectHandlingXmlElement->removeChildElement(protocolBChCntXmlElement, true);
-				auto protoFailoverTimeXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::FAILOVERTIME));
-				if (protoFailoverTimeXmlElement)
-					objectHandlingXmlElement->removeChildElement(protoFailoverTimeXmlElement, true);
+					// remove elements that are not used by this ohm
+					auto protocolAChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
+					if (protocolAChCntXmlElement)
+						objectHandlingXmlElement->removeChildElement(protocolAChCntXmlElement, true);
+					auto protocolBChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLBCHCNT));
+					if (protocolBChCntXmlElement)
+						objectHandlingXmlElement->removeChildElement(protocolBChCntXmlElement, true);
+					auto protoFailoverTimeXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::FAILOVERTIME));
+					if (protoFailoverTimeXmlElement)
+						objectHandlingXmlElement->removeChildElement(protoFailoverTimeXmlElement, true);
 
-				// update precision element
-				auto precisionXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
-				if (!precisionXmlElement)
-					precisionXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
-				auto precisionTextXmlElement = precisionXmlElement->getFirstChildElement();
-				if (precisionTextXmlElement && precisionTextXmlElement->isTextElement())
-					precisionTextXmlElement->setText(String(DS100_VALUCHANGE_SENSITIVITY));
-				else
-					precisionXmlElement->addTextElement(String(DS100_VALUCHANGE_SENSITIVITY));
-			}
-			break;
+					// update precision element
+					auto precisionXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
+					if (!precisionXmlElement)
+						precisionXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
+					auto precisionTextXmlElement = precisionXmlElement->getFirstChildElement();
+					if (precisionTextXmlElement && precisionTextXmlElement->isTextElement())
+						precisionTextXmlElement->setText(String(DS100_VALUCHANGE_SENSITIVITY));
+					else
+						precisionXmlElement->addTextElement(String(DS100_VALUCHANGE_SENSITIVITY));
+				}
+				break;
 			case EM_Extend:
-			{
-				// EM_Extend refers to Multiplex nA to mB object handling mode with channel A and B parameter attributes
-				objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Mux_nA_to_mB_withValFilter));
+				{
+					// EM_Extend refers to Multiplex nA to mB object handling mode with channel A and B parameter attributes
+					objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Mux_nA_to_mB_withValFilter));
 
-				// remove elements that are not used by this ohm
-				auto protoFailoverTimeXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::FAILOVERTIME));
-				if (protoFailoverTimeXmlElement)
-					objectHandlingXmlElement->removeChildElement(protoFailoverTimeXmlElement, true);
+					// remove elements that are not used by this ohm
+					auto protoFailoverTimeXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::FAILOVERTIME));
+					if (protoFailoverTimeXmlElement)
+						objectHandlingXmlElement->removeChildElement(protoFailoverTimeXmlElement, true);
 				
-				// update first DS100 channel count elements
-				auto protocolAChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
-				if (!protocolAChCntXmlElement)
-					protocolAChCntXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
-				auto protocolAChCntTextXmlElement = protocolAChCntXmlElement->getFirstChildElement();
-				if (protocolAChCntTextXmlElement && protocolAChCntTextXmlElement->isTextElement())
-					protocolAChCntTextXmlElement->setText(String(DS100_CHANNELCOUNT));
-				else
-					protocolAChCntXmlElement->addTextElement(String(DS100_CHANNELCOUNT));
+					// update first DS100 channel count elements
+					auto protocolAChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
+					if (!protocolAChCntXmlElement)
+						protocolAChCntXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
+					auto protocolAChCntTextXmlElement = protocolAChCntXmlElement->getFirstChildElement();
+					if (protocolAChCntTextXmlElement && protocolAChCntTextXmlElement->isTextElement())
+						protocolAChCntTextXmlElement->setText(String(DS100_CHANNELCOUNT));
+					else
+						protocolAChCntXmlElement->addTextElement(String(DS100_CHANNELCOUNT));
 
-				// update first DS100 channel count elements
-				auto protocolBChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLBCHCNT));
-				if (!protocolBChCntXmlElement)
-					protocolBChCntXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLBCHCNT));
-				auto protocolBChCntTextXmlElement = protocolBChCntXmlElement->getFirstChildElement();
-				if (protocolBChCntTextXmlElement && protocolBChCntTextXmlElement->isTextElement())
-					protocolBChCntTextXmlElement->setText(String(DS100_EXTMODE_CHANNELCOUNT));
-				else
-					protocolBChCntXmlElement->addTextElement(String(DS100_EXTMODE_CHANNELCOUNT));
+					// update first DS100 channel count elements
+					auto protocolBChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLBCHCNT));
+					if (!protocolBChCntXmlElement)
+						protocolBChCntXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLBCHCNT));
+					auto protocolBChCntTextXmlElement = protocolBChCntXmlElement->getFirstChildElement();
+					if (protocolBChCntTextXmlElement && protocolBChCntTextXmlElement->isTextElement())
+						protocolBChCntTextXmlElement->setText(String(DS100_EXTMODE_CHANNELCOUNT));
+					else
+						protocolBChCntXmlElement->addTextElement(String(DS100_EXTMODE_CHANNELCOUNT));
 
-				// update precision element
-				auto precisionXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
-				if (!precisionXmlElement)
-					precisionXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
-				auto precisionTextXmlElement = precisionXmlElement->getFirstChildElement();
-				if (precisionTextXmlElement && precisionTextXmlElement->isTextElement())
-					precisionTextXmlElement->setText(String(DS100_VALUCHANGE_SENSITIVITY));
-				else
-					precisionXmlElement->addTextElement(String(DS100_VALUCHANGE_SENSITIVITY));
-			}
-			break;
+					// update precision element
+					auto precisionXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
+					if (!precisionXmlElement)
+						precisionXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
+					auto precisionTextXmlElement = precisionXmlElement->getFirstChildElement();
+					if (precisionTextXmlElement && precisionTextXmlElement->isTextElement())
+						precisionTextXmlElement->setText(String(DS100_VALUCHANGE_SENSITIVITY));
+					else
+						precisionXmlElement->addTextElement(String(DS100_VALUCHANGE_SENSITIVITY));
+				}
+				break;																					
 			case EM_Mirror:
-			{
-				// EM_Extend refers to Multiplex nA to mB object handling mode with channel A and B parameter attributes
-				objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Mirror_dualA_withValFilter));
+				{
+					// EM_Extend refers to Multiplex nA to mB object handling mode with channel A and B parameter attributes
+					objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Mirror_dualA_withValFilter));
 				
-				// remove elements that are not used by this ohm
-				auto protocolAChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
-				if (protocolAChCntXmlElement)
-					objectHandlingXmlElement->removeChildElement(protocolAChCntXmlElement, true);
-				auto protocolBChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLBCHCNT));
-				if (protocolBChCntXmlElement)
-					objectHandlingXmlElement->removeChildElement(protocolBChCntXmlElement, true);
+					// remove elements that are not used by this ohm
+					auto protocolAChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
+					if (protocolAChCntXmlElement)
+						objectHandlingXmlElement->removeChildElement(protocolAChCntXmlElement, true);
+					auto protocolBChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLBCHCNT));
+					if (protocolBChCntXmlElement)
+						objectHandlingXmlElement->removeChildElement(protocolBChCntXmlElement, true);
 
-				// update failover time element
-				auto protoFailoverTimeXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::FAILOVERTIME));
-				if (!protoFailoverTimeXmlElement)
-					protoFailoverTimeXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::FAILOVERTIME));
-				auto protoFailoverTimeTextXmlElement = protoFailoverTimeXmlElement->getFirstChildElement();
-				if (protoFailoverTimeTextXmlElement && protoFailoverTimeTextXmlElement->isTextElement())
-					protoFailoverTimeTextXmlElement->setText("1000");
-				else
-					protoFailoverTimeXmlElement->addTextElement("1000");
+					// update failover time element
+					auto protoFailoverTimeXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::FAILOVERTIME));
+					if (!protoFailoverTimeXmlElement)
+						protoFailoverTimeXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::FAILOVERTIME));
+					auto protoFailoverTimeTextXmlElement = protoFailoverTimeXmlElement->getFirstChildElement();
+					if (protoFailoverTimeTextXmlElement && protoFailoverTimeTextXmlElement->isTextElement())
+						protoFailoverTimeTextXmlElement->setText("1000");
+					else
+						protoFailoverTimeXmlElement->addTextElement("1000");
 
-				// update precision element
-				auto precisionXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
-				if (!precisionXmlElement)
-					precisionXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
-				auto precisionTextXmlElement = precisionXmlElement->getFirstChildElement();
-				if (precisionTextXmlElement && precisionTextXmlElement->isTextElement())
-					precisionTextXmlElement->setText(String(DS100_VALUCHANGE_SENSITIVITY));
-				else if (precisionTextXmlElement)
-					precisionXmlElement->addTextElement(String(DS100_VALUCHANGE_SENSITIVITY));
-			}
-			break;
+					// update precision element
+					auto precisionXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
+					if (!precisionXmlElement)
+						precisionXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
+					auto precisionTextXmlElement = precisionXmlElement->getFirstChildElement();
+					if (precisionTextXmlElement && precisionTextXmlElement->isTextElement())
+						precisionTextXmlElement->setText(String(DS100_VALUCHANGE_SENSITIVITY));
+					else if (precisionTextXmlElement)
+						precisionXmlElement->addTextElement(String(DS100_VALUCHANGE_SENSITIVITY));
+				}
+				break;
 			default:
 				break;
 			}
@@ -1966,6 +2022,90 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 			return false;
 
 		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
+}
+
+/**
+ * Getter method for active DS100 in extension mode "parallel".
+ * This does not return a member variable value but contains logic to derive the mode from internal cached xml element configuration.
+ * @return The DS100 currently set as active one for extension mode "parallel" in cached xml config.
+ */
+ActiveParallelModeDS100 ProtocolBridgingWrapper::GetActiveParallelModeDS100()
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto objectHandlingXmlElement = nodeXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OBJECTHANDLING));
+		if (objectHandlingXmlElement)
+		{
+			auto objectHandlingMode = ProcessingEngineConfig::ObjectHandlingModeFromString(objectHandlingXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE)));
+			switch (objectHandlingMode)
+			{
+			case OHM_A1active_withValFilter:
+				return APM_1st;
+			case OHM_A2active_withValFilter:
+				return APM_2nd;
+			case OHM_Mirror_dualA_withValFilter:
+			case OHM_Mux_nA_to_mB_withValFilter:
+			case OHM_Forward_only_valueChanges:
+			case OHM_Bypass:
+			case OHM_Invalid:
+			case OHM_Mux_nA_to_mB:
+			case OHM_Remap_A_X_Y_to_B_XY:
+			case OHM_DS100_DeviceSimulation:
+			case OHM_Forward_A_to_B_only:
+			case OHM_Reverse_B_to_A_only:
+				return APM_None;
+			case OHM_UserMAX:
+			default:
+				jassertfalse;
+				return APM_None;
+			}
+		}
+	}
+
+	return APM_None;
+}
+
+/**
+ * Setter method for active DS100 in extension mode "parallel".
+ * This does not set a member variable but contains logic to reconfigure the cached xml element according to the given mode value.
+ * @param activeParallelModeDS100	The DS100 to set as active one.
+ * @param dontSendNotification	-Ignored-
+ * @return	True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetActiveParallelModeDS100(ActiveParallelModeDS100 activeParallelModeDS100, bool dontSendNotification)
+{
+	ignoreUnused(dontSendNotification);
+
+	// chicken exit - no changes to cached xml element and still successful return if no activeParallelMode shall be set
+	if (activeParallelModeDS100 == APM_None)
+		return true;
+
+	if (GetDS100ExtensionMode() != EM_Parallel)
+	{
+		// makes no sense to set the details of parallel extension mode when parallel mode itself is not active
+		jassertfalse;
+		SetDS100ExtensionMode(EM_Parallel);
+	}
+
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto objectHandlingXmlElement = nodeXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OBJECTHANDLING));
+		if (objectHandlingXmlElement)
+		{
+			if (activeParallelModeDS100 == APM_2nd)
+				objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_A2active_withValFilter));
+			else
+				objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_A1active_withValFilter));
+
+			return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+		}
+		else
+			return false;
 	}
 	else
 		return false;

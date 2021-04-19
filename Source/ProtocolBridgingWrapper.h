@@ -99,6 +99,20 @@ public:
 	bool SendMessage(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData);
 
 	//==========================================================================
+	void SetOnline(bool online);
+
+	//==========================================================================
+	void Disconnect();
+	bool Reconnect();
+
+	//==========================================================================
+	std::unique_ptr<XmlElement> createStateXml() override;
+	bool setStateXml(XmlElement* stateXml) override;
+
+	//==========================================================================
+	void protocolStateChanged(ProtocolId id, ObjectHandlingState state) override;
+
+	//==========================================================================
 	ProtocolBridgingType GetActiveBridgingProtocols();
 	void SetActiveBridgingProtocols(ProtocolBridgingType desiredActiveBridgingTypes);
 
@@ -116,6 +130,9 @@ public:
 
 	ExtensionMode GetDS100ExtensionMode();
 	bool SetDS100ExtensionMode(ExtensionMode mode, bool dontSendNotification = false);
+
+	ActiveParallelModeDS100 GetActiveParallelModeDS100();
+	bool SetActiveParallelModeDS100(ActiveParallelModeDS100 activeParallelModeDS100, bool dontSendNotification = false);
 
 	ObjectHandlingState GetDS100State() const;
 	void SetDS100State(ObjectHandlingState state);
@@ -227,17 +244,6 @@ public:
 	bool SetYamahaOSCRemotePort(int remotePort, bool dontSendNotification = false);
 	int GetYamahaOSCMappingArea();
 	bool SetYamahaOSCMappingArea(int mappingAreaId, bool dontSendNotification = false);
-
-	//==========================================================================
-	std::unique_ptr<XmlElement> createStateXml() override;
-	bool setStateXml(XmlElement* stateXml) override;
-
-	//==========================================================================
-	void protocolStateChanged(ProtocolId id, ObjectHandlingState state) override;
-
-	//==========================================================================
-	void Disconnect();
-	void Reconnect();
 
 	//==========================================================================
 	static bool IsBridgingObjectOnly(RemoteObjectIdentifier id);

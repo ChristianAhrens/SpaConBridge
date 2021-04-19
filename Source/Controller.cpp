@@ -81,9 +81,10 @@ Controller::Controller()
 
 	// Default OSC server settings. These might become overwritten 
 	// by setStateInformation()
-	SetRate(DCP_Init, PROTOCOL_INTERVAL_DEF, true);
+	SetRefreshInterval(DCP_Init, PROTOCOL_INTERVAL_DEF, true);
 	SetDS100IpAddress(DCP_Init, PROTOCOL_DEFAULT_IP, true);
 	SetExtensionMode(DCP_Init, EM_Off, true);
+	SetActiveParallelModeDS100(DCP_Init, APM_None, true);
 }
 
 /**
@@ -164,7 +165,7 @@ void Controller::SetParameterChanged(DataChangeParticipant changeSource, DataCha
 	case DCT_NumProcessors:
 	case DCT_None:
 	case DCT_IPAddress:
-	case DCT_MessageRate:
+	case DCT_RefreshInterval:
 	case DCT_CommunicationConfig:
 	case DCT_SoundobjectID:
 	case DCT_MatrixInputID:
@@ -183,7 +184,7 @@ void Controller::SetParameterChanged(DataChangeParticipant changeSource, DataCha
 		if (changeSource != DCP_Init)
 			triggerConfigurationUpdate(false);
 		break;
-	case DCT_Online:
+	case DCT_Connected:
 	case DCT_SoundobjectPosition:
 	case DCT_ReverbSendGain:
 	case DCT_SoundobjectSpread:
@@ -602,7 +603,7 @@ void Controller::SetDS100IpAddress(DataChangeParticipant changeSource, String ip
 		m_protocolBridge.SetDS100IpAddress(ipAddress, dontSendNotification);
 
 		// Signal the change to all Processors. 
-		SetParameterChanged(changeSource, (DCT_IPAddress | DCT_Online));
+		SetParameterChanged(changeSource, (DCT_IPAddress | DCT_Connected));
 
 		Reconnect();
 	}
@@ -635,7 +636,7 @@ void Controller::SetSecondDS100IpAddress(DataChangeParticipant changeSource, Str
 		m_protocolBridge.SetSecondDS100IpAddress(ipAddress, dontSendNotification);
 
 		// Signal the change to all Processors. 
-		SetParameterChanged(changeSource, (DCT_IPAddress | DCT_Online));
+		SetParameterChanged(changeSource, (DCT_IPAddress | DCT_Connected));
 
 		Reconnect();
 	}
@@ -643,18 +644,18 @@ void Controller::SetSecondDS100IpAddress(DataChangeParticipant changeSource, Str
 
 /**
  * Getter function for the DS100 bridging communication state.
- * @return		True if all communication channels are online.
+ * @return		True if all communication channels are connected.
  */
-bool Controller::IsOnline() const
+bool Controller::IsConnected() const
 {
 	switch (GetExtensionMode())
 	{
 	case ExtensionMode::EM_Off:
-		return IsFirstDS100Online();
+		return IsFirstDS100Connected();
 	case ExtensionMode::EM_Extend:
 	case ExtensionMode::EM_Mirror:
 	case ExtensionMode::EM_Parallel:
-		return (IsFirstDS100Online() && IsSecondDS100Online());
+		return (IsFirstDS100Connected() && IsSecondDS100Connected());
 	default:
 		return false;
 	}
@@ -662,20 +663,24 @@ bool Controller::IsOnline() const
 
 /**
  * Getter function for the DS100 bridging communication state.
- * @return		True if communication channel with first DS100 is online.
+ * @return		True if communication channel with first DS100 is connected.
  */
-bool Controller::IsFirstDS100Online() const
+bool Controller::IsFirstDS100Connected() const
 {
 	return ((m_protocolBridge.GetDS100State() & OHS_Protocol_Up) == OHS_Protocol_Up);
 }
 
 /**
  * Getter function for the DS100 bridging mirror state.
- * @return		True if first DS100 is currently master in mirror extension mode.
+ * @return		True if first DS100 is currently master in extension modes "parallel" or "mirror".
  */
-bool Controller::IsFirstDS100MirrorMaster() const
+bool Controller::IsFirstDS100Master() const
 {
-	if (GetExtensionMode() != EM_Mirror)
+	if (GetExtensionMode() == EM_Off)
+		return true;
+	if (GetExtensionMode() == EM_Extend)
+		return true;
+	if (GetExtensionMode() != EM_Parallel && GetExtensionMode() != EM_Mirror)
 		return false;
 
 	return ((m_protocolBridge.GetDS100State() & OHS_Protocol_Master) == OHS_Protocol_Master);
@@ -683,58 +688,90 @@ bool Controller::IsFirstDS100MirrorMaster() const
 
 /**
  * Getter function for the DS100 bridging communication state.
- * @return		True if communication channel with second DS100 is online.
+ * @return		True if communication channel with second DS100 is connected.
  */
-bool Controller::IsSecondDS100Online() const
+bool Controller::IsSecondDS100Connected() const
 {
 	return ((m_protocolBridge.GetSecondDS100State() & OHS_Protocol_Up) == OHS_Protocol_Up);
 }
 
 /**
  * Getter function for the DS100 bridging mirror state.
- * @return		True if second DS100 is currently master in mirror extension mode.
+ * @return		True if second DS100 is currently master in extension modes "parallel" or "mirror".
  */
-bool Controller::IsSecondDS100MirrorMaster() const
+bool Controller::IsSecondDS100Master() const
 {
-	if (GetExtensionMode() != EM_Mirror)
+	if (GetExtensionMode() == EM_Off)
+		return false;
+	if (GetExtensionMode() == EM_Extend)
+		return true;
+	if (GetExtensionMode() != EM_Parallel && GetExtensionMode() != EM_Mirror)
 		return false;
 
 	return ((m_protocolBridge.GetSecondDS100State() & OHS_Protocol_Master) == OHS_Protocol_Master);
 }
 
 /**
- * Getter for the rate at which OSC messages are being sent out.
- * @return	Messaging rate, in milliseconds.
+ * Setter for the DS100 bridging online state.
+ * @param changeSource	The application module which is causing the property change.
+ * @param online	The online activated state to be set.
  */
-int Controller::GetRate() const
+void Controller::SetOnline(DataChangeParticipant changeSource, bool online)
 {
-	return m_oscMsgRate;
+	if (online != m_onlineState)
+	{
+		const ScopedLock lock(m_mutex);
+
+		m_onlineState = online;
+
+		m_protocolBridge.SetOnline(online);
+
+		SetParameterChanged(changeSource, DCT_RefreshInterval);
+	}
+}
+
+/**
+ * Getter function for the DS100 bridging online state.
+ * @return		True if communication channel with DS100 is online (activated, not neccessarily connected).
+ */
+bool Controller::IsOnline() const
+{
+	return m_onlineState;
+}
+
+/**
+ * Getter for the interval at which the controller internal update is triggered.
+ * @return	Refresh Interval, in milliseconds.
+ */
+int Controller::GetRefreshInterval() const
+{
+	return m_refreshInterval;
 }
 
 /**
  * Setter for the rate at which OSC messages are being sent out.
  * @param changeSource	The application module which is causing the property change.
- * @param rate	New messaging rate, in milliseconds.
+ * @param refreshInterval	New refresh interval, in milliseconds.
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  */
-void Controller::SetRate(DataChangeParticipant changeSource, int rate, bool dontSendNotification)
+void Controller::SetRefreshInterval(DataChangeParticipant changeSource, int refreshInterval, bool dontSendNotification)
 {
-	if (rate != m_oscMsgRate)
+	if (refreshInterval != m_refreshInterval)
 	{
 		const ScopedLock lock(m_mutex);
 
 		// Clip rate to the allowed range.
-		rate = jmin(PROTOCOL_INTERVAL_MAX, jmax(PROTOCOL_INTERVAL_MIN, rate));
+		refreshInterval = jmin(PROTOCOL_INTERVAL_MAX, jmax(PROTOCOL_INTERVAL_MIN, refreshInterval));
 
-		m_oscMsgRate = rate;
+		m_refreshInterval = refreshInterval;
 
-		m_protocolBridge.SetDS100MsgRate(rate, dontSendNotification);
+		m_protocolBridge.SetDS100MsgRate(refreshInterval, dontSendNotification);
 
 		// Signal the change to all Processors.
-		SetParameterChanged(changeSource, DCT_MessageRate);
+		SetParameterChanged(changeSource, DCT_RefreshInterval);
 
 		// Reset timer to the new interval.
-		startTimer(m_oscMsgRate);
+		startTimer(m_refreshInterval);
 	}
 }
 
@@ -743,13 +780,13 @@ void Controller::SetRate(DataChangeParticipant changeSource, int rate, bool dont
  * @return	Returns a std::pair<int, int> where the first number is the minimum supported rate, 
  *			and the second number is the maximum.
  */
-std::pair<int, int> Controller::GetSupportedRateRange()
+std::pair<int, int> Controller::GetSupportedRefreshIntervalRange()
 {
 	return std::pair<int, int>(PROTOCOL_INTERVAL_MIN, PROTOCOL_INTERVAL_MAX);
 }
 
 /**
- * Getter function for the IP address to which m_oscSender and m_oscReceiver are connected.
+ * Getter function for the DS100 extension mode currently used.
  * @return	Current IP address.
  */
 ExtensionMode Controller::GetExtensionMode() const
@@ -758,10 +795,9 @@ ExtensionMode Controller::GetExtensionMode() const
 }
 
 /**
- * Setter function for the IP address to which m_oscSender and m_oscReceiver are connected.
- * NOTE: changing ip address will disconnect m_oscSender and m_oscReceiver.
+ * Setter function for the DS100 extension mode to be used.
  * @param changeSource	The application module which is causing the property change.
- * @param ipAddress		New IP address.
+ * @param mode		New extension mode.
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  */
 void Controller::SetExtensionMode(DataChangeParticipant changeSource, ExtensionMode mode, bool dontSendNotification)
@@ -775,7 +811,39 @@ void Controller::SetExtensionMode(DataChangeParticipant changeSource, ExtensionM
 		m_protocolBridge.SetDS100ExtensionMode(mode, dontSendNotification);
 
 		// Signal the change to all Processors. 
-		SetParameterChanged(changeSource, (DCT_ExtensionMode | DCT_Online));
+		SetParameterChanged(changeSource, (DCT_ExtensionMode | DCT_Connected));
+
+		Reconnect();
+	}
+}
+
+/**
+ * Getter function for the DS100 currently active in extension mode "parallel".
+ * @return	Current parallel mode DS100 active.
+ */
+ActiveParallelModeDS100 Controller::GetActiveParallelModeDS100() const
+{
+	return m_DS100ActiveParallelModeDS100;
+}
+
+/**
+ * Setter function for the DS100 to be currently active in extension mode "parallel".
+ * @param changeSource	The application module which is causing the property change.
+ * @param activeParallelModeDS100		New active DS100 in parallel extension mode.
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ */
+void Controller::SetActiveParallelModeDS100(DataChangeParticipant changeSource, ActiveParallelModeDS100 activeParallelModeDS100, bool dontSendNotification)
+{
+	if (m_DS100ActiveParallelModeDS100 != activeParallelModeDS100)
+	{
+		const ScopedLock lock(m_mutex);
+
+		m_DS100ActiveParallelModeDS100 = activeParallelModeDS100;
+
+		m_protocolBridge.SetActiveParallelModeDS100(activeParallelModeDS100, dontSendNotification);
+
+		// Signal the change to all Processors. 
+		SetParameterChanged(changeSource, (DCT_ExtensionMode | DCT_Connected));
 
 		Reconnect();
 	}
@@ -783,14 +851,14 @@ void Controller::SetExtensionMode(DataChangeParticipant changeSource, ExtensionM
 
 /**
  * Method to initialize IP address and polling rate.
- * @param changeSource	The application module which is causing the property change.
- * @param ipAddress		New IP address.
- * @param rate			New messaging rate, in milliseconds.
+ * @param changeSource			The application module which is causing the property change.
+ * @param ipAddress				New IP address.
+ * @param rarefreshIntervalte	New refresh interval, in milliseconds.
  */
-void Controller::InitGlobalSettings(DataChangeParticipant changeSource, String ipAddress, int rate)
+void Controller::InitGlobalSettings(DataChangeParticipant changeSource, String ipAddress, int refreshInterval)
 {
 	SetDS100IpAddress(changeSource, ipAddress);
-	SetRate(changeSource, rate);
+	SetRefreshInterval(changeSource, refreshInterval);
 }
 
 /**
@@ -814,6 +882,16 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 		// is bridged to DS100 and returned by it 
 		// so we can handle the data in the end as well
 		if (senderProtocolId != DS100_1_PROCESSINGPROTOCOL_ID && senderProtocolId != DS100_2_PROCESSINGPROTOCOL_ID)
+			return;
+	}
+
+	if (GetExtensionMode() == EM_Parallel)
+	{
+		// Do neither handle any protocol data from second DS100 if first is set as active one...
+		if (GetActiveParallelModeDS100() == APM_1st && senderProtocolId != DS100_1_PROCESSINGPROTOCOL_ID)
+			return;
+		// ...nor any protocol data from first DS100 if second is set as active one in parallel extension mode.
+		if (GetActiveParallelModeDS100() == APM_2nd && senderProtocolId != DS100_2_PROCESSINGPROTOCOL_ID)
 			return;
 	}
 
@@ -1362,6 +1440,7 @@ void Controller::timerCallback()
 		DataChangeType paramSetsInTransit = DCT_None;
 
 		newMsgData._addrVal._first = static_cast<juce::uint16>(miProcessor->GetMatrixInputId());
+		newMsgData._addrVal._second = INVALID_ADDRESS_VALUE;
 
 		// Iterate through all automation parameters.
 		for (int pIdx = MII_ParamIdx_LevelMeterPreMute; pIdx < MII_ParamIdx_MaxIndex; ++pIdx)
@@ -1488,6 +1567,7 @@ void Controller::timerCallback()
 		DataChangeType paramSetsInTransit = DCT_None;
 
 		newMsgData._addrVal._first = static_cast<juce::uint16>(moProcessor->GetMatrixOutputId());
+		newMsgData._addrVal._second = INVALID_ADDRESS_VALUE;
 
 		// Iterate through all automation parameters.
 		for (int pIdx = MOI_ParamIdx_LevelMeterPostMute; pIdx < MOI_ParamIdx_MaxIndex; ++pIdx)
@@ -1580,6 +1660,15 @@ bool Controller::setStateXml(XmlElement* stateXml)
 		return false;
 
 	bool retVal = true;
+
+	// set online state from xml
+	auto onlineStateXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::ONLINESTATE));
+	if (onlineStateXmlElement)
+	{
+		auto onlineStateTextXmlElement = onlineStateXmlElement->getFirstChildElement();
+		if (onlineStateTextXmlElement && onlineStateTextXmlElement->isTextElement())
+			SetOnline(DCP_Init, onlineStateTextXmlElement->getAllSubText().getIntValue() == 1);
+	}
 
 	// create soundobject processors from xml
 	auto soundobjectProcessorsXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTPROCESSORS));
@@ -1685,7 +1774,8 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			SetExtensionMode(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100ExtensionMode(), true);
 			SetDS100IpAddress(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100IpAddress(), true);
 			SetSecondDS100IpAddress(DataChangeParticipant::DCP_Init, m_protocolBridge.GetSecondDS100IpAddress(), true);
-			SetRate(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100MsgRate(), true);
+			SetRefreshInterval(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100MsgRate(), true);
+			SetActiveParallelModeDS100(DataChangeParticipant::DCP_Init, m_protocolBridge.GetActiveParallelModeDS100(), true);
 		}
 	}
 
@@ -1701,6 +1791,15 @@ bool Controller::setStateXml(XmlElement* stateXml)
 std::unique_ptr<XmlElement> Controller::createStateXml()
 {
 	auto controllerXmlElement = std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER));
+
+	auto onlineStateXmlElement = controllerXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::ONLINESTATE));
+	if (!onlineStateXmlElement)
+		onlineStateXmlElement = controllerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::ONLINESTATE));
+	auto onlineStateTextXmlElement = onlineStateXmlElement->getFirstChildElement();
+	if (onlineStateTextXmlElement && onlineStateTextXmlElement->isTextElement())
+		onlineStateTextXmlElement->setText(String(IsOnline() ? 1 : 0));
+	else
+		onlineStateXmlElement->addTextElement(String(IsOnline() ? 1 : 0));
 
 	// create xml from soundobject processors
 	auto soundobjectProcessorsXmlElement = controllerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTPROCESSORS));

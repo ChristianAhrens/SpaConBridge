@@ -508,25 +508,25 @@ SoundobjectId SoundobjectProcessor::GetSoundobjectId() const
 /**
  * Setter function for the send rate used in the outgoing OSC messages.
  * @param changeSource	The application module which is causing the property change.
- * @param oscMsgRate	The interval at which OSC messages are sent, in ms.
+ * @param refreshInterval	The interval at which OSC messages are sent, in ms.
  */
-void SoundobjectProcessor::SetMessageRate(DataChangeParticipant changeSource, int oscMsgRate)
+void SoundobjectProcessor::SetRefreshInterval(DataChangeParticipant changeSource, int refreshInterval)
 {
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
-		ctrl->SetRate(changeSource, oscMsgRate);
+		ctrl->SetRefreshInterval(changeSource, refreshInterval);
 }
 
 /**
  * Getter function for the send rate used in the outgoing OSC messages.
  * @return	The interval at which OSC messages are sent, in ms.
  */
-int SoundobjectProcessor::GetMessageRate() const
+int SoundobjectProcessor::GetRefreshInterval() const
 {
 	int rate = 0;
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
-		rate = ctrl->GetRate();
+		rate = ctrl->GetRefreshInterval();
 
 	return rate;
 }

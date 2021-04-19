@@ -91,6 +91,18 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_DS100Settings->addComponent(m_SecondDS100ModeLabel.get(), false, false);
 	m_DS100Settings->addComponent(m_SecondDS100ModeButton.get(), true, false);
 
+	m_SecondDS100ParallelModeButton = std::make_unique<JUCEAppBasics::SplitButtonComponent>();
+	m_SecondDS100ParallelModeButton->addListener(this);
+	m_SecondDS100ParallelModeButtonIds[m_SecondDS100ParallelModes[0]] = m_SecondDS100ParallelModeButton->addButton(m_SecondDS100ParallelModes[0]);
+	m_SecondDS100ParallelModeButtonIds[m_SecondDS100ParallelModes[1]] = m_SecondDS100ParallelModeButton->addButton(m_SecondDS100ParallelModes[1]);
+	m_SecondDS100ParallelModeButton->setButtonDown(m_SecondDS100ParallelModeButtonIds[m_SecondDS100ParallelModes[0]]);
+	m_SecondDS100ParallelModeLabel = std::make_unique<Label>();
+	m_SecondDS100ParallelModeLabel->setJustificationType(Justification::centred);
+	m_SecondDS100ParallelModeLabel->setText("Active DS100", dontSendNotification);
+	m_SecondDS100ParallelModeLabel->attachToComponent(m_SecondDS100ParallelModeButton.get(), true);
+	m_DS100Settings->addComponent(m_SecondDS100ParallelModeLabel.get(), false, false);
+	m_DS100Settings->addComponent(m_SecondDS100ParallelModeButton.get(), true, false);
+
 	//second DS100 - ch. 65-128
 	m_SecondDS100IpAddressEdit = std::make_unique<TextEditor>();
 	m_SecondDS100IpAddressEdit->addListener(this);
@@ -99,11 +111,12 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_SecondDS100IpAddressLabel->setJustificationType(Justification::centred);
 	m_SecondDS100IpAddressLabel->setText("IP Address", dontSendNotification);
 	m_SecondDS100IpAddressLabel->attachToComponent(m_SecondDS100IpAddressEdit.get(), true);
+	m_DS100Settings->addComponent(m_SecondDS100IpAddressLabel.get(), false, false);
+	m_DS100Settings->addComponent(m_SecondDS100IpAddressEdit.get(), true, false);
+
 	m_SecondDS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>(false, false);
 	m_SecondDS100ZeroconfDiscovery->onServiceSelected = [=](JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info) { handleSecondDS100ServiceSelected(type, info); };
 	m_SecondDS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC, RX_PORT_DS100_HOST);
-	m_DS100Settings->addComponent(m_SecondDS100IpAddressLabel.get(), false, false);
-	m_DS100Settings->addComponent(m_SecondDS100IpAddressEdit.get(), true, false);
 	m_DS100Settings->addComponent(m_SecondDS100ZeroconfDiscovery.get(), true, false);
 
 	m_DS100Settings->resized();
@@ -472,7 +485,7 @@ void SettingsSectionsComponent::buttonClicked(JUCEAppBasics::SplitButtonComponen
 	if (!ctrl)
 		return;
 
-	// DS100 settings section
+	// DS100 mode settings section
 	if (m_SecondDS100ModeButton && m_SecondDS100ModeButton.get() == button)
 	{
 		if (m_SecondDS100ModeButtonIds[m_SecondDS100Modes[0]] == buttonId) // Off
@@ -490,6 +503,19 @@ void SettingsSectionsComponent::buttonClicked(JUCEAppBasics::SplitButtonComponen
 		else if (m_SecondDS100ModeButtonIds[m_SecondDS100Modes[3]] == buttonId) // Mirror
 		{
 			ctrl->SetExtensionMode(DCP_Settings, EM_Mirror);
+		}
+	}
+
+	// DS100 parallel mode active DS100 1st/2nd selection
+	else if (m_SecondDS100ParallelModeButton && m_SecondDS100ParallelModeButton.get() == button)
+	{
+		if (m_SecondDS100ParallelModeButtonIds[m_SecondDS100ParallelModes[0]] == buttonId) // 1st DS100 active
+		{
+			ctrl->SetActiveParallelModeDS100(DCP_Settings, APM_1st);
+		}
+		else if (m_SecondDS100ParallelModeButtonIds[m_SecondDS100ParallelModes[1]] == buttonId) // 2nd DS100 active
+		{
+			ctrl->SetActiveParallelModeDS100(DCP_Settings, APM_2nd);
 		}
 	}
 
@@ -547,7 +573,7 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 
 	// DS100 settings section
 	if (m_DS100IntervalEdit && m_DS100IntervalEdit.get() == &editor)
-		ctrl->SetRate(DCP_Settings, m_DS100IntervalEdit->getText().getIntValue());
+		ctrl->SetRefreshInterval(DCP_Settings, m_DS100IntervalEdit->getText().getIntValue());
 	else if (m_DS100IpAddressEdit && m_DS100IpAddressEdit.get() == &editor)
 		ctrl->SetDS100IpAddress(DCP_Settings, m_DS100IpAddressEdit->getText());
 	else if (m_SecondDS100IpAddressEdit && m_SecondDS100IpAddressEdit.get() == &editor)
@@ -733,7 +759,7 @@ void SettingsSectionsComponent::processUpdatedConfig()
 
 	// DS100 settings section
 	if (m_DS100IntervalEdit)
-		m_DS100IntervalEdit->setText(String(ctrl->GetRate()) + UNIT_MILLISECOND);
+		m_DS100IntervalEdit->setText(String(ctrl->GetRefreshInterval()) + UNIT_MILLISECOND);
 	if (m_DS100IpAddressEdit)
 		m_DS100IpAddressEdit->setText(ctrl->GetDS100IpAddress());
 	if (m_SecondDS100ModeButton)
@@ -747,6 +773,17 @@ void SettingsSectionsComponent::processUpdatedConfig()
 			newActiveButtonId = m_SecondDS100ModeButtonIds[m_SecondDS100Modes[3]];
 		m_SecondDS100ModeButton->setButtonDown(newActiveButtonId);
 	}
+	if (m_SecondDS100ParallelModeButton)
+	{
+		m_SecondDS100ParallelModeButton->setEnabled(ctrl->GetExtensionMode() == EM_Parallel);
+
+		auto newActiveButtonId = m_SecondDS100ParallelModeButtonIds[m_SecondDS100ParallelModes[0]];
+		if (ctrl->GetActiveParallelModeDS100() == APM_2nd)
+			newActiveButtonId = m_SecondDS100ParallelModeButtonIds[m_SecondDS100ParallelModes[1]];
+		m_SecondDS100ParallelModeButton->setButtonDown(newActiveButtonId);
+	}
+	if (m_SecondDS100ParallelModeLabel)
+		m_SecondDS100ParallelModeLabel->setEnabled(ctrl->GetExtensionMode() == EM_Parallel);
 	if (m_SecondDS100IpAddressEdit)
 	{
 		m_SecondDS100IpAddressEdit->setText(ctrl->GetSecondDS100IpAddress());

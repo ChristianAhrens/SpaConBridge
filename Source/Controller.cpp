@@ -1773,6 +1773,7 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			SetDS100IpAddress(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100IpAddress(), true);
 			SetSecondDS100IpAddress(DataChangeParticipant::DCP_Init, m_protocolBridge.GetSecondDS100IpAddress(), true);
 			SetRefreshInterval(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100MsgRate(), true);
+			SetActiveParallelModeDS100(DataChangeParticipant::DCP_Init, m_protocolBridge.GetActiveParallelModeDS100(), true);
 		}
 	}
 

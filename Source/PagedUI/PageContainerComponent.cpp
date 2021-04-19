@@ -322,15 +322,15 @@ void PageContainerComponent::UpdateGui(bool init)
 		if (ctrl->PopParameterChanged(DCP_PageContainer, DCT_Connected) || init)
 		{
 			auto connected1 = ctrl->IsFirstDS100Connected();
-			auto mm1 = ctrl->IsFirstDS100MirrorMaster();
+			auto master1 = ctrl->IsFirstDS100Master();
 			m_connectedLed1st->SetOn(connected1);
-			m_connectedLed1st->SetHighlightOn(connected1 && mm1);
+			m_connectedLed1st->SetHighlightOn(connected1 && master1);
 			if (secondDS100Used)
 			{
 				auto connected2 = ctrl->IsSecondDS100Connected();
-				auto mm2 = ctrl->IsSecondDS100MirrorMaster();
+				auto master2 = ctrl->IsSecondDS100Master();
 				m_connectedLed2nd->SetOn(connected2);
-				m_connectedLed2nd->SetHighlightOn(connected2 && mm2);
+				m_connectedLed2nd->SetHighlightOn(connected2 && master2);
 			}
 		}
 	}

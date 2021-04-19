@@ -188,9 +188,9 @@ public:
 	void Reconnect();
 	bool IsConnected() const;
 	bool IsFirstDS100Connected() const;
-	bool IsFirstDS100MirrorMaster() const;
+	bool IsFirstDS100Master() const;
 	bool IsSecondDS100Connected() const;
-	bool IsSecondDS100MirrorMaster() const;
+	bool IsSecondDS100Master() const;
 
 	//==========================================================================
 	void SetOnline(DataChangeParticipant changeSource, bool online);

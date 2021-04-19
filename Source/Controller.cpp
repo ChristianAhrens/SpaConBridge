@@ -672,11 +672,15 @@ bool Controller::IsFirstDS100Connected() const
 
 /**
  * Getter function for the DS100 bridging mirror state.
- * @return		True if first DS100 is currently master in mirror extension mode.
+ * @return		True if first DS100 is currently master in extension modes "parallel" or "mirror".
  */
-bool Controller::IsFirstDS100MirrorMaster() const
+bool Controller::IsFirstDS100Master() const
 {
-	if (GetExtensionMode() != EM_Mirror)
+	if (GetExtensionMode() == EM_Off)
+		return true;
+	if (GetExtensionMode() == EM_Extend)
+		return true;
+	if (GetExtensionMode() != EM_Parallel && GetExtensionMode() != EM_Mirror)
 		return false;
 
 	return ((m_protocolBridge.GetDS100State() & OHS_Protocol_Master) == OHS_Protocol_Master);
@@ -693,11 +697,15 @@ bool Controller::IsSecondDS100Connected() const
 
 /**
  * Getter function for the DS100 bridging mirror state.
- * @return		True if second DS100 is currently master in mirror extension mode.
+ * @return		True if second DS100 is currently master in extension modes "parallel" or "mirror".
  */
-bool Controller::IsSecondDS100MirrorMaster() const
+bool Controller::IsSecondDS100Master() const
 {
-	if (GetExtensionMode() != EM_Mirror)
+	if (GetExtensionMode() == EM_Off)
+		return false;
+	if (GetExtensionMode() == EM_Extend)
+		return true;
+	if (GetExtensionMode() != EM_Parallel && GetExtensionMode() != EM_Mirror)
 		return false;
 
 	return ((m_protocolBridge.GetSecondDS100State() & OHS_Protocol_Master) == OHS_Protocol_Master);
@@ -874,6 +882,16 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 		// is bridged to DS100 and returned by it 
 		// so we can handle the data in the end as well
 		if (senderProtocolId != DS100_1_PROCESSINGPROTOCOL_ID && senderProtocolId != DS100_2_PROCESSINGPROTOCOL_ID)
+			return;
+	}
+
+	if (GetExtensionMode() == EM_Parallel)
+	{
+		// Do neither handle any protocol data from second DS100 if first is set as active one...
+		if (GetActiveParallelModeDS100() == APM_1st && senderProtocolId != DS100_1_PROCESSINGPROTOCOL_ID)
+			return;
+		// ...nor any protocol data from first DS100 if second is set as active one in parallel extension mode.
+		if (GetActiveParallelModeDS100() == APM_2nd && senderProtocolId != DS100_2_PROCESSINGPROTOCOL_ID)
 			return;
 	}
 

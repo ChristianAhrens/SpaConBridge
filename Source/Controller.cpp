@@ -1440,6 +1440,7 @@ void Controller::timerCallback()
 		DataChangeType paramSetsInTransit = DCT_None;
 
 		newMsgData._addrVal._first = static_cast<juce::uint16>(miProcessor->GetMatrixInputId());
+		newMsgData._addrVal._second = INVALID_ADDRESS_VALUE;
 
 		// Iterate through all automation parameters.
 		for (int pIdx = MII_ParamIdx_LevelMeterPreMute; pIdx < MII_ParamIdx_MaxIndex; ++pIdx)
@@ -1566,6 +1567,7 @@ void Controller::timerCallback()
 		DataChangeType paramSetsInTransit = DCT_None;
 
 		newMsgData._addrVal._first = static_cast<juce::uint16>(moProcessor->GetMatrixOutputId());
+		newMsgData._addrVal._second = INVALID_ADDRESS_VALUE;
 
 		// Iterate through all automation parameters.
 		for (int pIdx = MOI_ParamIdx_LevelMeterPostMute; pIdx < MOI_ParamIdx_MaxIndex; ++pIdx)

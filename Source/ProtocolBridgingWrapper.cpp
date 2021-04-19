@@ -80,7 +80,7 @@ bool ProtocolBridgingWrapper::SendMessage(RemoteObjectIdentifier Id, RemoteObjec
 		else
 			return false;
 	}
-	else
+	else if (GetDS100ExtensionMode() == EM_Extend)
 	{
 		if (msgData._addrVal._first > DS100_CHANNELCOUNT)
 		{
@@ -93,6 +93,18 @@ bool ProtocolBridgingWrapper::SendMessage(RemoteObjectIdentifier Id, RemoteObjec
 		}
 		else
 			return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
+	}
+	else if (GetDS100ExtensionMode() == EM_Parallel)
+	{
+		auto sendSuccess = true;
+		sendSuccess = sendSuccess && m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
+		sendSuccess = sendSuccess && m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData);
+
+		return sendSuccess;
+	}
+	else
+	{
+		return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
 	}
 }
 

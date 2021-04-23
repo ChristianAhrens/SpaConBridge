@@ -14,6 +14,9 @@ It is neither suppported nor driven by official d&b activities.
 
 It was originally inspired by "Soundscape DAW Plugin" made publicly available at https://github.com/dbaudio-soundscape/db-Soundscape-DAW-Plugins and "Soundscape Control with DiGiCo SD consoles" made publicly available at https://github.com/dbaudio-soundscape/db-Soundscape-control-with-DiGiCo-SD-Consoles.
 
+A brief introductory video on usage and features of v0.3.1 of the build for iPadOS can be seen here:
+_[![SpaConBridge v0.3.1 Introduction](https://img.youtube.com/vi/ozhQxKidtWc/0.jpg)](https://youtu.be/ozhQxKidtWc)_
+
 
 **Known Issues:**
 

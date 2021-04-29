@@ -21,51 +21,32 @@
 
 #include <JuceHeader.h>
 
+#include "PageComponentBase.h"
+
 
 namespace SpaConBridge
 {
 
 
 /**
- * Abstract class PageComponentBase.
- * Must be reimplemented to provide a component for an app page.
+ * class StandalonePollingPageComponentBase is supposed to be used
+ * as base component for pages that use remote objects for internal use only without
+ * submitting them as active for bridging.
  */
-class PageComponentBase : public Component
+class StandalonePollingPageComponentBase : public PageComponentBase
 {
 public:
-
-	/**
-	 * Overlay types. There can only be one active at the time.
-	 */
-	enum PageComponentType
-	{
-		PCT_Unknown = 0,
-		PCT_Overview,
-		PCT_MultiSlide,
-        PCT_MatrixIOs,
-		PCT_Settings,
-		PCT_Statistics,
-		PCT_About,
-		PCT_Scenes,
-		PCT_EnSpace,
-	};
-
-	explicit PageComponentBase(PageComponentType type);
-	~PageComponentBase() override;
+	explicit StandalonePollingPageComponentBase(PageComponentType type);
+	~StandalonePollingPageComponentBase() override;
 
 	//==============================================================================
-	PageComponentType GetPageComponentType() const;
-
-	//==============================================================================
-	virtual void UpdateGui(bool init) = 0;
+	void UpdateGui(bool init) override;
 
 protected:
-	bool	IsPortraitAspectRatio();
 
 private:
-	PageComponentType	m_pageComponentType;	/**> Type of page as specified by the PageComponentType enum. */
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PageComponentBase)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StandalonePollingPageComponentBase)
 };
 
 

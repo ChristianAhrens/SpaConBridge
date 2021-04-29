@@ -290,10 +290,18 @@
                   file="submodules/JUCE-AppBasics/Resources/Images/rule_unchecked-24px.svg"/>
             <FILE id="f9cDvj" name="save-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/save-24px.svg"/>
             <FILE id="Hiyloc" name="school-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/school-24px.svg"/>
+            <FILE id="l7Fooc" name="sensors_black_24dp.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/sensors_black_24dp.svg"/>
             <FILE id="vVMBfg" name="settings-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/settings-24px.svg"/>
             <FILE id="N7oVfc" name="show_chart-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/show_chart-24px.svg"/>
+            <FILE id="teKZnx" name="skip_next-24px.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/skip_next-24px.svg"/>
+            <FILE id="pBd8LD" name="skip_previous-24px.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/skip_previous-24px.svg"/>
+            <FILE id="C2APLR" name="slideshow_black_24dp.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/slideshow_black_24dp.svg"/>
             <FILE id="nSAA4c" name="tune-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/tune-24px.svg"/>
             <FILE id="YFXXxo" name="vertical_split-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/vertical_split-24px.svg"/>
@@ -361,6 +369,18 @@
       </GROUP>
       <GROUP id="{ABC3680A-0C49-EE16-E766-E6ED89078A7C}" name="PagedUI">
         <GROUP id="{4680382C-A46A-B4C1-0D87-F92C4050063D}" name="PageComponents">
+          <GROUP id="{7924143C-8C1E-B2B1-5191-DCD096F934A1}" name="EnSpacePage">
+            <FILE id="aPLLvz" name="EnSpacePageComponent.cpp" compile="1" resource="0"
+                  file="Source/PagedUI/PageComponents/EnSpacePage/EnSpacePageComponent.cpp"/>
+            <FILE id="WHrQP3" name="EnSpacePageComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/EnSpacePage/EnSpacePageComponent.h"/>
+          </GROUP>
+          <GROUP id="{74C25C82-BCEB-2302-6B34-0B5FA1F709AD}" name="ScenesPage">
+            <FILE id="MJs8AP" name="ScenesPageComponent.cpp" compile="1" resource="0"
+                  file="Source/PagedUI/PageComponents/ScenesPage/ScenesPageComponent.cpp"/>
+            <FILE id="VVqW3s" name="ScenesPageComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/ScenesPage/ScenesPageComponent.h"/>
+          </GROUP>
           <GROUP id="{49670C0C-DE7C-D21A-221C-9FD67169A2B2}" name="SoundobjectTablePage">
             <FILE id="f5Ls1u" name="SoundobjectTableComponent.cpp" compile="1"
                   resource="0" file="Source/PagedUI/PageComponents/SoundobjectTablePage/SoundobjectTableComponent.cpp"/>
@@ -437,6 +457,10 @@
                 file="Source/PagedUI/PageComponents/PageComponentBase.cpp"/>
           <FILE id="oNGL8i" name="PageComponentBase.h" compile="0" resource="0"
                 file="Source/PagedUI/PageComponents/PageComponentBase.h"/>
+          <FILE id="LSCEoK" name="StandalonePollingPageComponentBase.cpp" compile="1"
+                resource="0" file="Source/PagedUI/PageComponents/StandalonePollingPageComponentBase.cpp"/>
+          <FILE id="jR5BP8" name="StandalonePollingPageComponentBase.h" compile="0"
+                resource="0" file="Source/PagedUI/PageComponents/StandalonePollingPageComponentBase.h"/>
           <FILE id="jHT3Ge" name="TableEditorComponents.cpp" compile="1" resource="0"
                 file="Source/PagedUI/PageComponents/TableEditorComponents.cpp"/>
           <FILE id="zBDbsv" name="TableEditorComponents.h" compile="0" resource="0"

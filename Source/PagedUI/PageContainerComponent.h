@@ -54,6 +54,8 @@ class MatrixIOPageComponent;
 class SettingsPageComponent;
 class StatisticsPageComponent;
 class AboutPageComponent;
+class ScenesPageComponent;
+class EnSpacePageComponent;
 
 
 /**
@@ -198,6 +200,8 @@ private:
 	std::unique_ptr<SettingsPageComponent>			m_settingsPage;			/**> Container for settings component. */
 	std::unique_ptr<StatisticsPageComponent>		m_statisticsPage;		/**> Container for statistics component. */
 	std::unique_ptr<AboutPageComponent>				m_aboutPage;			/**> Container for about component. */
+	std::unique_ptr<ScenesPageComponent>			m_scenesPage;			/**> Container for scenes component. */
+	std::unique_ptr<EnSpacePageComponent>			m_enSpacePage;			/**> Container for EnSpace component. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PageContainerComponent)
 };
@@ -219,6 +223,8 @@ public:
 		OTI_Table = 0,
 		OTI_MultiSlider,
         OTI_MatrixIOs,
+		OTI_Scenes,
+		OTI_EnSpace,
 		OTI_Statistics,
 		OTI_Settings,
 	};

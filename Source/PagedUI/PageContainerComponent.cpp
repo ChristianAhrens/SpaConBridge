@@ -43,6 +43,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PageComponents/SettingsPage/SettingsPageComponent.h"
 #include "PageComponents/StatisticsPage/StatisticsPageComponent.h"
 #include "PageComponents/AboutPage/AboutPageComponent.h"
+#include "PageComponents/ScenesPage/ScenesPageComponent.h"
+#include "PageComponents/EnSpacePage/EnSpacePageComponent.h"
 
 #include "../Controller.h"
 #include "../SurfaceSlider.h"
@@ -55,14 +57,19 @@ namespace SpaConBridge
 
 
 /**
- * Rate at which the Overview GUI will refresh, when the multi-slider tab is selected.
+ * Rate at which the GUI will refresh, when the multi-slider tab is selected.
  */
 static constexpr int GUI_UPDATE_RATE_FAST = 75;
 
 /**
- * Rate at which the Overview GUI will refresh.
+ * Rate at which the table pages (SO, MI/MO will refresh.
  */
 static constexpr int GUI_UPDATE_RATE_SLOW = 120;
+
+/**
+ * Rate at which the Scenes/EnSpace pages will refresh.
+ */
+static constexpr int GUI_UPDATE_RATE_SUPERSLOW = 1500;
 
 
 /*
@@ -116,8 +123,10 @@ PageContainerComponent::PageContainerComponent()
 	m_soundobjectsPage = std::make_unique<SoundobjectTablePageComponent>();
 	m_multiSliderPage = std::make_unique<MultiSurfacePageComponent>();
     m_matrixIOPage = std::make_unique<MatrixIOPageComponent>();
-	m_settingsPage = std::make_unique<SettingsPageComponent>();
 	m_statisticsPage = std::make_unique<StatisticsPageComponent>();
+	m_scenesPage = std::make_unique<ScenesPageComponent>();
+	m_enSpacePage = std::make_unique<EnSpacePageComponent>();
+	m_settingsPage = std::make_unique<SettingsPageComponent>();
 	m_aboutPage = std::make_unique<AboutPageComponent>();
 	m_aboutPage->onCloseClick = [=] { toggleAboutPage(); };
 
@@ -133,7 +142,9 @@ PageContainerComponent::PageContainerComponent()
 	m_tabbedComponent->addTab("Table", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_soundobjectsPage.get(), false, CustomButtonTabbedComponent::OTI_Table);
 	m_tabbedComponent->addTab("Slider", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSliderPage.get(), false, CustomButtonTabbedComponent::OTI_MultiSlider);
 	m_tabbedComponent->addTab("Matrix IOs", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_matrixIOPage.get(), false, CustomButtonTabbedComponent::OTI_MatrixIOs);
-    m_tabbedComponent->addTab("Statistics", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_statisticsPage.get(), false, CustomButtonTabbedComponent::OTI_Statistics);
+	m_tabbedComponent->addTab("Scenes", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_scenesPage.get(), false, CustomButtonTabbedComponent::OTI_Scenes);
+	m_tabbedComponent->addTab("EnSpace", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_enSpacePage.get(), false, CustomButtonTabbedComponent::OTI_EnSpace);
+	m_tabbedComponent->addTab("Statistics", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_statisticsPage.get(), false, CustomButtonTabbedComponent::OTI_Statistics);
 	m_tabbedComponent->addTab("Settings", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_settingsPage.get(), false, CustomButtonTabbedComponent::OTI_Settings);
 	m_tabbedComponent->SetIsHandlingChanges(true);
 
@@ -236,6 +247,8 @@ void PageContainerComponent::resized()
     m_matrixIOPage->setBounds(rect);
 	m_settingsPage->setBounds(rect);
 	m_statisticsPage->setBounds(rect);
+	m_scenesPage->setBounds(rect);
+	m_enSpacePage->setBounds(rect);
 
 	// finally resize the aboutpage, if visible and therefor on top of everything else at all
 	if (m_aboutPage && m_aboutPage->isVisible())
@@ -342,11 +355,8 @@ void PageContainerComponent::UpdateGui(bool init)
 			m_soundobjectsPage->UpdateGui(init);
 
 		// When the overview table is active, no need to refresh GUI very quickly
-		if (getTimerInterval() == GUI_UPDATE_RATE_FAST)
-		{
-			//DBG("PageContainerComponent::timerCallback(): Switching to GUI_UPDATE_RATE_SLOW");
+		if (getTimerInterval() != GUI_UPDATE_RATE_SLOW)
 			startTimer(GUI_UPDATE_RATE_SLOW);
-		}
 	}
 	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_MultiSlider)
 	{
@@ -354,24 +364,36 @@ void PageContainerComponent::UpdateGui(bool init)
 			m_multiSliderPage->UpdateGui(init);
 
 		// When multi-slider is active, we refresh the GUI faster
-		if (getTimerInterval() == GUI_UPDATE_RATE_SLOW)
-		{
-			//DBG("PageContainerComponent::timerCallback: Switching to GUI_UPDATE_RATE_FAST");
+		if (getTimerInterval() != GUI_UPDATE_RATE_FAST)
 			startTimer(GUI_UPDATE_RATE_FAST);
-		}
 	}
     else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_MatrixIOs)
     {
         if (m_matrixIOPage)
             m_matrixIOPage->UpdateGui(init);
 
-        // When multi-slider is active, we refresh the GUI faster
-        if (getTimerInterval() == GUI_UPDATE_RATE_SLOW)
-        {
-            //DBG("PageContainerComponent::timerCallback: Switching to GUI_UPDATE_RATE_FAST");
-            startTimer(GUI_UPDATE_RATE_FAST);
-        }
+        // When matrix IO tab is active, we refresh the GUI faster
+		if (getTimerInterval() != GUI_UPDATE_RATE_SLOW)
+			startTimer(GUI_UPDATE_RATE_SLOW);
     }
+	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_Scenes)
+	{
+		if (m_matrixIOPage)
+			m_matrixIOPage->UpdateGui(init);
+
+		// When scenes tab is active, we refresh the GUI super slow
+		if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
+			startTimer(GUI_UPDATE_RATE_SUPERSLOW);
+	}
+	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_EnSpace)
+	{
+		if (m_enSpacePage)
+			m_enSpacePage->UpdateGui(init);
+
+		// When EnSpace tab is active, we refresh the GUI super slow
+		if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
+			startTimer(GUI_UPDATE_RATE_SUPERSLOW);
+	}
 }
 
 /**
@@ -688,6 +710,12 @@ void CustomDrawableTabBarButton::updateDrawableButtonImageColours()
 		break;
 	case CustomButtonTabbedComponent::OTI_Statistics:
 		imageName = BinaryData::show_chart24px_svg;
+		break;
+	case CustomButtonTabbedComponent::OTI_Scenes:
+		imageName = BinaryData::slideshow_black_24dp_svg;
+		break;
+	case CustomButtonTabbedComponent::OTI_EnSpace:
+		imageName = BinaryData::sensors_black_24dp_svg;
 		break;
 	default:
 		break;

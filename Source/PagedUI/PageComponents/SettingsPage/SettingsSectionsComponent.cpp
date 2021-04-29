@@ -46,7 +46,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 
 	// DS100 settings section
 	m_DS100Settings = std::make_unique<HeaderWithElmListComponent>();
-	m_DS100Settings->setHeaderText("DS100");
+	m_DS100Settings->setHeaderText("DS100 Settings");
 	m_DS100Settings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/DS100.md"));
 	m_DS100Settings->setHasActiveToggle(false);
 	addAndMakeVisible(m_DS100Settings.get());
@@ -124,7 +124,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 
 	// DiGiCo settings section
 	m_DiGiCoBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
-	m_DiGiCoBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_DiGiCo) + " Bridging");
+	m_DiGiCoBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_DiGiCo) + " Bridging");
+	m_DiGiCoBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_DiGiCo) + " Bridging Settings");
 	m_DiGiCoBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/DiGiCoOSC.md"));
 	m_DiGiCoBridgingSettings->setHasActiveToggle(true);
 	m_DiGiCoBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
@@ -165,7 +166,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 
 	// BlackTrax RTTrPM settings section
 	m_RTTrPMBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
-	m_RTTrPMBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_BlacktraxRTTrPM) + " Bridging");
+	m_RTTrPMBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_BlacktraxRTTrPM) + " Bridging");
+	m_RTTrPMBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_BlacktraxRTTrPM) + " Bridging Settings");
 	m_RTTrPMBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/BlacktraxRTTrPM.md"));
 	m_RTTrPMBridgingSettings->setHasActiveToggle(true);
 	m_RTTrPMBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
@@ -208,7 +210,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 
 	// Generic OSC settings section
 	m_GenericOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
-	m_GenericOSCBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_GenericOSC) + " Bridging");
+	m_GenericOSCBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_GenericOSC) + " Bridging");
+	m_GenericOSCBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_GenericOSC) + " Bridging Settings");
 	m_GenericOSCBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/GenericOSC.md"));
 	m_GenericOSCBridgingSettings->setHasActiveToggle(true);
 	m_GenericOSCBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
@@ -249,7 +252,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 
 	// Generic MIDI settings section
 	m_GenericMIDIBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
-	m_GenericMIDIBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_GenericMIDI) + " Bridging");
+	m_GenericMIDIBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_GenericMIDI) + " Bridging");
+	m_GenericMIDIBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_GenericMIDI) + " Bridging Settings");
 	m_GenericMIDIBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/GenericMIDI.md"));
 	m_GenericMIDIBridgingSettings->setHasActiveToggle(true);
 	m_GenericMIDIBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
@@ -357,7 +361,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 
 	// YamahaOSC settings section
 	m_YamahaOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
-	m_YamahaOSCBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_YamahaOSC) + " Bridging");
+	m_YamahaOSCBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_YamahaOSC) + " Bridging");
+	m_YamahaOSCBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_YamahaOSC) + " Bridging Settings");
 	m_YamahaOSCBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/YamahaOSC.md"));
 	m_YamahaOSCBridgingSettings->setHasActiveToggle(true);
 	m_YamahaOSCBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };

@@ -45,6 +45,9 @@ public:
 	//==============================================================================
 	void UpdateGui(bool init) override;
 
+	//==========================================================================
+	void paint(Graphics&) override;
+
 protected:
 	const std::map<RemoteObjectIdentifier, std::vector<RemoteObjectAddressing>>& GetStandalonePollingObjects() const;
 	void SetStandalonePollingObjects(const std::map<RemoteObjectIdentifier, std::vector<RemoteObjectAddressing>>& objects);

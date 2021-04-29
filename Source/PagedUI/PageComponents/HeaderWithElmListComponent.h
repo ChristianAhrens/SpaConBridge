@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "../../../SpaConBridgeCommon.h"
+#include "../../SpaConBridgeCommon.h"
 
 
 namespace SpaConBridge
@@ -37,6 +37,7 @@ public:
 
 	//==============================================================================
 	void setHasActiveToggle(bool hasActiveToggle);
+	void setActiveToggleText(String activeToggleText);
 	void setHeaderText(String headerText);
 	void addComponent(Component* compo, bool includeInLayout = true, bool takeOwnership = true);
 	void setToggleActiveState(bool toggleState);

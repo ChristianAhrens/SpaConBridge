@@ -369,6 +369,10 @@
       </GROUP>
       <GROUP id="{ABC3680A-0C49-EE16-E766-E6ED89078A7C}" name="PagedUI">
         <GROUP id="{4680382C-A46A-B4C1-0D87-F92C4050063D}" name="PageComponents">
+          <FILE id="xzhoWW" name="HeaderWithElmListComponent.cpp" compile="1"
+                resource="0" file="Source/PagedUI/PageComponents/HeaderWithElmListComponent.cpp"/>
+          <FILE id="OdNWxk" name="HeaderWithElmListComponent.h" compile="0" resource="0"
+                file="Source/PagedUI/PageComponents/HeaderWithElmListComponent.h"/>
           <GROUP id="{7924143C-8C1E-B2B1-5191-DCD096F934A1}" name="EnSpacePage">
             <FILE id="aPLLvz" name="EnSpacePageComponent.cpp" compile="1" resource="0"
                   file="Source/PagedUI/PageComponents/EnSpacePage/EnSpacePageComponent.cpp"/>
@@ -406,10 +410,6 @@
                   file="Source/PagedUI/PageComponents/StatisticsPage/StatisticsPlotComponent.h"/>
           </GROUP>
           <GROUP id="{811EF1A2-3AD2-5387-1DC2-32ED14213B13}" name="SettingsPage">
-            <FILE id="csxZSv" name="HeaderWithElmListComponent.cpp" compile="1"
-                  resource="0" file="Source/PagedUI/PageComponents/SettingsPage/HeaderWithElmListComponent.cpp"/>
-            <FILE id="YBHy5N" name="HeaderWithElmListComponent.h" compile="0" resource="0"
-                  file="Source/PagedUI/PageComponents/SettingsPage/HeaderWithElmListComponent.h"/>
             <FILE id="XTyWNE" name="SettingsPageComponent.cpp" compile="1" resource="0"
                   file="Source/PagedUI/PageComponents/SettingsPage/SettingsPageComponent.cpp"/>
             <FILE id="DKcTjc" name="SettingsPageComponent.h" compile="0" resource="0"

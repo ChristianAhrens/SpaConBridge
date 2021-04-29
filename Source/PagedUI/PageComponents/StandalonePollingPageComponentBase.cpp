@@ -49,6 +49,17 @@ StandalonePollingPageComponentBase::~StandalonePollingPageComponentBase()
 }
 
 /**
+ * Reimplemented to paint background.
+ * @param g		Graphics context that must be used to do the drawing operations.
+ */
+void StandalonePollingPageComponentBase::paint(Graphics& g)
+{
+	// Paint background to cover the controls behind this overlay.
+	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
+	g.fillRect(getLocalBounds());
+}
+
+/**
  * Method to handle object data responses.
  * This includes filtering objects that have been added to internal 'monitoring' list and forwarding that data to
  * internal handling method of derived class instance.
@@ -88,7 +99,7 @@ void StandalonePollingPageComponentBase::UpdateGui(bool init)
  */
 void StandalonePollingPageComponentBase::triggerPollOnce()
 {
-	Controller* ctrl = Controller::GetInstance();
+	auto ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return;
 

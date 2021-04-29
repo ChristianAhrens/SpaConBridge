@@ -19,8 +19,8 @@
 
 #include "HeaderWithElmListComponent.h"
 
-#include "../../../Controller.h"
-#include "../../../LookAndFeel.h"
+#include "../../Controller.h"
+#include "../../LookAndFeel.h"
 
 #include <Image_utils.h>
 
@@ -158,12 +158,19 @@ void HeaderWithElmListComponent::setHasActiveToggle(bool hasActiveToggle)
  */
 void HeaderWithElmListComponent::setHeaderText(String headerText)
 {
-	m_activeToggleLabel->setText("Use " + headerText, dontSendNotification);
-
 	auto font = m_headerLabel->getFont();
 	font.setBold(true);
 	m_headerLabel->setFont(font);
-	m_headerLabel->setText(headerText + " Settings", dontSendNotification);
+	m_headerLabel->setText(headerText, dontSendNotification);
+}
+
+/**
+ * Setter for the active toggle text of this component.
+ * @param activeToggleText	The text to use in active toggle label
+ */
+void HeaderWithElmListComponent::setActiveToggleText(String activeToggleText)
+{
+	m_activeToggleLabel->setText(activeToggleText, dontSendNotification);
 }
 
 /**

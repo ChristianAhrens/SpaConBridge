@@ -38,6 +38,7 @@ public:
 	~EnSpacePageComponent() override;
 
 protected:
+	void HandleObjectDataInternal(RemoteObjectIdentifier objectId, const RemoteObjectMessageData& msgData) override;
 
 private:
 

@@ -1211,6 +1211,18 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 }
 
 /**
+ * Proxy method to allow direct access to bridging module message sending method.
+ * @param	Id		The remote object identifier of the message to be sent.
+ * @param	msgData	The message data incl. addressing to be sent.
+ * @return	True on success, false on sending failure.
+ */
+bool Controller::SendMessageDataDirect(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData)
+{
+	DBG(String(__FUNCTION__) + ProcessingEngineConfig::GetObjectDescription(Id));
+	return m_protocolBridge.SendMessage(Id, msgData);
+}
+
+/**
  * Disconnect the active bridging nodes' protocols.
  */
 void Controller::Disconnect()

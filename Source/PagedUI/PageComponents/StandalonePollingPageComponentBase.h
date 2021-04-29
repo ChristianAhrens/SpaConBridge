@@ -23,6 +23,8 @@
 
 #include "PageComponentBase.h"
 
+#include "../../Controller.h"
+
 
 namespace SpaConBridge
 {
@@ -33,7 +35,8 @@ namespace SpaConBridge
  * as base component for pages that use remote objects for internal use only without
  * submitting them as active for bridging.
  */
-class StandalonePollingPageComponentBase : public PageComponentBase
+class StandalonePollingPageComponentBase :	public PageComponentBase,
+											public ProtocolBridgingWrapper::Listener
 {
 public:
 	explicit StandalonePollingPageComponentBase(PageComponentType type);
@@ -43,8 +46,20 @@ public:
 	void UpdateGui(bool init) override;
 
 protected:
+	const std::map<RemoteObjectIdentifier, std::vector<RemoteObjectAddressing>>& GetStandalonePollingObjects() const;
+	void SetStandalonePollingObjects(const std::map<RemoteObjectIdentifier, std::vector<RemoteObjectAddressing>>& objects);
+	void AddStandalonePollingObject(const RemoteObjectIdentifier roi, const RemoteObjectAddressing& addressing);
+
+	//==========================================================================
+	void HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier objectId, const RemoteObjectMessageData& msgData) override;
+
+	//==============================================================================
+	virtual void HandleObjectDataInternal(RemoteObjectIdentifier objectId, const RemoteObjectMessageData& msgData) = 0;
 
 private:
+	void triggerPollOnce();
+
+	std::map<RemoteObjectIdentifier, std::vector<RemoteObjectAddressing>>	m_objectsForStandalonePolling;	/**< Objects that are registered for 'monitoring' */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StandalonePollingPageComponentBase)
 };

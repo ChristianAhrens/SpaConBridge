@@ -36,6 +36,7 @@ namespace SpaConBridge
 EnSpacePageComponent::EnSpacePageComponent()
 	: StandalonePollingPageComponentBase(PCT_EnSpace)
 {
+	AddStandalonePollingObject(ROI_MatrixSettings_ReverbRoomId, RemoteObjectAddressing());
 }
 
 /**
@@ -43,6 +44,17 @@ EnSpacePageComponent::EnSpacePageComponent()
  */
 EnSpacePageComponent::~EnSpacePageComponent()
 {
+}
+
+/**
+ * Reimplemented method to handle updated object data for objects that have been added for standalone polling.
+ * @param	objectId	The remote object identifier of the object that shall be handled.
+ * @param	msgData		The remote object message data that was received and shall be handled.
+ */
+void EnSpacePageComponent::HandleObjectDataInternal(RemoteObjectIdentifier objectId, const RemoteObjectMessageData& msgData)
+{
+	ignoreUnused(msgData);
+	DBG(String(__FUNCTION__) + ProcessingEngineConfig::GetObjectDescription(objectId));
 }
 
 

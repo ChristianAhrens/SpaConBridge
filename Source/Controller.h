@@ -210,6 +210,9 @@ public:
 	//==========================================================================
 	void HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier Id, const RemoteObjectMessageData& msgData) override;
 
+	//==========================================================================
+	bool SendMessageDataDirect(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData);
+
 private:
 	void timerCallback() override;
 

@@ -36,6 +36,9 @@ namespace SpaConBridge
 ScenesPageComponent::ScenesPageComponent()
 	: StandalonePollingPageComponentBase(PCT_Scenes)
 {
+	AddStandalonePollingObject(ROI_Scene_SceneIndex, RemoteObjectAddressing());
+	AddStandalonePollingObject(ROI_Scene_SceneName, RemoteObjectAddressing());
+	AddStandalonePollingObject(ROI_Scene_SceneComment, RemoteObjectAddressing());
 }
 
 /**
@@ -43,6 +46,17 @@ ScenesPageComponent::ScenesPageComponent()
  */
 ScenesPageComponent::~ScenesPageComponent()
 {
+}
+
+/**
+ * Reimplemented method to handle updated object data for objects that have been added for standalone polling.
+ * @param	objectId	The remote object identifier of the object that shall be handled.
+ * @param	msgData		The remote object message data that was received and shall be handled.
+ */
+void ScenesPageComponent::HandleObjectDataInternal(RemoteObjectIdentifier objectId, const RemoteObjectMessageData& msgData)
+{
+	ignoreUnused(msgData);
+	DBG(String(__FUNCTION__) + ProcessingEngineConfig::GetObjectDescription(objectId));
 }
 
 

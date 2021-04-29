@@ -378,8 +378,8 @@ void PageContainerComponent::UpdateGui(bool init)
     }
 	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_Scenes)
 	{
-		if (m_matrixIOPage)
-			m_matrixIOPage->UpdateGui(init);
+		if (m_scenesPage)
+			m_scenesPage->UpdateGui(init);
 
 		// When scenes tab is active, we refresh the GUI super slow
 		if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)

@@ -48,16 +48,18 @@ ScenesPageComponent::ScenesPageComponent()
 	if (GetElementsContainer())
 		GetElementsContainer()->setHeaderText("Scenes");
 
+	m_transportControls = std::make_unique<HorizontalComponentLayouter>();
+	if (GetElementsContainer())
+		GetElementsContainer()->addComponent(m_transportControls.get(), true, false);
+	
 	m_previousButton = std::make_unique<JUCEAppBasics::TextWithImageButton>();
 	m_previousButton->setButtonText("Previous");
 	m_previousButton->setImagePosition(Justification::centredLeft);
-	if (GetElementsContainer())
-		GetElementsContainer()->addComponent(m_previousButton.get(), true, false);
+	m_transportControls->AddComponent(m_previousButton.get());
 	m_nextButton = std::make_unique<JUCEAppBasics::TextWithImageButton>();
 	m_nextButton->setButtonText("Next");
 	m_nextButton->setImagePosition(Justification::centredLeft);
-	if (GetElementsContainer())
-		GetElementsContainer()->addComponent(m_nextButton.get(), true, false);
+	m_transportControls->AddComponent(m_nextButton.get());
 
 	m_sceneIndexEdit = std::make_unique<TextEditor>();
 	if (GetElementsContainer())

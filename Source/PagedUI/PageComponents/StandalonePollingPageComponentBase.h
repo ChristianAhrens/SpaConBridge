@@ -22,8 +22,9 @@
 #include <JuceHeader.h>
 
 #include "PageComponentBase.h"
+#include "HeaderWithElmListComponent.h"
 
-#include "../../Controller.h"
+#include "../../ProtocolBridgingWrapper.h"
 
 
 namespace SpaConBridge
@@ -42,11 +43,14 @@ public:
 	explicit StandalonePollingPageComponentBase(PageComponentType type);
 	~StandalonePollingPageComponentBase() override;
 
+	HeaderWithElmListComponent* GetElementsContainer();
+
 	//==============================================================================
 	void UpdateGui(bool init) override;
 
 	//==========================================================================
 	void paint(Graphics&) override;
+	void resized() override;
 
 protected:
 	const std::map<RemoteObjectIdentifier, std::vector<RemoteObjectAddressing>>& GetStandalonePollingObjects() const;
@@ -63,6 +67,10 @@ private:
 	void triggerPollOnce();
 
 	std::map<RemoteObjectIdentifier, std::vector<RemoteObjectAddressing>>	m_objectsForStandalonePolling;	/**< Objects that are registered for 'monitoring' */
+
+	//==============================================================================
+	std::unique_ptr<HeaderWithElmListComponent>	m_elementsContainer;
+	std::unique_ptr<Viewport>					m_elementsContainerViewport;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StandalonePollingPageComponentBase)
 };

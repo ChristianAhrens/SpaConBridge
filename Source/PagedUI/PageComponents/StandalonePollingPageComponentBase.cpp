@@ -19,6 +19,8 @@
 
 #include "StandalonePollingPageComponentBase.h"
 
+#include "../../Controller.h"
+
 
 namespace SpaConBridge
 {
@@ -36,6 +38,11 @@ namespace SpaConBridge
 StandalonePollingPageComponentBase::StandalonePollingPageComponentBase(PageComponentType type)
 	: PageComponentBase(type)
 {
+	m_elementsContainer = std::make_unique<HeaderWithElmListComponent>();
+	m_elementsContainerViewport = std::make_unique<Viewport>();
+	m_elementsContainerViewport->setViewedComponent(m_elementsContainer.get(), false);
+	addAndMakeVisible(m_elementsContainerViewport.get());
+
 	auto ctrl = SpaConBridge::Controller::GetInstance();
 	if (ctrl)
 		ctrl->AddProtocolBridgingWrapperListener(this);
@@ -49,6 +56,15 @@ StandalonePollingPageComponentBase::~StandalonePollingPageComponentBase()
 }
 
 /**
+ * Getter for the private elements container component to be able to externally add items.
+ * @return	The container object pointer, if existing. Otherwise nullptr.
+ */
+HeaderWithElmListComponent* StandalonePollingPageComponentBase::GetElementsContainer()
+{
+	return m_elementsContainer.get();
+}
+
+/**
  * Reimplemented to paint background.
  * @param g		Graphics context that must be used to do the drawing operations.
  */
@@ -57,6 +73,45 @@ void StandalonePollingPageComponentBase::paint(Graphics& g)
 	// Paint background to cover the controls behind this overlay.
 	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
 	g.fillRect(getLocalBounds());
+}
+
+/**
+ * Reimplemented to resize elements container component.
+ */
+void StandalonePollingPageComponentBase::resized()
+{
+	auto bounds = getLocalBounds().reduced(5);
+
+	if (m_elementsContainerViewport)
+		m_elementsContainerViewport->setBounds(bounds);
+
+	auto minWidth = HeaderWithElmListComponent::m_attachedItemWidth + HeaderWithElmListComponent::m_layoutItemWidth;
+	auto minHeight = m_elementsContainer->getHeight();
+
+	if (bounds.getWidth() < minWidth)
+		bounds.setWidth(minWidth);
+	if (bounds.getHeight() < minHeight)
+		bounds.setHeight(minHeight);
+
+	if (m_elementsContainer && m_elementsContainerViewport)
+	{
+		bounds = bounds.reduced(5);
+
+		if (m_elementsContainerViewport->isVerticalScrollBarShown() || m_elementsContainerViewport->isHorizontalScrollBarShown())
+		{
+			auto boundsWithoutScrollbars = bounds;
+
+			if (m_elementsContainerViewport->isVerticalScrollBarShown())
+				boundsWithoutScrollbars.setWidth(bounds.getWidth() - m_elementsContainerViewport->getVerticalScrollBar().getWidth());
+
+			if (m_elementsContainerViewport->isHorizontalScrollBarShown())
+				boundsWithoutScrollbars.setHeight(bounds.getHeight() - m_elementsContainerViewport->getHorizontalScrollBar().getHeight());
+
+			m_elementsContainer->setBounds(boundsWithoutScrollbars);
+		}
+		else
+			m_elementsContainer->setBounds(bounds);
+	}
 }
 
 /**

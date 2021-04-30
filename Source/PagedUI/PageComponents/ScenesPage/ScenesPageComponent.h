@@ -20,6 +20,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include <TextWithImageButton.h>
 
 #include "../StandalonePollingPageComponentBase.h"
 
@@ -31,16 +32,28 @@ namespace SpaConBridge
 /**
  * class ScenesPageComponent provides control for DS100 scene transport.
  */
-class ScenesPageComponent : public StandalonePollingPageComponentBase
+class ScenesPageComponent : public StandalonePollingPageComponentBase,
+							public TextButton::Listener
 {
 public:
 	explicit ScenesPageComponent();
 	~ScenesPageComponent() override;
 
+	//==========================================================================
+	void buttonClicked(Button* button) override;
+
+	//==========================================================================
+	void lookAndFeelChanged() override;
+
 protected:
 	void HandleObjectDataInternal(RemoteObjectIdentifier objectId, const RemoteObjectMessageData& msgData) override;
 
 private:
+	std::unique_ptr<JUCEAppBasics::TextWithImageButton>	m_previousButton;
+	std::unique_ptr<JUCEAppBasics::TextWithImageButton>	m_nextButton;
+	std::unique_ptr<TextEditor>							m_sceneIndexEdit;
+	std::unique_ptr<TextEditor>							m_sceneNameEdit;
+	std::unique_ptr<TextEditor>							m_sceneCommentEdit;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ScenesPageComponent)
 };

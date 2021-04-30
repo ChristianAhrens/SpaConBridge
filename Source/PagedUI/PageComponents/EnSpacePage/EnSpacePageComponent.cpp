@@ -19,7 +19,7 @@
 
 #include "EnSpacePageComponent.h"
 
-#include "../HeaderWithElmListComponent.h"
+#include "../../../Controller.h"
 
 
 namespace SpaConBridge
@@ -40,17 +40,15 @@ EnSpacePageComponent::EnSpacePageComponent()
 {
 	AddStandalonePollingObject(ROI_MatrixSettings_ReverbRoomId, RemoteObjectAddressing());
 
-	m_elementsContainer = std::make_unique<HeaderWithElmListComponent>();
-	m_elementsContainer->setHeaderText("En-Space - Room");
-	m_elementsContainerViewport = std::make_unique<Viewport>();
-	m_elementsContainerViewport->setViewedComponent(m_elementsContainer.get(), false);
-	addAndMakeVisible(m_elementsContainerViewport.get());
+	if (GetElementsContainer())
+		GetElementsContainer()->setHeaderText("En-Space - Room");
 
 	for (int i = ESRI_Off; i < ESRI_Max; i++)
 	{
 		m_roomIdButtons[i] = std::make_unique<TextButton>(GetEnSpaceRoomIdName(static_cast<EnSpaceRoomId>(i)));
 		m_roomIdButtons.at(i)->addListener(this);
-		m_elementsContainer->addComponent(m_roomIdButtons.at(i).get(), true, false);
+		if (GetElementsContainer())
+			GetElementsContainer()->addComponent(m_roomIdButtons.at(i).get(), true, false);
 	}
 }
 
@@ -59,45 +57,6 @@ EnSpacePageComponent::EnSpacePageComponent()
  */
 EnSpacePageComponent::~EnSpacePageComponent()
 {
-}
-
-/**
- * Reimplemented to resize elements container component.
- */
-void EnSpacePageComponent::resized()
-{
-	auto bounds = getLocalBounds().reduced(5);
-
-	if (m_elementsContainerViewport)
-		m_elementsContainerViewport->setBounds(bounds);
-
-	auto minWidth = HeaderWithElmListComponent::m_attachedItemWidth + HeaderWithElmListComponent::m_layoutItemWidth;
-	auto minHeight = m_elementsContainer->getHeight();
-
-	if (bounds.getWidth() < minWidth)
-		bounds.setWidth(minWidth);
-	if (bounds.getHeight() < minHeight)
-		bounds.setHeight(minHeight);
-
-	if (m_elementsContainer && m_elementsContainerViewport)
-	{
-		bounds = bounds.reduced(5);
-
-		if (m_elementsContainerViewport->isVerticalScrollBarShown() || m_elementsContainerViewport->isHorizontalScrollBarShown())
-		{
-			auto boundsWithoutScrollbars = bounds;
-
-			if (m_elementsContainerViewport->isVerticalScrollBarShown())
-				boundsWithoutScrollbars.setWidth(bounds.getWidth() - m_elementsContainerViewport->getVerticalScrollBar().getWidth());
-
-			if (m_elementsContainerViewport->isHorizontalScrollBarShown())
-				boundsWithoutScrollbars.setHeight(bounds.getHeight() - m_elementsContainerViewport->getHorizontalScrollBar().getHeight());
-
-			m_elementsContainer->setBounds(boundsWithoutScrollbars);
-		}
-		else
-			m_elementsContainer->setBounds(bounds);
-	}
 }
 
 /**

@@ -27,10 +27,6 @@
 namespace SpaConBridge
 {
 
-/**
- * Fwd. declarations
- */
-class HeaderWithElmListComponent;
 
 /**
  * class EnSpacePageComponent provides control for DS100 scene transport.
@@ -60,10 +56,6 @@ public:
 
 	String GetEnSpaceRoomIdName(EnSpaceRoomId id);
 
-	//==============================================================================
-	//void paint(Graphics&) override;
-	void resized() override;
-
 	//==========================================================================
 	void buttonClicked(Button* button) override;
 
@@ -71,8 +63,6 @@ protected:
 	void HandleObjectDataInternal(RemoteObjectIdentifier objectId, const RemoteObjectMessageData& msgData) override;
 
 private:
-	std::unique_ptr<HeaderWithElmListComponent>	m_elementsContainer;
-	std::unique_ptr<Viewport>					m_elementsContainerViewport;
 	std::map<int, std::unique_ptr<TextButton>>	m_roomIdButtons;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EnSpacePageComponent)

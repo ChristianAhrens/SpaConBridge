@@ -32,6 +32,21 @@ namespace SpaConBridge
 class HeaderWithElmListComponent : public Component
 {
 public:
+	struct LayoutingMetadata
+	{
+		LayoutingMetadata(bool includeInLayout, bool takeOwnership, int verticalSpan)
+		{
+			_includeInLayout = includeInLayout;
+			_takeOwnership = takeOwnership;
+			_verticalSpan = verticalSpan;
+		}
+
+		bool	_includeInLayout;
+		bool	_takeOwnership;
+		int		_verticalSpan;
+	};
+
+public:
 	HeaderWithElmListComponent(const String& componentName = String());
 	~HeaderWithElmListComponent() override;
 
@@ -39,7 +54,7 @@ public:
 	void setHasActiveToggle(bool hasActiveToggle);
 	void setActiveToggleText(String activeToggleText);
 	void setHeaderText(String headerText);
-	void addComponent(Component* compo, bool includeInLayout = true, bool takeOwnership = true);
+	void addComponent(Component* compo, bool includeInLayout = true, bool takeOwnership = true, int verticalSpan = 1);
 	void setToggleActiveState(bool toggleState);
 	
 	void onToggleActive();
@@ -67,14 +82,14 @@ protected:
 
 private:
 	//==============================================================================
-	bool																		m_hasActiveToggle{ false };
-	bool																		m_toggleState{ true };
-	std::unique_ptr<ToggleButton>												m_activeToggle;
-	std::unique_ptr<Label>														m_activeToggleLabel;
-	std::unique_ptr<Label>														m_headerLabel;
-	std::unique_ptr<DrawableButton>												m_helpButton;
-	std::unique_ptr<URL>														m_helpUrl;
-	std::vector<std::pair<std::unique_ptr<Component>, std::pair<bool, bool>>>	m_components;
+	bool																	m_hasActiveToggle{ false };
+	bool																	m_toggleState{ true };
+	std::unique_ptr<ToggleButton>											m_activeToggle;
+	std::unique_ptr<Label>													m_activeToggleLabel;
+	std::unique_ptr<Label>													m_headerLabel;
+	std::unique_ptr<DrawableButton>											m_helpButton;
+	std::unique_ptr<URL>													m_helpUrl;
+	std::vector<std::pair<std::unique_ptr<Component>, LayoutingMetadata>>	m_components;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HeaderWithElmListComponent)
 };

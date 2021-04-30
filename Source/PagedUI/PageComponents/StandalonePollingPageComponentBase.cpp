@@ -131,6 +131,22 @@ void StandalonePollingPageComponentBase::HandleMessageData(NodeId nodeId, Protoc
 	if (senderProtocolId != DS100_1_PROCESSINGPROTOCOL_ID && senderProtocolId != DS100_2_PROCESSINGPROTOCOL_ID)
 		return;
 
+	// from here on we require the controller singleton to be available
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
+	// enshure that in parallel extension mode, only the polling request answers of the active device are processed
+	if (ctrl->GetExtensionMode() == EM_Parallel)
+	{
+		// Do neither handle any protocol data from second DS100 if first is set as active one...
+		if (ctrl->GetActiveParallelModeDS100() == APM_1st && senderProtocolId != DS100_1_PROCESSINGPROTOCOL_ID)
+			return;
+		// ...nor any protocol data from first DS100 if second is set as active one in parallel extension mode.
+		if (ctrl->GetActiveParallelModeDS100() == APM_2nd && senderProtocolId != DS100_2_PROCESSINGPROTOCOL_ID)
+			return;
+	}
+
 	// only forward the data corresponding to relevant remote objects to derived implementations
 	if (m_objectsForStandalonePolling.count(objectId) > 0)
 		if (std::find(m_objectsForStandalonePolling.at(objectId).begin(), m_objectsForStandalonePolling.at(objectId).end(), msgData._addrVal) != m_objectsForStandalonePolling.at(objectId).end())

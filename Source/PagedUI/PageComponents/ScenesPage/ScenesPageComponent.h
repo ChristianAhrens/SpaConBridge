@@ -29,6 +29,11 @@ namespace SpaConBridge
 {
 
 
+/**
+ * Helper class to allow horizontal layouting of child components
+ * and use the instance of this class as a single component embedded
+ * in other layouts.
+ */
 class HorizontalComponentLayouter : public Component
 {
 public:
@@ -47,25 +52,34 @@ public:
 		m_layoutComponents.erase(iter);
 		return true;
 	}
+	void SetSpacing(int spacing)
+	{
+		m_spacing = spacing;
+	}
 	void resized() override
 	{
 		FlexBox fb;
 		fb.flexDirection = FlexBox::Direction::row;
-		for (auto const& c : m_layoutComponents)
+		auto compoCnt = m_layoutComponents.size();
+		for (int i = 0; i < compoCnt; i++)
 		{
-			fb.items.add(FlexItem(*c).withFlex(1));
+			fb.items.add(FlexItem(*m_layoutComponents.at(i)).withFlex(1));
+			if (i < compoCnt - 1)
+				fb.items.add(FlexItem().withWidth(static_cast<float>(m_spacing)));
 		}
 		fb.performLayout(getLocalBounds().toFloat());
 	}
 
 	std::vector<Component*>	m_layoutComponents;
+	int m_spacing{ 0 };
 };
 
 /**
  * class ScenesPageComponent provides control for DS100 scene transport.
  */
 class ScenesPageComponent : public StandalonePollingPageComponentBase,
-							public TextButton::Listener
+							public TextButton::Listener,
+							public TextEditor::Listener
 {
 public:
 	explicit ScenesPageComponent();
@@ -81,10 +95,14 @@ protected:
 	void HandleObjectDataInternal(RemoteObjectIdentifier objectId, const RemoteObjectMessageData& msgData) override;
 
 private:
-	std::unique_ptr<HorizontalComponentLayouter>		m_transportControls;
+	std::unique_ptr<HorizontalComponentLayouter>		m_prevNextLayoutContainer;
 	std::unique_ptr<JUCEAppBasics::TextWithImageButton>	m_previousButton;
 	std::unique_ptr<JUCEAppBasics::TextWithImageButton>	m_nextButton;
+	
+	std::unique_ptr<HorizontalComponentLayouter>		m_recallIdxLayoutContainer;
+	std::unique_ptr<TextButton>							m_recallButton;
 	std::unique_ptr<TextEditor>							m_sceneIndexEdit;
+	
 	std::unique_ptr<TextEditor>							m_sceneNameEdit;
 	std::unique_ptr<TextEditor>							m_sceneCommentEdit;
 

@@ -48,28 +48,46 @@ ScenesPageComponent::ScenesPageComponent()
 	if (GetElementsContainer())
 		GetElementsContainer()->setHeaderText("Scenes");
 
-	m_transportControls = std::make_unique<HorizontalComponentLayouter>();
+	// Previous / Next buttons wrapped in horizontal layouting container
+	m_prevNextLayoutContainer = std::make_unique<HorizontalComponentLayouter>();
+	m_prevNextLayoutContainer->SetSpacing(5);
 	if (GetElementsContainer())
-		GetElementsContainer()->addComponent(m_transportControls.get(), true, false);
+		GetElementsContainer()->addComponent(m_prevNextLayoutContainer.get(), true, false);
 	
 	m_previousButton = std::make_unique<JUCEAppBasics::TextWithImageButton>();
 	m_previousButton->setButtonText("Previous");
 	m_previousButton->setImagePosition(Justification::centredLeft);
-	m_transportControls->AddComponent(m_previousButton.get());
+	m_previousButton->addListener(this);
+	m_prevNextLayoutContainer->AddComponent(m_previousButton.get());
 	m_nextButton = std::make_unique<JUCEAppBasics::TextWithImageButton>();
 	m_nextButton->setButtonText("Next");
 	m_nextButton->setImagePosition(Justification::centredLeft);
-	m_transportControls->AddComponent(m_nextButton.get());
+	m_nextButton->addListener(this);
+	m_prevNextLayoutContainer->AddComponent(m_nextButton.get());
+
+	// scene index editor and recall button wrapped in horizontal layouting container
+	m_recallIdxLayoutContainer = std::make_unique<HorizontalComponentLayouter>();
+	m_recallIdxLayoutContainer->SetSpacing(5);
+	if (GetElementsContainer())
+		GetElementsContainer()->addComponent(m_recallIdxLayoutContainer.get(), true, false);
 
 	m_sceneIndexEdit = std::make_unique<TextEditor>();
-	if (GetElementsContainer())
-		GetElementsContainer()->addComponent(m_sceneIndexEdit.get(), true, false);
+	m_sceneIndexEdit->addListener(this);
+	m_recallIdxLayoutContainer->AddComponent(m_sceneIndexEdit.get());
+	m_recallButton = std::make_unique<TextButton>();
+	m_recallButton->setButtonText("Recall");
+	m_recallButton->addListener(this);
+	m_recallIdxLayoutContainer->AddComponent(m_recallButton.get());
+
+	// scene name and comment as full-width elements, comment with special height
 	m_sceneNameEdit = std::make_unique<TextEditor>();
+	m_sceneNameEdit->setReadOnly(true);
 	if (GetElementsContainer())
 		GetElementsContainer()->addComponent(m_sceneNameEdit.get(), true, false);
 	m_sceneCommentEdit = std::make_unique<TextEditor>();
+	m_sceneCommentEdit->setReadOnly(true);
 	if (GetElementsContainer())
-		GetElementsContainer()->addComponent(m_sceneCommentEdit.get(), true, false);
+		GetElementsContainer()->addComponent(m_sceneCommentEdit.get(), true, false, 3);
 
 	lookAndFeelChanged();
 }
@@ -100,6 +118,25 @@ void ScenesPageComponent::buttonClicked(Button* button)
 	{
 		RemoteObjectMessageData romd;
 		ctrl->SendMessageDataDirect(ROI_Scene_Previous, romd);
+	}
+	else if (m_recallButton && m_recallButton.get() == button)
+	{
+		auto sceneIndexFloat = m_sceneIndexEdit->getText().getFloatValue();
+		auto sceneIndexCent = static_cast<int>(sceneIndexFloat * 100);
+		auto sceneIndexMajor = sceneIndexCent / 100;
+		auto sceneIndexMinor = sceneIndexCent - (sceneIndexMajor * 100);
+
+		int dualIntValue[2];
+		dualIntValue[0] = sceneIndexMajor;
+		dualIntValue[1] = sceneIndexMinor;
+
+		RemoteObjectMessageData romd;
+		romd._valType = ROVT_INT;
+		romd._valCount = 2;
+		romd._payloadOwned = false;
+		romd._payloadSize = 2 * sizeof(int);
+		romd._payload = &dualIntValue;
+		ctrl->SendMessageDataDirect(ROI_Scene_Recall, romd);
 	}
 }
 

@@ -108,8 +108,6 @@ void ScenesPageComponent::buttonClicked(Button* button)
  */
 void ScenesPageComponent::HandleObjectDataInternal(RemoteObjectIdentifier objectId, const RemoteObjectMessageData& msgData)
 {
-	DBG(String(__FUNCTION__) + ProcessingEngineConfig::GetObjectDescription(objectId));
-
 	// all remote objects that are read here are of type string and must meet these common criteria
 	if (msgData._valType == ROVT_STRING
 		&& msgData._valCount * sizeof(char) == msgData._payloadSize

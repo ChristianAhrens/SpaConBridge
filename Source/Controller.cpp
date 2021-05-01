@@ -1290,7 +1290,7 @@ void Controller::timerCallback()
 		DataChangeType paramSetsInTransit = DCT_None;
 
 		newMsgData._addrVal._first = static_cast<juce::uint16>(soProcessor->GetSoundobjectId());
-		newMsgData._addrVal._second = static_cast<juce::uint16>(soProcessor->GetMappingId());
+		newMsgData._addrVal._second = INVALID_ADDRESS_VALUE;
 
 		// Iterate through all automation parameters.
 		for (int pIdx = SPI_ParamIdx_X; pIdx < SPI_ParamIdx_MaxIndex; ++pIdx)
@@ -1307,6 +1307,8 @@ void Controller::timerCallback()
 					{
 						newDualFloatValue[0] = soProcessor->GetParameterValue(SPI_ParamIdx_X);
 						newDualFloatValue[1] = soProcessor->GetParameterValue(SPI_ParamIdx_Y);
+
+						newMsgData._addrVal._second = static_cast<juce::uint16>(soProcessor->GetMappingId());
 
 						newMsgData._valCount = 2;
 						newMsgData._valType = ROVT_FLOAT;

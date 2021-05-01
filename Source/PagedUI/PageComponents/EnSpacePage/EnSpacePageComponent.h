@@ -32,7 +32,8 @@ namespace SpaConBridge
  * class EnSpacePageComponent provides control for DS100 scene transport.
  */
 class EnSpacePageComponent :	public StandalonePollingPageComponentBase,
-								public TextButton::Listener
+								public TextButton::Listener,
+								public Slider::Listener
 {
 public:
 	enum EnSpaceRoomId
@@ -56,14 +57,28 @@ public:
 
 	String GetEnSpaceRoomIdName(EnSpaceRoomId id);
 
+	//==============================================================================
+	void UpdateGui(bool init) override;
+
 	//==========================================================================
 	void buttonClicked(Button* button) override;
+
+	//==========================================================================
+	void sliderValueChanged(Slider* slider) override;
 
 protected:
 	void HandleObjectDataInternal(RemoteObjectIdentifier objectId, const RemoteObjectMessageData& msgData) override;
 
 private:
 	std::map<int, std::unique_ptr<TextButton>>	m_roomIdButtons;
+
+	std::unique_ptr<Label>	m_preDelayFactorLabel;
+	std::unique_ptr<Slider>	m_preDelayFactorSlider;
+	std::unique_ptr<Label>	m_rearLevelLabel;
+	std::unique_ptr<Slider>	m_rearLevelSlider;
+
+	bool m_preDelayFactorChangePending{ false };
+	bool m_rearLevelChangePending{ false };
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EnSpacePageComponent)
 };

@@ -39,6 +39,8 @@ EnSpacePageComponent::EnSpacePageComponent()
 	: StandalonePollingPageComponentBase(PCT_EnSpace)
 {
 	AddStandalonePollingObject(ROI_MatrixSettings_ReverbRoomId, RemoteObjectAddressing());
+	AddStandalonePollingObject(ROI_MatrixSettings_ReverbPredelayFactor, RemoteObjectAddressing());
+	AddStandalonePollingObject(ROI_MatrixSettings_ReverbRearLevel, RemoteObjectAddressing());
 
 	if (GetElementsContainer())
 		GetElementsContainer()->setHeaderText("En-Space - Room");
@@ -49,6 +51,39 @@ EnSpacePageComponent::EnSpacePageComponent()
 		m_roomIdButtons.at(i)->addListener(this);
 		if (GetElementsContainer())
 			GetElementsContainer()->addComponent(m_roomIdButtons.at(i).get(), true, false);
+	}
+
+	m_preDelayFactorSlider = std::make_unique<Slider>();
+	m_preDelayFactorSlider->setRange(
+		juce::Range<double>(ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixSettings_ReverbPredelayFactor).getStart(),
+							ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixSettings_ReverbPredelayFactor).getEnd()),
+		0.1f);
+	m_preDelayFactorSlider->addListener(this);
+	m_preDelayFactorLabel = std::make_unique<Label>();
+	m_preDelayFactorLabel->setJustificationType(Justification::centred);
+	m_preDelayFactorLabel->setText("Predelay Factor", dontSendNotification);
+	m_preDelayFactorLabel->attachToComponent(m_preDelayFactorSlider.get(), true);
+	if (GetElementsContainer())
+	{
+		GetElementsContainer()->addComponent(m_preDelayFactorLabel.get(), false, false);
+		GetElementsContainer()->addComponent(m_preDelayFactorSlider.get(), true, false);
+	}
+
+	m_rearLevelSlider = std::make_unique<Slider>();
+	m_rearLevelSlider->setRange(
+		juce::Range<double>(ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixSettings_ReverbRearLevel).getStart(),
+							ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixSettings_ReverbRearLevel).getEnd()),
+		0.1f);
+	m_rearLevelSlider->addListener(this);
+	m_rearLevelSlider->setTextValueSuffix("dB");
+	m_rearLevelLabel = std::make_unique<Label>();
+	m_rearLevelLabel->setJustificationType(Justification::centred);
+	m_rearLevelLabel->setText("Rear Level", dontSendNotification);
+	m_rearLevelLabel->attachToComponent(m_rearLevelSlider.get(), true);
+	if (GetElementsContainer())
+	{
+		GetElementsContainer()->addComponent(m_rearLevelLabel.get(), false, false);
+		GetElementsContainer()->addComponent(m_rearLevelSlider.get(), true, false);
 	}
 }
 
@@ -124,36 +159,139 @@ void EnSpacePageComponent::buttonClicked(Button* button)
 }
 
 /**
+ * Reimplemented to handle slider member value changes.
+ * @param	slider	The slider that value has changed.
+ */
+void EnSpacePageComponent::sliderValueChanged(Slider* slider)
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
+	if (m_preDelayFactorSlider && m_preDelayFactorSlider.get() == slider)
+	{
+		m_preDelayFactorChangePending = true;
+	}
+	else if (m_rearLevelSlider && m_rearLevelSlider.get() == slider)
+	{
+		m_rearLevelChangePending = true;
+	}
+}
+
+/**
  * Reimplemented method to handle updated object data for objects that have been added for standalone polling.
  * @param	objectId	The remote object identifier of the object that shall be handled.
  * @param	msgData		The remote object message data that was received and shall be handled.
  */
 void EnSpacePageComponent::HandleObjectDataInternal(RemoteObjectIdentifier objectId, const RemoteObjectMessageData& msgData)
 {
-	if (objectId != ROI_MatrixSettings_ReverbRoomId)
-		return;
 	if (msgData._addrVal != RemoteObjectAddressing())
 		return;
 	if (msgData._valCount != 1)
 		return;
-	if (msgData._valType != ROVT_INT)
-		return;
-	if (msgData._payloadSize != sizeof(int))
-		return;
 
-	auto newRoomId = static_cast<EnSpaceRoomId>(*static_cast<int*>(msgData._payload));
-
-	for (int i = ESRI_Off; i < ESRI_Max; i++)
+	switch (objectId)
 	{
-		if (m_roomIdButtons.count(i) == 0)
-			jassertfalse;
-		else
+	case ROI_MatrixSettings_ReverbRoomId:
 		{
-			auto shouldBeOn = (newRoomId == i);
+			if (msgData._valType != ROVT_INT)
+				return;
+			if (msgData._payloadSize != sizeof(int))
+				return;
 
-			if (m_roomIdButtons.at(i))
-				m_roomIdButtons.at(i)->setToggleState(shouldBeOn, dontSendNotification);
+			auto newRoomId = *static_cast<int*>(msgData._payload);
+			auto rriR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixSettings_ReverbRoomId);
+			newRoomId = jlimit(static_cast<int>(rriR.getStart()), static_cast<int>(rriR.getEnd()), newRoomId);
+
+			for (int i = ESRI_Off; i < ESRI_Max; i++)
+			{
+				if (m_roomIdButtons.count(i) == 0)
+					jassertfalse;
+				else
+				{
+					auto shouldBeOn = (newRoomId == i);
+
+					if (m_roomIdButtons.at(i))
+						m_roomIdButtons.at(i)->setToggleState(shouldBeOn, dontSendNotification);
+				}
+			}
 		}
+		break;
+	case ROI_MatrixSettings_ReverbPredelayFactor:
+		{
+		if (msgData._valType != ROVT_FLOAT)
+			return;
+		if (msgData._payloadSize != sizeof(float))
+			return;
+
+		auto newPreDelayFactor = *static_cast<float*>(msgData._payload);
+		auto rpfR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixSettings_ReverbPredelayFactor);
+		newPreDelayFactor = jlimit(static_cast<float>(rpfR.getStart()), static_cast<float>(rpfR.getEnd()), newPreDelayFactor);
+
+		if (m_preDelayFactorSlider)
+			m_preDelayFactorSlider->setValue(newPreDelayFactor);
+		}
+		break;
+	case ROI_MatrixSettings_ReverbRearLevel:
+		{
+		if (msgData._valType != ROVT_FLOAT)
+			return;
+		if (msgData._payloadSize != sizeof(float))
+			return;
+
+		auto newReverbRearLevel = *static_cast<float*>(msgData._payload);
+		auto rrLR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixSettings_ReverbRearLevel);
+		newReverbRearLevel = jlimit(static_cast<float>(rrLR.getStart()), static_cast<float>(rrLR.getEnd()), newReverbRearLevel);
+
+		if (m_rearLevelSlider)
+			m_rearLevelSlider->setValue(newReverbRearLevel);
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+/**
+ * Reimplemented to both trigger the base implementation and also send pending slider value changes.
+ * @param	init	True if this update is an initial one, false if it is a regular
+ */
+void EnSpacePageComponent::UpdateGui(bool init)
+{
+	StandalonePollingPageComponentBase::UpdateGui(init);
+
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
+	if (m_preDelayFactorChangePending && m_preDelayFactorSlider)
+	{
+		auto pdfVal = static_cast<float>(m_preDelayFactorSlider->getValue());
+
+		RemoteObjectMessageData romd;
+		romd._valType = ROVT_FLOAT;
+		romd._valCount = 1;
+		romd._payloadOwned = false;
+		romd._payloadSize = sizeof(float);
+		romd._payload = &pdfVal;
+		ctrl->SendMessageDataDirect(ROI_MatrixSettings_ReverbPredelayFactor, romd);
+
+		m_preDelayFactorChangePending = false;
+	}
+	
+	if (m_rearLevelChangePending && m_rearLevelSlider)
+	{
+		auto rlVal = static_cast<float>(m_rearLevelSlider->getValue());
+
+		RemoteObjectMessageData romd;
+		romd._valType = ROVT_FLOAT;
+		romd._valCount = 1;
+		romd._payloadOwned = false;
+		romd._payloadSize = sizeof(float);
+		romd._payload = &rlVal;
+		ctrl->SendMessageDataDirect(ROI_MatrixSettings_ReverbRearLevel, romd);
+
+		m_rearLevelChangePending = false;
 	}
 }
 

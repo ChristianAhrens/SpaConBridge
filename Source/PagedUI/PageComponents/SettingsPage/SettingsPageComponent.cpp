@@ -158,14 +158,14 @@ void SettingsPageComponent::resized()
 		m_settingsComponent->setBounds(bounds);
 		m_settingsViewport->setBounds(bounds);
 
-		if (m_settingsViewport->isVerticalScrollBarShown() || m_settingsViewport->isHorizontalScrollBarShown())
+		if (m_settingsViewport->canScrollVertically() || m_settingsViewport->canScrollHorizontally())
 		{
 			auto boundsWithoutScrollbars = bounds;
 
-			if (m_settingsViewport->isVerticalScrollBarShown())
+			if (m_settingsViewport->canScrollVertically())
 				boundsWithoutScrollbars.setWidth(bounds.getWidth() - m_settingsViewport->getVerticalScrollBar().getWidth());
 
-			if (m_settingsViewport->isHorizontalScrollBarShown())
+			if (m_settingsViewport->canScrollHorizontally())
 				boundsWithoutScrollbars.setHeight(bounds.getHeight() - m_settingsViewport->getHorizontalScrollBar().getHeight());
 
 			m_settingsComponent->setBounds(boundsWithoutScrollbars);

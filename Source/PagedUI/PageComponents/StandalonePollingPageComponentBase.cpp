@@ -39,8 +39,11 @@ StandalonePollingPageComponentBase::StandalonePollingPageComponentBase(PageCompo
 	: PageComponentBase(type)
 {
 	m_elementsContainer = std::make_unique<HeaderWithElmListComponent>();
+	m_borderedElementsContainer = std::make_unique<BorderedComponentContainer>();
+	m_borderedElementsContainer->SetComponent(m_elementsContainer.get());
+	m_borderedElementsContainer->SetBorder(3);
 	m_elementsContainerViewport = std::make_unique<Viewport>();
-	m_elementsContainerViewport->setViewedComponent(m_elementsContainer.get(), false);
+	m_elementsContainerViewport->setViewedComponent(m_borderedElementsContainer.get(), false);
 	addAndMakeVisible(m_elementsContainerViewport.get());
 
 	auto ctrl = SpaConBridge::Controller::GetInstance();
@@ -85,32 +88,30 @@ void StandalonePollingPageComponentBase::resized()
 	if (m_elementsContainerViewport)
 		m_elementsContainerViewport->setBounds(bounds);
 
-	auto minWidth = HeaderWithElmListComponent::m_attachedItemWidth + HeaderWithElmListComponent::m_layoutItemWidth;
-	auto minHeight = m_elementsContainer->getHeight();
+	auto minWidth = HeaderWithElmListComponent::m_attachedItemWidth + HeaderWithElmListComponent::m_layoutItemWidth + 2 * m_borderedElementsContainer->GetBorder();
+	auto minHeight = m_borderedElementsContainer->GetBorderedHeight();
 
 	if (bounds.getWidth() < minWidth)
 		bounds.setWidth(minWidth);
 	if (bounds.getHeight() < minHeight)
 		bounds.setHeight(minHeight);
 
-	if (m_elementsContainer && m_elementsContainerViewport)
+	if (m_borderedElementsContainer && m_elementsContainerViewport)
 	{
-		bounds = bounds.reduced(5);
-
-		if (m_elementsContainerViewport->isVerticalScrollBarShown() || m_elementsContainerViewport->isHorizontalScrollBarShown())
+		if (m_elementsContainerViewport->canScrollVertically() || m_elementsContainerViewport->canScrollHorizontally())
 		{
 			auto boundsWithoutScrollbars = bounds;
 
-			if (m_elementsContainerViewport->isVerticalScrollBarShown())
+			if (m_elementsContainerViewport->canScrollVertically())
 				boundsWithoutScrollbars.setWidth(bounds.getWidth() - m_elementsContainerViewport->getVerticalScrollBar().getWidth());
 
-			if (m_elementsContainerViewport->isHorizontalScrollBarShown())
+			if (m_elementsContainerViewport->canScrollHorizontally())
 				boundsWithoutScrollbars.setHeight(bounds.getHeight() - m_elementsContainerViewport->getHorizontalScrollBar().getHeight());
 
-			m_elementsContainer->setBounds(boundsWithoutScrollbars);
+			m_borderedElementsContainer->setBounds(boundsWithoutScrollbars);
 		}
 		else
-			m_elementsContainer->setBounds(bounds);
+			m_borderedElementsContainer->setBounds(bounds);
 	}
 }
 

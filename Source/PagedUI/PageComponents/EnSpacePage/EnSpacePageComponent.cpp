@@ -20,6 +20,7 @@
 #include "EnSpacePageComponent.h"
 
 #include "../../../Controller.h"
+#include "../../../LookAndFeel.h"
 
 
 namespace SpaConBridge
@@ -250,6 +251,23 @@ void EnSpacePageComponent::HandleObjectDataInternal(RemoteObjectIdentifier objec
 	default:
 		break;
 	}
+}
+
+/**
+ * Reimplemented from component to change slider track colours.
+ */
+void EnSpacePageComponent::lookAndFeelChanged()
+{
+	Component::lookAndFeelChanged();
+
+	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (!dblookAndFeel)
+		return;
+
+	if (m_preDelayFactorSlider)
+		m_preDelayFactorSlider->setColour(Slider::trackColourId, dblookAndFeel->GetDbColor(DbLookAndFeelBase::DarkColor).darker());
+	if (m_rearLevelSlider)
+		m_rearLevelSlider->setColour(Slider::trackColourId, dblookAndFeel->GetDbColor(DbLookAndFeelBase::DarkColor).darker());
 }
 
 /**

@@ -66,6 +66,9 @@ public:
 	//==========================================================================
 	void sliderValueChanged(Slider* slider) override;
 
+	//==========================================================================
+	void lookAndFeelChanged() override;
+
 protected:
 	void HandleObjectDataInternal(RemoteObjectIdentifier objectId, const RemoteObjectMessageData& msgData) override;
 

@@ -27,6 +27,51 @@ namespace SpaConBridge
 
 
 /**
+ * Helper class to allow horizontal layouting of child components
+ * and use the instance of this class as a single component embedded
+ * in other layouts.
+ */
+class HorizontalComponentLayouter : public Component
+{
+public:
+	void AddComponent(Component* compo)
+	{
+		addAndMakeVisible(compo);
+		m_layoutComponents.push_back(compo);
+	}
+	bool RemoveComponent(Component* compo)
+	{
+		auto iter = std::find(m_layoutComponents.begin(), m_layoutComponents.end(), compo);
+		if (iter == m_layoutComponents.end())
+			return false;
+
+		removeChildComponent(compo);
+		m_layoutComponents.erase(iter);
+		return true;
+	}
+	void SetSpacing(int spacing)
+	{
+		m_spacing = spacing;
+	}
+	void resized() override
+	{
+		FlexBox fb;
+		fb.flexDirection = FlexBox::Direction::row;
+		auto compoCnt = m_layoutComponents.size();
+		for (int i = 0; i < compoCnt; i++)
+		{
+			fb.items.add(FlexItem(*m_layoutComponents.at(i)).withFlex(1));
+			if (i < compoCnt - 1)
+				fb.items.add(FlexItem().withWidth(static_cast<float>(m_spacing)));
+		}
+		fb.performLayout(getLocalBounds().toFloat());
+	}
+
+	std::vector<Component*>	m_layoutComponents;
+	int m_spacing{ 0 };
+};
+
+/**
  * HeaderWithElmListComponent is a component to hold a header component with multiple other components in a specific layout.
  */
 class HeaderWithElmListComponent : public Component

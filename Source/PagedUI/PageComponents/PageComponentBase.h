@@ -45,7 +45,9 @@ public:
         PCT_MatrixIOs,
 		PCT_Settings,
 		PCT_Statistics,
-		PCT_About
+		PCT_About,
+		PCT_Scenes,
+		PCT_EnSpace,
 	};
 
 	explicit PageComponentBase(PageComponentType type);

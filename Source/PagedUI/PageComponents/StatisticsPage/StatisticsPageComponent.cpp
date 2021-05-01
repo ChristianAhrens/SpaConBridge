@@ -128,7 +128,7 @@ void StatisticsPageComponent::onConfigUpdated()
  * @param objectId	The remote object id of the object that was received
  * @param msgData	The actual message data that was received
  */
-void StatisticsPageComponent::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier Id, const RemoteObjectMessageData& msgData)
+void StatisticsPageComponent::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier objectId, const RemoteObjectMessageData& msgData)
 {
 	if (nodeId != DEFAULT_PROCNODE_ID)
 		return;
@@ -174,7 +174,7 @@ void StatisticsPageComponent::HandleMessageData(NodeId nodeId, ProtocolId sender
 	m_plotComponent->IncreaseCount(bridgingProtocol);
 	
 	// add message data to logging component
-	m_logComponent->AddMessageData(logSource, Id, msgData);
+	m_logComponent->AddMessageData(logSource, objectId, msgData);
 }
 
 

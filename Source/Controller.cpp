@@ -1114,9 +1114,6 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 						case RemoteObjectValueType::ROVT_FLOAT:
 							newValue = static_cast<float*>(msgData._payload)[0];
 							break;
-						case RemoteObjectValueType::ROVT_STRING:
-							newValue = std::stof(std::string(static_cast<char*>(msgData._payload)));
-							break;
 						case RemoteObjectValueType::ROVT_NONE:
 						default:
 							newValue = 0.0f;
@@ -1154,9 +1151,6 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 					case RemoteObjectValueType::ROVT_FLOAT:
 						newValue = static_cast<float*>(msgData._payload)[0];
 						break;
-					case RemoteObjectValueType::ROVT_STRING:
-						newValue = std::stof(std::string(static_cast<char*>(msgData._payload)));
-						break;
 					case RemoteObjectValueType::ROVT_NONE:
 					default:
 						newValue = 0.0f;
@@ -1193,9 +1187,6 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 					case RemoteObjectValueType::ROVT_FLOAT:
 						newValue = static_cast<float*>(msgData._payload)[0];
 						break;
-					case RemoteObjectValueType::ROVT_STRING:
-						newValue = std::stof(std::string(static_cast<char*>(msgData._payload)));
-						break;
 					case RemoteObjectValueType::ROVT_NONE:
 					default:
 						newValue = 0.0f;
@@ -1208,6 +1199,17 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 		}
 	}
 
+}
+
+/**
+ * Proxy method to allow direct access to bridging module message sending method.
+ * @param	Id		The remote object identifier of the message to be sent.
+ * @param	msgData	The message data incl. addressing to be sent.
+ * @return	True on success, false on sending failure.
+ */
+bool Controller::SendMessageDataDirect(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData)
+{
+	return m_protocolBridge.SendMessage(Id, msgData);
 }
 
 /**

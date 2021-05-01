@@ -95,6 +95,7 @@ ScenesPageComponent::ScenesPageComponent()
 	}
 	m_sceneCommentEdit = std::make_unique<TextEditor>();
 	m_sceneCommentEdit->setReadOnly(true);
+	m_sceneCommentEdit->setMultiLine(true, true);
 	m_sceneCommentLabel = std::make_unique<Label>();
 	m_sceneCommentLabel->setJustificationType(Justification::centredTop);
 	m_sceneCommentLabel->setText("Comment", dontSendNotification);

@@ -71,8 +71,10 @@ ScenesPageComponent::ScenesPageComponent()
 	if (GetElementsContainer())
 		GetElementsContainer()->addComponent(m_recallIdxLayoutContainer.get(), true, false);
 
+	m_sceneIndexFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(6, "1234567890,");
 	m_sceneIndexEdit = std::make_unique<TextEditor>();
 	m_sceneIndexEdit->addListener(this);
+	m_sceneIndexEdit->setInputFilter(m_sceneIndexFilter.get(), false);
 	m_recallIdxLayoutContainer->AddComponent(m_sceneIndexEdit.get());
 	m_recallButton = std::make_unique<TextButton>();
 	m_recallButton->setButtonText("Recall");
@@ -151,6 +153,66 @@ void ScenesPageComponent::buttonClicked(Button* button)
 		romd._payloadSize = 2 * sizeof(int);
 		romd._payload = &dualIntValue;
 		ctrl->SendMessageDataDirect(ROI_Scene_Recall, romd);
+
+		m_sceneIndexChangePending = false;
+	}
+}
+
+/**
+ * Reimplemented to handle text editor changes.
+ * @param	textEdit	The text editor whose text was changed.
+ */
+void ScenesPageComponent::textEditorTextChanged(TextEditor& textEdit)
+{
+	if (m_sceneIndexEdit && m_sceneIndexEdit.get() == &textEdit)
+	{
+		DBG(String(__FUNCTION__));
+		m_sceneIndexChangePending = true;
+	}
+}
+
+/**
+ * Reimplemented to handle text editor return key presses.
+ * @param	textEdit	The text editor that the return key was pressed on.
+ */
+void ScenesPageComponent::textEditorReturnKeyPressed(TextEditor& textEdit)
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
+	if (m_sceneIndexEdit && m_sceneIndexEdit.get() == &textEdit)
+	{
+		auto sceneIndexFloat = m_sceneIndexEdit->getText().getFloatValue();
+		auto sceneIndexCent = static_cast<int>(sceneIndexFloat * 100);
+		auto sceneIndexMajor = sceneIndexCent / 100;
+		auto sceneIndexMinor = sceneIndexCent - (sceneIndexMajor * 100);
+
+		int dualIntValue[2];
+		dualIntValue[0] = sceneIndexMajor;
+		dualIntValue[1] = sceneIndexMinor;
+
+		RemoteObjectMessageData romd;
+		romd._valType = ROVT_INT;
+		romd._valCount = 2;
+		romd._payloadOwned = false;
+		romd._payloadSize = 2 * sizeof(int);
+		romd._payload = &dualIntValue;
+		ctrl->SendMessageDataDirect(ROI_Scene_Recall, romd);
+		
+		m_sceneIndexChangePending = false;
+	}
+}
+
+/**
+ * Reimplemented to handle text editor escape key presses.
+ * @param	textEdit	The text editor that the excape key was pressed on.
+ */
+void ScenesPageComponent::textEditorEscapeKeyPressed(TextEditor& textEdit)
+{
+	if (m_sceneIndexEdit && m_sceneIndexEdit.get() == &textEdit)
+	{
+		m_sceneIndexChangePending = false;
 	}
 }
 
@@ -171,13 +233,16 @@ void ScenesPageComponent::HandleObjectDataInternal(RemoteObjectIdentifier object
 		switch (objectId)
 		{
 		case ROI_Scene_SceneIndex:
-			m_sceneIndexEdit->setText(remoteObjectContentString);
+			if (m_sceneIndexEdit && !m_sceneIndexChangePending)
+				m_sceneIndexEdit->setText(remoteObjectContentString, dontSendNotification);
 			break;
 		case ROI_Scene_SceneName:
-			m_sceneNameEdit->setText(remoteObjectContentString);
+			if (m_sceneNameEdit)
+				m_sceneNameEdit->setText(remoteObjectContentString);
 			break;
 		case ROI_Scene_SceneComment:
-			m_sceneCommentEdit->setText(remoteObjectContentString);
+			if (m_sceneCommentEdit)
+				m_sceneCommentEdit->setText(remoteObjectContentString);
 			break;
 		default:
 			break;

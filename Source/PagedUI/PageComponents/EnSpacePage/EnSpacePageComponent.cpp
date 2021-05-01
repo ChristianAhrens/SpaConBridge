@@ -220,6 +220,8 @@ void EnSpacePageComponent::HandleObjectDataInternal(RemoteObjectIdentifier objec
 		break;
 	case ROI_MatrixSettings_ReverbPredelayFactor:
 		{
+		if (m_preDelayFactorChangePending)
+			return;
 		if (msgData._valType != ROVT_FLOAT)
 			return;
 		if (msgData._payloadSize != sizeof(float))
@@ -235,6 +237,8 @@ void EnSpacePageComponent::HandleObjectDataInternal(RemoteObjectIdentifier objec
 		break;
 	case ROI_MatrixSettings_ReverbRearLevel:
 		{
+		if (m_rearLevelChangePending)
+			return;
 		if (msgData._valType != ROVT_FLOAT)
 			return;
 		if (msgData._payloadSize != sizeof(float))

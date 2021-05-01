@@ -89,6 +89,11 @@ public:
 	void buttonClicked(Button* button) override;
 
 	//==========================================================================
+	void textEditorTextChanged(TextEditor& textEdit) override;
+	void textEditorReturnKeyPressed(TextEditor& textEdit) override;
+	void textEditorEscapeKeyPressed(TextEditor& textEdit) override;
+
+	//==========================================================================
 	void lookAndFeelChanged() override;
 
 protected:
@@ -99,15 +104,18 @@ private:
 	std::unique_ptr<JUCEAppBasics::TextWithImageButton>	m_previousButton;
 	std::unique_ptr<JUCEAppBasics::TextWithImageButton>	m_nextButton;
 	
-	std::unique_ptr<HorizontalComponentLayouter>		m_recallIdxLayoutContainer;
-	std::unique_ptr<TextButton>							m_recallButton;
-	std::unique_ptr<Label>								m_sceneIndexLabel;
-	std::unique_ptr<TextEditor>							m_sceneIndexEdit;
+	std::unique_ptr<HorizontalComponentLayouter>				m_recallIdxLayoutContainer;
+	std::unique_ptr<TextButton>									m_recallButton;
+	std::unique_ptr<Label>										m_sceneIndexLabel;
+	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_sceneIndexFilter;
+	std::unique_ptr<TextEditor>									m_sceneIndexEdit;
 	
-	std::unique_ptr<Label>								m_sceneNameLabel;
-	std::unique_ptr<TextEditor>							m_sceneNameEdit;
-	std::unique_ptr<Label>								m_sceneCommentLabel;
-	std::unique_ptr<TextEditor>							m_sceneCommentEdit;
+	std::unique_ptr<Label>		m_sceneNameLabel;
+	std::unique_ptr<TextEditor>	m_sceneNameEdit;
+	std::unique_ptr<Label>		m_sceneCommentLabel;
+	std::unique_ptr<TextEditor>	m_sceneCommentEdit;
+
+	bool m_sceneIndexChangePending{ false };
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ScenesPageComponent)
 };

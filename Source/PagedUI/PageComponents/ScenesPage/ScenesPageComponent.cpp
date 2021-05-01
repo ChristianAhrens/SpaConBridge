@@ -71,7 +71,7 @@ ScenesPageComponent::ScenesPageComponent()
 	if (GetElementsContainer())
 		GetElementsContainer()->addComponent(m_recallIdxLayoutContainer.get(), true, false);
 
-	m_sceneIndexFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(6, "1234567890,");
+	m_sceneIndexFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(6, "1234567890.");
 	m_sceneIndexEdit = std::make_unique<TextEditor>();
 	m_sceneIndexEdit->addListener(this);
 	m_sceneIndexEdit->setInputFilter(m_sceneIndexFilter.get(), false);

@@ -82,12 +82,26 @@ ScenesPageComponent::ScenesPageComponent()
 	// scene name and comment as full-width elements, comment with special height
 	m_sceneNameEdit = std::make_unique<TextEditor>();
 	m_sceneNameEdit->setReadOnly(true);
+	m_sceneNameLabel = std::make_unique<Label>();
+	m_sceneNameLabel->setJustificationType(Justification::centred);
+	m_sceneNameLabel->setText("Name", dontSendNotification);
+	m_sceneNameLabel->attachToComponent(m_sceneNameEdit.get(), true);
 	if (GetElementsContainer())
+	{
+		GetElementsContainer()->addComponent(m_sceneNameLabel.get(), false, false);
 		GetElementsContainer()->addComponent(m_sceneNameEdit.get(), true, false);
+	}
 	m_sceneCommentEdit = std::make_unique<TextEditor>();
 	m_sceneCommentEdit->setReadOnly(true);
+	m_sceneCommentLabel = std::make_unique<Label>();
+	m_sceneCommentLabel->setJustificationType(Justification::centredTop);
+	m_sceneCommentLabel->setText("Comment", dontSendNotification);
+	m_sceneCommentLabel->attachToComponent(m_sceneCommentEdit.get(), true);
 	if (GetElementsContainer())
+	{
+		GetElementsContainer()->addComponent(m_sceneCommentLabel.get(), false, false);
 		GetElementsContainer()->addComponent(m_sceneCommentEdit.get(), true, false, 3);
+	}
 
 	lookAndFeelChanged();
 }

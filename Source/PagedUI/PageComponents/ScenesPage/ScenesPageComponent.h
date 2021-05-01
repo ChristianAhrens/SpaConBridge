@@ -101,9 +101,12 @@ private:
 	
 	std::unique_ptr<HorizontalComponentLayouter>		m_recallIdxLayoutContainer;
 	std::unique_ptr<TextButton>							m_recallButton;
+	std::unique_ptr<Label>								m_sceneIndexLabel;
 	std::unique_ptr<TextEditor>							m_sceneIndexEdit;
 	
+	std::unique_ptr<Label>								m_sceneNameLabel;
 	std::unique_ptr<TextEditor>							m_sceneNameEdit;
+	std::unique_ptr<Label>								m_sceneCommentLabel;
 	std::unique_ptr<TextEditor>							m_sceneCommentEdit;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ScenesPageComponent)

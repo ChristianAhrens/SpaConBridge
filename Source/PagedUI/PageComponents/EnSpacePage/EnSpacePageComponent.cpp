@@ -220,14 +220,20 @@ void EnSpacePageComponent::HandleObjectDataInternal(RemoteObjectIdentifier objec
 		break;
 	case ROI_MatrixSettings_ReverbPredelayFactor:
 		{
-		if (m_preDelayFactorChangePending)
-			return;
 		if (msgData._valType != ROVT_FLOAT)
 			return;
 		if (msgData._payloadSize != sizeof(float))
 			return;
 
 		auto newPreDelayFactor = *static_cast<float*>(msgData._payload);
+
+		if (m_preDelayFactorChangePending)
+		{
+			if (m_preDelayFactorChange == newPreDelayFactor)
+				m_preDelayFactorChangePending = false;
+			return;
+		}
+
 		auto rpfR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixSettings_ReverbPredelayFactor);
 		newPreDelayFactor = jlimit(static_cast<float>(rpfR.getStart()), static_cast<float>(rpfR.getEnd()), newPreDelayFactor);
 
@@ -237,14 +243,20 @@ void EnSpacePageComponent::HandleObjectDataInternal(RemoteObjectIdentifier objec
 		break;
 	case ROI_MatrixSettings_ReverbRearLevel:
 		{
-		if (m_rearLevelChangePending)
-			return;
 		if (msgData._valType != ROVT_FLOAT)
 			return;
 		if (msgData._payloadSize != sizeof(float))
 			return;
 
 		auto newReverbRearLevel = *static_cast<float*>(msgData._payload);
+
+		if (m_rearLevelChangePending)
+		{
+			if (m_rearLevelChange == newReverbRearLevel)
+				m_rearLevelChangePending = false;
+			return;
+		}
+
 		auto rrLR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixSettings_ReverbRearLevel);
 		newReverbRearLevel = jlimit(static_cast<float>(rrLR.getStart()), static_cast<float>(rrLR.getEnd()), newReverbRearLevel);
 
@@ -290,30 +302,36 @@ void EnSpacePageComponent::UpdateGui(bool init)
 	{
 		auto pdfVal = static_cast<float>(m_preDelayFactorSlider->getValue());
 
-		RemoteObjectMessageData romd;
-		romd._valType = ROVT_FLOAT;
-		romd._valCount = 1;
-		romd._payloadOwned = false;
-		romd._payloadSize = sizeof(float);
-		romd._payload = &pdfVal;
-		ctrl->SendMessageDataDirect(ROI_MatrixSettings_ReverbPredelayFactor, romd);
+		if (m_preDelayFactorChange != pdfVal)
+		{
+			m_preDelayFactorChange = pdfVal;
 
-		m_preDelayFactorChangePending = false;
+			RemoteObjectMessageData romd;
+			romd._valType = ROVT_FLOAT;
+			romd._valCount = 1;
+			romd._payloadOwned = false;
+			romd._payloadSize = sizeof(float);
+			romd._payload = &m_preDelayFactorChange;
+			ctrl->SendMessageDataDirect(ROI_MatrixSettings_ReverbPredelayFactor, romd);
+		}
 	}
 	
 	if (m_rearLevelChangePending && m_rearLevelSlider)
 	{
 		auto rlVal = static_cast<float>(m_rearLevelSlider->getValue());
 
-		RemoteObjectMessageData romd;
-		romd._valType = ROVT_FLOAT;
-		romd._valCount = 1;
-		romd._payloadOwned = false;
-		romd._payloadSize = sizeof(float);
-		romd._payload = &rlVal;
-		ctrl->SendMessageDataDirect(ROI_MatrixSettings_ReverbRearLevel, romd);
+		if (m_rearLevelChange != rlVal)
+		{
+			m_rearLevelChange = rlVal;
 
-		m_rearLevelChangePending = false;
+			RemoteObjectMessageData romd;
+			romd._valType = ROVT_FLOAT;
+			romd._valCount = 1;
+			romd._payloadOwned = false;
+			romd._payloadSize = sizeof(float);
+			romd._payload = &m_rearLevelChange;
+			ctrl->SendMessageDataDirect(ROI_MatrixSettings_ReverbRearLevel, romd);
+		}
 	}
 }
 

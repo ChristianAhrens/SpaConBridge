@@ -81,7 +81,9 @@ private:
 	std::unique_ptr<Slider>	m_rearLevelSlider;
 
 	bool m_preDelayFactorChangePending{ false };
+	float m_preDelayFactorChange{ 0.0f };
 	bool m_rearLevelChangePending{ false };
+	float m_rearLevelChange{ 0.0f };
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EnSpacePageComponent)
 };

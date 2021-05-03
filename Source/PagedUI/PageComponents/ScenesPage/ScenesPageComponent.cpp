@@ -147,6 +147,8 @@ void ScenesPageComponent::buttonClicked(Button* button)
 		dualIntValue[0] = sceneIndexMajor;
 		dualIntValue[1] = sceneIndexMinor;
 
+		m_sceneIndexChange = std::make_pair(sceneIndexMajor, sceneIndexMinor);
+
 		RemoteObjectMessageData romd;
 		romd._valType = ROVT_INT;
 		romd._valCount = 2;
@@ -155,7 +157,7 @@ void ScenesPageComponent::buttonClicked(Button* button)
 		romd._payload = &dualIntValue;
 		ctrl->SendMessageDataDirect(ROI_Scene_Recall, romd);
 
-		m_sceneIndexChangePending = false;
+		m_sceneIndexChangePending = true;
 	}
 }
 
@@ -167,7 +169,6 @@ void ScenesPageComponent::textEditorTextChanged(TextEditor& textEdit)
 {
 	if (m_sceneIndexEdit && m_sceneIndexEdit.get() == &textEdit)
 	{
-		DBG(String(__FUNCTION__));
 		m_sceneIndexChangePending = true;
 	}
 }
@@ -193,6 +194,8 @@ void ScenesPageComponent::textEditorReturnKeyPressed(TextEditor& textEdit)
 		dualIntValue[0] = sceneIndexMajor;
 		dualIntValue[1] = sceneIndexMinor;
 
+		m_sceneIndexChange = std::make_pair(sceneIndexMajor, sceneIndexMinor);
+
 		RemoteObjectMessageData romd;
 		romd._valType = ROVT_INT;
 		romd._valCount = 2;
@@ -201,7 +204,7 @@ void ScenesPageComponent::textEditorReturnKeyPressed(TextEditor& textEdit)
 		romd._payload = &dualIntValue;
 		ctrl->SendMessageDataDirect(ROI_Scene_Recall, romd);
 		
-		m_sceneIndexChangePending = false;
+		m_sceneIndexChangePending = true;
 	}
 }
 
@@ -234,9 +237,23 @@ void ScenesPageComponent::HandleObjectDataInternal(RemoteObjectIdentifier object
 		switch (objectId)
 		{
 		case ROI_Scene_SceneIndex:
-			if (m_sceneIndexEdit && !m_sceneIndexChangePending)
+			{
+			auto sceneIndexFloat = remoteObjectContentString.getFloatValue();
+			auto sceneIndexCent = static_cast<int>(sceneIndexFloat * 100);
+			auto sceneIndexMajor = sceneIndexCent / 100;
+			auto sceneIndexMinor = sceneIndexCent - (sceneIndexMajor * 100);
+
+			if (m_sceneIndexChangePending)
+			{
+				if (m_sceneIndexChange.first == sceneIndexMajor && m_sceneIndexChange.second == sceneIndexMinor)
+					m_sceneIndexChangePending = false;
+				break;
+			}
+
+			if (m_sceneIndexEdit)
 				m_sceneIndexEdit->setText(remoteObjectContentString, dontSendNotification);
 			break;
+			}
 		case ROI_Scene_SceneName:
 			if (m_sceneNameEdit)
 				m_sceneNameEdit->setText(remoteObjectContentString);

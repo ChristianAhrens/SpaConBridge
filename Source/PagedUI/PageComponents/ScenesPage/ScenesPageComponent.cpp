@@ -107,6 +107,8 @@ ScenesPageComponent::ScenesPageComponent()
 	}
 
 	lookAndFeelChanged();
+
+	resized();
 }
 
 /**

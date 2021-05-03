@@ -86,6 +86,10 @@ EnSpacePageComponent::EnSpacePageComponent()
 		GetElementsContainer()->addComponent(m_rearLevelLabel.get(), false, false);
 		GetElementsContainer()->addComponent(m_rearLevelSlider.get(), true, false);
 	}
+
+	lookAndFeelChanged();
+
+	resized();
 }
 
 /**

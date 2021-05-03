@@ -70,7 +70,8 @@ private:
 	std::unique_ptr<Label>		m_sceneCommentLabel;
 	std::unique_ptr<TextEditor>	m_sceneCommentEdit;
 
-	bool m_sceneIndexChangePending{ false };
+	bool				m_sceneIndexChangePending{ false };
+	std::pair<int, int> m_sceneIndexChange{ 0, 0 };
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ScenesPageComponent)
 };

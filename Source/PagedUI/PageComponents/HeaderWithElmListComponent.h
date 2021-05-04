@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "../../../SpaConBridgeCommon.h"
+#include "../../SpaConBridgeCommon.h"
 
 
 namespace SpaConBridge
@@ -27,18 +27,79 @@ namespace SpaConBridge
 
 
 /**
+ * Helper class to allow horizontal layouting of child components
+ * and use the instance of this class as a single component embedded
+ * in other layouts.
+ */
+class HorizontalComponentLayouter : public Component
+{
+public:
+	void AddComponent(Component* compo)
+	{
+		addAndMakeVisible(compo);
+		m_layoutComponents.push_back(compo);
+	}
+	bool RemoveComponent(Component* compo)
+	{
+		auto iter = std::find(m_layoutComponents.begin(), m_layoutComponents.end(), compo);
+		if (iter == m_layoutComponents.end())
+			return false;
+
+		removeChildComponent(compo);
+		m_layoutComponents.erase(iter);
+		return true;
+	}
+	void SetSpacing(int spacing)
+	{
+		m_spacing = spacing;
+	}
+	void resized() override
+	{
+		FlexBox fb;
+		fb.flexDirection = FlexBox::Direction::row;
+		auto compoCnt = m_layoutComponents.size();
+		for (int i = 0; i < compoCnt; i++)
+		{
+			fb.items.add(FlexItem(*m_layoutComponents.at(i)).withFlex(1));
+			if (i < compoCnt - 1)
+				fb.items.add(FlexItem().withWidth(static_cast<float>(m_spacing)));
+		}
+		fb.performLayout(getLocalBounds().toFloat());
+	}
+
+	std::vector<Component*>	m_layoutComponents;
+	int m_spacing{ 0 };
+};
+
+/**
  * HeaderWithElmListComponent is a component to hold a header component with multiple other components in a specific layout.
  */
 class HeaderWithElmListComponent : public Component
 {
+public:
+	struct LayoutingMetadata
+	{
+		LayoutingMetadata(bool includeInLayout, bool takeOwnership, int verticalSpan)
+		{
+			_includeInLayout = includeInLayout;
+			_takeOwnership = takeOwnership;
+			_verticalSpan = verticalSpan;
+		}
+
+		bool	_includeInLayout;
+		bool	_takeOwnership;
+		int		_verticalSpan;
+	};
+
 public:
 	HeaderWithElmListComponent(const String& componentName = String());
 	~HeaderWithElmListComponent() override;
 
 	//==============================================================================
 	void setHasActiveToggle(bool hasActiveToggle);
+	void setActiveToggleText(String activeToggleText);
 	void setHeaderText(String headerText);
-	void addComponent(Component* compo, bool includeInLayout = true, bool takeOwnership = true);
+	void addComponent(Component* compo, bool includeInLayout = true, bool takeOwnership = true, int verticalSpan = 1);
 	void setToggleActiveState(bool toggleState);
 	
 	void onToggleActive();
@@ -66,14 +127,14 @@ protected:
 
 private:
 	//==============================================================================
-	bool																		m_hasActiveToggle{ false };
-	bool																		m_toggleState{ true };
-	std::unique_ptr<ToggleButton>												m_activeToggle;
-	std::unique_ptr<Label>														m_activeToggleLabel;
-	std::unique_ptr<Label>														m_headerLabel;
-	std::unique_ptr<DrawableButton>												m_helpButton;
-	std::unique_ptr<URL>														m_helpUrl;
-	std::vector<std::pair<std::unique_ptr<Component>, std::pair<bool, bool>>>	m_components;
+	bool																	m_hasActiveToggle{ false };
+	bool																	m_toggleState{ true };
+	std::unique_ptr<ToggleButton>											m_activeToggle;
+	std::unique_ptr<Label>													m_activeToggleLabel;
+	std::unique_ptr<Label>													m_headerLabel;
+	std::unique_ptr<DrawableButton>											m_helpButton;
+	std::unique_ptr<URL>													m_helpUrl;
+	std::vector<std::pair<std::unique_ptr<Component>, LayoutingMetadata>>	m_components;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HeaderWithElmListComponent)
 };

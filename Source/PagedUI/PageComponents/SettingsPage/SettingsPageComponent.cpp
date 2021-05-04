@@ -110,7 +110,7 @@ void SettingsPageComponent::paint(Graphics& g)
 {
 	// Paint background to cover the controls behind this overlay.
 	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
-	g.fillRect(Rectangle<int>(0, 0, getLocalBounds().getWidth(), getLocalBounds().getHeight()));
+	g.fillRect(getLocalBounds());
 }
 
 /**
@@ -158,14 +158,14 @@ void SettingsPageComponent::resized()
 		m_settingsComponent->setBounds(bounds);
 		m_settingsViewport->setBounds(bounds);
 
-		if (m_settingsViewport->isVerticalScrollBarShown() || m_settingsViewport->isHorizontalScrollBarShown())
+		if (m_settingsViewport->canScrollVertically() || m_settingsViewport->canScrollHorizontally())
 		{
 			auto boundsWithoutScrollbars = bounds;
 
-			if (m_settingsViewport->isVerticalScrollBarShown())
+			if (m_settingsViewport->canScrollVertically())
 				boundsWithoutScrollbars.setWidth(bounds.getWidth() - m_settingsViewport->getVerticalScrollBar().getWidth());
 
-			if (m_settingsViewport->isHorizontalScrollBarShown())
+			if (m_settingsViewport->canScrollHorizontally())
 				boundsWithoutScrollbars.setHeight(bounds.getHeight() - m_settingsViewport->getHorizontalScrollBar().getHeight());
 
 			m_settingsComponent->setBounds(boundsWithoutScrollbars);
@@ -313,7 +313,7 @@ void SettingsPageComponent::onLoadConfigClicked()
 {
     // create the file chooser dialog
 	FileChooser chooser("Select a " + JUCEApplication::getInstance()->getApplicationName() + " config file to load...",
-		File::getSpecialLocation(File::userDocumentsDirectory)); // all filepatterns are allowed for loading (currently seems to not work on iOS and not be regarded on macOS at all)
+		File::getSpecialLocation(File::userDocumentsDirectory), String(), true, false, this); // all filepatterns are allowed for loading (currently seems to not work on iOS and not be regarded on macOS at all)
     // and trigger opening it
 	if (chooser.browseForFileToOpen())
 	{
@@ -338,7 +338,7 @@ void SettingsPageComponent::onSaveConfigClicked()
     
     // create the file chooser dialog
 	FileChooser chooser("Save current " + JUCEApplication::getInstance()->getApplicationName() + " config file as...",
-                        initialFileSuggestion, "*.config");
+                        initialFileSuggestion, "*.config", true, false, this);
     // and trigger opening it
 	if (chooser.browseForFileToSave(true))
 	{

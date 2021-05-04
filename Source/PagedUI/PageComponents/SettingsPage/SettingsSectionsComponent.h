@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "HeaderWithElmListComponent.h"
+#include "../HeaderWithElmListComponent.h"
 
 #include "../../../SpaConBridgeCommon.h"
 

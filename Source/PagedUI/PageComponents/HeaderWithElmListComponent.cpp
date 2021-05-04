@@ -19,8 +19,8 @@
 
 #include "HeaderWithElmListComponent.h"
 
-#include "../../../Controller.h"
-#include "../../../LookAndFeel.h"
+#include "../../Controller.h"
+#include "../../LookAndFeel.h"
 
 #include <Image_utils.h>
 
@@ -61,7 +61,7 @@ HeaderWithElmListComponent::~HeaderWithElmListComponent()
 {
 	for (auto& component : m_components)
 	{
-		auto dontDelete = !component.second.second;
+		auto dontDelete = !component.second._takeOwnership;
         if (dontDelete)
             component.first.release(); // release the pointer to not have the memory cleaned up for those elements that are still externally managed (flagged by second bool in second pair)
 	}
@@ -158,12 +158,19 @@ void HeaderWithElmListComponent::setHasActiveToggle(bool hasActiveToggle)
  */
 void HeaderWithElmListComponent::setHeaderText(String headerText)
 {
-	m_activeToggleLabel->setText("Use " + headerText, dontSendNotification);
-
 	auto font = m_headerLabel->getFont();
 	font.setBold(true);
 	m_headerLabel->setFont(font);
-	m_headerLabel->setText(headerText + " Settings", dontSendNotification);
+	m_headerLabel->setText(headerText, dontSendNotification);
+}
+
+/**
+ * Setter for the active toggle text of this component.
+ * @param activeToggleText	The text to use in active toggle label
+ */
+void HeaderWithElmListComponent::setActiveToggleText(String activeToggleText)
+{
+	m_activeToggleLabel->setText(activeToggleText, dontSendNotification);
 }
 
 /**
@@ -172,14 +179,15 @@ void HeaderWithElmListComponent::setHeaderText(String headerText)
  * @param includeInLayout	Bool flag that can indicate if the component shall be made visible in this components 
  *							context but not layouted. (e.g. a lable that is already attached to another component)
  * @param takeOwnerShip		Bool flag that indicates if ownership of the given component shall be taken.
+ * @param verticalSpan		count of vertical item height units the component shall use when layouted
  */
-void HeaderWithElmListComponent::addComponent(Component* compo, bool includeInLayout, bool takeOwnership)
+void HeaderWithElmListComponent::addComponent(Component* compo, bool includeInLayout, bool takeOwnership, int verticalSpan)
 {
 	if (!compo)
 		return;
 
 	addAndMakeVisible(compo);
-	m_components.push_back(std::make_pair(std::unique_ptr<Component>(compo), std::make_pair(includeInLayout, takeOwnership)));
+	m_components.push_back(std::make_pair(std::unique_ptr<Component>(compo), LayoutingMetadata(includeInLayout, takeOwnership, verticalSpan)));
 
 	compo->setEnabled(m_toggleState);
 }
@@ -254,14 +262,16 @@ void HeaderWithElmListComponent::resized()
 	// Add all the componentes that are flagged to be included in layouting
 	for (auto const& component : m_components)
 	{
-		auto includeInLayout = component.second.first;
+		auto includeInLayout = component.second._includeInLayout;
+		auto itemVerticalSpan = component.second._verticalSpan;
+		auto flexItemHeight = (itemHeight * itemVerticalSpan) + (2 * itemMargin * (itemVerticalSpan - 1));
 		if (includeInLayout)
 		{
 			fb.items.add(FlexItem(*component.first.get())
-				.withHeight(itemHeight)
+				.withHeight(flexItemHeight)
 				.withMaxWidth(m_layoutItemWidth)
 				.withMargin(FlexItem::Margin(itemMargin, itemMargin, itemMargin, 130 + itemMargin)));
-			itemCount++;
+			itemCount += itemVerticalSpan;
 		}
 	}
 

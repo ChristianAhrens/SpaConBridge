@@ -6,6 +6,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.3.2] - 2021-05-04
+### Added
+- Added new tab "Scenes" allowing control of previous/next/recall remote objects and displaying Scene index/name/comment strings
+- Added new tab "EnSpace" allowing control of currently active room, predelay factor and rear level
+
+### Changed
+- Implemented support for OSC string type messages
+
+### Fixed
+- Fixed crash on iOS that occured when cancelling the file load and save dialogs
+- Fixed SoundObject Spread, ReverbSendGain and DelayMode messages to be sent to DS100 in correct format
+- Fixed RTTrPMProtocolProcessor to not block entire node processing shutdown that lead to active OSC traffic even though the app was set to 'offline' on UI
+
 ## [0.3.1] - 2021-04-20
 ### Added
 - Added button to manually toggle between online/offline

@@ -170,6 +170,9 @@ public:
 	bool GetMatrixOutputTableCollapsed();
 	void SetMatrixOutputTableCollapsed(bool collapsed);
 
+	//==============================================================================
+	void SetScenesPagePinnedScenes(const std::vector<std::pair<std::pair<int, int>, std::string>>& pinnedScenes);
+
 private:
 	//==============================================================================
 	void toggleAboutPage();

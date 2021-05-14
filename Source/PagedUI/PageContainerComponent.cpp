@@ -578,6 +578,16 @@ void PageContainerComponent::SetMatrixOutputTableCollapsed(bool collapsed)
 		return m_matrixIOPage->SetOutputsCollapsed(collapsed);
 }
 
+/**
+ * Setter for the pinned scenes of Scenes Page
+ * @param pinnedScenes	The pinned scenes.
+ */
+void PageContainerComponent::SetScenesPagePinnedScenes(const std::vector<std::pair<std::pair<int, int>, std::string>>& pinnedScenes)
+{
+	if (m_scenesPage)
+		m_scenesPage->SetPinnedScenes(pinnedScenes);
+}
+
 
 /*
 ===============================================================================

@@ -150,6 +150,53 @@ std::pair<int, int> ScenesPageComponent::GetCurrentSceneIndex()
 }
 
 /**
+ * Method to set the map of pinned scenes and refresh the UI accordingly.
+ * This also does clear any existing pinned scenes.
+ * @param	pinnedScenes	The list of scenes that shall be set as new pinned scenes.
+ */
+void ScenesPageComponent::SetPinnedScenes(const std::vector<std::pair<std::pair<int, int>, std::string>>& pinnedScenes)
+{
+	m_pinnedSceneIdxRecallLayoutContainer.clear();
+	m_pinnedSceneIdxRecallButtons.clear();
+	m_unpinSceneIdxRecallButtons.clear();
+
+	for (auto const& sceneIdxNameKV : pinnedScenes)
+	{
+		auto& sceneIndex = sceneIdxNameKV.first;
+		auto& sceneName = sceneIdxNameKV.second;
+
+		m_pinnedSceneIdxRecallLayoutContainer.insert(std::make_pair(sceneIndex, std::make_unique<HorizontalLayouterComponent>()));
+		m_pinnedSceneIdxRecallLayoutContainer.at(sceneIndex)->SetSpacing(5);
+		if (GetElementsContainer())
+			GetElementsContainer()->addComponent(m_pinnedSceneIdxRecallLayoutContainer.at(sceneIndex).get(), true, false);
+
+		auto recallButtonText = String(sceneIndex.first) + "." + String(sceneIndex.second).paddedLeft('0', 2);
+		if (!sceneName.empty())
+			recallButtonText += " " + String(sceneName);
+		m_pinnedSceneIdxRecallButtons.insert(std::make_pair(sceneIndex, std::make_unique<TextButton>()));
+		m_pinnedSceneIdxRecallButtons.at(sceneIndex)->setButtonText(recallButtonText);
+		m_pinnedSceneIdxRecallButtons.at(sceneIndex)->addListener(this);
+		m_pinnedSceneIdxRecallButtons.at(sceneIndex)->setTooltip("Recall Scene");
+		m_pinnedSceneIdxRecallLayoutContainer.at(sceneIndex)->AddComponent(m_pinnedSceneIdxRecallButtons.at(sceneIndex).get(), 7);
+
+		m_unpinSceneIdxRecallButtons.insert(std::make_pair(sceneIndex, std::make_unique<DrawableButton>("unpin scene index", DrawableButton::ButtonStyle::ImageOnButtonBackground)));
+		m_unpinSceneIdxRecallButtons.at(sceneIndex)->setClickingTogglesState(false);
+		m_unpinSceneIdxRecallButtons.at(sceneIndex)->addListener(this);
+		m_unpinSceneIdxRecallButtons.at(sceneIndex)->setTooltip("Unpin Scene Index");
+		m_pinnedSceneIdxRecallLayoutContainer.at(sceneIndex)->AddComponent(m_unpinSceneIdxRecallButtons.at(sceneIndex).get(), 1);
+	}
+
+	if (m_pinnedSceneIdxRecallLayoutContainer.count(pinnedScenes.front().first) > 0 && m_pinnedSceneIdxRecallLayoutContainer.at(pinnedScenes.front().first))
+		m_pinnedSceneIdxRecallLabel->attachToComponent(m_pinnedSceneIdxRecallLayoutContainer.at(pinnedScenes.front().first).get(), true);
+
+	lookAndFeelChanged();
+
+	if (GetElementsContainer())
+		GetElementsContainer()->resized();
+	resized();
+}
+
+/**
  * Reimplemented to handle button member clicks.
  * @param	button	The button that has been clicked.
  */

@@ -327,6 +327,17 @@ void PageComponentManager::SetMatrixOutputTableCollapsed(bool collapsed)
 }
 
 /**
+ * Proxy Setter for the pinned scenes in Scenes Page.
+ * Forwards the call to PageContainerComponent.
+ * @param pinnedScenes	The pinned scenes of Scenes Page.
+ */
+void PageComponentManager::SetScenesPagePinnedScenes(const std::vector<std::pair<std::pair<int, int>, std::string>>& pinnedScenes)
+{
+	if (m_pageContainer)
+		m_pageContainer->SetScenesPagePinnedScenes(pinnedScenes);
+}
+
+/**
  * Get the currently selected coordinate mapping used for the multi-slider.
  * @return The selected mapping area.
  */
@@ -493,6 +504,31 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
 
 				SetMatrixOutputTableCollapsed(collapsed);
 			}
+		}
+	}
+
+	auto scenesPageXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SCENESPAGE));
+	if (scenesPageXmlElement)
+	{
+		auto pinnedScenesXmlElement = scenesPageXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::PINNEDSCENES));
+		if (pinnedScenesXmlElement)
+		{
+			auto pinnedScenes = std::vector<std::pair<std::pair<int, int>, std::string>>();
+			for (auto sceneXmlElement : pinnedScenesXmlElement->getChildIterator())
+			{
+				if (sceneXmlElement && sceneXmlElement->getTagName() == AppConfiguration::getTagName(AppConfiguration::TagID::SCENE))
+				{
+					auto sceneIndexMajor = sceneXmlElement->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::INDEXMAJOR));
+					auto sceneIndexMinor = sceneXmlElement->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::INDEXMINOR));
+					auto sceneName = String();
+					auto sceneNameTextXmlElement = sceneXmlElement->getFirstChildElement();
+					if (sceneNameTextXmlElement && sceneNameTextXmlElement->isTextElement())
+						sceneName = sceneNameTextXmlElement->getText();
+					pinnedScenes.push_back(std::make_pair(std::make_pair(sceneIndexMajor, sceneIndexMinor), sceneName.toStdString()));
+				}
+			}
+
+			SetScenesPagePinnedScenes(pinnedScenes);
 		}
 	}
 

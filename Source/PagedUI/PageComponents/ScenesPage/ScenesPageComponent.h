@@ -43,6 +43,9 @@ public:
 	std::pair<int, int> GetCurrentSceneIndex();
 
 	//==========================================================================
+	void SetPinnedScenes(const std::vector<std::pair<std::pair<int, int>, std::string>>& pinnedScenes);
+
+	//==========================================================================
 	void buttonClicked(Button* button) override;
 
 	//==========================================================================

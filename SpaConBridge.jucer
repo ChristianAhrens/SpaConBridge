@@ -266,6 +266,8 @@
             <FILE id="lbzD6a" name="call_received-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/call_received-24px.svg"/>
             <FILE id="q7WeR0" name="cancel-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/cancel-24px.svg"/>
+            <FILE id="y861zl" name="clear_black_24dp.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/clear_black_24dp.svg"/>
             <FILE id="oihE0b" name="find_replace-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/find_replace-24px.svg"/>
             <FILE id="A3cgD8" name="folder_open-24px.svg" compile="0" resource="1"
@@ -283,6 +285,8 @@
                   file="submodules/JUCE-AppBasics/Resources/Images/keyboard_arrow_up-24px.svg"/>
             <FILE id="Jc6pvI" name="mobiledata_off-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/mobiledata_off-24px.svg"/>
+            <FILE id="icu6GT" name="push_pin_black_24dp.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/push_pin_black_24dp.svg"/>
             <FILE id="UWlhHT" name="remove-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/remove-24px.svg"/>
             <FILE id="eGKYMH" name="rule_checked-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/rule_checked-24px.svg"/>

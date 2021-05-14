@@ -31,43 +31,22 @@ namespace SpaConBridge
  * and use the instance of this class as a single component embedded
  * in other layouts.
  */
-class HorizontalComponentLayouter : public Component
+class HorizontalLayouterComponent : public Component
 {
 public:
-	void AddComponent(Component* compo)
-	{
-		addAndMakeVisible(compo);
-		m_layoutComponents.push_back(compo);
-	}
-	bool RemoveComponent(Component* compo)
-	{
-		auto iter = std::find(m_layoutComponents.begin(), m_layoutComponents.end(), compo);
-		if (iter == m_layoutComponents.end())
-			return false;
+	explicit HorizontalLayouterComponent(const String& componentName = String());
+	~HorizontalLayouterComponent() override;
 
-		removeChildComponent(compo);
-		m_layoutComponents.erase(iter);
-		return true;
-	}
-	void SetSpacing(int spacing)
-	{
-		m_spacing = spacing;
-	}
-	void resized() override
-	{
-		FlexBox fb;
-		fb.flexDirection = FlexBox::Direction::row;
-		auto compoCnt = m_layoutComponents.size();
-		for (int i = 0; i < compoCnt; i++)
-		{
-			fb.items.add(FlexItem(*m_layoutComponents.at(i)).withFlex(1));
-			if (i < compoCnt - 1)
-				fb.items.add(FlexItem().withWidth(static_cast<float>(m_spacing)));
-		}
-		fb.performLayout(getLocalBounds().toFloat());
-	}
+	//==============================================================================
+	void AddComponent(Component* compo, float layoutRatio = 1.0f);
+	bool RemoveComponent(Component* compo);
+	void SetSpacing(int spacing);
+	void resized() override;
 
+private:
+	//==============================================================================
 	std::vector<Component*>	m_layoutComponents;
+	std::vector<float>		m_layoutRatios;
 	int m_spacing{ 0 };
 };
 
@@ -100,6 +79,7 @@ public:
 	void setActiveToggleText(String activeToggleText);
 	void setHeaderText(String headerText);
 	void addComponent(Component* compo, bool includeInLayout = true, bool takeOwnership = true, int verticalSpan = 1);
+	void removeComponent(Component* compo);
 	void setToggleActiveState(bool toggleState);
 	
 	void onToggleActive();

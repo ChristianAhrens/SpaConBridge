@@ -40,6 +40,8 @@ public:
 	explicit ScenesPageComponent();
 	~ScenesPageComponent() override;
 
+	std::pair<int, int> GetCurrentSceneIndex();
+
 	//==========================================================================
 	void buttonClicked(Button* button) override;
 
@@ -55,20 +57,31 @@ protected:
 	void HandleObjectDataInternal(RemoteObjectIdentifier objectId, const RemoteObjectMessageData& msgData) override;
 
 private:
-	std::unique_ptr<HorizontalComponentLayouter>		m_prevNextLayoutContainer;
+	void PinSceneRecall(const std::pair<int, int>& sceneIndex);
+	void UnpinSceneRecall(const std::pair<int, int>& sceneIndex);
+	bool SendRecallSceneIndex(const std::pair<int, int>& sceneIndex);
+
+	std::unique_ptr<HorizontalLayouterComponent>		m_prevNextLayoutContainer;
 	std::unique_ptr<JUCEAppBasics::TextWithImageButton>	m_previousButton;
 	std::unique_ptr<JUCEAppBasics::TextWithImageButton>	m_nextButton;
 	
-	std::unique_ptr<HorizontalComponentLayouter>				m_recallIdxLayoutContainer;
+	std::unique_ptr<HorizontalLayouterComponent>				m_recallIdxLayoutContainer;
+	std::unique_ptr<HorizontalLayouterComponent>				m_recallIdxSubLayoutContainer;
 	std::unique_ptr<TextButton>									m_recallButton;
-	std::unique_ptr<Label>										m_sceneIndexLabel;
-	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_sceneIndexFilter;
-	std::unique_ptr<TextEditor>									m_sceneIndexEdit;
+	std::unique_ptr<DrawableButton>								m_pinSceneIdxRecallButton;
+	std::unique_ptr<Label>										m_sceneIdxLabel;
+	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_sceneIdxFilter;
+	std::unique_ptr<TextEditor>									m_sceneIdxEdit;
 	
 	std::unique_ptr<Label>		m_sceneNameLabel;
 	std::unique_ptr<TextEditor>	m_sceneNameEdit;
 	std::unique_ptr<Label>		m_sceneCommentLabel;
 	std::unique_ptr<TextEditor>	m_sceneCommentEdit;
+
+	std::unique_ptr<Label>														m_pinnedSceneIdxRecallLabel;
+	std::map<std::pair<int, int>, std::unique_ptr<HorizontalLayouterComponent>>	m_pinnedSceneIdxRecallLayoutContainer;
+	std::map<std::pair<int, int>, std::unique_ptr<TextButton>>					m_pinnedSceneIdxRecallButtons;
+	std::map<std::pair<int, int>, std::unique_ptr<DrawableButton>>				m_unpinSceneIdxRecallButtons;
 
 	bool				m_sceneIndexChangePending{ false };
 	std::pair<int, int> m_sceneIndexChange{ 0, 0 };

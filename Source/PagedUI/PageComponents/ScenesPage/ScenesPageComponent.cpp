@@ -150,7 +150,28 @@ std::pair<int, int> ScenesPageComponent::GetCurrentSceneIndex()
 }
 
 /**
- * Method to set the map of pinned scenes and refresh the UI accordingly.
+ * Method to get the list of pinned scenes from internal hashes.
+ * @return	The list of scenes that shall be set as new pinned scenes.
+ */
+std::vector<std::pair<std::pair<int, int>, std::string>> ScenesPageComponent::GetPinnedScenes()
+{
+	auto pinnedScenes = std::vector<std::pair<std::pair<int, int>, std::string>>();
+
+	for (auto const& pinnedButton : m_pinnedSceneIdxRecallButtons)
+	{
+		auto& sceneIndex = pinnedButton.first;
+
+		auto recallButtonTextHypothesis = String(sceneIndex.first) + "." + String(sceneIndex.second).paddedLeft('0', 2) + " "; // This is how the button text was created, so we try to disassemble it the same way
+		auto sceneName = pinnedButton.second->getButtonText().substring(recallButtonTextHypothesis.length());;
+
+		pinnedScenes.push_back(std::make_pair(pinnedButton.first, sceneName.toStdString()));
+	}
+
+	return pinnedScenes;
+}
+
+/**
+ * Method to set the list of pinned scenes and refresh the UI accordingly.
  * This also does clear any existing pinned scenes.
  * @param	pinnedScenes	The list of scenes that shall be set as new pinned scenes.
  */
@@ -186,11 +207,14 @@ void ScenesPageComponent::SetPinnedScenes(const std::vector<std::pair<std::pair<
 		m_pinnedSceneIdxRecallLayoutContainer.at(sceneIndex)->AddComponent(m_unpinSceneIdxRecallButtons.at(sceneIndex).get(), 1);
 	}
 
-	if (m_pinnedSceneIdxRecallLayoutContainer.count(pinnedScenes.front().first) > 0 && m_pinnedSceneIdxRecallLayoutContainer.at(pinnedScenes.front().first))
+	// attach the pinned scenes label to first of the recall trigger buttons
+	if (!pinnedScenes.empty() &&m_pinnedSceneIdxRecallLayoutContainer.count(pinnedScenes.front().first) > 0 && m_pinnedSceneIdxRecallLayoutContainer.at(pinnedScenes.front().first))
 		m_pinnedSceneIdxRecallLabel->attachToComponent(m_pinnedSceneIdxRecallLayoutContainer.at(pinnedScenes.front().first).get(), true);
 
+	// set the correct icons to the newly created buttons
 	lookAndFeelChanged();
 
+	// update the sizing of the embedded viewport contents
 	if (GetElementsContainer())
 		GetElementsContainer()->resized();
 	resized();
@@ -362,11 +386,18 @@ void ScenesPageComponent::PinSceneRecall(const std::pair<int, int>& sceneIndex)
 	m_unpinSceneIdxRecallButtons.at(sceneIndex)->setTooltip("Unpin Scene Index");
 	m_pinnedSceneIdxRecallLayoutContainer.at(sceneIndex)->AddComponent(m_unpinSceneIdxRecallButtons.at(sceneIndex).get(), 1);
 
+	// set the correct icons to the newly created buttons
 	lookAndFeelChanged();
 
+	// update the sizing of the embedded viewport contents
 	if (GetElementsContainer())
 		GetElementsContainer()->resized();
 	resized();
+
+	// finally trigger refreshing the config file
+	auto config = SpaConBridge::AppConfiguration::getInstance();
+	if (config)
+		config->triggerConfigurationDump(false);
 }
 
 /**
@@ -398,9 +429,15 @@ void ScenesPageComponent::UnpinSceneRecall(const std::pair<int, int>& sceneIndex
 		m_pinnedSceneIdxRecallLayoutContainer.erase(sceneIndex);
 	}
 
+	// update the sizing of the embedded viewport contents
 	if (GetElementsContainer())
 		GetElementsContainer()->resized();
 	resized();
+
+	// finally trigger refreshing the config file
+	auto config = SpaConBridge::AppConfiguration::getInstance();
+	if (config)
+		config->triggerConfigurationDump(false);
 }
 
 /**

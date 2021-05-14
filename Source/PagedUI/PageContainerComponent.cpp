@@ -579,6 +579,21 @@ void PageContainerComponent::SetMatrixOutputTableCollapsed(bool collapsed)
 }
 
 /**
+ * Getter for the pinned scenes of Scenes Page
+ * @return	The pinned scenes.
+ */
+std::vector<std::pair<std::pair<int, int>, std::string>> PageContainerComponent::GetScenesPagePinnedScenes()
+{
+	if (m_scenesPage)
+		return m_scenesPage->GetPinnedScenes();
+	else
+	{
+		jassertfalse;
+		return std::vector<std::pair<std::pair<int, int>, std::string>>();
+	}
+}
+
+/**
  * Setter for the pinned scenes of Scenes Page
  * @param pinnedScenes	The pinned scenes.
  */

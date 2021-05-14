@@ -327,6 +327,22 @@ void PageComponentManager::SetMatrixOutputTableCollapsed(bool collapsed)
 }
 
 /**
+ * Proxy Getter for the pinned scenes in Scenes Page.
+ * Forwards the call to PageContainerComponent.
+ * @return	The pinned scenes of Scenes Page.
+ */
+std::vector<std::pair<std::pair<int, int>, std::string>> PageComponentManager::GetScenesPagePinnedScenes()
+{
+	if (m_pageContainer)
+		return m_pageContainer->GetScenesPagePinnedScenes();
+	else
+	{
+		jassertfalse;
+		return std::vector<std::pair<std::pair<int, int>, std::string>>();
+	}
+}
+
+/**
  * Proxy Setter for the pinned scenes in Scenes Page.
  * Forwards the call to PageContainerComponent.
  * @param pinnedScenes	The pinned scenes of Scenes Page.
@@ -584,6 +600,26 @@ std::unique_ptr<XmlElement> PageComponentManager::createStateXml()
 			auto collapsedXmlElement = matrixOutputTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::COLLAPSED));
 			if (collapsedXmlElement)
 				collapsedXmlElement->addTextElement(String(IsMatrixOutputTableCollapsed() ? 1 : 0));
+		}
+
+		auto scenesPageXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SCENESPAGE));
+		if (scenesPageXmlElement)
+		{
+			auto pinnedScenesXmlElement = scenesPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::PINNEDSCENES));
+			if (pinnedScenesXmlElement)
+			{
+				auto pinnedScenes = GetScenesPagePinnedScenes();
+				for (auto const& pinnedScene : pinnedScenes)
+				{
+					auto pinnedSceneXmlElement = pinnedScenesXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SCENE));
+					if (pinnedSceneXmlElement)
+					{
+						pinnedSceneXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::INDEXMAJOR), pinnedScene.first.first);
+						pinnedSceneXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::INDEXMINOR), pinnedScene.first.second);
+						pinnedSceneXmlElement->addTextElement(pinnedScene.second);
+					}
+				}
+			}
 		}
 	}
 

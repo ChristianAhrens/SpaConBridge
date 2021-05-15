@@ -552,6 +552,8 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
 			SetScenesPagePinnedScenes(pinnedScenes);
 		}
 	}
+    
+    m_pageContainer->SetPagesBeingInitialized(false);
 
 	return retVal;
 }

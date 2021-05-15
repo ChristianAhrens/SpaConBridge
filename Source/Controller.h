@@ -83,8 +83,9 @@ public:
 	SoundobjectProcessor* GetSoundobjectProcessor(SoundobjectProcessorId processorId) const;
 	std::vector<SoundobjectProcessorId> GetSoundobjectProcessorIds() const;
 
-	void ActivateSoundobjectId(SoundobjectId soundobjectId, MappingId mappingId);
-	void DeactivateSoundobjectId(SoundobjectId soundobjectId, MappingId mappingId);
+	JUCE_DEPRECATED(void ActivateSoundobjectId(SoundobjectId soundobjectId, MappingId mappingId));
+	JUCE_DEPRECATED(void DeactivateSoundobjectId(SoundobjectId soundobjectId, MappingId mappingId));
+	void UpdateActiveSoundobjects();
 
 	void SetSelectedSoundobjectProcessorIds(const std::vector<SoundobjectProcessorId>& processorIds, bool clearPrevSelection);
 	const std::vector<SoundobjectProcessorId> GetSelectedSoundobjectProcessorIds();
@@ -99,8 +100,9 @@ public:
 	MatrixInputProcessor* GetMatrixInputProcessor(MatrixInputProcessorId processorId) const;
 	std::vector<MatrixInputProcessorId> GetMatrixInputProcessorIds() const;
 
-	void ActivateMatrixInputId(MatrixInputId matrixInputId);
-	void DeactivateMatrixInputId(MatrixInputId matrixInputId);
+	JUCE_DEPRECATED(void ActivateMatrixInputId(MatrixInputId matrixInputId));
+	JUCE_DEPRECATED(void DeactivateMatrixInputId(MatrixInputId matrixInputId));
+	void UpdateActiveMatrixInputs();
 
 	void SetSelectedMatrixInputProcessorIds(const std::vector<MatrixInputProcessorId>& processorIds, bool clearPrevSelection);
 	const std::vector<MatrixInputProcessorId> GetSelectedMatrixInputProcessorIds();
@@ -115,8 +117,9 @@ public:
 	MatrixOutputProcessor* GetMatrixOutputProcessor(MatrixOutputProcessorId processorId) const;
 	std::vector<MatrixOutputProcessorId> GetMatrixOutputProcessorIds() const;
 
-	void ActivateMatrixOutputId(MatrixOutputId matrixOutputId);
-	void DeactivateMatrixOutputId(MatrixOutputId matrixOutputId);
+	JUCE_DEPRECATED(void ActivateMatrixOutputId(MatrixOutputId matrixOutputId));
+	JUCE_DEPRECATED(void DeactivateMatrixOutputId(MatrixOutputId matrixOutputId));
+	void UpdateActiveMatrixOutputs();
 
 	void SetSelectedMatrixOutputProcessorIds(const std::vector<MatrixOutputProcessorId>& processorIds, bool clearPrevSelection);
 	const std::vector<MatrixOutputProcessorId> GetSelectedMatrixOutputProcessorIds();

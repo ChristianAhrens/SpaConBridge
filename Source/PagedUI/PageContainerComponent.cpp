@@ -397,6 +397,27 @@ void PageContainerComponent::UpdateGui(bool init)
 }
 
 /**
+ * Sets the contained page components initializing state.
+ * This is used to prevent the pages from each posting config update triggers
+ * while themselves being updated with fresh config.
+ * @param	initializing	The init state to set to the pages
+ */
+void PageContainerComponent::SetPagesBeingInitialized(bool initializing)
+{
+	// the tab component does send config update triggers as well when set to handling changes
+	m_tabbedComponent->SetIsHandlingChanges(!initializing);
+
+	m_soundobjectsPage->SetPageIsInitializing(initializing);
+	m_multiSliderPage->SetPageIsInitializing(initializing);
+	m_matrixIOPage->SetPageIsInitializing(initializing);
+	m_settingsPage->SetPageIsInitializing(initializing);
+	m_statisticsPage->SetPageIsInitializing(initializing);
+	m_aboutPage->SetPageIsInitializing(initializing);
+	m_scenesPage->SetPageIsInitializing(initializing);
+	m_enSpacePage->SetPageIsInitializing(initializing);
+}
+
+/**
  * Method to externally set the currently active tab.
  * This is used to restore the current active tab from config file on app start.
  * @param tabIdx	The tab index to set active

@@ -59,7 +59,6 @@ MainSpaConBridgeComponent::MainSpaConBridgeComponent(std::function<void(DbLookAn
     }
 
     // enshure the config is processed and contents forwarded to already existing application components.
-    onConfigUpdated();
     m_config->triggerWatcherUpdate();
 
     // enshure the controller singleton is created

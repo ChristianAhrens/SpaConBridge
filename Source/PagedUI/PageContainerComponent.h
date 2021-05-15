@@ -146,6 +146,8 @@ public:
 
 	void UpdateGui(bool init);
 
+	void SetPagesBeingInitialized(bool initializing);
+
 	//==============================================================================
 	void lookAndFeelChanged() override;
 

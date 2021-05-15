@@ -398,7 +398,12 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
 	if (!stateXml || (stateXml->getTagName() != AppConfiguration::getTagName(AppConfiguration::TagID::UICONFIG)))
 		return false;
 
+	if (!m_pageContainer)
+		return false;
+
 	auto retVal = true;
+
+	m_pageContainer->SetPagesBeingInitialized(true);
 
 	// Handle the look and feel type from xml first, since this is set as active dropdown index in overview. If we do not do this first, 
 	// the default selected index will we written to config due to update trigger from SetActiveTab

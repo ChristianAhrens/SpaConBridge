@@ -384,6 +384,9 @@ void SettingsPageComponent::onToggleRawConfigVisible()
  */
 void SettingsPageComponent::onSelectedLookAndFeelChanged()
 {
+	if (IsPageInitializing())
+		return;
+
 	auto config = SpaConBridge::AppConfiguration::getInstance();
 	if (config)
 		config->triggerConfigurationDump(true);

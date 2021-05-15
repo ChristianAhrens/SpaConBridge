@@ -327,6 +327,33 @@ void PageComponentManager::SetMatrixOutputTableCollapsed(bool collapsed)
 }
 
 /**
+ * Proxy Getter for the pinned scenes in Scenes Page.
+ * Forwards the call to PageContainerComponent.
+ * @return	The pinned scenes of Scenes Page.
+ */
+std::vector<std::pair<std::pair<int, int>, std::string>> PageComponentManager::GetScenesPagePinnedScenes()
+{
+	if (m_pageContainer)
+		return m_pageContainer->GetScenesPagePinnedScenes();
+	else
+	{
+		jassertfalse;
+		return std::vector<std::pair<std::pair<int, int>, std::string>>();
+	}
+}
+
+/**
+ * Proxy Setter for the pinned scenes in Scenes Page.
+ * Forwards the call to PageContainerComponent.
+ * @param pinnedScenes	The pinned scenes of Scenes Page.
+ */
+void PageComponentManager::SetScenesPagePinnedScenes(const std::vector<std::pair<std::pair<int, int>, std::string>>& pinnedScenes)
+{
+	if (m_pageContainer)
+		m_pageContainer->SetScenesPagePinnedScenes(pinnedScenes);
+}
+
+/**
  * Get the currently selected coordinate mapping used for the multi-slider.
  * @return The selected mapping area.
  */
@@ -501,7 +528,32 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
 		}
 	}
 
-	m_pageContainer->SetPagesBeingInitialized(false);
+	auto scenesPageXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SCENESPAGE));
+	if (scenesPageXmlElement)
+	{
+		auto pinnedScenesXmlElement = scenesPageXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::PINNEDSCENES));
+		if (pinnedScenesXmlElement)
+		{
+			auto pinnedScenes = std::vector<std::pair<std::pair<int, int>, std::string>>();
+			for (auto sceneXmlElement : pinnedScenesXmlElement->getChildIterator())
+			{
+				if (sceneXmlElement && sceneXmlElement->getTagName() == AppConfiguration::getTagName(AppConfiguration::TagID::SCENE))
+				{
+					auto sceneIndexMajor = sceneXmlElement->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::INDEXMAJOR));
+					auto sceneIndexMinor = sceneXmlElement->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::INDEXMINOR));
+					auto sceneName = String();
+					auto sceneNameTextXmlElement = sceneXmlElement->getFirstChildElement();
+					if (sceneNameTextXmlElement && sceneNameTextXmlElement->isTextElement())
+						sceneName = sceneNameTextXmlElement->getText();
+					pinnedScenes.push_back(std::make_pair(std::make_pair(sceneIndexMajor, sceneIndexMinor), sceneName.toStdString()));
+				}
+			}
+
+			SetScenesPagePinnedScenes(pinnedScenes);
+		}
+	}
+    
+    m_pageContainer->SetPagesBeingInitialized(false);
 
 	return retVal;
 }
@@ -555,6 +607,26 @@ std::unique_ptr<XmlElement> PageComponentManager::createStateXml()
 			auto collapsedXmlElement = matrixOutputTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::COLLAPSED));
 			if (collapsedXmlElement)
 				collapsedXmlElement->addTextElement(String(IsMatrixOutputTableCollapsed() ? 1 : 0));
+		}
+
+		auto scenesPageXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SCENESPAGE));
+		if (scenesPageXmlElement)
+		{
+			auto pinnedScenesXmlElement = scenesPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::PINNEDSCENES));
+			if (pinnedScenesXmlElement)
+			{
+				auto pinnedScenes = GetScenesPagePinnedScenes();
+				for (auto const& pinnedScene : pinnedScenes)
+				{
+					auto pinnedSceneXmlElement = pinnedScenesXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SCENE));
+					if (pinnedSceneXmlElement)
+					{
+						pinnedSceneXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::INDEXMAJOR), pinnedScene.first.first);
+						pinnedSceneXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::INDEXMINOR), pinnedScene.first.second);
+						pinnedSceneXmlElement->addTextElement(pinnedScene.second);
+					}
+				}
+			}
 		}
 	}
 

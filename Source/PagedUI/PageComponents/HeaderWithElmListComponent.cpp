@@ -28,6 +28,99 @@
 namespace SpaConBridge
 {
 
+/*
+===============================================================================
+	Class HorizontalLayouterComponent
+===============================================================================
+*/
+
+/**
+ * Class constructor.
+ */
+HorizontalLayouterComponent::HorizontalLayouterComponent(const String& componentName) 
+	: Component(componentName)
+{
+}
+
+/**
+ * Class destructor.
+ */
+HorizontalLayouterComponent::~HorizontalLayouterComponent()
+{
+}
+
+/**
+ * Helper method to add a component to the internal list of components to be layouted
+ * that optionally takes a ratio value to take into account when layouting.
+ * @param	compo			The component to add.
+ * @param	layoutRatio		The ratio value to take into account for the component.
+ */
+void HorizontalLayouterComponent::AddComponent(Component* compo, float layoutRatio)
+{
+	addAndMakeVisible(compo);
+	m_layoutComponents.push_back(compo);
+	m_layoutRatios.push_back(layoutRatio);
+}
+
+/**
+ * Helper method to remove a component from the internal list of components to be layouted.
+ * @param	compo	The component to remove.
+ * @return	False if the given component is not known internally, true if it is successfully removed.
+ */
+bool HorizontalLayouterComponent::RemoveComponent(Component* compo)
+{
+	auto compoIter = m_layoutComponents.begin();
+	auto ratioIter = m_layoutRatios.begin();
+	for (; compoIter != m_layoutComponents.end() && ratioIter != m_layoutRatios.end(); compoIter++, ratioIter++)
+		if (*compoIter == compo)
+			break;
+
+	if (compoIter == m_layoutComponents.end() || ratioIter == m_layoutRatios.end())
+		return false;
+
+	removeChildComponent(compo);
+	m_layoutComponents.erase(compoIter);
+	m_layoutRatios.erase(ratioIter);
+	return true;
+}
+
+/**
+ * Setter for the internal layouting spacing value.
+ * @param	spacing		The spacing value to set.
+ */
+void HorizontalLayouterComponent::SetSpacing(int spacing)
+{
+	m_spacing = spacing;
+}
+
+/**
+ * Reimplemented from Component to dynamically arrange items in vertical direction.
+ */
+void HorizontalLayouterComponent::resized()
+{
+	// prepare width layouting
+	auto ratioSum = 0.0f;
+	for (auto const& ratio : m_layoutRatios)
+		ratioSum += ratio;
+	auto totalCompoWidth = getLocalBounds().getWidth() - ((m_layoutComponents.size() - 1) * m_spacing);
+	auto widthPerRatioUnit = totalCompoWidth / ratioSum;
+
+	FlexBox fb;
+	fb.flexDirection = FlexBox::Direction::row;
+	auto compoCnt = m_layoutComponents.size();
+	auto ratioCnt = m_layoutRatios.size();
+	jassert(compoCnt == ratioCnt);
+	for (int i = 0; i < compoCnt && i < ratioCnt; i++)
+	{
+		auto& compo = m_layoutComponents.at(i);
+		auto& ratio = m_layoutRatios.at(i);
+		fb.items.add(FlexItem(*compo).withWidth(widthPerRatioUnit * ratio));
+		if (i < compoCnt - 1)
+			fb.items.add(FlexItem().withWidth(static_cast<float>(m_spacing)));
+	}
+	fb.performLayout(getLocalBounds().toFloat());
+}
+
 
 /*
 ===============================================================================
@@ -190,6 +283,31 @@ void HeaderWithElmListComponent::addComponent(Component* compo, bool includeInLa
 	m_components.push_back(std::make_pair(std::unique_ptr<Component>(compo), LayoutingMetadata(includeInLayout, takeOwnership, verticalSpan)));
 
 	compo->setEnabled(m_toggleState);
+}
+
+/**
+ * Methdo to remove a component from internal list of components.
+ * @param compo	The component to remove.
+ */
+void HeaderWithElmListComponent::removeComponent(Component* compo)
+{
+	if (!compo)
+		return;
+
+	removeChildComponent(compo);
+
+	for (auto compoIter = m_components.begin(); compoIter != m_components.end(); compoIter++)
+	{
+		if (compoIter->first.get() == compo)
+		{
+			auto dontDelete = !compoIter->second._takeOwnership;
+			if (dontDelete)
+				compoIter->first.release(); // release the pointer to not have the memory cleaned up for those elements that are externally managed (flagged by second bool in second pair)
+
+			m_components.erase(compoIter);
+			break;
+		}
+	}
 }
 
 /**

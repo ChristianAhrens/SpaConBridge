@@ -88,6 +88,10 @@ public:
 	void SetMatrixOutputTableCollapsed(bool collapsed);
 
 	//==============================================================================
+	std::vector<std::pair<std::pair<int, int>, std::string>> GetScenesPagePinnedScenes();
+	void SetScenesPagePinnedScenes(const std::vector<std::pair<std::pair<int, int>, std::string>>& pinnedScenes);
+
+	//==============================================================================
 	DbLookAndFeelBase::LookAndFeelType GetLookAndFeelType() const;
 	void SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType, bool dontSendNotification);
 

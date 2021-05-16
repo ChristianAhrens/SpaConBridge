@@ -189,9 +189,7 @@ std::vector<std::pair<std::pair<int, int>, std::string>> ScenesPageComponent::Ge
  */
 void ScenesPageComponent::SetPinnedScenes(const std::vector<std::pair<std::pair<int, int>, std::string>>& pinnedScenes)
 {
-	m_pinnedSceneIdxRecallLayoutContainer.clear();
-	m_pinnedSceneIdxRecallButtons.clear();
-	m_unpinSceneIdxRecallButtons.clear();
+	ClearPinnedScenes();
 
 	for (auto const& sceneIdxNameKV : pinnedScenes)
 	{
@@ -228,6 +226,27 @@ void ScenesPageComponent::SetPinnedScenes(const std::vector<std::pair<std::pair<
 
 	// update the sizing of the embedded viewport contents
 	resized();
+}
+
+/**
+ * Method to clear internal hashes containing elements related to pinned scenes on ui
+ */
+void ScenesPageComponent::ClearPinnedScenes()
+{
+	for (auto const& buttonKV : m_pinnedSceneIdxRecallButtons)
+		if (m_pinnedSceneIdxRecallLayoutContainer.count(buttonKV.first) > 0)
+			m_pinnedSceneIdxRecallLayoutContainer.at(buttonKV.first)->RemoveComponent(buttonKV.second.get());
+	m_pinnedSceneIdxRecallButtons.clear();
+
+	for (auto const& buttonKV : m_unpinSceneIdxRecallButtons)
+		if (m_pinnedSceneIdxRecallLayoutContainer.count(buttonKV.first) > 0)
+			m_pinnedSceneIdxRecallLayoutContainer.at(buttonKV.first)->RemoveComponent(buttonKV.second.get());
+	m_unpinSceneIdxRecallButtons.clear();
+
+	for (auto const& container : m_pinnedSceneIdxRecallLayoutContainer)
+		if (GetElementsContainer())
+			GetElementsContainer()->removeComponent(container.second.get());
+	m_pinnedSceneIdxRecallLayoutContainer.clear();
 }
 
 /**

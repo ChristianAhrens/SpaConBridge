@@ -45,6 +45,7 @@ public:
 	//==========================================================================
 	std::vector<std::pair<std::pair<int, int>, std::string>> GetPinnedScenes();
 	void SetPinnedScenes(const std::vector<std::pair<std::pair<int, int>, std::string>>& pinnedScenes);
+	void ClearPinnedScenes();
 
 	//==========================================================================
 	void resized() override;

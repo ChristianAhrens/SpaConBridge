@@ -47,6 +47,9 @@ public:
 	void SetPinnedScenes(const std::vector<std::pair<std::pair<int, int>, std::string>>& pinnedScenes);
 
 	//==========================================================================
+	void resized() override;
+
+	//==========================================================================
 	void buttonClicked(Button* button) override;
 
 	//==========================================================================

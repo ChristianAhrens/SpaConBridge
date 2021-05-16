@@ -136,6 +136,18 @@ ScenesPageComponent::~ScenesPageComponent()
 }
 
 /**
+ * Reimplemented to resize elements container component.
+ */
+void ScenesPageComponent::resized()
+{
+	// update the sizing of the embedded viewport contents
+	if (GetElementsContainer())
+		GetElementsContainer()->resized();
+
+	StandalonePollingPageComponentBase::resized();
+}
+
+/**
  * Helper method to get the current scene index as is set as text in idx editor.
  * @return	The scene index major, minor.
  */
@@ -215,8 +227,6 @@ void ScenesPageComponent::SetPinnedScenes(const std::vector<std::pair<std::pair<
 	lookAndFeelChanged();
 
 	// update the sizing of the embedded viewport contents
-	if (GetElementsContainer())
-		GetElementsContainer()->resized();
 	resized();
 }
 
@@ -390,8 +400,6 @@ void ScenesPageComponent::PinSceneRecall(const std::pair<int, int>& sceneIndex)
 	lookAndFeelChanged();
 
 	// update the sizing of the embedded viewport contents
-	if (GetElementsContainer())
-		GetElementsContainer()->resized();
 	resized();
 
 	// finally trigger refreshing the config file
@@ -430,8 +438,6 @@ void ScenesPageComponent::UnpinSceneRecall(const std::pair<int, int>& sceneIndex
 	}
 
 	// update the sizing of the embedded viewport contents
-	if (GetElementsContainer())
-		GetElementsContainer()->resized();
 	resized();
 
 	// finally trigger refreshing the config file

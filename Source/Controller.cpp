@@ -1773,15 +1773,8 @@ bool Controller::setStateXml(XmlElement* stateXml)
 	else
 		retVal = false;
 
-	// trigger UI update once after the processors have been created
-	auto pageMgr = PageComponentManager::GetInstance();
-	if (pageMgr)
-	{
-		auto pageContainer = pageMgr->GetPageContainer();
-		if (pageContainer)
-			pageContainer->UpdateGui(false);
-	}
-
+	// Configure the bridging module before the UI is initialized, because it requires certain details in controller
+	// config to be set up already to be reflected on UI accordingly
 	auto bridgingXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::BRIDGING));
 	if (bridgingXmlElement)
 	{
@@ -1793,6 +1786,15 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			SetRefreshInterval(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100MsgRate(), true);
 			SetActiveParallelModeDS100(DataChangeParticipant::DCP_Init, m_protocolBridge.GetActiveParallelModeDS100(), true);
 		}
+	}
+
+	// trigger UI update once after the processors have been created
+	auto pageMgr = PageComponentManager::GetInstance();
+	if (pageMgr)
+	{
+		auto pageContainer = pageMgr->GetPageContainer();
+		if (pageContainer)
+			pageContainer->UpdateGui(false);
 	}
 
 	return retVal;

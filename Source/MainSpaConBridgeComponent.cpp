@@ -43,11 +43,12 @@ MainSpaConBridgeComponent::MainSpaConBridgeComponent()
 MainSpaConBridgeComponent::MainSpaConBridgeComponent(std::function<void(DbLookAndFeelBase::LookAndFeelType)> lafUpdateCallback)
     : onUpdateLookAndFeel(lafUpdateCallback)
 {
+    // a single instance of tooltip window is required and used by JUCE everywhere a tooltip is required.
     m_toolTipWindowInstance = std::make_unique<TooltipWindow>();
 
+    // create the configuration object (is being initialized from disk automatically)
     m_config = std::make_unique<AppConfiguration>(JUCEAppBasics::AppConfigurationBase::getDefaultConfigFilePath());
     m_config->addDumper(this);
-    m_config->addWatcher(this);
 
     // check if config creation was able to read a valid config from disk...
     if (!m_config->isValid())
@@ -58,21 +59,18 @@ MainSpaConBridgeComponent::MainSpaConBridgeComponent(std::function<void(DbLookAn
         m_config->triggerConfigurationDump();
     }
 
-    // enshure the config is processed and contents forwarded to already existing application components.
-    m_config->triggerWatcherUpdate();
+    // add this main component to watchers
+    m_config->addWatcher(this, true);
 
-    // enshure the controller singleton is created
+    // enshure the controller and pagemanager singleton is created
     auto ctrl = SpaConBridge::Controller::GetInstance();
-    ignoreUnused(ctrl);
-
-    // enshure the overviewmanager singleton is created
+    jassert(ctrl);
     auto pageMgr = SpaConBridge::PageComponentManager::GetInstance();
-    if (pageMgr)
-    {
-        // get the overview component from manager to use as central element for app ui
-        auto pageContainer = pageMgr->GetPageContainer();
-        addAndMakeVisible(pageContainer);
-    }
+    jassert(pageMgr);
+
+    // get the overview component from manager to use as central element for app ui
+    auto pageContainer = pageMgr->GetPageContainer();
+    addAndMakeVisible(pageContainer);
 
     setSize(896, 414);
 }

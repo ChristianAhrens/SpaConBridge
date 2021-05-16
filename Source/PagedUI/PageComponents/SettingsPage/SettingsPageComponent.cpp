@@ -90,9 +90,7 @@ SettingsPageComponent::SettingsPageComponent()
 	// register this object as config watcher
 	auto config = SpaConBridge::AppConfiguration::getInstance();
 	if (config)
-	{
-		config->addWatcher(this);
-	}
+		config->addWatcher(this, true);
 }
 
 /**

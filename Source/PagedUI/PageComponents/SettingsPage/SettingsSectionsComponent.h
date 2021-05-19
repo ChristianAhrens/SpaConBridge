@@ -56,6 +56,9 @@ public:
 	void resized() override;
 
 	//==========================================================================
+	void lookAndFeelChanged() override;
+
+	//==========================================================================
 	void buttonClicked(JUCEAppBasics::SplitButtonComponent* button, uint64 buttonId) override;
 
 	//==========================================================================
@@ -87,6 +90,19 @@ private:
 	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_ipAddressEditFilter;
 	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_portEditFilter;
 	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_mappingEditFilter;
+
+	// General settings section
+	std::unique_ptr<HeaderWithElmListComponent>					m_GeneralSettings;
+	std::unique_ptr<HorizontalLayouterComponent>				m_PageEnableButtonContainer;
+	std::unique_ptr<DrawableButton>								m_SoundObjectPageButton;
+	std::unique_ptr<DrawableButton>								m_MultisurfacePageButton;
+	std::unique_ptr<DrawableButton>								m_MatrixIOPageButton;
+	std::unique_ptr<DrawableButton>								m_ScenesPageButton;
+	std::unique_ptr<DrawableButton>								m_EnSpacePageButton;
+	std::unique_ptr<DrawableButton>								m_StatisticsPageButton;
+	std::unique_ptr<Label>										m_EnabledPagesLabel;
+	std::unique_ptr<ComboBox>									m_LookAndFeelSelect;
+	std::unique_ptr<Label>										m_LookAndFeelLabel;
 
 	// DS100 settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_DS100Settings;

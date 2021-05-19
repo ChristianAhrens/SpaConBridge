@@ -20,6 +20,9 @@
 #include "SettingsSectionsComponent.h"
 
 #include "../../../Controller.h"
+#include "../../../LookAndFeel.h"
+
+#include <Image_utils.h>
 
 
 namespace SpaConBridge
@@ -37,12 +40,55 @@ namespace SpaConBridge
  */
 SettingsSectionsComponent::SettingsSectionsComponent()
 {
-
 	// TextEditor input filters to be used for different editors
 	m_intervalEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890"); // 7 digits: "9999 ms"
 	m_ipAddressEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(15, "1234567890."); // 15 digits: "255.255.255.255"
 	m_portEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(5, "1234567890"); // 5 digits: "65535"
 	m_mappingEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(1, "1234"); // 1 digit: "4"
+
+	// General settings section
+	m_GeneralSettings = std::make_unique<HeaderWithElmListComponent>();
+	m_GeneralSettings->setHeaderText("General Settings");
+	m_GeneralSettings->setHasActiveToggle(false);
+	addAndMakeVisible(m_GeneralSettings.get());
+
+	m_PageEnableButtonContainer = std::make_unique<HorizontalLayouterComponent>();
+	m_PageEnableButtonContainer->SetSpacing(5);
+	m_SoundObjectPageButton = std::make_unique<DrawableButton>("SoundObjectPage", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	m_SoundObjectPageButton->setClickingTogglesState(true);
+	m_PageEnableButtonContainer->AddComponent(m_SoundObjectPageButton.get());
+	m_MultisurfacePageButton = std::make_unique<DrawableButton>("MultisurfacePage", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	m_MultisurfacePageButton->setClickingTogglesState(true);
+	m_PageEnableButtonContainer->AddComponent(m_MultisurfacePageButton.get());
+	m_MatrixIOPageButton = std::make_unique<DrawableButton>("MatrixIOPage", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	m_MatrixIOPageButton->setClickingTogglesState(true);
+	m_PageEnableButtonContainer->AddComponent(m_MatrixIOPageButton.get());
+	m_ScenesPageButton = std::make_unique<DrawableButton>("ScenesPage", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	m_ScenesPageButton->setClickingTogglesState(true);
+	m_PageEnableButtonContainer->AddComponent(m_ScenesPageButton.get());
+	m_EnSpacePageButton = std::make_unique<DrawableButton>("EnSpacePage", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	m_EnSpacePageButton->setClickingTogglesState(true);
+	m_PageEnableButtonContainer->AddComponent(m_EnSpacePageButton.get());
+	m_StatisticsPageButton = std::make_unique<DrawableButton>("StatisticsPage", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	m_StatisticsPageButton->setClickingTogglesState(true);
+	m_PageEnableButtonContainer->AddComponent(m_StatisticsPageButton.get());
+	m_EnabledPagesLabel = std::make_unique<Label>("PageEnableButton", "Enabled Pages");
+	m_EnabledPagesLabel->setJustificationType(Justification::centred);
+	m_EnabledPagesLabel->attachToComponent(m_PageEnableButtonContainer.get(), true);
+	m_GeneralSettings->addComponent(m_EnabledPagesLabel.get(), false, false);
+	m_GeneralSettings->addComponent(m_PageEnableButtonContainer.get(), true, false);
+
+	m_LookAndFeelSelect = std::make_unique<ComboBox>();
+	m_LookAndFeelSelect->addItem(DbLookAndFeelBase::getLookAndFeelName(DbLookAndFeelBase::LAFT_Dark), DbLookAndFeelBase::LAFT_Dark);
+	m_LookAndFeelSelect->addItem(DbLookAndFeelBase::getLookAndFeelName(DbLookAndFeelBase::LAFT_Light), DbLookAndFeelBase::LAFT_Light);
+	m_LookAndFeelLabel = std::make_unique<Label>("LookAndFeelSelect", "Look and feel");
+	m_LookAndFeelLabel->setJustificationType(Justification::centred);
+	m_LookAndFeelLabel->attachToComponent(m_LookAndFeelSelect.get(), true);
+	m_GeneralSettings->addComponent(m_LookAndFeelLabel.get(), false, false);
+	m_GeneralSettings->addComponent(m_LookAndFeelSelect.get(), true, false);
+
+	m_GeneralSettings->resized();
+
 
 	// DS100 settings section
 	m_DS100Settings = std::make_unique<HeaderWithElmListComponent>();
@@ -54,9 +100,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_DS100IntervalEdit = std::make_unique<TextEditor>();
 	m_DS100IntervalEdit->addListener(this);
 	m_DS100IntervalEdit->setInputFilter(m_intervalEditFilter.get(), false);
-	m_DS100IntervalLabel = std::make_unique<Label>();
+	m_DS100IntervalLabel = std::make_unique<Label>("DS100IntervalEdit", "Interval");
 	m_DS100IntervalLabel->setJustificationType(Justification::centred);
-	m_DS100IntervalLabel->setText("Interval", dontSendNotification);
 	m_DS100IntervalLabel->attachToComponent(m_DS100IntervalEdit.get(), true);
 	m_DS100Settings->addComponent(m_DS100IntervalLabel.get(), false, false);
 	m_DS100Settings->addComponent(m_DS100IntervalEdit.get(), true, false);
@@ -65,9 +110,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_DS100IpAddressEdit = std::make_unique<TextEditor>();
 	m_DS100IpAddressEdit->addListener(this);
 	m_DS100IpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
-	m_DS100IpAddressLabel = std::make_unique<Label>();
+	m_DS100IpAddressLabel = std::make_unique<Label>("DS100IpAddressEdit", "IP Address");
 	m_DS100IpAddressLabel->setJustificationType(Justification::centred);
-	m_DS100IpAddressLabel->setText("IP Address", dontSendNotification);
 	m_DS100IpAddressLabel->attachToComponent(m_DS100IpAddressEdit.get(), true);
 	m_DS100Settings->addComponent(m_DS100IpAddressLabel.get(), false, false);
 	m_DS100Settings->addComponent(m_DS100IpAddressEdit.get(), true, false);
@@ -84,9 +128,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_SecondDS100ModeButtonIds[m_SecondDS100Modes[2]] = m_SecondDS100ModeButton->addButton(m_SecondDS100Modes[2]);
 	m_SecondDS100ModeButtonIds[m_SecondDS100Modes[3]] = m_SecondDS100ModeButton->addButton(m_SecondDS100Modes[3]);
 	m_SecondDS100ModeButton->setButtonDown(m_SecondDS100ModeButtonIds[m_SecondDS100Modes[0]]);
-	m_SecondDS100ModeLabel = std::make_unique<Label>();
+	m_SecondDS100ModeLabel = std::make_unique<Label>("SecondDS100ModeButton", "2nd DS100");
 	m_SecondDS100ModeLabel->setJustificationType(Justification::centred);
-	m_SecondDS100ModeLabel->setText("2nd DS100", dontSendNotification);
 	m_SecondDS100ModeLabel->attachToComponent(m_SecondDS100ModeButton.get(), true);
 	m_DS100Settings->addComponent(m_SecondDS100ModeLabel.get(), false, false);
 	m_DS100Settings->addComponent(m_SecondDS100ModeButton.get(), true, false);
@@ -96,9 +139,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_SecondDS100ParallelModeButtonIds[m_SecondDS100ParallelModes[0]] = m_SecondDS100ParallelModeButton->addButton(m_SecondDS100ParallelModes[0]);
 	m_SecondDS100ParallelModeButtonIds[m_SecondDS100ParallelModes[1]] = m_SecondDS100ParallelModeButton->addButton(m_SecondDS100ParallelModes[1]);
 	m_SecondDS100ParallelModeButton->setButtonDown(m_SecondDS100ParallelModeButtonIds[m_SecondDS100ParallelModes[0]]);
-	m_SecondDS100ParallelModeLabel = std::make_unique<Label>();
+	m_SecondDS100ParallelModeLabel = std::make_unique<Label>("SecondDS100ParallelModeButton", "Active DS100");
 	m_SecondDS100ParallelModeLabel->setJustificationType(Justification::centred);
-	m_SecondDS100ParallelModeLabel->setText("Active DS100", dontSendNotification);
 	m_SecondDS100ParallelModeLabel->attachToComponent(m_SecondDS100ParallelModeButton.get(), true);
 	m_DS100Settings->addComponent(m_SecondDS100ParallelModeLabel.get(), false, false);
 	m_DS100Settings->addComponent(m_SecondDS100ParallelModeButton.get(), true, false);
@@ -107,9 +149,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_SecondDS100IpAddressEdit = std::make_unique<TextEditor>();
 	m_SecondDS100IpAddressEdit->addListener(this);
 	m_SecondDS100IpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
-	m_SecondDS100IpAddressLabel = std::make_unique<Label>();
+	m_SecondDS100IpAddressLabel = std::make_unique<Label>("SecondDS100IpAddressEdit", "IP Address");
 	m_SecondDS100IpAddressLabel->setJustificationType(Justification::centred);
-	m_SecondDS100IpAddressLabel->setText("IP Address", dontSendNotification);
 	m_SecondDS100IpAddressLabel->attachToComponent(m_SecondDS100IpAddressEdit.get(), true);
 	m_DS100Settings->addComponent(m_SecondDS100IpAddressLabel.get(), false, false);
 	m_DS100Settings->addComponent(m_SecondDS100IpAddressEdit.get(), true, false);
@@ -134,9 +175,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_DiGiCoIpAddressEdit = std::make_unique<TextEditor>();
 	m_DiGiCoIpAddressEdit->addListener(this);
 	m_DiGiCoIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
-	m_DiGiCoIpAddressLabel = std::make_unique<Label>();
+	m_DiGiCoIpAddressLabel = std::make_unique<Label>("DiGiCoIpAddressEdit", "IP Address");
 	m_DiGiCoIpAddressLabel->setJustificationType(Justification::centred);
-	m_DiGiCoIpAddressLabel->setText("IP Address", dontSendNotification);
 	m_DiGiCoIpAddressLabel->attachToComponent(m_DiGiCoIpAddressEdit.get(), true);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoIpAddressLabel.get(), false, false);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoIpAddressEdit.get(), true, false);
@@ -144,9 +184,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_DiGiCoListeningPortEdit = std::make_unique<TextEditor>();
 	m_DiGiCoListeningPortEdit->addListener(this);
 	m_DiGiCoListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
-	m_DiGiCoListeningPortLabel = std::make_unique<Label>();
+	m_DiGiCoListeningPortLabel = std::make_unique<Label>("DiGiCoListeningPortEdit", "Listening Port");
 	m_DiGiCoListeningPortLabel->setJustificationType(Justification::centred);
-	m_DiGiCoListeningPortLabel->setText("Listening Port", dontSendNotification);
 	m_DiGiCoListeningPortLabel->attachToComponent(m_DiGiCoListeningPortEdit.get(), true);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoListeningPortLabel.get(), false, false);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoListeningPortEdit.get(), true, false);
@@ -154,9 +193,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_DiGiCoRemotePortEdit = std::make_unique<TextEditor>();
 	m_DiGiCoRemotePortEdit->addListener(this);
 	m_DiGiCoRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
-	m_DiGiCoRemotePortLabel = std::make_unique<Label>();
+	m_DiGiCoRemotePortLabel = std::make_unique<Label>("DiGiCoRemotePortEdit", "Remote Port");
 	m_DiGiCoRemotePortLabel->setJustificationType(Justification::centred);
-	m_DiGiCoRemotePortLabel->setText("Remote Port", dontSendNotification);
 	m_DiGiCoRemotePortLabel->attachToComponent(m_DiGiCoRemotePortEdit.get(), true);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoRemotePortLabel.get(), false, false);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoRemotePortEdit.get(), true, false);
@@ -176,9 +214,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_RTTrPMListeningPortEdit = std::make_unique<TextEditor>();
 	m_RTTrPMListeningPortEdit->addListener(this);
 	m_RTTrPMListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
-	m_RTTrPMListeningPortLabel = std::make_unique<Label>();
+	m_RTTrPMListeningPortLabel = std::make_unique<Label>("RTTrPMListeningPortEdit", "Listening Port");
 	m_RTTrPMListeningPortLabel->setJustificationType(Justification::centred);
-	m_RTTrPMListeningPortLabel->setText("Listening Port", dontSendNotification);
 	m_RTTrPMListeningPortLabel->attachToComponent(m_RTTrPMListeningPortEdit.get(), true);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMListeningPortLabel.get(), false, false);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMListeningPortEdit.get(), true, false);
@@ -188,9 +225,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[0]] = m_RTTrPMInterpretXYRelativeButton->addButton(m_RTTrPMInterpretXYRelativeModes[0]);
 	m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[1]] = m_RTTrPMInterpretXYRelativeButton->addButton(m_RTTrPMInterpretXYRelativeModes[1]);
 	m_RTTrPMInterpretXYRelativeButton->setButtonDown(m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[0]]);
-	m_RTTrPMInterpretXYRelativeLabel = std::make_unique<Label>();
+	m_RTTrPMInterpretXYRelativeLabel = std::make_unique<Label>("RTTrPMInterpretXYRelativeButton", "XY interpret mode");
 	m_RTTrPMInterpretXYRelativeLabel->setJustificationType(Justification::centred);
-	m_RTTrPMInterpretXYRelativeLabel->setText("XY interpret mode", dontSendNotification);
 	m_RTTrPMInterpretXYRelativeLabel->attachToComponent(m_RTTrPMInterpretXYRelativeButton.get(), true);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMInterpretXYRelativeLabel.get(), false, false);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMInterpretXYRelativeButton.get(), true, false);
@@ -198,9 +234,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_RTTrPMMappingAreaSelect = std::make_unique<ComboBox>();
 	m_RTTrPMMappingAreaSelect->addListener(this);
 	m_RTTrPMMappingAreaSelect->addItemList({ "1", "2", "3", "4" }, MAI_First);
-	m_RTTrPMMappingAreaLabel = std::make_unique<Label>();
+	m_RTTrPMMappingAreaLabel = std::make_unique<Label>("RTTrPMMappingAreaSelect", "Mapping Area");
 	m_RTTrPMMappingAreaLabel->setJustificationType(Justification::centred);
-	m_RTTrPMMappingAreaLabel->setText("Mapping Area", dontSendNotification);
 	m_RTTrPMMappingAreaLabel->attachToComponent(m_RTTrPMMappingAreaSelect.get(), true);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingAreaLabel.get(), false, false);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingAreaSelect.get(), true, false);
@@ -220,9 +255,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericOSCIpAddressEdit = std::make_unique<TextEditor>();
 	m_GenericOSCIpAddressEdit->addListener(this);
 	m_GenericOSCIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
-	m_GenericOSCIpAddressLabel = std::make_unique<Label>();
+	m_GenericOSCIpAddressLabel = std::make_unique<Label>("GenericOSCIpAddressEdit", "IP Address");
 	m_GenericOSCIpAddressLabel->setJustificationType(Justification::centred);
-	m_GenericOSCIpAddressLabel->setText("IP Address", dontSendNotification);
 	m_GenericOSCIpAddressLabel->attachToComponent(m_GenericOSCIpAddressEdit.get(), true);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCIpAddressLabel.get(), false, false);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCIpAddressEdit.get(), true, false);
@@ -230,9 +264,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericOSCListeningPortEdit = std::make_unique<TextEditor>();
 	m_GenericOSCListeningPortEdit->addListener(this);
 	m_GenericOSCListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
-	m_GenericOSCListeningPortLabel = std::make_unique<Label>();
+	m_GenericOSCListeningPortLabel = std::make_unique<Label>("GenericOSCListeningPortEdit", "Listening Port");
 	m_GenericOSCListeningPortLabel->setJustificationType(Justification::centred);
-	m_GenericOSCListeningPortLabel->setText("Listening Port", dontSendNotification);
 	m_GenericOSCListeningPortLabel->attachToComponent(m_GenericOSCListeningPortEdit.get(), true);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCListeningPortLabel.get(), false, false);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCListeningPortEdit.get(), true, false);
@@ -240,9 +273,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericOSCRemotePortEdit = std::make_unique<TextEditor>();
 	m_GenericOSCRemotePortEdit->addListener(this);
 	m_GenericOSCRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
-	m_GenericOSCRemotePortLabel = std::make_unique<Label>();
+	m_GenericOSCRemotePortLabel = std::make_unique<Label>("GenericOSCRemotePortEdit", "Remote Port");
 	m_GenericOSCRemotePortLabel->setJustificationType(Justification::centred);
-	m_GenericOSCRemotePortLabel->setText("Remote Port", dontSendNotification);
 	m_GenericOSCRemotePortLabel->attachToComponent(m_GenericOSCRemotePortEdit.get(), true);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCRemotePortLabel.get(), false, false);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCRemotePortEdit.get(), true, false);
@@ -263,9 +295,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIInputDeviceSelect->setTextWhenNoChoicesAvailable("No MIDI Inputs Enabled");
 	updateAvailableMidiInputDevices();
 	m_GenericMIDIInputDeviceSelect->addListener(this);
-	m_GenericMIDIInputDeviceSelectLabel = std::make_unique<Label>();
+	m_GenericMIDIInputDeviceSelectLabel = std::make_unique<Label>("GenericMIDIInputDeviceSelect", "MIDI Input");
 	m_GenericMIDIInputDeviceSelectLabel->setJustificationType(Justification::centred);
-	m_GenericMIDIInputDeviceSelectLabel->setText("MIDI Input", dontSendNotification);
 	m_GenericMIDIInputDeviceSelectLabel->attachToComponent(m_GenericMIDIInputDeviceSelect.get(), true);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIInputDeviceSelectLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIInputDeviceSelect.get(), true, false);
@@ -274,9 +305,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIOutputDeviceSelect->setTextWhenNoChoicesAvailable("No MIDI Outputs Enabled");
 	updateAvailableMidiOutputDevices();
 	m_GenericMIDIOutputDeviceSelect->addListener(this);
-	m_GenericMIDIOutputDeviceSelectLabel = std::make_unique<Label>();
+	m_GenericMIDIOutputDeviceSelectLabel = std::make_unique<Label>("GenericMIDIOutputDeviceSelect", "MIDI Output");
 	m_GenericMIDIOutputDeviceSelectLabel->setJustificationType(Justification::centred);
-	m_GenericMIDIOutputDeviceSelectLabel->setText("MIDI Output", dontSendNotification);
 	m_GenericMIDIOutputDeviceSelectLabel->attachToComponent(m_GenericMIDIOutputDeviceSelect.get(), true);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIOutputDeviceSelectLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIOutputDeviceSelect.get(), true, false);
@@ -284,9 +314,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIMappingAreaSelect = std::make_unique<ComboBox>();
 	m_GenericMIDIMappingAreaSelect->addListener(this);
 	m_GenericMIDIMappingAreaSelect->addItemList({ "1", "2", "3", "4" }, MAI_First);
-	m_GenericMIDIMappingAreaLabel = std::make_unique<Label>();
+	m_GenericMIDIMappingAreaLabel = std::make_unique<Label>("GenericMIDIMappingAreaSelect", "Mapping Area");
 	m_GenericMIDIMappingAreaLabel->setJustificationType(Justification::centred);
-	m_GenericMIDIMappingAreaLabel->setText("Mapping Area", dontSendNotification);
 	m_GenericMIDIMappingAreaLabel->attachToComponent(m_GenericMIDIMappingAreaSelect.get(), true);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMappingAreaLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMappingAreaSelect.get(), true, false);
@@ -295,9 +324,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 		static_cast<std::int16_t>(ROI_MatrixInput_Select), 
 		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_Trigger | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
 	m_GenericMIDIMatrixInputSelectLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
-	m_GenericMIDIMatrixInputSelectLabel = std::make_unique<Label>();
+	m_GenericMIDIMatrixInputSelectLabel = std::make_unique<Label>("GenericMIDIMatrixInputSelectLearner", "Object Select");
 	m_GenericMIDIMatrixInputSelectLabel->setJustificationType(Justification::centredLeft);
-	m_GenericMIDIMatrixInputSelectLabel->setText("Object Select", dontSendNotification);
 	m_GenericMIDIMatrixInputSelectLabel->attachToComponent(m_GenericMIDIMatrixInputSelectLearner.get(), true);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMatrixInputSelectLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMatrixInputSelectLearner.get(), true, false);
@@ -306,9 +334,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 		static_cast<std::int16_t>(ROI_CoordinateMapping_SourcePosition_X),
 		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_ValueRange | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
 	m_GenericMIDIXValueLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
-	m_GenericMIDIXValueLabel = std::make_unique<Label>();
+	m_GenericMIDIXValueLabel = std::make_unique<Label>("GenericMIDIXValueLearner", "Relative Pos. X");
 	m_GenericMIDIXValueLabel->setJustificationType(Justification::centredLeft);
-	m_GenericMIDIXValueLabel->setText("Relative Pos. X", dontSendNotification);
 	m_GenericMIDIXValueLabel->attachToComponent(m_GenericMIDIXValueLearner.get(), true);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIXValueLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIXValueLearner.get(), true, false);
@@ -317,9 +344,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 		static_cast<std::int16_t>(ROI_CoordinateMapping_SourcePosition_Y),
 		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_ValueRange | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
 	m_GenericMIDIYValueLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
-	m_GenericMIDIYValueLabel = std::make_unique<Label>();
+	m_GenericMIDIYValueLabel = std::make_unique<Label>("GenericMIDIYValueLearner", "Relative Pos. Y");
 	m_GenericMIDIYValueLabel->setJustificationType(Justification::centredLeft);
-	m_GenericMIDIYValueLabel->setText("Relative Pos. Y", dontSendNotification);
 	m_GenericMIDIYValueLabel->attachToComponent(m_GenericMIDIYValueLearner.get(), true);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIYValueLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIYValueLearner.get(), true, false);
@@ -328,9 +354,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 		static_cast<std::int16_t>(ROI_MatrixInput_ReverbSendGain),
 		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_ValueRange | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
 	m_GenericMIDIReverbSendGainLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
-	m_GenericMIDIReverbSendGainLabel = std::make_unique<Label>();
+	m_GenericMIDIReverbSendGainLabel = std::make_unique<Label>("GenericMIDIReverbSendGainLearner", "Reverb Send Gain");
 	m_GenericMIDIReverbSendGainLabel->setJustificationType(Justification::centredLeft);
-	m_GenericMIDIReverbSendGainLabel->setText("Reverb Send Gain", dontSendNotification);
 	m_GenericMIDIReverbSendGainLabel->attachToComponent(m_GenericMIDIReverbSendGainLearner.get(), true);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIReverbSendGainLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIReverbSendGainLearner.get(), true, false);
@@ -339,9 +364,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 		static_cast<std::int16_t>(ROI_Positioning_SourceSpread),
 		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_ValueRange | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
 	m_GenericMIDISourceSpreadLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
-	m_GenericMIDISourceSpreadLabel = std::make_unique<Label>();
+	m_GenericMIDISourceSpreadLabel = std::make_unique<Label>("GenericMIDISourceSpreadLearner", "Object Spread");
 	m_GenericMIDISourceSpreadLabel->setJustificationType(Justification::centredLeft);
-	m_GenericMIDISourceSpreadLabel->setText("Object Spread", dontSendNotification);
 	m_GenericMIDISourceSpreadLabel->attachToComponent(m_GenericMIDISourceSpreadLearner.get(), true);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDISourceSpreadLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDISourceSpreadLearner.get(), true, false);
@@ -350,9 +374,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 		static_cast<std::int16_t>(ROI_Positioning_SourceDelayMode),
 		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_ValueRange | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
 	m_GenericMIDIDelayModeLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
-	m_GenericMIDIDelayModeLabel = std::make_unique<Label>();
+	m_GenericMIDIDelayModeLabel = std::make_unique<Label>("GenericMIDIDelayModeLearner", "Object DelayMode");
 	m_GenericMIDIDelayModeLabel->setJustificationType(Justification::centredLeft);
-	m_GenericMIDIDelayModeLabel->setText("Object DelayMode", dontSendNotification);
 	m_GenericMIDIDelayModeLabel->attachToComponent(m_GenericMIDIDelayModeLearner.get(), true);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIDelayModeLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIDelayModeLearner.get(), true, false);
@@ -371,9 +394,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_YamahaOSCIpAddressEdit = std::make_unique<TextEditor>();
 	m_YamahaOSCIpAddressEdit->addListener(this);
 	m_YamahaOSCIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
-	m_YamahaOSCIpAddressLabel = std::make_unique<Label>();
+	m_YamahaOSCIpAddressLabel = std::make_unique<Label>("YamahaOSCIpAddressEdit", "IP Address");
 	m_YamahaOSCIpAddressLabel->setJustificationType(Justification::centred);
-	m_YamahaOSCIpAddressLabel->setText("IP Address", dontSendNotification);
 	m_YamahaOSCIpAddressLabel->attachToComponent(m_YamahaOSCIpAddressEdit.get(), true);
 	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCIpAddressLabel.get(), false, false);
 	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCIpAddressEdit.get(), true, false);
@@ -381,9 +403,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_YamahaOSCListeningPortEdit = std::make_unique<TextEditor>();
 	m_YamahaOSCListeningPortEdit->addListener(this);
 	m_YamahaOSCListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
-	m_YamahaOSCListeningPortLabel = std::make_unique<Label>();
+	m_YamahaOSCListeningPortLabel = std::make_unique<Label>("YamahaOSCListeningPortEdit", "Listening Port");
 	m_YamahaOSCListeningPortLabel->setJustificationType(Justification::centred);
-	m_YamahaOSCListeningPortLabel->setText("Listening Port", dontSendNotification);
 	m_YamahaOSCListeningPortLabel->attachToComponent(m_YamahaOSCListeningPortEdit.get(), true);
 	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCListeningPortLabel.get(), false, false);
 	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCListeningPortEdit.get(), true, false);
@@ -391,9 +412,8 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_YamahaOSCRemotePortEdit = std::make_unique<TextEditor>();
 	m_YamahaOSCRemotePortEdit->addListener(this);
 	m_YamahaOSCRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
-	m_YamahaOSCRemotePortLabel = std::make_unique<Label>();
+	m_YamahaOSCRemotePortLabel = std::make_unique<Label>("YamahaOSCRemotePortEdit", "Remote Port");
 	m_YamahaOSCRemotePortLabel->setJustificationType(Justification::centred);
-	m_YamahaOSCRemotePortLabel->setText("Remote Port", dontSendNotification);
 	m_YamahaOSCRemotePortLabel->attachToComponent(m_YamahaOSCRemotePortEdit.get(), true);
 	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCRemotePortLabel.get(), false, false);
 	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCRemotePortEdit.get(), true, false);
@@ -401,14 +421,17 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_YamahaOSCMappingAreaSelect = std::make_unique<ComboBox>();
 	m_YamahaOSCMappingAreaSelect->addListener(this);
 	m_YamahaOSCMappingAreaSelect->addItemList({ "1", "2", "3", "4" }, MAI_First);
-	m_YamahaOSCMappingAreaLabel = std::make_unique<Label>();
+	m_YamahaOSCMappingAreaLabel = std::make_unique<Label>("YamahaOSCMappingAreaSelect", "Mapping Area");
 	m_YamahaOSCMappingAreaLabel->setJustificationType(Justification::centred);
-	m_YamahaOSCMappingAreaLabel->setText("Mapping Area", dontSendNotification);
 	m_YamahaOSCMappingAreaLabel->attachToComponent(m_YamahaOSCMappingAreaSelect.get(), true);
 	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCMappingAreaLabel.get(), false, false);
 	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCMappingAreaSelect.get(), true, false);
 
 	m_YamahaOSCBridgingSettings->resized();
+
+
+	// trigger lookAndFeelChanged once to initially setup drawablebuttons
+	lookAndFeelChanged();
 }
 
 /**
@@ -437,7 +460,9 @@ void SettingsSectionsComponent::resized()
 	auto margin = 3.0f;
 
 	auto minWidth = HeaderWithElmListComponent::m_attachedItemWidth + HeaderWithElmListComponent::m_layoutItemWidth;
-	auto minHeight = (m_DS100Settings->getHeight() + (2 * margin))
+	auto minHeight = 
+		(m_GeneralSettings->getHeight() + (2 * margin))
+		+ (m_DS100Settings->getHeight() + (2 * margin))
 		+ (m_DiGiCoBridgingSettings->getHeight() + (2 * margin))
 		+ (m_RTTrPMBridgingSettings->getHeight() + (2 * margin))
 		+ (m_GenericOSCBridgingSettings->getHeight() + (2 * margin))
@@ -459,6 +484,9 @@ void SettingsSectionsComponent::resized()
 	fb.flexDirection = FlexBox::Direction::column;
 	fb.justifyContent = FlexBox::JustifyContent::flexStart;
 	fb.items.addArray({
+		FlexItem(*m_GeneralSettings.get())
+			.withHeight(static_cast<float>(m_GeneralSettings->getHeight()))
+			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
 		FlexItem(*m_DS100Settings.get())
 			.withHeight(static_cast<float>(m_DS100Settings->getHeight()))
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
@@ -478,6 +506,108 @@ void SettingsSectionsComponent::resized()
 			.withHeight(static_cast<float>(m_YamahaOSCBridgingSettings->getHeight()))
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)) });
 	fb.performLayout(bounds);
+}
+
+/**
+ * Reimplemented from component to change drawablebutton icon data.
+ */
+void SettingsSectionsComponent::lookAndFeelChanged()
+{
+	Component::lookAndFeelChanged();
+
+	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (!dblookAndFeel)
+		return;
+
+	if (m_SoundObjectPageButton)
+	{
+		std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(String(BinaryData::vertical_split24px_svg), NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+		m_SoundObjectPageButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+	}
+
+	if (m_MultisurfacePageButton)
+	{
+		std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(String(BinaryData::grain24px_svg), NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+		m_MultisurfacePageButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+	}
+
+	if (m_MatrixIOPageButton)
+	{
+		std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(String(BinaryData::tune24px_svg), NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+		m_MatrixIOPageButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+	}
+
+	if (m_ScenesPageButton)
+	{
+		std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(String(BinaryData::slideshow_black_24dp_svg), NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+		m_ScenesPageButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+	}
+
+	if (m_EnSpacePageButton)
+	{
+		std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(String(BinaryData::sensors_black_24dp_svg), NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+		m_EnSpacePageButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+	}
+
+	if (m_StatisticsPageButton)
+	{
+		std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(String(BinaryData::show_chart24px_svg), NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+		m_StatisticsPageButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+	}
 }
 
 /**

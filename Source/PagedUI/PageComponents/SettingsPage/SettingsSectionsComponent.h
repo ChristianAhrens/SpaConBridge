@@ -85,6 +85,24 @@ private:
 	//==============================================================================
 	void handleMidiAssiSet(Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi);
 
+	//==============================================================================
+	void processUpdatedGeneralConfig();
+	void processUpdatedDS100Config();
+	void processUpdatedDiGiCoConfig();
+	void processUpdatedRTTrPMConfig();
+	void processUpdatedGenericOSCConfig();
+	void processUpdatedGenericMIDIConfig();
+	void processUpdatedYamahaOSCConfig();
+
+	//==============================================================================
+	void createGeneralSettingsSection();
+	void createDS100SettingsSection();
+	void createDiGiCoSettingsSection();
+	void createRTTrPMSettingsSection();
+	void createGenericOSCSettingsSection();
+	void createGenericMIDISettingsSection();
+	void createYamahaOSCSettingsSection();
+
 	// input filters for texteditors
 	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_intervalEditFilter;
 	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_ipAddressEditFilter;

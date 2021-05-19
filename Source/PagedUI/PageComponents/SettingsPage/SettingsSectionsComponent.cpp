@@ -46,6 +46,20 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_portEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(5, "1234567890"); // 5 digits: "65535"
 	m_mappingEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(1, "1234"); // 1 digit: "4"
 
+	createGeneralSettingsSection();
+	createDS100SettingsSection();
+	createDiGiCoSettingsSection();
+	createRTTrPMSettingsSection();
+	createGenericOSCSettingsSection();
+	createGenericMIDISettingsSection();
+	createYamahaOSCSettingsSection();
+}
+
+/**
+ * Helper method to create and setup objects for general settings section
+ */
+void SettingsSectionsComponent::createGeneralSettingsSection()
+{
 	// General settings section
 	m_GeneralSettings = std::make_unique<HeaderWithElmListComponent>();
 	m_GeneralSettings->setHeaderText("General Settings");
@@ -89,7 +103,15 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 
 	m_GeneralSettings->resized();
 
+	// trigger lookAndFeelChanged once to initially setup drawablebuttons
+	lookAndFeelChanged();
+}
 
+/**
+ * Helper method to create and setup objects for DS100 settings section
+ */
+void SettingsSectionsComponent::createDS100SettingsSection()
+{
 	// DS100 settings section
 	m_DS100Settings = std::make_unique<HeaderWithElmListComponent>();
 	m_DS100Settings->setHeaderText("DS100 Settings");
@@ -161,8 +183,13 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_DS100Settings->addComponent(m_SecondDS100ZeroconfDiscovery.get(), true, false);
 
 	m_DS100Settings->resized();
+}
 
-
+/**
+ * Helper method to create and setup objects for DiGiCo settings section
+ */
+void SettingsSectionsComponent::createDiGiCoSettingsSection()
+{
 	// DiGiCo settings section
 	m_DiGiCoBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
 	m_DiGiCoBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_DiGiCo) + " Bridging");
@@ -200,8 +227,13 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoRemotePortEdit.get(), true, false);
 
 	m_DiGiCoBridgingSettings->resized();
+}
 
-
+/**
+ * Helper method to create and setup objects for Blacktrax RTTrPM settings section
+ */
+void SettingsSectionsComponent::createRTTrPMSettingsSection()
+{
 	// BlackTrax RTTrPM settings section
 	m_RTTrPMBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
 	m_RTTrPMBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_BlacktraxRTTrPM) + " Bridging");
@@ -241,8 +273,13 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingAreaSelect.get(), true, false);
 
 	m_RTTrPMBridgingSettings->resized();
+}
 
-
+/**
+ * Helper method to create and setup objects for d&b Generic OSC settings section
+ */
+void SettingsSectionsComponent::createGenericOSCSettingsSection()
+{
 	// Generic OSC settings section
 	m_GenericOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
 	m_GenericOSCBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_GenericOSC) + " Bridging");
@@ -280,8 +317,13 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCRemotePortEdit.get(), true, false);
 
 	m_GenericOSCBridgingSettings->resized();
+}
 
-
+/**
+ * Helper method to create and setup objects for Generic MIDI settings section
+ */
+void SettingsSectionsComponent::createGenericMIDISettingsSection()
+{
 	// Generic MIDI settings section
 	m_GenericMIDIBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
 	m_GenericMIDIBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_GenericMIDI) + " Bridging");
@@ -381,7 +423,13 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIDelayModeLearner.get(), true, false);
 
 	m_GenericMIDIBridgingSettings->resized();
+}
 
+/**
+ * Helper method to create and setup objects for Yamaha OSC settings section
+ */
+void SettingsSectionsComponent::createYamahaOSCSettingsSection()
+{
 	// YamahaOSC settings section
 	m_YamahaOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
 	m_YamahaOSCBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_YamahaOSC) + " Bridging");
@@ -428,10 +476,6 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCMappingAreaSelect.get(), true, false);
 
 	m_YamahaOSCBridgingSettings->resized();
-
-
-	// trigger lookAndFeelChanged once to initially setup drawablebuttons
-	lookAndFeelChanged();
 }
 
 /**
@@ -888,6 +932,27 @@ void SettingsSectionsComponent::updateAvailableMidiOutputDevices()
  */
 void SettingsSectionsComponent::processUpdatedConfig()
 {
+	processUpdatedGeneralConfig();
+	processUpdatedDS100Config();
+	processUpdatedDiGiCoConfig();
+	processUpdatedRTTrPMConfig();
+	processUpdatedGenericOSCConfig();
+	processUpdatedGenericMIDIConfig();
+	processUpdatedYamahaOSCConfig();
+}
+
+/**
+ * Helper method to update objects for general settings section with updated config
+ */
+void SettingsSectionsComponent::processUpdatedGeneralConfig()
+{
+}
+
+/**
+ * Helper method to update objects for DS100 settings section with updated config
+ */
+void SettingsSectionsComponent::processUpdatedDS100Config()
+{
 	Controller* ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return;
@@ -928,6 +993,16 @@ void SettingsSectionsComponent::processUpdatedConfig()
 		m_SecondDS100IpAddressLabel->setEnabled(ctrl->GetExtensionMode() != EM_Off);
 	if (m_SecondDS100ZeroconfDiscovery)
 		m_SecondDS100ZeroconfDiscovery->setEnabled(ctrl->GetExtensionMode() != EM_Off);
+}
+
+/**
+ * Helper method to update objects for DiGiCo settings section with updated config
+ */
+void SettingsSectionsComponent::processUpdatedDiGiCoConfig()
+{
+	Controller* ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
 
 	// DiGiCo settings section
 	auto DiGiCoBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_DiGiCo) == PBT_DiGiCo;
@@ -939,6 +1014,16 @@ void SettingsSectionsComponent::processUpdatedConfig()
 		m_DiGiCoListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_DiGiCo)), false);
 	if (m_DiGiCoRemotePortEdit)
 		m_DiGiCoRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_DiGiCo)), false);
+}
+
+/**
+ * Helper method to update objects for RTTrPM settings section with updated config
+ */
+void SettingsSectionsComponent::processUpdatedRTTrPMConfig()
+{
+	Controller* ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
 
 	// RTTrPM settings section
 	auto RTTrPMBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_BlacktraxRTTrPM) == PBT_BlacktraxRTTrPM;
@@ -959,6 +1044,16 @@ void SettingsSectionsComponent::processUpdatedConfig()
 	}
 	if (m_RTTrPMMappingAreaLabel)
 		m_RTTrPMMappingAreaLabel->setEnabled((RTTrPMMappingAreaId != MAI_Invalid));
+}
+
+/**
+ *  Helper method to update objects for Generic OSC settings section with updated config
+ */
+void SettingsSectionsComponent::processUpdatedGenericOSCConfig()
+{
+	Controller* ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
 
 	// Generic OSC settings section
 	auto GenericOSCBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_GenericOSC) == PBT_GenericOSC;
@@ -970,6 +1065,16 @@ void SettingsSectionsComponent::processUpdatedConfig()
 		m_GenericOSCListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_GenericOSC)), false);
 	if (m_GenericOSCRemotePortEdit)
 		m_GenericOSCRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_GenericOSC)), false);
+}
+
+/**
+ * Helper method to update objects for Generic MIDI settings section with updated config
+ */
+void SettingsSectionsComponent::processUpdatedGenericMIDIConfig()
+{
+	Controller* ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
 
 	// Generic MIDI settings section
 	auto GenericMIDIBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_GenericMIDI) == PBT_GenericMIDI;
@@ -1040,7 +1145,17 @@ void SettingsSectionsComponent::processUpdatedConfig()
 		m_GenericMIDIDelayModeLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
 		m_GenericMIDIDelayModeLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIDelayModeLearner->getReferredId())));
 	}
-    
+}
+
+/**
+ * Helper method to update objects for Yamaha OSC settings section with updated config
+ */
+void SettingsSectionsComponent::processUpdatedYamahaOSCConfig()
+{
+	Controller* ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
 	// Yamaha OSC settings section
 	auto YamahaOSCBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_YamahaOSC) == PBT_YamahaOSC;
 	if (m_YamahaOSCBridgingSettings)

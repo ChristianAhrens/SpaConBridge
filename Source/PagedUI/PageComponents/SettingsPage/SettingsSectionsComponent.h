@@ -39,7 +39,8 @@ namespace SpaConBridge
  * a viewport for scrolling functionality.
  */
 class SettingsSectionsComponent : 
-	public Component, 
+	public Component,
+	public Button::Listener,
 	public TextEditor::Listener,
 	public ComboBox::Listener,
 	public JUCEAppBasics::SplitButtonComponent::Listener
@@ -57,6 +58,9 @@ public:
 
 	//==========================================================================
 	void lookAndFeelChanged() override;
+
+	//==========================================================================
+	void buttonClicked(Button* button) override;
 
 	//==========================================================================
 	void buttonClicked(JUCEAppBasics::SplitButtonComponent* button, uint64 buttonId) override;

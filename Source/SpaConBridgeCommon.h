@@ -60,6 +60,20 @@ typedef juce::uint32 ProtocolBridgingType;
 typedef juce::uint8 ComsMode;
 
 /**
+ * UI Page Indices
+ */
+enum UIPageIndex
+{
+	UPI_Table = 0,
+	UPI_MultiSlider,
+	UPI_MatrixIOs,
+	UPI_Scenes,
+	UPI_EnSpace,
+	UPI_Statistics,
+	UPI_Settings,
+};
+
+/**
  * Data Change Participant (Source or Sink)
  * Enum used to define where a parameter or property change has originated or is processed in.
  */

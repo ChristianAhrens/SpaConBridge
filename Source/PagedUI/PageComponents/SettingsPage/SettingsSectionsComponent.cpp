@@ -70,21 +70,27 @@ void SettingsSectionsComponent::createGeneralSettingsSection()
 	m_PageEnableButtonContainer->SetSpacing(5);
 	m_SoundObjectPageButton = std::make_unique<DrawableButton>("SoundObjectPage", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_SoundObjectPageButton->setClickingTogglesState(true);
+	m_SoundObjectPageButton->addListener(this);
 	m_PageEnableButtonContainer->AddComponent(m_SoundObjectPageButton.get());
 	m_MultisurfacePageButton = std::make_unique<DrawableButton>("MultisurfacePage", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_MultisurfacePageButton->setClickingTogglesState(true);
+	m_MultisurfacePageButton->addListener(this);
 	m_PageEnableButtonContainer->AddComponent(m_MultisurfacePageButton.get());
 	m_MatrixIOPageButton = std::make_unique<DrawableButton>("MatrixIOPage", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_MatrixIOPageButton->setClickingTogglesState(true);
+	m_MatrixIOPageButton->addListener(this);
 	m_PageEnableButtonContainer->AddComponent(m_MatrixIOPageButton.get());
 	m_ScenesPageButton = std::make_unique<DrawableButton>("ScenesPage", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_ScenesPageButton->setClickingTogglesState(true);
+	m_ScenesPageButton->addListener(this);
 	m_PageEnableButtonContainer->AddComponent(m_ScenesPageButton.get());
 	m_EnSpacePageButton = std::make_unique<DrawableButton>("EnSpacePage", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_EnSpacePageButton->setClickingTogglesState(true);
+	m_EnSpacePageButton->addListener(this);
 	m_PageEnableButtonContainer->AddComponent(m_EnSpacePageButton.get());
 	m_StatisticsPageButton = std::make_unique<DrawableButton>("StatisticsPage", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_StatisticsPageButton->setClickingTogglesState(true);
+	m_StatisticsPageButton->addListener(this);
 	m_PageEnableButtonContainer->AddComponent(m_StatisticsPageButton.get());
 	m_EnabledPagesLabel = std::make_unique<Label>("PageEnableButton", "Enabled Pages");
 	m_EnabledPagesLabel->setJustificationType(Justification::centred);
@@ -651,6 +657,42 @@ void SettingsSectionsComponent::lookAndFeelChanged()
 			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
 			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
 		m_StatisticsPageButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+	}
+}
+
+/**
+ * Reimplemented from Button Listener.
+ * @param button	The button object instance that was clicked
+ */
+void SettingsSectionsComponent::buttonClicked(Button* button)
+{
+	Controller* ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
+	if (m_SoundObjectPageButton && m_SoundObjectPageButton.get() == button)
+	{
+		UPI_Table;
+	}
+	else if (m_MultisurfacePageButton && m_MultisurfacePageButton.get() == button)
+	{
+		UPI_MultiSlider;
+	}
+	else if (m_MatrixIOPageButton && m_MatrixIOPageButton.get() == button)
+	{
+		UPI_MatrixIOs;
+	}
+	else if (m_ScenesPageButton && m_ScenesPageButton.get() == button)
+	{
+		UPI_Scenes;
+	}
+	else if (m_EnSpacePageButton && m_EnSpacePageButton.get() == button)
+	{
+		UPI_EnSpace;
+	}
+	else if (m_StatisticsPageButton && m_StatisticsPageButton.get() == button)
+	{
+		UPI_Statistics;
 	}
 }
 

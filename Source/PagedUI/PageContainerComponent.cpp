@@ -139,13 +139,13 @@ PageContainerComponent::PageContainerComponent()
 
 	// Add the page tabs.
 	m_tabbedComponent->SetIsHandlingChanges(false);
-	m_tabbedComponent->addTab("Table", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_soundobjectsPage.get(), false, CustomButtonTabbedComponent::OTI_Table);
-	m_tabbedComponent->addTab("Slider", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSliderPage.get(), false, CustomButtonTabbedComponent::OTI_MultiSlider);
-	m_tabbedComponent->addTab("Matrix IOs", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_matrixIOPage.get(), false, CustomButtonTabbedComponent::OTI_MatrixIOs);
-	m_tabbedComponent->addTab("Scenes", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_scenesPage.get(), false, CustomButtonTabbedComponent::OTI_Scenes);
-	m_tabbedComponent->addTab("EnSpace", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_enSpacePage.get(), false, CustomButtonTabbedComponent::OTI_EnSpace);
-	m_tabbedComponent->addTab("Statistics", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_statisticsPage.get(), false, CustomButtonTabbedComponent::OTI_Statistics);
-	m_tabbedComponent->addTab("Settings", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_settingsPage.get(), false, CustomButtonTabbedComponent::OTI_Settings);
+	m_tabbedComponent->addTab("Table", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_soundobjectsPage.get(), false, UPI_Table);
+	m_tabbedComponent->addTab("Slider", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSliderPage.get(), false, UPI_MultiSlider);
+	m_tabbedComponent->addTab("Matrix IOs", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_matrixIOPage.get(), false, UPI_MatrixIOs);
+	m_tabbedComponent->addTab("Scenes", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_scenesPage.get(), false, UPI_Scenes);
+	m_tabbedComponent->addTab("EnSpace", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_enSpacePage.get(), false, UPI_EnSpace);
+	m_tabbedComponent->addTab("Statistics", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_statisticsPage.get(), false, UPI_Statistics);
+	m_tabbedComponent->addTab("Settings", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_settingsPage.get(), false, UPI_Settings);
 	m_tabbedComponent->SetIsHandlingChanges(true);
 
 	// Start GUI-refreshing timer.
@@ -349,7 +349,7 @@ void PageContainerComponent::UpdateGui(bool init)
 	}
 
 	// Save some performance: only update the component inside the currently active tab.
-	if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_Table)
+	if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == UPI_Table)
 	{
 		if (m_soundobjectsPage)
 			m_soundobjectsPage->UpdateGui(init);
@@ -358,7 +358,7 @@ void PageContainerComponent::UpdateGui(bool init)
 		if (getTimerInterval() != GUI_UPDATE_RATE_SLOW)
 			startTimer(GUI_UPDATE_RATE_SLOW);
 	}
-	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_MultiSlider)
+	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == UPI_MultiSlider)
 	{
 		if (m_multiSliderPage)
 			m_multiSliderPage->UpdateGui(init);
@@ -367,7 +367,7 @@ void PageContainerComponent::UpdateGui(bool init)
 		if (getTimerInterval() != GUI_UPDATE_RATE_FAST)
 			startTimer(GUI_UPDATE_RATE_FAST);
 	}
-    else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_MatrixIOs)
+    else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == UPI_MatrixIOs)
     {
         if (m_matrixIOPage)
             m_matrixIOPage->UpdateGui(init);
@@ -376,7 +376,7 @@ void PageContainerComponent::UpdateGui(bool init)
 		if (getTimerInterval() != GUI_UPDATE_RATE_SLOW)
 			startTimer(GUI_UPDATE_RATE_SLOW);
     }
-	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_Scenes)
+	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == UPI_Scenes)
 	{
 		if (m_scenesPage)
 			m_scenesPage->UpdateGui(init);
@@ -385,7 +385,7 @@ void PageContainerComponent::UpdateGui(bool init)
 		if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
 			startTimer(GUI_UPDATE_RATE_SUPERSLOW);
 	}
-	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_EnSpace)
+	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == UPI_EnSpace)
 	{
 		if (m_enSpacePage)
 			m_enSpacePage->UpdateGui(init);
@@ -742,25 +742,25 @@ void CustomDrawableTabBarButton::updateDrawableButtonImageColours()
 	String imageName;
 	switch (m_tabIndex)
 	{
-	case CustomButtonTabbedComponent::OTI_Table:
+	case UPI_Table:
 		imageName = BinaryData::vertical_split24px_svg;
 		break;
-	case CustomButtonTabbedComponent::OTI_MultiSlider:
+	case UPI_MultiSlider:
 		imageName = BinaryData::grain24px_svg;
 		break;
-    case CustomButtonTabbedComponent::OTI_MatrixIOs:
+    case UPI_MatrixIOs:
         imageName = BinaryData::tune24px_svg;
         break;
-	case CustomButtonTabbedComponent::OTI_Settings:
+	case UPI_Settings:
 		imageName = BinaryData::settings24px_svg;
 		break;
-	case CustomButtonTabbedComponent::OTI_Statistics:
+	case UPI_Statistics:
 		imageName = BinaryData::show_chart24px_svg;
 		break;
-	case CustomButtonTabbedComponent::OTI_Scenes:
+	case UPI_Scenes:
 		imageName = BinaryData::slideshow_black_24dp_svg;
 		break;
-	case CustomButtonTabbedComponent::OTI_EnSpace:
+	case UPI_EnSpace:
 		imageName = BinaryData::sensors_black_24dp_svg;
 		break;
 	default:

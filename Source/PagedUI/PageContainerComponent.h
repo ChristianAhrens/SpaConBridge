@@ -220,21 +220,6 @@ private:
 class CustomButtonTabbedComponent : public TabbedComponent
 {
 public:
-
-	/**
-	 * Overview tab indices
-	 */
-	enum OverviewTabIndex
-	{
-		OTI_Table = 0,
-		OTI_MultiSlider,
-        OTI_MatrixIOs,
-		OTI_Scenes,
-		OTI_EnSpace,
-		OTI_Statistics,
-		OTI_Settings,
-	};
-
 	CustomButtonTabbedComponent();
 	~CustomButtonTabbedComponent() override;
 

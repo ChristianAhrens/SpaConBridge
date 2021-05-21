@@ -47,7 +47,6 @@ namespace SpaConBridge
 /**
  * Forward declarations
  */
-class COverview;
 class PageContainerComponent;
 
 
@@ -73,10 +72,6 @@ public:
 	//==============================================================================
 	const std::vector<UIPageId>& GetEnabledPages() const;
 	void SetEnabledPages(const std::vector<UIPageId>& enabledPages, bool dontSendNotification);
-
-	//==============================================================================
-	int GetSelectedMapping() const;
-	void SetSelectedMapping(int mapping);
 
 	//==============================================================================
 	int GetSoundobjectTableRowHeight();
@@ -112,8 +107,6 @@ protected:
 	std::vector<UIPageId>				m_enabledPages;												/**< Remember the currently enabled pages. */
 
 	DbLookAndFeelBase::LookAndFeelType	m_lookAndFeelType{ DbLookAndFeelBase::LAFT_InvalidFirst };	/**< Remember the currently selected look and feel type. */
-
-	int									m_selectedMapping{ 1 };										/**< Remember the last selected coordinate mapping for the multi-slider. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PageComponentManager)
 };

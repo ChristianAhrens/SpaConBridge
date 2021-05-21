@@ -211,24 +211,6 @@ void PageComponentManager::SetEnabledPages(const std::vector<UIPageId>& enabledP
 }
 
 /**
- * Get the currently selected coordinate mapping used for the multi-slider.
- * @return The selected mapping area.
- */
-int PageComponentManager::GetSelectedMapping() const
-{
-	return m_selectedMapping;
-}
-
-/**
- * Set the currently selected coordinate mapping used for the multi-slider.
- * @param mapping	The new selected mapping area.
- */
-void PageComponentManager::SetSelectedMapping(int mapping)
-{
-	m_selectedMapping = mapping;
-}
-
-/**
  * Proxy Getter for the row height in sound objects table.
  * Forwards call to PageContainerComponent.
  * @return	The table row height.

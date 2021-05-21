@@ -58,6 +58,10 @@ public:
 	//==============================================================================
 	void UpdateGui(bool init) override;
 
+	//==============================================================================
+	int GetSelectedMapping() const;
+	void SetSelectedMapping(int mapping);
+
 protected:
 	//==============================================================================
 	void paint(Graphics&) override;
@@ -70,6 +74,7 @@ private:
 	std::unique_ptr<Component>	m_multiSliderSurface;	/**> Multi-source 2D-Slider. */
 	std::unique_ptr<Label>		m_mappingAreaLabel;		/**> Mapping selector label. */
 	std::unique_ptr<ComboBox>	m_mappingAreaSelect;	/**> ComboBox selector for the coordinate mapping area. */
+	int							m_selectedMapping{ 1 };	/**< Remember the last selected coordinate mapping for the multi-slider. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSurfacePageComponent)
 };

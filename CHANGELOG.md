@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+- 
+
+### Changed
+- 
+
+### Fixed
+- 
+
+## [0.3.3] - 2021-05-21
+### Added
 - Added "Pinnable" Scenes (create custom Scene Index recall buttons by "pinning" current Scene)
 - Added "General Settings" section to settings page, allowing enabling/disabling of pages to be shown on UI, and moved existing look and feel selection dropdown from bottom bar to "General Settings" section
 

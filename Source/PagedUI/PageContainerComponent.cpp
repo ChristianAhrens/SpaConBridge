@@ -350,7 +350,7 @@ void PageContainerComponent::UpdateGui(bool init)
 	}
 
 	// Save some performance: only update the component inside the currently active tab.
-	if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == UPI_SoundObjects)
+	if (m_tabbedComponent && m_tabbedComponent->getCurrentTabName() == GetPageNameFromId(UPI_SoundObjects))
 	{
 		if (m_soundobjectsPage)
 			m_soundobjectsPage->UpdateGui(init);
@@ -359,7 +359,7 @@ void PageContainerComponent::UpdateGui(bool init)
 		if (getTimerInterval() != GUI_UPDATE_RATE_SLOW)
 			startTimer(GUI_UPDATE_RATE_SLOW);
 	}
-	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == UPI_MultiSlider)
+	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabName() == GetPageNameFromId(UPI_MultiSlider))
 	{
 		if (m_multiSliderPage)
 			m_multiSliderPage->UpdateGui(init);
@@ -368,7 +368,7 @@ void PageContainerComponent::UpdateGui(bool init)
 		if (getTimerInterval() != GUI_UPDATE_RATE_FAST)
 			startTimer(GUI_UPDATE_RATE_FAST);
 	}
-    else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == UPI_MatrixIOs)
+    else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabName() == GetPageNameFromId(UPI_MatrixIOs))
     {
         if (m_matrixIOPage)
             m_matrixIOPage->UpdateGui(init);
@@ -377,7 +377,7 @@ void PageContainerComponent::UpdateGui(bool init)
 		if (getTimerInterval() != GUI_UPDATE_RATE_SLOW)
 			startTimer(GUI_UPDATE_RATE_SLOW);
     }
-	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == UPI_Scenes)
+	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabName() == GetPageNameFromId(UPI_Scenes))
 	{
 		if (m_scenesPage)
 			m_scenesPage->UpdateGui(init);
@@ -386,7 +386,7 @@ void PageContainerComponent::UpdateGui(bool init)
 		if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
 			startTimer(GUI_UPDATE_RATE_SUPERSLOW);
 	}
-	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == UPI_EnSpace)
+	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabName() == GetPageNameFromId(UPI_EnSpace))
 	{
 		if (m_enSpacePage)
 			m_enSpacePage->UpdateGui(init);

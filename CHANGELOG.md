@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Introduced major performance improvement regarding all UI interactions that affect the application xml configuration
 
 ### Fixed
-- 
+- App stability and minor bugs
 
 ## [0.3.2] - 2021-05-04
 ### Added

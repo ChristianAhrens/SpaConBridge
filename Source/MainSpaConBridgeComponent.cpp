@@ -60,17 +60,22 @@ MainSpaConBridgeComponent::MainSpaConBridgeComponent(std::function<void(DbLookAn
     }
 
     // add this main component to watchers
-    m_config->addWatcher(this, true);
+    m_config->addWatcher(this, false); // no initialUpdate here, we do that manually a few lines below
 
-    // enshure the controller and pagemanager singleton is created
+    // enshure the controller singleton is created
     auto ctrl = SpaConBridge::Controller::GetInstance();
     jassert(ctrl);
+    ignoreUnused(ctrl);
+    // enshure the pagemanager singleton is created
     auto pageMgr = SpaConBridge::PageComponentManager::GetInstance();
     jassert(pageMgr);
 
     // get the overview component from manager to use as central element for app ui
     auto pageContainer = pageMgr->GetPageContainer();
     addAndMakeVisible(pageContainer);
+
+    // do the initial update with config contents
+    m_config->triggerWatcherUpdate();
 
     setSize(896, 414);
 }

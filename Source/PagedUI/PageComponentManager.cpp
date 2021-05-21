@@ -470,18 +470,18 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
 	auto enabledPagesXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::ENABLEDPAGES));
 	if (enabledPagesXmlElement)
 	{
+		auto enabledPages = std::vector<UIPageId>();
+
 		auto enabledPagesTextElement = enabledPagesXmlElement->getFirstChildElement();
 		if (enabledPagesTextElement && enabledPagesTextElement->isTextElement())
 		{
-			auto enabledPages = std::vector<UIPageId>();
-
 			auto enabledPagesIdStrings = StringArray();
 			enabledPagesIdStrings.addTokens(enabledPagesTextElement->getText(), ", ");
 			for (auto const& pageIdString : enabledPagesIdStrings)
 				enabledPages.push_back(static_cast<UIPageId>(pageIdString.getIntValue()));
-
-			SetEnabledPages(enabledPages, true);
 		}
+
+		SetEnabledPages(enabledPages, true);
 	}
 
 	auto soundobjectTableXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTTABLE));

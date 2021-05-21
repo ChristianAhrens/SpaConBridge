@@ -39,7 +39,8 @@ namespace SpaConBridge
  * a viewport for scrolling functionality.
  */
 class SettingsSectionsComponent : 
-	public Component, 
+	public Component,
+	public Button::Listener,
 	public TextEditor::Listener,
 	public ComboBox::Listener,
 	public JUCEAppBasics::SplitButtonComponent::Listener
@@ -54,6 +55,12 @@ public:
 	//==========================================================================
 	void paint(Graphics&) override;
 	void resized() override;
+
+	//==========================================================================
+	void lookAndFeelChanged() override;
+
+	//==========================================================================
+	void buttonClicked(Button* button) override;
 
 	//==========================================================================
 	void buttonClicked(JUCEAppBasics::SplitButtonComponent* button, uint64 buttonId) override;
@@ -82,11 +89,42 @@ private:
 	//==============================================================================
 	void handleMidiAssiSet(Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi);
 
+	//==============================================================================
+	void processUpdatedGeneralConfig();
+	void processUpdatedDS100Config();
+	void processUpdatedDiGiCoConfig();
+	void processUpdatedRTTrPMConfig();
+	void processUpdatedGenericOSCConfig();
+	void processUpdatedGenericMIDIConfig();
+	void processUpdatedYamahaOSCConfig();
+
+	//==============================================================================
+	void createGeneralSettingsSection();
+	void createDS100SettingsSection();
+	void createDiGiCoSettingsSection();
+	void createRTTrPMSettingsSection();
+	void createGenericOSCSettingsSection();
+	void createGenericMIDISettingsSection();
+	void createYamahaOSCSettingsSection();
+
 	// input filters for texteditors
 	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_intervalEditFilter;
 	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_ipAddressEditFilter;
 	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_portEditFilter;
 	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_mappingEditFilter;
+
+	// General settings section
+	std::unique_ptr<HeaderWithElmListComponent>					m_GeneralSettings;
+	std::unique_ptr<HorizontalLayouterComponent>				m_PageEnableButtonContainer;
+	std::unique_ptr<DrawableButton>								m_SoundObjectPageButton;
+	std::unique_ptr<DrawableButton>								m_MultisurfacePageButton;
+	std::unique_ptr<DrawableButton>								m_MatrixIOPageButton;
+	std::unique_ptr<DrawableButton>								m_ScenesPageButton;
+	std::unique_ptr<DrawableButton>								m_EnSpacePageButton;
+	std::unique_ptr<DrawableButton>								m_StatisticsPageButton;
+	std::unique_ptr<Label>										m_EnabledPagesLabel;
+	std::unique_ptr<ComboBox>									m_LookAndFeelSelect;
+	std::unique_ptr<Label>										m_LookAndFeelLabel;
 
 	// DS100 settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_DS100Settings;

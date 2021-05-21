@@ -60,6 +60,24 @@ typedef juce::uint32 ProtocolBridgingType;
 typedef juce::uint8 ComsMode;
 
 /**
+ * UI Page Indices
+ */
+enum UIPageId
+{
+	UPI_InvalidMin = 0,
+	UPI_SoundObjects,
+	UPI_MultiSlider,
+	UPI_MatrixIOs,
+	UPI_Scenes,
+	UPI_EnSpace,
+	UPI_Statistics,
+	UPI_Settings,
+	UPI_InvalidMax
+};
+String GetPageNameFromId(UIPageId pageId);
+UIPageId GetPageIdFromName(String pageName);
+
+/**
  * Data Change Participant (Source or Sink)
  * Enum used to define where a parameter or property change has originated or is processed in.
  */

@@ -53,11 +53,6 @@ public:
 	void onLoadConfigClicked();
 	void onSaveConfigClicked();
 	void onToggleRawConfigVisible();
-	void onSelectedLookAndFeelChanged();
-
-	//==========================================================================
-	void SetSelectedLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType);
-	DbLookAndFeelBase::LookAndFeelType GetSelectedLookAndFeelType();
 
 	//==========================================================================
 	void lookAndFeelChanged() override;
@@ -79,8 +74,6 @@ private:
 
 	std::unique_ptr<TextButton>		m_settingsRawApplyButton;
 	std::unique_ptr<TextEditor>		m_settingsRawEditor;
-	std::unique_ptr<ComboBox>		m_lookAndFeelSelect;
-	std::unique_ptr<Label>			m_lookAndFeelLabel;
 
 	std::unique_ptr<JUCEAppBasics::TextWithImageButton>	m_loadConfigButton;
 	std::unique_ptr<JUCEAppBasics::TextWithImageButton>	m_saveConfigButton;

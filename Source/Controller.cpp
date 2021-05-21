@@ -1069,8 +1069,15 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 			auto pageMgr = PageComponentManager::GetInstance();
 			if (pageMgr)
 			{
-				auto tabIndex = static_cast<int*>(msgData._payload)[0];
-				pageMgr->SetActiveTab(tabIndex, dontSendNotification);
+				auto pageIndex = static_cast<int*>(msgData._payload)[0];
+				if (pageIndex > UPI_InvalidMin && pageIndex < UPI_InvalidMax)
+				{
+					auto pageId = static_cast<UIPageId>(pageIndex);
+
+					// enshure that the externally selected page is currently visible on UI
+					if (std::find(pageMgr->GetEnabledPages().begin(), pageMgr->GetEnabledPages().end(), pageId) != pageMgr->GetEnabledPages().end())
+						pageMgr->SetActivePage(pageId, dontSendNotification);
+				}
 			}
 		}
 	}

@@ -69,6 +69,13 @@ PageComponentManager::PageComponentManager()
 
 	// Default overview window properties.
 	m_pageContainer = nullptr;
+
+	// Initialization of members to a usable default makes sense 
+	// when no config xml is available on app start and therefor 
+	// init values of this instance are going to be used for default config.
+	m_activePage = UPI_SoundObjects;
+	for (int id = UPI_InvalidMin + 1; id < UPI_InvalidMax; id++) m_enabledPages.push_back(static_cast<UIPageId>(id));
+	m_lookAndFeelType = DbLookAndFeelBase::LAFT_Dark;
 }
 
 /**
@@ -146,25 +153,55 @@ void PageComponentManager::ClosePageContainer(bool destroy)
 }
 
 /**
- * Get the currently active tab within the overview window.
- * @return The currently active tab.
+ * Getter for the currently active page of the main window.
+ * @return The currently active page.
  */
-int PageComponentManager::GetActiveTab() const
+UIPageId PageComponentManager::GetActivePage() const
 {
-	return m_selectedTab;
+	return m_activePage;
 }
 
 /**
- * Set the currently active tab within the overview window.
- * @param tabIdx	The currently active tab index.
+ * Setter for the currently active tab of the main window.
+ * @param pageIdx	The currently active page id.
+ * @param dontSendNotification	Indication if the configuration update shall be triggerd as well
  */
-void PageComponentManager::SetActiveTab(int tabIdx, bool dontSendNotification)
+void PageComponentManager::SetActivePage(UIPageId pageId, bool dontSendNotification)
 {
-	m_selectedTab = tabIdx;
+	m_activePage = pageId;
 
 	if (m_pageContainer != nullptr)
 	{
-		m_pageContainer->SetActiveTab(tabIdx);
+		m_pageContainer->SetActivePage(pageId);
+	}
+
+	if (!dontSendNotification)
+	{
+		triggerConfigurationUpdate(false);
+	}
+}
+
+/**
+ * Getter for the currently enabled pages of the main window.
+ * @return The currently enabled pages.
+ */
+const std::vector<UIPageId>& PageComponentManager::GetEnabledPages() const
+{
+	return m_enabledPages;
+}
+
+/**
+ * Setter for the currently enabled pages of the main window.
+ * @param enabledPages	The pages to set as currently currently enabled.
+ * @param dontSendNotification	Indication if the configuration update shall be triggerd as well
+ */
+void PageComponentManager::SetEnabledPages(const std::vector<UIPageId>& enabledPages, bool dontSendNotification)
+{
+	m_enabledPages = enabledPages;
+
+	if (m_pageContainer != nullptr)
+	{
+		m_pageContainer->SetEnabledPages(enabledPages);
 	}
 
 	if (!dontSendNotification)
@@ -359,15 +396,7 @@ void PageComponentManager::SetScenesPagePinnedScenes(const std::vector<std::pair
  */
 DbLookAndFeelBase::LookAndFeelType PageComponentManager::GetLookAndFeelType() const
 {
-	if (m_pageContainer != nullptr)
-	{
-		return m_pageContainer->GetLookAndFeelType();
-	}
-	else
-	{
-		jassertfalse;
-		return DbLookAndFeelBase::LAFT_InvalidFirst;
-	}
+	return m_lookAndFeelType;
 }
 
 /**
@@ -376,14 +405,11 @@ DbLookAndFeelBase::LookAndFeelType PageComponentManager::GetLookAndFeelType() co
  */
 void PageComponentManager::SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType, bool dontSendNotification)
 {
-	if (m_pageContainer != nullptr)
-	{
-		m_pageContainer->SetLookAndFeelType(lookAndFeelType);
-	}
+	m_lookAndFeelType = lookAndFeelType;
 
 	if (!dontSendNotification)
 	{
-		triggerConfigurationUpdate(false);
+		triggerConfigurationUpdate(true); // we do want to include watcher update, since only that way the whole application is set to new LAFT (onConfigUpdated in main component)
 	}
 }
 
@@ -430,15 +456,32 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
 		auto activeTabTextElement = activeTabXmlElement->getFirstChildElement();
 		if (activeTabTextElement && activeTabTextElement->isTextElement())
 		{
-			auto tabIdx = activeTabTextElement->getText().getIntValue();
+			auto pageId = GetPageIdFromName(activeTabTextElement->getText());
 
-			if (tabIdx != -1)
+			if (pageId > UPI_InvalidMin && pageId < UPI_InvalidMax)
 			{
-				SetActiveTab(tabIdx, true);
+				SetActivePage(pageId, true);
 			}
 			else
 				retVal = false;
 		}
+	}
+
+	auto enabledPagesXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::ENABLEDPAGES));
+	if (enabledPagesXmlElement)
+	{
+		auto enabledPages = std::vector<UIPageId>();
+
+		auto enabledPagesTextElement = enabledPagesXmlElement->getFirstChildElement();
+		if (enabledPagesTextElement && enabledPagesTextElement->isTextElement())
+		{
+			auto enabledPagesIdStrings = StringArray();
+			enabledPagesIdStrings.addTokens(enabledPagesTextElement->getText(), ", ");
+			for (auto const& pageIdString : enabledPagesIdStrings)
+				enabledPages.push_back(static_cast<UIPageId>(pageIdString.getIntValue()));
+		}
+
+		SetEnabledPages(enabledPages, true);
 	}
 
 	auto soundobjectTableXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTTABLE));
@@ -571,7 +614,16 @@ std::unique_ptr<XmlElement> PageComponentManager::createStateXml()
 	{
 		auto activeTabXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::ACTIVETAB));
 		if (activeTabXmlElement)
-			activeTabXmlElement->addTextElement(String(GetActiveTab()));
+			activeTabXmlElement->addTextElement(GetPageNameFromId(GetActivePage()));
+
+		auto enabledPagesXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::ENABLEDPAGES));
+		if (enabledPagesXmlElement)
+		{
+			auto enabledPagesIdStrings = StringArray();
+			for (auto const& pageId : GetEnabledPages())
+				enabledPagesIdStrings.add(String(pageId));
+			enabledPagesXmlElement->addTextElement(enabledPagesIdStrings.joinIntoString(", "));
+		}
 
 		auto lookAndFeelXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::LOOKANDFEELTYPE));
 		if (lookAndFeelXmlElement)

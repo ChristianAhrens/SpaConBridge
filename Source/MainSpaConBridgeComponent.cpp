@@ -60,7 +60,7 @@ MainSpaConBridgeComponent::MainSpaConBridgeComponent(std::function<void(DbLookAn
     }
 
     // add this main component to watchers
-    m_config->addWatcher(this, false); // no initialUpdate here, we do that manually a few lines below
+    m_config->addWatcher(this, true); // this initial update cannot yet reach all parts of the app, esp. settings page that relies on fully initialized pagecomponentmanager, therefor a manual watcher update is triggered below
 
     // enshure the controller singleton is created
     auto ctrl = SpaConBridge::Controller::GetInstance();
@@ -74,7 +74,7 @@ MainSpaConBridgeComponent::MainSpaConBridgeComponent(std::function<void(DbLookAn
     auto pageContainer = pageMgr->GetPageContainer();
     addAndMakeVisible(pageContainer);
 
-    // do the initial update with config contents
+    // do the initial update for the whole application with config contents
     m_config->triggerWatcherUpdate();
 
     setSize(896, 414);

@@ -139,13 +139,14 @@ PageContainerComponent::PageContainerComponent()
 
 	// Add the page tabs.
 	m_tabbedComponent->SetIsHandlingChanges(false);
-	m_tabbedComponent->addTab("Table", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_soundobjectsPage.get(), false, CustomButtonTabbedComponent::OTI_Table);
-	m_tabbedComponent->addTab("Slider", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSliderPage.get(), false, CustomButtonTabbedComponent::OTI_MultiSlider);
-	m_tabbedComponent->addTab("Matrix IOs", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_matrixIOPage.get(), false, CustomButtonTabbedComponent::OTI_MatrixIOs);
-	m_tabbedComponent->addTab("Scenes", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_scenesPage.get(), false, CustomButtonTabbedComponent::OTI_Scenes);
-	m_tabbedComponent->addTab("EnSpace", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_enSpacePage.get(), false, CustomButtonTabbedComponent::OTI_EnSpace);
-	m_tabbedComponent->addTab("Statistics", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_statisticsPage.get(), false, CustomButtonTabbedComponent::OTI_Statistics);
-	m_tabbedComponent->addTab("Settings", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_settingsPage.get(), false, CustomButtonTabbedComponent::OTI_Settings);
+	m_tabbedComponent->addTab(GetPageNameFromId(UPI_SoundObjects), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_soundobjectsPage.get(), false, UPI_SoundObjects);
+	m_tabbedComponent->addTab(GetPageNameFromId(UPI_MultiSlider), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSliderPage.get(), false, UPI_MultiSlider);
+	m_tabbedComponent->addTab(GetPageNameFromId(UPI_MatrixIOs), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_matrixIOPage.get(), false, UPI_MatrixIOs);
+	m_tabbedComponent->addTab(GetPageNameFromId(UPI_Scenes), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_scenesPage.get(), false, UPI_Scenes);
+	m_tabbedComponent->addTab(GetPageNameFromId(UPI_EnSpace), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_enSpacePage.get(), false, UPI_EnSpace);
+	m_tabbedComponent->addTab(GetPageNameFromId(UPI_Statistics), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_statisticsPage.get(), false, UPI_Statistics);
+	m_tabbedComponent->addTab(GetPageNameFromId(UPI_Settings), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_settingsPage.get(), false, UPI_Settings);
+
 	m_tabbedComponent->SetIsHandlingChanges(true);
 
 	// Start GUI-refreshing timer.
@@ -349,7 +350,7 @@ void PageContainerComponent::UpdateGui(bool init)
 	}
 
 	// Save some performance: only update the component inside the currently active tab.
-	if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_Table)
+	if (m_tabbedComponent && m_tabbedComponent->getCurrentTabName() == GetPageNameFromId(UPI_SoundObjects))
 	{
 		if (m_soundobjectsPage)
 			m_soundobjectsPage->UpdateGui(init);
@@ -358,7 +359,7 @@ void PageContainerComponent::UpdateGui(bool init)
 		if (getTimerInterval() != GUI_UPDATE_RATE_SLOW)
 			startTimer(GUI_UPDATE_RATE_SLOW);
 	}
-	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_MultiSlider)
+	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabName() == GetPageNameFromId(UPI_MultiSlider))
 	{
 		if (m_multiSliderPage)
 			m_multiSliderPage->UpdateGui(init);
@@ -367,7 +368,7 @@ void PageContainerComponent::UpdateGui(bool init)
 		if (getTimerInterval() != GUI_UPDATE_RATE_FAST)
 			startTimer(GUI_UPDATE_RATE_FAST);
 	}
-    else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_MatrixIOs)
+    else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabName() == GetPageNameFromId(UPI_MatrixIOs))
     {
         if (m_matrixIOPage)
             m_matrixIOPage->UpdateGui(init);
@@ -376,7 +377,7 @@ void PageContainerComponent::UpdateGui(bool init)
 		if (getTimerInterval() != GUI_UPDATE_RATE_SLOW)
 			startTimer(GUI_UPDATE_RATE_SLOW);
     }
-	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_Scenes)
+	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabName() == GetPageNameFromId(UPI_Scenes))
 	{
 		if (m_scenesPage)
 			m_scenesPage->UpdateGui(init);
@@ -385,7 +386,7 @@ void PageContainerComponent::UpdateGui(bool init)
 		if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
 			startTimer(GUI_UPDATE_RATE_SUPERSLOW);
 	}
-	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == CustomButtonTabbedComponent::OTI_EnSpace)
+	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabName() == GetPageNameFromId(UPI_EnSpace))
 	{
 		if (m_enSpacePage)
 			m_enSpacePage->UpdateGui(init);
@@ -397,31 +398,79 @@ void PageContainerComponent::UpdateGui(bool init)
 }
 
 /**
- * Method to externally set the currently active tab.
- * This is used to restore the current active tab from config file on app start.
- * @param tabIdx	The tab index to set active
+ * Sets the contained page components initializing state.
+ * This is used to prevent the pages from each posting config update triggers
+ * while themselves being updated with fresh config.
+ * @param	initializing	The init state to set to the pages
  */
-void PageContainerComponent::SetActiveTab(int tabIdx)
+void PageContainerComponent::SetPagesBeingInitialized(bool initializing)
 {
-	m_tabbedComponent->setCurrentTabIndex(tabIdx, false);
+	// the tab component does send config update triggers as well when set to handling changes
+	m_tabbedComponent->SetIsHandlingChanges(!initializing);
+
+	m_soundobjectsPage->SetPageIsInitializing(initializing);
+	m_multiSliderPage->SetPageIsInitializing(initializing);
+	m_matrixIOPage->SetPageIsInitializing(initializing);
+	m_settingsPage->SetPageIsInitializing(initializing);
+	m_statisticsPage->SetPageIsInitializing(initializing);
+	m_aboutPage->SetPageIsInitializing(initializing);
+	m_scenesPage->SetPageIsInitializing(initializing);
+	m_enSpacePage->SetPageIsInitializing(initializing);
 }
 
 /**
- * Setter for the currently selected look and feel type.
- * @param lookAndFeelType	The look and feel type to set as currently selected in dropdown
+ * Method to externally set the currently active page.
+ * This is used e.g. to restore the current active page from config file on app start.
+ * @param pageId	The page id to set active
  */
-void PageContainerComponent::SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType)
+void PageContainerComponent::SetActivePage(UIPageId pageId)
 {
-	m_settingsPage->SetSelectedLookAndFeelType(lookAndFeelType);
+	jassert(pageId > UPI_InvalidMin && pageId < UPI_InvalidMax);
+	m_tabbedComponent->setCurrentTabIndex(m_tabbedComponent->getTabNames().indexOf(GetPageNameFromId(pageId)));
 }
 
 /**
- * Getter for the currently selected look and feel type.
- * @return	The look and feel type that currently is selected in dropdown
+ * Method to externally set the enabled tabs (pages).
+ * @param enabledPages	The pages to set active (visible)
  */
-DbLookAndFeelBase::LookAndFeelType PageContainerComponent::GetLookAndFeelType()
+void PageContainerComponent::SetEnabledPages(const std::vector<UIPageId>& enabledPages)
 {
-	return m_settingsPage->GetSelectedLookAndFeelType();
+	// mute change broadcasting while we modify the tabs
+	m_tabbedComponent->SetIsHandlingChanges(false);
+
+	// cache the currently active tab to reactivate it after tab recreation (don't default to first tab)
+	auto activeTabId = GetPageIdFromName(m_tabbedComponent->getCurrentTabName());
+
+	// start clearing currently enabled tabs and recreate the ones to be enabled from now on
+	m_tabbedComponent->clearTabs();
+
+	auto SoundObjectsPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_SoundObjects) != enabledPages.end();
+	auto MultiSliderPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_MultiSlider) != enabledPages.end();
+	auto MatrixIOsPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_MatrixIOs) != enabledPages.end();
+	auto ScenesPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_Scenes) != enabledPages.end();
+	auto EnSpacePageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_EnSpace) != enabledPages.end();
+	auto StatisticsPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_Statistics) != enabledPages.end();
+
+	if (SoundObjectsPageEnabled)
+		m_tabbedComponent->addTab(GetPageNameFromId(UPI_SoundObjects), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_soundobjectsPage.get(), false, UPI_SoundObjects);
+	if (MultiSliderPageEnabled)
+		m_tabbedComponent->addTab(GetPageNameFromId(UPI_MultiSlider), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSliderPage.get(), false, UPI_MultiSlider);
+	if (MatrixIOsPageEnabled)
+		m_tabbedComponent->addTab(GetPageNameFromId(UPI_MatrixIOs), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_matrixIOPage.get(), false, UPI_MatrixIOs);
+	if (ScenesPageEnabled)
+		m_tabbedComponent->addTab(GetPageNameFromId(UPI_Scenes), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_scenesPage.get(), false, UPI_Scenes);
+	if (EnSpacePageEnabled)
+		m_tabbedComponent->addTab(GetPageNameFromId(UPI_EnSpace), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_enSpacePage.get(), false, UPI_EnSpace);
+	if (StatisticsPageEnabled)
+		m_tabbedComponent->addTab(GetPageNameFromId(UPI_Statistics), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_statisticsPage.get(), false, UPI_Statistics);
+
+	m_tabbedComponent->addTab(GetPageNameFromId(UPI_Settings), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_settingsPage.get(), false, UPI_Settings);
+
+	// restore the previously active tab
+	m_tabbedComponent->setCurrentTabIndex(m_tabbedComponent->getTabNames().indexOf(GetPageNameFromId(activeTabId)));
+
+	// reenable change broadcasting
+	m_tabbedComponent->SetIsHandlingChanges(true);
 }
 
 /**
@@ -578,6 +627,31 @@ void PageContainerComponent::SetMatrixOutputTableCollapsed(bool collapsed)
 		return m_matrixIOPage->SetOutputsCollapsed(collapsed);
 }
 
+/**
+ * Getter for the pinned scenes of Scenes Page
+ * @return	The pinned scenes.
+ */
+std::vector<std::pair<std::pair<int, int>, std::string>> PageContainerComponent::GetScenesPagePinnedScenes()
+{
+	if (m_scenesPage)
+		return m_scenesPage->GetPinnedScenes();
+	else
+	{
+		jassertfalse;
+		return std::vector<std::pair<std::pair<int, int>, std::string>>();
+	}
+}
+
+/**
+ * Setter for the pinned scenes of Scenes Page
+ * @param pinnedScenes	The pinned scenes.
+ */
+void PageContainerComponent::SetScenesPagePinnedScenes(const std::vector<std::pair<std::pair<int, int>, std::string>>& pinnedScenes)
+{
+	if (m_scenesPage)
+		m_scenesPage->SetPinnedScenes(pinnedScenes);
+}
+
 
 /*
 ===============================================================================
@@ -608,8 +682,9 @@ CustomButtonTabbedComponent::~CustomButtonTabbedComponent()
  */
 TabBarButton* CustomButtonTabbedComponent::createTabButton(const String& tabName, int tabIndex)
 {
-	ignoreUnused(tabName);
-	return new CustomDrawableTabBarButton(tabIndex, getTabbedButtonBar());
+	ignoreUnused(tabIndex);
+
+	return new CustomDrawableTabBarButton(GetPageIdFromName(tabName), getTabbedButtonBar());
 }
 
 /**
@@ -621,14 +696,16 @@ TabBarButton* CustomButtonTabbedComponent::createTabButton(const String& tabName
  */
 void CustomButtonTabbedComponent::currentTabChanged(int newCurrentTabIndex, const String& newCurrentTabName)
 {
-	ignoreUnused(newCurrentTabName);
+	ignoreUnused(newCurrentTabIndex);
 
 	if (!GetIsHandlingChanges())
 		return;
 
+	auto newCurrentPageId = GetPageIdFromName(newCurrentTabName);
+
 	PageComponentManager* pageMgr = PageComponentManager::GetInstance();
 	if (pageMgr)
-		pageMgr->SetActiveTab(newCurrentTabIndex, false);
+		pageMgr->SetActivePage(newCurrentPageId, false);
 
 	PageContainerComponent* parent = dynamic_cast<PageContainerComponent*>(getParentComponent());
 	if (parent)
@@ -671,12 +748,12 @@ void CustomButtonTabbedComponent::SetIsHandlingChanges(bool isHandlingChanges)
 
 /**
  * Class constructor.
- * @param tabIdx	Tab index starting at 0.
+ * @param pageId	The page id to use.
  * @param ownerBar	TabbedButtonBar object which contains this button.
  */
-CustomDrawableTabBarButton::CustomDrawableTabBarButton(int tabIdx, TabbedButtonBar& ownerBar)
+CustomDrawableTabBarButton::CustomDrawableTabBarButton(UIPageId pageId, TabbedButtonBar& ownerBar)
 	: TabBarButton(String(), ownerBar),
-	m_tabIndex(tabIdx)
+	m_pageId(pageId)
 {
 	updateDrawableButtonImageColours();
 }
@@ -694,30 +771,31 @@ CustomDrawableTabBarButton::~CustomDrawableTabBarButton()
 void CustomDrawableTabBarButton::updateDrawableButtonImageColours()
 {
 	String imageName;
-	switch (m_tabIndex)
+	switch (m_pageId)
 	{
-	case CustomButtonTabbedComponent::OTI_Table:
+	case UPI_SoundObjects:
 		imageName = BinaryData::vertical_split24px_svg;
 		break;
-	case CustomButtonTabbedComponent::OTI_MultiSlider:
+	case UPI_MultiSlider:
 		imageName = BinaryData::grain24px_svg;
 		break;
-    case CustomButtonTabbedComponent::OTI_MatrixIOs:
+    case UPI_MatrixIOs:
         imageName = BinaryData::tune24px_svg;
         break;
-	case CustomButtonTabbedComponent::OTI_Settings:
+	case UPI_Settings:
 		imageName = BinaryData::settings24px_svg;
 		break;
-	case CustomButtonTabbedComponent::OTI_Statistics:
+	case UPI_Statistics:
 		imageName = BinaryData::show_chart24px_svg;
 		break;
-	case CustomButtonTabbedComponent::OTI_Scenes:
+	case UPI_Scenes:
 		imageName = BinaryData::slideshow_black_24dp_svg;
 		break;
-	case CustomButtonTabbedComponent::OTI_EnSpace:
+	case UPI_EnSpace:
 		imageName = BinaryData::sensors_black_24dp_svg;
 		break;
 	default:
+		imageName = BinaryData::clear_black_24dp_svg;
 		break;
 	}
 

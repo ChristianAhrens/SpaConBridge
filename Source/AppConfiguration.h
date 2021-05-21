@@ -46,6 +46,10 @@ public:
 		BRIDGING,
         LOOKANDFEELTYPE,
         ONLINESTATE,
+        SCENESPAGE,
+        PINNEDSCENES,
+        SCENE,
+        ENABLEDPAGES,
     };
     static String getTagName(TagID ID)
     {
@@ -81,6 +85,14 @@ public:
             return "LookAndFeelType";
         case ONLINESTATE:
             return "Online";
+        case SCENESPAGE:
+            return "ScenesPage";
+        case PINNEDSCENES:
+            return "PinnedScenes";
+        case SCENE:
+            return "Scene";
+        case ENABLEDPAGES:
+            return "EnabledPages";
 		default:
 			return "INVALID";
         }
@@ -91,6 +103,8 @@ public:
 		PROCESSORCHANNELID,
         PROCESSORRECORDID,
         PROCESSORCOMSMODE,
+        INDEXMAJOR,
+        INDEXMINOR,
 	};
 	static String getAttributeName(AttributeID Id)
 	{
@@ -102,6 +116,10 @@ public:
             return "RecordId";
         case PROCESSORCOMSMODE:
             return "ComsMode";
+        case INDEXMAJOR:
+            return "IndexMajor";
+        case INDEXMINOR:
+            return "IndexMinor";
 		default:
 			return "INVALID";
 		}

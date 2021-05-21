@@ -146,15 +146,16 @@ public:
 
 	void UpdateGui(bool init);
 
+	void SetPagesBeingInitialized(bool initializing);
+
 	//==============================================================================
 	void lookAndFeelChanged() override;
 
 	//==============================================================================
-	void SetActiveTab(int tabIdx);
+	void SetActivePage(UIPageId pageId);
 
 	//==============================================================================
-	void SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType);
-	DbLookAndFeelBase::LookAndFeelType GetLookAndFeelType();
+	void SetEnabledPages(const std::vector<UIPageId>& enabledPages);
 
 	//==============================================================================
 	int GetSoundobjectTableRowHeight();
@@ -169,6 +170,10 @@ public:
 	void SetMatrixInputTableCollapsed(bool collapsed);
 	bool GetMatrixOutputTableCollapsed();
 	void SetMatrixOutputTableCollapsed(bool collapsed);
+
+	//==============================================================================
+	std::vector<std::pair<std::pair<int, int>, std::string>> GetScenesPagePinnedScenes();
+	void SetScenesPagePinnedScenes(const std::vector<std::pair<std::pair<int, int>, std::string>>& pinnedScenes);
 
 private:
 	//==============================================================================
@@ -214,21 +219,6 @@ private:
 class CustomButtonTabbedComponent : public TabbedComponent
 {
 public:
-
-	/**
-	 * Overview tab indices
-	 */
-	enum OverviewTabIndex
-	{
-		OTI_Table = 0,
-		OTI_MultiSlider,
-        OTI_MatrixIOs,
-		OTI_Scenes,
-		OTI_EnSpace,
-		OTI_Statistics,
-		OTI_Settings,
-	};
-
 	CustomButtonTabbedComponent();
 	~CustomButtonTabbedComponent() override;
 
@@ -253,7 +243,7 @@ protected:
 class CustomDrawableTabBarButton : public TabBarButton
 {
 public:
-	CustomDrawableTabBarButton(int tabIdx, TabbedButtonBar& ownerBar);
+	CustomDrawableTabBarButton(UIPageId pageId, TabbedButtonBar& ownerBar);
 	~CustomDrawableTabBarButton() override;
 
 	void updateDrawableButtonImageColours();
@@ -267,7 +257,7 @@ protected:
 private:
 	bool setVisibleDrawable(Drawable* visibleDrawable);
 
-	int m_tabIndex;
+	UIPageId m_pageId;
 	std::unique_ptr<juce::Drawable> m_normalImage, m_overImage, m_downImage, m_disabledImage, m_normalOnImage, m_overOnImage, m_downOnImage, m_disabledOnImage;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CustomDrawableTabBarButton)

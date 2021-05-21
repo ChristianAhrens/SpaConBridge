@@ -307,14 +307,18 @@ SoundobjectProcessorId Controller::AddSoundobjectProcessor(DataChangeParticipant
  */
 void Controller::RemoveSoundobjectProcessor(SoundobjectProcessor* p)
 {
-	DeactivateSoundobjectId(p->GetSoundobjectId(), p->GetMappingId());
-
 	int idx = m_soundobjectProcessors.indexOf(p);
 	jassert(idx >= 0); // Tried to remove inexistent Processor object.
 	if (idx >= 0)
 	{
 		const ScopedLock lock(m_mutex);
 		m_soundobjectProcessors.remove(idx);
+
+		// Manually trigger updating active objects, since timer based
+		// updating will not catch changes, if no soundobjects are
+		// left any more.
+		if (m_soundobjectProcessors.isEmpty())
+			UpdateActiveSoundobjects();
 
 		SetParameterChanged(DCP_Host, DCT_NumProcessors);
 	}
@@ -410,14 +414,18 @@ MatrixInputProcessorId Controller::AddMatrixInputProcessor(DataChangeParticipant
  */
 void Controller::RemoveMatrixInputProcessor(MatrixInputProcessor* p)
 {
-	DeactivateMatrixInputId(p->GetMatrixInputId());
-
 	int idx = m_matrixInputProcessors.indexOf(p);
 	jassert(idx >= 0); // Tried to remove inexistent Processor object.
 	if (idx >= 0)
 	{
 		const ScopedLock lock(m_mutex);
 		m_matrixInputProcessors.remove(idx);
+
+		// Manually trigger updating active objects, since timer based
+		// updating will not catch changes, if no matrix inputs are
+		// left any more.
+		if (m_matrixInputProcessors.isEmpty())
+			UpdateActiveMatrixInputs();
 
 		SetParameterChanged(DCP_Host, DCT_NumProcessors);
 	}
@@ -514,14 +522,18 @@ MatrixOutputProcessorId Controller::AddMatrixOutputProcessor(DataChangeParticipa
  */
 void Controller::RemoveMatrixOutputProcessor(MatrixOutputProcessor* p)
 {
-	DeactivateMatrixOutputId(p->GetMatrixOutputId());
-
 	int idx = m_matrixOutputProcessors.indexOf(p);
 	jassert(idx >= 0); // Tried to remove inexistent Processor object.
 	if (idx >= 0)
 	{
 		const ScopedLock lock(m_mutex);
 		m_matrixOutputProcessors.remove(idx);
+
+		// Manually trigger updating active objects, since timer based
+		// updating will not catch changes, if no matrix outputs are
+		// left any more.
+		if (m_matrixOutputProcessors.isEmpty())
+			UpdateActiveMatrixOutputs();
 
 		SetParameterChanged(DCP_Host, DCT_NumProcessors);
 	}
@@ -1057,8 +1069,15 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 			auto pageMgr = PageComponentManager::GetInstance();
 			if (pageMgr)
 			{
-				auto tabIndex = static_cast<int*>(msgData._payload)[0];
-				pageMgr->SetActiveTab(tabIndex, dontSendNotification);
+				auto pageIndex = static_cast<int*>(msgData._payload)[0];
+				if (pageIndex > UPI_InvalidMin && pageIndex < UPI_InvalidMax)
+				{
+					auto pageId = static_cast<UIPageId>(pageIndex);
+
+					// enshure that the externally selected page is currently visible on UI
+					if (std::find(pageMgr->GetEnabledPages().begin(), pageMgr->GetEnabledPages().end(), pageId) != pageMgr->GetEnabledPages().end())
+						pageMgr->SetActivePage(pageId, dontSendNotification);
+				}
 			}
 		}
 	}
@@ -1242,6 +1261,7 @@ void Controller::timerCallback()
 	int newIntValue;
 	RemoteObjectMessageData newMsgData;
 
+	auto activeSSIdsChanged = false;
 	for (auto const& soProcessor : m_soundobjectProcessors)
 	{
 		auto comsMode = soProcessor->GetComsMode();
@@ -1277,10 +1297,7 @@ void Controller::timerCallback()
 			}
 			soProcessor->PopParameterChanged(DCP_Host, DCT_ComsMode);
 
-			if (activateSSId)
-				ActivateSoundobjectId(soProcessor->GetSoundobjectId(), soProcessor->GetMappingId());
-			else if (deactivateSSId)
-				DeactivateSoundobjectId(soProcessor->GetSoundobjectId(), soProcessor->GetMappingId());
+			activeSSIdsChanged = activateSSId || deactivateSSId;
 		}
 
 		// Signal every timer tick to each processor instance.
@@ -1395,7 +1412,10 @@ void Controller::timerCallback()
 		// All changed parameters were sent out, so we can reset their flags now.
 		soProcessor->PopParameterChanged(DCP_Protocol, DCT_SoundobjectParameters);
 	}
+	if (activeSSIdsChanged)
+		UpdateActiveSoundobjects();
 
+	auto activeMIIdsChanged = false;
 	for (auto const& miProcessor : m_matrixInputProcessors)
 	{
 		auto comsMode = miProcessor->GetComsMode();
@@ -1431,10 +1451,7 @@ void Controller::timerCallback()
 			}
 			miProcessor->PopParameterChanged(DCP_Host, DCT_ComsMode);
 
-			if (activateMIId)
-				ActivateMatrixInputId(miProcessor->GetMatrixInputId());
-			else if (deactivateMIId)
-				DeactivateMatrixInputId(miProcessor->GetMatrixInputId());
+			activeMIIdsChanged = activateMIId || deactivateMIId;
 		}
 
 		// Signal every timer tick to each processor instance.
@@ -1522,7 +1539,10 @@ void Controller::timerCallback()
 		// All changed parameters were sent out, so we can reset their flags now.
 		miProcessor->PopParameterChanged(DCP_Protocol, DCT_MatrixInputParameters);
 	}
+	if (activeMIIdsChanged)
+		UpdateActiveMatrixInputs();
 
+	auto activeMOIdsChanged = false;
 	for (auto const& moProcessor : m_matrixOutputProcessors)
 	{
 		auto comsMode = moProcessor->GetComsMode();
@@ -1558,10 +1578,7 @@ void Controller::timerCallback()
 			}
 			moProcessor->PopParameterChanged(DCP_Host, DCT_ComsMode);
 
-			if (activateMOId)
-				ActivateMatrixOutputId(moProcessor->GetMatrixOutputId());
-			else if (deactivateMOId)
-				DeactivateMatrixOutputId(moProcessor->GetMatrixOutputId());
+			activeMOIdsChanged = activateMOId || deactivateMOId;
 		}
 
 		// Signal every timer tick to each processor instance.
@@ -1649,6 +1666,8 @@ void Controller::timerCallback()
 		// All changed parameters were sent out, so we can reset their flags now.
 		moProcessor->PopParameterChanged(DCP_Protocol, DCT_MatrixOutputParameters);
 	}
+	if (activeMOIdsChanged)
+		UpdateActiveMatrixOutputs();
 
 }
 
@@ -1761,15 +1780,8 @@ bool Controller::setStateXml(XmlElement* stateXml)
 	else
 		retVal = false;
 
-	// trigger UI update once after the processors have been created
-	auto pageMgr = PageComponentManager::GetInstance();
-	if (pageMgr)
-	{
-		auto pageContainer = pageMgr->GetPageContainer();
-		if (pageContainer)
-			pageContainer->UpdateGui(false);
-	}
-
+	// Configure the bridging module before the UI is initialized, because it requires certain details in controller
+	// config to be set up already to be reflected on UI accordingly
 	auto bridgingXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::BRIDGING));
 	if (bridgingXmlElement)
 	{
@@ -1781,6 +1793,15 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			SetRefreshInterval(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100MsgRate(), true);
 			SetActiveParallelModeDS100(DataChangeParticipant::DCP_Init, m_protocolBridge.GetActiveParallelModeDS100(), true);
 		}
+	}
+
+	// trigger UI update once after the processors have been created
+	auto pageMgr = PageComponentManager::GetInstance();
+	if (pageMgr)
+	{
+		auto pageContainer = pageMgr->GetPageContainer();
+		if (pageContainer)
+			pageContainer->UpdateGui(false);
 	}
 
 	return retVal;
@@ -1885,7 +1906,7 @@ void Controller::ActivateSoundobjectId(SoundobjectId soundobjectId, MappingId ma
 	ignoreUnused(soundobjectId);
 	ignoreUnused(mappingId);
 
-	m_protocolBridge.UpdateActiveDS100RemoteObjectIds();
+	UpdateActiveSoundobjects();
 }
 
 /**
@@ -1898,6 +1919,14 @@ void Controller::DeactivateSoundobjectId(SoundobjectId soundobjectId, MappingId 
 	ignoreUnused(soundobjectId);
 	ignoreUnused(mappingId);
 
+	UpdateActiveSoundobjects();
+}
+
+/**
+ * Updates the soundobjects that are currently being actively handled.
+ */
+void Controller::UpdateActiveSoundobjects()
+{
 	m_protocolBridge.UpdateActiveDS100RemoteObjectIds();
 }
 
@@ -2015,7 +2044,7 @@ void Controller::ActivateMatrixInputId(MatrixInputId matrixInputId)
 {
 	ignoreUnused(matrixInputId);
 
-	m_protocolBridge.UpdateActiveDS100RemoteObjectIds();
+	UpdateActiveMatrixInputs();
 }
 
 /**
@@ -2026,6 +2055,14 @@ void Controller::DeactivateMatrixInputId(MatrixInputId matrixInputId)
 {
 	ignoreUnused(matrixInputId);
 
+	UpdateActiveMatrixInputs();
+}
+
+/**
+ * Updates the matrix inputs that are currently being actively handled.
+ */
+void Controller::UpdateActiveMatrixInputs()
+{
 	m_protocolBridge.UpdateActiveDS100RemoteObjectIds();
 }
 
@@ -2143,7 +2180,7 @@ void Controller::ActivateMatrixOutputId(MatrixOutputId MatrixOutputId)
 {
 	ignoreUnused(MatrixOutputId);
 
-	m_protocolBridge.UpdateActiveDS100RemoteObjectIds();
+	UpdateActiveMatrixOutputs();
 }
 
 /**
@@ -2154,6 +2191,14 @@ void Controller::DeactivateMatrixOutputId(MatrixOutputId MatrixOutputId)
 {
 	ignoreUnused(MatrixOutputId);
 
+	UpdateActiveMatrixOutputs();
+}
+
+/**
+ * Updates the matrix outputs that are currently being actively handled.
+ */
+void Controller::UpdateActiveMatrixOutputs()
+{
 	m_protocolBridge.UpdateActiveDS100RemoteObjectIds();
 }
 

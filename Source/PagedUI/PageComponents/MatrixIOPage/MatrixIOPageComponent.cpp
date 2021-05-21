@@ -50,12 +50,16 @@ MatrixIOPageComponent::MatrixIOPageComponent()
 	m_inputsComponent->onCurrentCollapseStateChanged = [=](bool collapsed) {
 		ignoreUnused(collapsed);
 		resized();
+		if (IsPageInitializing())
+			return;
 		auto config = SpaConBridge::AppConfiguration::getInstance();
 		if (config)
 			config->triggerConfigurationDump(false);
 	};
 	m_inputsComponent->onCurrentRowHeightChanged = [=](int rowHeight) {
 		ignoreUnused(rowHeight);
+		if (IsPageInitializing())
+			return;
 		auto config = SpaConBridge::AppConfiguration::getInstance();
 		if (config)
 			config->triggerConfigurationDump(false);
@@ -66,12 +70,16 @@ MatrixIOPageComponent::MatrixIOPageComponent()
 	m_outputsComponent->onCurrentCollapseStateChanged = [=](bool collapsed) {
 		ignoreUnused(collapsed);
 		resized();
+		if (IsPageInitializing())
+			return;
 		auto config = SpaConBridge::AppConfiguration::getInstance();
 		if (config)
 			config->triggerConfigurationDump(false);
 	};
 	m_outputsComponent->onCurrentRowHeightChanged = [=](int rowHeight) {
 		ignoreUnused(rowHeight);
+		if (IsPageInitializing())
+			return;
 		auto config = SpaConBridge::AppConfiguration::getInstance();
 		if (config)
 			config->triggerConfigurationDump(false);
@@ -84,7 +92,7 @@ MatrixIOPageComponent::MatrixIOPageComponent()
 	// register this object as config watcher
 	auto config = SpaConBridge::AppConfiguration::getInstance();
 	if (config)
-		config->addWatcher(this);
+		config->addWatcher(this, true);
 }
 
 /**

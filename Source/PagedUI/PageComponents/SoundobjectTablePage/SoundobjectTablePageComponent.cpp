@@ -67,12 +67,16 @@ SoundobjectTablePageComponent::SoundobjectTablePageComponent()
 	m_soundobjectsTable = std::make_unique<SoundobjectTableComponent>();
 	m_soundobjectsTable->onCurrentSelectedProcessorChanged = [=](SoundobjectProcessorId id) { 
 		SetSoundsourceProcessorEditorActive(id);
+		if (IsPageInitializing())
+			return;
 		auto config = SpaConBridge::AppConfiguration::getInstance();
 		if (config)
 			config->triggerConfigurationDump(false);
 	};
 	m_soundobjectsTable->onCurrentRowHeightChanged = [=](int rowHeight) { 
 		ignoreUnused(rowHeight);
+		if (IsPageInitializing())
+			return;
 		auto config = SpaConBridge::AppConfiguration::getInstance();
 		if (config)
 			config->triggerConfigurationDump(false);
@@ -82,7 +86,7 @@ SoundobjectTablePageComponent::SoundobjectTablePageComponent()
 	// register this object as config watcher
 	auto config = SpaConBridge::AppConfiguration::getInstance();
 	if (config)
-		config->addWatcher(this);
+		config->addWatcher(this, true);
 }
 
 /**

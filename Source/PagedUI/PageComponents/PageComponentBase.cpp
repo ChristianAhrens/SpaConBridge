@@ -55,6 +55,24 @@ PageComponentBase::PageComponentType PageComponentBase::GetPageComponentType() c
 }
 
 /**
+ * Get this PageComponent's initializing state.
+ * @return	True if the page is currently set to initializing state, false if not.
+ */
+bool PageComponentBase::IsPageInitializing() const
+{
+	return m_isInitializing;
+}
+
+/**
+ * Set this PageComponent's initializing state.
+ * @param	initializing	The initializing state to set.
+ */
+void PageComponentBase::SetPageIsInitializing(bool initializing)
+{
+	m_isInitializing = initializing;
+}
+
+/**
  * Minimal helper method to determine if aspect ratio of currently
  * available screen realestate suggests we are in portrait or landscape orientation
  * and be able to use the same determination code in multiple places.

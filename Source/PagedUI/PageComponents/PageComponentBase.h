@@ -57,13 +57,18 @@ public:
 	PageComponentType GetPageComponentType() const;
 
 	//==============================================================================
+	bool IsPageInitializing() const;
+	void SetPageIsInitializing(bool initializing);
+
+	//==============================================================================
 	virtual void UpdateGui(bool init) = 0;
 
 protected:
 	bool	IsPortraitAspectRatio();
 
 private:
-	PageComponentType	m_pageComponentType;	/**> Type of page as specified by the PageComponentType enum. */
+	PageComponentType	m_pageComponentType{ PCT_Unknown };	/**> Type of page as specified by the PageComponentType enum. */
+	bool				m_isInitializing{ false };
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PageComponentBase)
 };

@@ -125,16 +125,10 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 	bool update = init;
 
 	// Update the selected mapping area.
-	int selectedMapping = 0;
-	auto pageMgr = PageComponentManager::GetInstance();
-	if (pageMgr)
+	if (GetSelectedMapping() != m_mappingAreaSelect->getSelectedId())
 	{
-		selectedMapping = pageMgr->GetSelectedMapping();
-		if (selectedMapping != m_mappingAreaSelect->getSelectedId())
-		{
-			m_mappingAreaSelect->setSelectedId(selectedMapping, dontSendNotification);
-			update = true;
-		}
+		m_mappingAreaSelect->setSelectedId(GetSelectedMapping(), dontSendNotification);
+		update = true;
 	}
 
 	auto ctrl = Controller::GetInstance();
@@ -152,7 +146,7 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 			if (processor)
 			{
 				auto soundobjectId = processor->GetSoundobjectId();
-				if (processor->GetMappingId() == selectedMapping)
+				if (processor->GetMappingId() == GetSelectedMapping())
 				{
 					// NOTE: only sources are included, which match the selected viewing mapping.
 					Point<float> p(processor->GetParameterValue(SPI_ParamIdx_X), processor->GetParameterValue(SPI_ParamIdx_Y));
@@ -180,18 +174,33 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
  */
 void MultiSurfacePageComponent::comboBoxChanged(ComboBox *comboBox)
 {
-	auto pageMgr = PageComponentManager::GetInstance();
-	if (pageMgr)
+	if (GetSelectedMapping() != comboBox->getSelectedId())
 	{
-		if (pageMgr->GetSelectedMapping() != comboBox->getSelectedId())
-		{
-			pageMgr->SetSelectedMapping(comboBox->getSelectedId());
+		SetSelectedMapping(comboBox->getSelectedId());
 
-			// Trigger an update on the multi-slider, so that only sources with the
-			// selected mapping are visible.
-			UpdateGui(true);
-		}
+		// Trigger an update on the multi-slider, so that only sources with the
+		// selected mapping are visible.
+		UpdateGui(true);
 	}
+}
+
+
+/**
+ * Get the currently selected coordinate mapping used for the multi-slider.
+ * @return The selected mapping area.
+ */
+int MultiSurfacePageComponent::GetSelectedMapping() const
+{
+	return m_selectedMapping;
+}
+
+/**
+ * Set the currently selected coordinate mapping used for the multi-slider.
+ * @param mapping	The new selected mapping area.
+ */
+void MultiSurfacePageComponent::SetSelectedMapping(int mapping)
+{
+	m_selectedMapping = mapping;
 }
 
 

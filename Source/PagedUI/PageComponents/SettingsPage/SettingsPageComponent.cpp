@@ -52,18 +52,6 @@ SettingsPageComponent::SettingsPageComponent()
 	m_settingsRawEditor->setMultiLine(true, false);
 	addAndMakeVisible(m_settingsRawEditor.get());
 
-	// Select combobox for look and feel selection
-	m_lookAndFeelSelect = std::make_unique<ComboBox>();
-	m_lookAndFeelSelect->addItem(DbLookAndFeelBase::getLookAndFeelName(DbLookAndFeelBase::LAFT_Dark), DbLookAndFeelBase::LAFT_Dark);
-	m_lookAndFeelSelect->addItem(DbLookAndFeelBase::getLookAndFeelName(DbLookAndFeelBase::LAFT_Light), DbLookAndFeelBase::LAFT_Light);
-	m_lookAndFeelSelect->onChange = [this] { onSelectedLookAndFeelChanged(); };
-	addAndMakeVisible(m_lookAndFeelSelect.get());
-	// Label for look and feel selection
-	m_lookAndFeelLabel = std::make_unique<Label>("LookAndFeelSelect", "Look and feel");
-	m_lookAndFeelLabel->setJustificationType(Justification::centred);
-	m_lookAndFeelLabel->attachToComponent(m_lookAndFeelSelect.get(), true);
-	addAndMakeVisible(m_lookAndFeelLabel.get());
-
 	// load/save config buttons
 	m_loadConfigButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Load config");
 	m_loadConfigButton->setImagePosition(Justification::centredLeft);
@@ -90,9 +78,7 @@ SettingsPageComponent::SettingsPageComponent()
 	// register this object as config watcher
 	auto config = SpaConBridge::AppConfiguration::getInstance();
 	if (config)
-	{
-		config->addWatcher(this);
-	}
+		config->addWatcher(this, true);
 }
 
 /**
@@ -123,9 +109,9 @@ void SettingsPageComponent::resized()
 	// toggle button for visibility of raw config textfield
 	auto bottomBarControlBounds = bounds.removeFromBottom(25);
 	auto bottomBarWidth = bottomBarControlBounds.getWidth();
-	if (m_lookAndFeelSelect && m_loadConfigButton && m_saveConfigButton && m_lookAndFeelSelect)
+	if (m_loadConfigButton && m_saveConfigButton)
 	{
-		if (bottomBarWidth >= 505)
+		if (bottomBarWidth >= 330)
 		{
 			m_useRawConfigButton->setVisible(true);
 			m_useRawConfigButton->setBounds(bottomBarControlBounds.removeFromRight(110));
@@ -134,7 +120,7 @@ void SettingsPageComponent::resized()
 		else
 			m_useRawConfigButton->setVisible(false);
 
-		if (bottomBarWidth >= 390)
+		if (bottomBarWidth >= 205)
 		{
 			m_loadConfigButton->setVisible(true);
 			m_loadConfigButton->setBounds(bottomBarControlBounds.removeFromRight(105));
@@ -147,8 +133,6 @@ void SettingsPageComponent::resized()
 			m_loadConfigButton->setVisible(false);
 			m_saveConfigButton->setVisible(false);
 		}
-
-		m_lookAndFeelSelect->setBounds(bottomBarControlBounds.removeFromLeft(170).removeFromRight(70));
 	}
 
 	bounds.removeFromBottom(5);
@@ -175,35 +159,6 @@ void SettingsPageComponent::resized()
 	// raw config textfield, etc. - not always visible!
 	m_settingsRawApplyButton->setBounds(bounds.removeFromTop(25));
 	m_settingsRawEditor->setBounds(bounds);
-}
-
-/**
- * Setter for the currently selected look and feel type in dropdown on ui
- * @param lookAndfeelType	The type to set as currently selected
- */
-void SettingsPageComponent::SetSelectedLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType)
-{
-	if (m_lookAndFeelSelect)
-		m_lookAndFeelSelect->setSelectedId(lookAndFeelType, dontSendNotification);
-}
-
-/**
- * Getter for the currently selected look and feel type in dropdown on ui
- * @return	The currently selected type
- */
-DbLookAndFeelBase::LookAndFeelType SettingsPageComponent::GetSelectedLookAndFeelType()
-{
-	if (m_lookAndFeelSelect)
-	{
-		auto lookAndFeelType = static_cast<DbLookAndFeelBase::LookAndFeelType>(m_lookAndFeelSelect->getSelectedId());
-		jassert(lookAndFeelType > DbLookAndFeelBase::LookAndFeelType::LAFT_InvalidFirst && lookAndFeelType < DbLookAndFeelBase::LookAndFeelType::LAFT_InvalidLast);
-		return lookAndFeelType;
-	}
-	else
-	{
-		jassertfalse;
-		return DbLookAndFeelBase::LAFT_InvalidFirst;
-	}
 }
 
 /**
@@ -377,16 +332,6 @@ void SettingsPageComponent::onToggleRawConfigVisible()
 			m_settingsRawEditor->setVisible(false);
 		}
 	}
-}
-
-/**
- *
- */
-void SettingsPageComponent::onSelectedLookAndFeelChanged()
-{
-	auto config = SpaConBridge::AppConfiguration::getInstance();
-	if (config)
-		config->triggerConfigurationDump(true);
 }
 
 

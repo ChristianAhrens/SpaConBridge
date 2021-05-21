@@ -25,6 +25,67 @@ namespace SpaConBridge
 {
 
 
+
+/**
+ * Helper method to derive the UI page name from a given page id enum value.
+ * @param	pageId	The page id to get the string representation for.
+ * @return	The string representation for the given page id.
+ */
+String GetPageNameFromId(UIPageId pageId)
+{
+	switch (pageId)
+	{
+		case UPI_InvalidMin:
+			return "InvalidMin";
+		case UPI_SoundObjects:
+			return "SoundObjects";
+		case UPI_MultiSlider:
+			return "MultiSlider";
+		case UPI_MatrixIOs:
+			return "MatrixIOs";
+		case UPI_Scenes:
+			return "Scenes";
+		case UPI_EnSpace:
+			return "EnSpace";
+		case UPI_Statistics:
+			return "Statistics";
+		case UPI_Settings:
+			return "Settings";
+		case UPI_InvalidMax:
+		default:
+			return "InvalidMax";
+	}
+}
+
+/**
+ * Helper method to derive the UI page id enum value from a given page name.
+ * @param	pageName	The page name to get the id enum value for.
+ * @return	The id enum value for the given page name.
+ */
+UIPageId GetPageIdFromName(String pageName)
+{
+	if (pageName == GetPageNameFromId(UPI_InvalidMin))
+		return UPI_InvalidMin;
+	if (pageName == GetPageNameFromId(UPI_SoundObjects))
+		return UPI_SoundObjects;
+	if (pageName == GetPageNameFromId(UPI_MultiSlider))
+		return UPI_MultiSlider;
+	if (pageName == GetPageNameFromId(UPI_MatrixIOs))
+		return UPI_MatrixIOs;
+	if (pageName == GetPageNameFromId(UPI_Scenes))
+		return UPI_Scenes;
+	if (pageName == GetPageNameFromId(UPI_EnSpace))
+		return UPI_EnSpace;
+	if (pageName == GetPageNameFromId(UPI_Statistics))
+		return UPI_Statistics;
+	if (pageName == GetPageNameFromId(UPI_Settings))
+		return UPI_Settings;
+	if (pageName == GetPageNameFromId(UPI_InvalidMax))
+		return UPI_InvalidMax;
+	else
+		return UPI_InvalidMin;
+}
+
 /**
  * Helper method to query a user readable short name for a protocol type that can be shown on UI.
  * @param type	The type value to get a short name for.

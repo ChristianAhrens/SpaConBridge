@@ -21,6 +21,7 @@
 
 #include "../../../Controller.h"
 #include "../../../LookAndFeel.h"
+#include "../../PageComponentManager.h"
 
 #include <Image_utils.h>
 
@@ -101,6 +102,7 @@ void SettingsSectionsComponent::createGeneralSettingsSection()
 	m_LookAndFeelSelect = std::make_unique<ComboBox>();
 	m_LookAndFeelSelect->addItem(DbLookAndFeelBase::getLookAndFeelName(DbLookAndFeelBase::LAFT_Dark), DbLookAndFeelBase::LAFT_Dark);
 	m_LookAndFeelSelect->addItem(DbLookAndFeelBase::getLookAndFeelName(DbLookAndFeelBase::LAFT_Light), DbLookAndFeelBase::LAFT_Light);
+	m_LookAndFeelSelect->addListener(this);
 	m_LookAndFeelLabel = std::make_unique<Label>("LookAndFeelSelect", "Look and feel");
 	m_LookAndFeelLabel->setJustificationType(Justification::centred);
 	m_LookAndFeelLabel->attachToComponent(m_LookAndFeelSelect.get(), true);
@@ -666,33 +668,31 @@ void SettingsSectionsComponent::lookAndFeelChanged()
  */
 void SettingsSectionsComponent::buttonClicked(Button* button)
 {
-	Controller* ctrl = Controller::GetInstance();
-	if (!ctrl)
+	auto pageMgr = PageComponentManager::GetInstance();
+	if (!pageMgr)
 		return;
 
-	if (m_SoundObjectPageButton && m_SoundObjectPageButton.get() == button)
+	// if the button that was changed is disabled, don't handle its change whatsoever
+	if (button && !button->isEnabled())
+		return;
+
+	// General Settings section
+	if (m_SoundObjectPageButton.get() == button || m_MultisurfacePageButton.get() == button || m_MatrixIOPageButton.get() == button || m_ScenesPageButton.get() == button || m_EnSpacePageButton.get() == button || m_StatisticsPageButton.get() == button)
 	{
-		UPI_Table;
-	}
-	else if (m_MultisurfacePageButton && m_MultisurfacePageButton.get() == button)
-	{
-		UPI_MultiSlider;
-	}
-	else if (m_MatrixIOPageButton && m_MatrixIOPageButton.get() == button)
-	{
-		UPI_MatrixIOs;
-	}
-	else if (m_ScenesPageButton && m_ScenesPageButton.get() == button)
-	{
-		UPI_Scenes;
-	}
-	else if (m_EnSpacePageButton && m_EnSpacePageButton.get() == button)
-	{
-		UPI_EnSpace;
-	}
-	else if (m_StatisticsPageButton && m_StatisticsPageButton.get() == button)
-	{
-		UPI_Statistics;
+		auto enabledPages = std::vector<UIPageId>();
+		if (m_SoundObjectPageButton && m_SoundObjectPageButton->getToggleState())
+			enabledPages.push_back(UPI_SoundObjects);
+		if (m_MultisurfacePageButton && m_MultisurfacePageButton->getToggleState())
+			enabledPages.push_back(UPI_MultiSlider);
+		if (m_MatrixIOPageButton && m_MatrixIOPageButton->getToggleState())
+			enabledPages.push_back(UPI_MatrixIOs);
+		if (m_ScenesPageButton && m_ScenesPageButton->getToggleState())
+			enabledPages.push_back(UPI_Scenes);
+		if (m_EnSpacePageButton && m_EnSpacePageButton->getToggleState())
+			enabledPages.push_back(UPI_EnSpace);
+		if (m_StatisticsPageButton && m_StatisticsPageButton->getToggleState())
+			enabledPages.push_back(UPI_Statistics);
+		pageMgr->SetEnabledPages(enabledPages, false);
 	}
 }
 
@@ -702,8 +702,12 @@ void SettingsSectionsComponent::buttonClicked(Button* button)
  */
 void SettingsSectionsComponent::buttonClicked(JUCEAppBasics::SplitButtonComponent* button, uint64 buttonId)
 {
-	Controller* ctrl = Controller::GetInstance();
+	auto ctrl = Controller::GetInstance();
 	if (!ctrl)
+		return;
+
+	// if the button that was changed is disabled, don't handle its change whatsoever
+	if (button && !button->isEnabled())
 		return;
 
 	// DS100 mode settings section
@@ -788,7 +792,7 @@ void SettingsSectionsComponent::textEditorFocusLost(TextEditor& editor)
  */
 void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 {
-	Controller* ctrl = Controller::GetInstance();
+	auto ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return;
 
@@ -843,16 +847,28 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
  */
 void SettingsSectionsComponent::comboBoxChanged(ComboBox* comboBox)
 {
-	Controller* ctrl = Controller::GetInstance();
+	auto ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return;
+
+	auto pageMgr = PageComponentManager::GetInstance();
+	if (!pageMgr)
+		return;
     
-    // if the combobox that was changed is disabled, don't handle its change
+    // if the combobox that was changed is disabled, don't handle its change whatsoever
     if (comboBox && !comboBox->isEnabled())
         return;
 
+	// General settings section
+	if (m_LookAndFeelSelect && m_LookAndFeelSelect.get() == comboBox)
+	{
+		auto lookAndFeelType = static_cast<DbLookAndFeelBase::LookAndFeelType>(m_LookAndFeelSelect->getSelectedId());
+		jassert(lookAndFeelType > DbLookAndFeelBase::LookAndFeelType::LAFT_InvalidFirst && lookAndFeelType < DbLookAndFeelBase::LookAndFeelType::LAFT_InvalidLast);
+		pageMgr->SetLookAndFeelType(lookAndFeelType, false);
+	}
+
 	// RTTrPM settings section
-	if (m_RTTrPMMappingAreaSelect && m_RTTrPMMappingAreaSelect.get() == comboBox)
+	else if (m_RTTrPMMappingAreaSelect && m_RTTrPMMappingAreaSelect.get() == comboBox)
 	{
 		m_previousRTTrPMMappingAreaId = m_RTTrPMMappingAreaSelect->getSelectedId();
 		ctrl->SetBridgingMappingArea(PBT_BlacktraxRTTrPM, m_previousRTTrPMMappingAreaId);
@@ -893,7 +909,7 @@ void SettingsSectionsComponent::comboBoxChanged(ComboBox* comboBox)
  */
 void SettingsSectionsComponent::setSettingsSectionActiveState(HeaderWithElmListComponent* settingsSection, bool activeState)
 {
-	Controller* ctrl = Controller::GetInstance();
+	auto ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return;
 
@@ -988,6 +1004,25 @@ void SettingsSectionsComponent::processUpdatedConfig()
  */
 void SettingsSectionsComponent::processUpdatedGeneralConfig()
 {
+	auto pageMgr = PageComponentManager::GetInstance();
+	if (!pageMgr)
+		return;
+
+	// General settings section
+	if (m_SoundObjectPageButton)
+		m_SoundObjectPageButton->setToggleState(std::find(pageMgr->GetEnabledPages().begin(), pageMgr->GetEnabledPages().end(), UPI_SoundObjects) != pageMgr->GetEnabledPages().end(), dontSendNotification);
+	if (m_MultisurfacePageButton)
+		m_MultisurfacePageButton->setToggleState(std::find(pageMgr->GetEnabledPages().begin(), pageMgr->GetEnabledPages().end(), UPI_MultiSlider) != pageMgr->GetEnabledPages().end(), dontSendNotification);
+	if (m_MatrixIOPageButton)
+		m_MatrixIOPageButton->setToggleState(std::find(pageMgr->GetEnabledPages().begin(), pageMgr->GetEnabledPages().end(), UPI_MatrixIOs) != pageMgr->GetEnabledPages().end(), dontSendNotification);
+	if (m_ScenesPageButton)
+		m_ScenesPageButton->setToggleState(std::find(pageMgr->GetEnabledPages().begin(), pageMgr->GetEnabledPages().end(), UPI_Scenes) != pageMgr->GetEnabledPages().end(), dontSendNotification);
+	if (m_EnSpacePageButton)
+		m_EnSpacePageButton->setToggleState(std::find(pageMgr->GetEnabledPages().begin(), pageMgr->GetEnabledPages().end(), UPI_EnSpace) != pageMgr->GetEnabledPages().end(), dontSendNotification);
+	if (m_StatisticsPageButton)
+		m_StatisticsPageButton->setToggleState(std::find(pageMgr->GetEnabledPages().begin(), pageMgr->GetEnabledPages().end(), UPI_Statistics) != pageMgr->GetEnabledPages().end(), dontSendNotification);
+	if (m_LookAndFeelSelect)
+		m_LookAndFeelSelect->setSelectedId(pageMgr->GetLookAndFeelType(), dontSendNotification);
 }
 
 /**
@@ -995,7 +1030,7 @@ void SettingsSectionsComponent::processUpdatedGeneralConfig()
  */
 void SettingsSectionsComponent::processUpdatedDS100Config()
 {
-	Controller* ctrl = Controller::GetInstance();
+	auto ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return;
 
@@ -1042,7 +1077,7 @@ void SettingsSectionsComponent::processUpdatedDS100Config()
  */
 void SettingsSectionsComponent::processUpdatedDiGiCoConfig()
 {
-	Controller* ctrl = Controller::GetInstance();
+	auto ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return;
 
@@ -1063,7 +1098,7 @@ void SettingsSectionsComponent::processUpdatedDiGiCoConfig()
  */
 void SettingsSectionsComponent::processUpdatedRTTrPMConfig()
 {
-	Controller* ctrl = Controller::GetInstance();
+	auto ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return;
 
@@ -1093,7 +1128,7 @@ void SettingsSectionsComponent::processUpdatedRTTrPMConfig()
  */
 void SettingsSectionsComponent::processUpdatedGenericOSCConfig()
 {
-	Controller* ctrl = Controller::GetInstance();
+	auto ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return;
 
@@ -1114,7 +1149,7 @@ void SettingsSectionsComponent::processUpdatedGenericOSCConfig()
  */
 void SettingsSectionsComponent::processUpdatedGenericMIDIConfig()
 {
-	Controller* ctrl = Controller::GetInstance();
+	auto ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return;
 
@@ -1194,7 +1229,7 @@ void SettingsSectionsComponent::processUpdatedGenericMIDIConfig()
  */
 void SettingsSectionsComponent::processUpdatedYamahaOSCConfig()
 {
-	Controller* ctrl = Controller::GetInstance();
+	auto ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return;
 
@@ -1230,7 +1265,7 @@ void SettingsSectionsComponent::handleDS100ServiceSelected(JUCEAppBasics::Zeroco
 	{
 		m_DS100IpAddressEdit->setText(info->ip, true);
         
-        Controller* ctrl = Controller::GetInstance();
+        auto ctrl = Controller::GetInstance();
         if (ctrl)
             ctrl->SetDS100IpAddress(DCP_Settings, info->ip);
 	}
@@ -1249,7 +1284,7 @@ void SettingsSectionsComponent::handleSecondDS100ServiceSelected(JUCEAppBasics::
 	{
 		m_SecondDS100IpAddressEdit->setText(info->ip, true);
 
-		Controller* ctrl = Controller::GetInstance();
+		auto ctrl = Controller::GetInstance();
 		if (ctrl)
 			ctrl->SetSecondDS100IpAddress(DCP_Settings, info->ip);
 	}
@@ -1269,7 +1304,7 @@ void SettingsSectionsComponent::handleMidiAssiSet(Component* sender, const JUCEA
 		// as is done in other handle methods with other editors,
 		// since it is already done by learners internally!
 
-		Controller* ctrl = Controller::GetInstance();
+		auto ctrl = Controller::GetInstance();
 		if (ctrl)
 			ctrl->SetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(learnerComponent->getReferredId()), midiAssi);
 	}

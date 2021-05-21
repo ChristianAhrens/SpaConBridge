@@ -49,6 +49,7 @@ public:
         SCENESPAGE,
         PINNEDSCENES,
         SCENE,
+        ENABLEDPAGES,
     };
     static String getTagName(TagID ID)
     {
@@ -90,6 +91,8 @@ public:
             return "PinnedScenes";
         case SCENE:
             return "Scene";
+        case ENABLEDPAGES:
+            return "EnabledPages";
 		default:
 			return "INVALID";
         }

@@ -139,13 +139,14 @@ PageContainerComponent::PageContainerComponent()
 
 	// Add the page tabs.
 	m_tabbedComponent->SetIsHandlingChanges(false);
-	m_tabbedComponent->addTab("Table", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_soundobjectsPage.get(), false, UPI_Table);
-	m_tabbedComponent->addTab("Slider", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSliderPage.get(), false, UPI_MultiSlider);
-	m_tabbedComponent->addTab("Matrix IOs", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_matrixIOPage.get(), false, UPI_MatrixIOs);
-	m_tabbedComponent->addTab("Scenes", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_scenesPage.get(), false, UPI_Scenes);
-	m_tabbedComponent->addTab("EnSpace", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_enSpacePage.get(), false, UPI_EnSpace);
-	m_tabbedComponent->addTab("Statistics", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_statisticsPage.get(), false, UPI_Statistics);
-	m_tabbedComponent->addTab("Settings", getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_settingsPage.get(), false, UPI_Settings);
+	m_tabbedComponent->addTab(GetPageNameFromId(UPI_SoundObjects), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_soundobjectsPage.get(), false, UPI_SoundObjects);
+	m_tabbedComponent->addTab(GetPageNameFromId(UPI_MultiSlider), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSliderPage.get(), false, UPI_MultiSlider);
+	m_tabbedComponent->addTab(GetPageNameFromId(UPI_MatrixIOs), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_matrixIOPage.get(), false, UPI_MatrixIOs);
+	m_tabbedComponent->addTab(GetPageNameFromId(UPI_Scenes), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_scenesPage.get(), false, UPI_Scenes);
+	m_tabbedComponent->addTab(GetPageNameFromId(UPI_EnSpace), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_enSpacePage.get(), false, UPI_EnSpace);
+	m_tabbedComponent->addTab(GetPageNameFromId(UPI_Statistics), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_statisticsPage.get(), false, UPI_Statistics);
+	m_tabbedComponent->addTab(GetPageNameFromId(UPI_Settings), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_settingsPage.get(), false, UPI_Settings);
+
 	m_tabbedComponent->SetIsHandlingChanges(true);
 
 	// Start GUI-refreshing timer.
@@ -349,7 +350,7 @@ void PageContainerComponent::UpdateGui(bool init)
 	}
 
 	// Save some performance: only update the component inside the currently active tab.
-	if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == UPI_Table)
+	if (m_tabbedComponent && m_tabbedComponent->getCurrentTabIndex() == UPI_SoundObjects)
 	{
 		if (m_soundobjectsPage)
 			m_soundobjectsPage->UpdateGui(init);
@@ -418,31 +419,58 @@ void PageContainerComponent::SetPagesBeingInitialized(bool initializing)
 }
 
 /**
- * Method to externally set the currently active tab.
- * This is used to restore the current active tab from config file on app start.
- * @param tabIdx	The tab index to set active
+ * Method to externally set the currently active page.
+ * This is used e.g. to restore the current active page from config file on app start.
+ * @param pageId	The page id to set active
  */
-void PageContainerComponent::SetActiveTab(int tabIdx)
+void PageContainerComponent::SetActivePage(UIPageId pageId)
 {
-	m_tabbedComponent->setCurrentTabIndex(tabIdx, false);
+	jassert(pageId > UPI_InvalidMin && pageId < UPI_InvalidMax);
+	m_tabbedComponent->setCurrentTabIndex(m_tabbedComponent->getTabNames().indexOf(GetPageNameFromId(pageId)));
 }
 
 /**
- * Setter for the currently selected look and feel type.
- * @param lookAndFeelType	The look and feel type to set as currently selected in dropdown
+ * Method to externally set the enabled tabs (pages).
+ * @param enabledPages	The pages to set active (visible)
  */
-void PageContainerComponent::SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType)
+void PageContainerComponent::SetEnabledPages(const std::vector<UIPageId>& enabledPages)
 {
-	m_settingsPage->SetSelectedLookAndFeelType(lookAndFeelType);
-}
+	// mute change broadcasting while we modify the tabs
+	m_tabbedComponent->SetIsHandlingChanges(false);
 
-/**
- * Getter for the currently selected look and feel type.
- * @return	The look and feel type that currently is selected in dropdown
- */
-DbLookAndFeelBase::LookAndFeelType PageContainerComponent::GetLookAndFeelType()
-{
-	return m_settingsPage->GetSelectedLookAndFeelType();
+	// cache the currently active tab to reactivate it after tab recreation (don't default to first tab)
+	auto activeTabId = GetPageIdFromName(m_tabbedComponent->getCurrentTabName());
+
+	// start clearing currently enabled tabs and recreate the ones to be enabled from now on
+	m_tabbedComponent->clearTabs();
+
+	auto SoundObjectsPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_SoundObjects) != enabledPages.end();
+	auto MultiSliderPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_MultiSlider) != enabledPages.end();
+	auto MatrixIOsPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_MatrixIOs) != enabledPages.end();
+	auto ScenesPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_Scenes) != enabledPages.end();
+	auto EnSpacePageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_EnSpace) != enabledPages.end();
+	auto StatisticsPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_Statistics) != enabledPages.end();
+
+	if (SoundObjectsPageEnabled)
+		m_tabbedComponent->addTab(GetPageNameFromId(UPI_SoundObjects), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_soundobjectsPage.get(), false, UPI_SoundObjects);
+	if (MultiSliderPageEnabled)
+		m_tabbedComponent->addTab(GetPageNameFromId(UPI_MultiSlider), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSliderPage.get(), false, UPI_MultiSlider);
+	if (MatrixIOsPageEnabled)
+		m_tabbedComponent->addTab(GetPageNameFromId(UPI_MatrixIOs), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_matrixIOPage.get(), false, UPI_MatrixIOs);
+	if (ScenesPageEnabled)
+		m_tabbedComponent->addTab(GetPageNameFromId(UPI_Scenes), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_scenesPage.get(), false, UPI_Scenes);
+	if (EnSpacePageEnabled)
+		m_tabbedComponent->addTab(GetPageNameFromId(UPI_EnSpace), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_enSpacePage.get(), false, UPI_EnSpace);
+	if (StatisticsPageEnabled)
+		m_tabbedComponent->addTab(GetPageNameFromId(UPI_Statistics), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_statisticsPage.get(), false, UPI_Statistics);
+
+	m_tabbedComponent->addTab(GetPageNameFromId(UPI_Settings), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_settingsPage.get(), false, UPI_Settings);
+
+	// restore the previously active tab
+	m_tabbedComponent->setCurrentTabIndex(m_tabbedComponent->getTabNames().indexOf(GetPageNameFromId(activeTabId)));
+
+	// reenable change broadcasting
+	m_tabbedComponent->SetIsHandlingChanges(true);
 }
 
 /**
@@ -654,8 +682,9 @@ CustomButtonTabbedComponent::~CustomButtonTabbedComponent()
  */
 TabBarButton* CustomButtonTabbedComponent::createTabButton(const String& tabName, int tabIndex)
 {
-	ignoreUnused(tabName);
-	return new CustomDrawableTabBarButton(tabIndex, getTabbedButtonBar());
+	ignoreUnused(tabIndex);
+
+	return new CustomDrawableTabBarButton(GetPageIdFromName(tabName), getTabbedButtonBar());
 }
 
 /**
@@ -667,14 +696,16 @@ TabBarButton* CustomButtonTabbedComponent::createTabButton(const String& tabName
  */
 void CustomButtonTabbedComponent::currentTabChanged(int newCurrentTabIndex, const String& newCurrentTabName)
 {
-	ignoreUnused(newCurrentTabName);
+	ignoreUnused(newCurrentTabIndex);
 
 	if (!GetIsHandlingChanges())
 		return;
 
+	auto newCurrentPageId = GetPageIdFromName(newCurrentTabName);
+
 	PageComponentManager* pageMgr = PageComponentManager::GetInstance();
 	if (pageMgr)
-		pageMgr->SetActiveTab(newCurrentTabIndex, false);
+		pageMgr->SetActivePage(newCurrentPageId, false);
 
 	PageContainerComponent* parent = dynamic_cast<PageContainerComponent*>(getParentComponent());
 	if (parent)
@@ -717,12 +748,12 @@ void CustomButtonTabbedComponent::SetIsHandlingChanges(bool isHandlingChanges)
 
 /**
  * Class constructor.
- * @param tabIdx	Tab index starting at 0.
+ * @param pageId	The page id to use.
  * @param ownerBar	TabbedButtonBar object which contains this button.
  */
-CustomDrawableTabBarButton::CustomDrawableTabBarButton(int tabIdx, TabbedButtonBar& ownerBar)
+CustomDrawableTabBarButton::CustomDrawableTabBarButton(UIPageId pageId, TabbedButtonBar& ownerBar)
 	: TabBarButton(String(), ownerBar),
-	m_tabIndex(tabIdx)
+	m_pageId(pageId)
 {
 	updateDrawableButtonImageColours();
 }
@@ -740,9 +771,9 @@ CustomDrawableTabBarButton::~CustomDrawableTabBarButton()
 void CustomDrawableTabBarButton::updateDrawableButtonImageColours()
 {
 	String imageName;
-	switch (m_tabIndex)
+	switch (m_pageId)
 	{
-	case UPI_Table:
+	case UPI_SoundObjects:
 		imageName = BinaryData::vertical_split24px_svg;
 		break;
 	case UPI_MultiSlider:
@@ -764,6 +795,7 @@ void CustomDrawableTabBarButton::updateDrawableButtonImageColours()
 		imageName = BinaryData::sensors_black_24dp_svg;
 		break;
 	default:
+		imageName = BinaryData::clear_black_24dp_svg;
 		break;
 	}
 

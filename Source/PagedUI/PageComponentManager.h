@@ -67,8 +67,12 @@ public:
 	void ClosePageContainer(bool destroy);
 
 	//==============================================================================
-	int GetActiveTab() const;
-	void SetActiveTab(int tabIdx, bool dontSendNotification);
+	UIPageId GetActivePage() const;
+	void SetActivePage(UIPageId pageId, bool dontSendNotification);
+
+	//==============================================================================
+	const std::vector<UIPageId>& GetEnabledPages() const;
+	void SetEnabledPages(const std::vector<UIPageId>& enabledPages, bool dontSendNotification);
 
 	//==============================================================================
 	int GetSelectedMapping() const;
@@ -101,10 +105,15 @@ public:
 
 protected:
 	//==============================================================================
-	static PageComponentManager	*m_singleton;			/**> The one and only instance of PageComponentManager. */
-	PageContainerComponent		*m_pageContainer;		/**> Pointer to the Overview winodw, if any. */
-	int							m_selectedTab{ 0 };		/**> Remember the last active tab. */
-	int							m_selectedMapping{ 1 };	/**> Remember the last selected coordinate mapping for the multi-slider. */
+	static PageComponentManager	*m_singleton;			/**< The one and only instance of PageComponentManager. */
+	PageContainerComponent		*m_pageContainer;		/**< Pointer to the page winodw. */
+
+	UIPageId							m_activePage{ UPI_InvalidMin };								/**< Remember the last active page. */
+	std::vector<UIPageId>				m_enabledPages;												/**< Remember the currently enabled pages. */
+
+	DbLookAndFeelBase::LookAndFeelType	m_lookAndFeelType{ DbLookAndFeelBase::LAFT_InvalidFirst };	/**< Remember the currently selected look and feel type. */
+
+	int									m_selectedMapping{ 1 };										/**< Remember the last selected coordinate mapping for the multi-slider. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PageComponentManager)
 };

@@ -392,6 +392,9 @@ void ScenesPageComponent::HandleObjectDataInternal(RemoteObjectIdentifier object
  */
 void ScenesPageComponent::PinSceneRecall(const std::pair<int, int>& sceneIndex)
 {
+    if (m_pinnedSceneIdxRecallButtons.count(sceneIndex) != 0)
+        return;
+    
 	m_pinnedSceneIdxRecallLayoutContainer.insert(std::make_pair(sceneIndex, std::make_unique<HorizontalLayouterComponent>()));
 	m_pinnedSceneIdxRecallLayoutContainer.at(sceneIndex)->SetSpacing(5);
 	if (GetElementsContainer())

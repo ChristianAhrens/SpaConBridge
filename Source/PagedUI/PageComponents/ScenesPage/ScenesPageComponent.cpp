@@ -263,15 +263,33 @@ void ScenesPageComponent::buttonClicked(Button* button)
 	{
 		RemoteObjectMessageData romd;
 		ctrl->SendMessageDataDirect(ROI_Scene_Next, romd);
+        
+        // clear the text changed indicator, to not block the index change updating
+        m_sceneIdxEditTextChanged = false;
+        
+        // after the recall command was sent, refresh the object values relevant for UI components
+        Timer::callAfterDelay(100, std::bind(&ScenesPageComponent::triggerPollOnce, this));
 	}
 	else if (m_previousButton && m_previousButton.get() == button)
 	{
 		RemoteObjectMessageData romd;
 		ctrl->SendMessageDataDirect(ROI_Scene_Previous, romd);
+        
+        // clear the text changed indicator, to not block the index change updating
+        m_sceneIdxEditTextChanged = false;
+        
+        // after the recall command was sent, refresh the object values relevant for UI components
+        Timer::callAfterDelay(100, std::bind(&ScenesPageComponent::triggerPollOnce, this));
 	}
 	else if (m_recallButton && m_recallButton.get() == button)
 	{
 		SendRecallSceneIndex(GetCurrentSceneIndex());
+        
+        // clear the text changed indicator, to not block the index change updating
+        m_sceneIdxEditTextChanged = false;
+        
+        // after the recall command was sent, refresh the object values relevant for UI components
+        Timer::callAfterDelay(100, std::bind(&ScenesPageComponent::triggerPollOnce, this));
 	}
 	else if (m_pinSceneIdxRecallButton && m_pinSceneIdxRecallButton.get() == button)
 	{
@@ -284,6 +302,13 @@ void ScenesPageComponent::buttonClicked(Button* button)
 			if (sceneIdxRecallButton.second && sceneIdxRecallButton.second.get() == button)
 			{
 				SendRecallSceneIndex(sceneIdxRecallButton.first);
+                
+                // clear the text changed indicator, to not block the index change updating
+                m_sceneIdxEditTextChanged = false;
+                
+                // after the recall command was sent, refresh the object values relevant for UI components
+                Timer::callAfterDelay(100, std::bind(&ScenesPageComponent::triggerPollOnce, this));
+                
 				return;
 			}
 		}
@@ -308,7 +333,7 @@ void ScenesPageComponent::textEditorTextChanged(TextEditor& textEdit)
 {
 	if (m_sceneIdxEdit && m_sceneIdxEdit.get() == &textEdit)
 	{
-		m_sceneIndexChangePending = true;
+        m_sceneIdxEditTextChanged = true;
 	}
 }
 
@@ -321,6 +346,7 @@ void ScenesPageComponent::textEditorReturnKeyPressed(TextEditor& textEdit)
 	if (m_sceneIdxEdit && m_sceneIdxEdit.get() == &textEdit)
 	{
 		SendRecallSceneIndex(GetCurrentSceneIndex());
+        m_sceneIdxEditTextChanged = false;
 	}
 }
 
@@ -332,8 +358,20 @@ void ScenesPageComponent::textEditorEscapeKeyPressed(TextEditor& textEdit)
 {
 	if (m_sceneIdxEdit && m_sceneIdxEdit.get() == &textEdit)
 	{
-		m_sceneIndexChangePending = false;
+        m_sceneIdxEditTextChanged = false;
 	}
+}
+
+/**
+ * Reimplemented to handle text editor focus loosing.
+ * @param    textEdit    The text editor that lost the focus.
+ */
+void ScenesPageComponent::textEditorFocusLost(TextEditor& textEdit)
+{
+    if (m_sceneIdxEdit && m_sceneIdxEdit.get() == &textEdit)
+    {
+        m_sceneIdxEditTextChanged = false;
+    }
 }
 
 /**
@@ -363,10 +401,9 @@ void ScenesPageComponent::HandleObjectDataInternal(RemoteObjectIdentifier object
 			{
 				if (m_sceneIndexChange.first == sceneIndexMajor && m_sceneIndexChange.second == sceneIndexMinor)
 					m_sceneIndexChangePending = false;
-				break;
 			}
 
-			if (m_sceneIdxEdit)
+			if (m_sceneIdxEdit && !m_sceneIdxEditTextChanged)
 				m_sceneIdxEdit->setText(remoteObjectContentString, dontSendNotification);
 			break;
 			}

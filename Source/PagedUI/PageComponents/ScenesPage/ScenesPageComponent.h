@@ -57,6 +57,7 @@ public:
 	void textEditorTextChanged(TextEditor& textEdit) override;
 	void textEditorReturnKeyPressed(TextEditor& textEdit) override;
 	void textEditorEscapeKeyPressed(TextEditor& textEdit) override;
+    void textEditorFocusLost (TextEditor& textEdit) override;
 
 	//==========================================================================
 	void lookAndFeelChanged() override;
@@ -93,6 +94,8 @@ private:
 
 	bool				m_sceneIndexChangePending{ false };
 	std::pair<int, int> m_sceneIndexChange{ 0, 0 };
+    
+    bool    m_sceneIdxEditTextChanged{ false };
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ScenesPageComponent)
 };

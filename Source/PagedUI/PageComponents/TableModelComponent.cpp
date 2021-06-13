@@ -985,6 +985,8 @@ void TableModelComponent::selectedRowsChanged(int lastRowSelected)
 				onCurrentSelectedProcessorChanged(GetProcessorIdForRow(lastRowSelected));
 			m_tableControlBar->SetRemoveEnabled(true);
 		}
+        
+        m_table->grabKeyboardFocus();
 	}
 }
 

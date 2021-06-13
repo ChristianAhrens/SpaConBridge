@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - 
 
 ### Fixed
+-
+
+## [0.3.4] - 2021-06-13
+### Fixed
 - Fixed text editors in tables always grabbing keyboard focus on row selection (solves annoying onscreen keyboard popping up on iOS)
 - Fixed Scenes page scene indices to not being pinnable if already pinned (avoids access violation on remove and issues with element layouting)
 - Fixed Scenes page scene index/name/comment updating to not rely on slow refreshing but react instantaneous on recall/next/previous/pinnedrecall

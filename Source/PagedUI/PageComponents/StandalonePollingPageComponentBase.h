@@ -151,6 +151,8 @@ protected:
 	const std::map<RemoteObjectIdentifier, std::vector<RemoteObjectAddressing>>& GetStandalonePollingObjects() const;
 	void SetStandalonePollingObjects(const std::map<RemoteObjectIdentifier, std::vector<RemoteObjectAddressing>>& objects);
 	void AddStandalonePollingObject(const RemoteObjectIdentifier roi, const RemoteObjectAddressing& addressing);
+    
+    void triggerPollOnce();
 
 	//==========================================================================
 	void HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier objectId, const RemoteObjectMessageData& msgData) override;
@@ -158,9 +160,8 @@ protected:
 	//==============================================================================
 	virtual void HandleObjectDataInternal(RemoteObjectIdentifier objectId, const RemoteObjectMessageData& msgData) = 0;
 
-private:
-	void triggerPollOnce();
 
+private:
 	std::map<RemoteObjectIdentifier, std::vector<RemoteObjectAddressing>>	m_objectsForStandalonePolling;	/**< Objects that are registered for 'monitoring' */
 
 	//==============================================================================

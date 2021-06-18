@@ -856,7 +856,7 @@ bool ProtocolBridgingWrapper::SetMuteProtocolRemoteObjects(ProtocolId protocolId
 
 			if (oldMutedObjects != mutedObjects)
 			{
-				ProcessingEngineConfig::WriteMutedObjects(mutedObjsXmlElement, mutedObjects);
+				ProcessingEngineConfig::ReplaceMutedObjects(mutedObjsXmlElement, mutedObjects);
 
 				SetBridgingNodeStateXml(nodeXmlElement, true);
 
@@ -900,7 +900,7 @@ bool ProtocolBridgingWrapper::SetUnmuteProtocolRemoteObjects(ProtocolId protocol
 
 			if (oldMutedObjects != mutedObjects)
 			{
-				ProcessingEngineConfig::WriteMutedObjects(mutedObjsXmlElement, mutedObjects);
+				ProcessingEngineConfig::ReplaceMutedObjects(mutedObjsXmlElement, mutedObjects);
 
 				SetBridgingNodeStateXml(nodeXmlElement, true);
 

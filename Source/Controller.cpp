@@ -2020,13 +2020,12 @@ std::vector<RemoteObject> Controller::GetSoundobjectProcessorRemoteObjects(Sound
 		auto processor = GetSoundobjectProcessor(processorId);
 		if (processor->GetSoundobjectId() == soundobjectId)
 		{
-			auto remoteObject = RemoteObject();
-			remoteObject._Addr._first = processor->GetSoundobjectId();
-			remoteObject._Addr._second = processor->GetMappingId();
 			for (auto& roi : SoundobjectProcessor::GetUsedRemoteObjects())
 			{
-				remoteObject._Id = roi;
-				remoteObjects.push_back(remoteObject);
+				if (ProcessingEngineConfig::IsRecordAddressingObject(roi))
+					remoteObjects.push_back(RemoteObject(roi, RemoteObjectAddressing(processor->GetSoundobjectId(), processor->GetMappingId())));
+				else
+					remoteObjects.push_back(RemoteObject(roi, RemoteObjectAddressing(processor->GetSoundobjectId(), INVALID_ADDRESS_VALUE)));
 			}
 
 			break;

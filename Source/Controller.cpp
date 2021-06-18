@@ -2007,6 +2007,34 @@ bool Controller::IsSoundobjectIdSelected(SoundobjectId soundobjectId)
 		return false;
 }
 
+/**
+ * Helper method to collect all remote objects that are used by a soundobject processor.
+ * @param soundobjectId		The id of the sound object processor to get the used remote objects for.
+ * @return		The list of used remote objects.
+ */
+std::vector<RemoteObject> Controller::GetSoundobjectProcessorRemoteObjects(SoundobjectId soundobjectId)
+{
+	auto remoteObjects = std::vector<RemoteObject>();
+	for (auto const& processorId : GetSoundobjectProcessorIds())
+	{
+		auto processor = GetSoundobjectProcessor(processorId);
+		if (processor->GetSoundobjectId() == soundobjectId)
+		{
+			auto remoteObject = RemoteObject();
+			remoteObject._Addr._first = processor->GetSoundobjectId();
+			remoteObject._Addr._second = processor->GetMappingId();
+			for (auto& roi : SoundobjectProcessor::GetUsedRemoteObjects())
+			{
+				remoteObject._Id = roi;
+				remoteObjects.push_back(remoteObject);
+			}
+
+			break;
+		}
+	}
+
+	return remoteObjects;
+}
 
 /**
  * Helper method to get a list of currently active remote objects.
@@ -2143,6 +2171,19 @@ bool Controller::IsMatrixInputIdSelected(MatrixInputId matrixInputId)
 		return false;
 }
 
+/**
+ * Helper method to collect all remote objects that are used by a matrix input processor.
+ * @param matrixInputId		The id of the matrix input processor to get the used remote objects for.
+ * @return		The list of used remote objects.
+ */
+std::vector<RemoteObject> Controller::GetMatrixInputProcessorRemoteObjects(MatrixInputId matrixInputId)
+{
+	auto remoteObjects = std::vector<RemoteObject>();
+	for (auto& roi : MatrixInputProcessor::GetUsedRemoteObjects())
+		remoteObjects.push_back(RemoteObject(roi, RemoteObjectAddressing(matrixInputId, INVALID_ADDRESS_VALUE)));
+
+	return remoteObjects;
+}
 
 /**
  * Helper method to get a list of currently active remote objects.
@@ -2279,6 +2320,19 @@ bool Controller::IsMatrixOutputIdSelected(MatrixOutputId MatrixOutputId)
 		return false;
 }
 
+/**
+ * Helper method to collect all remote objects that are used by a matrix output processor.
+ * @param matrixOutputId		The id of the matrix output processor to get the used remote objects for.
+ * @return		The list of used remote objects.
+ */
+std::vector<RemoteObject> Controller::GetMatrixOutputProcessorRemoteObjects(MatrixOutputId matrixOutputId)
+{
+	auto remoteObjects = std::vector<RemoteObject>();
+	for (auto& roi : MatrixOutputProcessor::GetUsedRemoteObjects())
+		remoteObjects.push_back(RemoteObject(roi, RemoteObjectAddressing(matrixOutputId, INVALID_ADDRESS_VALUE)));
+
+	return remoteObjects;
+}
 
 /**
  * Adds a given listener object to this controller instance's bridging wrapper object.

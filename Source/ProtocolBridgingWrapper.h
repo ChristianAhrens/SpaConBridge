@@ -268,6 +268,10 @@ private:
 	bool SetUnmuteProtocolMatrixOutputId(ProtocolId protocolId, MatrixOutputId matrixOutputId);
 	bool SetUnmuteProtocolMatrixOutputIds(ProtocolId protocolId, const std::vector<MatrixOutputId>& matrixOutputIds);
 
+	bool GetMuteProtocolRemoteObjects(ProtocolId protocolId, const std::vector<RemoteObject>& objects);
+	bool SetMuteProtocolRemoteObjects(ProtocolId protocolId, const std::vector<RemoteObject>& objects);
+	bool SetUnmuteProtocolRemoteObjects(ProtocolId protocolId, const std::vector<RemoteObject>& objects);
+
 	String GetProtocolIpAddress(ProtocolId protocolId);
 	bool SetProtocolIpAddress(ProtocolId protocolId, String ipAddress, bool dontSendNotification = false);
 	int GetProtocolListeningPort(ProtocolId protocolId);

@@ -850,8 +850,7 @@ bool ProtocolBridgingWrapper::SetMuteProtocolRemoteObjects(ProtocolId protocolId
 			auto oldMutedObjects = mutedObjects;
 			for (auto const& object : objects)
 			{
-				auto objIter = std::find(mutedObjects.begin(), mutedObjects.end(), object);
-				if (objIter != mutedObjects.end())
+				if (std::find(mutedObjects.begin(), mutedObjects.end(), object) == mutedObjects.end())
 					mutedObjects.push_back(object);
 			}
 

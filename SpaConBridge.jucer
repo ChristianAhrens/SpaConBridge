@@ -261,6 +261,8 @@
         <GROUP id="{A1501CBC-FDBD-6A07-19CE-0B89ABD08D89}" name="Resources">
           <GROUP id="{49230987-3CBC-5512-5852-2C92F74CB3FC}" name="Images">
             <FILE id="TAkUW8" name="add-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/add-24px.svg"/>
+            <FILE id="ngUAkm" name="add_batch-24dp.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/add_batch-24dp.svg"/>
             <FILE id="yuy29J" name="call_made-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/call_made-24px.svg"/>
             <FILE id="lbzD6a" name="call_received-24px.svg" compile="0" resource="1"

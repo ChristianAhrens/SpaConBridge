@@ -312,7 +312,7 @@ bool ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridg
 			hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_DS100_HOST);
 
 		// Active objects preparation
-		std::vector<RemoteObject> activeObjects;
+		auto activeObjects = std::vector<RemoteObject>();
 		RemoteObject objectX, objectY;
 
 		auto activeObjsXmlElement = protocolAXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ACTIVEOBJECTS));
@@ -424,7 +424,10 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupDiGiCoBridgingProtocol
 		if (ipAdressXmlElement)
 			ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
 
-		protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
+		auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
+		auto mutedObjects = std::vector<RemoteObject>();
+		if (mutedObjsXmlElement)
+			ProcessingEngineConfig::WriteMutedObjects(mutedObjsXmlElement, mutedObjects);
 	}
 
 	return protocolBXmlElement;
@@ -453,7 +456,10 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupRTTrPMBridgingProtocol
 		if (mappingAreaIdXmlElement)
 			mappingAreaIdXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), PROTOCOL_DEFAULT_MAPPINGAREA);
 
-		protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
+		auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
+		auto mutedObjects = std::vector<RemoteObject>();
+		if (mutedObjsXmlElement)
+			ProcessingEngineConfig::WriteMutedObjects(mutedObjsXmlElement, mutedObjects);
 	}
 
 	return protocolBXmlElement;
@@ -486,7 +492,10 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupGenericOSCBridgingProt
 		if (ipAdressXmlElement)
 			ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
 
-		protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
+		auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
+		auto mutedObjects = std::vector<RemoteObject>();
+		if (mutedObjsXmlElement)
+			ProcessingEngineConfig::WriteMutedObjects(mutedObjsXmlElement, mutedObjects);
 	}
 
 	return protocolBXmlElement;
@@ -519,7 +528,10 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupGenericMIDIBridgingPro
 		if (mappingAreaIdXmlElement)
 			mappingAreaIdXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), PROTOCOL_DEFAULT_MAPPINGAREA);
 
-		protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
+		auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
+		auto mutedObjects = std::vector<RemoteObject>();
+		if (mutedObjsXmlElement)
+			ProcessingEngineConfig::WriteMutedObjects(mutedObjsXmlElement, mutedObjects);
 	}
 
 	return protocolBXmlElement;
@@ -556,7 +568,10 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupYamahaOSCBridgingProto
 		if (mappingAreaIdXmlElement)
 			mappingAreaIdXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), PROTOCOL_DEFAULT_MAPPINGAREA);
 
-		protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
+		auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
+		auto mutedObjects = std::vector<RemoteObject>();
+		if (mutedObjsXmlElement)
+			ProcessingEngineConfig::WriteMutedObjects(mutedObjsXmlElement, mutedObjects);
 	}
 
 	return protocolBXmlElement;

@@ -75,6 +75,7 @@ TableModelComponent::TableModelComponent(ControlBarPosition pos, bool tableCanCo
     addAndMakeVisible(m_tableControlBar.get());
 
     m_tableControlBar->onAddClick = [=] { onAddProcessor(); };
+	m_tableControlBar->onAddMultipleClick = [=] { onAddMultipleProcessors(); };
     m_tableControlBar->onRemoveClick = [=] { onRemoveProcessor(); };
     m_tableControlBar->onSelectAllClick = [=] { onSelectAllProcessors(); };
     m_tableControlBar->onSelectNoneClick = [=] { onDeselectAllProcessors(); };
@@ -1064,6 +1065,33 @@ void TableModelComponent::onCollapseToggled(bool collapsed)
 {
 	if (onCurrentCollapseStateChanged)
 		onCurrentCollapseStateChanged(collapsed);
+}
+
+/**
+ * Utility method to show a dialog to the user, querying for the desired row count to add to the table.
+ * If user chooses cancel, a count of zero will be returned.
+ * @return	The count of rows to add chosen by the user. Zero if cancelled.
+ */
+std::int32_t TableModelComponent::QueryUserRowCountChoice()
+{
+#if JUCE_MODAL_LOOPS_PERMITTED
+	AlertWindow w("Add multiple rows",
+		"Please choose how many rows to add.",
+		AlertWindow::QuestionIcon);
+
+	w.addTextEditor("row_count", "1");
+	w.addButton("OK", 1, KeyPress(KeyPress::returnKey, 0, 0));
+	w.addButton("Cancel", 0, KeyPress(KeyPress::escapeKey, 0, 0));
+
+	if (w.runModalLoop() != 0) // not cancel
+	{
+		auto text = w.getTextEditorContents("row_count");
+		auto rowCount = text.getIntValue();
+		return rowCount;
+	}
+#endif
+
+	return 0;
 }
 
 

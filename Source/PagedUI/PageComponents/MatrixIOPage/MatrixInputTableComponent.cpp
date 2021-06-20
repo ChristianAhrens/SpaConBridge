@@ -168,6 +168,20 @@ void MatrixInputTableComponent::onAddProcessor()
 /**
  * Reimplemented pure virtual method that is used as std::function callback in table control bar
  */
+void MatrixInputTableComponent::onAddMultipleProcessors()
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
+	auto rowCount = QueryUserRowCountChoice();
+	if (rowCount > 0)
+		ctrl->createNewMatrixInputProcessors(rowCount);
+}
+
+/**
+ * Reimplemented pure virtual method that is used as std::function callback in table control bar
+ */
 void MatrixInputTableComponent::onRemoveProcessor()
 {
 	auto ctrl = Controller::GetInstance();

@@ -77,6 +77,7 @@ public:
 
 	//==========================================================================
 	void createNewSoundobjectProcessor();
+	void createNewSoundobjectProcessors(int newProcessorsCount);
 	SoundobjectProcessorId AddSoundobjectProcessor(DataChangeParticipant changeSource, SoundobjectProcessor* p);
 	void RemoveSoundobjectProcessor(SoundobjectProcessor* p);
 	int GetSoundobjectProcessorCount() const;
@@ -94,6 +95,7 @@ public:
 
 	//==========================================================================
 	void createNewMatrixInputProcessor();
+	void createNewMatrixInputProcessors(int newProcessorsCount);
 	MatrixInputProcessorId AddMatrixInputProcessor(DataChangeParticipant changeSource, MatrixInputProcessor* p);
 	void RemoveMatrixInputProcessor(MatrixInputProcessor* p);
 	int GetMatrixInputProcessorCount() const;
@@ -111,6 +113,7 @@ public:
 
 	//==========================================================================
 	void createNewMatrixOutputProcessor();
+	void createNewMatrixOutputProcessors(int newProcessorsCount);
 	MatrixOutputProcessorId AddMatrixOutputProcessor(DataChangeParticipant changeSource, MatrixOutputProcessor* p);
 	void RemoveMatrixOutputProcessor(MatrixOutputProcessor* p);
 	int GetMatrixOutputProcessorCount() const;

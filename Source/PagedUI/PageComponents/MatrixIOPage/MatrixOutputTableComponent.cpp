@@ -168,6 +168,20 @@ void MatrixOutputTableComponent::onAddProcessor()
 /**
  * Reimplemented pure virtual method that is used as std::function callback in table control bar
  */
+void MatrixOutputTableComponent::onAddMultipleProcessors()
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
+	auto rowCount = QueryUserRowCountChoice();
+	if (rowCount > 0)
+		ctrl->createNewMatrixOutputProcessors(rowCount);
+}
+
+/**
+ * Reimplemented pure virtual method that is used as std::function callback in table control bar
+ */
 void MatrixOutputTableComponent::onRemoveProcessor()
 {
 	auto ctrl = Controller::GetInstance();

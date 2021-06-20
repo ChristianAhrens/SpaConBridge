@@ -92,6 +92,8 @@ public:
 	void SetSoundobjectIdSelectState(SoundobjectId soundobjectId, bool selected);
 	bool IsSoundobjectIdSelected(SoundobjectId soundobjectId);
 
+	std::vector<RemoteObject> GetSoundobjectProcessorRemoteObjects(SoundobjectId soundobjectId);
+
 	//==========================================================================
 	void createNewMatrixInputProcessor();
 	MatrixInputProcessorId AddMatrixInputProcessor(DataChangeParticipant changeSource, MatrixInputProcessor* p);
@@ -109,6 +111,8 @@ public:
 	void SetMatrixInputIdSelectState(MatrixInputId matrixInputId, bool selected);
 	bool IsMatrixInputIdSelected(MatrixInputId matrixInputId);
 
+	std::vector<RemoteObject> GetMatrixInputProcessorRemoteObjects(MatrixInputId matrixInputId);
+
 	//==========================================================================
 	void createNewMatrixOutputProcessor();
 	MatrixOutputProcessorId AddMatrixOutputProcessor(DataChangeParticipant changeSource, MatrixOutputProcessor* p);
@@ -125,6 +129,8 @@ public:
 	const std::vector<MatrixOutputProcessorId> GetSelectedMatrixOutputProcessorIds();
 	void SetMatrixOutputIdSelectState(MatrixOutputId matrixOutputId, bool selected);
 	bool IsMatrixOutputIdSelected(MatrixOutputId matrixOutputId);
+
+	std::vector<RemoteObject> GetMatrixOutputProcessorRemoteObjects(MatrixOutputId matrixOutputId);
 
 	//==========================================================================
 	static String GetDefaultDS100IpAddress();

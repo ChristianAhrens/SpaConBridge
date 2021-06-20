@@ -75,6 +75,7 @@ TableModelComponent::TableModelComponent(ControlBarPosition pos, bool tableCanCo
     addAndMakeVisible(m_tableControlBar.get());
 
     m_tableControlBar->onAddClick = [=] { onAddProcessor(); };
+	m_tableControlBar->onAddMultipleClick = [=] { onAddMultipleProcessors(); };
     m_tableControlBar->onRemoveClick = [=] { onRemoveProcessor(); };
     m_tableControlBar->onSelectAllClick = [=] { onSelectAllProcessors(); };
     m_tableControlBar->onSelectNoneClick = [=] { onDeselectAllProcessors(); };

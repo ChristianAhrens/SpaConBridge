@@ -48,6 +48,7 @@ public:
 protected:
 	//==============================================================================
 	void onAddProcessor() override;
+	void onAddMultipleProcessors() override;
 	void onRemoveProcessor() override;
 
 private:

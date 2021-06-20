@@ -172,6 +172,8 @@ void MatrixOutputTableComponent::onAddMultipleProcessors()
 {
 	auto w = std::make_unique<AlertWindow>("Matrix Outputs", "Choose how many to add", juce::AlertWindow::NoIcon).release();
 	w->addTextEditor("processor_count", "1");
+    w->getTextEditor("processor_count")->setInputRestrictions(3, "0123456789");
+    w->getTextEditor("processor_count")->setKeyboardType(TextInputTarget::VirtualKeyboardType::phoneNumberKeyboard);
 	w->addButton("OK", 1, KeyPress(KeyPress::returnKey, 0, 0));
 	w->addButton("Cancel", 0, KeyPress(KeyPress::escapeKey, 0, 0));
 

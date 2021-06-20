@@ -128,9 +128,6 @@ public:
 
 protected:
 	//==============================================================================
-	int QueryUserRowCountChoice();
-
-	//==============================================================================
 	virtual void onAddProcessor() = 0;
 	virtual void onAddMultipleProcessors() = 0;
 	virtual void onRemoveProcessor() = 0;

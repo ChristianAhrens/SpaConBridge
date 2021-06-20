@@ -170,13 +170,29 @@ void MatrixInputTableComponent::onAddProcessor()
  */
 void MatrixInputTableComponent::onAddMultipleProcessors()
 {
-	auto ctrl = Controller::GetInstance();
-	if (!ctrl)
-		return;
+	auto w = std::make_unique<AlertWindow>("Matrix Inputs", "Choose how many to add", juce::AlertWindow::NoIcon).release();
+	w->addTextEditor("processor_count", "1");
+	w->addButton("OK", 1, KeyPress(KeyPress::returnKey, 0, 0));
+	w->addButton("Cancel", 0, KeyPress(KeyPress::escapeKey, 0, 0));
 
-	auto rowCount = QueryUserRowCountChoice();
-	if (rowCount > 0)
-		ctrl->createNewMatrixInputProcessors(rowCount);
+	auto callbackFunctionBody = ([w](int result)
+		{
+			if (result == 1)
+			{
+				auto ctrl = Controller::GetInstance();
+				if (ctrl)
+				{
+					auto text = w->getTextEditorContents("processor_count");
+					auto processorCount = text.getIntValue();
+					if (processorCount > 0)
+						ctrl->createNewMatrixInputProcessors(processorCount);
+				}
+			}
+		});
+	auto modalCallback = juce::ModalCallbackFunction::create(callbackFunctionBody);
+
+	// Run asynchronously
+	w->enterModalState(true, modalCallback, true);
 }
 
 /**

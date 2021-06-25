@@ -23,6 +23,7 @@
 #include "../../../Controller.h"
 #include "../../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
 #include "../../../RowHeightSlider.h"
+#include "../../../WaitingEntertainerComponent.h"
 
 
 namespace SpaConBridge
@@ -231,7 +232,11 @@ void SoundobjectTableComponent::onRemoveProcessor()
 	// when processors are being deleted in next step, the current selection will be queried, which is why clearing the selection before is neccessary
 	SetSelectedRows(std::vector<juce::int32>());
 
+	auto selectedProcessorsCount = selectedProcessorIds.size();
+	auto i = 1;
+
     // Iterate through the processor ids once more to destroy the selected processors themselves.
+	WaitingEntertainerComponent::GetInstance()->Show();
 	for (auto processorId : selectedProcessorIds)
 	{
 		if (ctrl->GetSoundobjectProcessorCount() >= 1)
@@ -239,7 +244,9 @@ void SoundobjectTableComponent::onRemoveProcessor()
 			auto processor = std::unique_ptr<SoundobjectProcessor>(ctrl->GetSoundobjectProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
             processor->releaseResources();
         }
+		WaitingEntertainerComponent::GetInstance()->SetNormalizedProgress(static_cast<double>(i++) / static_cast<double>(selectedProcessorsCount));
 	}
+	WaitingEntertainerComponent::GetInstance()->Hide();
 }
 
 

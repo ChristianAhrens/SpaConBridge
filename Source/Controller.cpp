@@ -35,6 +35,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "Controller.h"
+#include "WaitingEntertainerComponent.h"
 
 #include "PagedUI/PageComponentManager.h"
 #include "PagedUI/PageContainerComponent.h"
@@ -272,8 +273,13 @@ void Controller::createNewSoundobjectProcessor()
  */
 void Controller::createNewSoundobjectProcessors(int newProcessorsCount)
 {
+	WaitingEntertainerComponent::GetInstance()->Show();
 	for (auto i = 0; i < newProcessorsCount; i++)
+	{
 		createNewSoundobjectProcessor();
+		WaitingEntertainerComponent::GetInstance()->SetNormalizedProgress(static_cast<double>(i + 1) / static_cast<double>(newProcessorsCount));
+	}
+	WaitingEntertainerComponent::GetInstance()->Hide();
 }
 
 /**
@@ -389,8 +395,13 @@ void Controller::createNewMatrixInputProcessor()
  */
 void Controller::createNewMatrixInputProcessors(int newProcessorsCount)
 {
+	WaitingEntertainerComponent::GetInstance()->Show();
 	for (auto i = 0; i < newProcessorsCount; i++)
+	{
 		createNewMatrixInputProcessor();
+		WaitingEntertainerComponent::GetInstance()->SetNormalizedProgress(static_cast<double>(i + 1) / static_cast<double>(newProcessorsCount));
+	}
+	WaitingEntertainerComponent::GetInstance()->Hide();
 }
 
 /**
@@ -507,8 +518,13 @@ void Controller::createNewMatrixOutputProcessor()
  */
 void Controller::createNewMatrixOutputProcessors(int newProcessorsCount)
 {
+	WaitingEntertainerComponent::GetInstance()->Show();
 	for (auto i = 0; i < newProcessorsCount; i++)
+	{
 		createNewMatrixOutputProcessor();
+		WaitingEntertainerComponent::GetInstance()->SetNormalizedProgress(static_cast<double>(i + 1) / static_cast<double>(newProcessorsCount));
+	}
+	WaitingEntertainerComponent::GetInstance()->Hide();
 }
 
 /**

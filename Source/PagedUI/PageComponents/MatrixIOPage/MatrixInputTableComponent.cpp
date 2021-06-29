@@ -23,6 +23,7 @@
 #include "../../../Controller.h"
 #include "../../../CustomAudioProcessors/MatrixInputProcessor/MatrixInputProcessor.h"
 #include "../../../RowHeightSlider.h"
+#include "../../../DelayedRecursiveFunctionCaller.h"
 
 
 namespace SpaConBridge
@@ -177,21 +178,27 @@ void MatrixInputTableComponent::onAddMultipleProcessors()
 	w->addButton("OK", 1, KeyPress(KeyPress::returnKey, 0, 0));
 	w->addButton("Cancel", 0, KeyPress(KeyPress::escapeKey, 0, 0));
 
-	auto callbackFunctionBody = ([w](int result)
+	// lambda to be called with the result of the modal processor count choise dialog
+	auto countChoiceCallbackFunctionBody = ([w](int result)
 		{
-			if (result == 1)
+			if (w && result == 1)
 			{
-				auto ctrl = Controller::GetInstance();
-				if (ctrl)
+				// get the requested count of new processors and start adding them if greater zero
+				int newProcessorsCount = w->getTextEditorContents("processor_count").getIntValue();
+				if (newProcessorsCount > 0)
 				{
-					auto text = w->getTextEditorContents("processor_count");
-					auto processorCount = text.getIntValue();
-					if (processorCount > 0)
-						ctrl->createNewMatrixInputProcessors(processorCount);
+					auto functionCaller = std::make_unique<DelayedRecursiveFunctionCaller>([]
+						{
+							auto ctrl = Controller::GetInstance();
+							if (ctrl)
+								ctrl->createNewMatrixInputProcessor();
+						}, newProcessorsCount, true);
+					functionCaller->Run();
+					functionCaller.release();
 				}
 			}
 		});
-	auto modalCallback = juce::ModalCallbackFunction::create(callbackFunctionBody);
+	auto modalCallback = juce::ModalCallbackFunction::create(countChoiceCallbackFunctionBody);
 
 	// Run asynchronously
 	w->enterModalState(true, modalCallback, true);
@@ -225,14 +232,20 @@ void MatrixInputTableComponent::onRemoveProcessor()
 	// when processors are being deleted in next step, the current selection will be queried, which is why clearing the selection before is neccessary
 	SetSelectedRows(std::vector<juce::int32>());
 
-    // Iterate through the processor ids once more to destroy the selected processors themselves.
-	for (auto processorId : selectedProcessorIds)
+	// Iterate through the processor ids once more to destroy the selected processors themselves.
+	if (selectedProcessorIds.size() > 0 && ctrl->GetMatrixInputProcessorCount() > 0)
 	{
-		if (ctrl->GetMatrixInputProcessorCount() >= 1)
-        {
-			auto processor = std::unique_ptr<MatrixInputProcessor>(ctrl->GetMatrixInputProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
-            processor->releaseResources();
-        }
+		auto functionCaller = std::make_unique<DelayedRecursiveFunctionCaller>([](int processorId)
+			{
+				auto ctrl = Controller::GetInstance();
+				if (ctrl && ctrl->GetMatrixInputProcessorCount() >= 1)
+				{
+					auto processor = std::unique_ptr<MatrixInputProcessor>(ctrl->GetMatrixInputProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
+					processor->releaseResources();
+				}
+			}, selectedProcessorIds, true);
+		functionCaller->Run();
+		functionCaller.release();
 	}
 }
 

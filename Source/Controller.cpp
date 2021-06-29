@@ -35,6 +35,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include "Controller.h"
+#include "WaitingEntertainerComponent.h"
 
 #include "PagedUI/PageComponentManager.h"
 #include "PagedUI/PageContainerComponent.h"
@@ -267,16 +268,6 @@ void Controller::createNewSoundobjectProcessor()
 }
 
 /**
- * Helper method to create multiple new processors incl. implicit triggering of
- * inserting it into xml config (by setting constructor bool flag to insertToConfig=true)
- */
-void Controller::createNewSoundobjectProcessors(int newProcessorsCount)
-{
-	for (auto i = 0; i < newProcessorsCount; i++)
-		createNewSoundobjectProcessor();
-}
-
-/**
  * Register a processor instance to the local list of processors. 
  * @param changeSource	The application module which is causing the property change.
  * @param p				Pointer to newly crated processor processor object.
@@ -381,16 +372,6 @@ void Controller::createNewMatrixInputProcessor()
 {
 	auto processor = std::make_unique<SpaConBridge::MatrixInputProcessor>(true);
 	processor.release(); // let go of the instance here, we do not want to destroy it, since it lives as member of controller when constructed
-}
-
-/**
- * Helper method to create multiple new processors incl. implicit triggering of
- * inserting it into xml config (by setting constructor bool flag to insertToConfig=true)
- */
-void Controller::createNewMatrixInputProcessors(int newProcessorsCount)
-{
-	for (auto i = 0; i < newProcessorsCount; i++)
-		createNewMatrixInputProcessor();
 }
 
 /**
@@ -499,16 +480,6 @@ void Controller::createNewMatrixOutputProcessor()
 {
 	auto processor = std::make_unique<SpaConBridge::MatrixOutputProcessor>(true);
 	processor.release(); // let go of the instance here, we do not want to destroy it, since it lives as member of controller when constructed
-}
-
-/**
- * Helper method to create multiple new processors incl. implicit triggering of
- * inserting it into xml config (by setting constructor bool flag to insertToConfig=true)
- */
-void Controller::createNewMatrixOutputProcessors(int newProcessorsCount)
-{
-	for (auto i = 0; i < newProcessorsCount; i++)
-		createNewMatrixOutputProcessor();
 }
 
 /**

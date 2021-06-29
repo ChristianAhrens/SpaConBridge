@@ -77,6 +77,14 @@ void WaitingEntertainerComponent::DestroyInstance()
 	std::unique_ptr<WaitingEntertainerComponent> death(m_singleton);
 }
 
+/**
+ * Method to update the progress displayed on UI.
+ * The input value is expected to be a normalized ratio value between 0...1
+ * that is interpreted as percentage and shown on UI as such.
+ * A value smaller than 0 triggers hiding the progress visualization, a value greater than 0 triggers showing visualization.
+ * 
+ * @param	progress	The normalized progress value to update to.
+ */
 void WaitingEntertainerComponent::SetNormalizedProgress(double progress)
 {
 	// update the progress value member that also is used as reference in progressBar itself!
@@ -118,12 +126,22 @@ void WaitingEntertainerComponent::SetNormalizedProgress(double progress)
 		m_progressBarSlider->setValue(static_cast<double>(m_progressValue * 100.0f), juce::NotificationType::sendNotificationSync);
 }
 
+/**
+ * Convenience method to trigger showing the progress visualization.
+ * This implementation forwards the call to SetNormalizedProgress method with
+ * progress value 0, to trigger showing visu.
+ */
 void WaitingEntertainerComponent::Show()
 {
 	if (!isVisible())
 		SetNormalizedProgress(0.0f);
 }
 
+/**
+ * Convenience method to trigger hiding the progress visualization.
+ * This implementation forwards the call to SetNormalizedProgress method with
+ * progress value -1, to trigger hiding visu.
+ */
 void WaitingEntertainerComponent::Hide()
 {
 	SetNormalizedProgress(-1.0f);
@@ -157,7 +175,7 @@ void WaitingEntertainerComponent::paint(Graphics& g)
  */
 void WaitingEntertainerComponent::resized()
 {
-	auto progressBarHeight = 50;
+	auto progressBarHeight = 30;
 	auto progressBarWidth = 0.5f * getWidth();
 
 	auto progressBarHMargin = static_cast<int>(0.25f * getWidth());

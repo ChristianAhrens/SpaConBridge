@@ -192,9 +192,15 @@ void SoundobjectTableComponent::onAddMultipleProcessors()
 				if (ctrl)
 				{
 					auto text = w->getTextEditorContents("processor_count");
-					auto processorCount = text.getIntValue();
-					if (processorCount > 0)
-						ctrl->createNewSoundobjectProcessors(processorCount);
+					auto newProcessorsCount = text.getIntValue();
+
+					WaitingEntertainerComponent::GetInstance()->Show();
+					for (auto i = 0; i < newProcessorsCount; i++)
+					{
+						ctrl->createNewSoundobjectProcessor();
+						WaitingEntertainerComponent::GetInstance()->SetNormalizedProgress(static_cast<double>(i + 1) / static_cast<double>(newProcessorsCount));
+					}
+					WaitingEntertainerComponent::GetInstance()->Hide();
 				}
 			}
 		});

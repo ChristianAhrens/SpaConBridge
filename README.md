@@ -20,8 +20,6 @@ _[![SpaConBridge v0.3.1 Introduction](https://img.youtube.com/vi/ozhQxKidtWc/0.j
 
 **Known Issues:**
 
-* The app freezes / performs poorly when configuration is changed while data is received (freezes the longer, the more Sound Objects are active)  
-__Note:__ Major code refactoring is required to solve this
 * Zeroconf is not working in builds for Windows OS  
 __Note:__ Needs to be implemented...
 * LookAndFeel change does not reliably update colour scheme for all UI elements  

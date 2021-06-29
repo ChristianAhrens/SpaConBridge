@@ -19,10 +19,10 @@
 
 #pragma once
 
+#include <JuceHeader.h>
 
-#include "../TableModelComponent.h"
-
-#include "../../../SpaConBridgeCommon.h"
+#include "LookAndFeel.h"
+#include "SpaConBridgeCommon.h"
 
 
 namespace SpaConBridge
@@ -30,31 +30,38 @@ namespace SpaConBridge
 
 
 /**
- * SoundobjectTableComponent class provides a .
+ * Class WaitingEntertainerComponent provides a progressbar on top of everything else with shadowed background.
  */
-class SoundobjectTableComponent :	public TableModelComponent
+class WaitingEntertainerComponent : public Component
 {
 public:
-	SoundobjectTableComponent();
-	virtual ~SoundobjectTableComponent() override;
+	WaitingEntertainerComponent();
+	~WaitingEntertainerComponent() override;
 
-	//==========================================================================
-	void RecreateTableRowIds() override;
-	void UpdateTable() override;
+	static WaitingEntertainerComponent* GetInstance();
+	void DestroyInstance();
 
-	//==========================================================================
-	int getNumRows() override;
-	void selectedRowsChanged(int lastRowSelected) override;
+	//==============================================================================
+	void SetNormalizedProgress(double progress);
+
+	void Show();
+	void Hide();
+
+	//==============================================================================
+	void lookAndFeelChanged() override;
 
 protected:
+	static WaitingEntertainerComponent* m_singleton;	/**< The one and only instance of WaitingEntertainerComponent. */
+
 	//==============================================================================
-	void onAddProcessor() override;
-	void onAddMultipleProcessors() override;
-	void onRemoveProcessor() override;
+	void paint(Graphics&) override;
+	void resized() override;
 
 private:
+	std::unique_ptr<Slider>	m_progressBarSlider;
+	double					m_progressValue{ 0.0f };
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SoundobjectTableComponent)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WaitingEntertainerComponent)
 };
 
 

@@ -23,6 +23,7 @@
 #include "../../../Controller.h"
 #include "../../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
 #include "../../../RowHeightSlider.h"
+#include "../../../DelayedRecursiveFunctionCaller.h"
 
 
 namespace SpaConBridge
@@ -174,6 +175,44 @@ void SoundobjectTableComponent::onAddProcessor()
 /**
  * Reimplemented pure virtual method that is used as std::function callback in table control bar
  */
+void SoundobjectTableComponent::onAddMultipleProcessors()
+{
+	auto w = std::make_unique<AlertWindow>("Sound Objects", "Choose how many to add", juce::AlertWindow::NoIcon).release();
+	w->addTextEditor("processor_count", "1");
+    w->getTextEditor("processor_count")->setInputRestrictions(3, "0123456789");
+    w->getTextEditor("processor_count")->setKeyboardType(TextInputTarget::VirtualKeyboardType::phoneNumberKeyboard);
+	w->addButton("OK", 1, KeyPress(KeyPress::returnKey, 0, 0));
+	w->addButton("Cancel", 0, KeyPress(KeyPress::escapeKey, 0, 0));
+
+	// lambda to be called with the result of the modal processor count choise dialog
+	auto countChoiceCallbackFunctionBody = ([w](int result)
+		{
+			if (w && result == 1)
+			{
+				// get the requested count of new processors and start adding them if greater zero
+				int newProcessorsCount = w->getTextEditorContents("processor_count").getIntValue();
+				if (newProcessorsCount > 0)
+				{
+					auto functionCaller = std::make_unique<DelayedRecursiveFunctionCaller>([]
+						{
+							auto ctrl = Controller::GetInstance();
+							if (ctrl)
+								ctrl->createNewSoundobjectProcessor();
+						}, newProcessorsCount, true);
+					functionCaller->Run();
+					functionCaller.release();
+				}
+			}
+		});
+	auto modalCallback = juce::ModalCallbackFunction::create(countChoiceCallbackFunctionBody);
+
+	// Run asynchronously
+	w->enterModalState(true, modalCallback, true);
+}
+
+/**
+ * Reimplemented pure virtual method that is used as std::function callback in table control bar
+ */
 void SoundobjectTableComponent::onRemoveProcessor()
 {
 	auto ctrl = Controller::GetInstance();
@@ -200,13 +239,19 @@ void SoundobjectTableComponent::onRemoveProcessor()
 	SetSelectedRows(std::vector<juce::int32>());
 
     // Iterate through the processor ids once more to destroy the selected processors themselves.
-	for (auto processorId : selectedProcessorIds)
+	if (selectedProcessorIds.size() > 0 && ctrl->GetSoundobjectProcessorCount() > 0)
 	{
-		if (ctrl->GetSoundobjectProcessorCount() >= 1)
-        {
-			auto processor = std::unique_ptr<SoundobjectProcessor>(ctrl->GetSoundobjectProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
-            processor->releaseResources();
-        }
+		auto functionCaller = std::make_unique<DelayedRecursiveFunctionCaller>([](int processorId)
+			{
+				auto ctrl = Controller::GetInstance();
+				if (ctrl && ctrl->GetSoundobjectProcessorCount() >= 1)
+				{
+					auto processor = std::unique_ptr<SoundobjectProcessor>(ctrl->GetSoundobjectProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
+					processor->releaseResources();
+				}
+			}, selectedProcessorIds, true);
+		functionCaller->Run();
+		functionCaller.release();
 	}
 }
 

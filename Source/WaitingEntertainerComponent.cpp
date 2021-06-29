@@ -91,25 +91,39 @@ void WaitingEntertainerComponent::SetNormalizedProgress(double progress)
 	m_progressValue = jlimit(double(0.0f), double(1.0f), progress);
 
 	// if a progress value to be shown on ui is set, verify that the component is visible
-	if (progress >= 0.0f && !isVisible())
+	if (progress >= 0.0f)
 	{
-		m_progressBarSlider = std::make_unique<Slider>();
-		m_progressBarSlider->setRange(0.0f, 100.0f, 1.0f);
-		m_progressBarSlider->setSliderStyle(Slider::LinearBar);
-		m_progressBarSlider->setTextValueSuffix("%");
-		addAndMakeVisible(m_progressBarSlider.get());
+		if (!m_progressBarSlider)
+		{
+			m_progressBarSlider = std::make_unique<Slider>();
+			m_progressBarSlider->setRange(0.0f, 100.0f, 1.0f);
+			m_progressBarSlider->setSliderStyle(Slider::LinearBar);
+			m_progressBarSlider->setTextValueSuffix("%");
+			addAndMakeVisible(m_progressBarSlider.get());
+			lookAndFeelChanged();
+		}
 
-		setVisible(true);
-		setAlwaysOnTop(true);
+		if (!isVisible())
+		{
+			setVisible(true);
+			setAlwaysOnTop(true);
+
+			m_progressBarSlider->setVisible(true);
+		}
 	}
 	// if an invalid progress value is set, hide the component
-	else if (progress < 0.0f && isVisible())
+	else if (progress < 0.0f)
 	{
-		setVisible(false);
-		setAlwaysOnTop(false);
+		if (isVisible())
+		{
+			setVisible(false);
+			setAlwaysOnTop(false);
+		}
 
-		removeChildComponent(m_progressBarSlider.get());
-		m_progressBarSlider.reset();
+		if (m_progressBarSlider)
+		{
+			m_progressBarSlider->setVisible(false);
+		}
 	}
 
 	// trigger main component to repaint+resize
@@ -156,6 +170,10 @@ void WaitingEntertainerComponent::lookAndFeelChanged()
 	// first forward the call to base implementation
 	Component::lookAndFeelChanged();
 
+	// determine the button colour from lookandfeel to use for progress meter
+	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (m_progressBarSlider && dblookAndFeel)
+		m_progressBarSlider->setColour(Slider::ColourIds::trackColourId, dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::HighlightColor));
 }
 
 /**
@@ -166,8 +184,20 @@ void WaitingEntertainerComponent::paint(Graphics& g)
 {
 	// Transparent background overlay
 	g.setColour(Colours::black);
-	g.setOpacity(0.5f);
+	g.setOpacity(0.6f);
 	g.fillRect(getLocalBounds());
+
+	// Solid background for the slider (LinearBar slider does not paint its background by itself)
+	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (dblookAndFeel)
+		g.setColour(dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkColor));
+	auto progressBarHeight = 30;
+	auto progressBarHMargin = static_cast<int>(0.25f * getWidth());
+	auto progressBarVMargin = static_cast<int>(0.5f * (getHeight() - progressBarHeight));
+
+	auto progressBarBounds = getLocalBounds().reduced(progressBarHMargin, progressBarVMargin);
+
+	g.fillRect(progressBarBounds);
 }
 
 /**
@@ -176,8 +206,6 @@ void WaitingEntertainerComponent::paint(Graphics& g)
 void WaitingEntertainerComponent::resized()
 {
 	auto progressBarHeight = 30;
-	auto progressBarWidth = 0.5f * getWidth();
-
 	auto progressBarHMargin = static_cast<int>(0.25f * getWidth());
 	auto progressBarVMargin = static_cast<int>(0.5f * (getHeight() - progressBarHeight));
 

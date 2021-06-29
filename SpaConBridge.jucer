@@ -525,6 +525,10 @@
             resource="0" file="Source/WaitingEntertainerComponent.cpp"/>
       <FILE id="eFKdRx" name="WaitingEntertainerComponent.h" compile="0"
             resource="0" file="Source/WaitingEntertainerComponent.h"/>
+      <FILE id="WvejI9" name="DelayedRecursiveFunctionCaller.cpp" compile="1"
+            resource="0" file="Source/DelayedRecursiveFunctionCaller.cpp"/>
+      <FILE id="g5106j" name="DelayedRecursiveFunctionCaller.h" compile="0"
+            resource="0" file="Source/DelayedRecursiveFunctionCaller.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>

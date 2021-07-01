@@ -12,7 +12,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Introduced major refactoring regarding bridging protocol communication 'Mute' state handling to operate on individual remote objects instead of channel numbers
 
 ### Fixed
--
+- Fixed sending Soundobject Delay Mode UI value changes by using correct remote object type ROVT_INT
+- Fixed EnSpace Page floating point value precision issue that could lead to Predelay Factor and Rear Level faders not updating on incoming value change
 
 ## [0.3.4] - 2021-06-13
 ### Fixed

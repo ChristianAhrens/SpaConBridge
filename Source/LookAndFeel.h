@@ -90,6 +90,10 @@ public:
 	void drawButtonBackground(Graphics&, Button&, const Colour& backgroundColour,
 		bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override;
 
+	//==============================================================================
+	void drawAlertBox(Graphics&, AlertWindow&, const Rectangle< int >& textArea,
+		TextLayout&) override;
+
 private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DbLookAndFeelBase)
 };

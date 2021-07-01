@@ -233,7 +233,7 @@ void EnSpacePageComponent::HandleObjectDataInternal(RemoteObjectIdentifier objec
 
 		if (m_preDelayFactorChangePending)
 		{
-			if (m_preDelayFactorChange == newPreDelayFactor)
+			if (std::roundf(10 * m_preDelayFactorChange) == std::roundf(10 * newPreDelayFactor))
 				m_preDelayFactorChangePending = false;
 			return;
 		}
@@ -256,7 +256,7 @@ void EnSpacePageComponent::HandleObjectDataInternal(RemoteObjectIdentifier objec
 
 		if (m_rearLevelChangePending)
 		{
-			if (m_rearLevelChange == newReverbRearLevel)
+			if (std::roundf(10 * m_rearLevelChange) == std::roundf(10 * newReverbRearLevel))
 				m_rearLevelChangePending = false;
 			return;
 		}

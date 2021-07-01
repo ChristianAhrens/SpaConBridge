@@ -810,50 +810,17 @@ void MuteButtonContainer::buttonClicked(Button* button)
 			switch (GetParentTable().GetTableType())
 			{
 			case TT_MatrixInputs:
-				{
-					// Get the IDs of the processors on the selected rows.
-					auto processorIds = GetParentTable().GetProcessorIdsForRows(selectedRows);
-					std::vector<MatrixInputId> matrixInputIds;
-					for (auto processorId : processorIds)
-					{
-						auto processor = ctrl->GetMatrixInputProcessor(processorId);
-						if (processor)
-							matrixInputIds.push_back(processor->GetMatrixInputId());
-					}
-
-					ctrl->SetMuteBridgingMatrixInputIds(type, matrixInputIds, newToggleState);
-				}
+				// Get the IDs of the processors on the selected rows.
+				ctrl->SetMuteBridgingMatrixInputProcessorIds(type, GetParentTable().GetProcessorIdsForRows(selectedRows), newToggleState);
 				break;
 			case TT_MatrixOutputs:
-				{
-					// Get the IDs of the processors on the selected rows.
-					auto processorIds = GetParentTable().GetProcessorIdsForRows(selectedRows);
-					std::vector<MatrixOutputId> matrixOutputIds;
-					for (auto processorId : processorIds)
-					{
-						auto processor = ctrl->GetMatrixOutputProcessor(processorId);
-						if (processor)
-							matrixOutputIds.push_back(processor->GetMatrixOutputId());
-					}
-
-					ctrl->SetMuteBridgingMatrixOutputIds(type, matrixOutputIds, newToggleState);
-				}
+				// Get the IDs of the processors on the selected rows.
+				ctrl->SetMuteBridgingMatrixOutputProcessorIds(type, GetParentTable().GetProcessorIdsForRows(selectedRows), newToggleState);
 				break;
 			case TT_Soundobjects:
 			default:
-				{
-					// Get the IDs of the processors on the selected rows.
-					auto processorIds = GetParentTable().GetProcessorIdsForRows(selectedRows);
-					std::vector<SoundobjectId> soundobjectIds;
-					for (auto processorId : processorIds)
-					{
-						auto processor = ctrl->GetSoundobjectProcessor(processorId);
-						if (processor)
-							soundobjectIds.push_back(processor->GetSoundobjectId());
-					}
-
-					ctrl->SetMuteBridgingSoundobjectIds(type, soundobjectIds, newToggleState);
-				}
+				// Get the IDs of the processors on the selected rows.
+				ctrl->SetMuteBridgingSoundobjectProcessorIds(type, GetParentTable().GetProcessorIdsForRows(selectedRows), newToggleState);
 				break;
 			}
 
@@ -902,26 +869,14 @@ void MuteButtonContainer::SetRow(int newRow)
 				switch (GetParentTable().GetTableType())
 				{
 				case TT_MatrixInputs:
-					{
-						auto processor = ctrl->GetMatrixInputProcessor(processorId);
-						if (processor)
-							m_bridgingMutes.at(type)->setToggleState(ctrl->GetMuteBridgingMatrixInputId(type, processor->GetMatrixInputId()), dontSendNotification);
-					}
+					m_bridgingMutes.at(type)->setToggleState(ctrl->GetMuteBridgingMatrixInputProcessorId(type, processorId), dontSendNotification);
 					break;
 				case TT_MatrixOutputs:
-					{
-						auto processor = ctrl->GetMatrixOutputProcessor(processorId);
-						if (processor)
-							m_bridgingMutes.at(type)->setToggleState(ctrl->GetMuteBridgingMatrixOutputId(type, processor->GetMatrixOutputId()), dontSendNotification);
-					}
+					m_bridgingMutes.at(type)->setToggleState(ctrl->GetMuteBridgingMatrixOutputProcessorId(type, processorId), dontSendNotification);
 					break;
 				case TT_Soundobjects:
 				default:
-					{
-						auto processor = ctrl->GetSoundobjectProcessor(processorId);
-						if (processor)
-							m_bridgingMutes.at(type)->setToggleState(ctrl->GetMuteBridgingSoundobjectId(type, processor->GetSoundobjectId()), dontSendNotification);
-					}
+					m_bridgingMutes.at(type)->setToggleState(ctrl->GetMuteBridgingSoundobjectProcessorId(type, processorId), dontSendNotification);
 					break;
 				}
 			}

@@ -1056,10 +1056,15 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 		if (msgData._valCount == 1 && msgData._valType == RemoteObjectValueType::ROVT_INT)
 		{
 			auto newSelectState = (static_cast<int*>(msgData._payload)[0] == 1);
-			if (IsSoundobjectIdSelected(soundobjectId) != newSelectState)
+
+			for (auto const& processorId : GetSoundobjectProcessorIds())
 			{
-				SetSoundobjectIdSelectState(soundobjectId, newSelectState);
-				SetParameterChanged(DCP_Protocol, DCT_ProcessorSelection);
+				auto processor = GetSoundobjectProcessor(processorId);
+				if (processor->GetSoundobjectId() == soundobjectId && IsSoundobjectProcessorIdSelected(processorId) != newSelectState)
+				{
+					SetSoundobjectProcessorIdSelectState(processorId, newSelectState);
+					SetParameterChanged(DCP_Protocol, DCT_ProcessorSelection);
+				}
 			}
 		}
 	}
@@ -1943,14 +1948,12 @@ void Controller::SetSelectedSoundobjectProcessorIds(const std::vector<Soundobjec
 	if (clearPrevSelection)
 	{
 		// clear all selected soundobject ids
-		m_soundObjectSelection.clear();
+		m_soundobjectProcessorSelection.clear();
 
 		// iterate through all processors and set each selected state based on given selection list
 		for (auto const& processorId : GetSoundobjectProcessorIds())
 		{
-			auto processor = GetSoundobjectProcessor(processorId);
-			if (processor)
-				SetSoundobjectIdSelectState(processor->GetSoundobjectId(), std::find(processorIds.begin(), processorIds.end(), processorId) != processorIds.end());
+			SetSoundobjectProcessorIdSelectState(processorId, std::find(processorIds.begin(), processorIds.end(), processorId) != processorIds.end());
 		}
 	}
 	else
@@ -1958,9 +1961,7 @@ void Controller::SetSelectedSoundobjectProcessorIds(const std::vector<Soundobjec
 		// iterate through selection list and set all contained processor ids to selected
 		for (auto const& processorId : processorIds)
 		{
-			auto processor = GetSoundobjectProcessor(processorId);
-			if (processor)
-				SetSoundobjectIdSelectState(processor->GetSoundobjectId(), true);
+			SetSoundobjectProcessorIdSelectState(processorId, true);
 		}
 	}
 }
@@ -1973,12 +1974,12 @@ void Controller::SetSelectedSoundobjectProcessorIds(const std::vector<Soundobjec
 const std::vector<SoundobjectProcessorId> Controller::GetSelectedSoundobjectProcessorIds()
 {
 	std::vector<SoundobjectProcessorId> processorIds;
-	processorIds.reserve(m_soundObjectSelection.size());
+	processorIds.reserve(m_soundobjectProcessorSelection.size());
 	for (auto const& processor : m_soundobjectProcessors)
 	{
-		auto sourceId = processor->GetSoundobjectId();
-		if ((m_soundObjectSelection.count(sourceId) > 0) && m_soundObjectSelection.at(sourceId))
-			processorIds.push_back(processor->GetProcessorId());
+		auto soundobjectProcessorId = processor->GetProcessorId();
+		if ((m_soundobjectProcessorSelection.count(soundobjectProcessorId) > 0) && m_soundobjectProcessorSelection.at(soundobjectProcessorId))
+			processorIds.push_back(soundobjectProcessorId);
 	}
 
 	return processorIds;
@@ -1987,50 +1988,42 @@ const std::vector<SoundobjectProcessorId> Controller::GetSelectedSoundobjectProc
 /**
  * Method to set a soundsource to be selected. This affects the internal map of soundsource select states
  * and triggers setting/updating table/multislider pages.
- * @param sourceId	The sourceId to modify regarding selected state
+ * @param soundobjectProcessorId	The soundobjectProcessorId to modify regarding selected state
  * @param selected	The selected state to set.
  */
-void Controller::SetSoundobjectIdSelectState(SoundobjectId soundobjectId, bool selected)
+void Controller::SetSoundobjectProcessorIdSelectState(SoundobjectProcessorId soundobjectProcessorId, bool selected)
 {
-	m_soundObjectSelection[soundobjectId] = selected;
+	m_soundobjectProcessorSelection[soundobjectProcessorId] = selected;
 }
 
 /**
  * Method to get a soundsource id selected state.
- * @param sourceId	The sourceId to modify regarding selected state
+ * @param soundobjectProcessorId	The sourceId to modify regarding selected state
  * @param selected	The selected state to set.
  */
-bool Controller::IsSoundobjectIdSelected(SoundobjectId soundobjectId)
+bool Controller::IsSoundobjectProcessorIdSelected(SoundobjectProcessorId soundobjectProcessorId)
 {
-	if (m_soundObjectSelection.count(soundobjectId) > 0)
-		return m_soundObjectSelection.at(soundobjectId);
+	if (m_soundobjectProcessorSelection.count(soundobjectProcessorId) > 0)
+		return m_soundobjectProcessorSelection.at(soundobjectProcessorId);
 	else
 		return false;
 }
 
 /**
  * Helper method to collect all remote objects that are used by a soundobject processor.
- * @param soundobjectId		The id of the sound object processor to get the used remote objects for.
+ * @param soundobjectProcessorId		The id of the sound object processor to get the used remote objects for.
  * @return		The list of used remote objects.
  */
-std::vector<RemoteObject> Controller::GetSoundobjectProcessorRemoteObjects(SoundobjectId soundobjectId)
+std::vector<RemoteObject> Controller::GetSoundobjectProcessorRemoteObjects(SoundobjectProcessorId soundobjectProcessorId)
 {
 	auto remoteObjects = std::vector<RemoteObject>();
-	for (auto const& processorId : GetSoundobjectProcessorIds())
+	auto processor = GetSoundobjectProcessor(soundobjectProcessorId);
+	for (auto& roi : SoundobjectProcessor::GetUsedRemoteObjects())
 	{
-		auto processor = GetSoundobjectProcessor(processorId);
-		if (processor->GetSoundobjectId() == soundobjectId)
-		{
-			for (auto& roi : SoundobjectProcessor::GetUsedRemoteObjects())
-			{
-				if (ProcessingEngineConfig::IsRecordAddressingObject(roi))
-					remoteObjects.push_back(RemoteObject(roi, RemoteObjectAddressing(processor->GetSoundobjectId(), processor->GetMappingId())));
-				else
-					remoteObjects.push_back(RemoteObject(roi, RemoteObjectAddressing(processor->GetSoundobjectId(), INVALID_ADDRESS_VALUE)));
-			}
-
-			break;
-		}
+		if (ProcessingEngineConfig::IsRecordAddressingObject(roi))
+			remoteObjects.push_back(RemoteObject(roi, RemoteObjectAddressing(processor->GetSoundobjectId(), processor->GetMappingId())));
+		else
+			remoteObjects.push_back(RemoteObject(roi, RemoteObjectAddressing(processor->GetSoundobjectId(), INVALID_ADDRESS_VALUE)));
 	}
 
 	return remoteObjects;
@@ -2098,7 +2091,7 @@ void Controller::UpdateActiveMatrixInputs()
  * Method to set a list of soundsource ids to be selected, based on given list of processorIds.
  * This affects the internal map of soundsource select states and triggers setting/updating table/multislider pages.
  * The additional bool is used to indicate if the current selection shall be extended or cleared and be replaced by new selection.
- * @param processorIds	The list of processorIds to use to set internal map of soundsourceids selected state
+ * @param processorIds	The list of processorIds to use to set internal map of matrixInput selected state
  * @param clearPrevSelection	Use to indicate if previously active selection shall be replaced or extended.
  */
 void Controller::SetSelectedMatrixInputProcessorIds(const std::vector<MatrixInputProcessorId>& processorIds, bool clearPrevSelection)
@@ -2106,14 +2099,12 @@ void Controller::SetSelectedMatrixInputProcessorIds(const std::vector<MatrixInpu
 	if (clearPrevSelection)
 	{
 		// clear all selected soundobject ids
-		m_matrixInputSelection.clear();
+		m_matrixInputProcessorSelection.clear();
 
 		// iterate through all processors and set each selected state based on given selection list
 		for (auto const& processorId : GetMatrixInputProcessorIds())
 		{
-			auto processor = GetMatrixInputProcessor(processorId);
-			if (processor)
-				SetMatrixInputIdSelectState(processor->GetMatrixInputId(), std::find(processorIds.begin(), processorIds.end(), processorId) != processorIds.end());
+			SetMatrixInputProcessorIdSelectState(processorId, std::find(processorIds.begin(), processorIds.end(), processorId) != processorIds.end());
 		}
 	}
 	else
@@ -2121,9 +2112,7 @@ void Controller::SetSelectedMatrixInputProcessorIds(const std::vector<MatrixInpu
 		// iterate through selection list and set all contained processor ids to selected
 		for (auto const& processorId : processorIds)
 		{
-			auto processor = GetMatrixInputProcessor(processorId);
-			if (processor)
-				SetMatrixInputIdSelectState(processor->GetMatrixInputId(), true);
+			SetMatrixInputProcessorIdSelectState(processorId, true);
 		}
 	}
 }
@@ -2136,11 +2125,11 @@ void Controller::SetSelectedMatrixInputProcessorIds(const std::vector<MatrixInpu
 const std::vector<MatrixInputProcessorId> Controller::GetSelectedMatrixInputProcessorIds()
 {
 	std::vector<MatrixInputProcessorId> processorIds;
-	processorIds.reserve(m_matrixInputSelection.size());
+	processorIds.reserve(m_matrixInputProcessorSelection.size());
 	for (auto const& processor : m_matrixInputProcessors)
 	{
 		auto sourceId = processor->GetMatrixInputId();
-		if ((m_matrixInputSelection.count(sourceId) > 0) && m_matrixInputSelection.at(sourceId))
+		if ((m_matrixInputProcessorSelection.count(sourceId) > 0) && m_matrixInputProcessorSelection.at(sourceId))
 			processorIds.push_back(processor->GetProcessorId());
 	}
 
@@ -2153,34 +2142,40 @@ const std::vector<MatrixInputProcessorId> Controller::GetSelectedMatrixInputProc
  * @param sourceId	The sourceId to modify regarding selected state
  * @param selected	The selected state to set.
  */
-void Controller::SetMatrixInputIdSelectState(MatrixInputId matrixInputId, bool selected)
+void Controller::SetMatrixInputProcessorIdSelectState(MatrixInputProcessorId matrixInputProcessorId, bool selected)
 {
-	m_matrixInputSelection[matrixInputId] = selected;
+	m_matrixInputProcessorSelection[matrixInputProcessorId] = selected;
 }
 
 /**
- * Method to get a MatrixChannel id selected state.
- * @param matrixChannelId	The sourceId to modify regarding selected state
+ * Method to get a MatrixInput id selected state.
+ * @param matrixInputProcessorId	The id to modify regarding selected state
  * @param selected	The selected state to set.
  */
-bool Controller::IsMatrixInputIdSelected(MatrixInputId matrixInputId)
+bool Controller::IsMatrixInputProcessorIdSelected(MatrixInputProcessorId matrixInputProcessorId)
 {
-	if (m_matrixInputSelection.count(matrixInputId) > 0)
-		return m_matrixInputSelection.at(matrixInputId);
+	if (m_matrixInputProcessorSelection.count(matrixInputProcessorId) > 0)
+		return m_matrixInputProcessorSelection.at(matrixInputProcessorId);
 	else
 		return false;
 }
 
 /**
  * Helper method to collect all remote objects that are used by a matrix input processor.
- * @param matrixInputId		The id of the matrix input processor to get the used remote objects for.
+ * @param matrixInputProcessorId		The id of the matrix input processor to get the used remote objects for.
  * @return		The list of used remote objects.
  */
-std::vector<RemoteObject> Controller::GetMatrixInputProcessorRemoteObjects(MatrixInputId matrixInputId)
+std::vector<RemoteObject> Controller::GetMatrixInputProcessorRemoteObjects(MatrixInputProcessorId matrixInputProcessorId)
 {
 	auto remoteObjects = std::vector<RemoteObject>();
+	auto processor = GetMatrixInputProcessor(matrixInputProcessorId);
 	for (auto& roi : MatrixInputProcessor::GetUsedRemoteObjects())
-		remoteObjects.push_back(RemoteObject(roi, RemoteObjectAddressing(matrixInputId, INVALID_ADDRESS_VALUE)));
+	{
+		if (ProcessingEngineConfig::IsRecordAddressingObject(roi))
+			jassertfalse; // Matrix Channel processors cannot handle record addressing!
+		else
+			remoteObjects.push_back(RemoteObject(roi, RemoteObjectAddressing(processor->GetMatrixInputId(), INVALID_ADDRESS_VALUE)));
+	}
 
 	return remoteObjects;
 }
@@ -2255,14 +2250,12 @@ void Controller::SetSelectedMatrixOutputProcessorIds(const std::vector<MatrixOut
 	if (clearPrevSelection)
 	{
 		// clear all selected soundobject ids
-		m_matrixOutputSelection.clear();
+		m_matrixOutputProcessorSelection.clear();
 
 		// iterate through all processors and set each selected state based on given selection list
 		for (auto const& processorId : GetMatrixOutputProcessorIds())
 		{
-			auto processor = GetMatrixOutputProcessor(processorId);
-			if (processor)
-				SetMatrixOutputIdSelectState(processor->GetMatrixOutputId(), std::find(processorIds.begin(), processorIds.end(), processorId) != processorIds.end());
+			SetMatrixOutputProcessorIdSelectState(processorId, std::find(processorIds.begin(), processorIds.end(), processorId) != processorIds.end());
 		}
 	}
 	else
@@ -2270,9 +2263,7 @@ void Controller::SetSelectedMatrixOutputProcessorIds(const std::vector<MatrixOut
 		// iterate through selection list and set all contained processor ids to selected
 		for (auto const& processorId : processorIds)
 		{
-			auto processor = GetMatrixOutputProcessor(processorId);
-			if (processor)
-				SetMatrixOutputIdSelectState(processor->GetMatrixOutputId(), true);
+			SetMatrixOutputProcessorIdSelectState(processorId, true);
 		}
 	}
 }
@@ -2285,12 +2276,12 @@ void Controller::SetSelectedMatrixOutputProcessorIds(const std::vector<MatrixOut
 const std::vector<MatrixOutputProcessorId> Controller::GetSelectedMatrixOutputProcessorIds()
 {
 	std::vector<MatrixOutputProcessorId> processorIds;
-	processorIds.reserve(m_matrixOutputSelection.size());
+	processorIds.reserve(m_matrixOutputProcessorSelection.size());
 	for (auto const& processor : m_matrixOutputProcessors)
 	{
-		auto sourceId = processor->GetMatrixOutputId();
-		if ((m_matrixOutputSelection.count(sourceId) > 0) && m_matrixOutputSelection.at(sourceId))
-			processorIds.push_back(processor->GetProcessorId());
+		auto matrixOutputProcessorId = processor->GetProcessorId();
+		if ((m_matrixOutputProcessorSelection.count(matrixOutputProcessorId) > 0) && m_matrixOutputProcessorSelection.at(matrixOutputProcessorId))
+			processorIds.push_back(matrixOutputProcessorId);
 	}
 
 	return processorIds;
@@ -2299,37 +2290,43 @@ const std::vector<MatrixOutputProcessorId> Controller::GetSelectedMatrixOutputPr
 /**
  * Method to set a MatrixChannel to be selected. This affects the internal map of MatrixChannel select states
  * and triggers setting/updating MatrixChannel pages.
- * @param sourceId	The sourceId to modify regarding selected state
+ * @param matrixOutputProcessorId	The sourceId to modify regarding selected state
  * @param selected	The selected state to set.
  */
-void Controller::SetMatrixOutputIdSelectState(MatrixOutputId MatrixOutputId, bool selected)
+void Controller::SetMatrixOutputProcessorIdSelectState(MatrixOutputProcessorId matrixOutputProcessorId, bool selected)
 {
-	m_matrixOutputSelection[MatrixOutputId] = selected;
+	m_matrixOutputProcessorSelection[matrixOutputProcessorId] = selected;
 }
 
 /**
  * Method to get a MatrixChannel id selected state.
- * @param matrixChannelId	The sourceId to modify regarding selected state
+ * @param matrixOutputProcessorId	The sourceId to modify regarding selected state
  * @param selected	The selected state to set.
  */
-bool Controller::IsMatrixOutputIdSelected(MatrixOutputId MatrixOutputId)
+bool Controller::IsMatrixOutputProcessorIdSelected(MatrixOutputProcessorId matrixOutputProcessorId)
 {
-	if (m_matrixOutputSelection.count(MatrixOutputId) > 0)
-		return m_matrixOutputSelection.at(MatrixOutputId);
+	if (m_matrixOutputProcessorSelection.count(matrixOutputProcessorId) > 0)
+		return m_matrixOutputProcessorSelection.at(matrixOutputProcessorId);
 	else
 		return false;
 }
 
 /**
  * Helper method to collect all remote objects that are used by a matrix output processor.
- * @param matrixOutputId		The id of the matrix output processor to get the used remote objects for.
+ * @param matrixOutputProcessorId		The id of the matrix output processor to get the used remote objects for.
  * @return		The list of used remote objects.
  */
-std::vector<RemoteObject> Controller::GetMatrixOutputProcessorRemoteObjects(MatrixOutputId matrixOutputId)
+std::vector<RemoteObject> Controller::GetMatrixOutputProcessorRemoteObjects(MatrixOutputProcessorId matrixOutputProcessorId)
 {
 	auto remoteObjects = std::vector<RemoteObject>();
+	auto processor = GetMatrixOutputProcessor(matrixOutputProcessorId);
 	for (auto& roi : MatrixOutputProcessor::GetUsedRemoteObjects())
-		remoteObjects.push_back(RemoteObject(roi, RemoteObjectAddressing(matrixOutputId, INVALID_ADDRESS_VALUE)));
+	{
+		if (ProcessingEngineConfig::IsRecordAddressingObject(roi))
+			jassertfalse; // Matrix Channel processors cannot handle record addressing!
+		else
+			remoteObjects.push_back(RemoteObject(roi, RemoteObjectAddressing(processor->GetMatrixOutputId(), INVALID_ADDRESS_VALUE)));
+	}
 
 	return remoteObjects;
 }
@@ -2392,23 +2389,23 @@ void Controller::SetActiveProtocolBridging(ProtocolBridgingType bridgingTypes)
 
 /**
  * Gets the mute state of the given source via proxy bridge object
- * @param soundobjectId The id of the source for which the mute state shall be returned
+ * @param soundobjectProcessorId The id of the soundobject processor for which the mute state shall be returned
  * @return The mute state
  */
-bool Controller::GetMuteBridgingSoundobjectId(ProtocolBridgingType bridgingType, SoundobjectId soundobjectId)
+bool Controller::GetMuteBridgingSoundobjectProcessorId(ProtocolBridgingType bridgingType, SoundobjectProcessorId soundobjectProcessorId)
 {
 	switch (bridgingType)
 	{
 	case PBT_DiGiCo:
-		return m_protocolBridge.GetMuteDiGiCoSoundobjectId(soundobjectId);
+		return m_protocolBridge.GetMuteDiGiCoSoundobjectProcessorId(soundobjectProcessorId);
 	case PBT_GenericOSC:
-		return m_protocolBridge.GetMuteGenericOSCSoundobjectId(soundobjectId);
+		return m_protocolBridge.GetMuteGenericOSCSoundobjectProcessorId(soundobjectProcessorId);
 	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.GetMuteRTTrPMSoundobjectId(soundobjectId);
+		return m_protocolBridge.GetMuteRTTrPMSoundobjectProcessorId(soundobjectProcessorId);
 	case PBT_GenericMIDI:
-		return m_protocolBridge.GetMuteGenericMIDISoundobjectId(soundobjectId);
+		return m_protocolBridge.GetMuteGenericMIDISoundobjectProcessorId(soundobjectProcessorId);
 	case PBT_YamahaOSC:
-		return m_protocolBridge.GetMuteYamahaOSCSoundobjectId(soundobjectId);
+		return m_protocolBridge.GetMuteYamahaOSCSoundobjectProcessorId(soundobjectProcessorId);
 	case PBT_YamahaSQ:
 	case PBT_HUI:
 	case PBT_DS100:
@@ -2420,24 +2417,24 @@ bool Controller::GetMuteBridgingSoundobjectId(ProtocolBridgingType bridgingType,
 
 /**
  * Sets the given source to be (un-)muted in DiGiCo protocol via proxy bridge object
- * @param soundobjectId The id of the source that shall be muted
+ * @param soundobjectProcessorId The id of the soundobject processor that shall be muted
  * @param mute Set to true for mute and false for unmute
  * @return True on success, false on failure
  */
-bool Controller::SetMuteBridgingSoundobjectId(ProtocolBridgingType bridgingType, SoundobjectId soundobjectId, bool mute)
+bool Controller::SetMuteBridgingSoundobjectProcessorId(ProtocolBridgingType bridgingType, SoundobjectId soundobjectProcessorId, bool mute)
 {
 	switch (bridgingType)
 	{
 	case PBT_DiGiCo:
-		return m_protocolBridge.SetMuteDiGiCoSoundobjectId(soundobjectId, mute);
+		return m_protocolBridge.SetMuteDiGiCoSoundobjectProcessorId(soundobjectProcessorId, mute);
 	case PBT_GenericOSC:
-		return m_protocolBridge.SetMuteGenericOSCSoundobjectId(soundobjectId, mute);
+		return m_protocolBridge.SetMuteGenericOSCSoundobjectProcessorId(soundobjectProcessorId, mute);
 	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.SetMuteRTTrPMSoundobjectId(soundobjectId, mute);
+		return m_protocolBridge.SetMuteRTTrPMSoundobjectProcessorId(soundobjectProcessorId, mute);
 	case PBT_GenericMIDI:
-		return m_protocolBridge.SetMuteGenericMIDISoundobjectId(soundobjectId, mute);
+		return m_protocolBridge.SetMuteGenericMIDISoundobjectProcessorId(soundobjectProcessorId, mute);
 	case PBT_YamahaOSC:
-		return m_protocolBridge.SetMuteYamahaOSCSoundobjectId(soundobjectId, mute);
+		return m_protocolBridge.SetMuteYamahaOSCSoundobjectProcessorId(soundobjectProcessorId, mute);
 	case PBT_YamahaSQ:
 	case PBT_HUI:
 	case PBT_DS100:
@@ -2449,24 +2446,24 @@ bool Controller::SetMuteBridgingSoundobjectId(ProtocolBridgingType bridgingType,
 
 /**
  * Sets the given sources to be (un-)muted in DiGiCo protocol via proxy bridge object
- * @param soundobjectId The ids of the sources that shall be muted
+ * @param soundobjectProcessorId The ids of the soundobject processors that shall be muted
  * @param mute Set to true for mute and false for unmute
  * @return True on success, false on failure
  */
-bool Controller::SetMuteBridgingSoundobjectIds(ProtocolBridgingType bridgingType, const std::vector<SoundobjectId>& soundobjectIds, bool mute)
+bool Controller::SetMuteBridgingSoundobjectProcessorIds(ProtocolBridgingType bridgingType, const std::vector<SoundobjectProcessorId>& soundobjectProcessorIds, bool mute)
 {
 	switch (bridgingType)
 	{
 	case PBT_DiGiCo:
-		return m_protocolBridge.SetMuteDiGiCoSoundobjectIds(soundobjectIds, mute);
+		return m_protocolBridge.SetMuteDiGiCoSoundobjectProcessorIds(soundobjectProcessorIds, mute);
 	case PBT_GenericOSC:
-		return m_protocolBridge.SetMuteGenericOSCSoundobjectIds(soundobjectIds, mute);
+		return m_protocolBridge.SetMuteGenericOSCSoundobjectProcessorIds(soundobjectProcessorIds, mute);
 	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.SetMuteRTTrPMSoundobjectIds(soundobjectIds, mute);
+		return m_protocolBridge.SetMuteRTTrPMSoundobjectProcessorIds(soundobjectProcessorIds, mute);
 	case PBT_GenericMIDI:
-		return m_protocolBridge.SetMuteGenericMIDISoundobjectIds(soundobjectIds, mute);
+		return m_protocolBridge.SetMuteGenericMIDISoundobjectProcessorIds(soundobjectProcessorIds, mute);
 	case PBT_YamahaOSC:
-		return m_protocolBridge.SetMuteYamahaOSCSoundobjectIds(soundobjectIds, mute);
+		return m_protocolBridge.SetMuteYamahaOSCSoundobjectProcessorIds(soundobjectProcessorIds, mute);
 	case PBT_YamahaSQ:
 	case PBT_HUI:
 	case PBT_DS100:
@@ -2478,23 +2475,23 @@ bool Controller::SetMuteBridgingSoundobjectIds(ProtocolBridgingType bridgingType
 
 /**
  * Gets the mute state of the given matrix input via proxy bridge object
- * @param matrixInputId The id of the source for which the mute state shall be returned
+ * @param matrixInputProcessorId The id of the matrix input processor for which the mute state shall be returned
  * @return The mute state
  */
-bool Controller::GetMuteBridgingMatrixInputId(ProtocolBridgingType bridgingType, MatrixInputId matrixInputId)
+bool Controller::GetMuteBridgingMatrixInputProcessorId(ProtocolBridgingType bridgingType, MatrixInputId matrixInputProcessorId)
 {
 	switch (bridgingType)
 	{
 	case PBT_DiGiCo:
-		return m_protocolBridge.GetMuteDiGiCoMatrixInputId(matrixInputId);
+		return m_protocolBridge.GetMuteDiGiCoMatrixInputProcessorId(matrixInputProcessorId);
 	case PBT_GenericOSC:
-		return m_protocolBridge.GetMuteGenericOSCMatrixInputId(matrixInputId);
+		return m_protocolBridge.GetMuteGenericOSCMatrixInputProcessorId(matrixInputProcessorId);
 	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.GetMuteRTTrPMMatrixInputId(matrixInputId);
+		return m_protocolBridge.GetMuteRTTrPMMatrixInputProcessorId(matrixInputProcessorId);
 	case PBT_GenericMIDI:
-		return m_protocolBridge.GetMuteGenericMIDIMatrixInputId(matrixInputId);
+		return m_protocolBridge.GetMuteGenericMIDIMatrixInputProcessorId(matrixInputProcessorId);
 	case PBT_YamahaOSC:
-		return m_protocolBridge.GetMuteYamahaOSCMatrixInputId(matrixInputId);
+		return m_protocolBridge.GetMuteYamahaOSCMatrixInputProcessorId(matrixInputProcessorId);
 	case PBT_YamahaSQ:
 	case PBT_HUI:
 	case PBT_DS100:
@@ -2510,20 +2507,20 @@ bool Controller::GetMuteBridgingMatrixInputId(ProtocolBridgingType bridgingType,
  * @param mute Set to true for mute and false for unmute
  * @return True on success, false on failure
  */
-bool Controller::SetMuteBridgingMatrixInputId(ProtocolBridgingType bridgingType, MatrixInputId matrixInputId, bool mute)
+bool Controller::SetMuteBridgingMatrixInputProcessorId(ProtocolBridgingType bridgingType, MatrixInputId matrixInputProcessorId, bool mute)
 {
 	switch (bridgingType)
 	{
 	case PBT_DiGiCo:
-		return m_protocolBridge.SetMuteDiGiCoMatrixInputId(matrixInputId, mute);
+		return m_protocolBridge.SetMuteDiGiCoMatrixInputProcessorId(matrixInputProcessorId, mute);
 	case PBT_GenericOSC:
-		return m_protocolBridge.SetMuteGenericOSCMatrixInputId(matrixInputId, mute);
+		return m_protocolBridge.SetMuteGenericOSCMatrixInputProcessorId(matrixInputProcessorId, mute);
 	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.SetMuteRTTrPMMatrixInputId(matrixInputId, mute);
+		return m_protocolBridge.SetMuteRTTrPMMatrixInputProcessorId(matrixInputProcessorId, mute);
 	case PBT_GenericMIDI:
-		return m_protocolBridge.SetMuteGenericMIDIMatrixInputId(matrixInputId, mute);
+		return m_protocolBridge.SetMuteGenericMIDIMatrixInputProcessorId(matrixInputProcessorId, mute);
 	case PBT_YamahaOSC:
-		return m_protocolBridge.SetMuteYamahaOSCMatrixInputId(matrixInputId, mute);
+		return m_protocolBridge.SetMuteYamahaOSCMatrixInputProcessorId(matrixInputProcessorId, mute);
 	case PBT_YamahaSQ:
 	case PBT_HUI:
 	case PBT_DS100:
@@ -2535,24 +2532,24 @@ bool Controller::SetMuteBridgingMatrixInputId(ProtocolBridgingType bridgingType,
 
 /**
  * Sets the given sources to be (un-)muted in DiGiCo protocol via proxy bridge object
- * @param matrixInputIds The ids of the matrix Inputs that shall be muted
+ * @param matrixInputProcessorIds The ids of the matrix Inputs that shall be muted
  * @param mute Set to true for mute and false for unmute
  * @return True on success, false on failure
  */
-bool Controller::SetMuteBridgingMatrixInputIds(ProtocolBridgingType bridgingType, const std::vector<MatrixInputId>& matrixInputIds, bool mute)
+bool Controller::SetMuteBridgingMatrixInputProcessorIds(ProtocolBridgingType bridgingType, const std::vector<MatrixInputProcessorId>& matrixInputProcessorIds, bool mute)
 {
 	switch (bridgingType)
 	{
 	case PBT_DiGiCo:
-		return m_protocolBridge.SetMuteDiGiCoMatrixInputIds(matrixInputIds, mute);
+		return m_protocolBridge.SetMuteDiGiCoMatrixInputProcessorIds(matrixInputProcessorIds, mute);
 	case PBT_GenericOSC:
-		return m_protocolBridge.SetMuteGenericOSCMatrixInputIds(matrixInputIds, mute);
+		return m_protocolBridge.SetMuteGenericOSCMatrixInputProcessorIds(matrixInputProcessorIds, mute);
 	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.SetMuteRTTrPMMatrixInputIds(matrixInputIds, mute);
+		return m_protocolBridge.SetMuteRTTrPMMatrixInputProcessorIds(matrixInputProcessorIds, mute);
 	case PBT_GenericMIDI:
-		return m_protocolBridge.SetMuteGenericMIDIMatrixInputIds(matrixInputIds, mute);
+		return m_protocolBridge.SetMuteGenericMIDIMatrixInputProcessorIds(matrixInputProcessorIds, mute);
 	case PBT_YamahaOSC:
-		return m_protocolBridge.SetMuteYamahaOSCMatrixInputIds(matrixInputIds, mute);
+		return m_protocolBridge.SetMuteYamahaOSCMatrixInputProcessorIds(matrixInputProcessorIds, mute);
 	case PBT_YamahaSQ:
 	case PBT_HUI:
 	case PBT_DS100:
@@ -2564,23 +2561,23 @@ bool Controller::SetMuteBridgingMatrixInputIds(ProtocolBridgingType bridgingType
 
 /**
  * Gets the mute state of the given source via proxy bridge object
- * @param sourceId The id of the source for which the mute state shall be returned
+ * @param matrixOutputProcessorId The id of the matrix output processor for which the mute state shall be returned
  * @return The mute state
  */
-bool Controller::GetMuteBridgingMatrixOutputId(ProtocolBridgingType bridgingType, MatrixOutputId matrixOutputId)
+bool Controller::GetMuteBridgingMatrixOutputProcessorId(ProtocolBridgingType bridgingType, MatrixOutputId matrixOutputProcessorId)
 {
 	switch (bridgingType)
 	{
 	case PBT_DiGiCo:
-		return m_protocolBridge.GetMuteDiGiCoMatrixOutputId(matrixOutputId);
+		return m_protocolBridge.GetMuteDiGiCoMatrixOutputProcessorId(matrixOutputProcessorId);
 	case PBT_GenericOSC:
-		return m_protocolBridge.GetMuteGenericOSCMatrixOutputId(matrixOutputId);
+		return m_protocolBridge.GetMuteGenericOSCMatrixOutputProcessorId(matrixOutputProcessorId);
 	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.GetMuteRTTrPMMatrixOutputId(matrixOutputId);
+		return m_protocolBridge.GetMuteRTTrPMMatrixOutputProcessorId(matrixOutputProcessorId);
 	case PBT_GenericMIDI:
-		return m_protocolBridge.GetMuteGenericMIDIMatrixOutputId(matrixOutputId);
+		return m_protocolBridge.GetMuteGenericMIDIMatrixOutputProcessorId(matrixOutputProcessorId);
 	case PBT_YamahaOSC:
-		return m_protocolBridge.GetMuteYamahaOSCMatrixOutputId(matrixOutputId);
+		return m_protocolBridge.GetMuteYamahaOSCMatrixOutputProcessorId(matrixOutputProcessorId);
 	case PBT_YamahaSQ:
 	case PBT_HUI:
 	case PBT_DS100:
@@ -2592,24 +2589,24 @@ bool Controller::GetMuteBridgingMatrixOutputId(ProtocolBridgingType bridgingType
 
 /**
  * Sets the given source to be (un-)muted in DiGiCo protocol via proxy bridge object
- * @param soundobjectId The id of the source that shall be muted
+ * @param matrixOutputProcessorId The id of the matrix output procssor that shall be muted
  * @param mute Set to true for mute and false for unmute
  * @return True on success, false on failure
  */
-bool Controller::SetMuteBridgingMatrixOutputId(ProtocolBridgingType bridgingType, MatrixOutputId matrixOutputId, bool mute)
+bool Controller::SetMuteBridgingMatrixOutputProcessorId(ProtocolBridgingType bridgingType, MatrixOutputId matrixOutputProcessorId, bool mute)
 {
 	switch (bridgingType)
 	{
 	case PBT_DiGiCo:
-		return m_protocolBridge.SetMuteDiGiCoMatrixOutputId(matrixOutputId, mute);
+		return m_protocolBridge.SetMuteDiGiCoMatrixOutputProcessorId(matrixOutputProcessorId, mute);
 	case PBT_GenericOSC:
-		return m_protocolBridge.SetMuteGenericOSCMatrixOutputId(matrixOutputId, mute);
+		return m_protocolBridge.SetMuteGenericOSCMatrixOutputProcessorId(matrixOutputProcessorId, mute);
 	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.SetMuteRTTrPMMatrixOutputId(matrixOutputId, mute);
+		return m_protocolBridge.SetMuteRTTrPMMatrixOutputProcessorId(matrixOutputProcessorId, mute);
 	case PBT_GenericMIDI:
-		return m_protocolBridge.SetMuteGenericMIDIMatrixOutputId(matrixOutputId, mute);
+		return m_protocolBridge.SetMuteGenericMIDIMatrixOutputProcessorId(matrixOutputProcessorId, mute);
 	case PBT_YamahaOSC:
-		return m_protocolBridge.SetMuteYamahaOSCMatrixOutputId(matrixOutputId, mute);
+		return m_protocolBridge.SetMuteYamahaOSCMatrixOutputProcessorId(matrixOutputProcessorId, mute);
 	case PBT_YamahaSQ:
 	case PBT_HUI:
 	case PBT_DS100:
@@ -2621,24 +2618,24 @@ bool Controller::SetMuteBridgingMatrixOutputId(ProtocolBridgingType bridgingType
 
 /**
  * Sets the given sources to be (un-)muted in DiGiCo protocol via proxy bridge object
- * @param matrixOutputIds The ids of the matrix outputs that shall be muted
+ * @param matrixOutputProcessorIds The ids of the matrix output processors that shall be muted
  * @param mute Set to true for mute and false for unmute
  * @return True on success, false on failure
  */
-bool Controller::SetMuteBridgingMatrixOutputIds(ProtocolBridgingType bridgingType, const std::vector<MatrixOutputId>& matrixOutputIds, bool mute)
+bool Controller::SetMuteBridgingMatrixOutputProcessorIds(ProtocolBridgingType bridgingType, const std::vector<MatrixOutputProcessorId>& matrixOutputProcessorIds, bool mute)
 {
 	switch (bridgingType)
 	{
 	case PBT_DiGiCo:
-		return m_protocolBridge.SetMuteDiGiCoMatrixOutputIds(matrixOutputIds, mute);
+		return m_protocolBridge.SetMuteDiGiCoMatrixOutputProcessorIds(matrixOutputProcessorIds, mute);
 	case PBT_GenericOSC:
-		return m_protocolBridge.SetMuteGenericOSCMatrixOutputIds(matrixOutputIds, mute);
+		return m_protocolBridge.SetMuteGenericOSCMatrixOutputProcessorIds(matrixOutputProcessorIds, mute);
 	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.SetMuteRTTrPMMatrixOutputIds(matrixOutputIds, mute);
+		return m_protocolBridge.SetMuteRTTrPMMatrixOutputProcessorIds(matrixOutputProcessorIds, mute);
 	case PBT_GenericMIDI:
-		return m_protocolBridge.SetMuteGenericMIDIMatrixOutputIds(matrixOutputIds, mute);
+		return m_protocolBridge.SetMuteGenericMIDIMatrixOutputProcessorIds(matrixOutputProcessorIds, mute);
 	case PBT_YamahaOSC:
-		return m_protocolBridge.SetMuteYamahaOSCMatrixOutputIds(matrixOutputIds, mute);
+		return m_protocolBridge.SetMuteYamahaOSCMatrixOutputProcessorIds(matrixOutputProcessorIds, mute);
 	case PBT_YamahaSQ:
 	case PBT_HUI:
 	case PBT_DS100:

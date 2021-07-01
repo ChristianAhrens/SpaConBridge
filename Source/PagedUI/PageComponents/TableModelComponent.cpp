@@ -488,15 +488,13 @@ bool TableModelComponent::LessThanSoundobjectBridgingMute(juce::int32 pId1, juce
 			auto mutedProtocolCountP1 = 0;
 			auto mutedProtocolCountP2 = 0;
 
-			auto soundobjectId1 = p1->GetSoundobjectId();
-			auto soundobjectId2 = p2->GetSoundobjectId();
 			for (auto bridgingType : ProtocolBridgingTypes)
 			{
 				auto activeBridging = ctrl->GetActiveProtocolBridging();
 				if ((activeBridging & bridgingType) == bridgingType)
 				{
-					mutedProtocolCountP1 += ctrl->GetMuteBridgingSoundobjectId(bridgingType, soundobjectId1) ? 1 : 0;
-					mutedProtocolCountP2 += ctrl->GetMuteBridgingSoundobjectId(bridgingType, soundobjectId2) ? 1 : 0;
+					mutedProtocolCountP1 += ctrl->GetMuteBridgingSoundobjectProcessorId(bridgingType, pId1) ? 1 : 0;
+					mutedProtocolCountP2 += ctrl->GetMuteBridgingSoundobjectProcessorId(bridgingType, pId2) ? 1 : 0;
 				}
 			}
 
@@ -538,15 +536,13 @@ bool TableModelComponent::LessThanMatrixInputBridgingMute(juce::int32 pId1, juce
 			auto mutedProtocolCountP1 = 0;
 			auto mutedProtocolCountP2 = 0;
 
-			auto matrixInputId1 = p1->GetMatrixInputId();
-			auto matrixInputId2 = p2->GetMatrixInputId();
 			for (auto bridgingType : ProtocolBridgingTypes)
 			{
 				auto activeBridging = ctrl->GetActiveProtocolBridging();
 				if ((activeBridging & bridgingType) == bridgingType)
 				{
-					mutedProtocolCountP1 += ctrl->GetMuteBridgingMatrixInputId(bridgingType, matrixInputId1) ? 1 : 0;
-					mutedProtocolCountP2 += ctrl->GetMuteBridgingMatrixInputId(bridgingType, matrixInputId2) ? 1 : 0;
+					mutedProtocolCountP1 += ctrl->GetMuteBridgingMatrixInputProcessorId(bridgingType, pId1) ? 1 : 0;
+					mutedProtocolCountP2 += ctrl->GetMuteBridgingMatrixInputProcessorId(bridgingType, pId2) ? 1 : 0;
 				}
 			}
 
@@ -588,15 +584,13 @@ bool TableModelComponent::LessThanMatrixOutputBridgingMute(juce::int32 pId1, juc
 			auto mutedProtocolCountP1 = 0;
 			auto mutedProtocolCountP2 = 0;
 
-			auto matrixOutputId1 = p1->GetMatrixOutputId();
-			auto matrixOutputId2 = p2->GetMatrixOutputId();
 			for (auto bridgingType : ProtocolBridgingTypes)
 			{
 				auto activeBridging = ctrl->GetActiveProtocolBridging();
 				if ((activeBridging & bridgingType) == bridgingType)
 				{
-					mutedProtocolCountP1 += ctrl->GetMuteBridgingMatrixOutputId(bridgingType, matrixOutputId1) ? 1 : 0;
-					mutedProtocolCountP2 += ctrl->GetMuteBridgingMatrixOutputId(bridgingType, matrixOutputId2) ? 1 : 0;
+					mutedProtocolCountP1 += ctrl->GetMuteBridgingMatrixOutputProcessorId(bridgingType, pId1) ? 1 : 0;
+					mutedProtocolCountP2 += ctrl->GetMuteBridgingMatrixOutputProcessorId(bridgingType, pId2) ? 1 : 0;
 				}
 			}
 

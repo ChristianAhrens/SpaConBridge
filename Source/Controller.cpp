@@ -1388,12 +1388,12 @@ void Controller::timerCallback()
 					// this parameter has been changed since the last timer tick.
 					if (((comsMode & CM_Tx) == CM_Tx) && soProcessor->GetParameterChanged(DCP_Protocol, DCT_DelayMode))
 					{
-						newDualFloatValue[0] = soProcessor->GetParameterValue(SPI_ParamIdx_DelayMode);
+						newIntValue = static_cast<int>(soProcessor->GetParameterValue(SPI_ParamIdx_DelayMode));
 
 						newMsgData._valCount = 1;
-						newMsgData._valType = ROVT_FLOAT;
-						newMsgData._payload = &newDualFloatValue;
-						newMsgData._payloadSize = sizeof(float);
+						newMsgData._valType = ROVT_INT;
+						newMsgData._payload = &newIntValue;
+						newMsgData._payloadSize = sizeof(int);
 
 						msgSent = m_protocolBridge.SendMessage(ROI_Positioning_SourceDelayMode, newMsgData);
 						paramSetsInTransit |= DCT_DelayMode;

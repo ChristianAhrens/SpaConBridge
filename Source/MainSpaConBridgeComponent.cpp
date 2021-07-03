@@ -27,6 +27,8 @@
 #include "CustomAudioProcessors/MatrixInputProcessor/MatrixInputProcessor.h"
 #include "CustomAudioProcessors/MatrixOutputProcessor/MatrixOutputProcessor.h"
 
+#include "WaitingEntertainerComponent.h"
+
 #include <iOS_utils.h>
 
 #include <JuceHeader.h>
@@ -43,6 +45,8 @@ MainSpaConBridgeComponent::MainSpaConBridgeComponent()
 MainSpaConBridgeComponent::MainSpaConBridgeComponent(std::function<void(DbLookAndFeelBase::LookAndFeelType)> lafUpdateCallback)
     : onUpdateLookAndFeel(lafUpdateCallback)
 {
+    addChildComponent(WaitingEntertainerComponent::GetInstance());
+
     // a single instance of tooltip window is required and used by JUCE everywhere a tooltip is required.
     m_toolTipWindowInstance = std::make_unique<TooltipWindow>();
 
@@ -77,11 +81,14 @@ MainSpaConBridgeComponent::MainSpaConBridgeComponent(std::function<void(DbLookAn
     // do the initial update for the whole application with config contents
     m_config->triggerWatcherUpdate();
 
-    setSize(896, 414);
+    setSize(960, 640);
 }
 
 MainSpaConBridgeComponent::~MainSpaConBridgeComponent()
 {
+    if (WaitingEntertainerComponent::GetInstance())
+        removeChildComponent(WaitingEntertainerComponent::GetInstance());
+
     if (m_config)
     {
         m_config->clearDumpers();
@@ -126,6 +133,8 @@ MainSpaConBridgeComponent::~MainSpaConBridgeComponent()
 
         ctrl->DestroyInstance();
     }
+
+    WaitingEntertainerComponent::GetInstance()->DestroyInstance();
 }
 
 void MainSpaConBridgeComponent::paint(juce::Graphics& g)
@@ -149,6 +158,11 @@ void MainSpaConBridgeComponent::resized()
         auto pageContainer = pageMgr->GetPageContainer();
         if (pageContainer)
             pageContainer->setBounds(safeBounds);
+    }
+
+    if (WaitingEntertainerComponent::GetInstance() && WaitingEntertainerComponent::GetInstance()->isVisible())
+    {
+        WaitingEntertainerComponent::GetInstance()->setBounds(getLocalBounds());
     }
 }
 

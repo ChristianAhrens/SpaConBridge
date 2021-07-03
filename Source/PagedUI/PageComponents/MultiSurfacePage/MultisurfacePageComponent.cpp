@@ -145,12 +145,11 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 			auto processor = ctrl->GetSoundobjectProcessor(processorId);
 			if (processor)
 			{
-				auto soundobjectId = processor->GetSoundobjectId();
 				if (processor->GetMappingId() == GetSelectedMapping())
 				{
 					// NOTE: only sources are included, which match the selected viewing mapping.
 					Point<float> p(processor->GetParameterValue(SPI_ParamIdx_X), processor->GetParameterValue(SPI_ParamIdx_Y));
-					cachedPositions.insert(std::make_pair(processorId, SurfaceMultiSlider::SoundobjectPosition(soundobjectId, p, ctrl->IsSoundobjectIdSelected(soundobjectId))));
+					cachedPositions.insert(std::make_pair(processorId, SurfaceMultiSlider::SoundobjectPosition(processor->GetSoundobjectId(), p, ctrl->IsSoundobjectProcessorIdSelected(processor->GetProcessorId()))));
 				}
 
 				if (processor->PopParameterChanged(DCP_MultiSlider, (DCT_SoundobjectProcessorConfig | DCT_SoundobjectPosition)))

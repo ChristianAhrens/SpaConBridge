@@ -20,8 +20,6 @@ _[![SpaConBridge v0.3.1 Introduction](https://img.youtube.com/vi/ozhQxKidtWc/0.j
 
 **Known Issues:**
 
-* The app freezes / performs poorly when configuration is changed while data is received (freezes the longer, the more Sound Objects are active)  
-__Note:__ Major code refactoring is required to solve this
 * Zeroconf is not working in builds for Windows OS  
 __Note:__ Needs to be implemented...
 * LookAndFeel change does not reliably update colour scheme for all UI elements  
@@ -41,6 +39,8 @@ __Note:__ In consequence, devices being plugged in / coming online while app is 
     * [Sound Object Parameter editing](#soundobjectparameterediting)
   * [Multi Sound Object XY Pad](#twodimensionalpositionslider)
   * [Matrix IO Table](#matrixiotable)
+  * [Scenes](#scenes)
+  * [En-Space](#enspace)
   * [Statistics](#protocolbridgingtrafficloggingandplotting)
   * [Settings](#appsettings)
 * [Supported Sound Object parameters on UI](#soundobjectuiparameters)
@@ -121,18 +121,42 @@ The selection / multiselection in Sound Object table is followed here and reflec
 
 ### Matrix Inputs/Outputs Table
 
-![Showreel.015.png](Resources/Documentation/Showreel/Showreel.015.png "Matrix IO Table Overview")
+![Showreel.006.png](Resources/Documentation/Showreel/Showreel.006.png "Matrix IO Table Overview")
 
 On the left side (landscape) or top (portrait) of the page, a table for visualization and control of DS100 matrix input channels is shown and on the right side or bottom of the page, a table for matrix outputs.
 Every row in both of the tables corresponds to an active Matrix Input or Output, meaning that it is shown on UI and its values can be received from DS100. This does not affect the pure protocol bridging in underlying module. E.g. in case an external OSC input sends new gain values for a channel that is not present in the table, the values will still be bridged to DS100. This needs to be kept in mind if muting the input data from a protocol for a Matrix Input/Output is desired!
 
+
+<a name="scenes" />
+
+### Scenes
+
+![Showreel.007.png](Resources/Documentation/Showreel/Showreel.007.png "Scenes")
+
+Scenes page constantly reads the currently active Scene Index, Name and Comment from DS100 (low refresh rate) and displays the values in text editors.
+
+The editor value for Scene Index can be edited by the user and used to trigger recalling the Scene specified by the index with a dedicated 'Recall' button. In addition to that, buttons for recalling previous and next scene directly are available.
+
+A separate button allows 'pinning' a Scene for direct recall.
+Clicking the button appends a direct recall entry for the Scene Index + Name currently active below the existing UI elements.
+Direct recall entries must be unique, therefor a direct recall entry for a Scene Index can exist only once in the list of pinned Scenes. Removing a pinned Scene is possible through the right-aligned delete button for every entry.
+
+
+<a name="enspace" />
+
+### En-Space
+
+![Showreel.008.png](Resources/Documentation/Showreel/Showreel.008.png "En-Space")
+
+En-Space page constantly reads the currently active room id, predelay factor and rear level values and displays them on UI.
+The values can be modified by the user through given UI elements.
 
 
 <a name="protocolbridgingtrafficloggingandplotting" />
 
 ### Statistics
 
-![Showreel.006.png](Resources/Documentation/Showreel/Showreel.006.png "Protocol Bridging Statistics")
+![Showreel.009.png](Resources/Documentation/Showreel/Showreel.009.png "Protocol Bridging Statistics")
 
 Statistics page shows a graphical representation for current bridging protocol load (messages per second) for every active protocol and a tabular log view of the last 200 received messages. The graphical representation shown describes the raw incoming data rate only and contains no information on actual bridging.
 Both plot and log are refreshed at a small rate to keep the performance impact on the host system resources low.
@@ -142,11 +166,17 @@ Both plot and log are refreshed at a small rate to keep the performance impact o
 
 ### Settings
 
-![Showreel.007.png](Resources/Documentation/Showreel/Showreel.007.png "App Settings")
+![Showreel.0010.png](Resources/Documentation/Showreel/Showreel.010.png "General Settings")
+
+Settings page is structured in sections.
+
+The first section allows configuration of application related parameters and is always active.
+The pages that are visible as tabs on the UI can be set (exception Settings tab, must always be visible) using toggle buttons for every page and the UI look and feel (dark vs. light) can be selected from a dropdown.
 
 <a name="appsettingsprotocols" />
 
-Settings page is structured in protocol sections.
+The following sections contain configuration details for the supported remote control protocols.
+
 DS100 OSC communication protocol is always active. The IP address can be manually configured or, if the build of SpaConBridge for the host system supports this, zeroconf discovery button can be used to select on of the discovered devices. OSC UDP communication ports are hardcoded to match the ones used by DS100.
 
 For details on the settings for the implemented protocols, see the individual documentation
@@ -161,8 +191,6 @@ For details on the settings for the implemented protocols, see the individual do
 
 The bottom bar of settings page contains buttons to save and load entire SpaConBridge configurations, as well as a button to show the raw current configuration in a text editor overlay. The latter is mainly useful for debugging purposes.
 Depending on the available horizontal UI resolution, buttons are hidden. 'Show raw config' disappears first, since it is least relevant for use. On host devices as smartphones, rotating from portrait to landscape mode can help to make the buttons visible, in case they are hidden in portrait mode.
-
-![Showreel.014.png](Resources/Documentation/Showreel/Showreel.014.png "Light LookAndFeel")
 
 
 <a name="soundobjectuiparameters" />

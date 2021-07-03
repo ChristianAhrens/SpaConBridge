@@ -121,12 +121,14 @@ public:
                 m_customLookAndFeel = std::unique_ptr<LookAndFeel>(new DarkDbLookAndFeel);
                 break;
             }
+            m_customLookAndFeel->setUsingNativeAlertWindows(true);
+
             Desktop::getInstance().setDefaultLookAndFeel(m_customLookAndFeel.get());
         }
 
     private:
-        std::unique_ptr<LookAndFeel>	                    m_customLookAndFeel; // our own look and feel implementation instance
-        std::unique_ptr<MainSpaConBridgeComponent>   m_mainComponent;
+        std::unique_ptr<LookAndFeel>                m_customLookAndFeel; // our own look and feel implementation instance
+        std::unique_ptr<MainSpaConBridgeComponent>  m_mainComponent;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainWindow)
     };

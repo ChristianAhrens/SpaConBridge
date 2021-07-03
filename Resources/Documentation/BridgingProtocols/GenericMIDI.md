@@ -1,6 +1,6 @@
 ## Generic MIDI bridging settings
 
-![Showreel.012.png](../Showreel/Showreel.012.png "Generic MIDI bridging settings")
+![Showreel.015.png](../Showreel/Showreel.015.png "Generic MIDI bridging settings")
 
 Assignment of mapping between MIDI input commmands and internal Soundscape parameters is done using the provided 'MIDI learner' training functionality.
 This can be activated clicking on the learner trigger buttons and brings up a popup menu that lists the incoming MIDI data preprocessed into usable mapping types

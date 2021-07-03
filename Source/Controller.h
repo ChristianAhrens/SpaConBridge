@@ -89,8 +89,10 @@ public:
 
 	void SetSelectedSoundobjectProcessorIds(const std::vector<SoundobjectProcessorId>& processorIds, bool clearPrevSelection);
 	const std::vector<SoundobjectProcessorId> GetSelectedSoundobjectProcessorIds();
-	void SetSoundobjectIdSelectState(SoundobjectId soundobjectId, bool selected);
-	bool IsSoundobjectIdSelected(SoundobjectId soundobjectId);
+	void SetSoundobjectProcessorIdSelectState(SoundobjectProcessorId soundobjectProcessorId, bool selected);
+	bool IsSoundobjectProcessorIdSelected(SoundobjectProcessorId soundobjectProcessorId);
+
+	std::vector<RemoteObject> GetSoundobjectProcessorRemoteObjects(SoundobjectProcessorId soundobjectProcessorId);
 
 	//==========================================================================
 	void createNewMatrixInputProcessor();
@@ -106,8 +108,10 @@ public:
 
 	void SetSelectedMatrixInputProcessorIds(const std::vector<MatrixInputProcessorId>& processorIds, bool clearPrevSelection);
 	const std::vector<MatrixInputProcessorId> GetSelectedMatrixInputProcessorIds();
-	void SetMatrixInputIdSelectState(MatrixInputId matrixInputId, bool selected);
-	bool IsMatrixInputIdSelected(MatrixInputId matrixInputId);
+	void SetMatrixInputProcessorIdSelectState(MatrixInputProcessorId matrixInputProcessorId, bool selected);
+	bool IsMatrixInputProcessorIdSelected(MatrixInputProcessorId matrixInputProcessorId);
+
+	std::vector<RemoteObject> GetMatrixInputProcessorRemoteObjects(MatrixInputProcessorId matrixInputProcessorId);
 
 	//==========================================================================
 	void createNewMatrixOutputProcessor();
@@ -123,8 +127,10 @@ public:
 
 	void SetSelectedMatrixOutputProcessorIds(const std::vector<MatrixOutputProcessorId>& processorIds, bool clearPrevSelection);
 	const std::vector<MatrixOutputProcessorId> GetSelectedMatrixOutputProcessorIds();
-	void SetMatrixOutputIdSelectState(MatrixOutputId matrixOutputId, bool selected);
-	bool IsMatrixOutputIdSelected(MatrixOutputId matrixOutputId);
+	void SetMatrixOutputProcessorIdSelectState(MatrixOutputProcessorId matrixOutputProcessorId, bool selected);
+	bool IsMatrixOutputProcessorIdSelected(MatrixOutputProcessorId matrixOutputProcessorId);
+
+	std::vector<RemoteObject> GetMatrixOutputProcessorRemoteObjects(MatrixOutputProcessorId matrixOutputProcessorId);
 
 	//==========================================================================
 	static String GetDefaultDS100IpAddress();
@@ -156,17 +162,17 @@ public:
 	void SetActiveProtocolBridging(ProtocolBridgingType bridgingType);
 	int GetActiveProtocolBridgingCount();
 	
-	bool GetMuteBridgingSoundobjectId(ProtocolBridgingType bridgingType, SoundobjectId soundobjectId);
-	bool SetMuteBridgingSoundobjectId(ProtocolBridgingType bridgingType, SoundobjectId soundobjectId, bool mute);
-	bool SetMuteBridgingSoundobjectIds(ProtocolBridgingType bridgingType, const std::vector<SoundobjectId>& soundobjectIds, bool mute);
+	bool GetMuteBridgingSoundobjectProcessorId(ProtocolBridgingType bridgingType, SoundobjectProcessorId soundobjectProcessorId);
+	bool SetMuteBridgingSoundobjectProcessorId(ProtocolBridgingType bridgingType, SoundobjectProcessorId soundobjectProcessorId, bool mute);
+	bool SetMuteBridgingSoundobjectProcessorIds(ProtocolBridgingType bridgingType, const std::vector<SoundobjectProcessorId>& soundobjectProcessorIds, bool mute);
 
-	bool GetMuteBridgingMatrixInputId(ProtocolBridgingType bridgingType, MatrixInputId matrixInputId);
-	bool SetMuteBridgingMatrixInputId(ProtocolBridgingType bridgingType, MatrixInputId matrixInputId, bool mute);
-	bool SetMuteBridgingMatrixInputIds(ProtocolBridgingType bridgingType, const std::vector<MatrixInputId>& matrixInputIds, bool mute);
+	bool GetMuteBridgingMatrixInputProcessorId(ProtocolBridgingType bridgingType, MatrixInputProcessorId matrixInputProcessorId);
+	bool SetMuteBridgingMatrixInputProcessorId(ProtocolBridgingType bridgingType, MatrixInputProcessorId matrixInputProcessorId, bool mute);
+	bool SetMuteBridgingMatrixInputProcessorIds(ProtocolBridgingType bridgingType, const std::vector<MatrixInputProcessorId>& matrixInputProcessorIds, bool mute);
 
-	bool GetMuteBridgingMatrixOutputId(ProtocolBridgingType bridgingType, MatrixOutputId matrixOutputId);
-	bool SetMuteBridgingMatrixOutputId(ProtocolBridgingType bridgingType, MatrixOutputId matrixOutputId, bool mute);
-	bool SetMuteBridgingMatrixOutputIds(ProtocolBridgingType bridgingType, const std::vector<MatrixOutputId>& matrixOutputIds, bool mute);
+	bool GetMuteBridgingMatrixOutputProcessorId(ProtocolBridgingType bridgingType, MatrixOutputProcessorId matrixOutputProcessorId);
+	bool SetMuteBridgingMatrixOutputProcessorId(ProtocolBridgingType bridgingType, MatrixOutputProcessorId matrixOutputProcessorId, bool mute);
+	bool SetMuteBridgingMatrixOutputProcessorIds(ProtocolBridgingType bridgingType, const std::vector<MatrixOutputProcessorId>& matrixOutputProcessorIds, bool mute);
 
 	String GetBridgingIpAddress(ProtocolBridgingType bridgingType);
 	bool SetBridgingIpAddress(ProtocolBridgingType bridgingType, String ipAddress, bool dontSendNotification = false);
@@ -242,9 +248,9 @@ protected:
 
 	CriticalSection					m_mutex;						/**< A re-entrant mutex. */
 
-	std::map<SoundobjectId, bool>	m_soundObjectSelection;			/**< The current select state of sound objects. */
-	std::map<MatrixInputId, bool>	m_matrixInputSelection;			/**< The current select state of matrix inputs. */
-	std::map<MatrixOutputId, bool>	m_matrixOutputSelection;		/**< The current select state of matrix outputs. */
+	std::map<SoundobjectProcessorId, bool>	m_soundobjectProcessorSelection;		/**< The current select state of sound objects. */
+	std::map<MatrixInputProcessorId, bool>	m_matrixInputProcessorSelection;		/**< The current select state of matrix inputs. */
+	std::map<MatrixOutputProcessorId, bool>	m_matrixOutputProcessorSelection;		/**< The current select state of matrix outputs. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Controller)
 };

@@ -63,6 +63,11 @@ TableControlBarComponent::TableControlBarComponent(bool canCollapse, const Strin
 	m_removeInstance->addListener(this);
 	m_removeInstance->setTooltip("Remove selected row(s)");
 	addAndMakeVisible(m_removeInstance.get());
+	m_addMultipleInstances = std::make_unique<DrawableButton>("add_batch", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	m_addMultipleInstances->setClickingTogglesState(false);
+	m_addMultipleInstances->addListener(this);
+	m_addMultipleInstances->setTooltip("Add multiple rows");
+	addAndMakeVisible(m_addMultipleInstances.get());
 
 	// Create quick selection buttons
 	m_selectAll = std::make_unique<DrawableButton>("all", DrawableButton::ButtonStyle::ImageOnButtonBackground);
@@ -191,6 +196,19 @@ void TableControlBarComponent::lookAndFeelChanged()
 
 		m_removeInstance->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
 
+		// batch-add images
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(BinaryData::add_batch24dp_svg, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+
+		m_addMultipleInstances->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+
 		// select all images
 		JUCEAppBasics::Image_utils::getDrawableButtonImages(BinaryData::rule_checked24px_svg, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
 			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
@@ -293,6 +311,11 @@ void TableControlBarComponent::buttonClicked(Button* button)
 		if (onRemoveClick)
 			onRemoveClick();
 	}
+	else if (button == m_addMultipleInstances.get())
+	{
+		if (onAddMultipleClick)
+			onAddMultipleClick();
+	}
 	else if (button == m_toggleCollapse.get())
 	{
 		m_collapsed = !m_collapsed;
@@ -375,6 +398,7 @@ void TableControlBarComponent::resized()
 			mainFB.items.add(FlexItem(*m_addInstance.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 4)));
 
 		mainFB.items.addArray({
+			FlexItem(*m_addMultipleInstances.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
 			FlexItem(*m_removeInstance.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
 			FlexItem().withFlex(1).withHeight(30),
 			FlexItem(*m_selectAll.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
@@ -403,6 +427,7 @@ void TableControlBarComponent::resized()
 			mainFB.items.add(FlexItem(*m_addInstance.get()).withHeight(25).withMargin(FlexItem::Margin(4, 2, 2, 3)));
 
 		mainFB.items.addArray({
+			FlexItem(*m_addMultipleInstances.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
 			FlexItem(*m_removeInstance.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
 			FlexItem().withFlex(1).withWidth(30),
 			FlexItem(*m_selectAll.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),

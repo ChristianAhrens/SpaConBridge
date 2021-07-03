@@ -103,13 +103,20 @@ void DbLookAndFeelBase::InitColours()
 
 	setColour(Label::textColourId, GetDbColor(DbColor::TextColor));
 	setColour(Label::textWhenEditingColourId, GetDbColor(DbColor::TextColor));
+
+	setColour(AlertWindow::textColourId, GetDbColor(DbColor::TextColor));
+	setColour(AlertWindow::outlineColourId, GetDbColor(DbColor::WindowColor));
+	setColour(AlertWindow::backgroundColourId, GetDbColor(DbColor::MidColor));
 }
 
-void DbLookAndFeelBase::drawButtonBackground(Graphics& g,
-    Button& button,
-    const Colour& backgroundColour,
-    bool shouldDrawButtonAsHighlighted,
-    bool shouldDrawButtonAsDown)
+/**
+ * Reimplemented nearly code-cloned method of LookAndFeel_V4, to get a custom looking button.
+ */
+void DbLookAndFeelBase::drawButtonBackground(	Graphics& g,
+												Button& button,
+												const Colour& backgroundColour,
+												bool shouldDrawButtonAsHighlighted,
+												bool shouldDrawButtonAsDown)
 {
 	auto cornerSize = 2.0f;
 	auto bounds = button.getLocalBounds().toFloat().reduced(0.5f, 0.5f);
@@ -150,6 +157,82 @@ void DbLookAndFeelBase::drawButtonBackground(Graphics& g,
 		g.setColour(button.findColour(ComboBox::outlineColourId));
 		g.drawRoundedRectangle(bounds, cornerSize, 1.0f);
 	}
+}
+
+/**
+ * Reimplemented nearly code-cloned method of LookAndFeel_V4, to get a custom looking AlertBox.
+ */
+void DbLookAndFeelBase::drawAlertBox(	Graphics& g,
+										AlertWindow& alert,
+										const Rectangle<int>& textArea,
+										TextLayout& textLayout)
+{
+	g.setColour(alert.findColour(AlertWindow::outlineColourId));
+	g.drawRect(alert.getLocalBounds().toFloat(), 1.0f);
+	
+	auto bounds = alert.getLocalBounds().reduced(1);
+	g.reduceClipRegion(bounds);
+	
+	g.setColour(alert.findColour(AlertWindow::backgroundColourId));
+	g.fillRect(bounds.toFloat());
+
+	auto iconSpaceUsed = 0;
+
+	auto iconWidth = 80;
+	auto iconSize = jmin(iconWidth + 50, bounds.getHeight() + 20);
+
+	if (alert.containsAnyExtraComponents() || alert.getNumButtons() > 2)
+		iconSize = jmin(iconSize, textArea.getHeight() + 50);
+
+	Rectangle<int> iconRect(iconSize / -10, iconSize / -10,
+		iconSize, iconSize);
+
+	if (alert.getAlertType() != AlertWindow::NoIcon)
+	{
+		Path icon;
+		char character;
+		uint32 colour;
+
+		if (alert.getAlertType() == AlertWindow::WarningIcon)
+		{
+			character = '!';
+
+			icon.addTriangle((float)iconRect.getX() + (float)iconRect.getWidth() * 0.5f, (float)iconRect.getY(),
+				static_cast<float> (iconRect.getRight()), static_cast<float> (iconRect.getBottom()),
+				static_cast<float> (iconRect.getX()), static_cast<float> (iconRect.getBottom()));
+
+			icon = icon.createPathWithRoundedCorners(5.0f);
+			colour = 0x66ff2a00;
+		}
+		else
+		{
+			colour = Colour(0xff00b0b9).withAlpha(0.4f).getARGB();
+			character = alert.getAlertType() == AlertWindow::InfoIcon ? 'i' : '?';
+
+			icon.addEllipse(iconRect.toFloat());
+		}
+
+		GlyphArrangement ga;
+		ga.addFittedText({ (float)iconRect.getHeight() * 0.9f, Font::bold },
+			String::charToString((juce_wchar)(uint8)character),
+			static_cast<float> (iconRect.getX()), static_cast<float> (iconRect.getY()),
+			static_cast<float> (iconRect.getWidth()), static_cast<float> (iconRect.getHeight()),
+			Justification::centred, false);
+		ga.createPath(icon);
+
+		icon.setUsingNonZeroWinding(false);
+		g.setColour(Colour(colour));
+		g.fillPath(icon);
+
+		iconSpaceUsed = iconWidth;
+	}
+
+	g.setColour(alert.findColour(AlertWindow::textColourId));
+
+	Rectangle<int> alertBounds(bounds.getX() + iconSpaceUsed, 30,
+		bounds.getWidth(), bounds.getHeight() - getAlertWindowButtonHeight() - 20);
+
+	textLayout.draw(g, alertBounds.toFloat());
 }
 
 

@@ -81,7 +81,7 @@ MainSpaConBridgeComponent::MainSpaConBridgeComponent(std::function<void(DbLookAn
     // do the initial update for the whole application with config contents
     m_config->triggerWatcherUpdate();
 
-    setSize(896, 414);
+    setSize(960, 640);
 }
 
 MainSpaConBridgeComponent::~MainSpaConBridgeComponent()

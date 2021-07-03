@@ -6,6 +6,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+- 
+
+### Changed
+- 
+
+### Fixed
+- 
+
+## [0.3.5] - 2021-07-03
+### Added
 - Added possiblity to batch-add multiple Soundobject-/MatrixInput-/MatrixOutput-Processors to tables at once
 
 ### Changed

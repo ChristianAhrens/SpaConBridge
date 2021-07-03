@@ -337,11 +337,15 @@ void AboutPageComponent::paint(Graphics& g)
 
 	auto bounds = getLocalBounds().reduced(25);
 
+	g.setColour(getLookAndFeel().findColour(AlertWindow::outlineColourId));
+	g.drawRect(bounds.toFloat(), 1.0f);
+
+	bounds.reduce(1, 1);
+	g.reduceClipRegion(bounds);
+
 	// Background
-	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
-	g.fillRoundedRectangle(bounds.toFloat(), 8.0f);
-	g.setColour(getLookAndFeel().findColour(TextEditor::outlineColourId));
-	g.drawRoundedRectangle(bounds.toFloat(), 8.0f, 3.0f);
+	g.setColour(getLookAndFeel().findColour(AlertWindow::backgroundColourId));
+	g.fillRect(bounds.toFloat());
 }
 
 /**

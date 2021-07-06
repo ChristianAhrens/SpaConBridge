@@ -20,7 +20,7 @@ _[![SpaConBridge v0.3.1 Introduction](https://img.youtube.com/vi/ozhQxKidtWc/0.j
 
 **Known Issues:**
 
-* Loading/Saving of config is only partially working in iOS/macOS builds due to issues with sandbox and hardened runtime settings of build
+* Loading/Saving of config is only partially working in iOS/macOS builds due to issues with sandbox and hardened runtime settings of build  
 __Note:__ Needs to be investigated, projucer seems to not entirely do the trick. More custom Xcode flags, etc. might have to be introduced.
 * Zeroconf is not working in builds for Windows OS  
 __Note:__ Needs to be implemented...
@@ -189,7 +189,7 @@ For details on the settings for the implemented protocols, see the individual do
   * [Generic MIDI communication](Resources/Documentation/BridgingProtocols/GenericMIDI.md)
   * [Yamaha OSC communication *](Resources/Documentation/BridgingProtocols/YamahaOSC.md)
   
-  &ast; Implemented using simulation only, entirely untested with real ones.
+  &ast; Was implemented using simulation only, entirely untested with physical devices.
 
 The bottom bar of settings page contains buttons to save and load entire SpaConBridge configurations, as well as a button to show the raw current configuration in a text editor overlay. The latter is mainly useful for debugging purposes.
 Depending on the available horizontal UI resolution, buttons are hidden. 'Show raw config' disappears first, since it is least relevant for use. On host devices as smartphones, rotating from portrait to landscape mode can help to make the buttons visible, in case they are hidden in portrait mode.

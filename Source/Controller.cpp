@@ -1703,17 +1703,23 @@ bool Controller::setStateXml(XmlElement* stateXml)
 	auto soundobjectProcessorsXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTPROCESSORS));
 	if (soundobjectProcessorsXmlElement)
 	{
+		auto oldExistingSOPIds = GetSoundobjectProcessorIds();
+		auto newConfigSOPIds = std::vector<SoundobjectProcessorId>();
+
 		for (auto processorXmlElement : soundobjectProcessorsXmlElement->getChildIterator())
 		{
 			jassert(processorXmlElement->getTagName().contains(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE)));
 			int elementProcessorId = processorXmlElement->getTagName().getTrailingIntValue();
 			bool alreadyExists = false;
 			for (auto processor : m_soundobjectProcessors)
+			{
 				if (processor->GetProcessorId() == elementProcessorId)
 				{
 					processor->setStateXml(processorXmlElement);
 					alreadyExists = true;
+					break;
 				}
+			}
 
 			if (!alreadyExists)
 			{
@@ -1722,6 +1728,18 @@ bool Controller::setStateXml(XmlElement* stateXml)
 				auto p = newProcessor.release();
 				jassert(m_soundobjectProcessors.contains(p));
 				p->setStateXml(processorXmlElement);
+			}
+
+			newConfigSOPIds.push_back(elementProcessorId);
+		}
+
+		for (auto const& processorId : oldExistingSOPIds)
+		{
+			if (std::find(newConfigSOPIds.begin(), newConfigSOPIds.end(), processorId) == newConfigSOPIds.end())
+			{
+				auto processor = std::unique_ptr<SoundobjectProcessor>(GetSoundobjectProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
+				std::unique_ptr<AudioProcessorEditor>(processor->getActiveEditor()).reset();
+				processor->releaseResources();
 			}
 		}
 	}
@@ -1732,17 +1750,23 @@ bool Controller::setStateXml(XmlElement* stateXml)
 	auto matrixInputProcessorsXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXINPUTPROCESSORS));
 	if (matrixInputProcessorsXmlElement)
 	{
+		auto oldExistingMIPIds = GetMatrixInputProcessorIds();
+		auto newConfigMIPIds = std::vector<MatrixInputProcessorId>();
+
 		for (auto processorXmlElement : matrixInputProcessorsXmlElement->getChildIterator())
 		{
 			jassert(processorXmlElement->getTagName().contains(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE)));
 			int elementProcessorId = processorXmlElement->getTagName().getTrailingIntValue();
 			bool alreadyExists = false;
 			for (auto processor : m_matrixInputProcessors)
+			{
 				if (processor->GetProcessorId() == elementProcessorId)
 				{
 					processor->setStateXml(processorXmlElement);
 					alreadyExists = true;
+					break;
 				}
+			}
 
 			if (!alreadyExists)
 			{
@@ -1752,26 +1776,44 @@ bool Controller::setStateXml(XmlElement* stateXml)
 				jassert(m_matrixInputProcessors.contains(p));
 				p->setStateXml(processorXmlElement);
 			}
+
+			newConfigMIPIds.push_back(elementProcessorId);
+		}
+
+		for (auto const& processorId : oldExistingMIPIds)
+		{
+			if (std::find(newConfigMIPIds.begin(), newConfigMIPIds.end(), processorId) == newConfigMIPIds.end())
+			{
+				auto processor = std::unique_ptr<MatrixInputProcessor>(GetMatrixInputProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
+				std::unique_ptr<AudioProcessorEditor>(processor->getActiveEditor()).reset();
+				processor->releaseResources();
+			}
 		}
 	}
 	else
 		retVal = false;
 
-	// create soundobject processors from xml
+	// create matrixoutput processors from xml
 	auto matrixOutputProcessorsXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXOUTPUTPROCESSORS));
 	if (matrixOutputProcessorsXmlElement)
 	{
+		auto oldExistingMOPIds = GetMatrixOutputProcessorIds();
+		auto newConfigMOPIds = std::vector<MatrixOutputProcessorId>();
+
 		for (auto processorXmlElement : matrixOutputProcessorsXmlElement->getChildIterator())
 		{
 			jassert(processorXmlElement->getTagName().contains(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE)));
 			int elementProcessorId = processorXmlElement->getTagName().getTrailingIntValue();
 			bool alreadyExists = false;
 			for (auto processor : m_matrixOutputProcessors)
+			{
 				if (processor->GetProcessorId() == elementProcessorId)
 				{
 					processor->setStateXml(processorXmlElement);
 					alreadyExists = true;
+					break;
 				}
+			}
 
 			if (!alreadyExists)
 			{
@@ -1780,6 +1822,18 @@ bool Controller::setStateXml(XmlElement* stateXml)
 				auto p = newProcessor.release();
 				jassert(m_matrixOutputProcessors.contains(p));
 				p->setStateXml(processorXmlElement);
+			}
+
+			newConfigMOPIds.push_back(elementProcessorId);
+		}
+
+		for (auto const& processorId : oldExistingMOPIds)
+		{
+			if (std::find(newConfigMOPIds.begin(), newConfigMOPIds.end(), processorId) == newConfigMOPIds.end())
+			{
+				auto processor = std::unique_ptr<MatrixOutputProcessor>(GetMatrixOutputProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
+				std::unique_ptr<AudioProcessorEditor>(processor->getActiveEditor()).reset();
+				processor->releaseResources();
 			}
 		}
 	}

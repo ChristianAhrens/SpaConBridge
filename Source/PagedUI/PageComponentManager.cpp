@@ -164,9 +164,9 @@ UIPageId PageComponentManager::GetActivePage() const
 /**
  * Setter for the currently active tab of the main window.
  * @param pageIdx	The currently active page id.
- * @param dontSendNotification	Indication if the configuration update shall be triggerd as well
+ * @param dontUpdateConfig	Indication if the configuration update shall be triggerd as well
  */
-void PageComponentManager::SetActivePage(UIPageId pageId, bool dontSendNotification)
+void PageComponentManager::SetActivePage(UIPageId pageId, bool dontUpdateConfig)
 {
 	m_activePage = pageId;
 
@@ -175,7 +175,7 @@ void PageComponentManager::SetActivePage(UIPageId pageId, bool dontSendNotificat
 		m_pageContainer->SetActivePage(pageId);
 	}
 
-	if (!dontSendNotification)
+	if (!dontUpdateConfig)
 	{
 		triggerConfigurationUpdate(false);
 	}
@@ -193,9 +193,9 @@ const std::vector<UIPageId>& PageComponentManager::GetEnabledPages() const
 /**
  * Setter for the currently enabled pages of the main window.
  * @param enabledPages	The pages to set as currently currently enabled.
- * @param dontSendNotification	Indication if the configuration update shall be triggerd as well
+ * @param dontUpdateConfig	Indication if the configuration update shall be triggerd as well
  */
-void PageComponentManager::SetEnabledPages(const std::vector<UIPageId>& enabledPages, bool dontSendNotification)
+void PageComponentManager::SetEnabledPages(const std::vector<UIPageId>& enabledPages, bool dontUpdateConfig)
 {
 	m_enabledPages = enabledPages;
 
@@ -204,7 +204,7 @@ void PageComponentManager::SetEnabledPages(const std::vector<UIPageId>& enabledP
 		m_pageContainer->SetEnabledPages(enabledPages);
 	}
 
-	if (!dontSendNotification)
+	if (!dontUpdateConfig)
 	{
 		triggerConfigurationUpdate(false);
 	}
@@ -373,7 +373,7 @@ void PageComponentManager::SetScenesPagePinnedScenes(const std::vector<std::pair
 }
 
 /**
- * Get the currently selected coordinate mapping used for the multi-slider.
+ * Get the currently active look and feel type as enum value.
  * @return The selected mapping area.
  */
 DbLookAndFeelBase::LookAndFeelType PageComponentManager::GetLookAndFeelType() const
@@ -382,14 +382,16 @@ DbLookAndFeelBase::LookAndFeelType PageComponentManager::GetLookAndFeelType() co
 }
 
 /**
- * Get the currently selected coordinate mapping used for the multi-slider.
+ * Setter for the look and feel enum type member.
+ * @param lookAndFeelType	The look and feel type to set
+ * @param dontUpdateConfig	Indication if the configuration update shall be triggerd as well
  * @return The selected mapping area.
  */
-void PageComponentManager::SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType, bool dontSendNotification)
+void PageComponentManager::SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType, bool dontUpdateConfig)
 {
 	m_lookAndFeelType = lookAndFeelType;
 
-	if (!dontSendNotification)
+	if (!dontUpdateConfig)
 	{
 		triggerConfigurationUpdate(true); // we do want to include watcher update, since only that way the whole application is set to new LAFT (onConfigUpdated in main component)
 	}

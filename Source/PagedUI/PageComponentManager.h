@@ -67,11 +67,11 @@ public:
 
 	//==============================================================================
 	UIPageId GetActivePage() const;
-	void SetActivePage(UIPageId pageId, bool dontSendNotification);
+	void SetActivePage(UIPageId pageId, bool dontUpdateConfig);
 
 	//==============================================================================
 	const std::vector<UIPageId>& GetEnabledPages() const;
-	void SetEnabledPages(const std::vector<UIPageId>& enabledPages, bool dontSendNotification);
+	void SetEnabledPages(const std::vector<UIPageId>& enabledPages, bool dontUpdateConfig);
 
 	//==============================================================================
 	int GetSoundobjectTableRowHeight();
@@ -92,7 +92,7 @@ public:
 
 	//==============================================================================
 	DbLookAndFeelBase::LookAndFeelType GetLookAndFeelType() const;
-	void SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType, bool dontSendNotification);
+	void SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType, bool dontUpdateConfig);
 
 	//==============================================================================
 	std::unique_ptr<XmlElement> createStateXml() override;

@@ -582,6 +582,10 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
     
     m_pageContainer->SetPagesBeingInitialized(false);
 
+	// Trigger updating UI with init parameter set.
+	// This primarily aims at refreshing the settings page.
+	m_pageContainer->UpdateGui(true);
+
 	return retVal;
 }
 

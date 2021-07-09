@@ -210,7 +210,10 @@ void SettingsPageComponent::lookAndFeelChanged()
  */
 void SettingsPageComponent::UpdateGui(bool init)
 {
-	ignoreUnused(init);
+	if (init)
+	{
+		onConfigUpdated();
+	}
 }
 
 /**
@@ -219,14 +222,14 @@ void SettingsPageComponent::UpdateGui(bool init)
  */
 void SettingsPageComponent::onConfigUpdated()
 {
-	auto config = AppConfiguration::getInstance();
-	if (config)
-	{
-		// trigger updating the settings visu in general
-		m_settingsComponent->processUpdatedConfig();
+	// trigger updating the settings visu in general
+	m_settingsComponent->processUpdatedConfig();
 
-		// if the raw config is currently visible, go into updating it as well
-		if (m_useRawConfigButton->getToggleState())
+	// if the raw config is currently visible, go into updating it as well
+	if (m_useRawConfigButton->getToggleState())
+	{
+		auto config = AppConfiguration::getInstance();
+		if (config)
 		{
 			// get the config for filling raw texteditor (meant for debugging, ...)
 			auto configXml = config->getConfigState();

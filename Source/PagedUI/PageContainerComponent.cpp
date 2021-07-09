@@ -395,6 +395,15 @@ void PageContainerComponent::UpdateGui(bool init)
 		if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
 			startTimer(GUI_UPDATE_RATE_SUPERSLOW);
 	}
+	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabName() == GetPageNameFromId(UPI_Settings))
+	{
+		if (m_settingsPage)
+			m_settingsPage->UpdateGui(init);
+
+		// When Settings tab is active, we refresh the GUI super slow
+		if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
+			startTimer(GUI_UPDATE_RATE_SUPERSLOW);
+	}
 }
 
 /**

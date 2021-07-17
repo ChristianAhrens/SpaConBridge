@@ -309,7 +309,6 @@ SoundobjectProcessorId Controller::AddSoundobjectProcessor(DataChangeParticipant
 void Controller::RemoveSoundobjectProcessor(SoundobjectProcessor* p)
 {
 	int idx = m_soundobjectProcessors.indexOf(p);
-	jassert(idx >= 0); // Tried to remove inexistent Processor object.
 	if (idx >= 0)
 	{
 		const ScopedLock lock(m_mutex);
@@ -323,6 +322,40 @@ void Controller::RemoveSoundobjectProcessor(SoundobjectProcessor* p)
 
 		SetParameterChanged(DCP_Host, DCT_NumProcessors);
 	}
+}
+
+/**
+ * Removes the processor ids and deletes the linked Processor instances from the local list of processors.
+ * @param sopIds		List of processor ids that shall be removed.
+ */
+void Controller::RemoveSoundobjectProcessorIds(const std::vector<SoundobjectProcessorId>& sopIds)
+{
+	if (sopIds.empty())
+		return;
+
+	for (auto const& processorId : sopIds)
+	{
+		auto processor = std::unique_ptr<SoundobjectProcessor>(GetSoundobjectProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
+		if (processor)
+		{
+			{
+				const ScopedLock lock(m_mutex);
+				m_soundobjectProcessors.removeAllInstancesOf(processor.get());
+			}
+
+			std::unique_ptr<AudioProcessorEditor>(processor->getActiveEditor()).reset();
+			processor->releaseResources();
+			processor->reset();
+		}
+	}
+
+	const ScopedLock lock(m_mutex);
+	// Manually trigger updating active objects, since timer based
+	// updating will not catch changes, if no matrix outputs are
+	// left any more.
+	if (m_soundobjectProcessors.isEmpty())
+		UpdateActiveSoundobjects();
+	SetParameterChanged(DCP_Host, DCT_NumProcessors);
 }
 
 /**
@@ -416,7 +449,6 @@ MatrixInputProcessorId Controller::AddMatrixInputProcessor(DataChangeParticipant
 void Controller::RemoveMatrixInputProcessor(MatrixInputProcessor* p)
 {
 	int idx = m_matrixInputProcessors.indexOf(p);
-	jassert(idx >= 0); // Tried to remove inexistent Processor object.
 	if (idx >= 0)
 	{
 		const ScopedLock lock(m_mutex);
@@ -430,6 +462,40 @@ void Controller::RemoveMatrixInputProcessor(MatrixInputProcessor* p)
 
 		SetParameterChanged(DCP_Host, DCT_NumProcessors);
 	}
+}
+
+/**
+ * Removes the processor ids and deletes the linked Processor instances from the local list of processors.
+ * @param mipIds		List of processor ids that shall be removed.
+ */
+void Controller::RemoveMatrixInputProcessorIds(const std::vector<MatrixInputProcessorId>& mipIds)
+{
+	if (mipIds.empty())
+		return;
+
+	for (auto const& processorId : mipIds)
+	{
+		auto processor = std::unique_ptr<MatrixInputProcessor>(GetMatrixInputProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
+		if (processor)
+		{
+			{
+				const ScopedLock lock(m_mutex);
+				m_matrixInputProcessors.removeAllInstancesOf(processor.get());
+			}
+
+			std::unique_ptr<AudioProcessorEditor>(processor->getActiveEditor()).reset();
+			processor->releaseResources();
+			processor->reset();
+		}
+	}
+
+	const ScopedLock lock(m_mutex);
+	// Manually trigger updating active objects, since timer based
+	// updating will not catch changes, if no matrix outputs are
+	// left any more.
+	if (m_matrixInputProcessors.isEmpty())
+		UpdateActiveMatrixInputs();
+	SetParameterChanged(DCP_Host, DCT_NumProcessors);
 }
 
 /**
@@ -524,7 +590,6 @@ MatrixOutputProcessorId Controller::AddMatrixOutputProcessor(DataChangeParticipa
 void Controller::RemoveMatrixOutputProcessor(MatrixOutputProcessor* p)
 {
 	int idx = m_matrixOutputProcessors.indexOf(p);
-	jassert(idx >= 0); // Tried to remove inexistent Processor object.
 	if (idx >= 0)
 	{
 		const ScopedLock lock(m_mutex);
@@ -538,6 +603,40 @@ void Controller::RemoveMatrixOutputProcessor(MatrixOutputProcessor* p)
 
 		SetParameterChanged(DCP_Host, DCT_NumProcessors);
 	}
+}
+
+/**
+ * Removes the processor ids and deletes the linked Processor instances from the local list of processors.
+ * @param mopIds		List of processor ids that shall be removed.
+ */
+void Controller::RemoveMatrixOutputProcessorIds(const std::vector<MatrixOutputProcessorId>& mopIds)
+{
+	if (mopIds.empty())
+		return;
+
+	for (auto const& processorId : mopIds)
+	{
+		auto processor = std::unique_ptr<MatrixOutputProcessor>(GetMatrixOutputProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
+		if (processor)
+		{
+			{
+				const ScopedLock lock(m_mutex);
+				m_matrixOutputProcessors.removeAllInstancesOf(processor.get());
+			}
+
+			std::unique_ptr<AudioProcessorEditor>(processor->getActiveEditor()).reset();
+			processor->releaseResources();
+			processor->reset();
+		}
+	}
+
+	const ScopedLock lock(m_mutex);
+	// Manually trigger updating active objects, since timer based
+	// updating will not catch changes, if no matrix outputs are
+	// left any more.
+	if (m_matrixOutputProcessors.isEmpty())
+		UpdateActiveMatrixOutputs();
+	SetParameterChanged(DCP_Host, DCT_NumProcessors);
 }
 
 /**
@@ -1733,15 +1832,15 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			newConfigSOPIds.push_back(elementProcessorId);
 		}
 
+		auto sopIdsToRemove = std::vector<SoundobjectProcessorId>();
 		for (auto const& processorId : oldExistingSOPIds)
 		{
 			if (std::find(newConfigSOPIds.begin(), newConfigSOPIds.end(), processorId) == newConfigSOPIds.end())
 			{
-				auto processor = std::unique_ptr<SoundobjectProcessor>(GetSoundobjectProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
-				std::unique_ptr<AudioProcessorEditor>(processor->getActiveEditor()).reset();
-				processor->releaseResources();
+				sopIdsToRemove.push_back(processorId);
 			}
 		}
+		RemoveSoundobjectProcessorIds(sopIdsToRemove);
 	}
 	else
 		retVal = false;
@@ -1780,15 +1879,15 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			newConfigMIPIds.push_back(elementProcessorId);
 		}
 
+		auto mipIdsToRemove = std::vector<MatrixInputProcessorId>();
 		for (auto const& processorId : oldExistingMIPIds)
 		{
 			if (std::find(newConfigMIPIds.begin(), newConfigMIPIds.end(), processorId) == newConfigMIPIds.end())
 			{
-				auto processor = std::unique_ptr<MatrixInputProcessor>(GetMatrixInputProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
-				std::unique_ptr<AudioProcessorEditor>(processor->getActiveEditor()).reset();
-				processor->releaseResources();
+				mipIdsToRemove.push_back(processorId);
 			}
 		}
+		RemoveMatrixInputProcessorIds(mipIdsToRemove);
 	}
 	else
 		retVal = false;
@@ -1827,15 +1926,15 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			newConfigMOPIds.push_back(elementProcessorId);
 		}
 
+		auto mopIdsToRemove = std::vector<MatrixOutputProcessorId>();
 		for (auto const& processorId : oldExistingMOPIds)
 		{
 			if (std::find(newConfigMOPIds.begin(), newConfigMOPIds.end(), processorId) == newConfigMOPIds.end())
 			{
-				auto processor = std::unique_ptr<MatrixOutputProcessor>(GetMatrixOutputProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
-				std::unique_ptr<AudioProcessorEditor>(processor->getActiveEditor()).reset();
-				processor->releaseResources();
+				mopIdsToRemove.push_back(processorId);
 			}
 		}
+		RemoveMatrixOutputProcessorIds(mopIdsToRemove);
 	}
 	else
 		retVal = false;
@@ -1855,7 +1954,7 @@ bool Controller::setStateXml(XmlElement* stateXml)
 		}
 	}
 
-	// trigger UI update once after the processors have been created
+	// trigger UI update once after the processors have been created to clean and update table editors, etc.
 	auto pageMgr = PageComponentManager::GetInstance();
 	if (pageMgr)
 	{

@@ -355,6 +355,16 @@ void Controller::RemoveSoundobjectProcessorIds(const std::vector<SoundobjectProc
 	// left any more.
 	if (m_soundobjectProcessors.isEmpty())
 		UpdateActiveSoundobjects();
+
+	// trigger updating page components to ensure the table contents (editor components esp.) don't keep stale obj. pointers
+	auto pageMgr = PageComponentManager::GetInstance();
+	if (pageMgr)
+	{
+		auto pageContainer = pageMgr->GetPageContainer();
+		if (pageContainer)
+			pageContainer->UpdateGui(true);
+	}
+
 	SetParameterChanged(DCP_Host, DCT_NumProcessors);
 }
 
@@ -495,6 +505,16 @@ void Controller::RemoveMatrixInputProcessorIds(const std::vector<MatrixInputProc
 	// left any more.
 	if (m_matrixInputProcessors.isEmpty())
 		UpdateActiveMatrixInputs();
+
+	// trigger updating page components to ensure the table contents (editor components esp.) don't keep stale obj. pointers
+	auto pageMgr = PageComponentManager::GetInstance();
+	if (pageMgr)
+	{
+		auto pageContainer = pageMgr->GetPageContainer();
+		if (pageContainer)
+			pageContainer->UpdateGui(true);
+	}
+
 	SetParameterChanged(DCP_Host, DCT_NumProcessors);
 }
 
@@ -636,6 +656,16 @@ void Controller::RemoveMatrixOutputProcessorIds(const std::vector<MatrixOutputPr
 	// left any more.
 	if (m_matrixOutputProcessors.isEmpty())
 		UpdateActiveMatrixOutputs();
+
+	// trigger updating page components to ensure the table contents (editor components esp.) don't keep stale obj. pointers
+	auto pageMgr = PageComponentManager::GetInstance();
+	if (pageMgr)
+	{
+		auto pageContainer = pageMgr->GetPageContainer();
+		if (pageContainer)
+			pageContainer->UpdateGui(true);
+	}
+
 	SetParameterChanged(DCP_Host, DCT_NumProcessors);
 }
 

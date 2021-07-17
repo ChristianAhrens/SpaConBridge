@@ -1861,7 +1861,7 @@ bool Controller::setStateXml(XmlElement* stateXml)
 	{
 		auto pageContainer = pageMgr->GetPageContainer();
 		if (pageContainer)
-			pageContainer->UpdateGui(false);
+			pageContainer->UpdateGui(true);
 	}
 
 	return retVal;

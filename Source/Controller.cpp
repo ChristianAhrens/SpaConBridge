@@ -2943,13 +2943,13 @@ bool Controller::LoadConfigurationFile(const File& fileToLoadFrom)
 	auto xmlConfig = juce::parseXML(fileToLoadFrom);
 
 	if (!config)
-		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Error", "Loading failed du to internal error.");
+		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Error", "Loading failed due to internal error.");
 	else if (!xmlConfig)
-		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Invalid config", "Loading failed du to invalid selected configuration file.");
+		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Invalid config", "Loading failed due to invalid configuration file.");
 	else if (!SpaConBridge::AppConfiguration::isValid(xmlConfig))
-		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed du to invalid configuration file contents.");
+		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed due to invalid configuration file contents.");
 	else if (!config->resetConfigState(std::move(xmlConfig)))
-		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed du to internal loading error.");
+		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed due to internal loading error.");
 	else
 	{
 		SetParameterChanged(DCP_Init, DCT_AllConfigParameters);
@@ -2971,9 +2971,9 @@ bool Controller::SaveConfigurationFile(const File& fileToSaveTo)
 	auto xmlConfig = config->getConfigState();
 
 	if (!config)
-		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Error", "Saving failed du to internal error.");
+		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Error", "Saving failed due to internal error.");
 	else if (!xmlConfig)
-		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Invalid", "Loading failed du to invalid internal configuration.");
+		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Invalid", "Saving failed due to invalid internal configuration.");
 	else if (!xmlConfig->writeTo(fileToSaveTo))
 		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Saving failed", "Saving failed due to insufficient write access rights.");
 	else

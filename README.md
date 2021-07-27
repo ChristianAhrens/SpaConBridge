@@ -8,6 +8,25 @@ There is no guarantee for compatibility inbetween versions or for the implemente
 
 See [LATEST RELEASE](../../releases/latest) for available binary packages.
 
+<table>
+<tr>
+<th>iPhoneOS</th>
+<th>iPadOS</th>
+</tr>
+<tr>
+<td><img src="Resources/Documentation/SpaConBridge_on-iPhoneOS.png" alt="SpaConBridge on iPhoneOS" width="50%"></td>
+<td><img src="Resources/Documentation/SpaConBridge_on-iPadOS.png" alt="SpaConBridge on iPadOS" width="90%"></td>
+</tr>
+<tr>
+<th>macOS</th>
+<th>Windows</th>
+</tr>
+<tr>
+<td><img src="Resources/Documentation/SpaConBridge_on-macOS.png" alt="SpaConBridge on macOS" width="100%"></td>
+<td><img src="Resources/Documentation/SpaConBridge_on-Windows.png" alt="SpaConBridge on Windows" width="85%"></td>
+</tr>
+</table>
+
 SpaConBridge was created with the idea in mind to have both a simple ui to monitor or control Sound Object parameters of a d&b audiotechnik Soundscape system, esp. the DS100 Signal Engine, via OSC protocol and at the same time the possibility of controlling interfacing with external control data input (MIDI device, OSC control app, ...).
 
 It is neither suppported nor driven by official d&b activities.
@@ -15,12 +34,13 @@ It is neither suppported nor driven by official d&b activities.
 It was originally inspired by "Soundscape DAW Plugin" made publicly available at https://github.com/dbaudio-soundscape/db-Soundscape-DAW-Plugins and "Soundscape Control with DiGiCo SD consoles" made publicly available at https://github.com/dbaudio-soundscape/db-Soundscape-control-with-DiGiCo-SD-Consoles.
 
 A brief introductory video on usage and features of v0.3.1 of the build for iPadOS can be seen here:
+
 _[![SpaConBridge v0.3.1 Introduction](https://img.youtube.com/vi/ozhQxKidtWc/0.jpg)](https://youtu.be/ozhQxKidtWc)_
 
 
 **Known Issues:**
 
-* Loading/Saving of config is only partially working in iOS/macOS builds due to issues with sandbox and hardened runtime settings of build
+* Loading/Saving of config is only partially working in iOS/macOS builds due to issues with sandbox and hardened runtime settings of build  
 __Note:__ Needs to be investigated, projucer seems to not entirely do the trick. More custom Xcode flags, etc. might have to be introduced.
 * Zeroconf is not working in builds for Windows OS  
 __Note:__ Needs to be implemented...
@@ -189,7 +209,7 @@ For details on the settings for the implemented protocols, see the individual do
   * [Generic MIDI communication](Resources/Documentation/BridgingProtocols/GenericMIDI.md)
   * [Yamaha OSC communication *](Resources/Documentation/BridgingProtocols/YamahaOSC.md)
   
-  &ast; Implemented using simulation only, entirely untested with real ones.
+  &ast; Was implemented using simulation only, entirely untested with physical devices.
 
 The bottom bar of settings page contains buttons to save and load entire SpaConBridge configurations, as well as a button to show the raw current configuration in a text editor overlay. The latter is mainly useful for debugging purposes.
 Depending on the available horizontal UI resolution, buttons are hidden. 'Show raw config' disappears first, since it is least relevant for use. On host devices as smartphones, rotating from portrait to landscape mode can help to make the buttons visible, in case they are hidden in portrait mode.

@@ -72,19 +72,25 @@ MultiSurfacePageComponent::MultiSurfacePageComponent()
 	m_mappingAreaSelect->addItem("Mapping Area 3", 3);
 	m_mappingAreaSelect->addItem("Mapping Area 4", 4);
 	m_mappingAreaSelect->addListener(this);
+	m_mappingAreaSelect->setTooltip("Show sound objects assigned to selected mapping area");
 	addAndMakeVisible(m_mappingAreaSelect.get());
 
 	// reverb send gain enable
-	m_reverbEnable = std::make_unique<TextButton>("Reverb");
+	m_reverbEnable = std::make_unique<DrawableButton>("Reverb", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_reverbEnable->addListener(this);
+	m_reverbEnable->setTooltip("Show En-Space send gain");
 	m_reverbEnable->setClickingTogglesState(true);
 	addAndMakeVisible(m_reverbEnable.get());
 
 	// spread factor enable 
-	m_spreadEnable = std::make_unique<TextButton>("Spread");
+	m_spreadEnable = std::make_unique<DrawableButton>("Spread", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_spreadEnable->addListener(this);
+	m_spreadEnable->setTooltip("Show Spread factor");
 	m_spreadEnable->setClickingTogglesState(true);
 	addAndMakeVisible(m_spreadEnable.get());
+
+	// trigger lookandfeel update
+	lookAndFeelChanged();
 }
 
 /**
@@ -118,9 +124,9 @@ void MultiSurfacePageComponent::resized()
 	// set the bounds for dropdown select by onthefly modifying 'bounds' dimensions - this leaves 'bounds' as rect with 25 removed from bottom
 	m_mappingAreaSelect->setBounds(controlElementsBounds.removeFromLeft(140));
 	controlElementsBounds.removeFromLeft(margin);
-	m_reverbEnable->setBounds(controlElementsBounds.removeFromLeft(90));
+	m_reverbEnable->setBounds(controlElementsBounds.removeFromLeft(controlElementsBounds.getHeight()));
 	controlElementsBounds.removeFromLeft(margin);
-	m_spreadEnable->setBounds(controlElementsBounds.removeFromLeft(90));
+	m_spreadEnable->setBounds(controlElementsBounds.removeFromLeft(controlElementsBounds.getHeight()));
 	
 	// set the bounds for the 2D slider area.
 	bounds.removeFromBottom(margin);
@@ -297,6 +303,48 @@ void MultiSurfacePageComponent::SetSpreadEnabled(bool enabled)
 
 	// Trigger an update on the multi-slider
 	UpdateGui(true);
+}
+
+/**
+ * Reimplemented method to handle changed look and feel data.
+ * This makes shure the add/remove buttons' svg images are colored correctly.
+ */
+void MultiSurfacePageComponent::lookAndFeelChanged()
+{
+	// first forward the call to base implementation
+	Component::lookAndFeelChanged();
+
+	// create the required button drawable images based on lookandfeel colours
+	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
+	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (dblookAndFeel)
+	{
+		// reverb images
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(BinaryData::sensors_black_24dp_svg, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+
+		m_reverbEnable->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+
+		// spread images
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(BinaryData::adjust_black_24dp_svg, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+
+		m_spreadEnable->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+	}
 }
 
 

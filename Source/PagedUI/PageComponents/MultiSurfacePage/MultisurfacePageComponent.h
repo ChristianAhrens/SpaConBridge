@@ -72,6 +72,9 @@ public:
 	bool IsSpreadEnabled() const;
 	void SetSpreadEnabled(bool enabled);
 
+	//==============================================================================
+	void lookAndFeelChanged() override;
+
 protected:
 	//==============================================================================
 	void paint(Graphics&) override;
@@ -89,9 +92,9 @@ private:
 	std::unique_ptr<ComboBox>			m_mappingAreaSelect;	/**> ComboBox selector for the coordinate mapping area. */
 	MappingAreaId						m_selectedMapping{ MappingAreaId::MAI_First };	/**< Remember the last selected coordinate mapping for the multi-slider. */
 
-	std::unique_ptr<TextButton>			m_reverbEnable;			/**> Checkbox for reverb send gain enable. */
+	std::unique_ptr<DrawableButton>		m_reverbEnable;			/**> Checkbox for reverb send gain enable. */
 
-	std::unique_ptr<TextButton>			m_spreadEnable;			/**> Checkbox for spread factor enable. */
+	std::unique_ptr<DrawableButton>		m_spreadEnable;			/**> Checkbox for spread factor enable. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSurfacePageComponent)
 };

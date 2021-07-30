@@ -61,23 +61,30 @@ MultiSurfacePageComponent::MultiSurfacePageComponent()
 	: PageComponentBase(PCT_MultiSlide)
 {
 	// Add multi-slider
-	m_multiSliderSurface = std::make_unique<SurfaceMultiSlider>(true, true);
+	m_multiSliderSurface = std::make_unique<SurfaceMultiSlider>();
 	addAndMakeVisible(m_multiSliderSurface.get());
 
 	// Mapping selector
 	m_mappingAreaSelect = std::make_unique<ComboBox>("Coordinate mapping");
 	m_mappingAreaSelect->setEditableText(false);
-	m_mappingAreaSelect->addItem("1", 1);
-	m_mappingAreaSelect->addItem("2", 2);
-	m_mappingAreaSelect->addItem("3", 3);
-	m_mappingAreaSelect->addItem("4", 4);
+	m_mappingAreaSelect->addItem("Mapping Area 1", 1);
+	m_mappingAreaSelect->addItem("Mapping Area 2", 2);
+	m_mappingAreaSelect->addItem("Mapping Area 3", 3);
+	m_mappingAreaSelect->addItem("Mapping Area 4", 4);
 	m_mappingAreaSelect->addListener(this);
 	addAndMakeVisible(m_mappingAreaSelect.get());
-	// Mapping label
-	m_mappingAreaLabel = std::make_unique<Label>("Coordinate mapping label", "View mapping:");
-	m_mappingAreaLabel->setJustificationType(Justification::centred);
-	m_mappingAreaLabel->attachToComponent(m_mappingAreaSelect.get(), true);
-	addAndMakeVisible(m_mappingAreaLabel.get());
+
+	// reverb send gain enable
+	m_reverbEnable = std::make_unique<TextButton>("Reverb");
+	m_reverbEnable->addListener(this);
+	m_reverbEnable->setClickingTogglesState(true);
+	addAndMakeVisible(m_reverbEnable.get());
+
+	// spread factor enable 
+	m_spreadEnable = std::make_unique<TextButton>("Spread");
+	m_spreadEnable->addListener(this);
+	m_spreadEnable->setClickingTogglesState(true);
+	addAndMakeVisible(m_spreadEnable.get());
 }
 
 /**
@@ -103,14 +110,21 @@ void MultiSurfacePageComponent::paint(Graphics& g)
  */
 void MultiSurfacePageComponent::resized()
 {
-	auto bounds = getLocalBounds().reduced(5);
+	auto margin = 5;
+	auto bounds = getLocalBounds().reduced(margin);
+
+	auto controlElementsBounds = bounds.removeFromBottom(25);
 	
 	// set the bounds for dropdown select by onthefly modifying 'bounds' dimensions - this leaves 'bounds' as rect with 25 removed from bottom
-	m_mappingAreaSelect->setBounds(bounds.removeFromBottom(25).removeFromLeft(170).removeFromRight(70));
+	m_mappingAreaSelect->setBounds(controlElementsBounds.removeFromLeft(140));
+	controlElementsBounds.removeFromLeft(margin);
+	m_reverbEnable->setBounds(controlElementsBounds.removeFromLeft(90));
+	controlElementsBounds.removeFromLeft(margin);
+	m_spreadEnable->setBounds(controlElementsBounds.removeFromLeft(90));
 	
 	// set the bounds for the 2D slider area.
-	bounds.removeFromBottom(5);
-	bounds.reduce(5, 5);
+	bounds.removeFromBottom(margin);
+	bounds.reduce(margin, margin);
 	m_multiSliderSurface->setBounds(bounds);
 }
 
@@ -162,12 +176,11 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 			}
 		}
 
-		auto multiSlider = dynamic_cast<SurfaceMultiSlider*>(m_multiSliderSurface.get());
-		if (update && multiSlider)
+		if (update && m_multiSliderSurface)
 		{
 			// Update all nipple positions on the 2D-Slider.
-			multiSlider->UpdateParameters(cachedParameters);
-			multiSlider->repaint();
+			m_multiSliderSurface->UpdateParameters(cachedParameters);
+			m_multiSliderSurface->repaint();
 		}
 	}
 }
@@ -188,6 +201,29 @@ void MultiSurfacePageComponent::comboBoxChanged(ComboBox *comboBox)
 	}
 }
 
+/**
+ * Called when a button has been clicked.
+ * @param button	The button that was clicked.
+ */
+void MultiSurfacePageComponent::buttonClicked(Button* button)
+{
+	if (m_reverbEnable.get() == button)
+	{
+		if (m_multiSliderSurface)
+			m_multiSliderSurface->SetReverbSndGainEnabled(button->getToggleState());
+
+		// Trigger an update on the multi-slider
+		UpdateGui(true);
+	}
+	else if (m_spreadEnable.get() == button)
+	{
+		if (m_multiSliderSurface)
+			m_multiSliderSurface->SetSpreadEnabled(button->getToggleState());
+
+		// Trigger an update on the multi-slider
+		UpdateGui(true);
+	}
+}
 
 /**
  * Get the currently selected coordinate mapping used for the multi-slider.

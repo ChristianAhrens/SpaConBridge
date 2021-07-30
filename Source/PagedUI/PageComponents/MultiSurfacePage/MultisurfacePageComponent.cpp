@@ -61,7 +61,7 @@ MultiSurfacePageComponent::MultiSurfacePageComponent()
 	: PageComponentBase(PCT_MultiSlide)
 {
 	// Add multi-slider
-	m_multiSliderSurface = std::make_unique<SurfaceMultiSlider>();
+	m_multiSliderSurface = std::make_unique<SurfaceMultiSlider>(true, true);
 	addAndMakeVisible(m_multiSliderSurface.get());
 
 	// Mapping selector
@@ -162,7 +162,7 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 			}
 		}
 
-		SurfaceMultiSlider* multiSlider = dynamic_cast<SurfaceMultiSlider*>(m_multiSliderSurface.get());
+		auto multiSlider = dynamic_cast<SurfaceMultiSlider*>(m_multiSliderSurface.get());
 		if (update && multiSlider)
 		{
 			// Update all nipple positions on the 2D-Slider.

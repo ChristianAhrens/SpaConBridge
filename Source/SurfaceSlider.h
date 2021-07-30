@@ -97,7 +97,11 @@ public:
 	typedef std::map<SoundobjectProcessorId, SoundobjectParameters> ParameterCache;
 
 	SurfaceMultiSlider();
+	SurfaceMultiSlider(bool spreadEnabled, bool reverbSndGainEnabled);
 	~SurfaceMultiSlider() override;
+
+	void SetSpreadEnabled(bool enabled);
+	void SetReverbSndGainEnabled(bool enabled);
 
 	void UpdateParameters(ParameterCache positions);
 
@@ -113,6 +117,8 @@ private:
 	std::vector<SoundobjectId>	m_highlightedIds;		/**> SourceIds of the currently highlighted knobs, if any. */
 	ParameterCache				m_cachedParameters;		/**> To save us from iterating over all Soundobject Processors at every click, cache their current parametervalues.
 														 * Keys are the SoundobjectProcessorId of each object processor. */
+	bool						m_spreadEnabled;
+	bool						m_reverbSndGainEnabled;
 };
 
 

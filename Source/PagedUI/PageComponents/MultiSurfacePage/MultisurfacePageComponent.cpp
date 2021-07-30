@@ -218,6 +218,11 @@ void MultiSurfacePageComponent::comboBoxChanged(ComboBox *comboBox)
 		// Trigger an update on the multi-slider, so that only sources with the
 		// selected mapping are visible.
 		UpdateGui(true);
+
+		// finally trigger refreshing the config file
+		auto config = SpaConBridge::AppConfiguration::getInstance();
+		if (config)
+			config->triggerConfigurationDump(false);
 	}
 }
 
@@ -229,11 +234,27 @@ void MultiSurfacePageComponent::buttonClicked(Button* button)
 {
 	if (m_reverbEnable.get() == button)
 	{
-		SetReverbEnabled(button->getToggleState());
+		if (IsReverbEnabled() != button->getToggleState())
+		{
+			SetReverbEnabled(button->getToggleState());
+
+			// finally trigger refreshing the config file
+			auto config = SpaConBridge::AppConfiguration::getInstance();
+			if (config)
+				config->triggerConfigurationDump(false);
+		}
 	}
 	else if (m_spreadEnable.get() == button)
 	{
-		SetSpreadEnabled(button->getToggleState());
+		if (IsSpreadEnabled() != button->getToggleState())
+		{
+			SetSpreadEnabled(button->getToggleState());
+
+			// finally trigger refreshing the config file
+			auto config = SpaConBridge::AppConfiguration::getInstance();
+			if (config)
+				config->triggerConfigurationDump(false);
+		}
 	}
 }
 

@@ -64,8 +64,13 @@ public:
 	void UpdateGui(bool init) override;
 
 	//==============================================================================
-	int GetSelectedMapping() const;
-	void SetSelectedMapping(int mapping);
+	MappingAreaId GetSelectedMapping() const;
+	void SetSelectedMapping(MappingAreaId mapping);
+
+	bool IsReverbEnabled() const;
+	void SetReverbEnabled(bool enabled);
+	bool IsSpreadEnabled() const;
+	void SetSpreadEnabled(bool enabled);
 
 protected:
 	//==============================================================================
@@ -82,7 +87,7 @@ private:
 	std::unique_ptr<SurfaceMultiSlider>	m_multiSliderSurface;	/**> Multi-source 2D-Slider. */
 
 	std::unique_ptr<ComboBox>			m_mappingAreaSelect;	/**> ComboBox selector for the coordinate mapping area. */
-	int									m_selectedMapping{ 1 };	/**< Remember the last selected coordinate mapping for the multi-slider. */
+	MappingAreaId						m_selectedMapping{ MappingAreaId::MAI_First };	/**< Remember the last selected coordinate mapping for the multi-slider. */
 
 	std::unique_ptr<TextButton>			m_reverbEnable;			/**> Checkbox for reverb send gain enable. */
 

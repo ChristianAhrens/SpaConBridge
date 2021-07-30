@@ -145,6 +145,20 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 		update = true;
 	}
 
+	// Update the reverb enabled state
+	if (IsReverbEnabled() != m_reverbEnable->getToggleState())
+	{
+		m_reverbEnable->setToggleState(IsReverbEnabled(), dontSendNotification);
+		update = true;
+	}
+
+	// Update the spread enabled state
+	if (IsSpreadEnabled() != m_spreadEnable->getToggleState())
+	{
+		m_spreadEnable->setToggleState(IsSpreadEnabled(), dontSendNotification);
+		update = true;
+	}
+
 	auto ctrl = Controller::GetInstance();
 	if (ctrl && m_multiSliderSurface)
 	{
@@ -193,7 +207,7 @@ void MultiSurfacePageComponent::comboBoxChanged(ComboBox *comboBox)
 {
 	if (GetSelectedMapping() != comboBox->getSelectedId())
 	{
-		SetSelectedMapping(comboBox->getSelectedId());
+		SetSelectedMapping(static_cast<MappingAreaId>(comboBox->getSelectedId()));
 
 		// Trigger an update on the multi-slider, so that only sources with the
 		// selected mapping are visible.
@@ -209,19 +223,11 @@ void MultiSurfacePageComponent::buttonClicked(Button* button)
 {
 	if (m_reverbEnable.get() == button)
 	{
-		if (m_multiSliderSurface)
-			m_multiSliderSurface->SetReverbSndGainEnabled(button->getToggleState());
-
-		// Trigger an update on the multi-slider
-		UpdateGui(true);
+		SetReverbEnabled(button->getToggleState());
 	}
 	else if (m_spreadEnable.get() == button)
 	{
-		if (m_multiSliderSurface)
-			m_multiSliderSurface->SetSpreadEnabled(button->getToggleState());
-
-		// Trigger an update on the multi-slider
-		UpdateGui(true);
+		SetSpreadEnabled(button->getToggleState());
 	}
 }
 
@@ -229,7 +235,7 @@ void MultiSurfacePageComponent::buttonClicked(Button* button)
  * Get the currently selected coordinate mapping used for the multi-slider.
  * @return The selected mapping area.
  */
-int MultiSurfacePageComponent::GetSelectedMapping() const
+MappingAreaId MultiSurfacePageComponent::GetSelectedMapping() const
 {
 	return m_selectedMapping;
 }
@@ -238,9 +244,59 @@ int MultiSurfacePageComponent::GetSelectedMapping() const
  * Set the currently selected coordinate mapping used for the multi-slider.
  * @param mapping	The new selected mapping area.
  */
-void MultiSurfacePageComponent::SetSelectedMapping(int mapping)
+void MultiSurfacePageComponent::SetSelectedMapping(MappingAreaId mapping)
 {
 	m_selectedMapping = mapping;
+}
+
+/**
+ * Getter for the reverb enabled state
+ * @return	The enabled state.
+ */
+bool MultiSurfacePageComponent::IsReverbEnabled() const
+{
+	if (m_multiSliderSurface)
+		return m_multiSliderSurface->IsReverbSndGainEnabled();
+	else
+		return false;
+}
+
+/**
+ * Setter for the reverb enabled state
+ * @param enabled	The enabled state to set.
+ */
+void MultiSurfacePageComponent::SetReverbEnabled(bool enabled)
+{
+	if (m_multiSliderSurface)
+		m_multiSliderSurface->SetReverbSndGainEnabled(enabled);
+
+	// Trigger an update on the multi-slider
+	UpdateGui(true);
+}
+
+/**
+ * Getter for the spread enabled state
+ * @return	The enabled state.
+ */
+bool MultiSurfacePageComponent::IsSpreadEnabled() const
+{
+	if (m_multiSliderSurface)
+		return m_multiSliderSurface->IsSpreadEnabled();
+	else
+		return false;
+}
+
+/**
+ * Setter for the spread enabled state
+ * @param enabled	The enabled state to set.
+ */
+void MultiSurfacePageComponent::SetSpreadEnabled(bool enabled)
+{
+	if (m_multiSliderSurface)
+		m_multiSliderSurface->SetSpreadEnabled(enabled);
+
+	// Trigger an update on the multi-slider
+	UpdateGui(true);
 }
 
 

@@ -100,7 +100,9 @@ public:
 	SurfaceMultiSlider(bool spreadEnabled, bool reverbSndGainEnabled);
 	~SurfaceMultiSlider() override;
 
+	bool IsSpreadEnabled();
 	void SetSpreadEnabled(bool enabled);
+	bool IsReverbSndGainEnabled();
 	void SetReverbSndGainEnabled(bool enabled);
 
 	void UpdateParameters(ParameterCache positions);

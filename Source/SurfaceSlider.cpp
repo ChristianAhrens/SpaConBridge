@@ -218,12 +218,30 @@ SurfaceMultiSlider::~SurfaceMultiSlider()
 }
 
 /**
+ * Getter for the bool flag that indicates if the spread factor value shall be visualized.
+ * @return	True if the flag for spread factor visualizing is set, false if not.
+ */
+bool SurfaceMultiSlider::IsSpreadEnabled()
+{
+	return m_spreadEnabled;
+}
+
+/**
  * Setter for the bool flag that indicates if the spread factor value shall be visualized.
  * @param	enabled		True if the flag for spread factor visualizing shall be set, false if not.
  */
 void SurfaceMultiSlider::SetSpreadEnabled(bool enabled)
 {
 	m_spreadEnabled = enabled;
+}
+
+/**
+ * Getter for the bool flag that indicates if the reverb send gain value shall be visualized.
+ * @return	True if the flag for reverb send gain visualizing is set, false if not.
+ */
+bool SurfaceMultiSlider::IsReverbSndGainEnabled()
+{
+	return m_reverbSndGainEnabled;
 }
 
 /**

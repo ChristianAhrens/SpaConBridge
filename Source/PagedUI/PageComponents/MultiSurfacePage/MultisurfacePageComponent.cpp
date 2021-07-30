@@ -139,20 +139,25 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 		
 		// Iterate through all procssor instances and see if anything changed there.
 		// At the same time collect all sources positions for updating.
-		SurfaceMultiSlider::PositionCache cachedPositions;
+		SurfaceMultiSlider::ParameterCache cachedParameters;
 		for (auto const& processorId : ctrl->GetSoundobjectProcessorIds())
 		{
 			auto processor = ctrl->GetSoundobjectProcessor(processorId);
 			if (processor)
 			{
+				// NOTE: only soundobjects are used that match the selected viewing mapping.
 				if (processor->GetMappingId() == GetSelectedMapping())
 				{
-					// NOTE: only sources are included, which match the selected viewing mapping.
-					Point<float> p(processor->GetParameterValue(SPI_ParamIdx_X), processor->GetParameterValue(SPI_ParamIdx_Y));
-					cachedPositions.insert(std::make_pair(processorId, SurfaceMultiSlider::SoundobjectPosition(processor->GetSoundobjectId(), p, ctrl->IsSoundobjectProcessorIdSelected(processor->GetProcessorId()))));
+					auto soundobjectId	= processor->GetSoundobjectId();
+					auto pos			= Point<float>(processor->GetParameterValue(SPI_ParamIdx_X), processor->GetParameterValue(SPI_ParamIdx_Y));
+					auto spread			= processor->GetParameterValue(SPI_ParamIdx_ObjectSpread);
+					auto reverbSendGain	= processor->GetParameterValue(SPI_ParamIdx_ReverbSendGain);
+					auto selected		= ctrl->IsSoundobjectProcessorIdSelected(processorId);
+
+					cachedParameters.insert(std::make_pair(processorId, SurfaceMultiSlider::SoundobjectParameters(soundobjectId, pos, spread, reverbSendGain, selected)));
 				}
 
-				if (processor->PopParameterChanged(DCP_MultiSlider, (DCT_SoundobjectProcessorConfig | DCT_SoundobjectPosition)))
+				if (processor->PopParameterChanged(DCP_MultiSlider, (DCT_SoundobjectProcessorConfig | DCT_SoundobjectParameters)))
 					update = true;
 			}
 		}
@@ -161,7 +166,7 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 		if (update && multiSlider)
 		{
 			// Update all nipple positions on the 2D-Slider.
-			multiSlider->UpdatePositions(cachedPositions);
+			multiSlider->UpdateParameters(cachedParameters);
 			multiSlider->repaint();
 		}
 	}

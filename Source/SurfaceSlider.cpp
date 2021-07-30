@@ -239,12 +239,12 @@ void SurfaceMultiSlider::paint(Graphics& g)
 	float knobSize = 10.0f;
 	float highlightedKnobSize = 2 * knobSize;
 
-	for (auto const& posKV : m_cachedPositions)
+	for (auto const& paramsKV : m_cachedParameters)
 	{
-		int inputNo(posKV.second._id);
+		int inputNo(paramsKV.second._id);
 
 		// Map the x/y coordinates to the pixel-wise dimensions of the surface area.
-		Point<float> pt(posKV.second._pos);
+		auto const& pt = paramsKV.second._pos;
 		float x = pt.x * w;
 		float y = h - (pt.y * h);
 
@@ -253,7 +253,7 @@ void SurfaceMultiSlider::paint(Graphics& g)
 		g.setColour(getLookAndFeel().findColour(Slider::thumbColourId).interpolatedWith(shade, 0.3f));
 
 		// Paint knob
-		if (posKV.second._selected)
+		if (paramsKV.second._selected)
 		{
 			g.drawEllipse(Rectangle<float>(x - (highlightedKnobSize / 2.0f), y - (highlightedKnobSize / 2.0f), highlightedKnobSize, highlightedKnobSize), 6.0f);
 
@@ -286,15 +286,15 @@ void SurfaceMultiSlider::mouseDown(const MouseEvent& e)
 	float knobSize = 15.0f;
 	float highlightedKnobSize = 2 * knobSize;
 
-	for (auto const& posKV : m_cachedPositions)
+	for (auto const& paramsKV : m_cachedParameters)
 	{
 		// Map the x/y coordinates to the pixel-wise dimensions of the surface area.
-		Point<float> pt(posKV.second._pos);
+		auto const& pt = paramsKV.second._pos;
 		float x = pt.x * w;
 		float y = h - (pt.y * h);
 
 		Path knobPath;
-		if (posKV.second._selected)
+		if (paramsKV.second._selected)
 			knobPath.addEllipse(Rectangle<float>(x - (highlightedKnobSize / 2.0f), y - (highlightedKnobSize / 2.0f), highlightedKnobSize, highlightedKnobSize));
 		else
 			knobPath.addEllipse(Rectangle<float>(x - (knobSize / 2.0f), y - (knobSize / 2.0f), knobSize, knobSize));
@@ -303,7 +303,7 @@ void SurfaceMultiSlider::mouseDown(const MouseEvent& e)
 		if (knobPath.contains(mousePos))
 		{
 			// Set this source as "selected" and begin a drag gesture.
-			m_currentlyDraggedId = posKV.first;
+			m_currentlyDraggedId = paramsKV.first;
 
 			auto ctrl = Controller::GetInstance();
 			if (ctrl)
@@ -389,13 +389,13 @@ void SurfaceMultiSlider::mouseUp(const MouseEvent& e)
 }
 
 /**
- * Update the local hash of plugins and their current coordinates.
- * @param positions	Map where the keys are the PluginIds of each source, while values are pairs of the corresponding 
- *					input number and position coordinates (0.0 to 1.0). 
+ * Update the local hash of processorIds and their current parameters.
+ * @param parameters	Map where the keys are the processorIds of each soundobject, while values are pairs of the corresponding 
+ *						soundobject number and position coordinates (0.0 to 1.0), spread, reverbSendGain and select state. 
  */
-void SurfaceMultiSlider::UpdatePositions(PositionCache positions)
+void SurfaceMultiSlider::UpdateParameters(ParameterCache parameters)
 {
-	m_cachedPositions = positions;
+	m_cachedParameters = parameters;
 }
 
 

@@ -91,6 +91,14 @@ public:
 	void SetScenesPagePinnedScenes(const std::vector<std::pair<std::pair<int, int>, std::string>>& pinnedScenes);
 
 	//==============================================================================
+	MappingAreaId GetMultiSliderMappingArea();
+	void SetMultiSliderMappingArea(MappingAreaId mappingArea, bool dontSendNotification);
+	bool IsMultiSliderReverbEnabled();
+	void SetMultiSliderReverbEnabled(bool enabled, bool dontSendNotification);
+	bool IsMultiSliderSpreadEnabled();
+	void SetMultiSliderSpreadEnabled(bool enabled, bool dontSendNotification);
+
+	//==============================================================================
 	DbLookAndFeelBase::LookAndFeelType GetLookAndFeelType() const;
 	void SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType, bool dontUpdateConfig);
 

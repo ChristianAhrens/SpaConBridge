@@ -263,6 +263,8 @@
             <FILE id="TAkUW8" name="add-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/add-24px.svg"/>
             <FILE id="ngUAkm" name="add_batch-24dp.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/add_batch-24dp.svg"/>
+            <FILE id="dTxfzC" name="adjust_black_24dp.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/adjust_black_24dp.svg"/>
             <FILE id="yuy29J" name="call_made-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/call_made-24px.svg"/>
             <FILE id="lbzD6a" name="call_received-24px.svg" compile="0" resource="1"

@@ -50,6 +50,10 @@ public:
         PINNEDSCENES,
         SCENE,
         ENABLEDPAGES,
+        MULTISLIDER,
+        MAPPINGAREA,
+        REVERBENABLED,
+        SPREADENABLED,
     };
     static String getTagName(TagID ID)
     {
@@ -93,6 +97,14 @@ public:
             return "Scene";
         case ENABLEDPAGES:
             return "EnabledPages";
+        case MULTISLIDER:
+            return "MultiSlider";
+        case MAPPINGAREA:
+            return "MappingArea";
+        case REVERBENABLED:
+            return "ReverbEnabled";
+        case SPREADENABLED:
+            return "SpreadEnabled";
 		default:
 			return "INVALID";
         }

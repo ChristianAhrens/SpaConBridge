@@ -373,6 +373,105 @@ void PageComponentManager::SetScenesPagePinnedScenes(const std::vector<std::pair
 }
 
 /**
+ * Proxy Getter for the selected mapping area in MultiSlider Page.
+ * Forwards the call to PageContainerComponent.
+ * @return	The selected mapping area in MultiSlider Page.
+ */
+MappingAreaId PageComponentManager::GetMultiSliderMappingArea()
+{
+	if (m_pageContainer)
+		return m_pageContainer->GetMultiSliderPageMappingArea();
+	else
+	{
+		jassertfalse;
+		return MappingAreaId::MAI_Invalid;
+	}
+}
+
+/**
+ * Proxy Setter for the selected mapping area in MultiSlider Page.
+ * Forwards the call to PageContainerComponent.
+ * @param mappingArea	The selected mapping area in MultiSlider Page.
+ * @param dontSendNotification	Indication if the configuration update shall be triggerd as well
+ */
+void PageComponentManager::SetMultiSliderMappingArea(MappingAreaId mappingArea, bool dontSendNotification)
+{
+	if (m_pageContainer)
+		m_pageContainer->SetMultiSliderPageMappingArea(mappingArea);
+
+	if (!dontSendNotification)
+	{
+		triggerConfigurationUpdate(false);
+	}
+}
+
+/**
+ * Proxy Getter for the reverb enabled state in MultiSlider Page.
+ * Forwards the call to PageContainerComponent.
+ * @return	The reverb enabled state in MultiSlider Page.
+ */
+bool PageComponentManager::IsMultiSliderReverbEnabled()
+{
+	if (m_pageContainer)
+		return m_pageContainer->IsMultiSliderPageReverbEnabled();
+	else
+	{
+		jassertfalse;
+		return false;
+	}
+}
+
+/**
+ * Proxy Setter for the reverb enabled state in MultiSlider Page.
+ * Forwards the call to PageContainerComponent.
+ * @param enabled	The reverb enabled state in MultiSlider Page.
+ * @param dontSendNotification	Indication if the configuration update shall be triggerd as well
+ */
+void PageComponentManager::SetMultiSliderReverbEnabled(bool enabled, bool dontSendNotification)
+{
+	if (m_pageContainer)
+		m_pageContainer->SetMultiSliderPageReverbEnabled(enabled);
+
+	if (!dontSendNotification)
+	{
+		triggerConfigurationUpdate(false);
+	}
+}
+
+/**
+ * Proxy Getter for the spread enabled state in MultiSlider Page.
+ * Forwards the call to PageContainerComponent.
+ * @return	The spread enabled state in MultiSlider Page.
+ */
+bool PageComponentManager::IsMultiSliderSpreadEnabled()
+{
+	if (m_pageContainer)
+		return m_pageContainer->IsMultiSliderPageSpreadEnabled();
+	else
+	{
+		jassertfalse;
+		return false;
+	}
+}
+
+/**
+ * Proxy Setter for the spread enabled state in MultiSlider Page.
+ * Forwards the call to PageContainerComponent.
+ * @param enabled	The spread enabled state in MultiSlider Page.
+ * @param dontSendNotification	Indication if the configuration update shall be triggerd as well
+ */
+void PageComponentManager::SetMultiSliderSpreadEnabled(bool enabled, bool dontSendNotification)
+{
+	if (m_pageContainer)
+		m_pageContainer->SetMultiSliderPageSpreadEnabled(enabled);
+
+	if (!dontSendNotification)
+	{
+		triggerConfigurationUpdate(false);
+	}
+}
+
+/**
  * Get the currently selected coordinate mapping used for the multi-slider.
  * @return The selected mapping area.
  */
@@ -577,6 +676,44 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
 			SetScenesPagePinnedScenes(pinnedScenes);
 		}
 	}
+
+	auto multisliderPageXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MULTISLIDER));
+	if (multisliderPageXmlElement)
+	{
+		auto mappingAreaXmlElement = multisliderPageXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MAPPINGAREA));
+		if (mappingAreaXmlElement)
+		{
+			auto mappingAreaTextXmlElement = mappingAreaXmlElement->getFirstChildElement();
+			if (mappingAreaTextXmlElement && mappingAreaTextXmlElement->isTextElement())
+			{
+				auto mappingArea = static_cast<MappingAreaId>(mappingAreaTextXmlElement->getText().getIntValue());
+
+				SetMultiSliderMappingArea(mappingArea, true);
+			}
+		}
+		auto reverbEnabledXmlElement = multisliderPageXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::REVERBENABLED));
+		if (reverbEnabledXmlElement)
+		{
+			auto reverbEnabledTextXmlElement = reverbEnabledXmlElement->getFirstChildElement();
+			if (reverbEnabledTextXmlElement && reverbEnabledTextXmlElement->isTextElement())
+			{
+				auto reverbEnabled = (reverbEnabledTextXmlElement->getText().getIntValue()==1);
+
+				SetMultiSliderReverbEnabled(reverbEnabled, true);
+			}
+		}
+		auto spreadEnabledXmlElement = multisliderPageXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SPREADENABLED));
+		if (spreadEnabledXmlElement)
+		{
+			auto spreadEnabledTextXmlElement = spreadEnabledXmlElement->getFirstChildElement();
+			if (spreadEnabledTextXmlElement && spreadEnabledTextXmlElement->isTextElement())
+			{
+				auto spreadEnabled = (spreadEnabledTextXmlElement->getText().getIntValue() == 1);
+
+				SetMultiSliderSpreadEnabled(spreadEnabled, true);
+			}
+		}
+	}
     
     m_pageContainer->SetPagesBeingInitialized(false);
 
@@ -661,6 +798,22 @@ std::unique_ptr<XmlElement> PageComponentManager::createStateXml()
 					}
 				}
 			}
+		}
+
+		auto multisliderPageXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MULTISLIDER));
+		if (multisliderPageXmlElement)
+		{
+			auto mappingAreaXmlElement = multisliderPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MAPPINGAREA));
+			if (mappingAreaXmlElement)
+				mappingAreaXmlElement->addTextElement(String(GetMultiSliderMappingArea()));
+
+			auto reverbEnabledXmlElement = multisliderPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::REVERBENABLED));
+			if (reverbEnabledXmlElement)
+				reverbEnabledXmlElement->addTextElement(String(IsMultiSliderReverbEnabled() ? 1 : 0));
+
+			auto spreadEnabledXmlElement = multisliderPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SPREADENABLED));
+			if (spreadEnabledXmlElement)
+				spreadEnabledXmlElement->addTextElement(String(IsMultiSliderSpreadEnabled() ? 1 : 0));
 		}
 	}
 

@@ -652,6 +652,75 @@ void PageContainerComponent::SetScenesPagePinnedScenes(const std::vector<std::pa
 		m_scenesPage->SetPinnedScenes(pinnedScenes);
 }
 
+/**
+ * Getter for the selected mapping area of MultiSlider Page
+ * @return	The selected mapping area.
+ */
+MappingAreaId PageContainerComponent::GetMultiSliderPageMappingArea()
+{
+	if (m_multiSliderPage)
+		return m_multiSliderPage->GetSelectedMapping();
+	else
+	{
+		jassertfalse;
+		return MappingAreaId::MAI_Invalid;
+	}
+}
+
+/**
+ * Setter for the selected mapping area of MultiSlider Page
+ * @param mappingArea	The mapping area to select.
+ */
+void PageContainerComponent::SetMultiSliderPageMappingArea(MappingAreaId mappingArea)
+{
+	if (m_multiSliderPage)
+		m_multiSliderPage->SetSelectedMapping(mappingArea);
+}
+
+/**
+ * Getter for the reverb enabled state of MultiSlider Page
+ * @return	The enabled state.
+ */
+bool PageContainerComponent::IsMultiSliderPageReverbEnabled()
+{
+	if (m_multiSliderPage)
+		return m_multiSliderPage->IsReverbEnabled();
+	else
+		return false;
+}
+
+/**
+ * Setter for the reverb enabled state of MultiSlider Page
+ * @param enabled	The enabled state to set.
+ */
+void PageContainerComponent::SetMultiSliderPageReverbEnabled(bool enabled)
+{
+	if (m_multiSliderPage)
+		m_multiSliderPage->SetReverbEnabled(enabled);
+}
+
+/**
+ * Getter for the spread enabled state of MultiSlider Page
+ * @return	The enabled state.
+ */
+bool PageContainerComponent::IsMultiSliderPageSpreadEnabled()
+{
+	if (m_multiSliderPage)
+		return m_multiSliderPage->IsSpreadEnabled();
+	else
+		return false;
+}
+
+/**
+ * Setter for the spread enabled state of MultiSlider Page
+ * @param enabled	The enabled state to set.
+ */
+void PageContainerComponent::SetMultiSliderPageSpreadEnabled(bool enabled)
+{
+	if (m_multiSliderPage)
+		m_multiSliderPage->SetSpreadEnabled(enabled);
+}
+
 
 /*
 ===============================================================================

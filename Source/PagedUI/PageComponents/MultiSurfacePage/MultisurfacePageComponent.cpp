@@ -67,17 +67,30 @@ MultiSurfacePageComponent::MultiSurfacePageComponent()
 	// Mapping selector
 	m_mappingAreaSelect = std::make_unique<ComboBox>("Coordinate mapping");
 	m_mappingAreaSelect->setEditableText(false);
-	m_mappingAreaSelect->addItem("1", 1);
-	m_mappingAreaSelect->addItem("2", 2);
-	m_mappingAreaSelect->addItem("3", 3);
-	m_mappingAreaSelect->addItem("4", 4);
+	m_mappingAreaSelect->addItem("Mapping Area 1", 1);
+	m_mappingAreaSelect->addItem("Mapping Area 2", 2);
+	m_mappingAreaSelect->addItem("Mapping Area 3", 3);
+	m_mappingAreaSelect->addItem("Mapping Area 4", 4);
 	m_mappingAreaSelect->addListener(this);
+	m_mappingAreaSelect->setTooltip("Show sound objects assigned to selected mapping area");
 	addAndMakeVisible(m_mappingAreaSelect.get());
-	// Mapping label
-	m_mappingAreaLabel = std::make_unique<Label>("Coordinate mapping label", "View mapping:");
-	m_mappingAreaLabel->setJustificationType(Justification::centred);
-	m_mappingAreaLabel->attachToComponent(m_mappingAreaSelect.get(), true);
-	addAndMakeVisible(m_mappingAreaLabel.get());
+
+	// reverb send gain enable
+	m_reverbEnable = std::make_unique<DrawableButton>("Reverb", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	m_reverbEnable->addListener(this);
+	m_reverbEnable->setTooltip("Show En-Space send gain");
+	m_reverbEnable->setClickingTogglesState(true);
+	addAndMakeVisible(m_reverbEnable.get());
+
+	// spread factor enable 
+	m_spreadEnable = std::make_unique<DrawableButton>("Spread", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	m_spreadEnable->addListener(this);
+	m_spreadEnable->setTooltip("Show Spread factor");
+	m_spreadEnable->setClickingTogglesState(true);
+	addAndMakeVisible(m_spreadEnable.get());
+
+	// trigger lookandfeel update
+	lookAndFeelChanged();
 }
 
 /**
@@ -103,14 +116,21 @@ void MultiSurfacePageComponent::paint(Graphics& g)
  */
 void MultiSurfacePageComponent::resized()
 {
-	auto bounds = getLocalBounds().reduced(5);
+	auto margin = 5;
+	auto bounds = getLocalBounds().reduced(margin);
+
+	auto controlElementsBounds = bounds.removeFromBottom(25);
 	
 	// set the bounds for dropdown select by onthefly modifying 'bounds' dimensions - this leaves 'bounds' as rect with 25 removed from bottom
-	m_mappingAreaSelect->setBounds(bounds.removeFromBottom(25).removeFromLeft(170).removeFromRight(70));
+	m_mappingAreaSelect->setBounds(controlElementsBounds.removeFromLeft(140));
+	controlElementsBounds.removeFromLeft(margin);
+	m_reverbEnable->setBounds(controlElementsBounds.removeFromLeft(controlElementsBounds.getHeight()));
+	controlElementsBounds.removeFromLeft(margin);
+	m_spreadEnable->setBounds(controlElementsBounds.removeFromLeft(controlElementsBounds.getHeight()));
 	
 	// set the bounds for the 2D slider area.
-	bounds.removeFromBottom(5);
-	bounds.reduce(5, 5);
+	bounds.removeFromBottom(margin);
+	bounds.reduce(margin, margin);
 	m_multiSliderSurface->setBounds(bounds);
 }
 
@@ -131,6 +151,20 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 		update = true;
 	}
 
+	// Update the reverb enabled state
+	if (IsReverbEnabled() != m_reverbEnable->getToggleState())
+	{
+		m_reverbEnable->setToggleState(IsReverbEnabled(), dontSendNotification);
+		update = true;
+	}
+
+	// Update the spread enabled state
+	if (IsSpreadEnabled() != m_spreadEnable->getToggleState())
+	{
+		m_spreadEnable->setToggleState(IsSpreadEnabled(), dontSendNotification);
+		update = true;
+	}
+
 	auto ctrl = Controller::GetInstance();
 	if (ctrl && m_multiSliderSurface)
 	{
@@ -139,30 +173,34 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 		
 		// Iterate through all procssor instances and see if anything changed there.
 		// At the same time collect all sources positions for updating.
-		SurfaceMultiSlider::PositionCache cachedPositions;
+		SurfaceMultiSlider::ParameterCache cachedParameters;
 		for (auto const& processorId : ctrl->GetSoundobjectProcessorIds())
 		{
 			auto processor = ctrl->GetSoundobjectProcessor(processorId);
 			if (processor)
 			{
+				// NOTE: only soundobjects are used that match the selected viewing mapping.
 				if (processor->GetMappingId() == GetSelectedMapping())
 				{
-					// NOTE: only sources are included, which match the selected viewing mapping.
-					Point<float> p(processor->GetParameterValue(SPI_ParamIdx_X), processor->GetParameterValue(SPI_ParamIdx_Y));
-					cachedPositions.insert(std::make_pair(processorId, SurfaceMultiSlider::SoundobjectPosition(processor->GetSoundobjectId(), p, ctrl->IsSoundobjectProcessorIdSelected(processor->GetProcessorId()))));
+					auto soundobjectId	= processor->GetSoundobjectId();
+					auto pos			= Point<float>(processor->GetParameterValue(SPI_ParamIdx_X), processor->GetParameterValue(SPI_ParamIdx_Y));
+					auto spread			= processor->GetParameterValue(SPI_ParamIdx_ObjectSpread);
+					auto reverbSendGain	= processor->GetParameterValue(SPI_ParamIdx_ReverbSendGain);
+					auto selected		= ctrl->IsSoundobjectProcessorIdSelected(processorId);
+
+					cachedParameters.insert(std::make_pair(processorId, SurfaceMultiSlider::SoundobjectParameters(soundobjectId, pos, spread, reverbSendGain, selected)));
 				}
 
-				if (processor->PopParameterChanged(DCP_MultiSlider, (DCT_SoundobjectProcessorConfig | DCT_SoundobjectPosition)))
+				if (processor->PopParameterChanged(DCP_MultiSlider, (DCT_SoundobjectProcessorConfig | DCT_SoundobjectParameters)))
 					update = true;
 			}
 		}
 
-		SurfaceMultiSlider* multiSlider = dynamic_cast<SurfaceMultiSlider*>(m_multiSliderSurface.get());
-		if (update && multiSlider)
+		if (update && m_multiSliderSurface)
 		{
 			// Update all nipple positions on the 2D-Slider.
-			multiSlider->UpdatePositions(cachedPositions);
-			multiSlider->repaint();
+			m_multiSliderSurface->UpdateParameters(cachedParameters);
+			m_multiSliderSurface->repaint();
 		}
 	}
 }
@@ -175,20 +213,56 @@ void MultiSurfacePageComponent::comboBoxChanged(ComboBox *comboBox)
 {
 	if (GetSelectedMapping() != comboBox->getSelectedId())
 	{
-		SetSelectedMapping(comboBox->getSelectedId());
+		SetSelectedMapping(static_cast<MappingAreaId>(comboBox->getSelectedId()));
 
 		// Trigger an update on the multi-slider, so that only sources with the
 		// selected mapping are visible.
 		UpdateGui(true);
+
+		// finally trigger refreshing the config file
+		auto config = SpaConBridge::AppConfiguration::getInstance();
+		if (config)
+			config->triggerConfigurationDump(false);
 	}
 }
 
+/**
+ * Called when a button has been clicked.
+ * @param button	The button that was clicked.
+ */
+void MultiSurfacePageComponent::buttonClicked(Button* button)
+{
+	if (m_reverbEnable.get() == button)
+	{
+		if (IsReverbEnabled() != button->getToggleState())
+		{
+			SetReverbEnabled(button->getToggleState());
+
+			// finally trigger refreshing the config file
+			auto config = SpaConBridge::AppConfiguration::getInstance();
+			if (config)
+				config->triggerConfigurationDump(false);
+		}
+	}
+	else if (m_spreadEnable.get() == button)
+	{
+		if (IsSpreadEnabled() != button->getToggleState())
+		{
+			SetSpreadEnabled(button->getToggleState());
+
+			// finally trigger refreshing the config file
+			auto config = SpaConBridge::AppConfiguration::getInstance();
+			if (config)
+				config->triggerConfigurationDump(false);
+		}
+	}
+}
 
 /**
  * Get the currently selected coordinate mapping used for the multi-slider.
  * @return The selected mapping area.
  */
-int MultiSurfacePageComponent::GetSelectedMapping() const
+MappingAreaId MultiSurfacePageComponent::GetSelectedMapping() const
 {
 	return m_selectedMapping;
 }
@@ -197,9 +271,101 @@ int MultiSurfacePageComponent::GetSelectedMapping() const
  * Set the currently selected coordinate mapping used for the multi-slider.
  * @param mapping	The new selected mapping area.
  */
-void MultiSurfacePageComponent::SetSelectedMapping(int mapping)
+void MultiSurfacePageComponent::SetSelectedMapping(MappingAreaId mapping)
 {
 	m_selectedMapping = mapping;
+}
+
+/**
+ * Getter for the reverb enabled state
+ * @return	The enabled state.
+ */
+bool MultiSurfacePageComponent::IsReverbEnabled() const
+{
+	if (m_multiSliderSurface)
+		return m_multiSliderSurface->IsReverbSndGainEnabled();
+	else
+		return false;
+}
+
+/**
+ * Setter for the reverb enabled state
+ * @param enabled	The enabled state to set.
+ */
+void MultiSurfacePageComponent::SetReverbEnabled(bool enabled)
+{
+	if (m_multiSliderSurface)
+		m_multiSliderSurface->SetReverbSndGainEnabled(enabled);
+
+	// Trigger an update on the multi-slider
+	UpdateGui(true);
+}
+
+/**
+ * Getter for the spread enabled state
+ * @return	The enabled state.
+ */
+bool MultiSurfacePageComponent::IsSpreadEnabled() const
+{
+	if (m_multiSliderSurface)
+		return m_multiSliderSurface->IsSpreadEnabled();
+	else
+		return false;
+}
+
+/**
+ * Setter for the spread enabled state
+ * @param enabled	The enabled state to set.
+ */
+void MultiSurfacePageComponent::SetSpreadEnabled(bool enabled)
+{
+	if (m_multiSliderSurface)
+		m_multiSliderSurface->SetSpreadEnabled(enabled);
+
+	// Trigger an update on the multi-slider
+	UpdateGui(true);
+}
+
+/**
+ * Reimplemented method to handle changed look and feel data.
+ * This makes shure the add/remove buttons' svg images are colored correctly.
+ */
+void MultiSurfacePageComponent::lookAndFeelChanged()
+{
+	// first forward the call to base implementation
+	Component::lookAndFeelChanged();
+
+	// create the required button drawable images based on lookandfeel colours
+	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
+	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (dblookAndFeel)
+	{
+		// reverb images
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(BinaryData::sensors_black_24dp_svg, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+
+		m_reverbEnable->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+
+		// spread images
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(BinaryData::adjust_black_24dp_svg, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+
+		m_spreadEnable->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+	}
 }
 
 

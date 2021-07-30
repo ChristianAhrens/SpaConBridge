@@ -71,21 +71,41 @@ private:
 class SurfaceMultiSlider  : public Component
 {
 public:
-	struct SoundobjectPosition
+	struct SoundobjectParameters
 	{
-		SoundobjectPosition() : _id(-1), _pos(Point<float>(0.0f, 0.0f)), _selected(false) {};
-		SoundobjectPosition(SoundobjectId id, const Point<float>& pos, bool selected) : _id(id), _pos(pos), _selected(selected) {};
+		SoundobjectParameters() : 
+			_id(-1), 
+			_pos(Point<float>(0.0f, 0.0f)),
+			_spread(0.0f),
+			_reverbSndGain(0.0f),
+			_selected(false) 
+		{};
+		SoundobjectParameters(SoundobjectId id, const Point<float>& pos, float spread, float reverbSendGain, bool selected) : 
+			_id(id), 
+			_pos(pos),
+			_spread(spread),
+			_reverbSndGain(reverbSendGain),
+			_selected(selected)
+		{};
 
 		SoundobjectId	_id;
 		Point<float>	_pos;
+		float			_spread;
+		float			_reverbSndGain;
 		bool			_selected;
 	};
-	typedef std::map<SoundobjectProcessorId, SoundobjectPosition> PositionCache;
+	typedef std::map<SoundobjectProcessorId, SoundobjectParameters> ParameterCache;
 
 	SurfaceMultiSlider();
+	SurfaceMultiSlider(bool spreadEnabled, bool reverbSndGainEnabled);
 	~SurfaceMultiSlider() override;
 
-	void UpdatePositions(PositionCache positions);
+	bool IsSpreadEnabled();
+	void SetSpreadEnabled(bool enabled);
+	bool IsReverbSndGainEnabled();
+	void SetReverbSndGainEnabled(bool enabled);
+
+	void UpdateParameters(ParameterCache positions);
 
 	void paint (Graphics& g) override;
 	void mouseDown (const MouseEvent& e) override;
@@ -97,9 +117,10 @@ private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SurfaceMultiSlider)
 	SoundobjectProcessorId		m_currentlyDraggedId;	/**> ProcessorId of the currently selected knob, if any. */
 	std::vector<SoundobjectId>	m_highlightedIds;		/**> SourceIds of the currently highlighted knobs, if any. */
-	PositionCache				m_cachedPositions;		/**> To save us from iterating over all Plug-ins at every click, cache the source positions.
-														 * Keys are the PluginIds of each source, while values are pairs of the corresponding
-														 * input number and position coordinates (0.0 to 1.0). */
+	ParameterCache				m_cachedParameters;		/**> To save us from iterating over all Soundobject Processors at every click, cache their current parametervalues.
+														 * Keys are the SoundobjectProcessorId of each object processor. */
+	bool						m_spreadEnabled;
+	bool						m_reverbSndGainEnabled;
 };
 
 

@@ -199,6 +199,14 @@ private:
 	std::unique_ptr<Label>										m_GenericMIDISourceSpreadLabel;
 	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDIDelayModeLearner;
 	std::unique_ptr<Label>										m_GenericMIDIDelayModeLabel;
+	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDIMatrixInputGainLearner;
+	std::unique_ptr<Label>										m_GenericMIDIMatrixInputGainLabel;
+	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDIMatrixInputMuteLearner;
+	std::unique_ptr<Label>										m_GenericMIDIMatrixInputMuteLabel;
+	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDIMatrixOutputGainLearner;
+	std::unique_ptr<Label>										m_GenericMIDIMatrixOutputGainLabel;
+	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDIMatrixOutputMuteLearner;
+	std::unique_ptr<Label>										m_GenericMIDIMatrixOutputMuteLabel;
 
 	// Yamaha OSC settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_YamahaOSCBridgingSettings;

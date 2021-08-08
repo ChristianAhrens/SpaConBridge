@@ -472,8 +472,8 @@ void PageComponentManager::SetMultiSliderSpreadEnabled(bool enabled, bool dontSe
 }
 
 /**
- * Get the currently selected coordinate mapping used for the multi-slider.
- * @return The selected mapping area.
+ * Getter for the look and feel enum type member value.
+ * @return The look and feel enum type member value.
  */
 DbLookAndFeelBase::LookAndFeelType PageComponentManager::GetLookAndFeelType() const
 {

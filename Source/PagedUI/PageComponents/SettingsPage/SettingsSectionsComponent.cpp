@@ -436,6 +436,46 @@ void SettingsSectionsComponent::createGenericMIDISettingsSection()
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIDelayModeLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIDelayModeLearner.get(), true, false);
 
+	m_GenericMIDIMatrixInputGainLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
+		static_cast<std::int16_t>(ROI_MatrixInput_Gain),
+		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_ValueRange | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
+	m_GenericMIDIMatrixInputGainLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+	m_GenericMIDIMatrixInputGainLabel = std::make_unique<Label>("GenericMIDIMatrixInputGainLearner", "MatrixInput Gain");
+	m_GenericMIDIMatrixInputGainLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIMatrixInputGainLabel->attachToComponent(m_GenericMIDIMatrixInputGainLearner.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMatrixInputGainLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMatrixInputGainLearner.get(), true, false);
+
+	m_GenericMIDIMatrixInputMuteLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
+		static_cast<std::int16_t>(ROI_MatrixInput_Mute),
+		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
+	m_GenericMIDIMatrixInputMuteLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+	m_GenericMIDIMatrixInputMuteLabel = std::make_unique<Label>("GenericMIDIMatrixInputMuteLearner", "MatrixInput Mute");
+	m_GenericMIDIMatrixInputMuteLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIMatrixInputMuteLabel->attachToComponent(m_GenericMIDIMatrixInputMuteLearner.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMatrixInputMuteLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMatrixInputMuteLearner.get(), true, false);
+
+	m_GenericMIDIMatrixOutputGainLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
+		static_cast<std::int16_t>(ROI_MatrixOutput_Gain),
+		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_ValueRange | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
+	m_GenericMIDIMatrixOutputGainLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+	m_GenericMIDIMatrixOutputGainLabel = std::make_unique<Label>("GenericMIDIMatrixOutputGainLearner", "MatrixOutput Gain");
+	m_GenericMIDIMatrixOutputGainLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIMatrixOutputGainLabel->attachToComponent(m_GenericMIDIMatrixOutputGainLearner.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMatrixOutputGainLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMatrixOutputGainLearner.get(), true, false);
+
+	m_GenericMIDIMatrixOutputMuteLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
+		static_cast<std::int16_t>(ROI_MatrixOutput_Mute),
+		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
+	m_GenericMIDIMatrixOutputMuteLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+	m_GenericMIDIMatrixOutputMuteLabel = std::make_unique<Label>("GenericMIDIMatrixOutputMuteLearner", "MatrixOutput Mute");
+	m_GenericMIDIMatrixOutputMuteLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIMatrixOutputMuteLabel->attachToComponent(m_GenericMIDIMatrixOutputMuteLearner.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMatrixOutputMuteLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMatrixOutputMuteLearner.get(), true, false);
+
 	m_GenericMIDIBridgingSettings->resized();
 }
 
@@ -1227,6 +1267,26 @@ void SettingsSectionsComponent::processUpdatedGenericMIDIConfig()
 	{
 		m_GenericMIDIDelayModeLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
 		m_GenericMIDIDelayModeLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIDelayModeLearner->getReferredId())));
+	}
+	if (m_GenericMIDIMatrixInputGainLearner)
+	{
+		m_GenericMIDIMatrixInputGainLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
+		m_GenericMIDIMatrixInputGainLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIMatrixInputGainLearner->getReferredId())));
+	}
+	if (m_GenericMIDIMatrixInputMuteLearner)
+	{
+		m_GenericMIDIMatrixInputMuteLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
+		m_GenericMIDIMatrixInputMuteLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIMatrixInputMuteLearner->getReferredId())));
+	}
+	if (m_GenericMIDIMatrixOutputGainLearner)
+	{
+		m_GenericMIDIMatrixOutputGainLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
+		m_GenericMIDIMatrixOutputGainLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIMatrixOutputGainLearner->getReferredId())));
+	}
+	if (m_GenericMIDIMatrixOutputMuteLearner)
+	{
+		m_GenericMIDIMatrixOutputMuteLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
+		m_GenericMIDIMatrixOutputMuteLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIMatrixOutputMuteLearner->getReferredId())));
 	}
 }
 

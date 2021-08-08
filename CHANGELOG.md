@@ -7,12 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
 - Added optional visualization of reverb send gain and spread factor to multislider page
+- Added support for MatrixInput and -Output Gain/Mute to MIDI Bridging
 
 ### Changed
 - 
 
 ### Fixed
-- 
+- Fixed MIDI handling for SoundObject Delay Mode in case three note on/off triggers are assigned
 
 ## [0.3.5] - 2021-07-03
 ### Added

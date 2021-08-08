@@ -69,6 +69,8 @@ DelayedRecursiveFunctionCaller::DelayedRecursiveFunctionCaller(std::function<voi
  */
 DelayedRecursiveFunctionCaller::~DelayedRecursiveFunctionCaller()
 {
+	if (m_finalVoidFunction)
+		m_finalVoidFunction();
 }
 
 /**
@@ -155,6 +157,16 @@ void DelayedRecursiveFunctionCaller::ExecuteIntFunctionCallbackWithContainerSize
 		if (m_selfDestroy)
 			std::unique_ptr<DelayedRecursiveFunctionCaller>(this);
 	}
+}
+
+/**
+ * Setter for the optional function callback member that is supposed
+ * to be called when destroying this caller object.
+ * @param	voidFunction	The void function to be finally called when destroying this object.
+ */
+void DelayedRecursiveFunctionCaller::SetFinalFunctionCall(std::function<void()> voidFunction)
+{
+	m_finalVoidFunction = voidFunction;
 }
 
 

@@ -333,6 +333,10 @@ void Controller::RemoveSoundobjectProcessorIds(const std::vector<SoundobjectProc
 	if (sopIds.empty())
 		return;
 
+	auto config = SpaConBridge::AppConfiguration::getInstance();
+	if (config)
+		config->SetFlushAndUpdateDisabled();
+
 	for (auto const& processorId : sopIds)
 	{
 		auto processor = std::unique_ptr<SoundobjectProcessor>(GetSoundobjectProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
@@ -348,6 +352,9 @@ void Controller::RemoveSoundobjectProcessorIds(const std::vector<SoundobjectProc
 			processor->reset();
 		}
 	}
+
+	if (config)
+		config->ResetFlushAndUpdateDisabled();
 
 	const ScopedLock lock(m_mutex);
 	// Manually trigger updating active objects, since timer based
@@ -483,6 +490,10 @@ void Controller::RemoveMatrixInputProcessorIds(const std::vector<MatrixInputProc
 	if (mipIds.empty())
 		return;
 
+	auto config = SpaConBridge::AppConfiguration::getInstance();
+	if (config)
+		config->SetFlushAndUpdateDisabled();
+
 	for (auto const& processorId : mipIds)
 	{
 		auto processor = std::unique_ptr<MatrixInputProcessor>(GetMatrixInputProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
@@ -498,6 +509,10 @@ void Controller::RemoveMatrixInputProcessorIds(const std::vector<MatrixInputProc
 			processor->reset();
 		}
 	}
+
+	if (config)
+		config->ResetFlushAndUpdateDisabled();
+
 
 	const ScopedLock lock(m_mutex);
 	// Manually trigger updating active objects, since timer based
@@ -634,6 +649,10 @@ void Controller::RemoveMatrixOutputProcessorIds(const std::vector<MatrixOutputPr
 	if (mopIds.empty())
 		return;
 
+	auto config = SpaConBridge::AppConfiguration::getInstance();
+	if (config)
+		config->SetFlushAndUpdateDisabled();
+
 	for (auto const& processorId : mopIds)
 	{
 		auto processor = std::unique_ptr<MatrixOutputProcessor>(GetMatrixOutputProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
@@ -649,6 +668,9 @@ void Controller::RemoveMatrixOutputProcessorIds(const std::vector<MatrixOutputPr
 			processor->reset();
 		}
 	}
+
+	if (config)
+		config->ResetFlushAndUpdateDisabled();
 
 	const ScopedLock lock(m_mutex);
 	// Manually trigger updating active objects, since timer based

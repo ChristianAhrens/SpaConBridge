@@ -47,23 +47,6 @@ namespace SpaConBridge
 {
 
 
-/**
- * Rate at which the GUI will refresh, after parameter changes have been detected.
- * 33 ms translates to about 30 frames per second.
- */
-static constexpr int GUI_UPDATE_RATE_FAST = 33;
-
-/**
- * Rate at which the GUI will refresh, when no parameter changes have taken place for a while.
- */
-static constexpr int GUI_UPDATE_RATE_SLOW = 120;
-
-/**
- * After this number of timer callbacks without parameter changes, the timer will switch to GUI_UPDATE_RATE_SLOW.
- */
-static constexpr int GUI_UPDATE_DELAY_TICKS = 15;
-
-
 /*
 ===============================================================================
  Class SoundobjectProcessorEditor

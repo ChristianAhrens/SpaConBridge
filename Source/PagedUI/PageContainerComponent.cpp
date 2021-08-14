@@ -56,22 +56,6 @@ namespace SpaConBridge
 {
 
 
-/**
- * Rate at which the GUI will refresh, when the multi-slider tab is selected.
- */
-static constexpr int GUI_UPDATE_RATE_FAST = 75;
-
-/**
- * Rate at which the table pages (SO, MI/MO will refresh.
- */
-static constexpr int GUI_UPDATE_RATE_SLOW = 120;
-
-/**
- * Rate at which the Scenes/EnSpace pages will refresh.
- */
-static constexpr int GUI_UPDATE_RATE_SUPERSLOW = 1500;
-
-
 /*
 ===============================================================================
  Class PageContainerComponent

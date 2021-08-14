@@ -337,16 +337,34 @@ void Controller::RemoveSoundobjectProcessorIds(const std::vector<SoundobjectProc
 	if (config)
 		config->SetFlushAndUpdateDisabled();
 
+	// first loop over processor ids to remove is to clean up the internal list, but not yet delete the processor and editor instances themselves
+	auto sops = std::vector<SoundobjectProcessor*>();
 	for (auto const& processorId : sopIds)
 	{
-		auto processor = std::unique_ptr<SoundobjectProcessor>(GetSoundobjectProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
+		auto processor = GetSoundobjectProcessor(processorId);
+		if (processor != nullptr)
+		{
+			const ScopedLock lock(m_mutex);
+			m_soundobjectProcessors.removeAllInstancesOf(processor);
+			sops.push_back(processor);
+		}
+	}
+
+	// trigger updating page components to ensure the table contents (editor components esp.) don't keep stale obj. pointers
+	auto pageMgr = PageComponentManager::GetInstance();
+	if (pageMgr)
+	{
+		auto pageContainer = pageMgr->GetPageContainer();
+		if (pageContainer)
+			pageContainer->UpdateGui(true);
+	}
+
+	// second loop over processors to remove is to delete the processor and editor instances themselves
+	for (auto const& sop : sops)
+	{
+		auto processor = std::unique_ptr<SoundobjectProcessor>(sop); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
 		if (processor)
 		{
-			{
-				const ScopedLock lock(m_mutex);
-				m_soundobjectProcessors.removeAllInstancesOf(processor.get());
-			}
-
 			std::unique_ptr<AudioProcessorEditor>(processor->getActiveEditor()).reset();
 			processor->releaseResources();
 			processor->reset();
@@ -358,19 +376,10 @@ void Controller::RemoveSoundobjectProcessorIds(const std::vector<SoundobjectProc
 
 	const ScopedLock lock(m_mutex);
 	// Manually trigger updating active objects, since timer based
-	// updating will not catch changes, if no matrix outputs are
+	// updating will not catch changes, if no soundobjects are
 	// left any more.
 	if (m_soundobjectProcessors.isEmpty())
 		UpdateActiveSoundobjects();
-
-	// trigger updating page components to ensure the table contents (editor components esp.) don't keep stale obj. pointers
-	auto pageMgr = PageComponentManager::GetInstance();
-	if (pageMgr)
-	{
-		auto pageContainer = pageMgr->GetPageContainer();
-		if (pageContainer)
-			pageContainer->UpdateGui(true);
-	}
 
 	SetParameterChanged(DCP_Host, DCT_NumProcessors);
 }
@@ -494,32 +503,18 @@ void Controller::RemoveMatrixInputProcessorIds(const std::vector<MatrixInputProc
 	if (config)
 		config->SetFlushAndUpdateDisabled();
 
+	// first loop over processor ids to remove is to clean up the internal list, but not yet delete the processor and editor instances themselves
+	auto mips = std::vector<MatrixInputProcessor*>();
 	for (auto const& processorId : mipIds)
 	{
-		auto processor = std::unique_ptr<MatrixInputProcessor>(GetMatrixInputProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
-		if (processor)
+		auto processor = GetMatrixInputProcessor(processorId);
+		if (processor != nullptr)
 		{
-			{
-				const ScopedLock lock(m_mutex);
-				m_matrixInputProcessors.removeAllInstancesOf(processor.get());
-			}
-
-			std::unique_ptr<AudioProcessorEditor>(processor->getActiveEditor()).reset();
-			processor->releaseResources();
-			processor->reset();
+			const ScopedLock lock(m_mutex);
+			m_matrixInputProcessors.removeAllInstancesOf(processor);
+			mips.push_back(processor);
 		}
 	}
-
-	if (config)
-		config->ResetFlushAndUpdateDisabled();
-
-
-	const ScopedLock lock(m_mutex);
-	// Manually trigger updating active objects, since timer based
-	// updating will not catch changes, if no matrix outputs are
-	// left any more.
-	if (m_matrixInputProcessors.isEmpty())
-		UpdateActiveMatrixInputs();
 
 	// trigger updating page components to ensure the table contents (editor components esp.) don't keep stale obj. pointers
 	auto pageMgr = PageComponentManager::GetInstance();
@@ -529,6 +524,28 @@ void Controller::RemoveMatrixInputProcessorIds(const std::vector<MatrixInputProc
 		if (pageContainer)
 			pageContainer->UpdateGui(true);
 	}
+
+	// second loop over processors to remove is to delete the processor and editor instances themselves
+	for (auto const& mip : mips)
+	{
+		auto processor = std::unique_ptr<MatrixInputProcessor>(mip); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
+		if (processor)
+		{
+			std::unique_ptr<AudioProcessorEditor>(processor->getActiveEditor()).reset();
+			processor->releaseResources();
+			processor->reset();
+		}
+	}
+
+	if (config)
+		config->ResetFlushAndUpdateDisabled();
+
+	const ScopedLock lock(m_mutex);
+	// Manually trigger updating active objects, since timer based
+	// updating will not catch changes, if no matrix inputs are
+	// left any more.
+	if (m_matrixInputProcessors.isEmpty())
+		UpdateActiveMatrixInputs();
 
 	SetParameterChanged(DCP_Host, DCT_NumProcessors);
 }
@@ -653,16 +670,34 @@ void Controller::RemoveMatrixOutputProcessorIds(const std::vector<MatrixOutputPr
 	if (config)
 		config->SetFlushAndUpdateDisabled();
 
+	// first loop over processor ids to remove is to clean up the internal list, but not yet delete the processor and editor instances themselves
+	auto mops = std::vector<MatrixOutputProcessor*>();
 	for (auto const& processorId : mopIds)
 	{
-		auto processor = std::unique_ptr<MatrixOutputProcessor>(GetMatrixOutputProcessor(processorId)); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
+		auto processor = GetMatrixOutputProcessor(processorId);
+		if (processor != nullptr)
+		{
+			const ScopedLock lock(m_mutex);
+			m_matrixOutputProcessors.removeAllInstancesOf(processor);
+			mops.push_back(processor);
+		}
+	}
+
+	// trigger updating page components to ensure the table contents (editor components esp.) don't keep stale obj. pointers
+	auto pageMgr = PageComponentManager::GetInstance();
+	if (pageMgr)
+	{
+		auto pageContainer = pageMgr->GetPageContainer();
+		if (pageContainer)
+			pageContainer->UpdateGui(true);
+	}
+
+	// second loop over processors to remove is to delete the processor and editor instances themselves
+	for (auto const& mop : mops)
+	{
+		auto processor = std::unique_ptr<MatrixOutputProcessor>(mop); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
 		if (processor)
 		{
-			{
-				const ScopedLock lock(m_mutex);
-				m_matrixOutputProcessors.removeAllInstancesOf(processor.get());
-			}
-
 			std::unique_ptr<AudioProcessorEditor>(processor->getActiveEditor()).reset();
 			processor->releaseResources();
 			processor->reset();
@@ -678,15 +713,6 @@ void Controller::RemoveMatrixOutputProcessorIds(const std::vector<MatrixOutputPr
 	// left any more.
 	if (m_matrixOutputProcessors.isEmpty())
 		UpdateActiveMatrixOutputs();
-
-	// trigger updating page components to ensure the table contents (editor components esp.) don't keep stale obj. pointers
-	auto pageMgr = PageComponentManager::GetInstance();
-	if (pageMgr)
-	{
-		auto pageContainer = pageMgr->GetPageContainer();
-		if (pageContainer)
-			pageContainer->UpdateGui(true);
-	}
 
 	SetParameterChanged(DCP_Host, DCT_NumProcessors);
 }

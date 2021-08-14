@@ -267,4 +267,28 @@ enum ActiveParallelModeDS100
 String GetRepositoryBaseWebUrl();
 String GetDocumentationBaseWebUrl();
 
+
+/**
+ * Rate at which the GUI will refresh, after parameter changes have been detected.
+ * 33 ms translates to about 30 frames per second.
+ */
+static constexpr int GUI_UPDATE_RATE_FAST = 60;
+
+/**
+ * Rate at which the GUI will refresh, when no parameter changes have taken place for a while.
+ */
+static constexpr int GUI_UPDATE_RATE_SLOW = 120;
+
+/**
+ * Rate at which the Scenes/EnSpace pages will refresh.
+ */
+static constexpr int GUI_UPDATE_RATE_SUPERSLOW = 1500;
+
+/**
+ * After this number of timer callbacks without parameter changes, the timer will switch to GUI_UPDATE_RATE_SLOW.
+ */
+static constexpr int GUI_UPDATE_DELAY_TICKS = 15;
+
+
+
 } // namespace SpaConBridge

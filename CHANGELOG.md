@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added support for MatrixInput and -Output Gain/Mute to MIDI Bridging
 
 ### Changed
-- 
+- Introduced massive performance improvement regarding configuration change handling (app start&quit, SoundObject/MatrixInput/MatrixOutput batch add&remove, Config loading)
 
 ### Fixed
 - Fixed MIDI handling for SoundObject Delay Mode in case three note on/off triggers are assigned

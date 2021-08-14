@@ -334,8 +334,12 @@ void Controller::RemoveSoundobjectProcessorIds(const std::vector<SoundobjectProc
 		return;
 
 	auto config = SpaConBridge::AppConfiguration::getInstance();
+	auto configFlushAndUpdateWasDisabled = false;
 	if (config)
+	{
+		configFlushAndUpdateWasDisabled = config->IsFlushAndUpdateDisabled();
 		config->SetFlushAndUpdateDisabled();
+	}
 
 	// first loop over processor ids to remove is to clean up the internal list, but not yet delete the processor and editor instances themselves
 	auto sops = std::vector<SoundobjectProcessor*>();
@@ -359,6 +363,9 @@ void Controller::RemoveSoundobjectProcessorIds(const std::vector<SoundobjectProc
 			pageContainer->UpdateGui(true);
 	}
 
+	if (config && !configFlushAndUpdateWasDisabled)
+		config->ResetFlushAndUpdateDisabled();
+
 	// second loop over processors to remove is to delete the processor and editor instances themselves
 	for (auto const& sop : sops)
 	{
@@ -370,9 +377,6 @@ void Controller::RemoveSoundobjectProcessorIds(const std::vector<SoundobjectProc
 			processor->reset();
 		}
 	}
-
-	if (config)
-		config->ResetFlushAndUpdateDisabled();
 
 	const ScopedLock lock(m_mutex);
 	// Manually trigger updating active objects, since timer based
@@ -500,8 +504,12 @@ void Controller::RemoveMatrixInputProcessorIds(const std::vector<MatrixInputProc
 		return;
 
 	auto config = SpaConBridge::AppConfiguration::getInstance();
+	auto configFlushAndUpdateWasDisabled = false;
 	if (config)
+	{
+		configFlushAndUpdateWasDisabled = config->IsFlushAndUpdateDisabled();
 		config->SetFlushAndUpdateDisabled();
+	}
 
 	// first loop over processor ids to remove is to clean up the internal list, but not yet delete the processor and editor instances themselves
 	auto mips = std::vector<MatrixInputProcessor*>();
@@ -525,6 +533,9 @@ void Controller::RemoveMatrixInputProcessorIds(const std::vector<MatrixInputProc
 			pageContainer->UpdateGui(true);
 	}
 
+	if (config && !configFlushAndUpdateWasDisabled)
+		config->ResetFlushAndUpdateDisabled();
+
 	// second loop over processors to remove is to delete the processor and editor instances themselves
 	for (auto const& mip : mips)
 	{
@@ -536,9 +547,6 @@ void Controller::RemoveMatrixInputProcessorIds(const std::vector<MatrixInputProc
 			processor->reset();
 		}
 	}
-
-	if (config)
-		config->ResetFlushAndUpdateDisabled();
 
 	const ScopedLock lock(m_mutex);
 	// Manually trigger updating active objects, since timer based
@@ -667,8 +675,12 @@ void Controller::RemoveMatrixOutputProcessorIds(const std::vector<MatrixOutputPr
 		return;
 
 	auto config = SpaConBridge::AppConfiguration::getInstance();
+	auto configFlushAndUpdateWasDisabled = false;
 	if (config)
+	{
+		configFlushAndUpdateWasDisabled = config->IsFlushAndUpdateDisabled();
 		config->SetFlushAndUpdateDisabled();
+	}
 
 	// first loop over processor ids to remove is to clean up the internal list, but not yet delete the processor and editor instances themselves
 	auto mops = std::vector<MatrixOutputProcessor*>();
@@ -692,6 +704,9 @@ void Controller::RemoveMatrixOutputProcessorIds(const std::vector<MatrixOutputPr
 			pageContainer->UpdateGui(true);
 	}
 
+	if (config && !configFlushAndUpdateWasDisabled)
+		config->ResetFlushAndUpdateDisabled();
+
 	// second loop over processors to remove is to delete the processor and editor instances themselves
 	for (auto const& mop : mops)
 	{
@@ -703,9 +718,6 @@ void Controller::RemoveMatrixOutputProcessorIds(const std::vector<MatrixOutputPr
 			processor->reset();
 		}
 	}
-
-	if (config)
-		config->ResetFlushAndUpdateDisabled();
 
 	const ScopedLock lock(m_mutex);
 	// Manually trigger updating active objects, since timer based

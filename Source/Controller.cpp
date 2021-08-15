@@ -1874,7 +1874,13 @@ void Controller::timerCallback()
  */
 bool Controller::setStateXml(XmlElement* stateXml)
 {
+	// sanity check, if the incoming xml does make sense for this method
 	if (!stateXml || (stateXml->getTagName() != AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER)))
+		return false;
+
+	// To prevent that we end up in a recursive ::setStateXml situation, verify that this setStateXml method is not called by itself
+	const ScopedXmlChangeLock lock(IsXmlChangeLocked());
+	if (!lock.isLocked())
 		return false;
 
 	bool retVal = true;
@@ -1895,10 +1901,14 @@ bool Controller::setStateXml(XmlElement* stateXml)
 		auto oldExistingSOPIds = GetSoundobjectProcessorIds();
 		auto newConfigSOPIds = std::vector<SoundobjectProcessorId>();
 
+		auto xmlsForNewProcessorsToCreateKV = std::map<int, XmlElement*>();
+
 		for (auto processorXmlElement : soundobjectProcessorsXmlElement->getChildIterator())
 		{
 			jassert(processorXmlElement->getTagName().contains(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE)));
 			int elementProcessorId = processorXmlElement->getTagName().getTrailingIntValue();
+			newConfigSOPIds.push_back(elementProcessorId);
+
 			bool alreadyExists = false;
 			for (auto processor : m_soundobjectProcessors)
 			{
@@ -1911,17 +1921,10 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			}
 
 			if (!alreadyExists)
-			{
-				auto newProcessor =	std::make_unique<SoundobjectProcessor>(false);
-				newProcessor->SetProcessorId(DCP_Init, elementProcessorId);
-				auto p = newProcessor.release();
-				jassert(m_soundobjectProcessors.contains(p));
-				p->setStateXml(processorXmlElement);
-			}
-
-			newConfigSOPIds.push_back(elementProcessorId);
+				xmlsForNewProcessorsToCreateKV.insert(std::make_pair(elementProcessorId, processorXmlElement));
 		}
 
+		// clean up no longer used processors first
 		auto sopIdsToRemove = std::vector<SoundobjectProcessorId>();
 		for (auto const& processorId : oldExistingSOPIds)
 		{
@@ -1931,6 +1934,16 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			}
 		}
 		RemoveSoundobjectProcessorIds(sopIdsToRemove);
+
+		// then create the ones that are entirely new in the updated xml config
+		for (auto const& newProcessorXmlElement : xmlsForNewProcessorsToCreateKV)
+		{
+			auto newProcessor = std::make_unique<SoundobjectProcessor>(false);
+			newProcessor->SetProcessorId(DCP_Init, newProcessorXmlElement.first);
+			auto p = newProcessor.release();
+			jassert(m_soundobjectProcessors.contains(p));
+			p->setStateXml(newProcessorXmlElement.second);
+		}
 	}
 	else
 		retVal = false;
@@ -1942,10 +1955,14 @@ bool Controller::setStateXml(XmlElement* stateXml)
 		auto oldExistingMIPIds = GetMatrixInputProcessorIds();
 		auto newConfigMIPIds = std::vector<MatrixInputProcessorId>();
 
+		auto xmlsForNewProcessorsToCreateKV = std::map<int, XmlElement*>();
+
 		for (auto processorXmlElement : matrixInputProcessorsXmlElement->getChildIterator())
 		{
 			jassert(processorXmlElement->getTagName().contains(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE)));
 			int elementProcessorId = processorXmlElement->getTagName().getTrailingIntValue();
+			newConfigMIPIds.push_back(elementProcessorId);
+
 			bool alreadyExists = false;
 			for (auto processor : m_matrixInputProcessors)
 			{
@@ -1958,17 +1975,10 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			}
 
 			if (!alreadyExists)
-			{
-				auto newProcessor = std::make_unique<MatrixInputProcessor>(false);
-				newProcessor->SetProcessorId(DCP_Init, elementProcessorId);
-				auto p = newProcessor.release();
-				jassert(m_matrixInputProcessors.contains(p));
-				p->setStateXml(processorXmlElement);
-			}
-
-			newConfigMIPIds.push_back(elementProcessorId);
+				xmlsForNewProcessorsToCreateKV.insert(std::make_pair(elementProcessorId, processorXmlElement));
 		}
 
+		// clean up no longer used processors first
 		auto mipIdsToRemove = std::vector<MatrixInputProcessorId>();
 		for (auto const& processorId : oldExistingMIPIds)
 		{
@@ -1978,6 +1988,16 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			}
 		}
 		RemoveMatrixInputProcessorIds(mipIdsToRemove);
+
+		// then create the ones that are entirely new in the updated xml config
+		for (auto const& newProcessorXmlElement : xmlsForNewProcessorsToCreateKV)
+		{
+			auto newProcessor = std::make_unique<MatrixInputProcessor>(false);
+			newProcessor->SetProcessorId(DCP_Init, newProcessorXmlElement.first);
+			auto p = newProcessor.release();
+			jassert(m_matrixInputProcessors.contains(p));
+			p->setStateXml(newProcessorXmlElement.second);
+		}
 	}
 	else
 		retVal = false;
@@ -1989,10 +2009,14 @@ bool Controller::setStateXml(XmlElement* stateXml)
 		auto oldExistingMOPIds = GetMatrixOutputProcessorIds();
 		auto newConfigMOPIds = std::vector<MatrixOutputProcessorId>();
 
+		auto xmlsForNewProcessorsToCreateKV = std::map<int, XmlElement*>();
+
 		for (auto processorXmlElement : matrixOutputProcessorsXmlElement->getChildIterator())
 		{
 			jassert(processorXmlElement->getTagName().contains(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE)));
 			int elementProcessorId = processorXmlElement->getTagName().getTrailingIntValue();
+			newConfigMOPIds.push_back(elementProcessorId);
+
 			bool alreadyExists = false;
 			for (auto processor : m_matrixOutputProcessors)
 			{
@@ -2005,17 +2029,10 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			}
 
 			if (!alreadyExists)
-			{
-				auto newProcessor = std::make_unique<MatrixOutputProcessor>(false);
-				newProcessor->SetProcessorId(DCP_Init, elementProcessorId);
-				auto p = newProcessor.release();
-				jassert(m_matrixOutputProcessors.contains(p));
-				p->setStateXml(processorXmlElement);
-			}
-
-			newConfigMOPIds.push_back(elementProcessorId);
+				xmlsForNewProcessorsToCreateKV.insert(std::make_pair(elementProcessorId, processorXmlElement));
 		}
 
+		// clean up no longer used processors first
 		auto mopIdsToRemove = std::vector<MatrixOutputProcessorId>();
 		for (auto const& processorId : oldExistingMOPIds)
 		{
@@ -2025,6 +2042,16 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			}
 		}
 		RemoveMatrixOutputProcessorIds(mopIdsToRemove);
+
+		// then create the ones that are entirely new in the updated xml config
+		for (auto const& newProcessorXmlElement : xmlsForNewProcessorsToCreateKV)
+		{
+			auto newProcessor = std::make_unique<MatrixOutputProcessor>(false);
+			newProcessor->SetProcessorId(DCP_Init, newProcessorXmlElement.first);
+			auto p = newProcessor.release();
+			jassert(m_matrixOutputProcessors.contains(p));
+			p->setStateXml(newProcessorXmlElement.second);
+		}
 	}
 	else
 		retVal = false;

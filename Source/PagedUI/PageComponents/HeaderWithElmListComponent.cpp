@@ -231,6 +231,17 @@ void HeaderWithElmListComponent::setHelpUrl(const URL& helpUrl)
 }
 
 /**
+ * Setter for the string that is painted in the background of the component
+ * as user info on e.g. 'Alpha' to inform the user that the components held by
+ * this object instance refer to a feature still under development.
+ */
+void HeaderWithElmListComponent::setBackgroundDecorationText(const std::string& text)
+{
+	for (auto i = 0; i < 200; i++)
+		m_backgroundDecorationText.append(text + "	");
+}
+
+/**
  * Method to set if this component shall display the enable/disable togglebutton
  * in its upper right corner or not.
  * @param hasActiveToggle	True if it shall show togglebutton, false if not
@@ -319,6 +330,7 @@ void HeaderWithElmListComponent::paint(Graphics& g)
 	auto w = getWidth();
 	auto h = getHeight();
 
+	// paint the background depending on the enabled toggle state
 	if (m_toggleState)
 		g.setColour(getLookAndFeel().findColour(TableListBox::backgroundColourId));
 	else
@@ -327,6 +339,23 @@ void HeaderWithElmListComponent::paint(Graphics& g)
 
 	g.setColour(getLookAndFeel().findColour(TableListBox::outlineColourId));
 	g.drawRect(0, 0, w, h);
+
+	// paint the info text
+	if (!m_backgroundDecorationText.empty())
+	{
+		if (m_toggleState)
+			g.setColour(getLookAndFeel().findColour(TableListBox::textColourId).withAlpha(0.10f));
+		else
+			g.setColour(getLookAndFeel().findColour(TableListBox::textColourId).withAlpha(0.05f));
+
+		auto trans = AffineTransform();
+		trans = trans.translated(-0.25f * w, 0);
+		trans = trans.rotated(-0.5f);
+
+		g.addTransform(trans);
+		g.setFont(Font(100, Font::FontStyleFlags::bold));
+		g.drawMultiLineText(String(m_backgroundDecorationText), 0, 0, static_cast<int>(1.5f * w));
+	}
 }
 
 /**

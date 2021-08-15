@@ -250,6 +250,7 @@ void SettingsSectionsComponent::createRTTrPMSettingsSection()
 {
 	// BlackTrax RTTrPM settings section
 	m_RTTrPMBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
+	m_RTTrPMBridgingSettings->setBackgroundDecorationText("Beta");
 	m_RTTrPMBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_BlacktraxRTTrPM) + " Bridging");
 	m_RTTrPMBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_BlacktraxRTTrPM) + " Bridging Settings");
 	m_RTTrPMBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/BlacktraxRTTrPM.md"));
@@ -340,6 +341,7 @@ void SettingsSectionsComponent::createGenericMIDISettingsSection()
 {
 	// Generic MIDI settings section
 	m_GenericMIDIBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
+	m_GenericMIDIBridgingSettings->setBackgroundDecorationText("Beta");
 	m_GenericMIDIBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_GenericMIDI) + " Bridging");
 	m_GenericMIDIBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_GenericMIDI) + " Bridging Settings");
 	m_GenericMIDIBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/GenericMIDI.md"));
@@ -486,6 +488,7 @@ void SettingsSectionsComponent::createYamahaOSCSettingsSection()
 {
 	// YamahaOSC settings section
 	m_YamahaOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
+	m_YamahaOSCBridgingSettings->setBackgroundDecorationText("Alpha");
 	m_YamahaOSCBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_YamahaOSC) + " Bridging");
 	m_YamahaOSCBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_YamahaOSC) + " Bridging Settings");
 	m_YamahaOSCBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/YamahaOSC.md"));

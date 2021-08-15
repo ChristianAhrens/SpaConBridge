@@ -309,7 +309,6 @@ SoundobjectProcessorId Controller::AddSoundobjectProcessor(DataChangeParticipant
 void Controller::RemoveSoundobjectProcessor(SoundobjectProcessor* p)
 {
 	int idx = m_soundobjectProcessors.indexOf(p);
-	jassert(idx >= 0); // Tried to remove inexistent Processor object.
 	if (idx >= 0)
 	{
 		const ScopedLock lock(m_mutex);
@@ -323,6 +322,70 @@ void Controller::RemoveSoundobjectProcessor(SoundobjectProcessor* p)
 
 		SetParameterChanged(DCP_Host, DCT_NumProcessors);
 	}
+}
+
+/**
+ * Removes the processor ids and deletes the linked Processor instances from the local list of processors.
+ * @param sopIds		List of processor ids that shall be removed.
+ */
+void Controller::RemoveSoundobjectProcessorIds(const std::vector<SoundobjectProcessorId>& sopIds)
+{
+	if (sopIds.empty())
+		return;
+
+	auto config = SpaConBridge::AppConfiguration::getInstance();
+	auto configFlushAndUpdateWasDisabled = false;
+	if (config)
+	{
+		configFlushAndUpdateWasDisabled = config->IsFlushAndUpdateDisabled();
+		config->SetFlushAndUpdateDisabled();
+	}
+
+	// first loop over processor ids to remove is to clean up the internal list, but not yet delete the processor and editor instances themselves
+	auto sops = std::vector<SoundobjectProcessor*>();
+	for (auto const& processorId : sopIds)
+	{
+		auto processor = GetSoundobjectProcessor(processorId);
+		if (processor != nullptr)
+		{
+			const ScopedLock lock(m_mutex);
+			m_soundobjectProcessors.removeAllInstancesOf(processor);
+			sops.push_back(processor);
+		}
+	}
+
+	// trigger updating page components to ensure the table contents (editor components esp.) don't keep stale obj. pointers
+	auto pageMgr = PageComponentManager::GetInstance();
+	if (pageMgr)
+	{
+		auto pageContainer = pageMgr->GetPageContainer();
+		if (pageContainer)
+			pageContainer->UpdateGui(true);
+	}
+
+	if (config && !configFlushAndUpdateWasDisabled)
+		config->ResetFlushAndUpdateDisabled();
+
+	// second loop over processors to remove is to delete the processor and editor instances themselves
+	for (auto const& sop : sops)
+	{
+		auto processor = std::unique_ptr<SoundobjectProcessor>(sop); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
+		if (processor)
+		{
+			std::unique_ptr<AudioProcessorEditor>(processor->getActiveEditor()).reset();
+			processor->releaseResources();
+			processor->reset();
+		}
+	}
+
+	const ScopedLock lock(m_mutex);
+	// Manually trigger updating active objects, since timer based
+	// updating will not catch changes, if no soundobjects are
+	// left any more.
+	if (m_soundobjectProcessors.isEmpty())
+		UpdateActiveSoundobjects();
+
+	SetParameterChanged(DCP_Host, DCT_NumProcessors);
 }
 
 /**
@@ -416,7 +479,6 @@ MatrixInputProcessorId Controller::AddMatrixInputProcessor(DataChangeParticipant
 void Controller::RemoveMatrixInputProcessor(MatrixInputProcessor* p)
 {
 	int idx = m_matrixInputProcessors.indexOf(p);
-	jassert(idx >= 0); // Tried to remove inexistent Processor object.
 	if (idx >= 0)
 	{
 		const ScopedLock lock(m_mutex);
@@ -430,6 +492,70 @@ void Controller::RemoveMatrixInputProcessor(MatrixInputProcessor* p)
 
 		SetParameterChanged(DCP_Host, DCT_NumProcessors);
 	}
+}
+
+/**
+ * Removes the processor ids and deletes the linked Processor instances from the local list of processors.
+ * @param mipIds		List of processor ids that shall be removed.
+ */
+void Controller::RemoveMatrixInputProcessorIds(const std::vector<MatrixInputProcessorId>& mipIds)
+{
+	if (mipIds.empty())
+		return;
+
+	auto config = SpaConBridge::AppConfiguration::getInstance();
+	auto configFlushAndUpdateWasDisabled = false;
+	if (config)
+	{
+		configFlushAndUpdateWasDisabled = config->IsFlushAndUpdateDisabled();
+		config->SetFlushAndUpdateDisabled();
+	}
+
+	// first loop over processor ids to remove is to clean up the internal list, but not yet delete the processor and editor instances themselves
+	auto mips = std::vector<MatrixInputProcessor*>();
+	for (auto const& processorId : mipIds)
+	{
+		auto processor = GetMatrixInputProcessor(processorId);
+		if (processor != nullptr)
+		{
+			const ScopedLock lock(m_mutex);
+			m_matrixInputProcessors.removeAllInstancesOf(processor);
+			mips.push_back(processor);
+		}
+	}
+
+	// trigger updating page components to ensure the table contents (editor components esp.) don't keep stale obj. pointers
+	auto pageMgr = PageComponentManager::GetInstance();
+	if (pageMgr)
+	{
+		auto pageContainer = pageMgr->GetPageContainer();
+		if (pageContainer)
+			pageContainer->UpdateGui(true);
+	}
+
+	if (config && !configFlushAndUpdateWasDisabled)
+		config->ResetFlushAndUpdateDisabled();
+
+	// second loop over processors to remove is to delete the processor and editor instances themselves
+	for (auto const& mip : mips)
+	{
+		auto processor = std::unique_ptr<MatrixInputProcessor>(mip); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
+		if (processor)
+		{
+			std::unique_ptr<AudioProcessorEditor>(processor->getActiveEditor()).reset();
+			processor->releaseResources();
+			processor->reset();
+		}
+	}
+
+	const ScopedLock lock(m_mutex);
+	// Manually trigger updating active objects, since timer based
+	// updating will not catch changes, if no matrix inputs are
+	// left any more.
+	if (m_matrixInputProcessors.isEmpty())
+		UpdateActiveMatrixInputs();
+
+	SetParameterChanged(DCP_Host, DCT_NumProcessors);
 }
 
 /**
@@ -524,7 +650,6 @@ MatrixOutputProcessorId Controller::AddMatrixOutputProcessor(DataChangeParticipa
 void Controller::RemoveMatrixOutputProcessor(MatrixOutputProcessor* p)
 {
 	int idx = m_matrixOutputProcessors.indexOf(p);
-	jassert(idx >= 0); // Tried to remove inexistent Processor object.
 	if (idx >= 0)
 	{
 		const ScopedLock lock(m_mutex);
@@ -538,6 +663,70 @@ void Controller::RemoveMatrixOutputProcessor(MatrixOutputProcessor* p)
 
 		SetParameterChanged(DCP_Host, DCT_NumProcessors);
 	}
+}
+
+/**
+ * Removes the processor ids and deletes the linked Processor instances from the local list of processors.
+ * @param mopIds		List of processor ids that shall be removed.
+ */
+void Controller::RemoveMatrixOutputProcessorIds(const std::vector<MatrixOutputProcessorId>& mopIds)
+{
+	if (mopIds.empty())
+		return;
+
+	auto config = SpaConBridge::AppConfiguration::getInstance();
+	auto configFlushAndUpdateWasDisabled = false;
+	if (config)
+	{
+		configFlushAndUpdateWasDisabled = config->IsFlushAndUpdateDisabled();
+		config->SetFlushAndUpdateDisabled();
+	}
+
+	// first loop over processor ids to remove is to clean up the internal list, but not yet delete the processor and editor instances themselves
+	auto mops = std::vector<MatrixOutputProcessor*>();
+	for (auto const& processorId : mopIds)
+	{
+		auto processor = GetMatrixOutputProcessor(processorId);
+		if (processor != nullptr)
+		{
+			const ScopedLock lock(m_mutex);
+			m_matrixOutputProcessors.removeAllInstancesOf(processor);
+			mops.push_back(processor);
+		}
+	}
+
+	// trigger updating page components to ensure the table contents (editor components esp.) don't keep stale obj. pointers
+	auto pageMgr = PageComponentManager::GetInstance();
+	if (pageMgr)
+	{
+		auto pageContainer = pageMgr->GetPageContainer();
+		if (pageContainer)
+			pageContainer->UpdateGui(true);
+	}
+
+	if (config && !configFlushAndUpdateWasDisabled)
+		config->ResetFlushAndUpdateDisabled();
+
+	// second loop over processors to remove is to delete the processor and editor instances themselves
+	for (auto const& mop : mops)
+	{
+		auto processor = std::unique_ptr<MatrixOutputProcessor>(mop); // when processor goes out of scope, it is destroyed and the destructor does handle unregistering from ccontroller by itself
+		if (processor)
+		{
+			std::unique_ptr<AudioProcessorEditor>(processor->getActiveEditor()).reset();
+			processor->releaseResources();
+			processor->reset();
+		}
+	}
+
+	const ScopedLock lock(m_mutex);
+	// Manually trigger updating active objects, since timer based
+	// updating will not catch changes, if no matrix outputs are
+	// left any more.
+	if (m_matrixOutputProcessors.isEmpty())
+		UpdateActiveMatrixOutputs();
+
+	SetParameterChanged(DCP_Host, DCT_NumProcessors);
 }
 
 /**
@@ -1685,7 +1874,13 @@ void Controller::timerCallback()
  */
 bool Controller::setStateXml(XmlElement* stateXml)
 {
+	// sanity check, if the incoming xml does make sense for this method
 	if (!stateXml || (stateXml->getTagName() != AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER)))
+		return false;
+
+	// To prevent that we end up in a recursive ::setStateXml situation, verify that this setStateXml method is not called by itself
+	const ScopedXmlChangeLock lock(IsXmlChangeLocked());
+	if (!lock.isLocked())
 		return false;
 
 	bool retVal = true;
@@ -1703,26 +1898,51 @@ bool Controller::setStateXml(XmlElement* stateXml)
 	auto soundobjectProcessorsXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTPROCESSORS));
 	if (soundobjectProcessorsXmlElement)
 	{
+		auto oldExistingSOPIds = GetSoundobjectProcessorIds();
+		auto newConfigSOPIds = std::vector<SoundobjectProcessorId>();
+
+		auto xmlsForNewProcessorsToCreateKV = std::map<int, XmlElement*>();
+
 		for (auto processorXmlElement : soundobjectProcessorsXmlElement->getChildIterator())
 		{
 			jassert(processorXmlElement->getTagName().contains(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE)));
 			int elementProcessorId = processorXmlElement->getTagName().getTrailingIntValue();
+			newConfigSOPIds.push_back(elementProcessorId);
+
 			bool alreadyExists = false;
 			for (auto processor : m_soundobjectProcessors)
+			{
 				if (processor->GetProcessorId() == elementProcessorId)
 				{
 					processor->setStateXml(processorXmlElement);
 					alreadyExists = true;
+					break;
 				}
+			}
 
 			if (!alreadyExists)
+				xmlsForNewProcessorsToCreateKV.insert(std::make_pair(elementProcessorId, processorXmlElement));
+		}
+
+		// clean up no longer used processors first
+		auto sopIdsToRemove = std::vector<SoundobjectProcessorId>();
+		for (auto const& processorId : oldExistingSOPIds)
+		{
+			if (std::find(newConfigSOPIds.begin(), newConfigSOPIds.end(), processorId) == newConfigSOPIds.end())
 			{
-				auto newProcessor =	std::make_unique<SoundobjectProcessor>(false);
-				newProcessor->SetProcessorId(DCP_Init, elementProcessorId);
-				auto p = newProcessor.release();
-				jassert(m_soundobjectProcessors.contains(p));
-				p->setStateXml(processorXmlElement);
+				sopIdsToRemove.push_back(processorId);
 			}
+		}
+		RemoveSoundobjectProcessorIds(sopIdsToRemove);
+
+		// then create the ones that are entirely new in the updated xml config
+		for (auto const& newProcessorXmlElement : xmlsForNewProcessorsToCreateKV)
+		{
+			auto newProcessor = std::make_unique<SoundobjectProcessor>(false);
+			newProcessor->SetProcessorId(DCP_Init, newProcessorXmlElement.first);
+			auto p = newProcessor.release();
+			jassert(m_soundobjectProcessors.contains(p));
+			p->setStateXml(newProcessorXmlElement.second);
 		}
 	}
 	else
@@ -1732,55 +1952,105 @@ bool Controller::setStateXml(XmlElement* stateXml)
 	auto matrixInputProcessorsXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXINPUTPROCESSORS));
 	if (matrixInputProcessorsXmlElement)
 	{
+		auto oldExistingMIPIds = GetMatrixInputProcessorIds();
+		auto newConfigMIPIds = std::vector<MatrixInputProcessorId>();
+
+		auto xmlsForNewProcessorsToCreateKV = std::map<int, XmlElement*>();
+
 		for (auto processorXmlElement : matrixInputProcessorsXmlElement->getChildIterator())
 		{
 			jassert(processorXmlElement->getTagName().contains(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE)));
 			int elementProcessorId = processorXmlElement->getTagName().getTrailingIntValue();
+			newConfigMIPIds.push_back(elementProcessorId);
+
 			bool alreadyExists = false;
 			for (auto processor : m_matrixInputProcessors)
+			{
 				if (processor->GetProcessorId() == elementProcessorId)
 				{
 					processor->setStateXml(processorXmlElement);
 					alreadyExists = true;
+					break;
 				}
+			}
 
 			if (!alreadyExists)
+				xmlsForNewProcessorsToCreateKV.insert(std::make_pair(elementProcessorId, processorXmlElement));
+		}
+
+		// clean up no longer used processors first
+		auto mipIdsToRemove = std::vector<MatrixInputProcessorId>();
+		for (auto const& processorId : oldExistingMIPIds)
+		{
+			if (std::find(newConfigMIPIds.begin(), newConfigMIPIds.end(), processorId) == newConfigMIPIds.end())
 			{
-				auto newProcessor = std::make_unique<MatrixInputProcessor>(false);
-				newProcessor->SetProcessorId(DCP_Init, elementProcessorId);
-				auto p = newProcessor.release();
-				jassert(m_matrixInputProcessors.contains(p));
-				p->setStateXml(processorXmlElement);
+				mipIdsToRemove.push_back(processorId);
 			}
+		}
+		RemoveMatrixInputProcessorIds(mipIdsToRemove);
+
+		// then create the ones that are entirely new in the updated xml config
+		for (auto const& newProcessorXmlElement : xmlsForNewProcessorsToCreateKV)
+		{
+			auto newProcessor = std::make_unique<MatrixInputProcessor>(false);
+			newProcessor->SetProcessorId(DCP_Init, newProcessorXmlElement.first);
+			auto p = newProcessor.release();
+			jassert(m_matrixInputProcessors.contains(p));
+			p->setStateXml(newProcessorXmlElement.second);
 		}
 	}
 	else
 		retVal = false;
 
-	// create soundobject processors from xml
+	// create matrixoutput processors from xml
 	auto matrixOutputProcessorsXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXOUTPUTPROCESSORS));
 	if (matrixOutputProcessorsXmlElement)
 	{
+		auto oldExistingMOPIds = GetMatrixOutputProcessorIds();
+		auto newConfigMOPIds = std::vector<MatrixOutputProcessorId>();
+
+		auto xmlsForNewProcessorsToCreateKV = std::map<int, XmlElement*>();
+
 		for (auto processorXmlElement : matrixOutputProcessorsXmlElement->getChildIterator())
 		{
 			jassert(processorXmlElement->getTagName().contains(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE)));
 			int elementProcessorId = processorXmlElement->getTagName().getTrailingIntValue();
+			newConfigMOPIds.push_back(elementProcessorId);
+
 			bool alreadyExists = false;
 			for (auto processor : m_matrixOutputProcessors)
+			{
 				if (processor->GetProcessorId() == elementProcessorId)
 				{
 					processor->setStateXml(processorXmlElement);
 					alreadyExists = true;
+					break;
 				}
+			}
 
 			if (!alreadyExists)
+				xmlsForNewProcessorsToCreateKV.insert(std::make_pair(elementProcessorId, processorXmlElement));
+		}
+
+		// clean up no longer used processors first
+		auto mopIdsToRemove = std::vector<MatrixOutputProcessorId>();
+		for (auto const& processorId : oldExistingMOPIds)
+		{
+			if (std::find(newConfigMOPIds.begin(), newConfigMOPIds.end(), processorId) == newConfigMOPIds.end())
 			{
-				auto newProcessor = std::make_unique<MatrixOutputProcessor>(false);
-				newProcessor->SetProcessorId(DCP_Init, elementProcessorId);
-				auto p = newProcessor.release();
-				jassert(m_matrixOutputProcessors.contains(p));
-				p->setStateXml(processorXmlElement);
+				mopIdsToRemove.push_back(processorId);
 			}
+		}
+		RemoveMatrixOutputProcessorIds(mopIdsToRemove);
+
+		// then create the ones that are entirely new in the updated xml config
+		for (auto const& newProcessorXmlElement : xmlsForNewProcessorsToCreateKV)
+		{
+			auto newProcessor = std::make_unique<MatrixOutputProcessor>(false);
+			newProcessor->SetProcessorId(DCP_Init, newProcessorXmlElement.first);
+			auto p = newProcessor.release();
+			jassert(m_matrixOutputProcessors.contains(p));
+			p->setStateXml(newProcessorXmlElement.second);
 		}
 	}
 	else
@@ -1801,13 +2071,13 @@ bool Controller::setStateXml(XmlElement* stateXml)
 		}
 	}
 
-	// trigger UI update once after the processors have been created
+	// trigger UI update once after the processors have been created to clean and update table editors, etc.
 	auto pageMgr = PageComponentManager::GetInstance();
 	if (pageMgr)
 	{
 		auto pageContainer = pageMgr->GetPageContainer();
 		if (pageContainer)
-			pageContainer->UpdateGui(false);
+			pageContainer->UpdateGui(true);
 	}
 
 	return retVal;
@@ -2943,20 +3213,34 @@ bool Controller::LoadConfigurationFile(const File& fileToLoadFrom)
 	auto xmlConfig = juce::parseXML(fileToLoadFrom);
 
 	if (!config)
-		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Error", "Loading failed due to internal error.");
-	else if (!xmlConfig)
-		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Invalid config", "Loading failed due to invalid configuration file.");
-	else if (!SpaConBridge::AppConfiguration::isValid(xmlConfig))
-		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed due to invalid configuration file contents.");
-	else if (!config->resetConfigState(std::move(xmlConfig)))
-		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed due to internal loading error.");
-	else
 	{
-		SetParameterChanged(DCP_Init, DCT_AllConfigParameters);
-		return true;
+		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Error", "Loading failed due to internal error.");
+		return false;
 	}
 
-	return false;
+	if (!xmlConfig)
+	{
+		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Invalid config", "Loading failed due to invalid configuration file.");
+		return false;
+	}
+
+	if (!SpaConBridge::AppConfiguration::isValid(xmlConfig))
+	{
+		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed due to invalid configuration file contents.");
+		return false;
+	}
+
+	config->SetFlushAndUpdateDisabled();
+	if (!config->resetConfigState(std::move(xmlConfig)))
+	{
+		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed due to internal loading error.");
+		config->ResetFlushAndUpdateDisabled();
+		return false;
+	}
+	config->ResetFlushAndUpdateDisabled();
+
+	SetParameterChanged(DCP_Init, DCT_AllConfigParameters);
+	return true;
 }
 
 /**

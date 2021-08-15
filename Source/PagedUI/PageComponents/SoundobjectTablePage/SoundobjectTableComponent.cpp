@@ -193,12 +193,22 @@ void SoundobjectTableComponent::onAddMultipleProcessors()
 				int newProcessorsCount = w->getTextEditorContents("processor_count").getIntValue();
 				if (newProcessorsCount > 0)
 				{
+					auto config = SpaConBridge::AppConfiguration::getInstance();
+					if (config)
+						config->SetFlushAndUpdateDisabled();
+
 					auto functionCaller = std::make_unique<DelayedRecursiveFunctionCaller>([]
 						{
 							auto ctrl = Controller::GetInstance();
 							if (ctrl)
 								ctrl->createNewSoundobjectProcessor();
 						}, newProcessorsCount, true);
+					functionCaller->SetFinalFunctionCall([]
+						{
+							auto config = SpaConBridge::AppConfiguration::getInstance();
+							if (config)
+								config->ResetFlushAndUpdateDisabled();
+						});
 					functionCaller->Run();
 					functionCaller.release();
 				}

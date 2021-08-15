@@ -310,7 +310,13 @@ std::unique_ptr<XmlElement> MatrixOutputProcessor::createStateXml()
  */
 bool MatrixOutputProcessor::setStateXml(XmlElement* stateXml)
 {
+	// sanity check, if the incoming xml does make sense for this method
 	if (!stateXml || (stateXml->getTagName() != (AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORINSTANCE) + String(GetProcessorId()))))
+		return false;
+
+	// To prevent that we end up in a recursive ::setStateXml situation, verify that this setStateXml method is not called by itself
+	const ScopedXmlChangeLock lock(IsXmlChangeLocked());
+	if (!lock.isLocked())
 		return false;
 
 	SetMatrixOutputId(DCP_Init, static_cast<MatrixOutputId>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORCHANNELID))));

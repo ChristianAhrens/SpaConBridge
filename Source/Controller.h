@@ -79,6 +79,7 @@ public:
 	void createNewSoundobjectProcessor();
 	SoundobjectProcessorId AddSoundobjectProcessor(DataChangeParticipant changeSource, SoundobjectProcessor* p);
 	void RemoveSoundobjectProcessor(SoundobjectProcessor* p);
+	void RemoveSoundobjectProcessorIds(const std::vector<SoundobjectProcessorId>& sopIds);
 	int GetSoundobjectProcessorCount() const;
 	SoundobjectProcessor* GetSoundobjectProcessor(SoundobjectProcessorId processorId) const;
 	std::vector<SoundobjectProcessorId> GetSoundobjectProcessorIds() const;
@@ -98,6 +99,7 @@ public:
 	void createNewMatrixInputProcessor();
 	MatrixInputProcessorId AddMatrixInputProcessor(DataChangeParticipant changeSource, MatrixInputProcessor* p);
 	void RemoveMatrixInputProcessor(MatrixInputProcessor* p);
+	void RemoveMatrixInputProcessorIds(const std::vector<MatrixInputProcessorId>& mipIds);
 	int GetMatrixInputProcessorCount() const;
 	MatrixInputProcessor* GetMatrixInputProcessor(MatrixInputProcessorId processorId) const;
 	std::vector<MatrixInputProcessorId> GetMatrixInputProcessorIds() const;
@@ -117,6 +119,7 @@ public:
 	void createNewMatrixOutputProcessor();
 	MatrixOutputProcessorId AddMatrixOutputProcessor(DataChangeParticipant changeSource, MatrixOutputProcessor* p);
 	void RemoveMatrixOutputProcessor(MatrixOutputProcessor* p);
+	void RemoveMatrixOutputProcessorIds(const std::vector<MatrixOutputProcessorId>& mopIds);
 	int GetMatrixOutputProcessorCount() const;
 	MatrixOutputProcessor* GetMatrixOutputProcessor(MatrixOutputProcessorId processorId) const;
 	std::vector<MatrixOutputProcessorId> GetMatrixOutputProcessorIds() const;

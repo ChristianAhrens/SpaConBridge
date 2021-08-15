@@ -43,13 +43,18 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace SpaConBridge
 {
 
+/**
+ * Fwd. decl.
+ */
+class SurfaceMultiSlider;
 
 /**
  * Class MultiSurfacePageComponent is just a component which contains the multi-source slider
  * and the mapping selection control.
  */
 class MultiSurfacePageComponent :	public PageComponentBase,
-									public ComboBox::Listener
+									public ComboBox::Listener,
+									public ToggleButton::Listener
 {
 public:
 	MultiSurfacePageComponent();
@@ -59,8 +64,16 @@ public:
 	void UpdateGui(bool init) override;
 
 	//==============================================================================
-	int GetSelectedMapping() const;
-	void SetSelectedMapping(int mapping);
+	MappingAreaId GetSelectedMapping() const;
+	void SetSelectedMapping(MappingAreaId mapping);
+
+	bool IsReverbEnabled() const;
+	void SetReverbEnabled(bool enabled);
+	bool IsSpreadEnabled() const;
+	void SetSpreadEnabled(bool enabled);
+
+	//==============================================================================
+	void lookAndFeelChanged() override;
 
 protected:
 	//==============================================================================
@@ -70,11 +83,18 @@ protected:
 	//==============================================================================
 	void comboBoxChanged(ComboBox *comboBox) override;
 
+	//==============================================================================
+	void buttonClicked(Button* button) override;
+
 private:
-	std::unique_ptr<Component>	m_multiSliderSurface;	/**> Multi-source 2D-Slider. */
-	std::unique_ptr<Label>		m_mappingAreaLabel;		/**> Mapping selector label. */
-	std::unique_ptr<ComboBox>	m_mappingAreaSelect;	/**> ComboBox selector for the coordinate mapping area. */
-	int							m_selectedMapping{ 1 };	/**< Remember the last selected coordinate mapping for the multi-slider. */
+	std::unique_ptr<SurfaceMultiSlider>	m_multiSliderSurface;	/**> Multi-source 2D-Slider. */
+
+	std::unique_ptr<ComboBox>			m_mappingAreaSelect;	/**> ComboBox selector for the coordinate mapping area. */
+	MappingAreaId						m_selectedMapping{ MappingAreaId::MAI_First };	/**< Remember the last selected coordinate mapping for the multi-slider. */
+
+	std::unique_ptr<DrawableButton>		m_reverbEnable;			/**> Checkbox for reverb send gain enable. */
+
+	std::unique_ptr<DrawableButton>		m_spreadEnable;			/**> Checkbox for spread factor enable. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSurfacePageComponent)
 };

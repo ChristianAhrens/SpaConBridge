@@ -164,9 +164,9 @@ UIPageId PageComponentManager::GetActivePage() const
 /**
  * Setter for the currently active tab of the main window.
  * @param pageIdx	The currently active page id.
- * @param dontSendNotification	Indication if the configuration update shall be triggerd as well
+ * @param dontUpdateConfig	Indication if the configuration update shall be triggerd as well
  */
-void PageComponentManager::SetActivePage(UIPageId pageId, bool dontSendNotification)
+void PageComponentManager::SetActivePage(UIPageId pageId, bool dontUpdateConfig)
 {
 	m_activePage = pageId;
 
@@ -175,7 +175,7 @@ void PageComponentManager::SetActivePage(UIPageId pageId, bool dontSendNotificat
 		m_pageContainer->SetActivePage(pageId);
 	}
 
-	if (!dontSendNotification)
+	if (!dontUpdateConfig)
 	{
 		triggerConfigurationUpdate(false);
 	}
@@ -193,9 +193,9 @@ const std::vector<UIPageId>& PageComponentManager::GetEnabledPages() const
 /**
  * Setter for the currently enabled pages of the main window.
  * @param enabledPages	The pages to set as currently currently enabled.
- * @param dontSendNotification	Indication if the configuration update shall be triggerd as well
+ * @param dontUpdateConfig	Indication if the configuration update shall be triggerd as well
  */
-void PageComponentManager::SetEnabledPages(const std::vector<UIPageId>& enabledPages, bool dontSendNotification)
+void PageComponentManager::SetEnabledPages(const std::vector<UIPageId>& enabledPages, bool dontUpdateConfig)
 {
 	m_enabledPages = enabledPages;
 
@@ -204,7 +204,7 @@ void PageComponentManager::SetEnabledPages(const std::vector<UIPageId>& enabledP
 		m_pageContainer->SetEnabledPages(enabledPages);
 	}
 
-	if (!dontSendNotification)
+	if (!dontUpdateConfig)
 	{
 		triggerConfigurationUpdate(false);
 	}
@@ -373,8 +373,107 @@ void PageComponentManager::SetScenesPagePinnedScenes(const std::vector<std::pair
 }
 
 /**
- * Get the currently selected coordinate mapping used for the multi-slider.
- * @return The selected mapping area.
+ * Proxy Getter for the selected mapping area in MultiSlider Page.
+ * Forwards the call to PageContainerComponent.
+ * @return	The selected mapping area in MultiSlider Page.
+ */
+MappingAreaId PageComponentManager::GetMultiSliderMappingArea()
+{
+	if (m_pageContainer)
+		return m_pageContainer->GetMultiSliderPageMappingArea();
+	else
+	{
+		jassertfalse;
+		return MappingAreaId::MAI_Invalid;
+	}
+}
+
+/**
+ * Proxy Setter for the selected mapping area in MultiSlider Page.
+ * Forwards the call to PageContainerComponent.
+ * @param mappingArea	The selected mapping area in MultiSlider Page.
+ * @param dontSendNotification	Indication if the configuration update shall be triggerd as well
+ */
+void PageComponentManager::SetMultiSliderMappingArea(MappingAreaId mappingArea, bool dontSendNotification)
+{
+	if (m_pageContainer)
+		m_pageContainer->SetMultiSliderPageMappingArea(mappingArea);
+
+	if (!dontSendNotification)
+	{
+		triggerConfigurationUpdate(false);
+	}
+}
+
+/**
+ * Proxy Getter for the reverb enabled state in MultiSlider Page.
+ * Forwards the call to PageContainerComponent.
+ * @return	The reverb enabled state in MultiSlider Page.
+ */
+bool PageComponentManager::IsMultiSliderReverbEnabled()
+{
+	if (m_pageContainer)
+		return m_pageContainer->IsMultiSliderPageReverbEnabled();
+	else
+	{
+		jassertfalse;
+		return false;
+	}
+}
+
+/**
+ * Proxy Setter for the reverb enabled state in MultiSlider Page.
+ * Forwards the call to PageContainerComponent.
+ * @param enabled	The reverb enabled state in MultiSlider Page.
+ * @param dontSendNotification	Indication if the configuration update shall be triggerd as well
+ */
+void PageComponentManager::SetMultiSliderReverbEnabled(bool enabled, bool dontSendNotification)
+{
+	if (m_pageContainer)
+		m_pageContainer->SetMultiSliderPageReverbEnabled(enabled);
+
+	if (!dontSendNotification)
+	{
+		triggerConfigurationUpdate(false);
+	}
+}
+
+/**
+ * Proxy Getter for the spread enabled state in MultiSlider Page.
+ * Forwards the call to PageContainerComponent.
+ * @return	The spread enabled state in MultiSlider Page.
+ */
+bool PageComponentManager::IsMultiSliderSpreadEnabled()
+{
+	if (m_pageContainer)
+		return m_pageContainer->IsMultiSliderPageSpreadEnabled();
+	else
+	{
+		jassertfalse;
+		return false;
+	}
+}
+
+/**
+ * Proxy Setter for the spread enabled state in MultiSlider Page.
+ * Forwards the call to PageContainerComponent.
+ * @param enabled	The spread enabled state in MultiSlider Page.
+ * @param dontSendNotification	Indication if the configuration update shall be triggerd as well
+ */
+void PageComponentManager::SetMultiSliderSpreadEnabled(bool enabled, bool dontSendNotification)
+{
+	if (m_pageContainer)
+		m_pageContainer->SetMultiSliderPageSpreadEnabled(enabled);
+
+	if (!dontSendNotification)
+	{
+		triggerConfigurationUpdate(false);
+	}
+}
+
+/**
+ * Getter for the look and feel enum type member value.
+ * @return The look and feel enum type member value.
  */
 DbLookAndFeelBase::LookAndFeelType PageComponentManager::GetLookAndFeelType() const
 {
@@ -382,14 +481,16 @@ DbLookAndFeelBase::LookAndFeelType PageComponentManager::GetLookAndFeelType() co
 }
 
 /**
- * Get the currently selected coordinate mapping used for the multi-slider.
+ * Setter for the look and feel enum type member.
+ * @param lookAndFeelType	The look and feel type to set
+ * @param dontUpdateConfig	Indication if the configuration update shall be triggerd as well
  * @return The selected mapping area.
  */
-void PageComponentManager::SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType, bool dontSendNotification)
+void PageComponentManager::SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType, bool dontUpdateConfig)
 {
 	m_lookAndFeelType = lookAndFeelType;
 
-	if (!dontSendNotification)
+	if (!dontUpdateConfig)
 	{
 		triggerConfigurationUpdate(true); // we do want to include watcher update, since only that way the whole application is set to new LAFT (onConfigUpdated in main component)
 	}
@@ -403,7 +504,13 @@ void PageComponentManager::SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType
  */
 bool PageComponentManager::setStateXml(XmlElement* stateXml)
 {
+	// sanity check, if the incoming xml does make sense for this method
 	if (!stateXml || (stateXml->getTagName() != AppConfiguration::getTagName(AppConfiguration::TagID::UICONFIG)))
+		return false;
+
+	// To prevent that we end up in a recursive ::setStateXml situation, verify that this setStateXml method is not called by itself
+	const ScopedXmlChangeLock lock(IsXmlChangeLocked());
+	if (!lock.isLocked())
 		return false;
 
 	if (!m_pageContainer)
@@ -577,8 +684,50 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
 			SetScenesPagePinnedScenes(pinnedScenes);
 		}
 	}
+
+	auto multisliderPageXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MULTISLIDER));
+	if (multisliderPageXmlElement)
+	{
+		auto mappingAreaXmlElement = multisliderPageXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MAPPINGAREA));
+		if (mappingAreaXmlElement)
+		{
+			auto mappingAreaTextXmlElement = mappingAreaXmlElement->getFirstChildElement();
+			if (mappingAreaTextXmlElement && mappingAreaTextXmlElement->isTextElement())
+			{
+				auto mappingArea = static_cast<MappingAreaId>(mappingAreaTextXmlElement->getText().getIntValue());
+
+				SetMultiSliderMappingArea(mappingArea, true);
+			}
+		}
+		auto reverbEnabledXmlElement = multisliderPageXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::REVERBENABLED));
+		if (reverbEnabledXmlElement)
+		{
+			auto reverbEnabledTextXmlElement = reverbEnabledXmlElement->getFirstChildElement();
+			if (reverbEnabledTextXmlElement && reverbEnabledTextXmlElement->isTextElement())
+			{
+				auto reverbEnabled = (reverbEnabledTextXmlElement->getText().getIntValue()==1);
+
+				SetMultiSliderReverbEnabled(reverbEnabled, true);
+			}
+		}
+		auto spreadEnabledXmlElement = multisliderPageXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SPREADENABLED));
+		if (spreadEnabledXmlElement)
+		{
+			auto spreadEnabledTextXmlElement = spreadEnabledXmlElement->getFirstChildElement();
+			if (spreadEnabledTextXmlElement && spreadEnabledTextXmlElement->isTextElement())
+			{
+				auto spreadEnabled = (spreadEnabledTextXmlElement->getText().getIntValue() == 1);
+
+				SetMultiSliderSpreadEnabled(spreadEnabled, true);
+			}
+		}
+	}
     
     m_pageContainer->SetPagesBeingInitialized(false);
+
+	// Trigger updating UI with init parameter set.
+	// This primarily aims at refreshing the settings page.
+	m_pageContainer->UpdateGui(true);
 
 	return retVal;
 }
@@ -661,6 +810,22 @@ std::unique_ptr<XmlElement> PageComponentManager::createStateXml()
 					}
 				}
 			}
+		}
+
+		auto multisliderPageXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MULTISLIDER));
+		if (multisliderPageXmlElement)
+		{
+			auto mappingAreaXmlElement = multisliderPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MAPPINGAREA));
+			if (mappingAreaXmlElement)
+				mappingAreaXmlElement->addTextElement(String(GetMultiSliderMappingArea()));
+
+			auto reverbEnabledXmlElement = multisliderPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::REVERBENABLED));
+			if (reverbEnabledXmlElement)
+				reverbEnabledXmlElement->addTextElement(String(IsMultiSliderReverbEnabled() ? 1 : 0));
+
+			auto spreadEnabledXmlElement = multisliderPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SPREADENABLED));
+			if (spreadEnabledXmlElement)
+				spreadEnabledXmlElement->addTextElement(String(IsMultiSliderSpreadEnabled() ? 1 : 0));
 		}
 	}
 

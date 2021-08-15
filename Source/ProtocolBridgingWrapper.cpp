@@ -245,7 +245,13 @@ bool ProtocolBridgingWrapper::setStateXml(XmlElement* stateXml)
  */
 bool ProtocolBridgingWrapper::SetBridgingNodeStateXml(XmlElement* stateXml, bool dontSendNotification)
 {
+	// sanity check, if the incoming xml does make sense for this method
 	if (!stateXml || (stateXml->getTagName() != ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::NODE)))
+		return false;
+
+	// To prevent that we end up in a recursive ::setStateXml situation, verify that this setStateXml method is not called by itself
+	const ScopedXmlChangeLock lock(IsXmlChangeLocked());
+	if (!lock.isLocked())
 		return false;
 
 	if (!dontSendNotification)

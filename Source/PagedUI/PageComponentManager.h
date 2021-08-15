@@ -67,11 +67,11 @@ public:
 
 	//==============================================================================
 	UIPageId GetActivePage() const;
-	void SetActivePage(UIPageId pageId, bool dontSendNotification);
+	void SetActivePage(UIPageId pageId, bool dontUpdateConfig);
 
 	//==============================================================================
 	const std::vector<UIPageId>& GetEnabledPages() const;
-	void SetEnabledPages(const std::vector<UIPageId>& enabledPages, bool dontSendNotification);
+	void SetEnabledPages(const std::vector<UIPageId>& enabledPages, bool dontUpdateConfig);
 
 	//==============================================================================
 	int GetSoundobjectTableRowHeight();
@@ -91,8 +91,16 @@ public:
 	void SetScenesPagePinnedScenes(const std::vector<std::pair<std::pair<int, int>, std::string>>& pinnedScenes);
 
 	//==============================================================================
+	MappingAreaId GetMultiSliderMappingArea();
+	void SetMultiSliderMappingArea(MappingAreaId mappingArea, bool dontSendNotification);
+	bool IsMultiSliderReverbEnabled();
+	void SetMultiSliderReverbEnabled(bool enabled, bool dontSendNotification);
+	bool IsMultiSliderSpreadEnabled();
+	void SetMultiSliderSpreadEnabled(bool enabled, bool dontSendNotification);
+
+	//==============================================================================
 	DbLookAndFeelBase::LookAndFeelType GetLookAndFeelType() const;
-	void SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType, bool dontSendNotification);
+	void SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType, bool dontUpdateConfig);
 
 	//==============================================================================
 	std::unique_ptr<XmlElement> createStateXml() override;

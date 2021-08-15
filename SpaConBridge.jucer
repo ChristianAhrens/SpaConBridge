@@ -183,6 +183,10 @@
                   file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProcessingEngineNode.cpp"/>
             <FILE id="hf871G" name="ProcessingEngineNode.h" compile="0" resource="0"
                   file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProcessingEngineNode.h"/>
+            <FILE id="gWEdMf" name="RemoteObjectValueCache.cpp" compile="1" resource="0"
+                  file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/RemoteObjectValueCache.cpp"/>
+            <FILE id="OsrJPc" name="RemoteObjectValueCache.h" compile="0" resource="0"
+                  file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/RemoteObjectValueCache.h"/>
             <FILE id="lTDQks" name="TimerThreadBase.cpp" compile="1" resource="0"
                   file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/TimerThreadBase.cpp"/>
             <FILE id="YHp7Cb" name="TimerThreadBase.h" compile="0" resource="0"
@@ -263,6 +267,8 @@
             <FILE id="TAkUW8" name="add-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/add-24px.svg"/>
             <FILE id="ngUAkm" name="add_batch-24dp.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/add_batch-24dp.svg"/>
+            <FILE id="dTxfzC" name="adjust_black_24dp.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/adjust_black_24dp.svg"/>
             <FILE id="yuy29J" name="call_made-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/call_made-24px.svg"/>
             <FILE id="lbzD6a" name="call_received-24px.svg" compile="0" resource="1"

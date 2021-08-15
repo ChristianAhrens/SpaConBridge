@@ -86,6 +86,7 @@ public:
 
 	//==============================================================================
 	void setHelpUrl(const URL& helpUrl);
+	void setBackgroundDecorationText(const std::string& text);
 
 	//==============================================================================
 	void paint(Graphics&) override;
@@ -114,6 +115,7 @@ private:
 	std::unique_ptr<Label>													m_headerLabel;
 	std::unique_ptr<DrawableButton>											m_helpButton;
 	std::unique_ptr<URL>													m_helpUrl;
+	std::string																m_backgroundDecorationText;
 	std::vector<std::pair<std::unique_ptr<Component>, LayoutingMetadata>>	m_components;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HeaderWithElmListComponent)

@@ -43,6 +43,8 @@ public:
 
 	void Run();
 
+	void SetFinalFunctionCall(std::function<void()> voidFunction);
+
 private:
 	void RunRecursiveFunctionCallsCount();
 	void RunRecursiveFunctionCallsContainerSize();
@@ -52,6 +54,7 @@ private:
 
 	std::function<void()>		m_voidFunction;
 	std::function<void(int)>	m_intFunction;
+	std::function<void()>		m_finalVoidFunction;
 	int							m_recursionCount{ -1 };
 	int							m_recursionCounter{ -1 };
 	std::vector<int>			m_intRecursionContainer;

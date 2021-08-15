@@ -56,22 +56,6 @@ namespace SpaConBridge
 {
 
 
-/**
- * Rate at which the GUI will refresh, when the multi-slider tab is selected.
- */
-static constexpr int GUI_UPDATE_RATE_FAST = 75;
-
-/**
- * Rate at which the table pages (SO, MI/MO will refresh.
- */
-static constexpr int GUI_UPDATE_RATE_SLOW = 120;
-
-/**
- * Rate at which the Scenes/EnSpace pages will refresh.
- */
-static constexpr int GUI_UPDATE_RATE_SUPERSLOW = 1500;
-
-
 /*
 ===============================================================================
  Class PageContainerComponent
@@ -349,51 +333,137 @@ void PageContainerComponent::UpdateGui(bool init)
 		}
 	}
 
-	// Save some performance: only update the component inside the currently active tab.
-	if (m_tabbedComponent && m_tabbedComponent->getCurrentTabName() == GetPageNameFromId(UPI_SoundObjects))
+	if (m_tabbedComponent)
 	{
-		if (m_soundobjectsPage)
-			m_soundobjectsPage->UpdateGui(init);
+		auto currentPageId = GetPageIdFromName(m_tabbedComponent->getCurrentTabName());
 
-		// When the overview table is active, no need to refresh GUI very quickly
-		if (getTimerInterval() != GUI_UPDATE_RATE_SLOW)
-			startTimer(GUI_UPDATE_RATE_SLOW);
-	}
-	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabName() == GetPageNameFromId(UPI_MultiSlider))
-	{
-		if (m_multiSliderPage)
-			m_multiSliderPage->UpdateGui(init);
+		// updating is always required when init is set.
+		// starting of refresh timer only when page is visible.
+		auto updateSoundObjects = init;
+		auto startRefreshSoundObjects = false;
+		auto updateMultiSlider = init;
+		auto startRefreshMultiSlider = false;
+		auto updateMatrixIOs = init;
+		auto startRefreshMatrixIOs = false;
+		auto updateScenes = init;
+		auto startRefreshScenes = false;
+		auto updateEnSpace = init;
+		auto startRefreshEnSpace = false;
+		auto updateStatistics = init;
+		auto startRefreshStatistics = false;
+		auto updateSettings = init;
+		auto startRefreshSettings = false;
 
-		// When multi-slider is active, we refresh the GUI faster
-		if (getTimerInterval() != GUI_UPDATE_RATE_FAST)
-			startTimer(GUI_UPDATE_RATE_FAST);
-	}
-    else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabName() == GetPageNameFromId(UPI_MatrixIOs))
-    {
-        if (m_matrixIOPage)
-            m_matrixIOPage->UpdateGui(init);
+		switch (currentPageId)
+		{
+		case UPI_SoundObjects:
+			updateSoundObjects = true;
+			startRefreshSoundObjects = true;
+			break;
+		case UPI_MultiSlider:
+			updateMultiSlider = true;
+			startRefreshMultiSlider = true;
+			break;
+		case UPI_MatrixIOs:
+			updateMatrixIOs = true;
+			startRefreshMatrixIOs = true;
+			break;
+		case UPI_Scenes:
+			updateScenes = true;
+			startRefreshScenes = true;
+			break;
+		case UPI_EnSpace:
+			updateEnSpace = true;
+			startRefreshEnSpace = true;
+			break;
+		case UPI_Statistics:
+			updateStatistics = true;
+			startRefreshStatistics = true;
+			break;
+		case UPI_Settings:
+			updateSettings = true;
+			startRefreshSettings = true;
+			break;
+		default:
+			break;
+		}
 
-        // When matrix IO tab is active, we refresh the GUI faster
-		if (getTimerInterval() != GUI_UPDATE_RATE_SLOW)
-			startTimer(GUI_UPDATE_RATE_SLOW);
-    }
-	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabName() == GetPageNameFromId(UPI_Scenes))
-	{
-		if (m_scenesPage)
-			m_scenesPage->UpdateGui(init);
+		if (updateSoundObjects)
+		{
+			if (m_soundobjectsPage)
+				m_soundobjectsPage->UpdateGui(init);
+		}
+		if (startRefreshSoundObjects)
+		{
+			if (getTimerInterval() != GUI_UPDATE_RATE_SLOW)
+				startTimer(GUI_UPDATE_RATE_SLOW);
+		}
 
-		// When scenes tab is active, we refresh the GUI super slow
-		if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
-			startTimer(GUI_UPDATE_RATE_SUPERSLOW);
-	}
-	else if (m_tabbedComponent && m_tabbedComponent->getCurrentTabName() == GetPageNameFromId(UPI_EnSpace))
-	{
-		if (m_enSpacePage)
-			m_enSpacePage->UpdateGui(init);
+		if (updateMultiSlider)
+		{
+			if (m_multiSliderPage)
+				m_multiSliderPage->UpdateGui(init);
+		}
+		if (startRefreshMultiSlider)
+		{
+			if (getTimerInterval() != GUI_UPDATE_RATE_FAST)
+				startTimer(GUI_UPDATE_RATE_FAST);
+		}
 
-		// When EnSpace tab is active, we refresh the GUI super slow
-		if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
-			startTimer(GUI_UPDATE_RATE_SUPERSLOW);
+		if (updateMatrixIOs)
+		{
+			if (m_matrixIOPage)
+				m_matrixIOPage->UpdateGui(init);
+		}
+		if (startRefreshMatrixIOs)
+		{
+			if (getTimerInterval() != GUI_UPDATE_RATE_SLOW)
+				startTimer(GUI_UPDATE_RATE_SLOW);
+		}
+
+		if (updateScenes)
+		{
+			if (m_scenesPage)
+				m_scenesPage->UpdateGui(init);
+		}
+		if (startRefreshScenes)
+		{
+			if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
+				startTimer(GUI_UPDATE_RATE_SUPERSLOW);
+		}
+		
+		if (updateEnSpace)
+		{
+			if (m_enSpacePage)
+				m_enSpacePage->UpdateGui(init);
+		}
+		if (startRefreshEnSpace)
+		{
+			if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
+				startTimer(GUI_UPDATE_RATE_SUPERSLOW);
+		}
+
+		if (updateStatistics)
+		{
+			if (m_statisticsPage)
+				m_statisticsPage->UpdateGui(init);
+		}
+		if (startRefreshStatistics)
+		{
+			if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
+				startTimer(GUI_UPDATE_RATE_SUPERSLOW);
+		}
+
+		if (updateSettings)
+		{
+			if (m_settingsPage)
+				m_settingsPage->UpdateGui(init);
+		}
+		if (startRefreshSettings)
+		{
+			if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
+				startTimer(GUI_UPDATE_RATE_SUPERSLOW);
+		}
 	}
 }
 
@@ -650,6 +720,75 @@ void PageContainerComponent::SetScenesPagePinnedScenes(const std::vector<std::pa
 {
 	if (m_scenesPage)
 		m_scenesPage->SetPinnedScenes(pinnedScenes);
+}
+
+/**
+ * Getter for the selected mapping area of MultiSlider Page
+ * @return	The selected mapping area.
+ */
+MappingAreaId PageContainerComponent::GetMultiSliderPageMappingArea()
+{
+	if (m_multiSliderPage)
+		return m_multiSliderPage->GetSelectedMapping();
+	else
+	{
+		jassertfalse;
+		return MappingAreaId::MAI_Invalid;
+	}
+}
+
+/**
+ * Setter for the selected mapping area of MultiSlider Page
+ * @param mappingArea	The mapping area to select.
+ */
+void PageContainerComponent::SetMultiSliderPageMappingArea(MappingAreaId mappingArea)
+{
+	if (m_multiSliderPage)
+		m_multiSliderPage->SetSelectedMapping(mappingArea);
+}
+
+/**
+ * Getter for the reverb enabled state of MultiSlider Page
+ * @return	The enabled state.
+ */
+bool PageContainerComponent::IsMultiSliderPageReverbEnabled()
+{
+	if (m_multiSliderPage)
+		return m_multiSliderPage->IsReverbEnabled();
+	else
+		return false;
+}
+
+/**
+ * Setter for the reverb enabled state of MultiSlider Page
+ * @param enabled	The enabled state to set.
+ */
+void PageContainerComponent::SetMultiSliderPageReverbEnabled(bool enabled)
+{
+	if (m_multiSliderPage)
+		m_multiSliderPage->SetReverbEnabled(enabled);
+}
+
+/**
+ * Getter for the spread enabled state of MultiSlider Page
+ * @return	The enabled state.
+ */
+bool PageContainerComponent::IsMultiSliderPageSpreadEnabled()
+{
+	if (m_multiSliderPage)
+		return m_multiSliderPage->IsSpreadEnabled();
+	else
+		return false;
+}
+
+/**
+ * Setter for the spread enabled state of MultiSlider Page
+ * @param enabled	The enabled state to set.
+ */
+void PageContainerComponent::SetMultiSliderPageSpreadEnabled(bool enabled)
+{
+	if (m_multiSliderPage)
+		m_multiSliderPage->SetSpreadEnabled(enabled);
 }
 
 

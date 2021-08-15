@@ -193,9 +193,21 @@ void SurfaceSlider::mouseUp(const MouseEvent& e)
 /**
  * Object constructor.
  */
-SurfaceMultiSlider::SurfaceMultiSlider()
+SurfaceMultiSlider::SurfaceMultiSlider() :
+	m_currentlyDraggedId(INVALID_PROCESSOR_ID),
+	m_spreadEnabled(false),
+	m_reverbSndGainEnabled(false)
 {
-	m_currentlyDraggedId = INVALID_PROCESSOR_ID;
+}
+
+/**
+ * Object constructor.
+ */
+SurfaceMultiSlider::SurfaceMultiSlider(bool spreadEnabled, bool reverbSndGainEnabled) :
+	m_currentlyDraggedId(INVALID_PROCESSOR_ID),
+	m_spreadEnabled(spreadEnabled),
+	m_reverbSndGainEnabled(reverbSndGainEnabled)
+{
 }
 
 /**
@@ -203,6 +215,42 @@ SurfaceMultiSlider::SurfaceMultiSlider()
  */
 SurfaceMultiSlider::~SurfaceMultiSlider()
 {
+}
+
+/**
+ * Getter for the bool flag that indicates if the spread factor value shall be visualized.
+ * @return	True if the flag for spread factor visualizing is set, false if not.
+ */
+bool SurfaceMultiSlider::IsSpreadEnabled()
+{
+	return m_spreadEnabled;
+}
+
+/**
+ * Setter for the bool flag that indicates if the spread factor value shall be visualized.
+ * @param	enabled		True if the flag for spread factor visualizing shall be set, false if not.
+ */
+void SurfaceMultiSlider::SetSpreadEnabled(bool enabled)
+{
+	m_spreadEnabled = enabled;
+}
+
+/**
+ * Getter for the bool flag that indicates if the reverb send gain value shall be visualized.
+ * @return	True if the flag for reverb send gain visualizing is set, false if not.
+ */
+bool SurfaceMultiSlider::IsReverbSndGainEnabled()
+{
+	return m_reverbSndGainEnabled;
+}
+
+/**
+ * Setter for the bool flag that indicates if the reverb send gain value shall be visualized.
+ * @param	enabled		True if the flag for reverb send gain visualizing shall be set, false if not.
+ */
+void SurfaceMultiSlider::SetReverbSndGainEnabled(bool enabled)
+{
+	m_reverbSndGainEnabled = enabled;
 }
 
 /**
@@ -236,39 +284,82 @@ void SurfaceMultiSlider::paint(Graphics& g)
 	g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
 	g.drawRect(Rectangle<float>(0.0f, 0.0f, w, h), 1.5f);
 
-	float knobSize = 10.0f;
-	float highlightedKnobSize = 2 * knobSize;
+	float normalKnobSize = 10.0f;
+	float highlightedKnobSize = 2 * normalKnobSize;
 
-	for (auto const& posKV : m_cachedPositions)
+	for (auto const& paramsKV : m_cachedParameters)
 	{
-		int inputNo(posKV.second._id);
+		int inputNo(paramsKV.second._id);
+
+		auto const& selected = paramsKV.second._selected;
+
+		auto knobSize = selected ? highlightedKnobSize : normalKnobSize;
+		auto knobThickness = selected ? 6.0f : 3.0f;
 
 		// Map the x/y coordinates to the pixel-wise dimensions of the surface area.
-		Point<float> pt(posKV.second._pos);
+		auto const& pt = paramsKV.second._pos;
 		float x = pt.x * w;
 		float y = h - (pt.y * h);
 
 		// Generate a color variant based on the input number, so make the nipples easier to tell from each other.
-		Colour shade(juce::uint8(inputNo * 111), juce::uint8(inputNo * 222), juce::uint8(inputNo * 333));
-		g.setColour(getLookAndFeel().findColour(Slider::thumbColourId).interpolatedWith(shade, 0.3f));
+		auto shade = Colour(juce::uint8(inputNo * 111), juce::uint8(inputNo * 222), juce::uint8(inputNo * 333));
+		auto knobColour = getLookAndFeel().findColour(Slider::thumbColourId).interpolatedWith(shade, 0.3f);
+
+		auto metaInfoSize = normalKnobSize + 5 * normalKnobSize;
+		auto innerRadius = 0.5f * highlightedKnobSize;
+
+		// Paint spread if enabled
+		if (m_spreadEnabled)
+		{
+			auto spreadSize = metaInfoSize * paramsKV.second._spread;
+			auto spreadColour = knobColour;
+
+			auto outerRadius = innerRadius + 0.5f * spreadSize;
+
+			auto spreadPath = juce::Path();
+			spreadPath.startNewSubPath(x, y);
+			spreadPath.addCentredArc(x, y, outerRadius, outerRadius, 0, 0.0f, 2.0f * juce::MathConstants<float>::pi);
+			spreadPath.addCentredArc(x, y, innerRadius, innerRadius, 0, 2.0f * juce::MathConstants<float>::pi, 0.0f);
+			spreadPath.closeSubPath();
+
+			g.setColour(spreadColour);
+			g.setOpacity(0.4f);
+			g.fillPath(spreadPath);
+		}
+
+		// Paint reverbSendGain if enabled
+		if (m_reverbSndGainEnabled)
+		{
+			auto miRevSndGainRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
+			auto normalizedRevSndGain = jmap(paramsKV.second._reverbSndGain, miRevSndGainRange.getStart(), miRevSndGainRange.getEnd(), 0.0f, 1.0f);
+			auto reverbSize = metaInfoSize * normalizedRevSndGain;
+			auto reverbColour = knobColour;
+
+			auto outerRadius = innerRadius + 0.5f * reverbSize;
+
+			auto reverbPath = juce::Path();
+			reverbPath.startNewSubPath(x, y);
+			reverbPath.addCentredArc(x, y, outerRadius, outerRadius, 0, 0.35f * juce::MathConstants<float>::pi, 0.65f * juce::MathConstants<float>::pi);
+			reverbPath.addCentredArc(x, y, innerRadius, innerRadius, 0, 0.65f * juce::MathConstants<float>::pi, 0.35f * juce::MathConstants<float>::pi);
+			reverbPath.closeSubPath();
+			reverbPath.startNewSubPath(x, y);
+			reverbPath.addCentredArc(x, y, outerRadius, outerRadius, 0, 1.35f * juce::MathConstants<float>::pi, 1.65f * juce::MathConstants<float>::pi);
+			reverbPath.addCentredArc(x, y, innerRadius, innerRadius, 0, 1.65f * juce::MathConstants<float>::pi, 1.35f * juce::MathConstants<float>::pi);
+			reverbPath.closeSubPath();
+
+			g.setColour(reverbColour);
+			g.setOpacity(0.6f);
+			g.fillPath(reverbPath);
+		}
 
 		// Paint knob
-		if (posKV.second._selected)
-		{
-			g.drawEllipse(Rectangle<float>(x - (highlightedKnobSize / 2.0f), y - (highlightedKnobSize / 2.0f), highlightedKnobSize, highlightedKnobSize), 6.0f);
+		g.setColour(knobColour);
+		g.setOpacity(1.0f);
+		g.drawEllipse(Rectangle<float>(x - (knobSize / 2.0f), y - (knobSize / 2.0f), knobSize, knobSize), knobThickness);
 
-			// Input number label
-			g.setFont(Font(11.0, Font::plain));
-			g.drawText(String(inputNo), Rectangle<float>(x - highlightedKnobSize, y + 3, highlightedKnobSize * 2.0f, highlightedKnobSize * 2.0f), Justification::centred, true);
-		}
-		else
-		{
-			g.drawEllipse(Rectangle<float>(x - (knobSize / 2.0f), y - (knobSize / 2.0f), knobSize, knobSize), 3.0f);
-
-			// Input number label
-			g.setFont(Font(11.0, Font::plain));
-			g.drawText(String(inputNo), Rectangle<float>(x - knobSize, y + 3, knobSize * 2.0f, knobSize * 2.0f), Justification::centred, true);
-		}
+		// Input number label
+		g.setFont(Font(11.0, Font::plain));
+		g.drawText(String(inputNo), Rectangle<float>(x - knobSize, y + 3, knobSize * 2.0f, knobSize * 2.0f), Justification::centred, true);
 	}
 }
 
@@ -286,15 +377,15 @@ void SurfaceMultiSlider::mouseDown(const MouseEvent& e)
 	float knobSize = 15.0f;
 	float highlightedKnobSize = 2 * knobSize;
 
-	for (auto const& posKV : m_cachedPositions)
+	for (auto const& paramsKV : m_cachedParameters)
 	{
 		// Map the x/y coordinates to the pixel-wise dimensions of the surface area.
-		Point<float> pt(posKV.second._pos);
+		auto const& pt = paramsKV.second._pos;
 		float x = pt.x * w;
 		float y = h - (pt.y * h);
 
 		Path knobPath;
-		if (posKV.second._selected)
+		if (paramsKV.second._selected)
 			knobPath.addEllipse(Rectangle<float>(x - (highlightedKnobSize / 2.0f), y - (highlightedKnobSize / 2.0f), highlightedKnobSize, highlightedKnobSize));
 		else
 			knobPath.addEllipse(Rectangle<float>(x - (knobSize / 2.0f), y - (knobSize / 2.0f), knobSize, knobSize));
@@ -303,7 +394,7 @@ void SurfaceMultiSlider::mouseDown(const MouseEvent& e)
 		if (knobPath.contains(mousePos))
 		{
 			// Set this source as "selected" and begin a drag gesture.
-			m_currentlyDraggedId = posKV.first;
+			m_currentlyDraggedId = paramsKV.first;
 
 			auto ctrl = Controller::GetInstance();
 			if (ctrl)
@@ -314,10 +405,11 @@ void SurfaceMultiSlider::mouseDown(const MouseEvent& e)
 				{
 					GestureManagedAudioParameterFloat* param;
 					param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
-					param->BeginGuiGesture();
-
+					if (param)
+						param->BeginGuiGesture();
 					param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_Y]);
-					param->BeginGuiGesture();
+					if (param)
+						param->BeginGuiGesture();
 				}
 			}
 
@@ -370,8 +462,13 @@ void SurfaceMultiSlider::mouseUp(const MouseEvent& e)
 			auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
 			if (processor)
 			{
-				dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X])->EndGuiGesture();
-				dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_Y])->EndGuiGesture();
+				GestureManagedAudioParameterFloat* param;
+				param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
+				if (param)
+					param->EndGuiGesture();
+				param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_Y]);
+				if (param)
+					param->EndGuiGesture();
 
 				// Get mouse pixel-wise position and scale it between 0 and 1.
 				Point<int> pos = e.getPosition();
@@ -389,13 +486,13 @@ void SurfaceMultiSlider::mouseUp(const MouseEvent& e)
 }
 
 /**
- * Update the local hash of plugins and their current coordinates.
- * @param positions	Map where the keys are the PluginIds of each source, while values are pairs of the corresponding 
- *					input number and position coordinates (0.0 to 1.0). 
+ * Update the local hash of processorIds and their current parameters.
+ * @param parameters	Map where the keys are the processorIds of each soundobject, while values are pairs of the corresponding 
+ *						soundobject number and position coordinates (0.0 to 1.0), spread, reverbSendGain and select state. 
  */
-void SurfaceMultiSlider::UpdatePositions(PositionCache positions)
+void SurfaceMultiSlider::UpdateParameters(ParameterCache parameters)
 {
-	m_cachedPositions = positions;
+	m_cachedParameters = parameters;
 }
 
 

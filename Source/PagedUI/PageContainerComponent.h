@@ -175,6 +175,14 @@ public:
 	std::vector<std::pair<std::pair<int, int>, std::string>> GetScenesPagePinnedScenes();
 	void SetScenesPagePinnedScenes(const std::vector<std::pair<std::pair<int, int>, std::string>>& pinnedScenes);
 
+	//==============================================================================
+	MappingAreaId GetMultiSliderPageMappingArea();
+	void SetMultiSliderPageMappingArea(MappingAreaId mappingArea);
+	bool IsMultiSliderPageReverbEnabled();
+	void SetMultiSliderPageReverbEnabled(bool enabled);
+	bool IsMultiSliderPageSpreadEnabled();
+	void SetMultiSliderPageSpreadEnabled(bool enabled);
+
 private:
 	//==============================================================================
 	void toggleAboutPage();

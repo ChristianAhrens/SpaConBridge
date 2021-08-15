@@ -40,8 +40,6 @@ _[![SpaConBridge v0.3.1 Introduction](https://img.youtube.com/vi/ozhQxKidtWc/0.j
 
 **Known Issues:**
 
-* Loading/Saving of config is only partially working in iOS/macOS builds due to issues with sandbox and hardened runtime settings of build  
-__Note:__ Needs to be investigated, projucer seems to not entirely do the trick. More custom Xcode flags, etc. might have to be introduced.
 * Zeroconf is not working in builds for Windows OS  
 __Note:__ Needs to be implemented...
 * LookAndFeel change does not reliably update colour scheme for all UI elements  

@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+### Fixed
+
+## [0.4.0] - 2021-08-15]
+### Added
 - Added optional visualization of reverb send gain and spread factor to multislider page
 - Added support for MatrixInput and -Output Gain/Mute to MIDI Bridging
 

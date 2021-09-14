@@ -3214,26 +3214,26 @@ bool Controller::LoadConfigurationFile(const File& fileToLoadFrom)
 
 	if (!config)
 	{
-		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Error", "Loading failed due to internal error.");
+		AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Error", "Loading failed due to internal error.");
 		return false;
 	}
 
 	if (!xmlConfig)
 	{
-		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Invalid config", "Loading failed due to invalid configuration file.");
+		AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Invalid config", "Loading failed due to invalid configuration file.");
 		return false;
 	}
 
 	if (!SpaConBridge::AppConfiguration::isValid(xmlConfig))
 	{
-		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed due to invalid configuration file contents.");
+		AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed due to invalid configuration file contents.");
 		return false;
 	}
 
 	config->SetFlushAndUpdateDisabled();
 	if (!config->resetConfigState(std::move(xmlConfig)))
 	{
-		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed due to internal loading error.");
+		AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed due to internal loading error.");
 		config->ResetFlushAndUpdateDisabled();
 		return false;
 	}
@@ -3255,11 +3255,11 @@ bool Controller::SaveConfigurationFile(const File& fileToSaveTo)
 	auto xmlConfig = config->getConfigState();
 
 	if (!config)
-		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Error", "Saving failed due to internal error.");
+		AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Error", "Saving failed due to internal error.");
 	else if (!xmlConfig)
-		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Invalid", "Saving failed due to invalid internal configuration.");
+		AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Invalid", "Saving failed due to invalid internal configuration.");
 	else if (!xmlConfig->writeTo(fileToSaveTo))
-		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Saving failed", "Saving failed due to insufficient write access rights.");
+		AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Saving failed", "Saving failed due to insufficient write access rights.");
 	else
 		return true;
 

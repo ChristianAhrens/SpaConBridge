@@ -273,7 +273,7 @@ void SettingsPageComponent::onLoadConfigClicked()
 	auto chooser = std::make_unique<FileChooser>("Select a " + JUCEApplication::getInstance()->getApplicationName() + " config file to load...",
 		File::getSpecialLocation(File::userDocumentsDirectory), String(), true, false, this); // all filepatterns are allowed for loading (currently seems to not work on iOS and not be regarded on macOS at all)
     // and trigger opening it
-	chooser->launchAsync(FileBrowserComponent::openMode, [this](const FileChooser& chooser)
+	chooser->launchAsync(FileBrowserComponent::openMode|FileBrowserComponent::canSelectFiles, [this](const FileChooser& chooser)
 		{
 			auto file = chooser.getResult();
 

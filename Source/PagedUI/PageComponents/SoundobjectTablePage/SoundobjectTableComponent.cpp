@@ -177,7 +177,7 @@ void SoundobjectTableComponent::onAddProcessor()
  */
 void SoundobjectTableComponent::onAddMultipleProcessors()
 {
-	auto w = std::make_unique<AlertWindow>("Sound Objects", "Choose how many to add", juce::AlertWindow::NoIcon).release();
+	auto w = std::make_unique<AlertWindow>("Sound Objects", "Choose how many to add", MessageBoxIconType::NoIcon).release();
 	w->addTextEditor("processor_count", "1");
     w->getTextEditor("processor_count")->setInputRestrictions(3, "0123456789");
     w->getTextEditor("processor_count")->setKeyboardType(TextInputTarget::VirtualKeyboardType::phoneNumberKeyboard);

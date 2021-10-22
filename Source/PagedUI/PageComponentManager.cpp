@@ -39,7 +39,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
 #include "../Controller.h"
-#include "../SurfaceSlider.h"
+#include "../SoundobjectSlider.h"
 
 #include <Image_utils.h>
 

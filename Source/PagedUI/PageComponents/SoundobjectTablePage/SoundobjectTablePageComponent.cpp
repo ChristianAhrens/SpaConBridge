@@ -40,7 +40,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
 #include "../../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessorEditor.h"
 
-#include "../../../SurfaceSlider.h"
+#include "../../../SoundobjectSlider.h"
 #include "../../../Controller.h"
 #include "../../../LookAndFeel.h"
 

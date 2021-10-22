@@ -39,7 +39,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
 #include "../../../Controller.h"
-#include "../../../SurfaceSlider.h"
+#include "../../../MultiSoundobjectSlider.h"
 
 #include <Image_utils.h>
 
@@ -61,7 +61,7 @@ MultiSurfacePageComponent::MultiSurfacePageComponent()
 	: PageComponentBase(PCT_MultiSlide)
 {
 	// Add multi-slider
-	m_multiSliderSurface = std::make_unique<SurfaceMultiSlider>();
+	m_multiSliderSurface = std::make_unique<MultiSoundobjectSlider>();
 	addAndMakeVisible(m_multiSliderSurface.get());
 
 	// Mapping selector
@@ -173,7 +173,7 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 		
 		// Iterate through all procssor instances and see if anything changed there.
 		// At the same time collect all sources positions for updating.
-		SurfaceMultiSlider::ParameterCache cachedParameters;
+		MultiSoundobjectSlider::ParameterCache cachedParameters;
 		for (auto const& processorId : ctrl->GetSoundobjectProcessorIds())
 		{
 			auto processor = ctrl->GetSoundobjectProcessor(processorId);
@@ -188,7 +188,7 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 					auto reverbSendGain	= processor->GetParameterValue(SPI_ParamIdx_ReverbSendGain);
 					auto selected		= ctrl->IsSoundobjectProcessorIdSelected(processorId);
 
-					cachedParameters.insert(std::make_pair(processorId, SurfaceMultiSlider::SoundobjectParameters(soundobjectId, pos, spread, reverbSendGain, selected)));
+					cachedParameters.insert(std::make_pair(processorId, MultiSoundobjectSlider::SoundobjectParameters(soundobjectId, pos, spread, reverbSendGain, selected)));
 				}
 
 				if (processor->PopParameterChanged(DCP_MultiSlider, (DCT_SoundobjectProcessorConfig | DCT_SoundobjectParameters)))

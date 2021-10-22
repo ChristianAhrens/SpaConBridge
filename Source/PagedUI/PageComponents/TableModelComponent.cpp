@@ -46,7 +46,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../../CustomAudioProcessors/MatrixOutputProcessor/MatrixOutputProcessor.h"
 #include "../../CustomAudioProcessors/MatrixOutputProcessor/MatrixOutputProcessorEditor.h"
 
-#include "../../SurfaceSlider.h"
+#include "../../SoundobjectSlider.h"
 #include "../../Controller.h"
 #include "../../LookAndFeel.h"
 

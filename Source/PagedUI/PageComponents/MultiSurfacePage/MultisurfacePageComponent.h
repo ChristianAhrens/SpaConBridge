@@ -46,7 +46,7 @@ namespace SpaConBridge
 /**
  * Fwd. decl.
  */
-class SurfaceMultiSlider;
+class MultiSoundobjectSlider;
 
 /**
  * Class MultiSurfacePageComponent is just a component which contains the multi-source slider
@@ -87,7 +87,7 @@ protected:
 	void buttonClicked(Button* button) override;
 
 private:
-	std::unique_ptr<SurfaceMultiSlider>	m_multiSliderSurface;	/**> Multi-source 2D-Slider. */
+	std::unique_ptr<MultiSoundobjectSlider>	m_multiSliderSurface;	/**> Multi-source 2D-Slider. */
 
 	std::unique_ptr<ComboBox>			m_mappingAreaSelect;	/**> ComboBox selector for the coordinate mapping area. */
 	MappingAreaId						m_selectedMapping{ MappingAreaId::MAI_First };	/**< Remember the last selected coordinate mapping for the multi-slider. */

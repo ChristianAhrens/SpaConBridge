@@ -216,7 +216,7 @@ static constexpr ComsMode CM_PollOnce =		0x0004; //< The X/Y coordinates have be
 static constexpr ComsMode CM_Sync =			(CM_Rx | CM_Tx); //< The Plug-in sends SET commands when necessary, else sends requests, and accepts all responses.
 
 /**
- * Invalid ProcessorId used to signal when selection in CSurfaceMultiSlider is empty etc..
+ * Invalid ProcessorId used to signal when selection in CMultiSoundobjectSlider is empty etc..
  */
 static constexpr SoundobjectProcessorId INVALID_PROCESSOR_ID = 0xFFFFFFFF;
 

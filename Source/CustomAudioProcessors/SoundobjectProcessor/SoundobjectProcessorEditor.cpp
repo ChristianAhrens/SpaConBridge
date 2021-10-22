@@ -61,9 +61,9 @@ namespace SpaConBridge
 SoundobjectProcessorEditor::SoundobjectProcessorEditor(SoundobjectProcessor& parent)
 	: AudioProcessorEditor(&parent)
 {
-	m_surfaceSlider = std::make_unique<SurfaceSlider>(&parent);
-	m_surfaceSlider->setWantsKeyboardFocus(true);
-	addAndMakeVisible(m_surfaceSlider.get());
+	m_soundobjectSlider = std::make_unique<SoundobjectSlider>(&parent);
+	m_soundobjectSlider->setWantsKeyboardFocus(true);
+	addAndMakeVisible(m_soundobjectSlider.get());
 
 	const Array<AudioProcessorParameter*>& params = parent.getParameters();
 	if (params.size() >= 2)
@@ -243,7 +243,7 @@ void SoundobjectProcessorEditor::textEditorReturnKeyPressed(TextEditor& textEdit
 
 	// Remove keyboard focus from this editor. 
 	// Function textEditorFocusLost will then take care of setting values.
-	m_surfaceSlider->grabKeyboardFocus();
+	m_soundobjectSlider->grabKeyboardFocus();
 }
 
 /**
@@ -290,12 +290,12 @@ void SoundobjectProcessorEditor::paint(Graphics& g)
     SoundobjectProcessor* pro = dynamic_cast<SoundobjectProcessor*>(getAudioProcessor());
     if (pro)
     {
-        auto surfaceSliderLabelVisible = true;
+        auto soundobjectSliderLabelVisible = true;
         if (twoDSurfaceArea.getWidth() < 250 || twoDSurfaceArea.getHeight() < 250)
-            surfaceSliderLabelVisible = false;
+			soundobjectSliderLabelVisible = false;
         
-        auto objNumTitleText = (surfaceSliderLabelVisible ? String("Object #") : String("#")) + String(pro->GetSoundobjectId());
-        auto titleTextWidth = surfaceSliderLabelVisible ? 73 : 33;
+        auto objNumTitleText = (soundobjectSliderLabelVisible ? String("Object #") : String("#")) + String(pro->GetSoundobjectId());
+        auto titleTextWidth = soundobjectSliderLabelVisible ? 73 : 33;
         auto objNumTitleRect = twoDSurfaceArea.removeFromBottom(25).removeFromLeft(titleTextWidth + 7).removeFromRight(titleTextWidth);
         
         g.setColour(getLookAndFeel().findColour(TableListBox::textColourId));
@@ -343,40 +343,40 @@ void SoundobjectProcessorEditor::resized()
 	auto isPortrait = getResizePaintAreaSplit(twoDSurfaceArea, parameterEditArea);
 
 	//==============================================================================
-	bool surfaceSliderLabelVisible = true;
+	bool soundobjectSliderLabelVisible = true;
 	if (twoDSurfaceArea.getWidth() < 250 || twoDSurfaceArea.getHeight() < 250)
-		surfaceSliderLabelVisible = false;
-	auto xSliderStripWidth = surfaceSliderLabelVisible ? 80 : 30;
-	auto ySliderStripWidth = surfaceSliderLabelVisible ? 100 : 30;
+		soundobjectSliderLabelVisible = false;
+	auto xSliderStripWidth = soundobjectSliderLabelVisible ? 80 : 30;
+	auto ySliderStripWidth = soundobjectSliderLabelVisible ? 100 : 30;
 	twoDSurfaceArea.reduce(5, 5);
-	twoDSurfaceArea.removeFromTop(surfaceSliderLabelVisible ? 30 : 10);
-	twoDSurfaceArea.removeFromRight(surfaceSliderLabelVisible ? 30 : 10);
+	twoDSurfaceArea.removeFromTop(soundobjectSliderLabelVisible ? 30 : 10);
+	twoDSurfaceArea.removeFromRight(soundobjectSliderLabelVisible ? 30 : 10);
 
 	// Y Slider
 	auto ySliderBounds = twoDSurfaceArea;
 	ySliderBounds.removeFromRight(twoDSurfaceArea.getWidth() - ySliderStripWidth);
 	ySliderBounds.removeFromBottom(xSliderStripWidth);
 	m_ySlider->setBounds(ySliderBounds);
-	m_ySlider->setTextBoxStyle(surfaceSliderLabelVisible ? Slider::TextBoxLeft : Slider::NoTextBox, false, 80, 20);
+	m_ySlider->setTextBoxStyle(soundobjectSliderLabelVisible ? Slider::TextBoxLeft : Slider::NoTextBox, false, 80, 20);
 	ySliderBounds.removeFromTop(50);
 	ySliderBounds.removeFromRight(30);
 	m_yAxisLabel->setBounds(ySliderBounds);
-	m_yAxisLabel->setVisible(surfaceSliderLabelVisible);
+	m_yAxisLabel->setVisible(soundobjectSliderLabelVisible);
 
 	// 2D Surface
 	auto surfaceSliderBounds = twoDSurfaceArea;
 	surfaceSliderBounds.removeFromLeft(ySliderStripWidth);
 	surfaceSliderBounds.removeFromBottom(xSliderStripWidth);
-	m_surfaceSlider->setBounds(surfaceSliderBounds);
+	m_soundobjectSlider->setBounds(surfaceSliderBounds);
 	
 	// X Slider
 	auto xSliderBounds = twoDSurfaceArea;
 	xSliderBounds.removeFromTop(twoDSurfaceArea.getHeight() - xSliderStripWidth);
 	xSliderBounds.removeFromLeft(ySliderStripWidth);
 	m_xSlider->setBounds(xSliderBounds.removeFromTop(50));
-	m_xSlider->setTextBoxStyle(surfaceSliderLabelVisible ? Slider::TextBoxBelow : Slider::NoTextBox, false, 80, 20);
+	m_xSlider->setTextBoxStyle(soundobjectSliderLabelVisible ? Slider::TextBoxBelow : Slider::NoTextBox, false, 80, 20);
 	m_xAxisLabel->setBounds(xSliderBounds);
-	m_xAxisLabel->setVisible(surfaceSliderLabelVisible);
+	m_xAxisLabel->setVisible(soundobjectSliderLabelVisible);
 
 
 	//==============================================================================
@@ -483,7 +483,7 @@ void SoundobjectProcessorEditor::UpdateGui(bool init)
 				m_ySlider->setValue(fParam->get(), dontSendNotification);
 
 			// Update the nipple position on the 2D-Slider.
-			m_surfaceSlider->repaint();
+			m_soundobjectSlider->repaint();
 		}
 
 		if (pro->PopParameterChanged(DCP_SoundobjectProcessor, DCT_ReverbSendGain))

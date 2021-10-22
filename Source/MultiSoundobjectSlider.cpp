@@ -1,40 +1,23 @@
-/*
-===============================================================================
-
-Copyright (C) 2019 d&b audiotechnik GmbH & Co. KG. All Rights Reserved.
-
-This file was originally part of the Soundscape VST, AU, and AAX Plug-in
-and now in a derived version is part of SpaConBridge.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice,
-this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
-
-3. The name of the author may not be used to endorse or promote products
-derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY d&b audiotechnik GmbH & Co. KG "AS IS" AND ANY
-EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-===============================================================================
-*/
+/* Copyright (c) 2020-2021, Christian Ahrens
+ *
+ * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 
-#include "SurfaceSlider.h"
+#include "MultiSoundobjectSlider.h"
 
 #include "Controller.h"
 
@@ -48,152 +31,14 @@ namespace SpaConBridge
 
 /*
 ===============================================================================
- Class SurfaceSlider
-===============================================================================
-*/
-
-/**
- * Object constructor.
- * @param parent	The audio processor object to act as parent.
- */
-SurfaceSlider::SurfaceSlider(AudioProcessor* parent)
-{
-	m_parent = parent;
-}
-
-/**
- * Object destructor.
- */
-SurfaceSlider::~SurfaceSlider()
-{
-}
-
-/**
- * Reimplemented paint event function.
- * Components can override this method to draw their content. The paint() method gets called when 
- * a region of a component needs redrawing, either because the component's repaint() method has 
- * been called, or because something has happened on the screen that means a section of a window needs to be redrawn.
- * @param g		The graphics context that must be used to do the drawing operations. 
- */
-void SurfaceSlider::paint(Graphics& g)
-{
-	auto w = getLocalBounds().getWidth();
-	auto h = getLocalBounds().getHeight();
-
-	// Surface area
-	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
-	g.fillRect(0, 0, w, h);
-
-	// Surface frame
-	g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
-	g.drawRect(Rectangle<int>(0, 0, w, h), 2);
-
-	// X knob posiiton
-	Path knobOutline;
-
-	float x = 0;
-	const Array<AudioProcessorParameter*>& params = m_parent->getParameters();
-	AudioParameterFloat* param = dynamic_cast<AudioParameterFloat*> (params[SPI_ParamIdx_X]);
-	if (param)
-		x = static_cast<float>(*param * w);
-
-	// Y knob position
-	float y = 0;
-	param = dynamic_cast<AudioParameterFloat*> (params[SPI_ParamIdx_Y]);
-	if (param)
-		y = h - (static_cast<float>(*param * h));
-
-	// Paint knob
-	float knobSize = 10;
-	knobOutline.addEllipse(x - (knobSize / 2), y - (knobSize / 2), knobSize, knobSize);
-
-	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
-	g.fillPath(knobOutline);
-	g.setColour(getLookAndFeel().findColour(Slider::thumbColourId));
-	g.strokePath(knobOutline, PathStrokeType(3)); // Stroke width
-
-}
-
-/**
- * Called when a mouse button is pressed. 
- * @param e		Details about the position and status of the mouse event, including the source component in which it occurred 
- */
-void SurfaceSlider::mouseDown(const MouseEvent& e)
-{
-	float w = static_cast<float>(getLocalBounds().getWidth());
-	float h = static_cast<float>(getLocalBounds().getHeight());
-
-	// Get mouse position and scale it between 0 and 1.
-	Point<int> pos = e.getMouseDownPosition();
-	float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / w)));
-	float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / h)));
-
-	SoundobjectProcessor* processor = dynamic_cast<SoundobjectProcessor*>(m_parent);
-	if (processor)
-	{
-		// Set new X and Y values
-		GestureManagedAudioParameterFloat* param;
-		param = dynamic_cast<GestureManagedAudioParameterFloat*>(m_parent->getParameters()[SPI_ParamIdx_X]);
-		param->BeginGuiGesture();
-		processor->SetParameterValue(DCP_SoundobjectProcessor, SPI_ParamIdx_X, x);
-		
-		param = dynamic_cast<GestureManagedAudioParameterFloat*>(m_parent->getParameters()[SPI_ParamIdx_Y]);
-		param->BeginGuiGesture();
-		processor->SetParameterValue(DCP_SoundobjectProcessor, SPI_ParamIdx_Y, y);
-	}
-}
-
-/**
- * Called when the mouse is moved while a button is held down. 
- * @param e		Details about the position and status of the mouse event, including the source component in which it occurred
- */
-void SurfaceSlider::mouseDrag(const MouseEvent& e)
-{
-	float w = static_cast<float>(getLocalBounds().getWidth());
-	float h = static_cast<float>(getLocalBounds().getHeight());
-
-	// Get mouse position and scale it between 0 and 1.
-	Point<int> pos = e.getPosition();
-	float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / w)));
-	float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / h)));
-
-	SoundobjectProcessor* procssor = dynamic_cast<SoundobjectProcessor*>(m_parent);
-	if (procssor)
-	{
-		// Set new X and Y values
-		procssor->SetParameterValue(DCP_SoundobjectProcessor, SPI_ParamIdx_X, x);
-		procssor->SetParameterValue(DCP_SoundobjectProcessor, SPI_ParamIdx_Y, y);
-	}
-}
-
-/**
- * Called when the mouse button is released.
- * Reimplemented just to call EndGuiGesture() to inform the host.
- * @param e		Details about the position and status of the mouse event, including the source component in which it occurred
- */
-void SurfaceSlider::mouseUp(const MouseEvent& e)
-{
-	ignoreUnused(e);
-
-	GestureManagedAudioParameterFloat* param;
-	param = dynamic_cast<GestureManagedAudioParameterFloat*>(m_parent->getParameters()[SPI_ParamIdx_X]);
-	param->EndGuiGesture();
-
-	param = dynamic_cast<GestureManagedAudioParameterFloat*>(m_parent->getParameters()[SPI_ParamIdx_Y]);
-	param->EndGuiGesture();
-}
-
-
-/*
-===============================================================================
- Class SurfaceMultiSlider
+ Class MultiSoundobjectSlider
 ===============================================================================
 */
 
 /**
  * Object constructor.
  */
-SurfaceMultiSlider::SurfaceMultiSlider() :
+MultiSoundobjectSlider::MultiSoundobjectSlider() :
 	m_currentlyDraggedId(INVALID_PROCESSOR_ID),
 	m_spreadEnabled(false),
 	m_reverbSndGainEnabled(false)
@@ -203,7 +48,7 @@ SurfaceMultiSlider::SurfaceMultiSlider() :
 /**
  * Object constructor.
  */
-SurfaceMultiSlider::SurfaceMultiSlider(bool spreadEnabled, bool reverbSndGainEnabled) :
+MultiSoundobjectSlider::MultiSoundobjectSlider(bool spreadEnabled, bool reverbSndGainEnabled) :
 	m_currentlyDraggedId(INVALID_PROCESSOR_ID),
 	m_spreadEnabled(spreadEnabled),
 	m_reverbSndGainEnabled(reverbSndGainEnabled)
@@ -213,7 +58,7 @@ SurfaceMultiSlider::SurfaceMultiSlider(bool spreadEnabled, bool reverbSndGainEna
 /**
  * Object destructor.
  */
-SurfaceMultiSlider::~SurfaceMultiSlider()
+MultiSoundobjectSlider::~MultiSoundobjectSlider()
 {
 }
 
@@ -221,7 +66,7 @@ SurfaceMultiSlider::~SurfaceMultiSlider()
  * Getter for the bool flag that indicates if the spread factor value shall be visualized.
  * @return	True if the flag for spread factor visualizing is set, false if not.
  */
-bool SurfaceMultiSlider::IsSpreadEnabled()
+bool MultiSoundobjectSlider::IsSpreadEnabled()
 {
 	return m_spreadEnabled;
 }
@@ -230,7 +75,7 @@ bool SurfaceMultiSlider::IsSpreadEnabled()
  * Setter for the bool flag that indicates if the spread factor value shall be visualized.
  * @param	enabled		True if the flag for spread factor visualizing shall be set, false if not.
  */
-void SurfaceMultiSlider::SetSpreadEnabled(bool enabled)
+void MultiSoundobjectSlider::SetSpreadEnabled(bool enabled)
 {
 	m_spreadEnabled = enabled;
 }
@@ -239,7 +84,7 @@ void SurfaceMultiSlider::SetSpreadEnabled(bool enabled)
  * Getter for the bool flag that indicates if the reverb send gain value shall be visualized.
  * @return	True if the flag for reverb send gain visualizing is set, false if not.
  */
-bool SurfaceMultiSlider::IsReverbSndGainEnabled()
+bool MultiSoundobjectSlider::IsReverbSndGainEnabled()
 {
 	return m_reverbSndGainEnabled;
 }
@@ -248,7 +93,7 @@ bool SurfaceMultiSlider::IsReverbSndGainEnabled()
  * Setter for the bool flag that indicates if the reverb send gain value shall be visualized.
  * @param	enabled		True if the flag for reverb send gain visualizing shall be set, false if not.
  */
-void SurfaceMultiSlider::SetReverbSndGainEnabled(bool enabled)
+void MultiSoundobjectSlider::SetReverbSndGainEnabled(bool enabled)
 {
 	m_reverbSndGainEnabled = enabled;
 }
@@ -260,7 +105,7 @@ void SurfaceMultiSlider::SetReverbSndGainEnabled(bool enabled)
  * been called, or because something has happened on the screen that means a section of a window needs to be redrawn.
  * @param g		The graphics context that must be used to do the drawing operations. 
  */
-void SurfaceMultiSlider::paint(Graphics& g)
+void MultiSoundobjectSlider::paint(Graphics& g)
 {
 	auto w = getLocalBounds().toFloat().getWidth();
 	auto h = getLocalBounds().toFloat().getHeight();
@@ -367,7 +212,7 @@ void SurfaceMultiSlider::paint(Graphics& g)
  * Called when a mouse button is pressed. 
  * @param e		Details about the position and status of the mouse event, including the source component in which it occurred 
  */
-void SurfaceMultiSlider::mouseDown(const MouseEvent& e)
+void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
 {
 	float w = static_cast<float>(getLocalBounds().getWidth());
 	float h = static_cast<float>(getLocalBounds().getHeight());
@@ -423,7 +268,7 @@ void SurfaceMultiSlider::mouseDown(const MouseEvent& e)
  * Called when the mouse is moved while a button is held down. 
  * @param e		Details about the position and status of the mouse event, including the source component in which it occurred
  */
-void SurfaceMultiSlider::mouseDrag(const MouseEvent& e)
+void MultiSoundobjectSlider::mouseDrag(const MouseEvent& e)
 {
 	if (m_currentlyDraggedId != INVALID_PROCESSOR_ID)
 	{
@@ -450,7 +295,7 @@ void SurfaceMultiSlider::mouseDrag(const MouseEvent& e)
  * Reimplemented just to call EndGuiGesture() to inform the host.
  * @param e		Details about the position and status of the mouse event, including the source component in which it occurred
  */
-void SurfaceMultiSlider::mouseUp(const MouseEvent& e)
+void MultiSoundobjectSlider::mouseUp(const MouseEvent& e)
 {
 	ignoreUnused(e);
 
@@ -490,7 +335,7 @@ void SurfaceMultiSlider::mouseUp(const MouseEvent& e)
  * @param parameters	Map where the keys are the processorIds of each soundobject, while values are pairs of the corresponding 
  *						soundobject number and position coordinates (0.0 to 1.0), spread, reverbSendGain and select state. 
  */
-void SurfaceMultiSlider::UpdateParameters(ParameterCache parameters)
+void MultiSoundobjectSlider::UpdateParameters(ParameterCache parameters)
 {
 	m_cachedParameters = parameters;
 }

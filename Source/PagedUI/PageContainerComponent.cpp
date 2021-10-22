@@ -47,7 +47,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PageComponents/EnSpacePage/EnSpacePageComponent.h"
 
 #include "../Controller.h"
-#include "../SurfaceSlider.h"
+#include "../SoundobjectSlider.h"
 
 #include <Image_utils.h>
 

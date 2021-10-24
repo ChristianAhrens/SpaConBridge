@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+- Added support for custom colour and size of Soundobjects in multi Soundobjects page
 
 ### Changed
 

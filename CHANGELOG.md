@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 
 ### Fixed
+- Fixed file open/save crash by implementing usage of asynchronous in favour of synchronous dialog interaction (JUCE 6.1 compatibility)
+- Fixed compilation errors regarding JUCE 6.1 update
 
 ## [0.4.0] - 2021-08-15]
 ### Added

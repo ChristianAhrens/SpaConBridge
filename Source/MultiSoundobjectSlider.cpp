@@ -129,8 +129,7 @@ void MultiSoundobjectSlider::paint(Graphics& g)
 	g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
 	g.drawRect(Rectangle<float>(0.0f, 0.0f, w, h), 1.5f);
 
-	float normalKnobSize = 10.0f;
-	float highlightedKnobSize = 2 * normalKnobSize;
+	float refKnobSize = 10.0f;
 
 	for (auto const& paramsKV : m_cachedParameters)
 	{
@@ -138,20 +137,19 @@ void MultiSoundobjectSlider::paint(Graphics& g)
 
 		auto const& selected = paramsKV.second._selected;
 
-		auto knobSize = selected ? highlightedKnobSize : normalKnobSize;
-		auto knobThickness = selected ? 6.0f : 3.0f;
+		auto knobColour = paramsKV.second._colour;
+
+		auto knobSizeScaleFactor = static_cast<float>(1.0f + (1.5f * paramsKV.second._size));
+		auto knobSize = refKnobSize * knobSizeScaleFactor;
+		auto knobThickness = 3.0f * knobSizeScaleFactor;
 
 		// Map the x/y coordinates to the pixel-wise dimensions of the surface area.
 		auto const& pt = paramsKV.second._pos;
 		float x = pt.x * w;
 		float y = h - (pt.y * h);
 
-		// Generate a color variant based on the input number, so make the nipples easier to tell from each other.
-		auto shade = Colour(juce::uint8(inputNo * 111), juce::uint8(inputNo * 222), juce::uint8(inputNo * 333));
-		auto knobColour = getLookAndFeel().findColour(Slider::thumbColourId).interpolatedWith(shade, 0.3f);
-
-		auto metaInfoSize = normalKnobSize + 5 * normalKnobSize;
-		auto innerRadius = 0.5f * highlightedKnobSize;
+		auto metaInfoSize = refKnobSize + 5 * refKnobSize;
+		auto innerRadius = 0.5f * knobSize;
 
 		// Paint spread if enabled
 		if (m_spreadEnabled)
@@ -200,7 +198,17 @@ void MultiSoundobjectSlider::paint(Graphics& g)
 		// Paint knob
 		g.setColour(knobColour);
 		g.setOpacity(1.0f);
-		g.drawEllipse(Rectangle<float>(x - (knobSize / 2.0f), y - (knobSize / 2.0f), knobSize, knobSize), knobThickness);
+		if (selected)
+		{
+			auto fillSize = knobSize + knobThickness;
+			auto outlineSize = 2.0f * innerRadius + metaInfoSize;
+			g.fillEllipse(Rectangle<float>(x - (fillSize / 2.0f), y - (fillSize / 2.0f), fillSize, fillSize));
+			g.drawEllipse(Rectangle<float>(x - (outlineSize / 2.0f), y - (outlineSize / 2.0f), outlineSize, outlineSize), 1.0f);
+		}
+		else
+		{
+			g.drawEllipse(Rectangle<float>(x - (knobSize / 2.0f), y - (knobSize / 2.0f), knobSize, knobSize), knobThickness);
+		}
 
 		// Input number label
 		g.setFont(Font(11.0, Font::plain));
@@ -335,7 +343,7 @@ void MultiSoundobjectSlider::mouseUp(const MouseEvent& e)
  * @param parameters	Map where the keys are the processorIds of each soundobject, while values are pairs of the corresponding 
  *						soundobject number and position coordinates (0.0 to 1.0), spread, reverbSendGain and select state. 
  */
-void MultiSoundobjectSlider::UpdateParameters(ParameterCache parameters)
+void MultiSoundobjectSlider::UpdateParameters(const ParameterCache& parameters)
 {
 	m_cachedParameters = parameters;
 }

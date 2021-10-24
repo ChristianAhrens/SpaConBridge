@@ -145,6 +145,8 @@ void MultiSoundobjectSlider::SetBackgroundImage(MappingAreaId mappingAreaId, con
 void MultiSoundobjectSlider::RemoveBackgroundImage(MappingAreaId mappingAreaId)
 {
 	m_backgroundImages.erase(mappingAreaId);
+
+	repaint();
 }
 
 /**

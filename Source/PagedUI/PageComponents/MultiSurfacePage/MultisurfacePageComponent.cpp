@@ -168,7 +168,7 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 	auto ctrl = Controller::GetInstance();
 	if (ctrl && m_multiSliderSurface)
 	{
-		if (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_NumProcessors) || (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_ProcessorSelection)))
+		if (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_NumProcessors) || (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_ProcessorSelection)) || (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_SoundobjectColourAndSize)))
 			update = true;
 		
 		// Iterate through all procssor instances and see if anything changed there.
@@ -187,8 +187,10 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 					auto spread			= processor->GetParameterValue(SPI_ParamIdx_ObjectSpread);
 					auto reverbSendGain	= processor->GetParameterValue(SPI_ParamIdx_ReverbSendGain);
 					auto selected		= ctrl->IsSoundobjectProcessorIdSelected(processorId);
+					auto colour			= processor->GetSoundobjectColour();
+					auto size			= processor->GetSoundobjectSize();
 
-					cachedParameters.insert(std::make_pair(processorId, MultiSoundobjectSlider::SoundobjectParameters(soundobjectId, pos, spread, reverbSendGain, selected)));
+					cachedParameters.insert(std::make_pair(processorId, MultiSoundobjectSlider::SoundobjectParameters(soundobjectId, pos, spread, reverbSendGain, selected, colour, size)));
 				}
 
 				if (processor->PopParameterChanged(DCP_MultiSlider, (DCT_SoundobjectProcessorConfig | DCT_SoundobjectParameters)))

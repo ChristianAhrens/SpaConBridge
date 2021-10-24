@@ -40,14 +40,18 @@ public:
 			_pos(Point<float>(0.0f, 0.0f)),
 			_spread(0.0f),
 			_reverbSndGain(0.0f),
-			_selected(false) 
+			_selected(false),
+			_colour(Colours::black),
+			_size(0.5f)
 		{};
-		SoundobjectParameters(SoundobjectId id, const Point<float>& pos, float spread, float reverbSendGain, bool selected) : 
+		SoundobjectParameters(SoundobjectId id, const Point<float>& pos, float spread, float reverbSendGain, bool selected, const Colour& colour, double size) : 
 			_id(id), 
 			_pos(pos),
 			_spread(spread),
 			_reverbSndGain(reverbSendGain),
-			_selected(selected)
+			_selected(selected),
+			_colour(colour),
+			_size(size)
 		{};
 
 		SoundobjectId	_id;
@@ -55,6 +59,8 @@ public:
 		float			_spread;
 		float			_reverbSndGain;
 		bool			_selected;
+		Colour			_colour;
+		double			_size;
 	};
 	typedef std::map<SoundobjectProcessorId, SoundobjectParameters> ParameterCache;
 
@@ -67,7 +73,7 @@ public:
 	bool IsReverbSndGainEnabled();
 	void SetReverbSndGainEnabled(bool enabled);
 
-	void UpdateParameters(ParameterCache positions);
+	void UpdateParameters(const ParameterCache& positions);
 
 	void paint (Graphics& g) override;
 	void mouseDown (const MouseEvent& e) override;

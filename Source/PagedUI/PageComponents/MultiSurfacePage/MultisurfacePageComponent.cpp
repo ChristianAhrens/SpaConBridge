@@ -72,8 +72,20 @@ MultiSurfacePageComponent::MultiSurfacePageComponent()
 	m_mappingAreaSelect->addItem("Mapping Area 3", 3);
 	m_mappingAreaSelect->addItem("Mapping Area 4", 4);
 	m_mappingAreaSelect->addListener(this);
-	m_mappingAreaSelect->setTooltip("Show sound objects assigned to selected mapping area");
+	m_mappingAreaSelect->setTooltip("Show sound objects assigned to selected Mapping Area");
 	addAndMakeVisible(m_mappingAreaSelect.get());
+
+	// load background image
+	m_loadImage = std::make_unique<DrawableButton>("Load Image", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	m_loadImage->addListener(this);
+	m_loadImage->setTooltip("Load background image for selected Mapping Area");
+	addAndMakeVisible(m_loadImage.get());
+
+	// remove background image
+	m_removeImage = std::make_unique<DrawableButton>("Remove Image", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	m_removeImage->addListener(this);
+	m_removeImage->setTooltip("Remove background image of selected Mapping Area");
+	addAndMakeVisible(m_removeImage.get());
 
 	// reverb send gain enable
 	m_reverbEnable = std::make_unique<DrawableButton>("Reverb", DrawableButton::ButtonStyle::ImageOnButtonBackground);
@@ -121,12 +133,17 @@ void MultiSurfacePageComponent::resized()
 
 	auto controlElementsBounds = bounds.removeFromBottom(25);
 	
-	// set the bounds for dropdown select by onthefly modifying 'bounds' dimensions - this leaves 'bounds' as rect with 25 removed from bottom
 	m_mappingAreaSelect->setBounds(controlElementsBounds.removeFromLeft(140));
 	controlElementsBounds.removeFromLeft(margin);
-	m_reverbEnable->setBounds(controlElementsBounds.removeFromLeft(controlElementsBounds.getHeight()));
+
+	m_loadImage->setBounds(controlElementsBounds.removeFromLeft(controlElementsBounds.getHeight()));
 	controlElementsBounds.removeFromLeft(margin);
-	m_spreadEnable->setBounds(controlElementsBounds.removeFromLeft(controlElementsBounds.getHeight()));
+	m_removeImage->setBounds(controlElementsBounds.removeFromLeft(controlElementsBounds.getHeight()));
+	
+	controlElementsBounds.removeFromRight(margin);
+	m_spreadEnable->setBounds(controlElementsBounds.removeFromRight(controlElementsBounds.getHeight()));
+	controlElementsBounds.removeFromRight(margin);
+	m_reverbEnable->setBounds(controlElementsBounds.removeFromRight(controlElementsBounds.getHeight()));
 	
 	// set the bounds for the 2D slider area.
 	bounds.removeFromBottom(margin);
@@ -234,7 +251,32 @@ void MultiSurfacePageComponent::comboBoxChanged(ComboBox *comboBox)
  */
 void MultiSurfacePageComponent::buttonClicked(Button* button)
 {
-	if (m_reverbEnable.get() == button)
+	if (m_loadImage.get() == button)
+	{
+		// create the file chooser dialog
+		auto chooser = std::make_unique<FileChooser>("Select a background image for Mapping Area " + String(GetSelectedMapping()) + "...",
+			File::getSpecialLocation(File::userDocumentsDirectory), "*.jpg;*.png", true, false, this); // all filepatterns are allowed for loading (currently seems to not work on iOS and not be regarded on macOS at all)
+		// and trigger opening it
+		chooser->launchAsync(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, [this](const FileChooser& chooser)
+			{
+				auto file = chooser.getResult();
+
+				// verify that the result is valid (ok clicked)
+				if (!file.getFullPathName().isEmpty())
+				{
+					juce::Image image = juce::ImageCache::getFromFile(file);
+					if (m_multiSliderSurface)
+						m_multiSliderSurface->SetBackgroundImage(GetSelectedMapping(), image);
+				}
+				delete static_cast<const FileChooser*>(&chooser);
+			});
+		chooser.release();
+	}
+	else if (m_removeImage.get() == button)
+	{
+		m_multiSliderSurface->RemoveBackgroundImage(GetSelectedMapping());
+	}
+	else if (m_reverbEnable.get() == button)
 	{
 		if (IsReverbEnabled() != button->getToggleState())
 		{
@@ -266,16 +308,25 @@ void MultiSurfacePageComponent::buttonClicked(Button* button)
  */
 MappingAreaId MultiSurfacePageComponent::GetSelectedMapping() const
 {
-	return m_selectedMapping;
+	if (m_multiSliderSurface)
+		return m_multiSliderSurface->GetSelectedMapping();
+	else
+		return MappingAreaId::MAI_First;
 }
 
 /**
  * Set the currently selected coordinate mapping used for the multi-slider.
  * @param mapping	The new selected mapping area.
  */
-void MultiSurfacePageComponent::SetSelectedMapping(MappingAreaId mapping)
+bool MultiSurfacePageComponent::SetSelectedMapping(MappingAreaId mapping)
 {
-	m_selectedMapping = mapping;
+	if (m_multiSliderSurface)
+	{
+		m_multiSliderSurface->SetSelectedMapping(mapping);
+		return true;
+	}
+	else
+		return false;
 }
 
 /**
@@ -342,6 +393,32 @@ void MultiSurfacePageComponent::lookAndFeelChanged()
 	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
 	if (dblookAndFeel)
 	{
+		// load image button images
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(BinaryData::image_black_24dp_svg, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+
+		m_loadImage->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+
+		// remove image button images
+		JUCEAppBasics::Image_utils::getDrawableButtonImages(BinaryData::hide_image_black_24dp_svg, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+
+		m_removeImage->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+
 		// reverb images
 		JUCEAppBasics::Image_utils::getDrawableButtonImages(BinaryData::sensors_black_24dp_svg, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
 			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),

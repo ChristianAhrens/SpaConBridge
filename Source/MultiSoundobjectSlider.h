@@ -68,10 +68,17 @@ public:
 	MultiSoundobjectSlider(bool spreadEnabled, bool reverbSndGainEnabled);
 	~MultiSoundobjectSlider() override;
 
+	MappingAreaId GetSelectedMapping() const;
+	void SetSelectedMapping(MappingAreaId mapping);
+
 	bool IsSpreadEnabled();
 	void SetSpreadEnabled(bool enabled);
 	bool IsReverbSndGainEnabled();
 	void SetReverbSndGainEnabled(bool enabled);
+
+	bool HasBackgroundImage(MappingAreaId mappingAreaId);
+	void SetBackgroundImage(MappingAreaId mappingAreaId, const juce::Image& backgroundImage);
+	void RemoveBackgroundImage(MappingAreaId mappingAreaId);
 
 	void UpdateParameters(const ParameterCache& positions);
 
@@ -83,12 +90,14 @@ public:
 private:
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSoundobjectSlider)
-	SoundobjectProcessorId		m_currentlyDraggedId;	/**> ProcessorId of the currently selected knob, if any. */
-	std::vector<SoundobjectId>	m_highlightedIds;		/**> SourceIds of the currently highlighted knobs, if any. */
-	ParameterCache				m_cachedParameters;		/**> To save us from iterating over all Soundobject Processors at every click, cache their current parametervalues.
-														 * Keys are the SoundobjectProcessorId of each object processor. */
-	bool						m_spreadEnabled;
-	bool						m_reverbSndGainEnabled;
+	SoundobjectProcessorId					m_currentlyDraggedId;	/**> ProcessorId of the currently selected knob, if any. */
+	std::vector<SoundobjectId>				m_highlightedIds;		/**> SourceIds of the currently highlighted knobs, if any. */
+	ParameterCache							m_cachedParameters;		/**> To save us from iterating over all Soundobject Processors at every click, cache their current parametervalues.
+																	 * Keys are the SoundobjectProcessorId of each object processor. */
+	bool									m_spreadEnabled;
+	bool									m_reverbSndGainEnabled;
+	MappingAreaId							m_selectedMapping;		/**< Remember the last selected coordinate mapping for the multi-slider. */
+	std::map<MappingAreaId, juce::Image>	m_backgroundImages;
 };
 
 

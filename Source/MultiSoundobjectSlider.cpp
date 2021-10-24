@@ -41,7 +41,8 @@ namespace SpaConBridge
 MultiSoundobjectSlider::MultiSoundobjectSlider() :
 	m_currentlyDraggedId(INVALID_PROCESSOR_ID),
 	m_spreadEnabled(false),
-	m_reverbSndGainEnabled(false)
+	m_reverbSndGainEnabled(false),
+	m_selectedMapping(MappingAreaId::MAI_First)
 {
 }
 
@@ -60,6 +61,24 @@ MultiSoundobjectSlider::MultiSoundobjectSlider(bool spreadEnabled, bool reverbSn
  */
 MultiSoundobjectSlider::~MultiSoundobjectSlider()
 {
+}
+
+/**
+ * Get the currently selected coordinate mapping used for the multi-slider.
+ * @return The selected mapping area.
+ */
+MappingAreaId MultiSoundobjectSlider::GetSelectedMapping() const
+{
+	return m_selectedMapping;
+}
+
+/**
+ * Set the currently selected coordinate mapping used for the multi-slider.
+ * @param mapping	The new selected mapping area.
+ */
+void MultiSoundobjectSlider::SetSelectedMapping(MappingAreaId mapping)
+{
+	m_selectedMapping = mapping;
 }
 
 /**
@@ -99,6 +118,36 @@ void MultiSoundobjectSlider::SetReverbSndGainEnabled(bool enabled)
 }
 
 /**
+ * Helper method to check if a background image is set for the given mapping area id 
+ * @param	mappingAreaId	The id of the mapping are to verify for if an image has been set as background
+ */
+bool MultiSoundobjectSlider::HasBackgroundImage(MappingAreaId mappingAreaId)
+{
+	return m_backgroundImages.count(mappingAreaId) > 0;
+}
+
+/**
+ * Helper method to set a background image for the given mapping area id
+ * @param	mappingAreaId	The id of the mapping are to set the background image for
+ * @param	backgroundImage	The image to set as background for the given mapping area id
+ */
+void MultiSoundobjectSlider::SetBackgroundImage(MappingAreaId mappingAreaId, const juce::Image& backgroundImage)
+{
+	m_backgroundImages.insert(std::make_pair(mappingAreaId, backgroundImage));
+
+	repaint();
+}
+
+/**
+ * Helper method to remove the background image for the given mapping area id
+ * @param	mappingAreaId	The id of the mapping are to remove the background image for
+ */
+void MultiSoundobjectSlider::RemoveBackgroundImage(MappingAreaId mappingAreaId)
+{
+	m_backgroundImages.erase(mappingAreaId);
+}
+
+/**
  * Reimplemented paint event function.
  * Components can override this method to draw their content. The paint() method gets called when 
  * a region of a component needs redrawing, either because the component's repaint() method has 
@@ -111,8 +160,17 @@ void MultiSoundobjectSlider::paint(Graphics& g)
 	auto h = getLocalBounds().toFloat().getHeight();
 
 	// Surface background area
-	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
-	g.fillRect(Rectangle<float>(0.0f, 0.0f, w, h));
+	auto backgroundRect = Rectangle<float>(0.0f, 0.0f, w, h).reduced(2);
+	if (!HasBackgroundImage(GetSelectedMapping()))
+	{
+		g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
+		g.fillRect(backgroundRect);
+	}
+	else
+	{
+		auto backgroundImage = m_backgroundImages.find(GetSelectedMapping())->second;
+		g.drawImage(backgroundImage, backgroundRect);
+	}
 
 	// Draw grid
 	const float dashLengths[2] = { 5.0f, 6.0f };

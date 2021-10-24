@@ -278,13 +278,12 @@ void SettingsPageComponent::onLoadConfigClicked()
 			auto file = chooser.getResult();
 
 			// verify that the result is valid (ok clicked)
-			if (file.getFullPathName().isEmpty())
-				return;
-
-			Controller* ctrl = Controller::GetInstance();
-			if (ctrl)
-				ctrl->LoadConfigurationFile(file);
-
+			if (!file.getFullPathName().isEmpty())
+			{
+				Controller* ctrl = Controller::GetInstance();
+				if (ctrl)
+					ctrl->LoadConfigurationFile(file);
+			}
 			delete static_cast<const FileChooser*>(&chooser);
 		});
 	chooser.release();
@@ -310,17 +309,16 @@ void SettingsPageComponent::onSaveConfigClicked()
 			auto file = chooser.getResult();
 			
 			// verify that the result is valid (ok clicked)
-			if (file.getFullPathName().isEmpty())
-				return;
+			if (!file.getFullPathName().isEmpty())
+			{
+				// enforce the .config extension
+				if (file.getFileExtension() != ".config")
+					file = file.withFileExtension(".config");
 
-			// enforce the .config extension
-			if (file.getFileExtension() != ".config")
-				file = file.withFileExtension(".config");
-
-			Controller* ctrl = Controller::GetInstance();
-			if (ctrl)
-				ctrl->SaveConfigurationFile(file);
-
+				Controller* ctrl = Controller::GetInstance();
+				if (ctrl)
+					ctrl->SaveConfigurationFile(file);
+			}
 			delete static_cast<const FileChooser*>(&chooser);
 		});
 	chooser.release();

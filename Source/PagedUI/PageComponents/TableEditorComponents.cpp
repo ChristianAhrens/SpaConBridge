@@ -995,6 +995,8 @@ void ColourAndSizePickerContainer::SetSoundObjectColourAndSize(const juce::Colou
 			{
 				processor->SetSoundobjectColour(DCP_SoundobjectTable, colour);
 				processor->SetSoundobjectSize(DCP_SoundobjectTable, size);
+
+				m_colourAndSizePicker.setCurrentColourAndSize(colour, size);
 			}
 		}
 		break;

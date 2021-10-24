@@ -115,6 +115,8 @@ public:
 		PROCESSORCHANNELID,
         PROCESSORRECORDID,
         PROCESSORCOMSMODE,
+        PROCESSORCOLOUR,
+        PROCESSORSIZE,
         INDEXMAJOR,
         INDEXMINOR,
 	};
@@ -128,6 +130,10 @@ public:
             return "RecordId";
         case PROCESSORCOMSMODE:
             return "ComsMode";
+        case PROCESSORCOLOUR:
+            return "Colour";
+        case PROCESSORSIZE:
+            return "Size";
         case INDEXMAJOR:
             return "IndexMajor";
         case INDEXMINOR:

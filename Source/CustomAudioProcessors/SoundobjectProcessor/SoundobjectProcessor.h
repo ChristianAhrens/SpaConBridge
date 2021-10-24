@@ -84,6 +84,12 @@ public:
 	ComsMode GetComsMode() const;
 	void SetComsMode(DataChangeParticipant changeSource, ComsMode newMode);
 
+	const juce::Colour& GetSoundobjectColour() const;
+	void SetSoundobjectColour(DataChangeParticipant changeSource, const juce::Colour &colour);
+
+	double GetSoundobjectSize() const;
+	void SetSoundobjectSize(DataChangeParticipant changeSource, double size);
+
 	float GetParameterValue(SoundobjectParameterIndex paramIdx, bool normalized = false) const;
 	void SetParameterValue(DataChangeParticipant changeSource, SoundobjectParameterIndex paramIdx, float newValue);
 
@@ -124,77 +130,25 @@ public:
 	void setCurrentProgram(int index) override;
 
 protected:
-	/**
-	 * X coordinate in meters.
-	 * NOTE: not using std::unique_ptr here, see addParameter().
-	 */
-	GestureManagedAudioParameterFloat*		m_xPos;
-
-	/**
-	 * Y coordinate in meters.
-	 */
-	GestureManagedAudioParameterFloat*		m_yPos;
-
-	/**
-	 * Matrix input En-Space gain.
-	 */
-	GestureManagedAudioParameterFloat*		m_reverbSendGain;
-
-	/**
-	 * Sound object spread.
-	 */
-	GestureManagedAudioParameterFloat*		m_sourceSpread;
-
-	/**
-	 * Sound object delay mode (Off, Tight, Full).
-	 */
-	GestureManagedAudioParameterChoice*		m_delayMode;
-
-	/**
-	 * Current OSC communication mode, sending and/or receiving.
-	 */
-	ComsMode					m_comsMode;
-
-	/*
-	 * Coordinate mapping index (1 to 4).
-	 */
-	MappingId					m_mappingId;
-
-	/*
-	 * SoundobjectID, or matrix input number.
-	 */
-	SoundobjectId				m_soundobjectId;
-
-	/**
-	 * Unique ID of this Processor instance. 
-	 * This is also this Processor's index within the Controller::m_processors array.
-	 */
-	SoundobjectProcessorId		m_processorId;
-
-	/**
-	 * Keep track of which automation parameters have changed recently. 
-	 * The array has one entry for each application module (see enum DataChangeSource).
-	 */
-	DataChangeType				m_parametersChanged[DCP_Max];
-
-	/**
-	 * Flags used to indicate when a SET command for a parameter is currently out on the network.
-	 * Until such a flag is cleared (in the Tick() method), calls to IsParamInTransit will return true.
-	 * This mechanism is used to ensure that parameters aren't overwritten right after having been
-	 * changed via the Gui or the host.
-	 */
-	DataChangeType				m_paramSetCommandsInTransit = DCT_None;
-
-	/**
-	 * User friendly name for this processor instance
-	 */
-	String						m_processorDisplayName;
-
-	/**
-	 * Member used to ensure that property changes are registered to the correct source.
-	 * See MainProcessor::SetParameterValue().
-	 */
-	DataChangeParticipant		m_currentChangeSource = DCP_Host;
+	GestureManagedAudioParameterFloat*		m_xPos;						/**< X coordinate in meters. NOTE: not using std::unique_ptr here, see addParameter(). */
+	GestureManagedAudioParameterFloat*		m_yPos;						/**< Y coordinate in meters. */
+	GestureManagedAudioParameterFloat*		m_reverbSendGain;			/**< Matrix input En-Space gain. */
+	GestureManagedAudioParameterFloat*		m_sourceSpread;				/**< Sound object spread. */
+	GestureManagedAudioParameterChoice*		m_delayMode;				/**< Sound object delay mode (Off, Tight, Full). */
+	ComsMode					m_comsMode;								/**< Current OSC communication mode, sending and/or receiving. */
+	MappingId					m_mappingId;							/**< Coordinate mapping index (1 to 4). */
+	SoundobjectId				m_soundobjectId;						/**< SoundobjectID, or matrix input number. */
+	juce::Colour				m_soundobjectColour;					/**< The colour to be used to paint this soundobject on ui. */
+	double						m_soundobjectSize;						/**< The size to be used to paint this soundobject on ui. */
+	SoundobjectProcessorId		m_processorId;							/**< Unique ID of this Processor instance. This is also this Processor's index within the Controller::m_processors array. */
+	DataChangeType				m_parametersChanged[DCP_Max];			/**< Keep track of which automation parameters have changed recently. The array has one entry for each application module (see enum DataChangeSource). */
+	DataChangeType				m_paramSetCommandsInTransit = DCT_None;	/**< Flags used to indicate when a SET command for a parameter is currently out on the network.
+																		 * Until such a flag is cleared (in the Tick() method), calls to IsParamInTransit will return true.
+																		 * This mechanism is used to ensure that parameters aren't overwritten right after having been
+																		 * changed via the Gui or the host.
+																		 */
+	String						m_processorDisplayName;					/**< User friendly name for this processor instance. */
+	DataChangeParticipant		m_currentChangeSource = DCP_Host;		/**< Member used to ensure that property changes are registered to the correct source. See MainProcessor::SetParameterValue(). */
 
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SoundobjectProcessor)

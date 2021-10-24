@@ -50,10 +50,6 @@ namespace SpaConBridge
  */
 class BridgingAwareTableHeaderComponent;
 class SoundobjectTableComponent;
-class ComboBoxContainer;
-class TextEditorContainer;
-class RadioButtonContainer;
-class EditableLabelContainer;
 class SoundobjectProcessorEditor;
 
 

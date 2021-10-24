@@ -233,6 +233,10 @@
       </GROUP>
       <GROUP id="{FAEFB6F6-97A8-A4B1-8911-35FBC344E2EF}" name="JUCE-AppBasics">
         <GROUP id="{AEF488F2-ECE4-B5B0-0BC4-9A3644EF8A18}" name="Source">
+          <FILE id="g72R4R" name="ColourAndSizePickerComponent.cpp" compile="1"
+                resource="0" file="submodules/JUCE-AppBasics/Source/ColourAndSizePickerComponent.cpp"/>
+          <FILE id="gwMBZq" name="ColourAndSizePickerComponent.h" compile="0"
+                resource="0" file="submodules/JUCE-AppBasics/Source/ColourAndSizePickerComponent.h"/>
           <FILE id="DQ1PKR" name="MidiCommandRangeAssignment.cpp" compile="1"
                 resource="0" file="submodules/JUCE-AppBasics/Source/MidiCommandRangeAssignment.cpp"/>
           <FILE id="SZ9CQH" name="MidiCommandRangeAssignment.h" compile="0" resource="0"
@@ -276,6 +280,8 @@
             <FILE id="q7WeR0" name="cancel-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/cancel-24px.svg"/>
             <FILE id="y861zl" name="clear_black_24dp.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/clear_black_24dp.svg"/>
+            <FILE id="oTwCgV" name="colorize_black_24dp.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/colorize_black_24dp.svg"/>
             <FILE id="oihE0b" name="find_replace-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/find_replace-24px.svg"/>
             <FILE id="A3cgD8" name="folder_open-24px.svg" compile="0" resource="1"

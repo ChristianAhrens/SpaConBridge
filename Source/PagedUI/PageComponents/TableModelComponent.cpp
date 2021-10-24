@@ -918,6 +918,23 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 		}
 		break;
 
+	case BridgingAwareTableHeaderComponent::TC_SoundobjectColourAndSize:
+		{
+			ColourAndSizePickerContainer* colourAndSizePicker = static_cast<ColourAndSizePickerContainer*> (existingComponentToUpdate);
+
+			// If an existing component is being passed-in for updating, we'll re-use it, but
+			// if not, we'll have to create one.
+			if (colourAndSizePicker == nullptr)
+				colourAndSizePicker = new ColourAndSizePickerContainer(*this);
+
+			// Ensure that the comboBox knows which row number it is located at.
+			colourAndSizePicker->SetRow(rowNumber);
+
+			// Return a pointer to the comboBox.
+			ret = colourAndSizePicker;
+		}
+		break;
+
 	default:
 		jassert(existingComponentToUpdate == nullptr);
 		break;
@@ -950,9 +967,11 @@ int TableModelComponent::getColumnAutoSizeWidth(int columnId)
 	case BridgingAwareTableHeaderComponent::TC_Mapping:
 		return 80;
 	case BridgingAwareTableHeaderComponent::TC_ComsMode:
-		return 110;
+		return 100;
 	case BridgingAwareTableHeaderComponent::TC_BridgingMute:
 		return 70;
+	case BridgingAwareTableHeaderComponent::TC_SoundobjectColourAndSize:
+		return 40;
 	default:
 		break;
 	}

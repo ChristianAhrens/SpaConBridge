@@ -106,7 +106,7 @@ SoundobjectProcessor::SoundobjectProcessor(bool insertToConfig)
 	m_comsMode = CM_Off;
 
 	// Default painting parameters
-	m_soundobjectColour = Desktop::getInstance().getDefaultLookAndFeel().findColour(Slider::thumbColourId);
+	m_soundobjectColour = Colours::black;
 	m_soundobjectSize = 0.5f;
 
 	// Start with all parameter changed flags cleared. Function setStateInformation() 

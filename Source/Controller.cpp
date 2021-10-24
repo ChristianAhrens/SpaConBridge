@@ -284,6 +284,7 @@ SoundobjectProcessorId Controller::AddSoundobjectProcessor(DataChangeParticipant
 		if (processor->GetSoundobjectId() > currentMaxSoundobjectId)
 			currentMaxSoundobjectId = processor->GetSoundobjectId();
 	}
+	SoundobjectId newSoundobjectId = currentMaxSoundobjectId + 1;
 
 	// Get the next free processor id to use (can be one inbetween or the next after the last)
 	auto newProcessorId = GetNextProcessorId();
@@ -297,7 +298,15 @@ SoundobjectProcessorId Controller::AddSoundobjectProcessor(DataChangeParticipant
 	SetParameterChanged(changeSource, DCT_NumProcessors);
 
 	// Set the new Processor's InputID to the next in sequence.
-	p->SetSoundobjectId(changeSource, currentMaxSoundobjectId + 1);
+	p->SetSoundobjectId(changeSource, newSoundobjectId);
+
+	// Set a color variant based on the input number, so make the nipples easier to tell from each other.
+	auto shade = Colour(juce::uint8(newSoundobjectId * 111), juce::uint8(newSoundobjectId * 222), juce::uint8(newSoundobjectId * 333));
+	auto knobColour = Desktop::getInstance().getDefaultLookAndFeel().findColour(Slider::thumbColourId).interpolatedWith(shade, 0.4f);
+	p->SetSoundobjectColour(changeSource, knobColour);
+
+	// Set a default painting siez for the new soundobject
+	p->SetSoundobjectSize(changeSource, 0.4f);
 
 	return newProcessorId;
 }

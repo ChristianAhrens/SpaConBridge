@@ -472,6 +472,31 @@ void PageComponentManager::SetMultiSliderSpreadEnabled(bool enabled, bool dontSe
 }
 
 /**
+ * Loads an image from a given file to image cache, inserts it to internal hash of backgrounds and sets the image to multi soundobject page
+ * @param	mappingArea	The mapping area the image shall be loaded for
+ * @param	file		The file resource to load the image from
+ */
+void PageComponentManager::LoadImageForMappingFromFile(MappingAreaId mappingArea, const File& file)
+{
+	m_multiSliderBackgrounds.insert(std::make_pair(mappingArea, juce::ImageCache::getFromFile(file)));
+
+	if (m_pageContainer)
+		m_pageContainer->SetMultiSliderPageBackgroundImage(mappingArea, m_multiSliderBackgrounds.at(mappingArea));
+}
+
+/**
+ * Removes a background image from internal hash and multi soundobject page
+ * @param	mappingArea	The mapping area the image shall be erased of
+ */
+void PageComponentManager::RemoveImageForMapping(MappingAreaId mappingArea)
+{
+	m_multiSliderBackgrounds.erase(mappingArea);
+
+	if (m_pageContainer)
+		m_pageContainer->RemoveMultiSliderPageBackgroundImage(mappingArea);
+}
+
+/**
  * Getter for the look and feel enum type member value.
  * @return The look and feel enum type member value.
  */

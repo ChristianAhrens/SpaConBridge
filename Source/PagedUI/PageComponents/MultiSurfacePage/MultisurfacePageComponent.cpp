@@ -292,17 +292,15 @@ void MultiSurfacePageComponent::buttonClicked(Button* button)
 
 				// verify that the result is valid (ok clicked)
 				if (!file.getFullPathName().isEmpty())
-				{
-					juce::Image image = juce::ImageCache::getFromFile(file);
-					SetBackgroundImage(GetSelectedMapping(), image);
-				}
+					PageComponentManager::GetInstance()->LoadImageForMappingFromFile(GetSelectedMapping(), file);
+
 				delete static_cast<const FileChooser*>(&chooser);
 			});
 		chooser.release();
 	}
 	else if (m_removeImage.get() == button)
 	{
-		RemoveBackgroundImage(GetSelectedMapping());
+		PageComponentManager::GetInstance()->RemoveImageForMapping(GetSelectedMapping());
 	}
 	else if (m_reverbEnable.get() == button)
 	{

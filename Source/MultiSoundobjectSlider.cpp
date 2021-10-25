@@ -287,8 +287,8 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
 
 	// Mouse click position (in pixel units)
 	Point<float> mousePos(static_cast<float>(e.getMouseDownPosition().x), static_cast<float>(e.getMouseDownPosition().y));
-	float knobSize = 15.0f;
-	float highlightedKnobSize = 2 * knobSize;
+
+	float refKnobSize = 10.0f;
 
 	for (auto const& paramsKV : m_cachedParameters)
 	{
@@ -297,11 +297,13 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
 		float x = pt.x * w;
 		float y = h - (pt.y * h);
 
+		auto knobSizeScaleFactor = static_cast<float>(1.0f + (1.5f * paramsKV.second._size));
+		auto knobSize = refKnobSize * knobSizeScaleFactor;
+		auto knobThickness = 3.0f * knobSizeScaleFactor;
+
 		Path knobPath;
-		if (paramsKV.second._selected)
-			knobPath.addEllipse(Rectangle<float>(x - (highlightedKnobSize / 2.0f), y - (highlightedKnobSize / 2.0f), highlightedKnobSize, highlightedKnobSize));
-		else
-			knobPath.addEllipse(Rectangle<float>(x - (knobSize / 2.0f), y - (knobSize / 2.0f), knobSize, knobSize));
+		auto fillSize = knobSize + knobThickness;
+		knobPath.addEllipse(Rectangle<float>(x - (fillSize / 2.0f), y - (fillSize / 2.0f), fillSize, fillSize));
 
 		// Check if the mouse click landed inside any of the knobs.
 		if (knobPath.contains(mousePos))

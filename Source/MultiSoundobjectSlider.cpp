@@ -126,6 +126,20 @@ bool MultiSoundobjectSlider::HasBackgroundImage(MappingAreaId mappingAreaId)
 	return m_backgroundImages.count(mappingAreaId) > 0;
 }
 
+
+/**
+ * Helper method to get the background image currently used for the given mapping area id
+ * @param	mappingAreaId	The id of the mapping are to get the background image for.
+ * return	The image used as background for the given mapping area id, nullptr if none is set.
+ */
+const juce::Image* MultiSoundobjectSlider::GetBackgroundImage(MappingAreaId mappingAreaId)
+{
+	if (HasBackgroundImage(mappingAreaId))
+		return &m_backgroundImages.at(mappingAreaId);
+	else
+		return nullptr;
+}
+
 /**
  * Helper method to set a background image for the given mapping area id
  * @param	mappingAreaId	The id of the mapping are to set the background image for
@@ -133,6 +147,9 @@ bool MultiSoundobjectSlider::HasBackgroundImage(MappingAreaId mappingAreaId)
  */
 void MultiSoundobjectSlider::SetBackgroundImage(MappingAreaId mappingAreaId, const juce::Image& backgroundImage)
 {
+	if (HasBackgroundImage(mappingAreaId))
+		m_backgroundImages.erase(mappingAreaId);
+	
 	m_backgroundImages.insert(std::make_pair(mappingAreaId, backgroundImage));
 
 	repaint();

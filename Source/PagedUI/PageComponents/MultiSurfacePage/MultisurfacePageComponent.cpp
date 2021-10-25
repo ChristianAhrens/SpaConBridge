@@ -148,7 +148,36 @@ void MultiSurfacePageComponent::resized()
 	// set the bounds for the 2D slider area.
 	bounds.removeFromBottom(margin);
 	bounds.reduce(margin, margin);
-	m_multiSliderSurface->setBounds(bounds);
+
+	if (m_multiSliderSurface)
+	{
+		auto multiSliderBounds = bounds;
+		auto multiSliderAspect = multiSliderBounds.toFloat().getAspectRatio();
+
+		auto backgroundImage = m_multiSliderSurface->GetBackgroundImage(GetSelectedMapping());
+		if (backgroundImage)
+		{
+			auto imageBounds = backgroundImage->getBounds().toFloat();
+			auto imageAspect = imageBounds.getAspectRatio();
+			
+			if (imageAspect > multiSliderAspect) // larger aspectratio is wider
+			{
+				auto aspectAdjustedHeight = multiSliderBounds.getWidth() / imageAspect;
+				auto yShift = 0.5f * (multiSliderBounds.getHeight() - aspectAdjustedHeight);
+				multiSliderBounds.setY(multiSliderBounds.getY() + yShift);
+				multiSliderBounds.setHeight(aspectAdjustedHeight);
+			}
+			else if (imageAspect < multiSliderAspect)
+			{
+				auto aspectAdjustedWidth = static_cast<int>(multiSliderBounds.getHeight() * imageAspect);
+				auto xShift = 0.5f * (multiSliderBounds.getWidth() - aspectAdjustedWidth);
+				multiSliderBounds.setX(multiSliderBounds.getX() + xShift);
+				multiSliderBounds.setWidth(aspectAdjustedWidth);
+			}
+		}
+
+		m_multiSliderSurface->setBounds(multiSliderBounds);
+	}
 }
 
 /**
@@ -265,8 +294,7 @@ void MultiSurfacePageComponent::buttonClicked(Button* button)
 				if (!file.getFullPathName().isEmpty())
 				{
 					juce::Image image = juce::ImageCache::getFromFile(file);
-					if (m_multiSliderSurface)
-						m_multiSliderSurface->SetBackgroundImage(GetSelectedMapping(), image);
+					SetBackgroundImage(GetSelectedMapping(), image);
 				}
 				delete static_cast<const FileChooser*>(&chooser);
 			});
@@ -274,7 +302,7 @@ void MultiSurfacePageComponent::buttonClicked(Button* button)
 	}
 	else if (m_removeImage.get() == button)
 	{
-		m_multiSliderSurface->RemoveBackgroundImage(GetSelectedMapping());
+		RemoveBackgroundImage(GetSelectedMapping());
 	}
 	else if (m_reverbEnable.get() == button)
 	{
@@ -323,6 +351,12 @@ bool MultiSurfacePageComponent::SetSelectedMapping(MappingAreaId mapping)
 	if (m_multiSliderSurface)
 	{
 		m_multiSliderSurface->SetSelectedMapping(mapping);
+
+		resized();
+
+		// Trigger an update on the multi-slider
+		UpdateGui(true);
+
 		return true;
 	}
 	else
@@ -377,6 +411,54 @@ void MultiSurfacePageComponent::SetSpreadEnabled(bool enabled)
 
 	// Trigger an update on the multi-slider
 	UpdateGui(true);
+}
+
+/**
+ * Getter for the background image for given mapping area.
+ * @param	mappingAreaId	The id of the mapping area to get the currently used background image for
+ * @return	A pointer to the currently used image, nullptr if none is set.
+ */
+const juce::Image* MultiSurfacePageComponent::GetBackgroundImage(MappingAreaId mappingAreaId)
+{
+	if (m_multiSliderSurface)
+		return m_multiSliderSurface->GetBackgroundImage(mappingAreaId);
+	else
+		return nullptr;
+}
+
+/**
+ * Setter for the background image for given mapping area.
+ * @param	mappingAreaId	The id of the mapping area to set the background image for
+ * @param	backgroundImage	The image to set as background
+ */
+void MultiSurfacePageComponent::SetBackgroundImage(MappingAreaId mappingAreaId, const juce::Image& backgroundImage)
+{
+	if (m_multiSliderSurface)
+	{
+		m_multiSliderSurface->SetBackgroundImage(mappingAreaId, backgroundImage);
+
+		resized();
+
+		// Trigger an update on the multi-slider
+		UpdateGui(true);
+	}
+}
+
+/**
+ * Helper method to remove the background image for given mapping area.
+ * @param	mappingAreaId	The id of the mapping area to remove the background image of
+ */
+void MultiSurfacePageComponent::RemoveBackgroundImage(MappingAreaId mappingAreaId)
+{
+	if (m_multiSliderSurface)
+	{
+		m_multiSliderSurface->RemoveBackgroundImage(mappingAreaId);
+
+		resized();
+
+		// Trigger an update on the multi-slider
+		UpdateGui(true);
+	}
 }
 
 /**

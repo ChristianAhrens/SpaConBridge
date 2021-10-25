@@ -72,6 +72,10 @@ public:
 	bool IsSpreadEnabled() const;
 	void SetSpreadEnabled(bool enabled);
 
+	const juce::Image* GetBackgroundImage(MappingAreaId mappingAreaId);
+	void SetBackgroundImage(MappingAreaId mappingAreaId, const juce::Image& backgroundImage);
+	void RemoveBackgroundImage(MappingAreaId mappingAreaId);
+
 	//==============================================================================
 	void lookAndFeelChanged() override;
 

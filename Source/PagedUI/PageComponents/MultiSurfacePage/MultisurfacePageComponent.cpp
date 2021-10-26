@@ -162,15 +162,15 @@ void MultiSurfacePageComponent::resized()
 			
 			if (imageAspect > multiSliderAspect) // larger aspectratio is wider
 			{
-				auto aspectAdjustedHeight = multiSliderBounds.getWidth() / imageAspect;
-				auto yShift = 0.5f * (multiSliderBounds.getHeight() - aspectAdjustedHeight);
+				auto aspectAdjustedHeight = static_cast<int>(multiSliderBounds.getWidth() / imageAspect);
+				auto yShift = static_cast<int>(0.5f * (multiSliderBounds.getHeight() - aspectAdjustedHeight));
 				multiSliderBounds.setY(multiSliderBounds.getY() + yShift);
 				multiSliderBounds.setHeight(aspectAdjustedHeight);
 			}
 			else if (imageAspect < multiSliderAspect)
 			{
 				auto aspectAdjustedWidth = static_cast<int>(multiSliderBounds.getHeight() * imageAspect);
-				auto xShift = 0.5f * (multiSliderBounds.getWidth() - aspectAdjustedWidth);
+				auto xShift = static_cast<int>(0.5f * (multiSliderBounds.getWidth() - aspectAdjustedWidth));
 				multiSliderBounds.setX(multiSliderBounds.getX() + xShift);
 				multiSliderBounds.setWidth(aspectAdjustedWidth);
 			}

@@ -482,6 +482,8 @@ void PageComponentManager::LoadImageForMappingFromFile(MappingAreaId mappingArea
 
 	if (m_pageContainer)
 		m_pageContainer->SetMultiSliderPageBackgroundImage(mappingArea, m_multiSliderBackgrounds.at(mappingArea));
+
+	triggerConfigurationUpdate(false);
 }
 
 /**
@@ -494,6 +496,8 @@ void PageComponentManager::RemoveImageForMapping(MappingAreaId mappingArea)
 
 	if (m_pageContainer)
 		m_pageContainer->RemoveMultiSliderPageBackgroundImage(mappingArea);
+
+	triggerConfigurationUpdate(false);
 }
 
 /**
@@ -746,6 +750,34 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
 				SetMultiSliderSpreadEnabled(spreadEnabled, true);
 			}
 		}
+		auto backgroundImagesXmlElement = multisliderPageXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::BACKGROUNDIMAGES));
+		if (backgroundImagesXmlElement)
+		{
+			for (int i = MAI_First; i <= MAI_Fourth; i++)
+			{
+				auto mapping = static_cast<MappingAreaId>(i);
+				auto bkgXmlElement = backgroundImagesXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::BACKGROUND) + String(mapping));
+				if (bkgXmlElement)
+				{
+					MemoryBlock pngData;
+					if (pngData.fromBase64Encoding(bkgXmlElement->getStringAttribute("pngData", String())))
+					{
+						MemoryInputStream inputStream(pngData.getData(), pngData.getSize(), true);
+						m_multiSliderBackgrounds.insert(std::make_pair(mapping, ImageFileFormat::loadFrom(inputStream)));
+
+						if (m_pageContainer)
+							m_pageContainer->SetMultiSliderPageBackgroundImage(mapping, m_multiSliderBackgrounds.at(mapping));
+					}
+				}
+				else
+				{
+					m_multiSliderBackgrounds.erase(mapping);
+
+					if (m_pageContainer)
+						m_pageContainer->RemoveMultiSliderPageBackgroundImage(mapping);
+				}
+			}
+		}
 	}
     
     m_pageContainer->SetPagesBeingInitialized(false);
@@ -851,6 +883,28 @@ std::unique_ptr<XmlElement> PageComponentManager::createStateXml()
 			auto spreadEnabledXmlElement = multisliderPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SPREADENABLED));
 			if (spreadEnabledXmlElement)
 				spreadEnabledXmlElement->addTextElement(String(IsMultiSliderSpreadEnabled() ? 1 : 0));
+
+			auto backgroundImagesXmlElement = multisliderPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::BACKGROUNDIMAGES));
+			if (backgroundImagesXmlElement)
+			{
+				for (int i = MAI_First; i <= MAI_Fourth; i++)
+				{
+					auto mapping = static_cast<MappingAreaId>(i);
+					if (m_multiSliderBackgrounds.count(mapping) > 0)
+					{
+						auto bkgXmlElement = backgroundImagesXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::BACKGROUND) + String(mapping));
+						if (bkgXmlElement)
+						{
+							MemoryOutputStream outputStream;
+							PNGImageFormat formattedImage;
+							formattedImage.writeImageToStream(m_multiSliderBackgrounds.at(mapping), outputStream);
+							MemoryBlock pngData(outputStream.getData(), outputStream.getDataSize());
+
+							bkgXmlElement->setAttribute("pngData", pngData.toBase64Encoding());
+						}
+					}
+				}
+			}
 		}
 	}
 

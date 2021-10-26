@@ -54,6 +54,8 @@ public:
         MAPPINGAREA,
         REVERBENABLED,
         SPREADENABLED,
+        BACKGROUNDIMAGES,
+        BACKGROUND,
     };
     static String getTagName(TagID ID)
     {
@@ -105,6 +107,10 @@ public:
             return "ReverbEnabled";
         case SPREADENABLED:
             return "SpreadEnabled";
+        case BACKGROUNDIMAGES:
+            return "BackgroundImages";
+        case BACKGROUND:
+            return "Bkg";
 		default:
 			return "INVALID";
         }

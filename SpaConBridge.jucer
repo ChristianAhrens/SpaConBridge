@@ -289,6 +289,10 @@
             <FILE id="N9NqBe" name="grain-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/grain-24px.svg"/>
             <FILE id="ToZnzd" name="height-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/height-24px.svg"/>
             <FILE id="rlRTHW" name="help-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/help-24px.svg"/>
+            <FILE id="frPr4P" name="hide_image_black_24dp.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/hide_image_black_24dp.svg"/>
+            <FILE id="LYjwSS" name="image_black_24dp.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/image_black_24dp.svg"/>
             <FILE id="hDIVdB" name="keyboard_arrow_down-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/keyboard_arrow_down-24px.svg"/>
             <FILE id="AJZAbu" name="keyboard_arrow_left-24px.svg" compile="0" resource="1"

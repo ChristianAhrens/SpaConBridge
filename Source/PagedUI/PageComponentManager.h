@@ -98,6 +98,9 @@ public:
 	bool IsMultiSliderSpreadEnabled();
 	void SetMultiSliderSpreadEnabled(bool enabled, bool dontSendNotification);
 
+	void LoadImageForMappingFromFile(MappingAreaId mappingArea, const File& file);
+	void RemoveImageForMapping(MappingAreaId mappingArea);
+
 	//==============================================================================
 	DbLookAndFeelBase::LookAndFeelType GetLookAndFeelType() const;
 	void SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType, bool dontUpdateConfig);
@@ -115,6 +118,8 @@ protected:
 	std::vector<UIPageId>				m_enabledPages;												/**< Remember the currently enabled pages. */
 
 	DbLookAndFeelBase::LookAndFeelType	m_lookAndFeelType{ DbLookAndFeelBase::LAFT_InvalidFirst };	/**< Remember the currently selected look and feel type. */
+
+	std::map<MappingAreaId, Image>	m_multiSliderBackgrounds;	/**< The background images to use for multislider. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PageComponentManager)
 };

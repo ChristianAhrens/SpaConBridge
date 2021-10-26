@@ -178,10 +178,14 @@ public:
 	//==============================================================================
 	MappingAreaId GetMultiSliderPageMappingArea();
 	void SetMultiSliderPageMappingArea(MappingAreaId mappingArea);
+
 	bool IsMultiSliderPageReverbEnabled();
 	void SetMultiSliderPageReverbEnabled(bool enabled);
 	bool IsMultiSliderPageSpreadEnabled();
 	void SetMultiSliderPageSpreadEnabled(bool enabled);
+
+	void SetMultiSliderPageBackgroundImage(MappingAreaId mappingAreaId, const juce::Image& backgroundImage);
+	void RemoveMultiSliderPageBackgroundImage(MappingAreaId mappingAreaId);
 
 private:
 	//==============================================================================

@@ -216,7 +216,7 @@ void MultiSoundobjectSlider::paint(Graphics& g)
 
 		auto knobColour = paramsKV.second._colour;
 
-		auto knobSizeScaleFactor = static_cast<float>(1.0f + (1.5f * paramsKV.second._size));
+		auto knobSizeScaleFactor = static_cast<float>(1.0f + (2.0f * paramsKV.second._size));
 		auto knobSize = refKnobSize * knobSizeScaleFactor;
 		auto knobThickness = 3.0f * knobSizeScaleFactor;
 
@@ -225,7 +225,7 @@ void MultiSoundobjectSlider::paint(Graphics& g)
 		float x = pt.x * w;
 		float y = h - (pt.y * h);
 
-		auto metaInfoSize = refKnobSize + 5 * refKnobSize;
+		auto metaInfoSize = 6 * refKnobSize;
 		auto innerRadius = 0.5f * knobSize;
 
 		// Paint spread if enabled
@@ -234,7 +234,7 @@ void MultiSoundobjectSlider::paint(Graphics& g)
 			auto spreadSize = metaInfoSize * paramsKV.second._spread;
 			auto spreadColour = knobColour;
 
-			auto outerRadius = innerRadius + 0.5f * spreadSize;
+			auto outerRadius = refKnobSize + (0.5f * spreadSize);
 
 			auto spreadPath = juce::Path();
 			spreadPath.startNewSubPath(x, y);
@@ -255,7 +255,7 @@ void MultiSoundobjectSlider::paint(Graphics& g)
 			auto reverbSize = metaInfoSize * normalizedRevSndGain;
 			auto reverbColour = knobColour;
 
-			auto outerRadius = innerRadius + 0.5f * reverbSize;
+			auto outerRadius = refKnobSize + (0.5f * reverbSize);
 
 			auto reverbPath = juce::Path();
 			reverbPath.startNewSubPath(x, y);
@@ -278,7 +278,7 @@ void MultiSoundobjectSlider::paint(Graphics& g)
 		if (selected)
 		{
 			auto fillSize = knobSize + knobThickness;
-			auto outlineSize = 2.0f * innerRadius + metaInfoSize;
+			auto outlineSize = 8 * refKnobSize;
 			g.fillEllipse(Rectangle<float>(x - (fillSize / 2.0f), y - (fillSize / 2.0f), fillSize, fillSize));
 			g.drawEllipse(Rectangle<float>(x - (outlineSize / 2.0f), y - (outlineSize / 2.0f), outlineSize, outlineSize), 1.0f);
 		}

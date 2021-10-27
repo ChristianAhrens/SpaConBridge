@@ -252,6 +252,10 @@ void SoundobjectTableComponent::onRemoveProcessor()
     // Iterate through the processor ids once more to destroy the selected processors themselves.
 	if (selectedProcessorIds.size() > 0 && ctrl->GetSoundobjectProcessorCount() > 0)
 	{
+		auto config = SpaConBridge::AppConfiguration::getInstance();
+		if (config)
+			config->SetFlushAndUpdateDisabled();
+
 		auto functionCaller = std::make_unique<DelayedRecursiveFunctionCaller>([](int processorId)
 			{
 				auto ctrl = Controller::GetInstance();
@@ -261,6 +265,12 @@ void SoundobjectTableComponent::onRemoveProcessor()
 					processor->releaseResources();
 				}
 			}, selectedProcessorIds, true);
+		functionCaller->SetFinalFunctionCall([]
+			{
+				auto config = SpaConBridge::AppConfiguration::getInstance();
+				if (config)
+					config->ResetFlushAndUpdateDisabled();
+			});
 		functionCaller->Run();
 		functionCaller.release();
 	}

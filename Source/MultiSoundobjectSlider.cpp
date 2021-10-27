@@ -216,7 +216,7 @@ void MultiSoundobjectSlider::paint(Graphics& g)
 
 		auto knobColour = paramsKV.second._colour;
 
-		auto knobSizeScaleFactor = static_cast<float>(1.0f + (1.5f * paramsKV.second._size));
+		auto knobSizeScaleFactor = static_cast<float>(1.0f + (2.0f * paramsKV.second._size));
 		auto knobSize = refKnobSize * knobSizeScaleFactor;
 		auto knobThickness = 3.0f * knobSizeScaleFactor;
 

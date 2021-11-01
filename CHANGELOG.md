@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+
+### Changed
+
+### Fixed
+
+## [0.4.1] - 2021-11-01
+### Added
 - Added support for background images in multi Soundobjects page
 - Added support for custom colour and size of Soundobjects in multi Soundobjects page
 

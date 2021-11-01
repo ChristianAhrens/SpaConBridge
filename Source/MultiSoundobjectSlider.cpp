@@ -78,7 +78,16 @@ MappingAreaId MultiSoundobjectSlider::GetSelectedMapping() const
  */
 void MultiSoundobjectSlider::SetSelectedMapping(MappingAreaId mapping)
 {
+	// remove background image component from being visualized if one was set for previously selected Mapping Area
+	if (m_backgroundImages.count(m_selectedMapping) != 0 && m_backgroundImages.at(m_selectedMapping))
+		removeChildComponent(m_backgroundImages.at(m_selectedMapping).get());
+
+	// set the incoming ID as currently selected Mapping Area
 	m_selectedMapping = mapping;
+	
+	// add background image associated with newly selected Mapping Area to be visualized if one is set
+	if (m_backgroundImages.count(mapping) != 0 && m_backgroundImages.at(mapping))
+		addAndMakeVisible(m_backgroundImages.at(mapping).get(), 0);
 }
 
 /**
@@ -126,7 +135,6 @@ bool MultiSoundobjectSlider::HasBackgroundImage(MappingAreaId mappingAreaId)
 	return m_backgroundImages.count(mappingAreaId) > 0;
 }
 
-
 /**
  * Helper method to get the background image currently used for the given mapping area id
  * @param	mappingAreaId	The id of the mapping are to get the background image for.
@@ -135,7 +143,7 @@ bool MultiSoundobjectSlider::HasBackgroundImage(MappingAreaId mappingAreaId)
 const juce::Image* MultiSoundobjectSlider::GetBackgroundImage(MappingAreaId mappingAreaId)
 {
 	if (HasBackgroundImage(mappingAreaId))
-		return &m_backgroundImages.at(mappingAreaId);
+		return &m_backgroundImages.at(mappingAreaId)->getImage();
 	else
 		return nullptr;
 }
@@ -150,9 +158,15 @@ void MultiSoundobjectSlider::SetBackgroundImage(MappingAreaId mappingAreaId, con
 	if (HasBackgroundImage(mappingAreaId))
 		m_backgroundImages.erase(mappingAreaId);
 	
-	m_backgroundImages.insert(std::make_pair(mappingAreaId, backgroundImage));
+	auto imageComponent = std::make_unique<ImageComponent>();
+	imageComponent->setImage(backgroundImage);
+	imageComponent->setInterceptsMouseClicks(false, false); // make the imagecomponent oblivious to mouse interaction to allow us to handle mouse down/drag/up in this component for SO moving
+	m_backgroundImages.insert(std::make_pair(mappingAreaId, std::move(imageComponent)));
 
-	repaint();
+	if (mappingAreaId == GetSelectedMapping())
+		addAndMakeVisible(m_backgroundImages.at(mappingAreaId).get(), 0);
+
+	resized();
 }
 
 /**
@@ -163,7 +177,7 @@ void MultiSoundobjectSlider::RemoveBackgroundImage(MappingAreaId mappingAreaId)
 {
 	m_backgroundImages.erase(mappingAreaId);
 
-	repaint();
+	resized();
 }
 
 /**
@@ -173,23 +187,18 @@ void MultiSoundobjectSlider::RemoveBackgroundImage(MappingAreaId mappingAreaId)
  * been called, or because something has happened on the screen that means a section of a window needs to be redrawn.
  * @param g		The graphics context that must be used to do the drawing operations. 
  */
-void MultiSoundobjectSlider::paint(Graphics& g)
+void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 {
-	auto w = getLocalBounds().toFloat().getWidth();
-	auto h = getLocalBounds().toFloat().getHeight();
-
-	// Surface background area
-	auto backgroundRect = Rectangle<float>(0.0f, 0.0f, w, h).reduced(2);
+	// Solid surface background area if no image is set
+	auto backgroundRect = getLocalBounds().toFloat().reduced(2);
 	if (!HasBackgroundImage(GetSelectedMapping()))
 	{
 		g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
 		g.fillRect(backgroundRect);
 	}
-	else
-	{
-		auto backgroundImage = m_backgroundImages.find(GetSelectedMapping())->second;
-		g.drawImage(backgroundImage, backgroundRect);
-	}
+
+	auto w = getLocalBounds().toFloat().getWidth();
+	auto h = getLocalBounds().toFloat().getHeight();
 
 	// Draw grid
 	const float dashLengths[2] = { 5.0f, 6.0f };
@@ -291,6 +300,18 @@ void MultiSoundobjectSlider::paint(Graphics& g)
 		g.setFont(Font(11.0, Font::plain));
 		g.drawText(String(inputNo), Rectangle<float>(x - knobSize, y + 3, knobSize * 2.0f, knobSize * 2.0f), Justification::centred, true);
 	}
+}
+
+/**
+ * Reimplemented component resize method to scale the currently selected Mapping Area's background
+ * image correctly if any is set.
+ */
+void MultiSoundobjectSlider::resized()
+{
+	Component::resized();
+
+	if (m_backgroundImages.count(GetSelectedMapping()) != 0 && m_backgroundImages.at(GetSelectedMapping()))
+		m_backgroundImages.at(GetSelectedMapping())->setBounds(getLocalBounds().reduced(2));
 }
 
 /**

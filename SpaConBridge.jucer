@@ -351,6 +351,7 @@
       <FILE id="txUcgc" name="COPYING.apachev2" compile="0" resource="1"
             file="COPYING.apachev2"/>
       <FILE id="qV60Cc" name="COPYING.LESSER" compile="0" resource="1" file="COPYING.LESSER"/>
+      <FILE id="tlq8fA" name="Default.config" compile="0" resource="1" file="Resources/Default.config"/>
       <FILE id="kQ4YKb" name="LICENSE" compile="0" resource="1" file="LICENSE"/>
       <FILE id="Q7vthe" name="README.md" compile="0" resource="1" file="README.md"/>
     </GROUP>

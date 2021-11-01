@@ -105,6 +105,10 @@ SoundobjectProcessor::SoundobjectProcessor(bool insertToConfig)
 	// Default OSC communication mode.
 	m_comsMode = CM_Off;
 
+	// Default painting parameters
+	m_soundobjectColour = Colours::black;
+	m_soundobjectSize = 0.5f;
+
 	// Start with all parameter changed flags cleared. Function setStateInformation() 
 	// will check whether or not we should initialize parameters when starting up.
 	for (int cs = 0; cs < DCP_Max; cs++)
@@ -359,6 +363,8 @@ std::unique_ptr<XmlElement> SoundobjectProcessor::createStateXml()
 		processorInstanceXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORCHANNELID), static_cast<int>(GetSoundobjectId()));
         processorInstanceXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORRECORDID), static_cast<int>(GetMappingId()));
         processorInstanceXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORCOMSMODE), static_cast<int>(GetComsMode()));
+		processorInstanceXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORCOLOUR), GetSoundobjectColour().toString());
+		processorInstanceXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORSIZE), GetSoundobjectSize());
 	}
 
     return processorInstanceXmlElement;
@@ -384,6 +390,11 @@ bool SoundobjectProcessor::setStateXml(XmlElement* stateXml)
 	SetSoundobjectId(DCP_Init, static_cast<SoundobjectId>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORCHANNELID))));
     SetMappingId(DCP_Init, static_cast<MappingId>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORRECORDID))));
     SetComsMode(DCP_Init, static_cast<ComsMode>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORCOMSMODE))));
+	if (stateXml->hasAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORCOLOUR)) && stateXml->hasAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORSIZE)))
+	{
+		SetSoundobjectColour(DCP_Init, juce::Colour::fromString(stateXml->getStringAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORCOLOUR))));
+		SetSoundobjectSize(DCP_Init, stateXml->getDoubleAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORSIZE)));
+	}
 
 	return true;
 }
@@ -503,12 +514,70 @@ void SoundobjectProcessor::SetSoundobjectId(DataChangeParticipant changeSource, 
 }
 
 /**
- * Getter function for the source Id
- * @return	The current source ID
+ * Getter method for the sound object Id
+ * @return	The sound object ID of this processor instance
  */
 SoundobjectId SoundobjectProcessor::GetSoundobjectId() const
 {
 	return m_soundobjectId;
+}
+
+/**
+ * Setter method for the sound object painting colour
+ * @param	changeSource	The application module which is causing the property change.
+ * @param	colour			The new colour to set
+ */
+void SoundobjectProcessor::SetSoundobjectColour(DataChangeParticipant changeSource, const juce::Colour& colour)
+{
+	if (m_soundobjectColour != colour)
+	{
+		m_soundobjectColour = colour;
+
+		// Signal change to other modules in the procssor.
+		SetParameterChanged(changeSource, DCT_SoundobjectColourAndSize);
+
+		// finally trigger config update
+		if (changeSource != DCP_Init)
+			triggerConfigurationUpdate(false);
+	}
+}
+
+/**
+ * Getter method for the sound object painting colour
+ * @return	The sound object painting colour for this processor instance
+ */
+const juce::Colour& SoundobjectProcessor::GetSoundobjectColour() const
+{
+	return m_soundobjectColour;
+}
+
+/**
+ * Setter method for the sound object painting size
+ * @param	changeSource	The application module which is causing the property change.
+ * @param	size			The new size to set
+ */
+void SoundobjectProcessor::SetSoundobjectSize(DataChangeParticipant changeSource, double size)
+{
+	if (m_soundobjectSize != size)
+	{
+		m_soundobjectSize = size;
+
+		// Signal change to other modules in the procssor.
+		SetParameterChanged(changeSource, DCT_SoundobjectColourAndSize);
+
+		// finally trigger config update
+		if (changeSource != DCP_Init)
+			triggerConfigurationUpdate(false);
+	}
+}
+
+/**
+ * Getter method for the sound object painting size
+ * @return	The sound object painting size for this processor instance
+ */
+double SoundobjectProcessor::GetSoundobjectSize() const
+{
+	return m_soundobjectSize;
 }
 
 /**

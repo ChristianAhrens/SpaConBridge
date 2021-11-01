@@ -270,17 +270,23 @@ void SettingsPageComponent::onApplyClicked()
 void SettingsPageComponent::onLoadConfigClicked()
 {
     // create the file chooser dialog
-	FileChooser chooser("Select a " + JUCEApplication::getInstance()->getApplicationName() + " config file to load...",
+	auto chooser = std::make_unique<FileChooser>("Select a " + JUCEApplication::getInstance()->getApplicationName() + " config file to load...",
 		File::getSpecialLocation(File::userDocumentsDirectory), String(), true, false, this); // all filepatterns are allowed for loading (currently seems to not work on iOS and not be regarded on macOS at all)
     // and trigger opening it
-	if (chooser.browseForFileToOpen())
-	{
-		auto file = chooser.getResult();
+	chooser->launchAsync(FileBrowserComponent::openMode|FileBrowserComponent::canSelectFiles, [this](const FileChooser& chooser)
+		{
+			auto file = chooser.getResult();
 
-		Controller* ctrl = Controller::GetInstance();
-		if (ctrl)
-			ctrl->LoadConfigurationFile(file);
-	}
+			// verify that the result is valid (ok clicked)
+			if (!file.getFullPathName().isEmpty())
+			{
+				Controller* ctrl = Controller::GetInstance();
+				if (ctrl)
+					ctrl->LoadConfigurationFile(file);
+			}
+			delete static_cast<const FileChooser*>(&chooser);
+		});
+	chooser.release();
 }
 
 /**
@@ -295,21 +301,27 @@ void SettingsPageComponent::onSaveConfigClicked()
     auto initialFileSuggestion = File(initialFilePathSuggestion);
     
     // create the file chooser dialog
-	FileChooser chooser("Save current " + JUCEApplication::getInstance()->getApplicationName() + " config file as...",
+	auto chooser = std::make_unique<FileChooser>("Save current " + JUCEApplication::getInstance()->getApplicationName() + " config file as...",
                         initialFileSuggestion, "*.config", true, false, this);
     // and trigger opening it
-	if (chooser.browseForFileToSave(true))
-	{
-		auto file = chooser.getResult();
-        
-        // enforce the .config extension
-        if (file.getFileExtension() != ".config")
-            file = file.withFileExtension(".config");
+	chooser->launchAsync(FileBrowserComponent::saveMode, [this](const FileChooser& chooser)
+		{
+			auto file = chooser.getResult();
+			
+			// verify that the result is valid (ok clicked)
+			if (!file.getFullPathName().isEmpty())
+			{
+				// enforce the .config extension
+				if (file.getFileExtension() != ".config")
+					file = file.withFileExtension(".config");
 
-		Controller* ctrl = Controller::GetInstance();
-		if (ctrl)
-			ctrl->SaveConfigurationFile(file);
-	}
+				Controller* ctrl = Controller::GetInstance();
+				if (ctrl)
+					ctrl->SaveConfigurationFile(file);
+			}
+			delete static_cast<const FileChooser*>(&chooser);
+		});
+	chooser.release();
 }
 
 /**

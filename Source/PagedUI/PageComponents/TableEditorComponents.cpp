@@ -885,4 +885,124 @@ void MuteButtonContainer::SetRow(int newRow)
 }
 
 
+/*
+===============================================================================
+ Class ColourAndSizePickerContainer
+===============================================================================
+*/
+
+/**
+ * Class constructor.
+ */
+ColourAndSizePickerContainer::ColourAndSizePickerContainer(TableModelComponent& td)
+	: TableEditorComponent(td)
+{
+	m_colourAndSizePicker.onColourAndSizeSet = [=](const juce::Colour& colour, double size) {
+		SetSoundObjectColourAndSize(colour, size);
+	};
+	addAndMakeVisible(m_colourAndSizePicker);
+}
+
+/**
+ * Class destructor.
+ */
+ColourAndSizePickerContainer::~ColourAndSizePickerContainer()
+{
+}
+
+/**
+ * Reimplemented from Component, used to resize the actual component inside.
+ */
+void ColourAndSizePickerContainer::resized()
+{
+	m_colourAndSizePicker.setBoundsInset(BorderSize<int>(4, 4, 5, 4));
+}
+
+/**
+ * Saves the row number where this component is located inside the overview table.
+ * It also updates the radio buttons with the current mute state.
+ * @param newRow	The new row number.
+ */
+void ColourAndSizePickerContainer::SetRow(int newRow)
+{
+	TableEditorComponent::SetRow(newRow);
+
+	// Find the procssor instance corresponding to the given row number.
+	auto processorId = GetParentTable().GetProcessorIdForRow(newRow);
+	auto ctrl = Controller::GetInstance();
+	if (ctrl)
+	{
+		switch (GetParentTable().GetTableType())
+		{
+		case TT_MatrixInputs:
+		case TT_MatrixOutputs:
+			jassertfalse;
+			break;
+		case TT_Soundobjects:
+		default:
+		{
+			auto processor = ctrl->GetSoundobjectProcessor(processorId);
+			if (processor)
+			{
+				auto colour = processor->GetSoundobjectColour();
+				auto size = processor->GetSoundobjectSize();
+				m_colourAndSizePicker.setCurrentColourAndSize(colour, size);
+			}
+		}
+		break;
+		}
+	}
+}
+
+/**
+ * Helper method to set a new colour and size for the soundobject associated with this table editor container
+ * @param	colour	The new colour to set
+ * @param	size	The new size to set
+ */
+void ColourAndSizePickerContainer::SetSoundObjectColourAndSize(const juce::Colour& colour, double size)
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
+	// Get the list of rows which are currently selected on the table.
+	std::vector<int> selectedRows = GetParentTable().GetSelectedRows();
+	if ((selectedRows.size() < 2) ||
+		(std::find(selectedRows.begin(), selectedRows.end(), GetRow()) == selectedRows.end()))
+	{
+		// If this ColourAndSizePicker's row (m_row) is NOT selected, or if no multi-selection was made 
+		// then modify the selectedRows list so that it only contains m_row.
+		selectedRows.clear();
+		selectedRows.push_back(GetRow());
+	}
+
+	// Get the IDs of the procssors on the selected rows.
+	auto processorIds = GetParentTable().GetProcessorIdsForRows(selectedRows);
+
+	for (auto const& processorId : processorIds)
+	{
+		switch (GetParentTable().GetTableType())
+		{
+		case TT_MatrixInputs:
+		case TT_MatrixOutputs:
+			jassertfalse;
+			break;
+		case TT_Soundobjects:
+		default:
+		{
+			auto processor = ctrl->GetSoundobjectProcessor(processorId);
+			if (processor)
+			{
+				processor->SetSoundobjectColour(DCP_SoundobjectTable, colour);
+				processor->SetSoundobjectSize(DCP_SoundobjectTable, size);
+
+				m_colourAndSizePicker.setCurrentColourAndSize(colour, size);
+			}
+		}
+		break;
+		}
+	}
+}
+
+
 } // namespace SpaConBridge

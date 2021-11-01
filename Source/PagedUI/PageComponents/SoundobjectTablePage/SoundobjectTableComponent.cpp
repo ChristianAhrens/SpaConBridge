@@ -56,6 +56,7 @@ SoundobjectTableComponent::SoundobjectTableComponent()
 	tableColumns[BridgingAwareTableHeaderComponent::TC_SoundobjectID] = BridgingAwareTableHeaderComponent::ColumnProperties("Object #", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_SoundobjectID), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_SoundobjectID), -1, tableHeaderFlags);
 	tableColumns[BridgingAwareTableHeaderComponent::TC_Mapping] = BridgingAwareTableHeaderComponent::ColumnProperties("Mapping", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_Mapping), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_Mapping), -1, tableHeaderFlags);
 	tableColumns[BridgingAwareTableHeaderComponent::TC_ComsMode] = BridgingAwareTableHeaderComponent::ColumnProperties("Mode", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_ComsMode), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_ComsMode), -1, tableHeaderFlags);
+	tableColumns[BridgingAwareTableHeaderComponent::TC_SoundobjectColourAndSize] = BridgingAwareTableHeaderComponent::ColumnProperties("", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_SoundobjectColourAndSize), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_SoundobjectColourAndSize), -1, tableHeaderFlags);
 	tableColumns[BridgingAwareTableHeaderComponent::TC_BridgingMute] = BridgingAwareTableHeaderComponent::ColumnProperties("", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_BridgingMute), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_BridgingMute), -1, tableHeaderFlags);
 
 	auto table = GetTable();
@@ -177,7 +178,7 @@ void SoundobjectTableComponent::onAddProcessor()
  */
 void SoundobjectTableComponent::onAddMultipleProcessors()
 {
-	auto w = std::make_unique<AlertWindow>("Sound Objects", "Choose how many to add", juce::AlertWindow::NoIcon).release();
+	auto w = std::make_unique<AlertWindow>("Sound Objects", "Choose how many to add", MessageBoxIconType::NoIcon).release();
 	w->addTextEditor("processor_count", "1");
     w->getTextEditor("processor_count")->setInputRestrictions(3, "0123456789");
     w->getTextEditor("processor_count")->setKeyboardType(TextInputTarget::VirtualKeyboardType::phoneNumberKeyboard);
@@ -251,6 +252,10 @@ void SoundobjectTableComponent::onRemoveProcessor()
     // Iterate through the processor ids once more to destroy the selected processors themselves.
 	if (selectedProcessorIds.size() > 0 && ctrl->GetSoundobjectProcessorCount() > 0)
 	{
+		auto config = SpaConBridge::AppConfiguration::getInstance();
+		if (config)
+			config->SetFlushAndUpdateDisabled();
+
 		auto functionCaller = std::make_unique<DelayedRecursiveFunctionCaller>([](int processorId)
 			{
 				auto ctrl = Controller::GetInstance();
@@ -260,6 +265,12 @@ void SoundobjectTableComponent::onRemoveProcessor()
 					processor->releaseResources();
 				}
 			}, selectedProcessorIds, true);
+		functionCaller->SetFinalFunctionCall([]
+			{
+				auto config = SpaConBridge::AppConfiguration::getInstance();
+				if (config)
+					config->ResetFlushAndUpdateDisabled();
+			});
 		functionCaller->Run();
 		functionCaller.release();
 	}

@@ -284,6 +284,7 @@ SoundobjectProcessorId Controller::AddSoundobjectProcessor(DataChangeParticipant
 		if (processor->GetSoundobjectId() > currentMaxSoundobjectId)
 			currentMaxSoundobjectId = processor->GetSoundobjectId();
 	}
+	SoundobjectId newSoundobjectId = currentMaxSoundobjectId + 1;
 
 	// Get the next free processor id to use (can be one inbetween or the next after the last)
 	auto newProcessorId = GetNextProcessorId();
@@ -297,7 +298,15 @@ SoundobjectProcessorId Controller::AddSoundobjectProcessor(DataChangeParticipant
 	SetParameterChanged(changeSource, DCT_NumProcessors);
 
 	// Set the new Processor's InputID to the next in sequence.
-	p->SetSoundobjectId(changeSource, currentMaxSoundobjectId + 1);
+	p->SetSoundobjectId(changeSource, newSoundobjectId);
+
+	// Set a color variant based on the input number, so make the nipples easier to tell from each other.
+	auto shade = Colour(juce::uint8(newSoundobjectId * 111), juce::uint8(newSoundobjectId * 222), juce::uint8(newSoundobjectId * 333));
+	auto knobColour = Desktop::getInstance().getDefaultLookAndFeel().findColour(Slider::thumbColourId).interpolatedWith(shade, 0.4f);
+	p->SetSoundobjectColour(changeSource, knobColour);
+
+	// Set a default painting siez for the new soundobject
+	p->SetSoundobjectSize(changeSource, 0.4f);
 
 	return newProcessorId;
 }
@@ -3214,26 +3223,26 @@ bool Controller::LoadConfigurationFile(const File& fileToLoadFrom)
 
 	if (!config)
 	{
-		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Error", "Loading failed due to internal error.");
+		AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Error", "Loading failed due to internal error.");
 		return false;
 	}
 
 	if (!xmlConfig)
 	{
-		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Invalid config", "Loading failed due to invalid configuration file.");
+		AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Invalid config", "Loading failed due to invalid configuration file.");
 		return false;
 	}
 
 	if (!SpaConBridge::AppConfiguration::isValid(xmlConfig))
 	{
-		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed due to invalid configuration file contents.");
+		AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed due to invalid configuration file contents.");
 		return false;
 	}
 
 	config->SetFlushAndUpdateDisabled();
 	if (!config->resetConfigState(std::move(xmlConfig)))
 	{
-		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed due to internal loading error.");
+		AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed due to internal loading error.");
 		config->ResetFlushAndUpdateDisabled();
 		return false;
 	}
@@ -3255,11 +3264,11 @@ bool Controller::SaveConfigurationFile(const File& fileToSaveTo)
 	auto xmlConfig = config->getConfigState();
 
 	if (!config)
-		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Error", "Saving failed due to internal error.");
+		AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Error", "Saving failed due to internal error.");
 	else if (!xmlConfig)
-		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Invalid", "Saving failed due to invalid internal configuration.");
+		AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Invalid", "Saving failed due to invalid internal configuration.");
 	else if (!xmlConfig->writeTo(fileToSaveTo))
-		AlertWindow::showMessageBox(AlertWindow::AlertIconType::WarningIcon, "Saving failed", "Saving failed due to insufficient write access rights.");
+		AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Saving failed", "Saving failed due to insufficient write access rights.");
 	else
 		return true;
 

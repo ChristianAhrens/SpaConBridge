@@ -46,6 +46,7 @@ public:
 		TC_OutputEditor,
 		TC_Mapping,
 		TC_ComsMode,
+		TC_SoundobjectColourAndSize,
 		TC_BridgingMute,
 		TC_MAX_COLUMNS
 	};

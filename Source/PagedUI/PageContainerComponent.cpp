@@ -47,7 +47,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "PageComponents/EnSpacePage/EnSpacePageComponent.h"
 
 #include "../Controller.h"
-#include "../SurfaceSlider.h"
+#include "../SoundobjectSlider.h"
 
 #include <Image_utils.h>
 
@@ -789,6 +789,27 @@ void PageContainerComponent::SetMultiSliderPageSpreadEnabled(bool enabled)
 {
 	if (m_multiSliderPage)
 		m_multiSliderPage->SetSpreadEnabled(enabled);
+}
+
+/**
+ * Setter for the background image for given mapping area.
+ * @param	mappingAreaId	The id of the mapping area to set the background image for
+ * @param	backgroundImage	The image to set as background
+ */
+void PageContainerComponent::SetMultiSliderPageBackgroundImage(MappingAreaId mappingAreaId, const juce::Image& backgroundImage)
+{
+	if (m_multiSliderPage)
+		m_multiSliderPage->SetBackgroundImage(mappingAreaId, backgroundImage);
+}
+
+/**
+ * Helper method to remove the background image for given mapping area.
+ * @param	mappingAreaId	The id of the mapping area to remove the background image of
+ */
+void PageContainerComponent::RemoveMultiSliderPageBackgroundImage(MappingAreaId mappingAreaId)
+{
+	if (m_multiSliderPage)
+		m_multiSliderPage->RemoveBackgroundImage(mappingAreaId);
 }
 
 

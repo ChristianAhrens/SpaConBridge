@@ -37,6 +37,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../../SpaConBridgeCommon.h"
 #include "../../AppConfiguration.h"
+#include "../../submodules/JUCE-AppBasics/Source/ColourAndSizePickerComponent.h"
 
 
 namespace SpaConBridge
@@ -167,6 +168,27 @@ private:
 	std::map<ProtocolBridgingType, std::unique_ptr<DrawableButton>>	m_bridgingMutes;	/**< The mute buttons currently in use. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MuteButtonContainer)
+};
+
+/**
+ * Class ColourAndSizePickerContainer is a container for the colour and size picking popup buttons used in the Soundobjects table.
+ */
+class ColourAndSizePickerContainer : public TableEditorComponent
+{
+public:
+	explicit ColourAndSizePickerContainer(TableModelComponent& td);
+	~ColourAndSizePickerContainer() override;
+
+	void SetRow(int newRow) override;
+
+	void resized() override;
+
+private:
+	void SetSoundObjectColourAndSize(const juce::Colour& colour, double size);
+
+	JUCEAppBasics::ColourAndSizePickerComponent		m_colourAndSizePicker;	/**< The actual colour and size picker component. */
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ColourAndSizePickerContainer)
 };
 
 

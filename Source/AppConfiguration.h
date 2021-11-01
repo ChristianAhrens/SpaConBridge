@@ -54,6 +54,8 @@ public:
         MAPPINGAREA,
         REVERBENABLED,
         SPREADENABLED,
+        BACKGROUNDIMAGES,
+        BACKGROUND,
     };
     static String getTagName(TagID ID)
     {
@@ -105,6 +107,10 @@ public:
             return "ReverbEnabled";
         case SPREADENABLED:
             return "SpreadEnabled";
+        case BACKGROUNDIMAGES:
+            return "BackgroundImages";
+        case BACKGROUND:
+            return "Bkg";
 		default:
 			return "INVALID";
         }
@@ -115,6 +121,8 @@ public:
 		PROCESSORCHANNELID,
         PROCESSORRECORDID,
         PROCESSORCOMSMODE,
+        PROCESSORCOLOUR,
+        PROCESSORSIZE,
         INDEXMAJOR,
         INDEXMINOR,
 	};
@@ -128,6 +136,10 @@ public:
             return "RecordId";
         case PROCESSORCOMSMODE:
             return "ComsMode";
+        case PROCESSORCOLOUR:
+            return "Colour";
+        case PROCESSORSIZE:
+            return "Size";
         case INDEXMAJOR:
             return "IndexMajor";
         case INDEXMINOR:

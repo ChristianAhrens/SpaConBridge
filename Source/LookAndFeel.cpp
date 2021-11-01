@@ -107,6 +107,9 @@ void DbLookAndFeelBase::InitColours()
 	setColour(AlertWindow::textColourId, GetDbColor(DbColor::TextColor));
 	setColour(AlertWindow::outlineColourId, GetDbColor(DbColor::WindowColor));
 	setColour(AlertWindow::backgroundColourId, GetDbColor(DbColor::DarkColor));
+
+	setColour(ColourSelector::labelTextColourId, GetDbColor(DbColor::TextColor));
+	setColour(ColourSelector::backgroundColourId, GetDbColor(DbColor::MidColor));
 }
 
 /**

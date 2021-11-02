@@ -273,7 +273,7 @@ const String GetErrorInfo(const SpaConBridgeErrorCode errorCode)
 	switch (errorCode)
 	{
 	case SEC_LoadConfig_CannotAccess:
-		return JUCEApplication::getInstance()->getApplicationName() + " cannot access the chosen configuration file.";
+		return JUCEApplication::getInstance()->getApplicationName() + " is not allowed to access the chosen configuration file.";
 	case SEC_LoadConfig_InternalError:
 		return JUCEApplication::getInstance()->getApplicationName() + " encountered an error with its internal configuration.";
 	case SEC_LoadConfig_InvalidFile:
@@ -283,17 +283,17 @@ const String GetErrorInfo(const SpaConBridgeErrorCode errorCode)
 	case SEC_LoadConfig_ConfigInit:
 		return JUCEApplication::getInstance()->getApplicationName() + " cannot initialize its configuration with given configuration file.";
 	case SEC_SaveConfig_CannotAccess:
-		return JUCEApplication::getInstance()->getApplicationName() + " cannot access the chosen configuration file destination.";
+		return JUCEApplication::getInstance()->getApplicationName() + " is not allowed to access the chosen configuration file destination.";
 	case SEC_SaveConfig_InternalError:
 		return JUCEApplication::getInstance()->getApplicationName() + " encountered an error with its internal configuration.";
 	case SEC_SaveConfig_InvalidInternalConfig:
 		return JUCEApplication::getInstance()->getApplicationName() + " encountered an error with its internal configuration contents.";
 	case SEC_SaveConfig_CannotWrite:
-		return JUCEApplication::getInstance()->getApplicationName() + " cannot write to the chosen configuration file destination.";
+		return JUCEApplication::getInstance()->getApplicationName() + " is not allowed to write to the chosen configuration file destination.";
 	case SEC_LoadImage_CannotAccess:
-		return JUCEApplication::getInstance()->getApplicationName() + " cannot access the chosen image.";
+		return JUCEApplication::getInstance()->getApplicationName() + " is not allowed to access the chosen image.";
 	case SEC_LoadImage_CannotRead:
-		return JUCEApplication::getInstance()->getApplicationName() + " cannot read the chosen image.";
+		return JUCEApplication::getInstance()->getApplicationName() + " is not allowed to read the chosen image.";
 	case SEC_LoadImage_InvalidImage:
 		return "The chosen image is invalid for usage in " + JUCEApplication::getInstance()->getApplicationName();
 	case SEC_None:

@@ -18,6 +18,9 @@
 
 #include "SpaConBridgeCommon.h"
 
+#include "LookAndFeel.h"
+
+#include <Image_utils.h>
 #include <JuceHeader.h>
 
 
@@ -228,6 +231,151 @@ String GetDocumentationBaseWebUrl()
 {
 	auto docuBasePath = String("Resources/Documentation/");
 	return GetRepositoryBaseWebUrl() + docuBasePath;
+}
+
+/**
+ * Helper method to get a user readable error title string for a given error code.
+ * @param	errorCode	The errorcode to get a title string for.
+ * @return	The title string for the errorcode given.
+ */
+const String GetErrorTitle(const SpaConBridgeErrorCode errorCode)
+{
+	switch (errorCode)
+	{
+	case SEC_LoadConfig_CannotAccess:
+	case SEC_LoadConfig_InternalError:
+	case SEC_LoadConfig_InvalidFile:
+	case SEC_LoadConfig_InvalidConfig:
+	case SEC_LoadConfig_ConfigInit:
+		return "Loading Failed";
+	case SEC_SaveConfig_CannotAccess:
+	case SEC_SaveConfig_InternalError:
+	case SEC_SaveConfig_InvalidInternalConfig:
+	case SEC_SaveConfig_CannotWrite:
+		return "Saving Failed";
+	case SEC_LoadImage_CannotAccess:
+	case SEC_LoadImage_CannotRead:
+	case SEC_LoadImage_InvalidImage:
+		return "Loading Image Failed";
+	case SEC_None:
+	default:
+		return "Error";
+	}
+}
+
+/**
+ * Helper method to get a user readable error info string for a given error code.
+ * @param	errorCode	The errorcode to get an info string for.
+ * @return	The info string for the errorcode given.
+ */
+const String GetErrorInfo(const SpaConBridgeErrorCode errorCode)
+{
+	switch (errorCode)
+	{
+	case SEC_LoadConfig_CannotAccess:
+		return JUCEApplication::getInstance()->getApplicationName() + " is not allowed to access the chosen configuration file.";
+	case SEC_LoadConfig_InternalError:
+		return JUCEApplication::getInstance()->getApplicationName() + " encountered an error with its internal configuration.";
+	case SEC_LoadConfig_InvalidFile:
+		return "The chosen configuration file is invalid for " + JUCEApplication::getInstance()->getApplicationName() + " to initialize from.";
+	case SEC_LoadConfig_InvalidConfig:
+		return "The chosen configuration file content is invalid for " + JUCEApplication::getInstance()->getApplicationName() + " to initialize from.";
+	case SEC_LoadConfig_ConfigInit:
+		return JUCEApplication::getInstance()->getApplicationName() + " cannot initialize its configuration with given configuration file.";
+	case SEC_SaveConfig_CannotAccess:
+		return JUCEApplication::getInstance()->getApplicationName() + " is not allowed to access the chosen configuration file destination.";
+	case SEC_SaveConfig_InternalError:
+		return JUCEApplication::getInstance()->getApplicationName() + " encountered an error with its internal configuration.";
+	case SEC_SaveConfig_InvalidInternalConfig:
+		return JUCEApplication::getInstance()->getApplicationName() + " encountered an error with its internal configuration contents.";
+	case SEC_SaveConfig_CannotWrite:
+		return JUCEApplication::getInstance()->getApplicationName() + " is not allowed to write to the chosen configuration file destination.";
+	case SEC_LoadImage_CannotAccess:
+		return JUCEApplication::getInstance()->getApplicationName() + " is not allowed to access the chosen image.";
+	case SEC_LoadImage_CannotRead:
+		return JUCEApplication::getInstance()->getApplicationName() + " is not allowed to read the chosen image.";
+	case SEC_LoadImage_InvalidImage:
+		return "The chosen image is invalid for usage in " + JUCEApplication::getInstance()->getApplicationName();
+	case SEC_None:
+	default:
+		return "No details available.";
+	}
+}
+
+/**
+ * Helper method to show a notification popup for the user
+ * based on the given errorCode.
+ * @param	errorCode	The errorcode to show the user notification popup for.
+ */
+void ShowUserErrorNotification(const SpaConBridgeErrorCode errorCode)
+{
+	auto errorTitleString = GetErrorTitle(errorCode);
+	auto errorInfoString = GetErrorInfo(errorCode);
+	AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, errorTitleString, errorInfoString);
+}
+
+/**
+ * Helper method to update the state images of a given DrawableButton with the given binary
+ * SVG image resource data combined with current lookAndFeel settings regarding colouring.
+ * This is a proxy implementation forwarding the call to overload using DrawableButton pointer parameter.
+ * @param	button				The button object to update.
+ * @param	binarySVGStringData	The SVG image data to use to update button images.
+ * @param	lookAndFeel			Pointer to the current lookAndFeel. Must be DbLookAndFeelBase derived object pointer.
+ * @return	True if the images were successfully set to the given DrawableButton. False if any error occured.
+ */
+bool UpdateDrawableButtonImages(const std::unique_ptr<JUCEAppBasics::TextWithImageButton>& button, const String& binarySVGStringData, LookAndFeel* lookAndFeel)
+{
+	return UpdateDrawableButtonImages(button.get(), binarySVGStringData, lookAndFeel);
+}
+
+/**
+ * Helper method to update the state images of a given DrawableButton with the given binary
+ * SVG image resource data combined with current lookAndFeel settings regarding colouring.
+ * This is a proxy implementation forwarding the call to overload using DrawableButton pointer parameter.
+ * @param	button				The button object to update.
+ * @param	binarySVGStringData	The SVG image data to use to update button images.
+ * @param	lookAndFeel			Pointer to the current lookAndFeel. Must be DbLookAndFeelBase derived object pointer.
+ * @return	True if the images were successfully set to the given DrawableButton. False if any error occured.
+ */
+bool UpdateDrawableButtonImages(const std::unique_ptr<DrawableButton>& button, const String& binarySVGStringData, LookAndFeel* lookAndFeel)
+{
+	return UpdateDrawableButtonImages(button.get(), binarySVGStringData, lookAndFeel);
+}
+
+/**
+ * Helper method to update the state images of a given DrawableButton with the given binary
+ * SVG image resource data combined with current lookAndFeel settings regarding colouring.
+ * @param	button				The button object to update.
+ * @param	binarySVGStringData	The SVG image data to use to update button images.
+ * @param	lookAndFeel			Pointer to the current lookAndFeel. Must be DbLookAndFeelBase derived object pointer.
+ * @return	True if the images were successfully set to the given DrawableButton. False if any error occured.
+ */
+bool UpdateDrawableButtonImages(DrawableButton* button, const String& binarySVGStringData, LookAndFeel* lookAndFeel)
+{
+	if (button == nullptr)
+		return false;
+	if (lookAndFeel == nullptr)
+		return false;
+
+	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(lookAndFeel);
+	if (dblookAndFeel == nullptr)
+		return false;
+
+	// create the required button drawable images based on lookandfeel colours
+	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
+	JUCEAppBasics::Image_utils::getDrawableButtonImages(binarySVGStringData, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+
+	button->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+
+	return true;
 }
 
 

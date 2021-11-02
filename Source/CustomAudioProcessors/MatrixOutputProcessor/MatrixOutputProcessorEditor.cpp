@@ -115,29 +115,18 @@ void MatrixOutputProcessorEditor::updateDrawableButtonImageColours()
 	if (!ctrl)
 		return;
 
-	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
-	if (!dblookAndFeel)
-		return;
-
-	// create the required button drawable images based on lookandfeel colours
-	String imageName = BinaryData::volume_off24px_svg;
-	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
-	JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+	// Update drawable button images with updated lookAndFeel colours
+	UpdateDrawableButtonImages(m_MatrixOutputMuteButton, BinaryData::volume_off24px_svg, &getLookAndFeel());
 
 	// determine the right red colour from lookandfeel
-	auto redColour = dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonRedColor);
+	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
+	if (dblookAndFeel)
+	{
+		auto redColour = dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonRedColor);
 
-	// set the images to button
-	m_MatrixOutputMuteButton->setColour(TextButton::ColourIds::buttonOnColourId, redColour.brighter(0.05f));
-	m_MatrixOutputMuteButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+		// set the images to button
+		m_MatrixOutputMuteButton->setColour(TextButton::ColourIds::buttonOnColourId, redColour.brighter(0.05f));
+	}
 }
 
 /**

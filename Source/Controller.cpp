@@ -3218,31 +3218,36 @@ bool Controller::SetBridgingMidiAssignmentMapping(ProtocolBridgingType bridgingT
  */
 bool Controller::LoadConfigurationFile(const File& fileToLoadFrom)
 {
+    if (!fileToLoadFrom.existsAsFile())
+    {
+		ShowUserErrorNotification(SEC_LoadConfig_CannotAccess);
+        return false;
+    }
+    
 	auto config = SpaConBridge::AppConfiguration::getInstance();
-	auto xmlConfig = juce::parseXML(fileToLoadFrom);
-
 	if (!config)
 	{
-		AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Error", "Loading failed due to internal error.");
+		ShowUserErrorNotification(SEC_LoadConfig_InternalError);
 		return false;
 	}
 
+	auto xmlConfig = juce::parseXML(fileToLoadFrom);
 	if (!xmlConfig)
 	{
-		AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Invalid config", "Loading failed due to invalid configuration file.");
+		ShowUserErrorNotification(SEC_LoadConfig_InvalidFile);
 		return false;
 	}
 
 	if (!SpaConBridge::AppConfiguration::isValid(xmlConfig))
 	{
-		AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed due to invalid configuration file contents.");
+		ShowUserErrorNotification(SEC_LoadConfig_InvalidConfig);
 		return false;
 	}
 
 	config->SetFlushAndUpdateDisabled();
 	if (!config->resetConfigState(std::move(xmlConfig)))
 	{
-		AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed due to internal loading error.");
+		ShowUserErrorNotification(SEC_LoadConfig_ConfigInit);
 		config->ResetFlushAndUpdateDisabled();
 		return false;
 	}
@@ -3260,15 +3265,21 @@ bool Controller::LoadConfigurationFile(const File& fileToLoadFrom)
  */
 bool Controller::SaveConfigurationFile(const File& fileToSaveTo)
 {
+    if (!fileToSaveTo.hasWriteAccess())
+    {
+		ShowUserErrorNotification(SEC_SaveConfig_CannotAccess);
+        return false;
+    }
+    
 	auto config = SpaConBridge::AppConfiguration::getInstance();
 	auto xmlConfig = config->getConfigState();
 
 	if (!config)
-		AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Error", "Saving failed due to internal error.");
+		ShowUserErrorNotification(SEC_SaveConfig_InternalError);
 	else if (!xmlConfig)
-		AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Invalid", "Saving failed due to invalid internal configuration.");
+		ShowUserErrorNotification(SEC_SaveConfig_InvalidInternalConfig);
 	else if (!xmlConfig->writeTo(fileToSaveTo))
-		AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Saving failed", "Saving failed due to insufficient write access rights.");
+		ShowUserErrorNotification(SEC_SaveConfig_CannotWrite);
 	else
 		return true;
 

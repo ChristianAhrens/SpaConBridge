@@ -616,99 +616,13 @@ void SettingsSectionsComponent::lookAndFeelChanged()
 {
 	Component::lookAndFeelChanged();
 
-	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
-	if (!dblookAndFeel)
-		return;
-
-	if (m_SoundObjectPageButton)
-	{
-		std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
-		JUCEAppBasics::Image_utils::getDrawableButtonImages(String(BinaryData::vertical_split24px_svg), NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-		m_SoundObjectPageButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
-	}
-
-	if (m_MultisurfacePageButton)
-	{
-		std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
-		JUCEAppBasics::Image_utils::getDrawableButtonImages(String(BinaryData::grain24px_svg), NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-		m_MultisurfacePageButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
-	}
-
-	if (m_MatrixIOPageButton)
-	{
-		std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
-		JUCEAppBasics::Image_utils::getDrawableButtonImages(String(BinaryData::tune24px_svg), NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-		m_MatrixIOPageButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
-	}
-
-	if (m_ScenesPageButton)
-	{
-		std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
-		JUCEAppBasics::Image_utils::getDrawableButtonImages(String(BinaryData::slideshow_black_24dp_svg), NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-		m_ScenesPageButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
-	}
-
-	if (m_EnSpacePageButton)
-	{
-		std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
-		JUCEAppBasics::Image_utils::getDrawableButtonImages(String(BinaryData::sensors_black_24dp_svg), NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-		m_EnSpacePageButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
-	}
-
-	if (m_StatisticsPageButton)
-	{
-		std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
-		JUCEAppBasics::Image_utils::getDrawableButtonImages(String(BinaryData::show_chart24px_svg), NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-		m_StatisticsPageButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
-	}
+	// Update drawable button images with updated lookAndFeel colours
+	UpdateDrawableButtonImages(m_SoundObjectPageButton, BinaryData::vertical_split24px_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_MultisurfacePageButton, BinaryData::grain24px_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_MatrixIOPageButton, BinaryData::tune24px_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_ScenesPageButton, BinaryData::slideshow_black_24dp_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_EnSpacePageButton, BinaryData::sensors_black_24dp_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_StatisticsPageButton, BinaryData::show_chart24px_svg, &getLookAndFeel());
 }
 
 /**

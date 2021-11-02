@@ -19,10 +19,7 @@
 
 #include "AboutPageComponent.h"
 
-#include "../../../LookAndFeel.h"
 #include "../../../SpaConBridgeCommon.h"
-
-#include <Image_utils.h>
 
 
 namespace SpaConBridge
@@ -303,24 +300,8 @@ void AboutPageComponent::lookAndFeelChanged()
 	// first forward the call to base implementation
 	PageComponentBase::lookAndFeelChanged();
 
-	// create the required button drawable images based on lookandfeel colours
-	String imageName = BinaryData::cancel24px_svg;
-	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
-	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
-	if (dblookAndFeel)
-	{
-		JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-
-		m_closeButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
-	}
+	// Update drawable button images with updated lookAndFeel colours
+	UpdateDrawableButtonImages(m_closeButton, BinaryData::cancel24px_svg, &getLookAndFeel());
 }
 
 /**

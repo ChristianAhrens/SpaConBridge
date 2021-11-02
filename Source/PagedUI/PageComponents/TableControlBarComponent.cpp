@@ -19,6 +19,8 @@
 
 #include "TableControlBarComponent.h"
 
+#include "../../SpaConBridgeCommon.h"
+
 #include "../../LookAndFeel.h"
 
 #include <Image_utils.h>
@@ -165,78 +167,14 @@ void TableControlBarComponent::lookAndFeelChanged()
 	// first forward the call to base implementation
 	Component::lookAndFeelChanged();
 
-	// create the required button drawable images based on lookandfeel colours
-	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
-	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
-	if (dblookAndFeel)
-	{
-		// add images
-		JUCEAppBasics::Image_utils::getDrawableButtonImages(BinaryData::add24px_svg, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+	// Update drawable button images with updated lookAndFeel colours
+	UpdateDrawableButtonImages(m_addInstance, BinaryData::add24px_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_removeInstance, BinaryData::remove24px_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_addMultipleInstances, BinaryData::add_batch24dp_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_selectAll, BinaryData::rule_checked24px_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_selectNone, BinaryData::rule_unchecked24px_svg, &getLookAndFeel());
 
-		m_addInstance->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
-
-		// remove images
-		JUCEAppBasics::Image_utils::getDrawableButtonImages(BinaryData::remove24px_svg, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-
-		m_removeInstance->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
-
-		// batch-add images
-		JUCEAppBasics::Image_utils::getDrawableButtonImages(BinaryData::add_batch24dp_svg, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-
-		m_addMultipleInstances->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
-
-		// select all images
-		JUCEAppBasics::Image_utils::getDrawableButtonImages(BinaryData::rule_checked24px_svg, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-
-		m_selectAll->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
-
-		// select none images
-		JUCEAppBasics::Image_utils::getDrawableButtonImages(BinaryData::rule_unchecked24px_svg, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-
-		m_selectNone->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
-
-		UpdateCollapsedButton();
-	}
+	UpdateCollapsedButton();
 }
 
 /**
@@ -245,43 +183,27 @@ void TableControlBarComponent::lookAndFeelChanged()
  */
 void TableControlBarComponent::UpdateCollapsedButton()
 {
-	// create the required button drawable images based on lookandfeel colours
-	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
-	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
-	if (dblookAndFeel)
+	if (m_canCollapse && m_toggleCollapse)
 	{
-		if (m_canCollapse && m_toggleCollapse)
+		auto imageName = String();
+
+		if (m_layoutDirection == LD_Horizontal)
 		{
-			auto imageName = String();
-
-			if (m_layoutDirection == LD_Horizontal)
-			{
-				if (m_collapsed)
-					imageName = BinaryData::keyboard_arrow_right24px_svg;
-				else
-					imageName = BinaryData::keyboard_arrow_up24px_svg;
-			}
-			else if (m_layoutDirection == LD_Vertical)
-			{
-				if (m_collapsed)
-					imageName = BinaryData::keyboard_arrow_down24px_svg;
-				else
-					imageName = BinaryData::keyboard_arrow_right24px_svg;
-			}
-
-			// collapse/expand images
-			JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-				dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-				dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-				dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-				dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-				dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-				dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-				dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-				dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-
-			m_toggleCollapse->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+			if (m_collapsed)
+				imageName = BinaryData::keyboard_arrow_right24px_svg;
+			else
+				imageName = BinaryData::keyboard_arrow_up24px_svg;
 		}
+		else if (m_layoutDirection == LD_Vertical)
+		{
+			if (m_collapsed)
+				imageName = BinaryData::keyboard_arrow_down24px_svg;
+			else
+				imageName = BinaryData::keyboard_arrow_right24px_svg;
+		}
+
+		// Update drawable button images with updated lookAndFeel colours
+		UpdateDrawableButtonImages(m_toggleCollapse, imageName, &getLookAndFeel());
 	}
 }
 

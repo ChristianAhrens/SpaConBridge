@@ -20,6 +20,8 @@
 
 #include <JuceHeader.h>
 
+#include <TextWithImageButton.h>
+
 #include <RemoteProtocolBridgeCommon.h>
 
 
@@ -292,10 +294,19 @@ enum SpaConBridgeErrorCode
 	SEC_LoadImage_InvalidImage
 };
 
+/**
+ * Helper methods to handle user notification popups
+ */
 const String GetErrorTitle(const SpaConBridgeErrorCode errorCode);
 const String GetErrorInfo(const SpaConBridgeErrorCode errorCode);
-
 void ShowUserErrorNotification(const SpaConBridgeErrorCode errorCode);
+
+/**
+ * Helper method to update DrawableButton images with a given binary image resource according to current custom lookAndFeel settings.
+ */
+bool UpdateDrawableButtonImages(const std::unique_ptr<DrawableButton>& drawableButton, const String& binarySVGStringData, LookAndFeel* lookAndFeel);
+bool UpdateDrawableButtonImages(const std::unique_ptr<JUCEAppBasics::TextWithImageButton>& drawableButton, const String& binarySVGStringData, LookAndFeel* lookAndFeel);
+bool UpdateDrawableButtonImages(DrawableButton* drawableButton, const String& binarySVGStringData, LookAndFeel* lookAndFeel);
 
 
 

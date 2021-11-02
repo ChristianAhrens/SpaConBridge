@@ -18,6 +18,9 @@
 
 #include "SpaConBridgeCommon.h"
 
+#include "LookAndFeel.h"
+
+#include <Image_utils.h>
 #include <JuceHeader.h>
 
 
@@ -309,6 +312,70 @@ void ShowUserErrorNotification(const SpaConBridgeErrorCode errorCode)
 	auto errorTitleString = GetErrorTitle(errorCode);
 	auto errorInfoString = GetErrorInfo(errorCode);
 	AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, errorTitleString, errorInfoString);
+}
+
+/**
+ * Helper method to update the state images of a given DrawableButton with the given binary
+ * SVG image resource data combined with current lookAndFeel settings regarding colouring.
+ * This is a proxy implementation forwarding the call to overload using DrawableButton pointer parameter.
+ * @param	button				The button object to update.
+ * @param	binarySVGStringData	The SVG image data to use to update button images.
+ * @param	lookAndFeel			Pointer to the current lookAndFeel. Must be DbLookAndFeelBase derived object pointer.
+ * @return	True if the images were successfully set to the given DrawableButton. False if any error occured.
+ */
+bool UpdateDrawableButtonImages(const std::unique_ptr<JUCEAppBasics::TextWithImageButton>& button, const String& binarySVGStringData, LookAndFeel* lookAndFeel)
+{
+	return UpdateDrawableButtonImages(button.get(), binarySVGStringData, lookAndFeel);
+}
+
+/**
+ * Helper method to update the state images of a given DrawableButton with the given binary
+ * SVG image resource data combined with current lookAndFeel settings regarding colouring.
+ * This is a proxy implementation forwarding the call to overload using DrawableButton pointer parameter.
+ * @param	button				The button object to update.
+ * @param	binarySVGStringData	The SVG image data to use to update button images.
+ * @param	lookAndFeel			Pointer to the current lookAndFeel. Must be DbLookAndFeelBase derived object pointer.
+ * @return	True if the images were successfully set to the given DrawableButton. False if any error occured.
+ */
+bool UpdateDrawableButtonImages(const std::unique_ptr<DrawableButton>& button, const String& binarySVGStringData, LookAndFeel* lookAndFeel)
+{
+	return UpdateDrawableButtonImages(button.get(), binarySVGStringData, lookAndFeel);
+}
+
+/**
+ * Helper method to update the state images of a given DrawableButton with the given binary
+ * SVG image resource data combined with current lookAndFeel settings regarding colouring.
+ * @param	button				The button object to update.
+ * @param	binarySVGStringData	The SVG image data to use to update button images.
+ * @param	lookAndFeel			Pointer to the current lookAndFeel. Must be DbLookAndFeelBase derived object pointer.
+ * @return	True if the images were successfully set to the given DrawableButton. False if any error occured.
+ */
+bool UpdateDrawableButtonImages(DrawableButton* button, const String& binarySVGStringData, LookAndFeel* lookAndFeel)
+{
+	if (button == nullptr)
+		return false;
+	if (lookAndFeel == nullptr)
+		return false;
+
+	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(lookAndFeel);
+	if (dblookAndFeel == nullptr)
+		return false;
+
+	// create the required button drawable images based on lookandfeel colours
+	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
+	JUCEAppBasics::Image_utils::getDrawableButtonImages(binarySVGStringData, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
+		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
+
+	button->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+
+	return true;
 }
 
 

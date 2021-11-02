@@ -126,8 +126,6 @@ public:
 	explicit RadioButtonContainer(TableModelComponent& td);
 	~RadioButtonContainer() override;
 
-	void updateButtons();
-
 	void SetRow(int newRow) override;
 
 	void lookAndFeelChanged() override;

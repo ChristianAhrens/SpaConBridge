@@ -542,69 +542,13 @@ void ScenesPageComponent::lookAndFeelChanged()
 {
 	Component::lookAndFeelChanged();
 
-	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
-	if (!dblookAndFeel)
-		return;
-
-	if (m_nextButton)
-	{
-		std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
-		JUCEAppBasics::Image_utils::getDrawableButtonImages(String(BinaryData::skip_next24px_svg), NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-		m_nextButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
-	}
-
-	if (m_previousButton)
-	{
-		std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
-		JUCEAppBasics::Image_utils::getDrawableButtonImages(String(BinaryData::skip_previous24px_svg), NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-		m_previousButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
-	}
-
-	if (m_pinSceneIdxRecallButton)
-	{
-		std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
-		JUCEAppBasics::Image_utils::getDrawableButtonImages(String(BinaryData::push_pin_black_24dp_svg), NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-		m_pinSceneIdxRecallButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
-	}
+	// Update drawable button images with updated lookAndFeel colours
+	UpdateDrawableButtonImages(m_nextButton, BinaryData::skip_next24px_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_previousButton, BinaryData::skip_previous24px_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_pinSceneIdxRecallButton, BinaryData::push_pin_black_24dp_svg, &getLookAndFeel());
 
 	for (auto const& unpinRecallButton : m_unpinSceneIdxRecallButtons)
-	{
-		std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
-		JUCEAppBasics::Image_utils::getDrawableButtonImages(String(BinaryData::clear_black_24dp_svg), NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-		unpinRecallButton.second->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
-	}
+		UpdateDrawableButtonImages(unpinRecallButton.second, BinaryData::clear_black_24dp_svg, &getLookAndFeel());
 }
 
 

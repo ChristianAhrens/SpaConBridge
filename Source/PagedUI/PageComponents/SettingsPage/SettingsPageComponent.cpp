@@ -168,39 +168,9 @@ void SettingsPageComponent::lookAndFeelChanged()
 {
 	Component::lookAndFeelChanged();
 
-	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
-	if (!dblookAndFeel)
-		return;
-
-	if (m_loadConfigButton)
-	{
-		std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
-		JUCEAppBasics::Image_utils::getDrawableButtonImages(String(BinaryData::folder_open24px_svg), NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-		m_loadConfigButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
-	}
-
-	if (m_saveConfigButton)
-	{
-		std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
-		JUCEAppBasics::Image_utils::getDrawableButtonImages(String(BinaryData::save24px_svg), NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-			dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-		m_saveConfigButton->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
-	}
+	// Update drawable button images with updated lookAndFeel colours
+	UpdateDrawableButtonImages(m_loadConfigButton, BinaryData::folder_open24px_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_saveConfigButton, BinaryData::save24px_svg, &getLookAndFeel());
 }
 
 /**

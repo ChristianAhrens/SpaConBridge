@@ -478,7 +478,20 @@ void PageComponentManager::SetMultiSliderSpreadEnabled(bool enabled, bool dontSe
  */
 void PageComponentManager::LoadImageForMappingFromFile(MappingAreaId mappingArea, const File& file)
 {
-	m_multiSliderBackgrounds.insert(std::make_pair(mappingArea, juce::ImageCache::getFromFile(file)));
+    if (!file.existsAsFile())
+    {
+        AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Loading image failed", "Loading image failed due to inaccessible filesystem.");
+        return;
+    }
+    
+    auto image = juce::ImageCache::getFromFile(file);
+    if (!image.isValid())
+    {
+        AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Loading image failed", "Loading image failed due to invalid contents.");
+        return;
+    }
+    
+	m_multiSliderBackgrounds.insert(std::make_pair(mappingArea, image));
 
 	if (m_pageContainer)
 		m_pageContainer->SetMultiSliderPageBackgroundImage(mappingArea, m_multiSliderBackgrounds.at(mappingArea));
@@ -890,7 +903,7 @@ std::unique_ptr<XmlElement> PageComponentManager::createStateXml()
 				for (int i = MAI_First; i <= MAI_Fourth; i++)
 				{
 					auto mapping = static_cast<MappingAreaId>(i);
-					if (m_multiSliderBackgrounds.count(mapping) > 0)
+					if (m_multiSliderBackgrounds.count(mapping) > 0 && m_multiSliderBackgrounds.at(mapping).isValid())
 					{
 						auto bkgXmlElement = backgroundImagesXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::BACKGROUND) + String(mapping));
 						if (bkgXmlElement)

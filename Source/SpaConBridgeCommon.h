@@ -1,38 +1,20 @@
-/*
-===============================================================================
-
-Copyright (C) 2019 d&b audiotechnik GmbH & Co. KG. All Rights Reserved.
-
-This file was originally part of the Soundscape VST, AU, and AAX Plug-in
-and now in a derived version is part of SpaConBridge.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice,
-this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
-
-3. The name of the author may not be used to endorse or promote products
-derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY d&b audiotechnik GmbH & Co. KG "AS IS" AND ANY
-EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-===============================================================================
-*/
-
+/* Copyright (c) 2020-2021, Christian Ahrens
+ *
+ * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 #pragma once
 
@@ -289,6 +271,31 @@ static constexpr int GUI_UPDATE_RATE_SUPERSLOW = 1500;
  * After this number of timer callbacks without parameter changes, the timer will switch to GUI_UPDATE_RATE_SLOW.
  */
 static constexpr int GUI_UPDATE_DELAY_TICKS = 15;
+
+/**
+ * Possible errors in SpaConBridge application that result in a user notification.
+ */
+enum SpaConBridgeErrorCode
+{
+	SEC_None = 0,
+	SEC_LoadConfig_CannotAccess,
+	SEC_LoadConfig_InternalError,
+	SEC_LoadConfig_InvalidFile,
+	SEC_LoadConfig_InvalidConfig,
+	SEC_LoadConfig_ConfigInit,
+	SEC_SaveConfig_CannotAccess,
+	SEC_SaveConfig_InternalError,
+	SEC_SaveConfig_InvalidInternalConfig,
+	SEC_SaveConfig_CannotWrite,
+	SEC_LoadImage_CannotAccess,
+	SEC_LoadImage_CannotRead,
+	SEC_LoadImage_InvalidImage
+};
+
+const String GetErrorTitle(const SpaConBridgeErrorCode errorCode);
+const String GetErrorInfo(const SpaConBridgeErrorCode errorCode);
+
+void ShowUserErrorNotification(const SpaConBridgeErrorCode errorCode);
 
 
 

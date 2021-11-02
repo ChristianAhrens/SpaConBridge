@@ -480,14 +480,22 @@ void PageComponentManager::LoadImageForMappingFromFile(MappingAreaId mappingArea
 {
     if (!file.existsAsFile())
     {
-        AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Loading image failed", "Loading image failed due to inaccessible filesystem.");
+		ShowUserErrorNotification(SEC_LoadImage_CannotAccess);
         return;
     }
+
+	auto inputStream = file.createInputStream(); // test inputstream to verify read access
+	if (!inputStream)
+	{
+		ShowUserErrorNotification(SEC_LoadImage_CannotRead);
+		return;
+	}
+	inputStream.reset(); // clean up the test inputstream
     
     auto image = juce::ImageCache::getFromFile(file);
     if (!image.isValid())
     {
-        AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Loading image failed", "Loading image failed due to invalid contents.");
+		ShowUserErrorNotification(SEC_LoadImage_InvalidImage);
         return;
     }
     

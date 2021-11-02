@@ -3218,6 +3218,12 @@ bool Controller::SetBridgingMidiAssignmentMapping(ProtocolBridgingType bridgingT
  */
 bool Controller::LoadConfigurationFile(const File& fileToLoadFrom)
 {
+    if (!fileToLoadFrom.existsAsFile())
+    {
+        AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Loading failed", "Loading failed - file does not exist.");
+        return false;
+    }
+    
 	auto config = SpaConBridge::AppConfiguration::getInstance();
 	auto xmlConfig = juce::parseXML(fileToLoadFrom);
 
@@ -3260,6 +3266,12 @@ bool Controller::LoadConfigurationFile(const File& fileToLoadFrom)
  */
 bool Controller::SaveConfigurationFile(const File& fileToSaveTo)
 {
+    if (!fileToSaveTo.hasWriteAccess())
+    {
+        AlertWindow::showMessageBoxAsync(AlertWindow::AlertIconType::WarningIcon, "Saving failed", "Saving failed due to missing write access rights.");
+        return false;
+    }
+    
 	auto config = SpaConBridge::AppConfiguration::getInstance();
 	auto xmlConfig = config->getConfigState();
 

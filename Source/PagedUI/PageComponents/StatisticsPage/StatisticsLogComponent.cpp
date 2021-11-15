@@ -281,6 +281,8 @@ String StatisticsLog::GetLogSourceName(StatisticsLogSource logSourceType)
 		return GetProtocolBridgingShortName(PBT_YamahaSQ);
 	case SLS_YamahaOSC:
 		return GetProtocolBridgingShortName(PBT_YamahaOSC);
+	case SLS_ADMOSC:
+		return GetProtocolBridgingShortName(PBT_ADMOSC);
 	case SLS_HUI:
 		return GetProtocolBridgingShortName(PBT_HUI);
 	case SLS_DS100:
@@ -314,6 +316,8 @@ const Colour StatisticsLog::GetLogSourceColour(StatisticsLogSource logSourceType
 		return GetProtocolBridgingColour(PBT_YamahaSQ);
 	case SLS_YamahaOSC:
 		return GetProtocolBridgingColour(PBT_YamahaOSC);
+	case SLS_ADMOSC:
+		return GetProtocolBridgingColour(PBT_ADMOSC);
 	case SLS_HUI:
 		return GetProtocolBridgingColour(PBT_HUI);
 	case SLS_DS100:

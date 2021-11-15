@@ -846,6 +846,16 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 	else if (m_GenericOSCRemotePortEdit && m_GenericOSCRemotePortEdit.get() == &editor)
 		ctrl->SetBridgingRemotePort(PBT_GenericOSC, m_GenericOSCRemotePortEdit->getText().getIntValue());
 
+	// ADM OSC settings section
+	else if (m_ADMOSCIpAddressEdit && m_ADMOSCIpAddressEdit.get() == &editor)
+		ctrl->SetBridgingIpAddress(PBT_ADMOSC, m_ADMOSCIpAddressEdit->getText());
+	else if (m_ADMOSCListeningPortEdit && m_ADMOSCListeningPortEdit.get() == &editor)
+		ctrl->SetBridgingListeningPort(PBT_ADMOSC, m_ADMOSCListeningPortEdit->getText().getIntValue());
+	else if (m_ADMOSCRemotePortEdit && m_ADMOSCRemotePortEdit.get() == &editor)
+		ctrl->SetBridgingRemotePort(PBT_ADMOSC, m_ADMOSCRemotePortEdit->getText().getIntValue());
+	else if (m_ADMOSCListeningPortEdit && m_ADMOSCListeningPortEdit.get() == &editor)
+		ctrl->SetBridgingListeningPort(PBT_ADMOSC, m_ADMOSCListeningPortEdit->getText().getIntValue());
+
 	// Yamaha OSC settings section
 	else if (m_YamahaOSCIpAddressEdit && m_YamahaOSCIpAddressEdit.get() == &editor)
 		ctrl->SetBridgingIpAddress(PBT_YamahaOSC, m_YamahaOSCIpAddressEdit->getText());
@@ -914,6 +924,10 @@ void SettingsSectionsComponent::comboBoxChanged(ComboBox* comboBox)
 	else if (m_GenericMIDIMappingAreaSelect && m_GenericMIDIMappingAreaSelect.get() == comboBox)
 		ctrl->SetBridgingMappingArea(PBT_GenericMIDI, m_GenericMIDIMappingAreaSelect->getSelectedId());
 
+	// ADM OSC settings section
+	else if (m_ADMOSCMappingAreaSelect && m_ADMOSCMappingAreaSelect.get() == comboBox)
+		ctrl->SetBridgingMappingArea(PBT_ADMOSC, m_ADMOSCMappingAreaSelect->getSelectedId());
+
 	// Yamaha OSC settings section
 	else if (m_YamahaOSCMappingAreaSelect && m_YamahaOSCMappingAreaSelect.get() == comboBox)
 		ctrl->SetBridgingMappingArea(PBT_YamahaOSC, m_YamahaOSCMappingAreaSelect->getSelectedId());
@@ -944,6 +958,8 @@ void SettingsSectionsComponent::setSettingsSectionActiveState(HeaderWithElmListC
 		sectionType = PBT_GenericOSC;
 	else if (settingsSection == m_GenericMIDIBridgingSettings.get())
 		sectionType = PBT_GenericMIDI;
+	else if (settingsSection == m_ADMOSCBridgingSettings.get())
+		sectionType = PBT_ADMOSC;
 	else if (settingsSection == m_YamahaOSCBridgingSettings.get())
 		sectionType = PBT_YamahaOSC;
 
@@ -1304,7 +1320,7 @@ void SettingsSectionsComponent::processUpdatedADMOSCConfig()
 	if (!ctrl)
 		return;
 
-	// Yamaha OSC settings section
+	// ADM OSC settings section
 	auto ADMOSCBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_ADMOSC) == PBT_ADMOSC;
 	if (m_ADMOSCBridgingSettings)
 		m_ADMOSCBridgingSettings->setToggleActiveState(ADMOSCBridgingActive);

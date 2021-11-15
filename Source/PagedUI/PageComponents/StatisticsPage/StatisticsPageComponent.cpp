@@ -162,6 +162,10 @@ void StatisticsPageComponent::HandleMessageData(NodeId nodeId, ProtocolId sender
 		bridgingProtocol = PBT_GenericMIDI;
 		logSource = StatisticsLog::StatisticsLogSource::SLS_GenericMIDI;
 		break;
+	case ADMOSC_PROCESSINGPROTOCOL_ID:
+		bridgingProtocol = PBT_ADMOSC;
+		logSource = StatisticsLog::StatisticsLogSource::SLS_ADMOSC;
+		break;
 	case YAMAHAOSC_PROCESSINGPROTOCOL_ID:
 		bridgingProtocol = PBT_YamahaOSC;
 		logSource = StatisticsLog::StatisticsLogSource::SLS_YamahaOSC;

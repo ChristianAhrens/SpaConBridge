@@ -53,6 +53,9 @@ static constexpr int RX_PORT_RTTRPM_HOST = 24100;		//< UDP port to which the Bla
 static constexpr int RX_PORT_YAMAHAOSC_DEVICE = 50016;	//< UDP port which the Yamaha Rivage console is listening to for OSC
 static constexpr int RX_PORT_YAMAHAOSC_HOST = 50017;	//< UDP port to which the Yamaha Rivage console will send OSC replies
 
+static constexpr int RX_PORT_ADMOSC_DEVICE = 50018;	//< UDP port which the Yamaha Rivage console is listening to for OSC
+static constexpr int RX_PORT_ADMOSC_HOST = 50019;	//< UDP port to which the Yamaha Rivage console will send OSC replies
+
 /**
  * Pre-define processing bridge config values
  */
@@ -64,6 +67,7 @@ static constexpr int GENERICOSC_PROCESSINGPROTOCOL_ID = 4;
 static constexpr int DS100_2_PROCESSINGPROTOCOL_ID = 6;
 static constexpr int GENERICMIDI_PROCESSINGPROTOCOL_ID = 7;
 static constexpr int YAMAHAOSC_PROCESSINGPROTOCOL_ID = 8;
+static constexpr int ADMOSC_PROCESSINGPROTOCOL_ID = 9;
 
 class ProtocolBridgingWrapper :
 	public ProcessingEngineNode::NodeListener,
@@ -224,6 +228,28 @@ public:
 	bool SetGenericMIDIMappingArea(int mappingAreaId, bool dontSendNotification = false);
 
 	//==========================================================================
+	bool GetMuteADMOSCSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId);
+	bool SetMuteADMOSCSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId, bool mute = true);
+	bool SetMuteADMOSCSoundobjectProcessorIds(const std::vector<SoundobjectProcessorId>& soundobjectProcessorIds, bool mute = true);
+
+	bool GetMuteADMOSCMatrixInputProcessorId(MatrixInputProcessorId matrixInputProcessorId);
+	bool SetMuteADMOSCMatrixInputProcessorId(MatrixInputProcessorId matrixInputProcessorId, bool mute = true);
+	bool SetMuteADMOSCMatrixInputProcessorIds(const std::vector<MatrixInputProcessorId>& matrixInputProcessorIds, bool mute = true);
+
+	bool GetMuteADMOSCMatrixOutputProcessorId(MatrixInputProcessorId matrixOutputProcessorId);
+	bool SetMuteADMOSCMatrixOutputProcessorId(MatrixInputProcessorId matrixOutputProcessorId, bool mute = true);
+	bool SetMuteADMOSCMatrixOutputProcessorIds(const std::vector<MatrixOutputProcessorId>& matrixOutputProcessorIds, bool mute = true);
+
+	String GetADMOSCIpAddress();
+	bool SetADMOSCIpAddress(String ipAddress, bool dontSendNotification = false);
+	int GetADMOSCListeningPort();
+	bool SetADMOSCListeningPort(int listeningPort, bool dontSendNotification = false);
+	int GetADMOSCRemotePort();
+	bool SetADMOSCRemotePort(int remotePort, bool dontSendNotification = false);
+	int GetADMOSCMappingArea();
+	bool SetADMOSCMappingArea(int mappingAreaId, bool dontSendNotification = false);
+
+	//==========================================================================
 	bool GetMuteYamahaOSCSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId);
 	bool SetMuteYamahaOSCSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId, bool mute = true);
 	bool SetMuteYamahaOSCSoundobjectProcessorIds(const std::vector<SoundobjectProcessorId>& soundobjectProcessorIds, bool mute = true);
@@ -296,6 +322,7 @@ private:
 	std::unique_ptr<XmlElement> SetupRTTrPMBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupGenericOSCBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupGenericMIDIBridgingProtocol();
+	std::unique_ptr<XmlElement> SetupADMOSCBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupYamahaOSCBridgingProtocol();
 
 	/**

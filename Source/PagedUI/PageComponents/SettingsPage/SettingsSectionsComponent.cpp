@@ -53,6 +53,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	createRTTrPMSettingsSection();
 	createGenericOSCSettingsSection();
 	createGenericMIDISettingsSection();
+	createADMOSCSettingsSection();
 	createYamahaOSCSettingsSection();
 }
 
@@ -536,6 +537,60 @@ void SettingsSectionsComponent::createYamahaOSCSettingsSection()
 }
 
 /**
+ * Helper method to create and setup objects for ADM OSC settings section
+ */
+void SettingsSectionsComponent::createADMOSCSettingsSection()
+{
+	// ADM-OSC settings section
+	m_ADMOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
+	m_ADMOSCBridgingSettings->setBackgroundDecorationText("Alpha");
+	m_ADMOSCBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_ADMOSC) + " Bridging");
+	m_ADMOSCBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_ADMOSC) + " Bridging Settings");
+	m_ADMOSCBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/ADMOSC.md"));
+	m_ADMOSCBridgingSettings->setHasActiveToggle(true);
+	m_ADMOSCBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
+	addAndMakeVisible(m_ADMOSCBridgingSettings.get());
+
+	m_ADMOSCIpAddressEdit = std::make_unique<TextEditor>();
+	m_ADMOSCIpAddressEdit->addListener(this);
+	m_ADMOSCIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
+	m_ADMOSCIpAddressLabel = std::make_unique<Label>("ADMOSCIpAddressEdit", "IP Address");
+	m_ADMOSCIpAddressLabel->setJustificationType(Justification::centred);
+	m_ADMOSCIpAddressLabel->attachToComponent(m_ADMOSCIpAddressEdit.get(), true);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCIpAddressLabel.get(), false, false);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCIpAddressEdit.get(), true, false);
+
+	m_ADMOSCListeningPortEdit = std::make_unique<TextEditor>();
+	m_ADMOSCListeningPortEdit->addListener(this);
+	m_ADMOSCListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
+	m_ADMOSCListeningPortLabel = std::make_unique<Label>("ADMOSCListeningPortEdit", "Listening Port");
+	m_ADMOSCListeningPortLabel->setJustificationType(Justification::centred);
+	m_ADMOSCListeningPortLabel->attachToComponent(m_ADMOSCListeningPortEdit.get(), true);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCListeningPortLabel.get(), false, false);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCListeningPortEdit.get(), true, false);
+
+	m_ADMOSCRemotePortEdit = std::make_unique<TextEditor>();
+	m_ADMOSCRemotePortEdit->addListener(this);
+	m_ADMOSCRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
+	m_ADMOSCRemotePortLabel = std::make_unique<Label>("ADMOSCRemotePortEdit", "Remote Port");
+	m_ADMOSCRemotePortLabel->setJustificationType(Justification::centred);
+	m_ADMOSCRemotePortLabel->attachToComponent(m_ADMOSCRemotePortEdit.get(), true);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCRemotePortLabel.get(), false, false);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCRemotePortEdit.get(), true, false);
+
+	m_ADMOSCMappingAreaSelect = std::make_unique<ComboBox>();
+	m_ADMOSCMappingAreaSelect->addListener(this);
+	m_ADMOSCMappingAreaSelect->addItemList({ "1", "2", "3", "4" }, MAI_First);
+	m_ADMOSCMappingAreaLabel = std::make_unique<Label>("ADMOSCMappingAreaSelect", "Mapping Area");
+	m_ADMOSCMappingAreaLabel->setJustificationType(Justification::centred);
+	m_ADMOSCMappingAreaLabel->attachToComponent(m_ADMOSCMappingAreaSelect.get(), true);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCMappingAreaLabel.get(), false, false);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCMappingAreaSelect.get(), true, false);
+
+	m_ADMOSCBridgingSettings->resized();
+}
+
+/**
  * Class destructor.
  */
 SettingsSectionsComponent::~SettingsSectionsComponent()
@@ -568,6 +623,7 @@ void SettingsSectionsComponent::resized()
 		+ (m_RTTrPMBridgingSettings->getHeight() + (2 * margin))
 		+ (m_GenericOSCBridgingSettings->getHeight() + (2 * margin))
 		+ (m_GenericMIDIBridgingSettings->getHeight() + (2 * margin))
+		+ (m_ADMOSCBridgingSettings->getHeight() + (2 * margin))
 		+ (m_YamahaOSCBridgingSettings->getHeight() + (2 * margin));
 
 	auto bounds = getLocalBounds();
@@ -602,6 +658,9 @@ void SettingsSectionsComponent::resized()
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
 		FlexItem(*m_GenericMIDIBridgingSettings.get())
 			.withHeight(static_cast<float>(m_GenericMIDIBridgingSettings->getHeight()))
+			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
+		FlexItem(*m_ADMOSCBridgingSettings.get())
+			.withHeight(static_cast<float>(m_ADMOSCBridgingSettings->getHeight()))
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
 		FlexItem(*m_YamahaOSCBridgingSettings.get())
 			.withHeight(static_cast<float>(m_YamahaOSCBridgingSettings->getHeight()))
@@ -959,6 +1018,7 @@ void SettingsSectionsComponent::processUpdatedConfig()
 	processUpdatedRTTrPMConfig();
 	processUpdatedGenericOSCConfig();
 	processUpdatedGenericMIDIConfig();
+	processUpdatedADMOSCConfig();
 	processUpdatedYamahaOSCConfig();
 }
 
@@ -1233,6 +1293,34 @@ void SettingsSectionsComponent::processUpdatedYamahaOSCConfig()
 	}
 	if (m_YamahaOSCMappingAreaLabel)
 		m_YamahaOSCMappingAreaLabel->setEnabled((ctrl->GetBridgingMappingArea(PBT_YamahaOSC) != MAI_Invalid));
+}
+
+/**
+ * Helper method to update objects for ADM OSC settings section with updated config
+ */
+void SettingsSectionsComponent::processUpdatedADMOSCConfig()
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
+	// Yamaha OSC settings section
+	auto ADMOSCBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_ADMOSC) == PBT_ADMOSC;
+	if (m_ADMOSCBridgingSettings)
+		m_ADMOSCBridgingSettings->setToggleActiveState(ADMOSCBridgingActive);
+	if (m_ADMOSCIpAddressEdit)
+		m_ADMOSCIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_ADMOSC));
+	if (m_ADMOSCListeningPortEdit)
+		m_ADMOSCListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_ADMOSC)), false);
+	if (m_ADMOSCRemotePortEdit)
+		m_ADMOSCRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_ADMOSC)), false);
+	if (m_ADMOSCMappingAreaSelect)
+	{
+		m_ADMOSCMappingAreaSelect->setSelectedId(ctrl->GetBridgingMappingArea(PBT_ADMOSC), sendNotificationAsync);
+		m_ADMOSCMappingAreaSelect->setEnabled((ctrl->GetBridgingMappingArea(PBT_ADMOSC) != MAI_Invalid));
+	}
+	if (m_ADMOSCMappingAreaLabel)
+		m_ADMOSCMappingAreaLabel->setEnabled((ctrl->GetBridgingMappingArea(PBT_ADMOSC) != MAI_Invalid));
 }
 
 /**

@@ -249,6 +249,15 @@ public:
 	int GetADMOSCMappingArea();
 	bool SetADMOSCMappingArea(int mappingAreaId, bool dontSendNotification = false);
 
+	int GetADMOSCXAxisInverted();
+	bool SetADMOSCXAxisInverted(int inverted, bool dontSendNotification = false);
+	int GetADMOSCYAxisInverted();
+	bool SetADMOSCYAxisInverted(int inverted, bool dontSendNotification = false);
+	int GetADMOSCXYAxisSwapped();
+	bool SetADMOSCXYAxisSwapped(int swapped, bool dontSendNotification = false);
+	int GetADMOSCDataSendingDisabled();
+	bool SetADMOSCDataSendingDisabled(int disabled, bool dontSendNotification = false);
+
 	//==========================================================================
 	bool GetMuteYamahaOSCSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId);
 	bool SetMuteYamahaOSCSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId, bool mute = true);
@@ -312,6 +321,15 @@ private:
 	bool SetProtocolOutputDeviceIdentifier(ProtocolId protocolId, const String& outputDeviceIdentifier, bool dontSendNotification = false);
 	JUCEAppBasics::MidiCommandRangeAssignment GetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId);
 	bool SetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification = false);
+	int GetProtocolXAxisInverted(ProtocolId protocolId);
+	bool SetProtocolXAxisInverted(ProtocolId protocolId, int inverted, bool dontSendNotification = false);
+	int GetProtocolYAxisInverted(ProtocolId protocolId);
+	bool SetProtocolYAxisInverted(ProtocolId protocolId, int inverted, bool dontSendNotification = false);
+	int GetProtocolXYAxisSwapped(ProtocolId protocolId);
+	bool SetProtocolXYAxisSwapped(ProtocolId protocolId, int swapped, bool dontSendNotification = false);
+	int GetProtocolDataSendingDisabled(ProtocolId protocolId);
+	bool SetProtocolDataSendingDisabled(ProtocolId protocolId, int disabled, bool dontSendNotification = false);
+
 	ObjectHandlingState GetProtocolState(ProtocolId protocolId) const;
 	void SetProtocolState(ProtocolId protocolId, ObjectHandlingState state);
 

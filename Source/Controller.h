@@ -179,18 +179,36 @@ public:
 
 	String GetBridgingIpAddress(ProtocolBridgingType bridgingType);
 	bool SetBridgingIpAddress(ProtocolBridgingType bridgingType, String ipAddress, bool dontSendNotification = false);
+
 	int GetBridgingListeningPort(ProtocolBridgingType bridgingType);
 	bool SetBridgingListeningPort(ProtocolBridgingType bridgingType, int listeningPort, bool dontSendNotification = false);
+
 	int GetBridgingRemotePort(ProtocolBridgingType bridgingType);
 	bool SetBridgingRemotePort(ProtocolBridgingType bridgingType, int remotePort, bool dontSendNotification = false);
+
 	int GetBridgingMappingArea(ProtocolBridgingType bridgingType);
 	bool SetBridgingMappingArea(ProtocolBridgingType bridgingType, int mappingAreaId, bool dontSendNotification = false);
+
 	String GetBridgingInputDeviceIdentifier(ProtocolBridgingType bridgingType);
 	bool SetBridgingInputDeviceIdentifier(ProtocolBridgingType bridgingType, const String& inputDeviceIdentifier, bool dontSendNotification = false);
+
 	String GetBridgingOutputDeviceIdentifier(ProtocolBridgingType bridgingType);
 	bool SetBridgingOutputDeviceIdentifier(ProtocolBridgingType bridgingType, const String& outputDeviceIdentifier, bool dontSendNotification = false);
+
 	JUCEAppBasics::MidiCommandRangeAssignment GetBridgingMidiAssignmentMapping(ProtocolBridgingType bridgingType, RemoteObjectIdentifier remoteObjectId);
 	bool SetBridgingMidiAssignmentMapping(ProtocolBridgingType bridgingType, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification = false);
+
+	int GetBridgingXAxisInverted(ProtocolBridgingType bridgingType);
+	bool SetBridgingXAxisInverted(ProtocolBridgingType bridgingType, int inverted, bool dontSendNotification = false);
+
+	int GetBridgingYAxisInverted(ProtocolBridgingType bridgingType);
+	bool SetBridgingYAxisInverted(ProtocolBridgingType bridgingType, int inverted, bool dontSendNotification = false);
+
+	int GetBridgingXYAxisSwapped(ProtocolBridgingType bridgingType);
+	bool SetBridgingXYAxisSwapped(ProtocolBridgingType bridgingType, int swapped, bool dontSendNotification = false);
+
+	int GetBridgingDataSendingDisabled(ProtocolBridgingType bridgingType);
+	bool SetBridgingDataSendingDisabled(ProtocolBridgingType bridgingType, int disabled, bool dontSendNotification = false);
 
 	//==========================================================================
 	void InitGlobalSettings(DataChangeParticipant changeSource, String ipAddress, int rate);

@@ -3142,11 +3142,12 @@ String Controller::GetBridgingInputDeviceIdentifier(ProtocolBridgingType bridgin
 	{
 	case PBT_GenericMIDI:
 		return m_protocolBridge.GetGenericMIDIInputDeviceIdentifier();
-	case PBT_YamahaOSC:
 	case PBT_BlacktraxRTTrPM:
 	case PBT_DiGiCo:
 	case PBT_GenericOSC:
 	case PBT_YamahaSQ:
+	case PBT_YamahaOSC:
+	case PBT_ADMOSC:
 	case PBT_HUI:
 	case PBT_DS100:
 	default:
@@ -3165,6 +3166,8 @@ bool Controller::SetBridgingInputDeviceIdentifier(ProtocolBridgingType bridgingT
 	case PBT_DiGiCo:
 	case PBT_GenericOSC:
 	case PBT_YamahaSQ:
+	case PBT_YamahaOSC:
+	case PBT_ADMOSC:
 	case PBT_HUI:
 	case PBT_DS100:
 	default:
@@ -3179,11 +3182,12 @@ String Controller::GetBridgingOutputDeviceIdentifier(ProtocolBridgingType bridgi
 	{
 	case PBT_GenericMIDI:
 		return m_protocolBridge.GetGenericMIDIOutputDeviceIdentifier();
-	case PBT_YamahaOSC:
 	case PBT_BlacktraxRTTrPM:
 	case PBT_DiGiCo:
 	case PBT_GenericOSC:
 	case PBT_YamahaSQ:
+	case PBT_YamahaOSC:
+	case PBT_ADMOSC:
 	case PBT_HUI:
 	case PBT_DS100:
 	default:
@@ -3202,6 +3206,8 @@ bool Controller::SetBridgingOutputDeviceIdentifier(ProtocolBridgingType bridging
 	case PBT_DiGiCo:
 	case PBT_GenericOSC:
 	case PBT_YamahaSQ:
+	case PBT_YamahaOSC:
+	case PBT_ADMOSC:
 	case PBT_HUI:
 	case PBT_DS100:
 	default:
@@ -3220,6 +3226,8 @@ JUCEAppBasics::MidiCommandRangeAssignment Controller::GetBridgingMidiAssignmentM
 	case PBT_DiGiCo:
 	case PBT_GenericOSC:
 	case PBT_YamahaSQ:
+	case PBT_YamahaOSC:
+	case PBT_ADMOSC:
 	case PBT_HUI:
 	case PBT_DS100:
 	default:
@@ -3238,6 +3246,167 @@ bool Controller::SetBridgingMidiAssignmentMapping(ProtocolBridgingType bridgingT
 	case PBT_DiGiCo:
 	case PBT_GenericOSC:
 	case PBT_YamahaSQ:
+	case PBT_YamahaOSC:
+	case PBT_ADMOSC:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
+int Controller::GetBridgingXAxisInverted(ProtocolBridgingType bridgingType)
+{
+	switch (bridgingType)
+	{
+	case PBT_ADMOSC:
+		return m_protocolBridge.GetADMOSCXAxisInverted();
+	case PBT_GenericMIDI:
+	case PBT_BlacktraxRTTrPM:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_YamahaOSC:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
+bool Controller::SetBridgingXAxisInverted(ProtocolBridgingType bridgingType, int inverted, bool dontSendNotification)
+{
+	switch (bridgingType)
+	{
+	case PBT_ADMOSC:
+		return m_protocolBridge.SetADMOSCXAxisInverted(inverted, dontSendNotification);
+	case PBT_GenericMIDI:
+	case PBT_BlacktraxRTTrPM:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_YamahaOSC:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
+int Controller::GetBridgingYAxisInverted(ProtocolBridgingType bridgingType)
+{
+	switch (bridgingType)
+	{
+	case PBT_ADMOSC:
+		return m_protocolBridge.GetADMOSCYAxisInverted();
+	case PBT_GenericMIDI:
+	case PBT_BlacktraxRTTrPM:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_YamahaOSC:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+bool Controller::SetBridgingYAxisInverted(ProtocolBridgingType bridgingType, int inverted, bool dontSendNotification)
+{
+	switch (bridgingType)
+	{
+	case PBT_ADMOSC:
+		return m_protocolBridge.SetADMOSCYAxisInverted(inverted, dontSendNotification);
+	case PBT_GenericMIDI:
+	case PBT_BlacktraxRTTrPM:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_YamahaOSC:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
+int Controller::GetBridgingXYAxisSwapped(ProtocolBridgingType bridgingType)
+{
+	switch (bridgingType)
+	{
+	case PBT_ADMOSC:
+		return m_protocolBridge.GetADMOSCXYAxisSwapped();
+	case PBT_GenericMIDI:
+	case PBT_BlacktraxRTTrPM:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_YamahaOSC:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
+bool Controller::SetBridgingXYAxisSwapped(ProtocolBridgingType bridgingType, int swapped, bool dontSendNotification)
+{
+	switch (bridgingType)
+	{
+	case PBT_ADMOSC:
+		return m_protocolBridge.SetADMOSCXYAxisSwapped(swapped, dontSendNotification);
+	case PBT_GenericMIDI:
+	case PBT_BlacktraxRTTrPM:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_YamahaOSC:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
+int Controller::GetBridgingDataSendingDisabled(ProtocolBridgingType bridgingType)
+{
+	switch (bridgingType)
+	{
+	case PBT_ADMOSC:
+		return m_protocolBridge.GetADMOSCDataSendingDisabled();
+	case PBT_GenericMIDI:
+	case PBT_BlacktraxRTTrPM:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_YamahaOSC:
+	case PBT_HUI:
+	case PBT_DS100:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
+bool Controller::SetBridgingDataSendingDisabled(ProtocolBridgingType bridgingType, int disabled, bool dontSendNotification)
+{
+	switch (bridgingType)
+	{
+	case PBT_ADMOSC:
+		return m_protocolBridge.SetADMOSCDataSendingDisabled(disabled, dontSendNotification);
+	case PBT_GenericMIDI:
+	case PBT_BlacktraxRTTrPM:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_YamahaOSC:
 	case PBT_HUI:
 	case PBT_DS100:
 	default:

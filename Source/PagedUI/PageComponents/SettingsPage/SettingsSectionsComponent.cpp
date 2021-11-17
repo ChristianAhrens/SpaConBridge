@@ -587,6 +587,32 @@ void SettingsSectionsComponent::createADMOSCSettingsSection()
 	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCMappingAreaLabel.get(), false, false);
 	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCMappingAreaSelect.get(), true, false);
 
+	m_ADMOSCInvertXYButtonContainer = std::make_unique<HorizontalLayouterComponent>();
+	m_ADMOSCInvertXYButtonContainer->SetSpacing(5);
+	m_ADMOSCInvertXButton = std::make_unique<TextButton>("X", "Invert X Axis");
+	m_ADMOSCInvertXButton->setClickingTogglesState(true);
+	m_ADMOSCInvertXButton->addListener(this);
+	m_ADMOSCInvertXYButtonContainer->AddComponent(m_ADMOSCInvertXButton.get());
+	m_ADMOSCInvertYButton = std::make_unique<TextButton>("Y", "Invert Y Axis");
+	m_ADMOSCInvertYButton->setClickingTogglesState(true);
+	m_ADMOSCInvertYButton->addListener(this);
+	m_ADMOSCInvertXYButtonContainer->AddComponent(m_ADMOSCInvertYButton.get());
+	m_ADMOSCInvertXYLabel = std::make_unique<Label>("ADMOSCInvertXYLabel", "Invert Axis");
+	m_ADMOSCInvertXYLabel->setJustificationType(Justification::centred);
+	m_ADMOSCInvertXYLabel->attachToComponent(m_ADMOSCInvertXYButtonContainer.get(), true);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCInvertXYLabel.get(), false, false);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCInvertXYButtonContainer.get(), true, false);
+
+	m_ADMOSCSwapXYButton = std::make_unique<TextButton>("Swap X/Y Axis", "Swap incoming X/Y cartesian coordinate values.");
+	m_ADMOSCSwapXYButton->setClickingTogglesState(true);
+	m_ADMOSCSwapXYButton->addListener(this);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCSwapXYButton.get(), true, false);
+
+	m_ADMOSCDisableSendingButton = std::make_unique<TextButton>("Disable sending data", "Disable sending of value changes to ADM OSC input devices.");
+	m_ADMOSCDisableSendingButton->setClickingTogglesState(true);
+	m_ADMOSCDisableSendingButton->addListener(this);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCDisableSendingButton.get(), true, false);
+
 	m_ADMOSCBridgingSettings->resized();
 }
 
@@ -690,6 +716,10 @@ void SettingsSectionsComponent::lookAndFeelChanged()
  */
 void SettingsSectionsComponent::buttonClicked(Button* button)
 {
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
 	auto pageMgr = PageComponentManager::GetInstance();
 	if (!pageMgr)
 		return;
@@ -715,6 +745,23 @@ void SettingsSectionsComponent::buttonClicked(Button* button)
 		if (m_StatisticsPageButton && m_StatisticsPageButton->getToggleState())
 			enabledPages.push_back(UPI_Statistics);
 		pageMgr->SetEnabledPages(enabledPages, false);
+	}
+	// ADM-OSC Settings section
+	else if (m_ADMOSCInvertXButton.get() == button)
+	{
+		ctrl->SetBridgingXAxisInverted(PBT_ADMOSC, m_ADMOSCInvertXButton->getToggleState() ? 1 : 0);
+	}
+	else if (m_ADMOSCInvertYButton.get() == button)
+	{
+		ctrl->SetBridgingYAxisInverted(PBT_ADMOSC, m_ADMOSCInvertYButton->getToggleState() ? 1 : 0);
+	}
+	else if (m_ADMOSCSwapXYButton.get() == button)
+	{
+		ctrl->SetBridgingXYAxisSwapped(PBT_ADMOSC, m_ADMOSCSwapXYButton->getToggleState() ? 1 : 0);
+	}
+	else if (m_ADMOSCDisableSendingButton.get() == button)
+	{
+		ctrl->SetBridgingDataSendingDisabled(PBT_ADMOSC, m_ADMOSCDisableSendingButton->getToggleState() ? 1 : 0);
 	}
 }
 
@@ -1337,6 +1384,15 @@ void SettingsSectionsComponent::processUpdatedADMOSCConfig()
 	}
 	if (m_ADMOSCMappingAreaLabel)
 		m_ADMOSCMappingAreaLabel->setEnabled((ctrl->GetBridgingMappingArea(PBT_ADMOSC) != MAI_Invalid));
+
+	if (m_ADMOSCInvertXButton)
+		m_ADMOSCInvertXButton->setToggleState(1 == ctrl->GetBridgingXAxisInverted(PBT_ADMOSC), dontSendNotification);
+	if (m_ADMOSCInvertYButton)
+		m_ADMOSCInvertYButton->setToggleState(1 == ctrl->GetBridgingYAxisInverted(PBT_ADMOSC), dontSendNotification);
+	if (m_ADMOSCSwapXYButton)
+		m_ADMOSCSwapXYButton->setToggleState(1 == ctrl->GetBridgingXYAxisSwapped(PBT_ADMOSC), dontSendNotification);
+	if (m_ADMOSCDisableSendingButton)
+		m_ADMOSCDisableSendingButton->setToggleState(1 == ctrl->GetBridgingDataSendingDisabled(PBT_ADMOSC), dontSendNotification);
 }
 
 /**

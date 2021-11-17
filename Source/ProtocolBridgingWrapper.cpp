@@ -589,6 +589,22 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupADMOSCBridgingProtocol
 		if (mappingAreaIdXmlElement)
 			mappingAreaIdXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), PROTOCOL_DEFAULT_MAPPINGAREA);
 
+		auto xAxisInvertedXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::XINVERTED));
+		if (xAxisInvertedXmlElement)
+			xAxisInvertedXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
+
+		auto yAxisInvertedXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::YINVERTED));
+		if (yAxisInvertedXmlElement)
+			yAxisInvertedXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
+
+		auto xyAxisSwappedXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::XYSWAPPED));
+		if (xyAxisSwappedXmlElement)
+			xyAxisSwappedXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
+
+		auto dataSendingDisabledXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATASENDINGDISABLED));
+		if (dataSendingDisabledXmlElement)
+			dataSendingDisabledXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
+
 		auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
 		auto mutedObjects = std::vector<RemoteObject>();
 		if (mutedObjsXmlElement)
@@ -1416,6 +1432,238 @@ bool ProtocolBridgingWrapper::SetMidiAssignmentMapping(ProtocolId protocolId, Re
 }
 
 /**
+ * Gets the currently set x-Axis inverted flag for the given protocol.
+ * @param protocolId	The id of the protocol to get the flag.
+ * @return	The requested flag value.
+ */
+int ProtocolBridgingWrapper::GetProtocolXAxisInverted(ProtocolId protocolId)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto xAxisInvertedXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::XINVERTED));
+			if (xAxisInvertedXmlElement)
+			{
+				return xAxisInvertedXmlElement->getIntAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE));
+			}
+		}
+	}
+
+	return 0;
+}
+
+/**
+ * Sets the desired x-Axis inverted flag for the given protocol.
+ * This method inserts the value into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param protocolId	The id of the protocol to set the flag value for.
+ * @param inverted		The x-Axis inverted flag value.
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetProtocolXAxisInverted(ProtocolId protocolId, int inverted, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto xAxisInvertedXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::XINVERTED));
+			if (xAxisInvertedXmlElement)
+			{
+				xAxisInvertedXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), inverted);
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
+}
+
+/**
+ * Gets the currently set y-Axis inverted flag for the given protocol.
+ * @param protocolId	The id of the protocol to get the flag.
+ * @return	The requested flag value.
+ */
+int ProtocolBridgingWrapper::GetProtocolYAxisInverted(ProtocolId protocolId)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto yAxisInvertedXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::YINVERTED));
+			if (yAxisInvertedXmlElement)
+			{
+				return yAxisInvertedXmlElement->getIntAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE));
+			}
+		}
+	}
+
+	return 0;
+}
+
+/**
+ * Sets the desired x-Axis inverted flag for the given protocol.
+ * This method inserts the value into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param protocolId	The id of the protocol to set the flag value for.
+ * @param inverted		The ^^-Axis inverted flag value.
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetProtocolYAxisInverted(ProtocolId protocolId, int inverted, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto yAxisInvertedXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::YINVERTED));
+			if (yAxisInvertedXmlElement)
+			{
+				yAxisInvertedXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), inverted);
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
+}
+
+/**
+ * Gets the currently set xy-Axis-Swapped inverted flag for the given protocol.
+ * @param protocolId	The id of the protocol to get the flag.
+ * @return	The requested flag value.
+ */
+int ProtocolBridgingWrapper::GetProtocolXYAxisSwapped(ProtocolId protocolId)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto xySwappedXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::XYSWAPPED));
+			if (xySwappedXmlElement)
+			{
+				return xySwappedXmlElement->getIntAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE));
+			}
+		}
+	}
+
+	return 0;
+}
+
+/**
+ * Sets the desired xy-Axis-swapped flag for the given protocol.
+ * This method inserts the value into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param protocolId	The id of the protocol to set the flag value for.
+ * @param inverted		The xy-Axis-swapped flag value.
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetProtocolXYAxisSwapped(ProtocolId protocolId, int swapped, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto xySwappedXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::XYSWAPPED));
+			if (xySwappedXmlElement)
+			{
+				xySwappedXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), swapped);
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
+}
+
+/**
+ * Gets the currently set data sending disabled flag for the given protocol.
+ * @param protocolId	The id of the protocol to get the flag.
+ * @return	The requested flag value.
+ */
+int ProtocolBridgingWrapper::GetProtocolDataSendingDisabled(ProtocolId protocolId)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto dataSendingDisabledXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATASENDINGDISABLED));
+			if (dataSendingDisabledXmlElement)
+			{
+				return dataSendingDisabledXmlElement->getIntAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE));
+			}
+		}
+	}
+
+	return 0;
+}
+
+/**
+ * Sets the desired data sending disabled flag for the given protocol.
+ * This method inserts the value into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param protocolId	The id of the protocol to set the flag value for.
+ * @param inverted		The data sending disabled flag value.
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetProtocolDataSendingDisabled(ProtocolId protocolId, int disabled, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto dataSendingDisabledXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATASENDINGDISABLED));
+			if (dataSendingDisabledXmlElement)
+			{
+				dataSendingDisabledXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), disabled);
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
+}
+
+/**
  * Getter for the controller-understandable status per protocol as can be presented to the user.
  * @param	protocolId	The id of the protocol to get the status for
  * @return	The status as requested
@@ -1442,6 +1690,10 @@ void ProtocolBridgingWrapper::SetProtocolState(ProtocolId protocolId, ObjectHand
 		ctrl->SetParameterChanged(DCP_Protocol, DCT_Connected);
 }
 
+/**
+ * Method to toggle the bridging module online state.
+ * @param	online	Bool indicator if connection shall be established or reset.
+ */
 void ProtocolBridgingWrapper::SetOnline(bool online)
 {
 	if (online)
@@ -3171,6 +3423,70 @@ int ProtocolBridgingWrapper::GetADMOSCMappingArea()
 bool ProtocolBridgingWrapper::SetADMOSCMappingArea(int mappingAreaId, bool dontSendNotification)
 {
 	return SetProtocolMappingArea(ADMOSC_PROCESSINGPROTOCOL_ID, mappingAreaId, dontSendNotification);
+}
+
+/**
+*
+*/
+int ProtocolBridgingWrapper::GetADMOSCXAxisInverted()
+{
+	return GetProtocolXAxisInverted(ADMOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+*
+*/
+bool ProtocolBridgingWrapper::SetADMOSCXAxisInverted(int inverted, bool dontSendNotification)
+{
+	return SetProtocolXAxisInverted(ADMOSC_PROCESSINGPROTOCOL_ID, inverted, dontSendNotification);
+}
+
+/**
+*
+*/
+int ProtocolBridgingWrapper::GetADMOSCYAxisInverted()
+{
+	return GetProtocolYAxisInverted(ADMOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+*
+*/
+bool ProtocolBridgingWrapper::SetADMOSCYAxisInverted(int inverted, bool dontSendNotification)
+{
+	return SetProtocolYAxisInverted(ADMOSC_PROCESSINGPROTOCOL_ID, inverted, dontSendNotification);
+}
+
+/**
+*
+*/
+int ProtocolBridgingWrapper::GetADMOSCXYAxisSwapped()
+{
+	return GetProtocolXYAxisSwapped(ADMOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+*
+*/
+bool ProtocolBridgingWrapper::SetADMOSCXYAxisSwapped(int swapped, bool dontSendNotification)
+{
+	return SetProtocolXYAxisSwapped(ADMOSC_PROCESSINGPROTOCOL_ID, swapped, dontSendNotification);
+}
+
+/**
+*
+*/
+int ProtocolBridgingWrapper::GetADMOSCDataSendingDisabled()
+{
+	return GetProtocolDataSendingDisabled(ADMOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+*
+*/
+bool ProtocolBridgingWrapper::SetADMOSCDataSendingDisabled(int disabled, bool dontSendNotification)
+{
+	return SetProtocolDataSendingDisabled(ADMOSC_PROCESSINGPROTOCOL_ID, disabled, dontSendNotification);
 }
 
 /**

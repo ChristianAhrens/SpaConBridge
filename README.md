@@ -1,12 +1,16 @@
 ![Showreel.001.png](Resources/Documentation/Showreel/Showreel.001.png "SpaConBridge Headline Icons")
 
-SpaConSim is a **PRIVATELY** created and driven project. It currently is in **EXPERIMENTAL** development.
+SpaConBridge (Spatial Control Bridge) is a **PRIVATELY** created and driven project. It currently is in **EXPERIMENTAL** development.
 
 Its sourcecode and prebuilt binaries are made publicly available to enable interested users to experiment, extend and create own adaptations.
 
 There is no guarantee for compatibility inbetween versions or for the implemented functionality to be reliable for professional use at all. Use what is provided here at your own risk!
 
 See [LATEST RELEASE](../../releases/latest) for available binary packages.
+
+![Platform:macOS](https://img.shields.io/badge/platform-iOS-lightgrey)
+![Platform:macOS](https://img.shields.io/badge/platform-macOS-lightgrey)
+![Platform:macOS](https://img.shields.io/badge/platform-Windows-lightgrey)
 
 <table>
 <tr>

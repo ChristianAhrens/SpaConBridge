@@ -210,8 +210,9 @@ For details on the settings for the implemented protocols, see the individual do
   * [Generic d&b OSC protocol communication](Resources/Documentation/BridgingProtocols/GenericOSC.md)
   * [Generic MIDI communication](Resources/Documentation/BridgingProtocols/GenericMIDI.md)
   * [Yamaha OSC communication *](Resources/Documentation/BridgingProtocols/YamahaOSC.md)
+  * [ADM OSC communication *](Resources/Documentation/BridgingProtocols/ADMOSC.md)
   
-  &ast; Was implemented using simulation only, entirely untested with physical devices.
+  &ast; Implemented using simulation only -> feature level 'Alpha'/'Beta'.
 
 The bottom bar of settings page contains buttons to save and load entire SpaConBridge configurations, as well as a button to show the raw current configuration in a text editor overlay. The latter is mainly useful for debugging purposes.
 Depending on the available horizontal UI resolution, buttons are hidden. 'Show raw config' disappears first, since it is least relevant for use. On host devices as smartphones, rotating from portrait to landscape mode can help to make the buttons visible, in case they are hidden in portrait mode.

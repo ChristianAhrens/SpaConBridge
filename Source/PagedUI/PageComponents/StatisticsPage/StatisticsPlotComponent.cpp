@@ -198,6 +198,8 @@ void StatisticsPlot::ResetStatisticsPlot()
 		m_plottedBridgingTypes.add(PBT_DS100);
 	if ((bridgingTypes & PBT_YamahaOSC) == PBT_YamahaOSC)
 		m_plottedBridgingTypes.add(PBT_YamahaOSC);
+	if ((bridgingTypes & PBT_ADMOSC) == PBT_ADMOSC)
+		m_plottedBridgingTypes.add(PBT_ADMOSC);
 
 	for (auto bridgingProtocol : m_plottedBridgingTypes)
 	{

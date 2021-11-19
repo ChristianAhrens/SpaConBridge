@@ -218,6 +218,9 @@ bool ProtocolBridgingWrapper::setStateXml(XmlElement* stateXml)
 			auto genericMIDIProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(GENERICMIDI_PROCESSINGPROTOCOL_ID));
 			if (genericMIDIProtocolXmlElement)
 				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericMIDI, *genericMIDIProtocolXmlElement));
+			auto admOSCProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(ADMOSC_PROCESSINGPROTOCOL_ID));
+			if (admOSCProtocolXmlElement)
+				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_ADMOSC, *admOSCProtocolXmlElement));
 			auto yamahaOSCProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(YAMAHAOSC_PROCESSINGPROTOCOL_ID));
 			if (yamahaOSCProtocolXmlElement)
 				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_YamahaOSC, *yamahaOSCProtocolXmlElement));
@@ -382,6 +385,18 @@ bool ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridg
 		}
 	}
 
+	// ADM OSC protocol - RoleB
+	{
+		auto admOSCBridgingXmlElement = SetupADMOSCBridgingProtocol();
+		if (admOSCBridgingXmlElement)
+		{
+			m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_ADMOSC, *admOSCBridgingXmlElement));
+
+			if ((bridgingProtocolsToActivate & PBT_ADMOSC) == PBT_ADMOSC)
+				nodeXmlElement->addChildElement(admOSCBridgingXmlElement.release());
+		}
+	}
+
 	// Yamaha OSC protocol - RoleB
 	{
 		auto yamahaOSCBridgingXmlElement = SetupYamahaOSCBridgingProtocol();
@@ -533,6 +548,62 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupGenericMIDIBridgingPro
 		auto mappingAreaIdXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MAPPINGAREA));
 		if (mappingAreaIdXmlElement)
 			mappingAreaIdXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), PROTOCOL_DEFAULT_MAPPINGAREA);
+
+		auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
+		auto mutedObjects = std::vector<RemoteObject>();
+		if (mutedObjsXmlElement)
+			ProcessingEngineConfig::WriteMutedObjects(mutedObjsXmlElement, mutedObjects);
+	}
+
+	return protocolBXmlElement;
+}
+
+/**
+ * Method to create the default ADM OSC bridging protocol xml element.
+ * @return	The protocol xml element that was created
+ */
+std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupADMOSCBridgingProtocol()
+{
+	// ADM OSC protocol - RoleB
+	auto protocolBXmlElement = std::make_unique<XmlElement>(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLB));
+	if (protocolBXmlElement)
+	{
+		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), ADMOSC_PROCESSINGPROTOCOL_ID);
+
+		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), ProcessingEngineConfig::ProtocolTypeToString(PT_ADMOSCProtocol));
+		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::USESACTIVEOBJ), 0);
+
+		auto clientPortXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+		if (clientPortXmlElement)
+			clientPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_ADMOSC_DEVICE);
+
+		auto hostPortXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
+		if (hostPortXmlElement)
+			hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_ADMOSC_HOST);
+
+		auto ipAdressXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
+		if (ipAdressXmlElement)
+			ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
+
+		auto mappingAreaIdXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MAPPINGAREA));
+		if (mappingAreaIdXmlElement)
+			mappingAreaIdXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), PROTOCOL_DEFAULT_MAPPINGAREA);
+
+		auto xAxisInvertedXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::XINVERTED));
+		if (xAxisInvertedXmlElement)
+			xAxisInvertedXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
+
+		auto yAxisInvertedXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::YINVERTED));
+		if (yAxisInvertedXmlElement)
+			yAxisInvertedXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
+
+		auto xyAxisSwappedXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::XYSWAPPED));
+		if (xyAxisSwappedXmlElement)
+			xyAxisSwappedXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
+
+		auto dataSendingDisabledXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATASENDINGDISABLED));
+		if (dataSendingDisabledXmlElement)
+			dataSendingDisabledXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
 
 		auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
 		auto mutedObjects = std::vector<RemoteObject>();
@@ -1361,6 +1432,238 @@ bool ProtocolBridgingWrapper::SetMidiAssignmentMapping(ProtocolId protocolId, Re
 }
 
 /**
+ * Gets the currently set x-Axis inverted flag for the given protocol.
+ * @param protocolId	The id of the protocol to get the flag.
+ * @return	The requested flag value.
+ */
+int ProtocolBridgingWrapper::GetProtocolXAxisInverted(ProtocolId protocolId)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto xAxisInvertedXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::XINVERTED));
+			if (xAxisInvertedXmlElement)
+			{
+				return xAxisInvertedXmlElement->getIntAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE));
+			}
+		}
+	}
+
+	return 0;
+}
+
+/**
+ * Sets the desired x-Axis inverted flag for the given protocol.
+ * This method inserts the value into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param protocolId	The id of the protocol to set the flag value for.
+ * @param inverted		The x-Axis inverted flag value.
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetProtocolXAxisInverted(ProtocolId protocolId, int inverted, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto xAxisInvertedXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::XINVERTED));
+			if (xAxisInvertedXmlElement)
+			{
+				xAxisInvertedXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), inverted);
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
+}
+
+/**
+ * Gets the currently set y-Axis inverted flag for the given protocol.
+ * @param protocolId	The id of the protocol to get the flag.
+ * @return	The requested flag value.
+ */
+int ProtocolBridgingWrapper::GetProtocolYAxisInverted(ProtocolId protocolId)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto yAxisInvertedXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::YINVERTED));
+			if (yAxisInvertedXmlElement)
+			{
+				return yAxisInvertedXmlElement->getIntAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE));
+			}
+		}
+	}
+
+	return 0;
+}
+
+/**
+ * Sets the desired x-Axis inverted flag for the given protocol.
+ * This method inserts the value into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param protocolId	The id of the protocol to set the flag value for.
+ * @param inverted		The ^^-Axis inverted flag value.
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetProtocolYAxisInverted(ProtocolId protocolId, int inverted, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto yAxisInvertedXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::YINVERTED));
+			if (yAxisInvertedXmlElement)
+			{
+				yAxisInvertedXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), inverted);
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
+}
+
+/**
+ * Gets the currently set xy-Axis-Swapped inverted flag for the given protocol.
+ * @param protocolId	The id of the protocol to get the flag.
+ * @return	The requested flag value.
+ */
+int ProtocolBridgingWrapper::GetProtocolXYAxisSwapped(ProtocolId protocolId)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto xySwappedXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::XYSWAPPED));
+			if (xySwappedXmlElement)
+			{
+				return xySwappedXmlElement->getIntAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE));
+			}
+		}
+	}
+
+	return 0;
+}
+
+/**
+ * Sets the desired xy-Axis-swapped flag for the given protocol.
+ * This method inserts the value into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param protocolId	The id of the protocol to set the flag value for.
+ * @param inverted		The xy-Axis-swapped flag value.
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetProtocolXYAxisSwapped(ProtocolId protocolId, int swapped, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto xySwappedXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::XYSWAPPED));
+			if (xySwappedXmlElement)
+			{
+				xySwappedXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), swapped);
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
+}
+
+/**
+ * Gets the currently set data sending disabled flag for the given protocol.
+ * @param protocolId	The id of the protocol to get the flag.
+ * @return	The requested flag value.
+ */
+int ProtocolBridgingWrapper::GetProtocolDataSendingDisabled(ProtocolId protocolId)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto dataSendingDisabledXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATASENDINGDISABLED));
+			if (dataSendingDisabledXmlElement)
+			{
+				return dataSendingDisabledXmlElement->getIntAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE));
+			}
+		}
+	}
+
+	return 0;
+}
+
+/**
+ * Sets the desired data sending disabled flag for the given protocol.
+ * This method inserts the value into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param protocolId	The id of the protocol to set the flag value for.
+ * @param inverted		The data sending disabled flag value.
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetProtocolDataSendingDisabled(ProtocolId protocolId, int disabled, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto dataSendingDisabledXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATASENDINGDISABLED));
+			if (dataSendingDisabledXmlElement)
+			{
+				dataSendingDisabledXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), disabled);
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
+}
+
+/**
  * Getter for the controller-understandable status per protocol as can be presented to the user.
  * @param	protocolId	The id of the protocol to get the status for
  * @return	The status as requested
@@ -1387,6 +1690,10 @@ void ProtocolBridgingWrapper::SetProtocolState(ProtocolId protocolId, ObjectHand
 		ctrl->SetParameterChanged(DCP_Protocol, DCT_Connected);
 }
 
+/**
+ * Method to toggle the bridging module online state.
+ * @param	online	Bool indicator if connection shall be established or reset.
+ */
 void ProtocolBridgingWrapper::SetOnline(bool online)
 {
 	if (online)
@@ -1422,6 +1729,10 @@ ProtocolBridgingType ProtocolBridgingWrapper::GetActiveBridgingProtocols()
 		if (protocolXmlElement)
 			activeBridgingTypes |= PBT_GenericMIDI;
 
+		protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(ADMOSC_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+			activeBridgingTypes |= PBT_ADMOSC;
+
 		protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(YAMAHAOSC_PROCESSINGPROTOCOL_ID));
 		if (protocolXmlElement)
 			activeBridgingTypes |= PBT_YamahaOSC;
@@ -1449,6 +1760,8 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 		auto removeGenericOSCBridging = (!(desiredActiveBridgingTypes & PBT_GenericOSC) && (currentlyActiveBridgingTypes & PBT_GenericOSC));
 		auto addGenericMIDIBridging = ((desiredActiveBridgingTypes & PBT_GenericMIDI) && !(currentlyActiveBridgingTypes & PBT_GenericMIDI));
 		auto removeGenericMIDIBridging = (!(desiredActiveBridgingTypes & PBT_GenericMIDI) && (currentlyActiveBridgingTypes & PBT_GenericMIDI));
+		auto addADMOSCBridging = ((desiredActiveBridgingTypes & PBT_ADMOSC) && !(currentlyActiveBridgingTypes & PBT_ADMOSC));
+		auto removeADMOSCBridging = (!(desiredActiveBridgingTypes & PBT_ADMOSC) && (currentlyActiveBridgingTypes & PBT_ADMOSC));
 		auto addYamahaOSCBridging = ((desiredActiveBridgingTypes & PBT_YamahaOSC) && !(currentlyActiveBridgingTypes & PBT_YamahaOSC));
 		auto removeYamahaOSCBridging = (!(desiredActiveBridgingTypes & PBT_YamahaOSC) && (currentlyActiveBridgingTypes & PBT_YamahaOSC));
 
@@ -1507,6 +1820,20 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 				if (protocolXmlElement)
 				{
 					m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericMIDI, *protocolXmlElement));
+					nodeXmlElement->removeChildElement(protocolXmlElement, true);
+				}
+			}
+
+			if (addADMOSCBridging)
+			{
+				nodeXmlElement->addChildElement(std::make_unique<XmlElement>(m_bridgingProtocolCacheMap.at(PBT_ADMOSC)).release());
+			}
+			else if (removeADMOSCBridging)
+			{
+				auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(ADMOSC_PROCESSINGPROTOCOL_ID));
+				if (protocolXmlElement)
+				{
+					m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_ADMOSC, *protocolXmlElement));
 					nodeXmlElement->removeChildElement(protocolXmlElement, true);
 				}
 			}
@@ -2904,6 +3231,269 @@ bool ProtocolBridgingWrapper::SetGenericMIDIMappingArea(int mappingAreaId, bool 
  * @param soundobjectProcessorId The id of the source for which the mute state shall be returned
  * @return The mute state
  */
+bool ProtocolBridgingWrapper::GetMuteADMOSCSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId)
+{
+	return GetMuteProtocolSoundobjectProcessorId(ADMOSC_PROCESSINGPROTOCOL_ID, soundobjectProcessorId);
+}
+
+/**
+ * Sets the given soundobjectProcessor to be (un-)muted
+ * @param soundobjectProcessorId The id of the source that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteADMOSCSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolSoundobjectProcessorId(ADMOSC_PROCESSINGPROTOCOL_ID, soundobjectProcessorId);
+	else
+		return SetUnmuteProtocolSoundobjectProcessorId(ADMOSC_PROCESSINGPROTOCOL_ID, soundobjectProcessorId);
+}
+
+/**
+ * Sets the given soundobject processors to be (un-)muted
+ * @param soundobjectProcessorIds The ids of the sources that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteADMOSCSoundobjectProcessorIds(const std::vector<SoundobjectProcessorId>& soundobjectProcessorIds, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolSoundobjectProcessorIds(ADMOSC_PROCESSINGPROTOCOL_ID, soundobjectProcessorIds);
+	else
+		return SetUnmuteProtocolSoundobjectProcessorIds(ADMOSC_PROCESSINGPROTOCOL_ID, soundobjectProcessorIds);
+}
+
+/**
+ * Gets the mute state of the given MatrixInputProcessor
+ * @param matrixInputProcessorId The id of the matrixInputProcessor for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteADMOSCMatrixInputProcessorId(MatrixInputProcessorId matrixInputProcessorId)
+{
+	return GetMuteProtocolMatrixInputProcessorId(ADMOSC_PROCESSINGPROTOCOL_ID, matrixInputProcessorId);
+}
+
+/**
+ * Sets the given MatrixInputProcessor to be (un-)muted
+ * @param matrixInputProcessorId The id of the matrixInputProcessor that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteADMOSCMatrixInputProcessorId(MatrixInputProcessorId matrixInputProcessorId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixInputProcessorId(ADMOSC_PROCESSINGPROTOCOL_ID, matrixInputProcessorId);
+	else
+		return SetUnmuteProtocolMatrixInputProcessorId(ADMOSC_PROCESSINGPROTOCOL_ID, matrixInputProcessorId);
+}
+
+/**
+ * Sets the given MatrixInputProcessors to be (un-)muted
+ * @param matrixInputProcessorIds The ids of the matrixInputProcessors that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteADMOSCMatrixInputProcessorIds(const std::vector<MatrixInputProcessorId>& matrixInputProcessorIds, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixInputProcessorIds(ADMOSC_PROCESSINGPROTOCOL_ID, matrixInputProcessorIds);
+	else
+		return SetUnmuteProtocolMatrixInputProcessorIds(ADMOSC_PROCESSINGPROTOCOL_ID, matrixInputProcessorIds);
+}
+
+/**
+ * Gets the mute state of the given matrixOutputProcessor
+ * @param matrixOutputProcessorId The id of the matrixOutputProcessor for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteADMOSCMatrixOutputProcessorId(MatrixOutputProcessorId matrixOutputProcessorId)
+{
+	return GetMuteProtocolMatrixOutputProcessorId(ADMOSC_PROCESSINGPROTOCOL_ID, matrixOutputProcessorId);
+}
+
+/**
+ * Sets the given MatrixOutputProcessor to be (un-)muted
+ * @param matrixOutputProcessorId The id of the matrixOutputProcessor that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteADMOSCMatrixOutputProcessorId(MatrixOutputProcessorId matrixOutputProcessorId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixOutputProcessorId(ADMOSC_PROCESSINGPROTOCOL_ID, matrixOutputProcessorId);
+	else
+		return SetUnmuteProtocolMatrixOutputProcessorId(ADMOSC_PROCESSINGPROTOCOL_ID, matrixOutputProcessorId);
+}
+
+/**
+ * Sets the given MatrixOutputProcessors to be (un-)muted
+ * @param matrixOutputProcessorIds The ids of the matrixOutputProcessor that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteADMOSCMatrixOutputProcessorIds(const std::vector<MatrixOutputProcessorId>& matrixOutputProcessorIds, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixOutputProcessorIds(ADMOSC_PROCESSINGPROTOCOL_ID, matrixOutputProcessorIds);
+	else
+		return SetUnmuteProtocolMatrixOutputProcessorIds(ADMOSC_PROCESSINGPROTOCOL_ID, matrixOutputProcessorIds);
+}
+
+/**
+ * Gets the currently set ADM client ip address.
+ * This method forwards the call to the generic implementation.
+ * @return	The ip address string
+ */
+String ProtocolBridgingWrapper::GetADMOSCIpAddress()
+{
+	return GetProtocolIpAddress(ADMOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol client ip address.
+ * This method forwards the call to the generic implementation.
+ * @param ipAddress	The new ip address string
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetADMOSCIpAddress(String ipAddress, bool dontSendNotification)
+{
+	return SetProtocolIpAddress(ADMOSC_PROCESSINGPROTOCOL_ID, ipAddress, dontSendNotification);
+}
+
+/**
+ * Gets the desired protocol listening port.
+ * This method forwards the call to the generic implementation.
+ * @return	The requested listening port
+ */
+int ProtocolBridgingWrapper::GetADMOSCListeningPort()
+{
+	return GetProtocolListeningPort(ADMOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol listening port.
+ * This method forwards the call to the generic implementation.
+ * @param	listeningPort	The protocol port to set as listening port
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetADMOSCListeningPort(int listeningPort, bool dontSendNotification)
+{
+	return SetProtocolListeningPort(ADMOSC_PROCESSINGPROTOCOL_ID, listeningPort, dontSendNotification);
+}
+
+/**
+ * Gets the desired protocol remote (target client) port.
+ * This method forwards the call to the generic implementation.
+ * @return	The requested remote port
+ */
+int ProtocolBridgingWrapper::GetADMOSCRemotePort()
+{
+	return GetProtocolRemotePort(ADMOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol remote port.
+ * This method forwards the call to the generic implementation.
+ * @param	remotePort	The protocol port to set as remote port
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetADMOSCRemotePort(int remotePort, bool dontSendNotification)
+{
+	return SetProtocolRemotePort(ADMOSC_PROCESSINGPROTOCOL_ID, remotePort, dontSendNotification);
+}
+
+/**
+ * Gets the desired protocol mapping area id.
+ * This method forwards the call to the generic implementation.
+ * @return	The requested mapping area id
+ */
+int ProtocolBridgingWrapper::GetADMOSCMappingArea()
+{
+	return GetProtocolMappingArea(ADMOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol mapping area id.
+ * This method forwards the call to the generic implementation.
+ * @param	mappingAreaId	The protocol mapping area id to set
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetADMOSCMappingArea(int mappingAreaId, bool dontSendNotification)
+{
+	return SetProtocolMappingArea(ADMOSC_PROCESSINGPROTOCOL_ID, mappingAreaId, dontSendNotification);
+}
+
+/**
+*
+*/
+int ProtocolBridgingWrapper::GetADMOSCXAxisInverted()
+{
+	return GetProtocolXAxisInverted(ADMOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+*
+*/
+bool ProtocolBridgingWrapper::SetADMOSCXAxisInverted(int inverted, bool dontSendNotification)
+{
+	return SetProtocolXAxisInverted(ADMOSC_PROCESSINGPROTOCOL_ID, inverted, dontSendNotification);
+}
+
+/**
+*
+*/
+int ProtocolBridgingWrapper::GetADMOSCYAxisInverted()
+{
+	return GetProtocolYAxisInverted(ADMOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+*
+*/
+bool ProtocolBridgingWrapper::SetADMOSCYAxisInverted(int inverted, bool dontSendNotification)
+{
+	return SetProtocolYAxisInverted(ADMOSC_PROCESSINGPROTOCOL_ID, inverted, dontSendNotification);
+}
+
+/**
+*
+*/
+int ProtocolBridgingWrapper::GetADMOSCXYAxisSwapped()
+{
+	return GetProtocolXYAxisSwapped(ADMOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+*
+*/
+bool ProtocolBridgingWrapper::SetADMOSCXYAxisSwapped(int swapped, bool dontSendNotification)
+{
+	return SetProtocolXYAxisSwapped(ADMOSC_PROCESSINGPROTOCOL_ID, swapped, dontSendNotification);
+}
+
+/**
+*
+*/
+int ProtocolBridgingWrapper::GetADMOSCDataSendingDisabled()
+{
+	return GetProtocolDataSendingDisabled(ADMOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+*
+*/
+bool ProtocolBridgingWrapper::SetADMOSCDataSendingDisabled(int disabled, bool dontSendNotification)
+{
+	return SetProtocolDataSendingDisabled(ADMOSC_PROCESSINGPROTOCOL_ID, disabled, dontSendNotification);
+}
+
+/**
+ * Gets the mute state of the given soundobject processor
+ * @param soundobjectProcessorId The id of the source for which the mute state shall be returned
+ * @return The mute state
+ */
 bool ProtocolBridgingWrapper::GetMuteYamahaOSCSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId)
 {
 	return GetMuteProtocolSoundobjectProcessorId(YAMAHAOSC_PROCESSINGPROTOCOL_ID, soundobjectProcessorId);
@@ -3014,7 +3604,7 @@ bool ProtocolBridgingWrapper::SetMuteYamahaOSCMatrixOutputProcessorIds(const std
 }
 
 /**
- * Gets the currently set DiGiCo client ip address.
+ * Gets the currently set ADM client ip address.
  * This method forwards the call to the generic implementation.
  * @return	The ip address string
  */

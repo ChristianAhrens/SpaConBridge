@@ -26,7 +26,7 @@ InfoAfterFile=..\..\..\CHANGELOG.md
 ;PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 OutputBaseFilename=SpaConBridgeSetup
-SetupIconFile=..\..\..\Resources\Images\spaconbridge.ico
+SetupIconFile=..\..\..\Builds\VisualStudio2019\icon.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -38,7 +38,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "..\..\..\Builds/VisualStudio2019\x64\Release\App\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\..\Builds\VisualStudio2019\x64\Release\App\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

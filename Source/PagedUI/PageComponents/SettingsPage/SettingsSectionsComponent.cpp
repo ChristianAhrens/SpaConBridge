@@ -587,28 +587,35 @@ void SettingsSectionsComponent::createADMOSCSettingsSection()
 	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCMappingAreaLabel.get(), false, false);
 	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCMappingAreaSelect.get(), true, false);
 
-	m_ADMOSCInvertXYButtonContainer = std::make_unique<HorizontalLayouterComponent>();
-	m_ADMOSCInvertXYButtonContainer->SetSpacing(5);
-	m_ADMOSCInvertXButton = std::make_unique<TextButton>("X", "Invert X Axis");
-	m_ADMOSCInvertXButton->setClickingTogglesState(true);
-	m_ADMOSCInvertXButton->addListener(this);
-	m_ADMOSCInvertXYButtonContainer->AddComponent(m_ADMOSCInvertXButton.get());
-	m_ADMOSCInvertYButton = std::make_unique<TextButton>("Y", "Invert Y Axis");
-	m_ADMOSCInvertYButton->setClickingTogglesState(true);
-	m_ADMOSCInvertYButton->addListener(this);
-	m_ADMOSCInvertXYButtonContainer->AddComponent(m_ADMOSCInvertYButton.get());
-	m_ADMOSCInvertXYLabel = std::make_unique<Label>("ADMOSCInvertXYLabel", "Invert Axis");
-	m_ADMOSCInvertXYLabel->setJustificationType(Justification::centred);
-	m_ADMOSCInvertXYLabel->attachToComponent(m_ADMOSCInvertXYButtonContainer.get(), true);
-	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCInvertXYLabel.get(), false, false);
-	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCInvertXYButtonContainer.get(), true, false);
-
-	m_ADMOSCSwapXYButton = std::make_unique<TextButton>("Swap X/Y Axis", "Swap incoming X/Y cartesian coordinate values.");
+	m_ADMOSCCoordSysModContainer = std::make_unique<HorizontalLayouterComponent>();
+	m_ADMOSCCoordSysModContainer->SetSpacing(5);
+	m_ADMOSCSwapXYButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("swap XY");
+	m_ADMOSCSwapXYButton->setTooltip("Swap X/Y coordinates.");
+	m_ADMOSCSwapXYButton->setImagePosition(Justification::centredLeft);
 	m_ADMOSCSwapXYButton->setClickingTogglesState(true);
 	m_ADMOSCSwapXYButton->addListener(this);
-	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCSwapXYButton.get(), true, false);
+	m_ADMOSCCoordSysModContainer->AddComponent(m_ADMOSCSwapXYButton.get());
+	m_ADMOSCInvertXButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("inv. X");
+	m_ADMOSCInvertXButton->setTooltip("Invert X coordinates.");
+	m_ADMOSCInvertXButton->setImagePosition(Justification::centredLeft);
+	m_ADMOSCInvertXButton->setClickingTogglesState(true);
+	m_ADMOSCInvertXButton->addListener(this);
+	m_ADMOSCCoordSysModContainer->AddComponent(m_ADMOSCInvertXButton.get());
+	m_ADMOSCInvertYButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("inv. Y");
+	m_ADMOSCInvertYButton->setTooltip("Invert Y coordinates.");
+	m_ADMOSCInvertYButton->setImagePosition(Justification::centredLeft);
+	m_ADMOSCInvertYButton->setClickingTogglesState(true);
+	m_ADMOSCInvertYButton->addListener(this);
+	m_ADMOSCCoordSysModContainer->AddComponent(m_ADMOSCInvertYButton.get());
+	m_ADMOSCCoordSysModLabel = std::make_unique<Label>("ADMOSCCoordSysModLabel", "XY coord. processing");
+	m_ADMOSCCoordSysModLabel->setJustificationType(Justification::centred);
+	m_ADMOSCCoordSysModLabel->attachToComponent(m_ADMOSCCoordSysModContainer.get(), true);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCCoordSysModLabel.get(), false, false);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCCoordSysModContainer.get(), true, false);
 
-	m_ADMOSCDisableSendingButton = std::make_unique<TextButton>("Disable sending data", "Disable sending of value changes to ADM OSC input devices.");
+	m_ADMOSCDisableSendingButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Disable adm return channel");
+	m_ADMOSCDisableSendingButton->setTooltip("Disable sending of value changes to ADM OSC input devices.");
+	m_ADMOSCDisableSendingButton->setImagePosition(Justification::centredLeft);
 	m_ADMOSCDisableSendingButton->setClickingTogglesState(true);
 	m_ADMOSCDisableSendingButton->addListener(this);
 	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCDisableSendingButton.get(), true, false);
@@ -708,6 +715,10 @@ void SettingsSectionsComponent::lookAndFeelChanged()
 	UpdateDrawableButtonImages(m_ScenesPageButton, BinaryData::slideshow_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_EnSpacePageButton, BinaryData::sensors_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_StatisticsPageButton, BinaryData::show_chart24px_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_ADMOSCInvertXButton, BinaryData::flip_black_24dp_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_ADMOSCInvertYButton, BinaryData::flip_black_24dp_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_ADMOSCSwapXYButton, BinaryData::compare_black_24dp_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_ADMOSCDisableSendingButton, BinaryData::mobiledata_off24px_svg, &getLookAndFeel());
 }
 
 /**

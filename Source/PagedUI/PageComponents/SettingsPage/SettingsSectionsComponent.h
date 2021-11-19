@@ -220,12 +220,12 @@ private:
 	std::unique_ptr<Label>										m_ADMOSCRemotePortLabel;
 	std::unique_ptr<ComboBox>									m_ADMOSCMappingAreaSelect;
 	std::unique_ptr<Label>										m_ADMOSCMappingAreaLabel;
-	std::unique_ptr<HorizontalLayouterComponent>				m_ADMOSCInvertXYButtonContainer;
-	std::unique_ptr<TextButton>									m_ADMOSCInvertXButton;
-	std::unique_ptr<TextButton>									m_ADMOSCInvertYButton;
-	std::unique_ptr<Label>										m_ADMOSCInvertXYLabel;
-	std::unique_ptr<TextButton>									m_ADMOSCSwapXYButton;
-	std::unique_ptr<TextButton>									m_ADMOSCDisableSendingButton;
+	std::unique_ptr<HorizontalLayouterComponent>				m_ADMOSCCoordSysModContainer;
+	std::unique_ptr<Label>										m_ADMOSCCoordSysModLabel;
+	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_ADMOSCInvertXButton;
+	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_ADMOSCInvertYButton;
+	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_ADMOSCSwapXYButton;
+	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_ADMOSCDisableSendingButton;
 
 	// Yamaha OSC settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_YamahaOSCBridgingSettings;

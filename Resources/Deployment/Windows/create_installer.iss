@@ -1,7 +1,7 @@
 #define MyAppName "SpaConBridge"
 #define MyAppExeName "SpaConBridge.exe"
 #define MyAppExePath "..\..\..\Builds\VisualStudio2019\x64\Release\App\SpaConBridge.exe"
-#define MyAppVersion GetVersionNumbersString('MyAppExePath')
+#define MyAppVersion GetVersionNumbersString("..\..\..\Builds\VisualStudio2019\x64\Release\App\SpaConBridge.exe")
 #define MyAppPublisher "Christian Ahrens"
 #define MyAppURL "https://www.github.com/ChristianAhrens/SpaConBridge"
 

@@ -25,4 +25,4 @@ echo Build installer
 echo.
 
 echo Move setup executable to workspace root
-move Output\SpaConBridgeSetup.exe %WORKSPACE%
+move Output\SpaConBridgeSetup*.exe %WORKSPACE%

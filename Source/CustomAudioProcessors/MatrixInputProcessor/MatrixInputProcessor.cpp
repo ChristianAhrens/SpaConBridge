@@ -427,7 +427,7 @@ void MatrixInputProcessor::InitializeSettings(MatrixInputId matrixInputId, Strin
 }
 
 /**
- * Method to get a list of remote object identifiers that are used by this soundsource processing object.
+ * Method to get a list of remote object identifiers that are used by this MatrixInput processing object.
  * @return	The requested list of remote object identifiers.
  */
 const std::vector<RemoteObjectIdentifier>	MatrixInputProcessor::GetUsedRemoteObjects()
@@ -436,6 +436,16 @@ const std::vector<RemoteObjectIdentifier>	MatrixInputProcessor::GetUsedRemoteObj
 		ROI_MatrixInput_LevelMeterPreMute, 
 		ROI_MatrixInput_Gain, 
 		ROI_MatrixInput_Mute };
+};
+
+/**
+ * Method to get a list of non-flicering remote object identifiers that are used by this MatrixInput processing object.
+ * @return	The requested list of remote object identifiers.
+ */
+const std::vector<RemoteObjectIdentifier>	MatrixInputProcessor::GetStaticRemoteObjects()
+{
+	return std::vector<RemoteObjectIdentifier>{
+		ROI_MatrixInput_ChannelName };
 };
 
 

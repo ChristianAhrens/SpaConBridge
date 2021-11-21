@@ -606,7 +606,23 @@ void SoundobjectProcessor::InitializeSettings(SoundobjectId soundobjectId, Mappi
  */
 const std::vector<RemoteObjectIdentifier>	SoundobjectProcessor::GetUsedRemoteObjects()
 {
-	return std::vector<RemoteObjectIdentifier>{ROI_CoordinateMapping_SourcePosition_XY, ROI_CoordinateMapping_SourcePosition_X, ROI_CoordinateMapping_SourcePosition_Y, ROI_MatrixInput_ReverbSendGain, ROI_Positioning_SourceSpread, ROI_Positioning_SourceDelayMode};
+	return std::vector<RemoteObjectIdentifier>{
+		ROI_CoordinateMapping_SourcePosition_XY,
+		ROI_CoordinateMapping_SourcePosition_X, 
+		ROI_CoordinateMapping_SourcePosition_Y,
+		ROI_MatrixInput_ReverbSendGain, 
+		ROI_Positioning_SourceSpread, 
+		ROI_Positioning_SourceDelayMode };
+};
+
+/**
+ * Method to get a list of non-flicering remote object identifiers that are used by this soundsource processing object.
+ * @return	The requested list of remote object identifiers.
+ */
+const std::vector<RemoteObjectIdentifier>	SoundobjectProcessor::GetStaticRemoteObjects()
+{
+	return std::vector<RemoteObjectIdentifier>{
+		ROI_MatrixInput_ChannelName };
 };
 
 

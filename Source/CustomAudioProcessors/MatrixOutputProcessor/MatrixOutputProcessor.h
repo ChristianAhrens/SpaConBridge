@@ -54,6 +54,7 @@ public:
 	void InitializeSettings(MatrixOutputId channelId, String ipAddress, ComsMode newMode);
 
 	static const std::vector<RemoteObjectIdentifier>	GetUsedRemoteObjects();
+	static const std::vector<RemoteObjectIdentifier>	GetStaticRemoteObjects();
 
 	MatrixOutputId GetMatrixOutputId() const;
 	void SetMatrixOutputId(DataChangeParticipant changeSource, MatrixOutputId MatrixOutputId);

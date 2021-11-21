@@ -439,6 +439,16 @@ const std::vector<RemoteObjectIdentifier>	MatrixOutputProcessor::GetUsedRemoteOb
 		ROI_MatrixOutput_Mute };
 };
 
+/**
+ * Method to get a list of non-flicering remote object identifiers that are used by this MatrixOutput processing object.
+ * @return	The requested list of remote object identifiers.
+ */
+const std::vector<RemoteObjectIdentifier>	MatrixOutputProcessor::GetStaticRemoteObjects()
+{
+	return std::vector<RemoteObjectIdentifier>{
+		ROI_MatrixOutput_ChannelName };
+};
+
 
 //==============================================================================
 // Overriden functions of class AudioProcessorParameter::Listener

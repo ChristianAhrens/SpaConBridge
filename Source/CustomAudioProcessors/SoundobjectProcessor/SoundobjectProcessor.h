@@ -71,6 +71,7 @@ public:
 	void InitializeSettings(SoundobjectId sourceId, MappingId mappingId, String ipAddress, ComsMode newMode);
 
 	static const std::vector<RemoteObjectIdentifier>	GetUsedRemoteObjects();
+	static const std::vector<RemoteObjectIdentifier>	GetStaticRemoteObjects();
 
 	SoundobjectId GetSoundobjectId() const;
 	void SetSoundobjectId(DataChangeParticipant changeSource, SoundobjectId sourceId);

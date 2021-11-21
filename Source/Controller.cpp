@@ -48,9 +48,62 @@ namespace SpaConBridge
 {
 
 
-static constexpr int PROTOCOL_INTERVAL_MIN = 20;		//< Minimum supported OSC messaging rate in milliseconds
-static constexpr int PROTOCOL_INTERVAL_MAX = 5000;	//< Maximum supported OSC messaging rate in milliseconds
-static constexpr int PROTOCOL_INTERVAL_DEF = 100;		//< Default OSC messaging rate in milliseconds
+static constexpr int PROTOCOL_INTERVAL_MIN			= 20;		//< Minimum supported OSC messaging rate in milliseconds
+static constexpr int PROTOCOL_INTERVAL_MAX			= 5000;		//< Maximum supported OSC messaging rate in milliseconds
+static constexpr int PROTOCOL_INTERVAL_DEF			= 100;		//< Default OSC messaging rate in milliseconds
+static constexpr int PROTOCOL_INTERVAL_STATIC_OBJS	= 2000;		//< Object polling rate for non-flicering static objects in milliseconds
+
+/*
+===============================================================================
+ Class StaticObjectsPollingHelper
+===============================================================================
+*/
+
+StaticObjectsPollingHelper::StaticObjectsPollingHelper()
+{
+	pollOnce();
+}
+
+StaticObjectsPollingHelper::StaticObjectsPollingHelper(int interval)
+	: StaticObjectsPollingHelper()
+{
+	SetInterval(interval); 
+}
+
+StaticObjectsPollingHelper::~StaticObjectsPollingHelper()
+{
+}
+
+void StaticObjectsPollingHelper::SetInterval(int interval)
+{ 
+	startTimer(interval); 
+}
+
+void StaticObjectsPollingHelper::timerCallback()
+{
+	pollOnce();
+}
+
+void StaticObjectsPollingHelper::pollOnce()
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+	if (!ctrl->IsOnline())
+		return;
+
+	bool success = true;
+	auto remoteObjectsToPoll = ctrl->GetStaticRemoteObjects();
+	for (auto const& remoteObject : remoteObjectsToPoll)
+	{
+		auto romd = RemoteObjectMessageData(remoteObject._Addr, ROVT_NONE, 0, nullptr, 0);
+		success &= ctrl->SendMessageDataDirect(remoteObject._Id, romd);
+	}
+
+	if (!success)
+		DBG(String(__FUNCTION__) + " sending static objects poll request failed");
+};
+
 
 /*
 ===============================================================================
@@ -86,6 +139,8 @@ Controller::Controller()
 	SetDS100IpAddress(DCP_Init, PROTOCOL_DEFAULT_IP, true);
 	SetExtensionMode(DCP_Init, EM_Off, true);
 	SetActiveParallelModeDS100(DCP_Init, APM_None, true);
+
+	m_pollingHelper = std::make_unique<StaticObjectsPollingHelper>(PROTOCOL_INTERVAL_STATIC_OBJS);
 }
 
 /**
@@ -255,6 +310,71 @@ juce::int32 Controller::GetNextProcessorId()
 	}
 
 	return newProcessorId;
+}
+
+/**
+ * Helper to collect all 'static' remote objects used in the controller dependant parts of the application.
+ * 'Static' in this scope has the meaning of a remote object value that is required just once and is
+ * updated rarely, like channel or device names.
+ * @return	The listing of remote objects.
+ */
+std::vector<RemoteObject> Controller::GetStaticRemoteObjects()
+{
+	std::vector<RemoteObject> remoteObjects;
+	remoteObjects.push_back(RemoteObject(ROI_Settings_DeviceName, RemoteObjectAddressing(INVALID_ADDRESS_VALUE, INVALID_ADDRESS_VALUE)));
+
+	auto soProcIds = GetSoundobjectProcessorIds();
+	for (auto const& processorId : soProcIds)
+	{
+		auto processor = GetSoundobjectProcessor(processorId);
+		for (auto& roi : SoundobjectProcessor::GetStaticRemoteObjects())
+		{
+			if (ProcessingEngineConfig::IsRecordAddressingObject(roi))
+				jassertfalse;
+			else
+			{
+				auto sosro = RemoteObject(roi, RemoteObjectAddressing(processor->GetSoundobjectId(), INVALID_ADDRESS_VALUE));
+				if (std::find(remoteObjects.begin(), remoteObjects.end(), sosro) == remoteObjects.end())
+					remoteObjects.push_back(sosro);
+			}
+		}
+	}
+
+	auto miProcIds = GetMatrixInputProcessorIds();
+	for (auto const& processorId : miProcIds)
+	{
+		auto processor = GetMatrixInputProcessor(processorId);
+		for (auto& roi : MatrixInputProcessor::GetStaticRemoteObjects())
+		{
+			if (ProcessingEngineConfig::IsRecordAddressingObject(roi))
+				jassertfalse;
+			else
+			{
+				auto misro = RemoteObject(roi, RemoteObjectAddressing(processor->GetMatrixInputId(), INVALID_ADDRESS_VALUE));
+				if (std::find(remoteObjects.begin(), remoteObjects.end(), misro) == remoteObjects.end())
+					remoteObjects.push_back(misro);
+			}
+		}
+	}
+
+	auto moProcIds = GetMatrixOutputProcessorIds();
+	for (auto const& processorId : moProcIds)
+	{
+		auto processor = GetMatrixOutputProcessor(processorId);
+		for (auto& roi : MatrixOutputProcessor::GetStaticRemoteObjects())
+		{
+			if (ProcessingEngineConfig::IsRecordAddressingObject(roi))
+				jassertfalse;
+			else
+			{
+				auto mosro = RemoteObject(roi, RemoteObjectAddressing(processor->GetMatrixOutputId(), INVALID_ADDRESS_VALUE));
+				if (std::find(remoteObjects.begin(), remoteObjects.end(), mosro) == remoteObjects.end())
+					remoteObjects.push_back(mosro);
+			}
+		}
+	}
+
+	return remoteObjects;
 }
 
 /**
@@ -1236,6 +1356,18 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 			change = DCT_TabPageSelection;
 		}
 		break;
+	case RemoteObjectIdentifier::ROI_MatrixInput_ChannelName:
+		{
+			jassert(msgData._valType == RemoteObjectValueType::ROVT_STRING);
+			change = DCT_MatrixInputName;
+		}
+		break;
+	case RemoteObjectIdentifier::ROI_MatrixOutput_ChannelName:
+		{
+			jassert(msgData._valType == RemoteObjectValueType::ROVT_STRING);
+			change = DCT_MatrixOutputName;
+		}
+		break;
 	default:
 		break;
 	}
@@ -1285,6 +1417,48 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 			}
 		}
 	}
+	else if (change == DCT_MatrixInputName)
+	{
+		for (auto const& processor : m_soundobjectProcessors)
+		{
+			// Check for matching Input number.
+			if (soundobjectId == processor->GetSoundobjectId())
+			{
+				if (msgData._valType == ROVT_STRING && msgData._payloadSize > 0 && msgData._payload != nullptr)
+				{
+					auto matrixInputName = std::string(static_cast<char*>(msgData._payload), msgData._payloadSize);
+					processor->changeProgramName(processor->getCurrentProgram(), matrixInputName);
+				}
+			}
+		}
+		for (auto const& processor : m_matrixInputProcessors)
+		{
+			// Check for matching Input number.
+			if (matrixInputId == processor->GetMatrixInputId())
+			{
+				if (msgData._valType == ROVT_STRING && msgData._payloadSize > 0 && msgData._payload != nullptr)
+				{
+					auto matrixInputName = std::string(static_cast<char*>(msgData._payload), msgData._payloadSize);
+					processor->changeProgramName(processor->getCurrentProgram(), matrixInputName);
+				}
+			}
+		}
+	}
+	else if (change == DCT_MatrixOutputName)
+	{
+		for (auto const& processor : m_matrixOutputProcessors)
+		{
+			// Check for matching Output number.
+			if (matrixOutputId == processor->GetMatrixOutputId())
+			{
+				if (msgData._valType == ROVT_STRING && msgData._payloadSize > 0 && msgData._payload != nullptr)
+				{
+					auto matrixOutputName = std::string(static_cast<char*>(msgData._payload), msgData._payloadSize);
+					processor->changeProgramName(processor->getCurrentProgram(), matrixOutputName);
+				}
+			}
+		}
+	}
 	else if (change != DCT_None)
 	{
 		// update all processors with fresh values
@@ -1311,9 +1485,12 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 						if (mappingId == processor->GetMappingId())
 						{
 							jassert(msgData._valCount == 2 && msgData._valType == RemoteObjectValueType::ROVT_FLOAT);
-							// Set the processor's new position.
-							processor->SetParameterValue(DCP_Protocol, SPI_ParamIdx_X, static_cast<float*>(msgData._payload)[0]);
-							processor->SetParameterValue(DCP_Protocol, SPI_ParamIdx_Y, static_cast<float*>(msgData._payload)[1]);
+							if (msgData._valCount == 2 && msgData._valType == RemoteObjectValueType::ROVT_FLOAT)
+							{
+								// Set the processor's new position.
+								processor->SetParameterValue(DCP_Protocol, SPI_ParamIdx_X, static_cast<float*>(msgData._payload)[0]);
+								processor->SetParameterValue(DCP_Protocol, SPI_ParamIdx_Y, static_cast<float*>(msgData._payload)[1]);
+							}
 
 							// A request was sent to the DS100 by the Controller because this processor was in CM_PollOnce mode.
 							// Since the response was now processed, set the processor back into it's original mode.
@@ -3315,6 +3492,7 @@ int Controller::GetBridgingYAxisInverted(ProtocolBridgingType bridgingType)
 		return false;
 	}
 }
+
 bool Controller::SetBridgingYAxisInverted(ProtocolBridgingType bridgingType, int inverted, bool dontSendNotification)
 {
 	switch (bridgingType)

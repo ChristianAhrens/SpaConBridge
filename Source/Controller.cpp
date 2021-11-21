@@ -1359,12 +1359,18 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 	case RemoteObjectIdentifier::ROI_MatrixInput_ChannelName:
 		{
 			jassert(msgData._valType == RemoteObjectValueType::ROVT_STRING);
+			soundobjectId = msgData._addrVal._first;
+			jassert(soundobjectId > 0);
+			matrixInputId = msgData._addrVal._first;
+			jassert(matrixInputId > 0);
 			change = DCT_MatrixInputName;
 		}
 		break;
 	case RemoteObjectIdentifier::ROI_MatrixOutput_ChannelName:
 		{
 			jassert(msgData._valType == RemoteObjectValueType::ROVT_STRING);
+			matrixOutputId = msgData._addrVal._first;
+			jassert(matrixOutputId > 0);
 			change = DCT_MatrixOutputName;
 		}
 		break;

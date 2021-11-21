@@ -297,7 +297,7 @@ void SoundobjectProcessorEditor::paint(Graphics& g)
 			else
 				objNumTitleText = m_processorName;
 		}
-        auto titleTextWidth = soundobjectSliderLabelVisible ? 99 : 33;
+        auto titleTextWidth = soundobjectSliderLabelVisible ? 130 : 35;
         auto objNumTitleRect = twoDSurfaceArea.removeFromBottom(25).removeFromLeft(titleTextWidth + 7).removeFromRight(titleTextWidth);
         
         g.setColour(getLookAndFeel().findColour(TableListBox::textColourId));

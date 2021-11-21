@@ -78,9 +78,6 @@ public:
 	MappingId GetMappingId() const;
 	void SetMappingId(DataChangeParticipant changeSource, MappingId mappingId);
 
-	int GetRefreshInterval() const;
-	void SetRefreshInterval(DataChangeParticipant changeSource, int refreshInterval);
-
 	ComsMode GetComsMode() const;
 	void SetComsMode(DataChangeParticipant changeSource, ComsMode newMode);
 

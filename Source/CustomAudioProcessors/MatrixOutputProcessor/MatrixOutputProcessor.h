@@ -58,9 +58,6 @@ public:
 	MatrixOutputId GetMatrixOutputId() const;
 	void SetMatrixOutputId(DataChangeParticipant changeSource, MatrixOutputId MatrixOutputId);
 
-	int GetRefreshInterval() const;
-	void SetRefreshInterval(DataChangeParticipant changeSource, int refreshInterval);
-
 	ComsMode GetComsMode() const;
 	void SetComsMode(DataChangeParticipant changeSource, ComsMode newMode);
 

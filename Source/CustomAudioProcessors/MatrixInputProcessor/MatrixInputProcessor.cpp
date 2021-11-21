@@ -409,32 +409,6 @@ MatrixInputId MatrixInputProcessor::GetMatrixInputId() const
 }
 
 /**
- * Setter function for the send rate used in the outgoing OSC messages.
- * @param changeSource	The application module which is causing the property change.
- * @param refreshInterval	The interval at which OSC messages are sent, in ms.
- */
-void MatrixInputProcessor::SetRefreshInterval(DataChangeParticipant changeSource, int refreshInterval)
-{
-	Controller* ctrl = Controller::GetInstance();
-	if (ctrl)
-		ctrl->SetRefreshInterval(changeSource, refreshInterval);
-}
-
-/**
- * Getter function for the send rate used in the outgoing OSC messages.
- * @return	The interval at which OSC messages are sent, in ms.
- */
-int MatrixInputProcessor::GetRefreshInterval() const
-{
-	int rate = 0;
-	Controller* ctrl = Controller::GetInstance();
-	if (ctrl)
-		rate = ctrl->GetRefreshInterval();
-
-	return rate;
-}
-
-/**
  * Method to initialize config setting, without risking overwriting with the defaults.
  * @param matrixInputId		New SourceID or matrix input number to use for this processor instance.
  * @param mappingId		New coordinate mapping to use for this procssor instance.

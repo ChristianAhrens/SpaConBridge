@@ -63,11 +63,18 @@ public:
 	StaticObjectsPollingHelper(int interval);
 	~StaticObjectsPollingHelper() override;
 
+	int GetInterval();
 	void SetInterval(int interval);
+
+	bool IsRunning();
+	void SetRunning(bool running);
 
 private:
 	void timerCallback() override;
 	void pollOnce();
+
+	int m_interval{ 0 };
+	bool m_running{ false };
 };
 
 
@@ -94,6 +101,8 @@ public:
 	juce::int32 GetNextProcessorId();
 
 	std::vector<RemoteObject> GetStaticRemoteObjects();
+	bool IsStaticRemoteObjectsPollingEnabled();
+	void SetStaticRemoteObjectsPollingEnabled(DataChangeParticipant changeSource, bool enabled);
 
 	//==========================================================================
 	void createNewSoundobjectProcessor();

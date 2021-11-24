@@ -74,9 +74,36 @@ StaticObjectsPollingHelper::~StaticObjectsPollingHelper()
 {
 }
 
+int StaticObjectsPollingHelper::GetInterval()
+{
+	return m_interval;
+}
+
 void StaticObjectsPollingHelper::SetInterval(int interval)
 { 
-	startTimer(interval); 
+	m_interval = interval;
+
+	if (m_running)
+		startTimer(interval);
+}
+
+bool StaticObjectsPollingHelper::IsRunning()
+{
+	return m_running && (getTimerInterval() != 0);
+}
+
+void StaticObjectsPollingHelper::SetRunning(bool running)
+{
+	// do not restart time (would mess up currently elapsing interval) and no need to set the m_running member to identical value
+	if (m_running != running)
+	{
+		if (running)
+			startTimer(m_interval);
+		else
+			stopTimer();
+
+		m_running = running;
+	}
 }
 
 void StaticObjectsPollingHelper::timerCallback()
@@ -375,6 +402,36 @@ std::vector<RemoteObject> Controller::GetStaticRemoteObjects()
 	}
 
 	return remoteObjects;
+}
+
+/**
+ * Helper to get the running state of internal pollinghelper member for
+ * non-flickering objects polling.
+ * @return	The running state of pollinghelper or false if object not existing.
+ */
+bool Controller::IsStaticRemoteObjectsPollingEnabled()
+{
+	if (!m_pollingHelper)
+		return false;
+
+	return m_pollingHelper->IsRunning();
+}
+
+/**
+ * Helper to set the running state of internal polling of non-flickering
+ * objects through pollinghelper object.
+ * @param	changeSource	
+ * @param	enabled			True if pollingHelper shall be set to running, false if to notrunning.
+
+ */
+void Controller::SetStaticRemoteObjectsPollingEnabled(DataChangeParticipant changeSource, bool enabled)
+{
+	if (m_pollingHelper && (m_pollingHelper->IsRunning() != enabled))
+	{
+		m_pollingHelper->SetRunning(enabled);
+
+		SetParameterChanged(changeSource, DCT_RefreshInterval);
+	}
 }
 
 /**
@@ -2086,6 +2143,15 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			SetOnline(DCP_Init, onlineStateTextXmlElement->getAllSubText().getIntValue() == 1);
 	}
 
+	// set polling non-flickering objects state from xml
+	auto staticObjectsPollingStateXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::STATICOBJECTSPOLLING));
+	if (staticObjectsPollingStateXmlElement)
+	{
+		auto staticObjectsPollingStateTextXmlElement = staticObjectsPollingStateXmlElement->getFirstChildElement();
+		if (staticObjectsPollingStateTextXmlElement && staticObjectsPollingStateTextXmlElement->isTextElement())
+			SetStaticRemoteObjectsPollingEnabled(DCP_Init, staticObjectsPollingStateTextXmlElement->getAllSubText().getIntValue() == 1);
+	}
+
 	// create soundobject processors from xml
 	auto soundobjectProcessorsXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTPROCESSORS));
 	if (soundobjectProcessorsXmlElement)
@@ -2293,6 +2359,15 @@ std::unique_ptr<XmlElement> Controller::createStateXml()
 		onlineStateTextXmlElement->setText(String(IsOnline() ? 1 : 0));
 	else
 		onlineStateXmlElement->addTextElement(String(IsOnline() ? 1 : 0));
+
+	auto staticObjectsPollingStateXmlElement = controllerXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::STATICOBJECTSPOLLING));
+	if (!staticObjectsPollingStateXmlElement)
+		staticObjectsPollingStateXmlElement = controllerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::STATICOBJECTSPOLLING));
+	auto staticObjectsPollingStateTextXmlElement = staticObjectsPollingStateXmlElement->getFirstChildElement();
+	if (staticObjectsPollingStateTextXmlElement && staticObjectsPollingStateTextXmlElement->isTextElement())
+		staticObjectsPollingStateTextXmlElement->setText(String(IsStaticRemoteObjectsPollingEnabled() ? 1 : 0));
+	else
+		staticObjectsPollingStateXmlElement->addTextElement(String(IsStaticRemoteObjectsPollingEnabled() ? 1 : 0));
 
 	// create xml from soundobject processors
 	auto soundobjectProcessorsXmlElement = controllerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTPROCESSORS));

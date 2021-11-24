@@ -229,12 +229,17 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 	if (ctrl->IsStaticRemoteObjectsPollingEnabled() != m_objectNamesEnable->getToggleState())
 	{
 		m_objectNamesEnable->setToggleState(ctrl->IsStaticRemoteObjectsPollingEnabled(), dontSendNotification);
+		if (m_multiSliderSurface)
+			m_multiSliderSurface->SetSoundobjectNamesEnabled(ctrl->IsStaticRemoteObjectsPollingEnabled());
 		update = true;
 	}
 
 	if (m_multiSliderSurface)
 	{
-		if (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_NumProcessors) || (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_ProcessorSelection)) || (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_SoundobjectColourAndSize)))
+		if (	ctrl->PopParameterChanged(DCP_MultiSlider, DCT_NumProcessors) 
+			|| (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_ProcessorSelection)) 
+			|| (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_SoundobjectColourAndSize)) 
+			|| (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_RefreshInterval)))
 			update = true;
 		
 		// Iterate through all procssor instances and see if anything changed there.
@@ -255,8 +260,9 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 					auto selected		= ctrl->IsSoundobjectProcessorIdSelected(processorId);
 					auto colour			= processor->GetSoundobjectColour();
 					auto size			= processor->GetSoundobjectSize();
+					auto objectName		= processor->getProgramName(processor->getCurrentProgram());
 
-					cachedParameters.insert(std::make_pair(processorId, MultiSoundobjectSlider::SoundobjectParameters(soundobjectId, pos, spread, reverbSendGain, selected, colour, size)));
+					cachedParameters.insert(std::make_pair(processorId, MultiSoundobjectSlider::SoundobjectParameters(soundobjectId, pos, spread, reverbSendGain, selected, colour, size, objectName)));
 				}
 
 				if (processor->PopParameterChanged(DCP_MultiSlider, (DCT_SoundobjectProcessorConfig | DCT_SoundobjectParameters)))
@@ -352,6 +358,12 @@ void MultiSurfacePageComponent::buttonClicked(Button* button)
 		if (ctrl && ctrl->IsStaticRemoteObjectsPollingEnabled() != button->getToggleState())
 		{
 			ctrl->SetStaticRemoteObjectsPollingEnabled(DCP_MultiSlider, button->getToggleState());
+			
+			if (m_multiSliderSurface)
+				m_multiSliderSurface->SetSoundobjectNamesEnabled(button->getToggleState());
+			
+			// Trigger an update on the multi-slider
+			UpdateGui(true);
 		}
 	}
 }

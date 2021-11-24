@@ -332,6 +332,8 @@
                   file="submodules/JUCE-AppBasics/Resources/Images/skip_previous-24px.svg"/>
             <FILE id="C2APLR" name="slideshow_black_24dp.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/slideshow_black_24dp.svg"/>
+            <FILE id="bWTH4K" name="text_fields_black_24dp.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/text_fields_black_24dp.svg"/>
             <FILE id="nSAA4c" name="tune-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/tune-24px.svg"/>
             <FILE id="YFXXxo" name="vertical_split-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/vertical_split-24px.svg"/>

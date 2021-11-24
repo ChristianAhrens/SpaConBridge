@@ -87,6 +87,14 @@ MultiSurfacePageComponent::MultiSurfacePageComponent()
 	m_removeImage->setTooltip("Remove background image of selected Mapping Area");
 	addAndMakeVisible(m_removeImage.get());
 
+	// object names enable
+	m_objectNamesEnable = std::make_unique<DrawableButton>("Object Names", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	m_objectNamesEnable = std::make_unique<DrawableButton>("Reverb", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	m_objectNamesEnable->addListener(this);
+	m_objectNamesEnable->setTooltip("Show Soundobject names");
+	m_objectNamesEnable->setClickingTogglesState(true);
+	addAndMakeVisible(m_objectNamesEnable.get());
+
 	// reverb send gain enable
 	m_reverbEnable = std::make_unique<DrawableButton>("Reverb", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_reverbEnable->addListener(this);
@@ -144,6 +152,8 @@ void MultiSurfacePageComponent::resized()
 	m_spreadEnable->setBounds(controlElementsBounds.removeFromRight(controlElementsBounds.getHeight()));
 	controlElementsBounds.removeFromRight(margin);
 	m_reverbEnable->setBounds(controlElementsBounds.removeFromRight(controlElementsBounds.getHeight()));
+	controlElementsBounds.removeFromRight(margin);
+	m_objectNamesEnable->setBounds(controlElementsBounds.removeFromRight(controlElementsBounds.getHeight()));
 	
 	// set the bounds for the 2D slider area.
 	bounds.removeFromBottom(margin);
@@ -187,6 +197,10 @@ void MultiSurfacePageComponent::resized()
  */
 void MultiSurfacePageComponent::UpdateGui(bool init)
 {
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
 	// Will be set to true if any changes relevant to the multi-slider are found.
 	bool update = init;
 
@@ -211,8 +225,14 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 		update = true;
 	}
 
-	auto ctrl = Controller::GetInstance();
-	if (ctrl && m_multiSliderSurface)
+	// Update the objectnames enabled state
+	if (ctrl->IsStaticRemoteObjectsPollingEnabled() != m_objectNamesEnable->getToggleState())
+	{
+		m_objectNamesEnable->setToggleState(ctrl->IsStaticRemoteObjectsPollingEnabled(), dontSendNotification);
+		update = true;
+	}
+
+	if (m_multiSliderSurface)
 	{
 		if (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_NumProcessors) || (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_ProcessorSelection)) || (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_SoundobjectColourAndSize)))
 			update = true;
@@ -324,6 +344,14 @@ void MultiSurfacePageComponent::buttonClicked(Button* button)
 			auto config = SpaConBridge::AppConfiguration::getInstance();
 			if (config)
 				config->triggerConfigurationDump(false);
+		}
+	}
+	else if (m_objectNamesEnable.get() == button)
+	{
+		auto ctrl = Controller::GetInstance();
+		if (ctrl && ctrl->IsStaticRemoteObjectsPollingEnabled() != button->getToggleState())
+		{
+			ctrl->SetStaticRemoteObjectsPollingEnabled(DCP_MultiSlider, button->getToggleState());
 		}
 	}
 }
@@ -473,6 +501,7 @@ void MultiSurfacePageComponent::lookAndFeelChanged()
 	UpdateDrawableButtonImages(m_removeImage, BinaryData::hide_image_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_reverbEnable, BinaryData::sensors_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_spreadEnable, BinaryData::adjust_black_24dp_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_objectNamesEnable, BinaryData::text_fields_black_24dp_svg, &getLookAndFeel());
 }
 
 

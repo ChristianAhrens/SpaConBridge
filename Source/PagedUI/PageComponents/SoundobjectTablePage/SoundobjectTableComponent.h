@@ -46,6 +46,9 @@ public:
 	int getNumRows() override;
 	void selectedRowsChanged(int lastRowSelected) override;
 
+	//==========================================================================
+	void SetColumnVisibility(int column, bool visible);
+
 protected:
 	//==============================================================================
 	void onAddProcessor() override;

@@ -54,6 +54,7 @@ SoundobjectTableComponent::SoundobjectTableComponent()
 	int tableHeaderFlags = (TableHeaderComponent::visible | TableHeaderComponent::sortable);
 	tableColumns[BridgingAwareTableHeaderComponent::TC_EmptyHandleCellID] = BridgingAwareTableHeaderComponent::ColumnProperties("", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_EmptyHandleCellID), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_EmptyHandleCellID), -1, tableHeaderFlags);
 	tableColumns[BridgingAwareTableHeaderComponent::TC_SoundobjectID] = BridgingAwareTableHeaderComponent::ColumnProperties("Object #", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_SoundobjectID), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_SoundobjectID), -1, tableHeaderFlags);
+	tableColumns[BridgingAwareTableHeaderComponent::TC_Name] = BridgingAwareTableHeaderComponent::ColumnProperties("Name", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_Name), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_Name), -1, tableHeaderFlags);
 	tableColumns[BridgingAwareTableHeaderComponent::TC_Mapping] = BridgingAwareTableHeaderComponent::ColumnProperties("Mapping", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_Mapping), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_Mapping), -1, tableHeaderFlags);
 	tableColumns[BridgingAwareTableHeaderComponent::TC_ComsMode] = BridgingAwareTableHeaderComponent::ColumnProperties("Mode", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_ComsMode), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_ComsMode), -1, tableHeaderFlags);
 	tableColumns[BridgingAwareTableHeaderComponent::TC_SoundobjectColourAndSize] = BridgingAwareTableHeaderComponent::ColumnProperties("", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_SoundobjectColourAndSize), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_SoundobjectColourAndSize), -1, tableHeaderFlags);
@@ -78,6 +79,20 @@ SoundobjectTableComponent::~SoundobjectTableComponent()
 {
 }
 
+/**
+ * Proxy method to set the visibility of a table column
+ * in table header.
+ * @param	column	The column which the visibility shall be modified of.
+ * @param	visible	The visibilitie state to set.
+ */
+void SoundobjectTableComponent::SetColumnVisibility(int column, bool visible)
+{
+	auto table = GetTable();
+	if (table)
+	{
+		table->getHeader().setColumnVisible(column, visible);
+	}
+}
 
 /**
  * This clears and re-fills m_processorIds.

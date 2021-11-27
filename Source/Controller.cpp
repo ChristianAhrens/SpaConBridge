@@ -127,8 +127,10 @@ void StaticObjectsPollingHelper::pollOnce()
 		success &= ctrl->SendMessageDataDirect(remoteObject._Id, romd);
 	}
 
+#ifdef DEBUG
 	if (!success)
 		DBG(String(__FUNCTION__) + " sending static objects poll request failed");
+#endif
 };
 
 

@@ -80,21 +80,6 @@ SoundobjectTableComponent::~SoundobjectTableComponent()
 }
 
 /**
- * Proxy method to set the visibility of a table column
- * in table header.
- * @param	column	The column which the visibility shall be modified of.
- * @param	visible	The visibilitie state to set.
- */
-void SoundobjectTableComponent::SetColumnVisibility(int column, bool visible)
-{
-	auto table = GetTable();
-	if (table)
-	{
-		table->getHeader().setColumnVisible(column, visible);
-	}
-}
-
-/**
  * This clears and re-fills m_processorIds.
  */
 void SoundobjectTableComponent::RecreateTableRowIds()
@@ -127,13 +112,13 @@ void SoundobjectTableComponent::RecreateTableRowIds()
 void SoundobjectTableComponent::UpdateTable()
 {
 	Controller* ctrl = Controller::GetInstance();
-	if (ctrl)
-	{
-		auto selectedProcessorIds = ctrl->GetSelectedSoundobjectProcessorIds();
-		auto selectedRows = GetRowsForProcessorIds(selectedProcessorIds);
-		if (GetSelectedRows() != selectedRows)
-			SetSelectedRows(selectedRows);
-	}
+	if (!ctrl)
+		return;
+
+	auto selectedProcessorIds = ctrl->GetSelectedSoundobjectProcessorIds();
+	auto selectedRows = GetRowsForProcessorIds(selectedProcessorIds);
+	if (GetSelectedRows() != selectedRows)
+		SetSelectedRows(selectedRows);
 
 	auto table = GetTable();
 	if (table)
@@ -144,7 +129,10 @@ void SoundobjectTableComponent::UpdateTable()
 		// Refresh table header
 		auto customTableHeader = dynamic_cast<BridgingAwareTableHeaderComponent*>(&table->getHeader());
 		if (customTableHeader)
+		{
 			customTableHeader->updateBridgingTitles();
+			customTableHeader->setColumnVisible(BridgingAwareTableHeaderComponent::TC_Name, ctrl->IsStaticRemoteObjectsPollingEnabled());
+		}
 	}
 }
 

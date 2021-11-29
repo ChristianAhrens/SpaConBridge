@@ -320,8 +320,9 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 			textLabel = paramsKV.second._objectName;
 		else
 			textLabel = String(paramsKV.second._id);
-		g.setFont(Font(11.0, Font::plain));
-		g.drawText(textLabel, Rectangle<float>(x - knobSize, y + 3, knobSize * 2.0f, knobSize * 2.0f), Justification::centred, true);
+		auto font = Font(11.0, Font::plain);
+		g.setFont(font);
+		g.drawText(textLabel, Rectangle<float>(x - knobSize, y + 3, static_cast<float>(font.getStringWidth(textLabel)), knobSize * 2.0f), Justification::centred, true);
 	}
 }
 

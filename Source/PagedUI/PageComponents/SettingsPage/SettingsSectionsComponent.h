@@ -127,8 +127,7 @@ private:
 	std::unique_ptr<Label>										m_EnabledPagesLabel;
 	std::unique_ptr<ComboBox>									m_LookAndFeelSelect;
 	std::unique_ptr<Label>										m_LookAndFeelLabel;
-	std::unique_ptr<DrawableButton>								m_StaticObjectsPollingButton;
-	std::unique_ptr<Label>										m_StaticObjectsPollingLabel;
+	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_StaticObjectsPollingButton;
 
 	// DS100 settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_DS100Settings;

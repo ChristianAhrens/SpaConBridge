@@ -116,14 +116,11 @@ void SettingsSectionsComponent::createGeneralSettingsSection()
 	m_GeneralSettings->addComponent(m_LookAndFeelLabel.get(), false, false);
 	m_GeneralSettings->addComponent(m_LookAndFeelSelect.get(), true, false);
 
-	m_StaticObjectsPollingButton = std::make_unique<DrawableButton>("ChannelNamesPolling", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	m_StaticObjectsPollingButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Show Soundobject names");
 	m_StaticObjectsPollingButton->setClickingTogglesState(true);
-	m_StaticObjectsPollingButton->setTooltip("Enable channel names polling");
+	m_StaticObjectsPollingButton->setTooltip("Show object names in " + GetPageNameFromId(UPI_SoundObjects) + " and " + GetPageNameFromId(UPI_MultiSlider) + " Page.");
+	m_StaticObjectsPollingButton->setImagePosition(Justification::centredLeft);
 	m_StaticObjectsPollingButton->addListener(this);
-	m_StaticObjectsPollingLabel = std::make_unique<Label>("ChannelNamesPolling", "Poll channel names");
-	m_StaticObjectsPollingLabel->setJustificationType(Justification::centred);
-	m_StaticObjectsPollingLabel->attachToComponent(m_StaticObjectsPollingButton.get(), true);
-	m_GeneralSettings->addComponent(m_StaticObjectsPollingLabel.get(), false, false);
 	m_GeneralSettings->addComponent(m_StaticObjectsPollingButton.get(), true, false);
 
 	m_GeneralSettings->resized();
@@ -211,7 +208,7 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 }
 
 /**
- * Helper method to create and setup objects for DiGiCo settings section
+* Helper method to create and setup objects for DiGiCo settings section
  */
 void SettingsSectionsComponent::createDiGiCoSettingsSection()
 {

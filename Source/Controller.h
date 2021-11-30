@@ -54,6 +54,31 @@ class MatrixOutputProcessor;
 
 
 /**
+ * Class StaticObjectsPollingHelper 
+ */
+class StaticObjectsPollingHelper : private Timer
+{
+public:
+	StaticObjectsPollingHelper();
+	StaticObjectsPollingHelper(int interval);
+	~StaticObjectsPollingHelper() override;
+
+	int GetInterval();
+	void SetInterval(int interval);
+
+	bool IsRunning();
+	void SetRunning(bool running);
+
+private:
+	void timerCallback() override;
+	void pollOnce();
+
+	int m_interval{ 0 };
+	bool m_running{ false };
+};
+
+
+/**
  * Class Controller which takes care of protocol communication through protocolbridging wrapper, including connection establishment
  * and sending/receiving of messages over the network.
  * NOTE: This is a singleton class, i.e. there is only one instance.
@@ -74,6 +99,10 @@ public:
 	void SetParameterChanged(DataChangeParticipant changeSource, DataChangeType changeTypes);
 
 	juce::int32 GetNextProcessorId();
+
+	std::vector<RemoteObject> GetStaticRemoteObjects();
+	bool IsStaticRemoteObjectsPollingEnabled();
+	void SetStaticRemoteObjectsPollingEnabled(DataChangeParticipant changeSource, bool enabled);
 
 	//==========================================================================
 	void createNewSoundobjectProcessor();
@@ -272,6 +301,9 @@ protected:
 	std::map<SoundobjectProcessorId, bool>	m_soundobjectProcessorSelection;		/**< The current select state of sound objects. */
 	std::map<MatrixInputProcessorId, bool>	m_matrixInputProcessorSelection;		/**< The current select state of matrix inputs. */
 	std::map<MatrixOutputProcessorId, bool>	m_matrixOutputProcessorSelection;		/**< The current select state of matrix outputs. */
+
+private:
+	std::unique_ptr<StaticObjectsPollingHelper> m_pollingHelper;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Controller)
 };

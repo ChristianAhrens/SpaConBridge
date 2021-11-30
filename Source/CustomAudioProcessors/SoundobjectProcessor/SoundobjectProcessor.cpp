@@ -581,32 +581,6 @@ double SoundobjectProcessor::GetSoundobjectSize() const
 }
 
 /**
- * Setter function for the send rate used in the outgoing OSC messages.
- * @param changeSource	The application module which is causing the property change.
- * @param refreshInterval	The interval at which OSC messages are sent, in ms.
- */
-void SoundobjectProcessor::SetRefreshInterval(DataChangeParticipant changeSource, int refreshInterval)
-{
-	Controller* ctrl = Controller::GetInstance();
-	if (ctrl)
-		ctrl->SetRefreshInterval(changeSource, refreshInterval);
-}
-
-/**
- * Getter function for the send rate used in the outgoing OSC messages.
- * @return	The interval at which OSC messages are sent, in ms.
- */
-int SoundobjectProcessor::GetRefreshInterval() const
-{
-	int rate = 0;
-	Controller* ctrl = Controller::GetInstance();
-	if (ctrl)
-		rate = ctrl->GetRefreshInterval();
-
-	return rate;
-}
-
-/**
  * Method to initialize config setting, without risking overwriting with the defaults.
  * @param soundobjectId	New SoundobjectID or matrix input number to use for this processor instance.
  * @param mappingId		New coordinate mapping to use for this procssor instance.
@@ -632,7 +606,23 @@ void SoundobjectProcessor::InitializeSettings(SoundobjectId soundobjectId, Mappi
  */
 const std::vector<RemoteObjectIdentifier>	SoundobjectProcessor::GetUsedRemoteObjects()
 {
-	return std::vector<RemoteObjectIdentifier>{ROI_CoordinateMapping_SourcePosition_XY, ROI_CoordinateMapping_SourcePosition_X, ROI_CoordinateMapping_SourcePosition_Y, ROI_MatrixInput_ReverbSendGain, ROI_Positioning_SourceSpread, ROI_Positioning_SourceDelayMode};
+	return std::vector<RemoteObjectIdentifier>{
+		ROI_CoordinateMapping_SourcePosition_XY,
+		ROI_CoordinateMapping_SourcePosition_X, 
+		ROI_CoordinateMapping_SourcePosition_Y,
+		ROI_MatrixInput_ReverbSendGain, 
+		ROI_Positioning_SourceSpread, 
+		ROI_Positioning_SourceDelayMode };
+};
+
+/**
+ * Method to get a list of non-flicering remote object identifiers that are used by this soundsource processing object.
+ * @return	The requested list of remote object identifiers.
+ */
+const std::vector<RemoteObjectIdentifier>	SoundobjectProcessor::GetStaticRemoteObjects()
+{
+	return std::vector<RemoteObjectIdentifier>{
+		ROI_MatrixInput_ChannelName };
 };
 
 

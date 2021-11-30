@@ -54,6 +54,7 @@ SoundobjectTableComponent::SoundobjectTableComponent()
 	int tableHeaderFlags = (TableHeaderComponent::visible | TableHeaderComponent::sortable);
 	tableColumns[BridgingAwareTableHeaderComponent::TC_EmptyHandleCellID] = BridgingAwareTableHeaderComponent::ColumnProperties("", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_EmptyHandleCellID), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_EmptyHandleCellID), -1, tableHeaderFlags);
 	tableColumns[BridgingAwareTableHeaderComponent::TC_SoundobjectID] = BridgingAwareTableHeaderComponent::ColumnProperties("Object #", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_SoundobjectID), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_SoundobjectID), -1, tableHeaderFlags);
+	tableColumns[BridgingAwareTableHeaderComponent::TC_Name] = BridgingAwareTableHeaderComponent::ColumnProperties("Name", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_Name), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_Name), -1, tableHeaderFlags);
 	tableColumns[BridgingAwareTableHeaderComponent::TC_Mapping] = BridgingAwareTableHeaderComponent::ColumnProperties("Mapping", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_Mapping), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_Mapping), -1, tableHeaderFlags);
 	tableColumns[BridgingAwareTableHeaderComponent::TC_ComsMode] = BridgingAwareTableHeaderComponent::ColumnProperties("Mode", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_ComsMode), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_ComsMode), -1, tableHeaderFlags);
 	tableColumns[BridgingAwareTableHeaderComponent::TC_SoundobjectColourAndSize] = BridgingAwareTableHeaderComponent::ColumnProperties("", getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_SoundobjectColourAndSize), getColumnAutoSizeWidth(BridgingAwareTableHeaderComponent::TC_SoundobjectColourAndSize), -1, tableHeaderFlags);
@@ -77,7 +78,6 @@ SoundobjectTableComponent::SoundobjectTableComponent()
 SoundobjectTableComponent::~SoundobjectTableComponent()
 {
 }
-
 
 /**
  * This clears and re-fills m_processorIds.
@@ -112,13 +112,13 @@ void SoundobjectTableComponent::RecreateTableRowIds()
 void SoundobjectTableComponent::UpdateTable()
 {
 	Controller* ctrl = Controller::GetInstance();
-	if (ctrl)
-	{
-		auto selectedProcessorIds = ctrl->GetSelectedSoundobjectProcessorIds();
-		auto selectedRows = GetRowsForProcessorIds(selectedProcessorIds);
-		if (GetSelectedRows() != selectedRows)
-			SetSelectedRows(selectedRows);
-	}
+	if (!ctrl)
+		return;
+
+	auto selectedProcessorIds = ctrl->GetSelectedSoundobjectProcessorIds();
+	auto selectedRows = GetRowsForProcessorIds(selectedProcessorIds);
+	if (GetSelectedRows() != selectedRows)
+		SetSelectedRows(selectedRows);
 
 	auto table = GetTable();
 	if (table)
@@ -129,7 +129,10 @@ void SoundobjectTableComponent::UpdateTable()
 		// Refresh table header
 		auto customTableHeader = dynamic_cast<BridgingAwareTableHeaderComponent*>(&table->getHeader());
 		if (customTableHeader)
+		{
 			customTableHeader->updateBridgingTitles();
+			customTableHeader->setColumnVisible(BridgingAwareTableHeaderComponent::TC_Name, ctrl->IsStaticRemoteObjectsPollingEnabled());
+		}
 	}
 }
 

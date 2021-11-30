@@ -223,6 +223,68 @@ void ComboBoxContainer::SetRow(int newRow)
 
 /*
 ===============================================================================
+ Class LabelContainer
+===============================================================================
+*/
+
+/**
+ * Class constructor.
+ */
+LabelContainer::LabelContainer(TableModelComponent& td)
+	: TableEditorComponent(td)
+{
+	addAndMakeVisible(m_label);
+}
+
+/**
+ * Class destructor.
+ */
+LabelContainer::~LabelContainer()
+{
+}
+
+/**
+ * Reimplemented from Component, used to resize the actual combo box component inside.
+ */
+void LabelContainer::resized()
+{
+	m_label.setBoundsInset(BorderSize<int>(4, 4, 5, 4));
+}
+
+/**
+ * Saves the row number where this component is located inside the overview table.
+ * It also updated the combo box's selected item according to that procssor's MappingID.
+ * @param newRow	The new row number.
+ */
+void LabelContainer::SetRow(int newRow)
+{
+	TableEditorComponent::SetRow(newRow);
+
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
+	// Find the procssor instance corresponding to the given row number.
+	auto processorId = GetParentTable().GetProcessorIdForRow(newRow);
+
+	switch (GetParentTable().GetTableType())
+	{
+	case TT_MatrixInputs:
+	case TT_MatrixOutputs:
+	case TT_Soundobjects:
+	default:
+	{
+		auto processor = ctrl->GetSoundobjectProcessor(processorId);
+		if (processor)
+			m_label.setText(processor->getProgramName(processor->getCurrentProgram()), dontSendNotification);
+	}
+	break;
+	}
+}
+
+
+/*
+===============================================================================
  Class TextEditorContainer
 ===============================================================================
 */

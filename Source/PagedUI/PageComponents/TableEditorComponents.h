@@ -93,6 +93,25 @@ private:
 };
 
 /**
+ * Class LabelContainer is a container for a label component used in the Overview table.
+ */
+class LabelContainer : public TableEditorComponent
+{
+public:
+	explicit LabelContainer(TableModelComponent& td);
+	~LabelContainer() override;
+
+	void SetRow(int newRow) override;
+
+	void resized() override;
+
+private:
+	Label	m_label;	/**> Actual label component. */
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LabelContainer)
+};
+
+/**
  * Class TextEditorContainer is a container for the SourceID TextEditor component used in the Overview table.
  */
 class TextEditorContainer : public TableEditorComponent,

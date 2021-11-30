@@ -56,6 +56,7 @@ public:
         SPREADENABLED,
         BACKGROUNDIMAGES,
         BACKGROUND,
+        STATICOBJECTSPOLLING,
     };
     static String getTagName(TagID ID)
     {
@@ -111,6 +112,8 @@ public:
             return "BackgroundImages";
         case BACKGROUND:
             return "Bkg";
+        case STATICOBJECTSPOLLING:
+            return "StaticObjectsPolling";
 		default:
 			return "INVALID";
         }

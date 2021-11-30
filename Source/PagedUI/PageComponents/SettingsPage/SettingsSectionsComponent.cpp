@@ -116,6 +116,13 @@ void SettingsSectionsComponent::createGeneralSettingsSection()
 	m_GeneralSettings->addComponent(m_LookAndFeelLabel.get(), false, false);
 	m_GeneralSettings->addComponent(m_LookAndFeelSelect.get(), true, false);
 
+	m_StaticObjectsPollingButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Show Soundobject names");
+	m_StaticObjectsPollingButton->setClickingTogglesState(true);
+	m_StaticObjectsPollingButton->setTooltip("Show object names in " + GetPageNameFromId(UPI_SoundObjects) + " and " + GetPageNameFromId(UPI_MultiSlider) + " Page.");
+	m_StaticObjectsPollingButton->setImagePosition(Justification::centredLeft);
+	m_StaticObjectsPollingButton->addListener(this);
+	m_GeneralSettings->addComponent(m_StaticObjectsPollingButton.get(), true, false);
+
 	m_GeneralSettings->resized();
 
 	// trigger lookAndFeelChanged once to initially setup drawablebuttons
@@ -201,7 +208,7 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 }
 
 /**
- * Helper method to create and setup objects for DiGiCo settings section
+* Helper method to create and setup objects for DiGiCo settings section
  */
 void SettingsSectionsComponent::createDiGiCoSettingsSection()
 {
@@ -714,6 +721,7 @@ void SettingsSectionsComponent::lookAndFeelChanged()
 	UpdateDrawableButtonImages(m_MatrixIOPageButton, BinaryData::tune24px_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_ScenesPageButton, BinaryData::slideshow_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_EnSpacePageButton, BinaryData::sensors_black_24dp_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_StaticObjectsPollingButton, BinaryData::text_fields_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_StatisticsPageButton, BinaryData::show_chart24px_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_ADMOSCInvertXButton, BinaryData::flip_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_ADMOSCInvertYButton, BinaryData::flip_black_24dp_svg, &getLookAndFeel());
@@ -757,6 +765,9 @@ void SettingsSectionsComponent::buttonClicked(Button* button)
 			enabledPages.push_back(UPI_Statistics);
 		pageMgr->SetEnabledPages(enabledPages, false);
 	}
+	if (m_StaticObjectsPollingButton.get() == button)
+		ctrl->SetStaticRemoteObjectsPollingEnabled(DCP_Settings, m_StaticObjectsPollingButton->getToggleState());
+
 	// ADM-OSC Settings section
 	else if (m_ADMOSCInvertXButton.get() == button)
 	{
@@ -1120,6 +1131,10 @@ void SettingsSectionsComponent::processUpdatedGeneralConfig()
 		m_StatisticsPageButton->setToggleState(std::find(pageMgr->GetEnabledPages().begin(), pageMgr->GetEnabledPages().end(), UPI_Statistics) != pageMgr->GetEnabledPages().end(), dontSendNotification);
 	if (m_LookAndFeelSelect)
 		m_LookAndFeelSelect->setSelectedId(pageMgr->GetLookAndFeelType(), dontSendNotification);
+
+	auto ctrl = Controller::GetInstance();
+	if (ctrl && m_StaticObjectsPollingButton)
+		m_StaticObjectsPollingButton->setToggleState(ctrl->IsStaticRemoteObjectsPollingEnabled(), dontSendNotification);
 }
 
 /**

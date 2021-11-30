@@ -42,16 +42,18 @@ public:
 			_reverbSndGain(0.0f),
 			_selected(false),
 			_colour(Colours::black),
-			_size(0.5f)
+			_size(0.5f),
+			_objectName(String())
 		{};
-		SoundobjectParameters(SoundobjectId id, const Point<float>& pos, float spread, float reverbSendGain, bool selected, const Colour& colour, double size) : 
+		SoundobjectParameters(SoundobjectId id, const Point<float>& pos, float spread, float reverbSendGain, bool selected, const Colour& colour, double size, const String& objectName) : 
 			_id(id), 
 			_pos(pos),
 			_spread(spread),
 			_reverbSndGain(reverbSendGain),
 			_selected(selected),
 			_colour(colour),
-			_size(size)
+			_size(size),
+			_objectName(objectName)
 		{};
 
 		SoundobjectId	_id;
@@ -61,6 +63,7 @@ public:
 		bool			_selected;
 		Colour			_colour;
 		double			_size;
+		String			_objectName;
 	};
 	typedef std::map<SoundobjectProcessorId, SoundobjectParameters> ParameterCache;
 
@@ -75,6 +78,8 @@ public:
 	void SetSpreadEnabled(bool enabled);
 	bool IsReverbSndGainEnabled();
 	void SetReverbSndGainEnabled(bool enabled);
+	bool IsSoundobjectNamesEnabled();
+	void SetSoundobjectNamesEnabled(bool enabled);
 
 	bool HasBackgroundImage(MappingAreaId mappingAreaId);
 	const juce::Image* GetBackgroundImage(MappingAreaId mappingAreaId);
@@ -100,6 +105,7 @@ private:
 																							 *	 Keys are the SoundobjectProcessorId of each object processor. */
 	bool														m_spreadEnabled;			/**< Flag indication, if SO spread factor visu shall be painted for individual SOs. */
 	bool														m_reverbSndGainEnabled;		/**< Flag indication, if SO reverb send gaind visu shall be painted for individual SOs. */
+	bool														m_soundObjectNamesEnabled;	/**< Flag indication, if SO name strings shall be painted for individual SOs. */
 	MappingAreaId												m_selectedMapping;			/**< Remember the last selected coordinate mapping for the multi-slider. */
 	std::map<MappingAreaId, std::unique_ptr<ImageComponent>>	m_backgroundImages;			/**< Map of background images for the four Mapping Areas that can be displayed. */
 };

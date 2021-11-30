@@ -410,32 +410,6 @@ MatrixOutputId MatrixOutputProcessor::GetMatrixOutputId() const
 }
 
 /**
- * Setter function for the send rate used in the outgoing OSC messages.
- * @param changeSource	The application module which is causing the property change.
- * @param refreshInterval	The interval at which OSC messages are sent, in ms.
- */
-void MatrixOutputProcessor::SetRefreshInterval(DataChangeParticipant changeSource, int refreshInterval)
-{
-	Controller* ctrl = Controller::GetInstance();
-	if (ctrl)
-		ctrl->SetRefreshInterval(changeSource, refreshInterval);
-}
-
-/**
- * Getter function for the send rate used in the outgoing OSC messages.
- * @return	The interval at which OSC messages are sent, in ms.
- */
-int MatrixOutputProcessor::GetRefreshInterval() const
-{
-	int rate = 0;
-	Controller* ctrl = Controller::GetInstance();
-	if (ctrl)
-		rate = ctrl->GetRefreshInterval();
-
-	return rate;
-}
-
-/**
  * Method to initialize config setting, without risking overwriting with the defaults.
  * @param MatrixOutputId		New SourceID or matrix input number to use for this processor instance.
  * @param mappingId		New coordinate mapping to use for this procssor instance.
@@ -463,6 +437,16 @@ const std::vector<RemoteObjectIdentifier>	MatrixOutputProcessor::GetUsedRemoteOb
 		ROI_MatrixOutput_LevelMeterPostMute,
 		ROI_MatrixOutput_Gain,
 		ROI_MatrixOutput_Mute };
+};
+
+/**
+ * Method to get a list of non-flicering remote object identifiers that are used by this MatrixOutput processing object.
+ * @return	The requested list of remote object identifiers.
+ */
+const std::vector<RemoteObjectIdentifier>	MatrixOutputProcessor::GetStaticRemoteObjects()
+{
+	return std::vector<RemoteObjectIdentifier>{
+		ROI_MatrixOutput_ChannelName };
 };
 
 

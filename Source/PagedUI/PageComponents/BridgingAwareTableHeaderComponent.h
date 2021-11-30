@@ -42,6 +42,7 @@ public:
 		TC_SoundobjectID,
 		TC_InputID,
 		TC_OutputID,
+		TC_Name,
 		TC_InputEditor,
 		TC_OutputEditor,
 		TC_Mapping,
@@ -91,6 +92,7 @@ public:
 	void updateBridgingTitles();
 	void updateColumnWidths();
 
+	
 private:
 	std::map<ProtocolBridgingType, bool>	m_bridgingProtocolActive;
 };

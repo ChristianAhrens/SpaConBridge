@@ -54,12 +54,10 @@ public:
 	void InitializeSettings(MatrixInputId matrixInputId, String ipAddress, ComsMode newMode);
 
 	static const std::vector<RemoteObjectIdentifier>	GetUsedRemoteObjects();
+	static const std::vector<RemoteObjectIdentifier>	GetStaticRemoteObjects();
 
 	MatrixInputId GetMatrixInputId() const;
 	void SetMatrixInputId(DataChangeParticipant changeSource, MatrixInputId matrixInputId);
-
-	int GetRefreshInterval() const;
-	void SetRefreshInterval(DataChangeParticipant changeSource, int refreshInterval);
 
 	ComsMode GetComsMode() const;
 	void SetComsMode(DataChangeParticipant changeSource, ComsMode newMode);

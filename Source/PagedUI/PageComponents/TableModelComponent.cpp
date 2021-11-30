@@ -430,6 +430,35 @@ bool TableModelComponent::LessThanMapping(juce::int32 pId1, juce::int32 pId2)
 }
 
 /**
+ * Helper sorting function used by std::sort(). This version is used to sort by procssor's name (currentProgram).
+ * @param pId1	Id of the first processor.
+ * @param pId2	Id of the second processor.
+ * @return	True if the first Name is less than the second.
+ */
+bool TableModelComponent::LessThanName(juce::int32 pId1, juce::int32 pId2)
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return false;
+
+	auto processorIds = ctrl->GetSoundobjectProcessorIds();
+	auto maxProcessorIdIter = std::max_element(processorIds.begin(), processorIds.end());
+	if (maxProcessorIdIter == processorIds.end())
+		return false;
+	auto maxProcessorId = *maxProcessorIdIter;
+	if ((pId1 <= maxProcessorId) && (pId2 <= maxProcessorId))
+	{
+		auto p1 = ctrl->GetSoundobjectProcessor(pId1);
+		auto p2 = ctrl->GetSoundobjectProcessor(pId2);
+		if (p1 && p2)
+			return (p1->getProgramName(p1->getCurrentProgram()) < p2->getProgramName(p2->getCurrentProgram()));
+	}
+
+	jassertfalse; // Index out of range!
+	return false;
+}
+
+/**
  * Helper sorting function used by std::sort(). This version is used to sort by procssor's ComsMode. 
  * @param pId1	Id of the first processor.
  * @param pId2	Id of the second processor.
@@ -693,6 +722,9 @@ void TableModelComponent::sortOrderChanged(int newSortColumnId, bool isForwards)
 	case BridgingAwareTableHeaderComponent::TC_Mapping:
 		std::sort(m_processorIds.begin(), m_processorIds.end(), TableModelComponent::LessThanMapping);
 		break;
+	case BridgingAwareTableHeaderComponent::TC_Name:
+		std::sort(m_processorIds.begin(), m_processorIds.end(), TableModelComponent::LessThanName);
+		break;
 	case BridgingAwareTableHeaderComponent::TC_ComsMode:
 		std::sort(m_processorIds.begin(), m_processorIds.end(), TableModelComponent::LessThanComsMode);
 		break;
@@ -745,6 +777,23 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 
 	case BridgingAwareTableHeaderComponent::TC_EmptyHandleCellID:
 		// empty cell does not use any component
+		break;
+
+	case BridgingAwareTableHeaderComponent::TC_Name:
+		{
+			LabelContainer* label = static_cast<LabelContainer*> (existingComponentToUpdate);
+
+			// If an existing component is being passed-in for updating, we'll re-use it, but
+			// if not, we'll have to create one.
+			if (label == nullptr)
+				label = new LabelContainer(*this);
+
+			// Ensure that the comboBox knows which row number it is located at.
+			label->SetRow(rowNumber);
+
+			// Return a pointer to the comboBox.
+			ret = label;
+		}
 		break;
 
 	case BridgingAwareTableHeaderComponent::TC_Mapping:
@@ -960,6 +1009,8 @@ int TableModelComponent::getColumnAutoSizeWidth(int columnId)
 		return 70;
 	case BridgingAwareTableHeaderComponent::TC_OutputID:
 		return 70;
+	case BridgingAwareTableHeaderComponent::TC_Name:
+		return 130;
 	case BridgingAwareTableHeaderComponent::TC_InputEditor:
 		return 190;
 	case BridgingAwareTableHeaderComponent::TC_OutputEditor:

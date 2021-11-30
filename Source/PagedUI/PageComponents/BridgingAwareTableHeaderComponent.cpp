@@ -52,11 +52,9 @@ BridgingAwareTableHeaderComponent::BridgingAwareTableHeaderComponent(const std::
 			columnPropertiesKV.second._propertyFlags,
 			columnPropertiesKV.second._insertIndex);
 	}
+
 	if (sortColumn != TC_None)
 		setSortColumnId(sortColumn, true);
-
-	updateBridgingTitles();
-	repaint();
 }
 
 /**

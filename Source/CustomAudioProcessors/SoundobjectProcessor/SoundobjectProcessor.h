@@ -71,15 +71,13 @@ public:
 	void InitializeSettings(SoundobjectId sourceId, MappingId mappingId, String ipAddress, ComsMode newMode);
 
 	static const std::vector<RemoteObjectIdentifier>	GetUsedRemoteObjects();
+	static const std::vector<RemoteObjectIdentifier>	GetStaticRemoteObjects();
 
 	SoundobjectId GetSoundobjectId() const;
 	void SetSoundobjectId(DataChangeParticipant changeSource, SoundobjectId sourceId);
 
 	MappingId GetMappingId() const;
 	void SetMappingId(DataChangeParticipant changeSource, MappingId mappingId);
-
-	int GetRefreshInterval() const;
-	void SetRefreshInterval(DataChangeParticipant changeSource, int refreshInterval);
 
 	ComsMode GetComsMode() const;
 	void SetComsMode(DataChangeParticipant changeSource, ComsMode newMode);

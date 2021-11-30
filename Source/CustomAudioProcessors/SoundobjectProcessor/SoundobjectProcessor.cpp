@@ -787,7 +787,11 @@ const String SoundobjectProcessor::getProgramName(int index)
  */
 void SoundobjectProcessor::changeProgramName(int index, const String& newName)
 {
-	ignoreUnused(index);
+	if (index != getCurrentProgram())
+		return;
+	if (newName == m_processorDisplayName)
+		return;
+
 	m_processorDisplayName = newName;
 
 	// Signal change to other modules in the procssor.

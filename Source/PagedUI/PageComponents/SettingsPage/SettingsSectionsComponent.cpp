@@ -53,6 +53,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	createRTTrPMSettingsSection();
 	createGenericOSCSettingsSection();
 	createGenericMIDISettingsSection();
+	createADMOSCSettingsSection();
 	createYamahaOSCSettingsSection();
 }
 
@@ -114,6 +115,13 @@ void SettingsSectionsComponent::createGeneralSettingsSection()
 	m_LookAndFeelLabel->attachToComponent(m_LookAndFeelSelect.get(), true);
 	m_GeneralSettings->addComponent(m_LookAndFeelLabel.get(), false, false);
 	m_GeneralSettings->addComponent(m_LookAndFeelSelect.get(), true, false);
+
+	m_StaticObjectsPollingButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Show Soundobject names");
+	m_StaticObjectsPollingButton->setClickingTogglesState(true);
+	m_StaticObjectsPollingButton->setTooltip("Show object names in " + GetPageNameFromId(UPI_SoundObjects) + " and " + GetPageNameFromId(UPI_MultiSlider) + " Page.");
+	m_StaticObjectsPollingButton->setImagePosition(Justification::centredLeft);
+	m_StaticObjectsPollingButton->addListener(this);
+	m_GeneralSettings->addComponent(m_StaticObjectsPollingButton.get(), true, false);
 
 	m_GeneralSettings->resized();
 
@@ -200,7 +208,7 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 }
 
 /**
- * Helper method to create and setup objects for DiGiCo settings section
+* Helper method to create and setup objects for DiGiCo settings section
  */
 void SettingsSectionsComponent::createDiGiCoSettingsSection()
 {
@@ -536,6 +544,93 @@ void SettingsSectionsComponent::createYamahaOSCSettingsSection()
 }
 
 /**
+ * Helper method to create and setup objects for ADM OSC settings section
+ */
+void SettingsSectionsComponent::createADMOSCSettingsSection()
+{
+	// ADM-OSC settings section
+	m_ADMOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
+	m_ADMOSCBridgingSettings->setBackgroundDecorationText("Alpha");
+	m_ADMOSCBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_ADMOSC) + " Bridging");
+	m_ADMOSCBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_ADMOSC) + " Bridging Settings");
+	m_ADMOSCBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/ADMOSC.md"));
+	m_ADMOSCBridgingSettings->setHasActiveToggle(true);
+	m_ADMOSCBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
+	addAndMakeVisible(m_ADMOSCBridgingSettings.get());
+
+	m_ADMOSCIpAddressEdit = std::make_unique<TextEditor>();
+	m_ADMOSCIpAddressEdit->addListener(this);
+	m_ADMOSCIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
+	m_ADMOSCIpAddressLabel = std::make_unique<Label>("ADMOSCIpAddressEdit", "IP Address");
+	m_ADMOSCIpAddressLabel->setJustificationType(Justification::centred);
+	m_ADMOSCIpAddressLabel->attachToComponent(m_ADMOSCIpAddressEdit.get(), true);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCIpAddressLabel.get(), false, false);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCIpAddressEdit.get(), true, false);
+
+	m_ADMOSCListeningPortEdit = std::make_unique<TextEditor>();
+	m_ADMOSCListeningPortEdit->addListener(this);
+	m_ADMOSCListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
+	m_ADMOSCListeningPortLabel = std::make_unique<Label>("ADMOSCListeningPortEdit", "Listening Port");
+	m_ADMOSCListeningPortLabel->setJustificationType(Justification::centred);
+	m_ADMOSCListeningPortLabel->attachToComponent(m_ADMOSCListeningPortEdit.get(), true);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCListeningPortLabel.get(), false, false);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCListeningPortEdit.get(), true, false);
+
+	m_ADMOSCRemotePortEdit = std::make_unique<TextEditor>();
+	m_ADMOSCRemotePortEdit->addListener(this);
+	m_ADMOSCRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
+	m_ADMOSCRemotePortLabel = std::make_unique<Label>("ADMOSCRemotePortEdit", "Remote Port");
+	m_ADMOSCRemotePortLabel->setJustificationType(Justification::centred);
+	m_ADMOSCRemotePortLabel->attachToComponent(m_ADMOSCRemotePortEdit.get(), true);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCRemotePortLabel.get(), false, false);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCRemotePortEdit.get(), true, false);
+
+	m_ADMOSCMappingAreaSelect = std::make_unique<ComboBox>();
+	m_ADMOSCMappingAreaSelect->addListener(this);
+	m_ADMOSCMappingAreaSelect->addItemList({ "1", "2", "3", "4" }, MAI_First);
+	m_ADMOSCMappingAreaLabel = std::make_unique<Label>("ADMOSCMappingAreaSelect", "Mapping Area");
+	m_ADMOSCMappingAreaLabel->setJustificationType(Justification::centred);
+	m_ADMOSCMappingAreaLabel->attachToComponent(m_ADMOSCMappingAreaSelect.get(), true);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCMappingAreaLabel.get(), false, false);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCMappingAreaSelect.get(), true, false);
+
+	m_ADMOSCCoordSysModContainer = std::make_unique<HorizontalLayouterComponent>();
+	m_ADMOSCCoordSysModContainer->SetSpacing(5);
+	m_ADMOSCSwapXYButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("swap XY");
+	m_ADMOSCSwapXYButton->setTooltip("Swap X/Y coordinates.");
+	m_ADMOSCSwapXYButton->setImagePosition(Justification::centredLeft);
+	m_ADMOSCSwapXYButton->setClickingTogglesState(true);
+	m_ADMOSCSwapXYButton->addListener(this);
+	m_ADMOSCCoordSysModContainer->AddComponent(m_ADMOSCSwapXYButton.get());
+	m_ADMOSCInvertXButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("inv. X");
+	m_ADMOSCInvertXButton->setTooltip("Invert X coordinates.");
+	m_ADMOSCInvertXButton->setImagePosition(Justification::centredLeft);
+	m_ADMOSCInvertXButton->setClickingTogglesState(true);
+	m_ADMOSCInvertXButton->addListener(this);
+	m_ADMOSCCoordSysModContainer->AddComponent(m_ADMOSCInvertXButton.get());
+	m_ADMOSCInvertYButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("inv. Y");
+	m_ADMOSCInvertYButton->setTooltip("Invert Y coordinates.");
+	m_ADMOSCInvertYButton->setImagePosition(Justification::centredLeft);
+	m_ADMOSCInvertYButton->setClickingTogglesState(true);
+	m_ADMOSCInvertYButton->addListener(this);
+	m_ADMOSCCoordSysModContainer->AddComponent(m_ADMOSCInvertYButton.get());
+	m_ADMOSCCoordSysModLabel = std::make_unique<Label>("ADMOSCCoordSysModLabel", "XY coord. processing");
+	m_ADMOSCCoordSysModLabel->setJustificationType(Justification::centred);
+	m_ADMOSCCoordSysModLabel->attachToComponent(m_ADMOSCCoordSysModContainer.get(), true);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCCoordSysModLabel.get(), false, false);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCCoordSysModContainer.get(), true, false);
+
+	m_ADMOSCDisableSendingButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Disable adm return channel");
+	m_ADMOSCDisableSendingButton->setTooltip("Disable sending of value changes to ADM OSC input devices.");
+	m_ADMOSCDisableSendingButton->setImagePosition(Justification::centredLeft);
+	m_ADMOSCDisableSendingButton->setClickingTogglesState(true);
+	m_ADMOSCDisableSendingButton->addListener(this);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCDisableSendingButton.get(), true, false);
+
+	m_ADMOSCBridgingSettings->resized();
+}
+
+/**
  * Class destructor.
  */
 SettingsSectionsComponent::~SettingsSectionsComponent()
@@ -568,6 +663,7 @@ void SettingsSectionsComponent::resized()
 		+ (m_RTTrPMBridgingSettings->getHeight() + (2 * margin))
 		+ (m_GenericOSCBridgingSettings->getHeight() + (2 * margin))
 		+ (m_GenericMIDIBridgingSettings->getHeight() + (2 * margin))
+		+ (m_ADMOSCBridgingSettings->getHeight() + (2 * margin))
 		+ (m_YamahaOSCBridgingSettings->getHeight() + (2 * margin));
 
 	auto bounds = getLocalBounds();
@@ -603,6 +699,9 @@ void SettingsSectionsComponent::resized()
 		FlexItem(*m_GenericMIDIBridgingSettings.get())
 			.withHeight(static_cast<float>(m_GenericMIDIBridgingSettings->getHeight()))
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
+		FlexItem(*m_ADMOSCBridgingSettings.get())
+			.withHeight(static_cast<float>(m_ADMOSCBridgingSettings->getHeight()))
+			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
 		FlexItem(*m_YamahaOSCBridgingSettings.get())
 			.withHeight(static_cast<float>(m_YamahaOSCBridgingSettings->getHeight()))
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)) });
@@ -622,7 +721,12 @@ void SettingsSectionsComponent::lookAndFeelChanged()
 	UpdateDrawableButtonImages(m_MatrixIOPageButton, BinaryData::tune24px_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_ScenesPageButton, BinaryData::slideshow_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_EnSpacePageButton, BinaryData::sensors_black_24dp_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_StaticObjectsPollingButton, BinaryData::text_fields_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_StatisticsPageButton, BinaryData::show_chart24px_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_ADMOSCInvertXButton, BinaryData::flip_black_24dp_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_ADMOSCInvertYButton, BinaryData::flip_black_24dp_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_ADMOSCSwapXYButton, BinaryData::compare_black_24dp_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_ADMOSCDisableSendingButton, BinaryData::mobiledata_off24px_svg, &getLookAndFeel());
 }
 
 /**
@@ -631,6 +735,10 @@ void SettingsSectionsComponent::lookAndFeelChanged()
  */
 void SettingsSectionsComponent::buttonClicked(Button* button)
 {
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
 	auto pageMgr = PageComponentManager::GetInstance();
 	if (!pageMgr)
 		return;
@@ -656,6 +764,26 @@ void SettingsSectionsComponent::buttonClicked(Button* button)
 		if (m_StatisticsPageButton && m_StatisticsPageButton->getToggleState())
 			enabledPages.push_back(UPI_Statistics);
 		pageMgr->SetEnabledPages(enabledPages, false);
+	}
+	if (m_StaticObjectsPollingButton.get() == button)
+		ctrl->SetStaticRemoteObjectsPollingEnabled(DCP_Settings, m_StaticObjectsPollingButton->getToggleState());
+
+	// ADM-OSC Settings section
+	else if (m_ADMOSCInvertXButton.get() == button)
+	{
+		ctrl->SetBridgingXAxisInverted(PBT_ADMOSC, m_ADMOSCInvertXButton->getToggleState() ? 1 : 0);
+	}
+	else if (m_ADMOSCInvertYButton.get() == button)
+	{
+		ctrl->SetBridgingYAxisInverted(PBT_ADMOSC, m_ADMOSCInvertYButton->getToggleState() ? 1 : 0);
+	}
+	else if (m_ADMOSCSwapXYButton.get() == button)
+	{
+		ctrl->SetBridgingXYAxisSwapped(PBT_ADMOSC, m_ADMOSCSwapXYButton->getToggleState() ? 1 : 0);
+	}
+	else if (m_ADMOSCDisableSendingButton.get() == button)
+	{
+		ctrl->SetBridgingDataSendingDisabled(PBT_ADMOSC, m_ADMOSCDisableSendingButton->getToggleState() ? 1 : 0);
 	}
 }
 
@@ -787,6 +915,16 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 	else if (m_GenericOSCRemotePortEdit && m_GenericOSCRemotePortEdit.get() == &editor)
 		ctrl->SetBridgingRemotePort(PBT_GenericOSC, m_GenericOSCRemotePortEdit->getText().getIntValue());
 
+	// ADM OSC settings section
+	else if (m_ADMOSCIpAddressEdit && m_ADMOSCIpAddressEdit.get() == &editor)
+		ctrl->SetBridgingIpAddress(PBT_ADMOSC, m_ADMOSCIpAddressEdit->getText());
+	else if (m_ADMOSCListeningPortEdit && m_ADMOSCListeningPortEdit.get() == &editor)
+		ctrl->SetBridgingListeningPort(PBT_ADMOSC, m_ADMOSCListeningPortEdit->getText().getIntValue());
+	else if (m_ADMOSCRemotePortEdit && m_ADMOSCRemotePortEdit.get() == &editor)
+		ctrl->SetBridgingRemotePort(PBT_ADMOSC, m_ADMOSCRemotePortEdit->getText().getIntValue());
+	else if (m_ADMOSCListeningPortEdit && m_ADMOSCListeningPortEdit.get() == &editor)
+		ctrl->SetBridgingListeningPort(PBT_ADMOSC, m_ADMOSCListeningPortEdit->getText().getIntValue());
+
 	// Yamaha OSC settings section
 	else if (m_YamahaOSCIpAddressEdit && m_YamahaOSCIpAddressEdit.get() == &editor)
 		ctrl->SetBridgingIpAddress(PBT_YamahaOSC, m_YamahaOSCIpAddressEdit->getText());
@@ -855,6 +993,10 @@ void SettingsSectionsComponent::comboBoxChanged(ComboBox* comboBox)
 	else if (m_GenericMIDIMappingAreaSelect && m_GenericMIDIMappingAreaSelect.get() == comboBox)
 		ctrl->SetBridgingMappingArea(PBT_GenericMIDI, m_GenericMIDIMappingAreaSelect->getSelectedId());
 
+	// ADM OSC settings section
+	else if (m_ADMOSCMappingAreaSelect && m_ADMOSCMappingAreaSelect.get() == comboBox)
+		ctrl->SetBridgingMappingArea(PBT_ADMOSC, m_ADMOSCMappingAreaSelect->getSelectedId());
+
 	// Yamaha OSC settings section
 	else if (m_YamahaOSCMappingAreaSelect && m_YamahaOSCMappingAreaSelect.get() == comboBox)
 		ctrl->SetBridgingMappingArea(PBT_YamahaOSC, m_YamahaOSCMappingAreaSelect->getSelectedId());
@@ -885,6 +1027,8 @@ void SettingsSectionsComponent::setSettingsSectionActiveState(HeaderWithElmListC
 		sectionType = PBT_GenericOSC;
 	else if (settingsSection == m_GenericMIDIBridgingSettings.get())
 		sectionType = PBT_GenericMIDI;
+	else if (settingsSection == m_ADMOSCBridgingSettings.get())
+		sectionType = PBT_ADMOSC;
 	else if (settingsSection == m_YamahaOSCBridgingSettings.get())
 		sectionType = PBT_YamahaOSC;
 
@@ -959,6 +1103,7 @@ void SettingsSectionsComponent::processUpdatedConfig()
 	processUpdatedRTTrPMConfig();
 	processUpdatedGenericOSCConfig();
 	processUpdatedGenericMIDIConfig();
+	processUpdatedADMOSCConfig();
 	processUpdatedYamahaOSCConfig();
 }
 
@@ -986,6 +1131,10 @@ void SettingsSectionsComponent::processUpdatedGeneralConfig()
 		m_StatisticsPageButton->setToggleState(std::find(pageMgr->GetEnabledPages().begin(), pageMgr->GetEnabledPages().end(), UPI_Statistics) != pageMgr->GetEnabledPages().end(), dontSendNotification);
 	if (m_LookAndFeelSelect)
 		m_LookAndFeelSelect->setSelectedId(pageMgr->GetLookAndFeelType(), dontSendNotification);
+
+	auto ctrl = Controller::GetInstance();
+	if (ctrl && m_StaticObjectsPollingButton)
+		m_StaticObjectsPollingButton->setToggleState(ctrl->IsStaticRemoteObjectsPollingEnabled(), dontSendNotification);
 }
 
 /**
@@ -1233,6 +1382,43 @@ void SettingsSectionsComponent::processUpdatedYamahaOSCConfig()
 	}
 	if (m_YamahaOSCMappingAreaLabel)
 		m_YamahaOSCMappingAreaLabel->setEnabled((ctrl->GetBridgingMappingArea(PBT_YamahaOSC) != MAI_Invalid));
+}
+
+/**
+ * Helper method to update objects for ADM OSC settings section with updated config
+ */
+void SettingsSectionsComponent::processUpdatedADMOSCConfig()
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
+	// ADM OSC settings section
+	auto ADMOSCBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_ADMOSC) == PBT_ADMOSC;
+	if (m_ADMOSCBridgingSettings)
+		m_ADMOSCBridgingSettings->setToggleActiveState(ADMOSCBridgingActive);
+	if (m_ADMOSCIpAddressEdit)
+		m_ADMOSCIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_ADMOSC));
+	if (m_ADMOSCListeningPortEdit)
+		m_ADMOSCListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_ADMOSC)), false);
+	if (m_ADMOSCRemotePortEdit)
+		m_ADMOSCRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_ADMOSC)), false);
+	if (m_ADMOSCMappingAreaSelect)
+	{
+		m_ADMOSCMappingAreaSelect->setSelectedId(ctrl->GetBridgingMappingArea(PBT_ADMOSC), sendNotificationAsync);
+		m_ADMOSCMappingAreaSelect->setEnabled((ctrl->GetBridgingMappingArea(PBT_ADMOSC) != MAI_Invalid));
+	}
+	if (m_ADMOSCMappingAreaLabel)
+		m_ADMOSCMappingAreaLabel->setEnabled((ctrl->GetBridgingMappingArea(PBT_ADMOSC) != MAI_Invalid));
+
+	if (m_ADMOSCInvertXButton)
+		m_ADMOSCInvertXButton->setToggleState(1 == ctrl->GetBridgingXAxisInverted(PBT_ADMOSC), dontSendNotification);
+	if (m_ADMOSCInvertYButton)
+		m_ADMOSCInvertYButton->setToggleState(1 == ctrl->GetBridgingYAxisInverted(PBT_ADMOSC), dontSendNotification);
+	if (m_ADMOSCSwapXYButton)
+		m_ADMOSCSwapXYButton->setToggleState(1 == ctrl->GetBridgingXYAxisSwapped(PBT_ADMOSC), dontSendNotification);
+	if (m_ADMOSCDisableSendingButton)
+		m_ADMOSCDisableSendingButton->setToggleState(1 == ctrl->GetBridgingDataSendingDisabled(PBT_ADMOSC), dontSendNotification);
 }
 
 /**

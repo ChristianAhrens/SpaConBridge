@@ -42,6 +42,7 @@ MultiSoundobjectSlider::MultiSoundobjectSlider() :
 	m_currentlyDraggedId(INVALID_PROCESSOR_ID),
 	m_spreadEnabled(false),
 	m_reverbSndGainEnabled(false),
+	m_soundObjectNamesEnabled(false),
 	m_selectedMapping(MappingAreaId::MAI_First)
 {
 }
@@ -124,6 +125,24 @@ bool MultiSoundobjectSlider::IsReverbSndGainEnabled()
 void MultiSoundobjectSlider::SetReverbSndGainEnabled(bool enabled)
 {
 	m_reverbSndGainEnabled = enabled;
+}
+
+/**
+ * Getter for the bool flag that indicates if the soundobject name string shall be visualized.
+ * @return	True if the flag for soundobject name visualizing is set, false if not.
+ */
+bool MultiSoundobjectSlider::IsSoundobjectNamesEnabled()
+{
+	return m_soundObjectNamesEnabled;
+}
+
+/**
+ * Setter for the bool flag that indicates if the soundobject name string shall be visualized.
+ * @param	enabled		True if the flag for reverb send gainsoundobject name visualizing shall be set, false if not.
+ */
+void MultiSoundobjectSlider::SetSoundobjectNamesEnabled(bool enabled)
+{
+	m_soundObjectNamesEnabled = enabled;
 }
 
 /**
@@ -219,7 +238,6 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 
 	for (auto const& paramsKV : m_cachedParameters)
 	{
-		int inputNo(paramsKV.second._id);
 
 		auto const& selected = paramsKV.second._selected;
 
@@ -296,9 +314,16 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 			g.drawEllipse(Rectangle<float>(x - (knobSize / 2.0f), y - (knobSize / 2.0f), knobSize, knobSize), knobThickness);
 		}
 
-		// Input number label
-		g.setFont(Font(11.0, Font::plain));
-		g.drawText(String(inputNo), Rectangle<float>(x - knobSize, y + 3, knobSize * 2.0f, knobSize * 2.0f), Justification::centred, true);
+		// Soundobject text labeling
+		auto textLabel = String();
+		if (m_soundObjectNamesEnabled)
+			textLabel = paramsKV.second._objectName;
+		else
+			textLabel = String(paramsKV.second._id);
+		auto font = Font(11.0, Font::plain);
+		auto fontDependantWidth = static_cast<float>(font.getStringWidth(textLabel));
+		g.setFont(font);
+		g.drawText(textLabel, Rectangle<float>(x - (0.5f * fontDependantWidth), y + 3, fontDependantWidth, knobSize * 2.0f), Justification::centred, true);
 	}
 }
 

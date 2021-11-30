@@ -143,11 +143,6 @@ SoundobjectProcessorEditor::SoundobjectProcessorEditor(SoundobjectProcessor& par
 		}
 	}
 
-	// Label for processor' display name.
-	m_displayNameLabel = std::make_unique<Label>("DisplayName");
-	m_displayNameLabel->setJustificationType(Justification(Justification::centredLeft));
-	addAndMakeVisible(m_displayNameLabel.get());
-
 	// Start GUI-refreshing timer.
 	startTimer(GUI_UPDATE_RATE_FAST);
 
@@ -294,8 +289,15 @@ void SoundobjectProcessorEditor::paint(Graphics& g)
         if (twoDSurfaceArea.getWidth() < 250 || twoDSurfaceArea.getHeight() < 250)
 			soundobjectSliderLabelVisible = false;
         
-        auto objNumTitleText = (soundobjectSliderLabelVisible ? String("Object #") : String("#")) + String(pro->GetSoundobjectId());
-        auto titleTextWidth = soundobjectSliderLabelVisible ? 73 : 33;
+        auto objNumTitleText = String("#") + String(pro->GetSoundobjectId());
+		if (soundobjectSliderLabelVisible)
+		{
+			if (m_processorName.isEmpty())
+				objNumTitleText = String("Object #") + String(pro->GetSoundobjectId());
+			else
+				objNumTitleText = m_processorName;
+		}
+        auto titleTextWidth = soundobjectSliderLabelVisible ? 130 : 35;
         auto objNumTitleRect = twoDSurfaceArea.removeFromBottom(25).removeFromLeft(titleTextWidth + 7).removeFromRight(titleTextWidth);
         
         g.setColour(getLookAndFeel().findColour(TableListBox::textColourId));
@@ -514,10 +516,7 @@ void SoundobjectProcessorEditor::UpdateGui(bool init)
 		}
 
 		if (pro->PopParameterChanged(DCP_SoundobjectProcessor, DCT_SoundobjectID))
-		{
-			// Update the displayName (Host probably called updateTrackProperties or changeProgramName)
-			m_displayNameLabel->setText(pro->getProgramName(0), dontSendNotification);
-		}
+			m_processorName = pro->getProgramName(0);
 	}
 
 	if (somethingChanged)

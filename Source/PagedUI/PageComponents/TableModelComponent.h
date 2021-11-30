@@ -85,6 +85,7 @@ public:
 	static bool LessThanSoundobjectId(juce::int32 pId1, juce::int32 pId2);
 	static bool LessThanMatrixInputId(juce::int32 pId1, juce::int32 pId2);
 	static bool LessThanMatrixOutputId(juce::int32 pId1, juce::int32 pId2);
+	static bool LessThanName(juce::int32 pId1, juce::int32 pId2);
 	static bool LessThanMapping(juce::int32 pId1, juce::int32 pId2);
 	static bool LessThanComsMode(juce::int32 pId1, juce::int32 pId2);
 	static bool LessThanSoundobjectBridgingMute(juce::int32 pId1, juce::int32 pId2);

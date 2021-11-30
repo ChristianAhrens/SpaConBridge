@@ -6,10 +6,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+- Added support for displaying channel names in SoundObjects and MultiSlider Page
+- Added support for ADM-OSC bridging protocol ('Alpha' feature)
+- Added support for Windows installer creation using Inno Setup
 
 ### Changed
 
 ### Fixed
+- Fixed Online state visualization (Restrict to only monitor DS100 communication, not other protocol communication.)
 
 ## [0.4.2] - 2021-11-02
 ### Added

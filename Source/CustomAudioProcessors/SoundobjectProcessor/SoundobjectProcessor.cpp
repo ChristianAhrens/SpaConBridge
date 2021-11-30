@@ -461,21 +461,10 @@ void SoundobjectProcessor::SetMappingId(DataChangeParticipant changeSource, Mapp
 {
 	if (m_mappingId != mappingId)
 	{
-		DataChangeType dct = DCT_MappingID;
-
 		m_mappingId = mappingId;
 
-		// If the user changes the coodinate mapping and we are in Receive mode, then the position
-		// of the X/Y sliders will update automatically to reflect the new mapping in the DS100.
-		// However, in Send-only mode we need to manually poll the DS100's position for the new mapping once.
-		if ((GetComsMode() & CM_Rx) != CM_Rx)
-		{
-			dct |= DCT_ComsMode;
-			m_comsMode |= CM_PollOnce;
-		}
-
 		// Signal change to other modules in the procssor.
-		SetParameterChanged(changeSource, dct);
+		SetParameterChanged(changeSource, DCT_MappingID);
         
         // finally trigger config update
         if (changeSource != DCP_Init)
@@ -581,32 +570,6 @@ double SoundobjectProcessor::GetSoundobjectSize() const
 }
 
 /**
- * Setter function for the send rate used in the outgoing OSC messages.
- * @param changeSource	The application module which is causing the property change.
- * @param refreshInterval	The interval at which OSC messages are sent, in ms.
- */
-void SoundobjectProcessor::SetRefreshInterval(DataChangeParticipant changeSource, int refreshInterval)
-{
-	Controller* ctrl = Controller::GetInstance();
-	if (ctrl)
-		ctrl->SetRefreshInterval(changeSource, refreshInterval);
-}
-
-/**
- * Getter function for the send rate used in the outgoing OSC messages.
- * @return	The interval at which OSC messages are sent, in ms.
- */
-int SoundobjectProcessor::GetRefreshInterval() const
-{
-	int rate = 0;
-	Controller* ctrl = Controller::GetInstance();
-	if (ctrl)
-		rate = ctrl->GetRefreshInterval();
-
-	return rate;
-}
-
-/**
  * Method to initialize config setting, without risking overwriting with the defaults.
  * @param soundobjectId	New SoundobjectID or matrix input number to use for this processor instance.
  * @param mappingId		New coordinate mapping to use for this procssor instance.
@@ -632,7 +595,23 @@ void SoundobjectProcessor::InitializeSettings(SoundobjectId soundobjectId, Mappi
  */
 const std::vector<RemoteObjectIdentifier>	SoundobjectProcessor::GetUsedRemoteObjects()
 {
-	return std::vector<RemoteObjectIdentifier>{ROI_CoordinateMapping_SourcePosition_XY, ROI_CoordinateMapping_SourcePosition_X, ROI_CoordinateMapping_SourcePosition_Y, ROI_MatrixInput_ReverbSendGain, ROI_Positioning_SourceSpread, ROI_Positioning_SourceDelayMode};
+	return std::vector<RemoteObjectIdentifier>{
+		ROI_CoordinateMapping_SourcePosition_XY,
+		ROI_CoordinateMapping_SourcePosition_X, 
+		ROI_CoordinateMapping_SourcePosition_Y,
+		ROI_MatrixInput_ReverbSendGain, 
+		ROI_Positioning_SourceSpread, 
+		ROI_Positioning_SourceDelayMode };
+};
+
+/**
+ * Method to get a list of non-flicering remote object identifiers that are used by this soundsource processing object.
+ * @return	The requested list of remote object identifiers.
+ */
+const std::vector<RemoteObjectIdentifier>	SoundobjectProcessor::GetStaticRemoteObjects()
+{
+	return std::vector<RemoteObjectIdentifier>{
+		ROI_MatrixInput_ChannelName };
 };
 
 
@@ -808,7 +787,11 @@ const String SoundobjectProcessor::getProgramName(int index)
  */
 void SoundobjectProcessor::changeProgramName(int index, const String& newName)
 {
-	ignoreUnused(index);
+	if (index != getCurrentProgram())
+		return;
+	if (newName == m_processorDisplayName)
+		return;
+
 	m_processorDisplayName = newName;
 
 	// Signal change to other modules in the procssor.

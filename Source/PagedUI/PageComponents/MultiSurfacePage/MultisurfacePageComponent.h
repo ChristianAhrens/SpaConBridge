@@ -94,13 +94,15 @@ private:
 	std::unique_ptr<MultiSoundobjectSlider>	m_multiSliderSurface;	/**> Multi-source 2D-Slider. */
 
 	std::unique_ptr<ComboBox>			m_mappingAreaSelect;	/**> ComboBox selector for the coordinate mapping area. */
+	std::unique_ptr<DrawableButton>		m_loadImage;			/**< Button to load background image. */
+	std::unique_ptr<DrawableButton>		m_removeImage;			/**< Button to remove background image. */
+
+	std::unique_ptr<DrawableButton>		m_objectNamesEnable;	/**> Checkbox for enabling showing object names. */
 
 	std::unique_ptr<DrawableButton>		m_reverbEnable;			/**> Checkbox for reverb send gain enable. */
 
 	std::unique_ptr<DrawableButton>		m_spreadEnable;			/**> Checkbox for spread factor enable. */
 
-	std::unique_ptr<DrawableButton>		m_loadImage;			/**< Button to load background image. */
-	std::unique_ptr<DrawableButton>		m_removeImage;			/**< Button to remove background image. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSurfacePageComponent)
 };

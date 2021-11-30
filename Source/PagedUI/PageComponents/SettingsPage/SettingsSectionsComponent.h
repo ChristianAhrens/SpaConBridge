@@ -96,6 +96,7 @@ private:
 	void processUpdatedRTTrPMConfig();
 	void processUpdatedGenericOSCConfig();
 	void processUpdatedGenericMIDIConfig();
+	void processUpdatedADMOSCConfig();
 	void processUpdatedYamahaOSCConfig();
 
 	//==============================================================================
@@ -105,6 +106,7 @@ private:
 	void createRTTrPMSettingsSection();
 	void createGenericOSCSettingsSection();
 	void createGenericMIDISettingsSection();
+	void createADMOSCSettingsSection();
 	void createYamahaOSCSettingsSection();
 
 	// input filters for texteditors
@@ -125,6 +127,7 @@ private:
 	std::unique_ptr<Label>										m_EnabledPagesLabel;
 	std::unique_ptr<ComboBox>									m_LookAndFeelSelect;
 	std::unique_ptr<Label>										m_LookAndFeelLabel;
+	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_StaticObjectsPollingButton;
 
 	// DS100 settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_DS100Settings;
@@ -207,6 +210,23 @@ private:
 	std::unique_ptr<Label>										m_GenericMIDIMatrixOutputGainLabel;
 	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDIMatrixOutputMuteLearner;
 	std::unique_ptr<Label>										m_GenericMIDIMatrixOutputMuteLabel;
+
+	// ADM OSC settings section
+	std::unique_ptr<HeaderWithElmListComponent>					m_ADMOSCBridgingSettings;
+	std::unique_ptr<TextEditor>									m_ADMOSCIpAddressEdit;
+	std::unique_ptr<Label>										m_ADMOSCIpAddressLabel;
+	std::unique_ptr<TextEditor>									m_ADMOSCListeningPortEdit;
+	std::unique_ptr<Label>										m_ADMOSCListeningPortLabel;
+	std::unique_ptr<TextEditor>									m_ADMOSCRemotePortEdit;
+	std::unique_ptr<Label>										m_ADMOSCRemotePortLabel;
+	std::unique_ptr<ComboBox>									m_ADMOSCMappingAreaSelect;
+	std::unique_ptr<Label>										m_ADMOSCMappingAreaLabel;
+	std::unique_ptr<HorizontalLayouterComponent>				m_ADMOSCCoordSysModContainer;
+	std::unique_ptr<Label>										m_ADMOSCCoordSysModLabel;
+	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_ADMOSCInvertXButton;
+	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_ADMOSCInvertYButton;
+	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_ADMOSCSwapXYButton;
+	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_ADMOSCDisableSendingButton;
 
 	// Yamaha OSC settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_YamahaOSCBridgingSettings;

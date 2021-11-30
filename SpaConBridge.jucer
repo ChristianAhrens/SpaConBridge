@@ -25,6 +25,10 @@
                       file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/OCAProtocolProcessor/OCAProtocolProcessor.h"/>
               </GROUP>
               <GROUP id="{3AC151D8-BEE7-5CBC-2C43-F243FDC23462}" name="OSCProtocolProcessor">
+                <FILE id="dW5MJI" name="ADMOSCProtocolProcessor.cpp" compile="1" resource="0"
+                      file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/OSCProtocolProcessor/ADMOSCProtocolProcessor.cpp"/>
+                <FILE id="PjueBh" name="ADMOSCProtocolProcessor.h" compile="0" resource="0"
+                      file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/OSCProtocolProcessor/ADMOSCProtocolProcessor.h"/>
                 <FILE id="xP4p1o" name="OSCProtocolProcessor.cpp" compile="1" resource="0"
                       file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/OSCProtocolProcessor/OSCProtocolProcessor.cpp"/>
                 <FILE id="DrDaok" name="OSCProtocolProcessor.h" compile="0" resource="0"
@@ -282,8 +286,12 @@
                   file="submodules/JUCE-AppBasics/Resources/Images/clear_black_24dp.svg"/>
             <FILE id="oTwCgV" name="colorize_black_24dp.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/colorize_black_24dp.svg"/>
+            <FILE id="UzxCgz" name="compare_black_24dp.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/compare_black_24dp.svg"/>
             <FILE id="oihE0b" name="find_replace-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/find_replace-24px.svg"/>
+            <FILE id="klDhr6" name="flip_black_24dp.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/flip_black_24dp.svg"/>
             <FILE id="A3cgD8" name="folder_open-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/folder_open-24px.svg"/>
             <FILE id="N9NqBe" name="grain-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/grain-24px.svg"/>
@@ -324,6 +332,8 @@
                   file="submodules/JUCE-AppBasics/Resources/Images/skip_previous-24px.svg"/>
             <FILE id="C2APLR" name="slideshow_black_24dp.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/slideshow_black_24dp.svg"/>
+            <FILE id="bWTH4K" name="text_fields_black_24dp.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/text_fields_black_24dp.svg"/>
             <FILE id="nSAA4c" name="tune-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/tune-24px.svg"/>
             <FILE id="YFXXxo" name="vertical_split-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/vertical_split-24px.svg"/>

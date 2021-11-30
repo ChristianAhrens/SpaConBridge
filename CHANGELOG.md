@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 
 ### Fixed
+- Fixed Online state visualization (Restrict to only monitor DS100 communication, not other protocol communication.)
 
 ## [0.4.2] - 2021-11-02
 ### Added

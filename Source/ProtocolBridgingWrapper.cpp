@@ -301,6 +301,17 @@ bool ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridg
             precisionTextXmlElement->setText(String(DS100_VALUCHANGE_SENSITIVITY));
         else
             precisionXmlElement->addTextElement(String(DS100_VALUCHANGE_SENSITIVITY));
+
+		// update reaction monitored protocols element
+		auto reactMoniProtosTextValue = String(DS100_1_PROCESSINGPROTOCOL_ID) + "," + String(DS100_2_PROCESSINGPROTOCOL_ID);
+		auto reactMoniProtosXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REACTMONIPROTOS));
+		if (!reactMoniProtosXmlElement)
+			reactMoniProtosXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REACTMONIPROTOS));
+		auto reactMoniProtosTextXmlElement = reactMoniProtosXmlElement->getFirstChildElement();
+		if (reactMoniProtosTextXmlElement && reactMoniProtosTextXmlElement->isTextElement())
+			reactMoniProtosTextXmlElement->setText(reactMoniProtosTextValue);
+		else
+			reactMoniProtosXmlElement->addTextElement(reactMoniProtosTextValue);
 	}
 
 	// DS100 protocol - RoleA
@@ -2182,6 +2193,17 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 						precisionTextXmlElement->setText(String(DS100_VALUCHANGE_SENSITIVITY));
 					else
 						precisionXmlElement->addTextElement(String(DS100_VALUCHANGE_SENSITIVITY));
+
+					// update reaction monitored protocols element
+					auto reactMoniProtosTextValue = String(DS100_1_PROCESSINGPROTOCOL_ID) + "," + String(DS100_2_PROCESSINGPROTOCOL_ID);
+					auto reactMoniProtosXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REACTMONIPROTOS));
+					if (!reactMoniProtosXmlElement)
+						reactMoniProtosXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REACTMONIPROTOS));
+					auto reactMoniProtosTextXmlElement = reactMoniProtosXmlElement->getFirstChildElement();
+					if (reactMoniProtosTextXmlElement && reactMoniProtosTextXmlElement->isTextElement())
+						reactMoniProtosTextXmlElement->setText(reactMoniProtosTextValue);
+					else
+						reactMoniProtosXmlElement->addTextElement(reactMoniProtosTextValue);
 				}
 				break;
 			case EM_Parallel:
@@ -2210,6 +2232,17 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 						precisionTextXmlElement->setText(String(DS100_VALUCHANGE_SENSITIVITY));
 					else
 						precisionXmlElement->addTextElement(String(DS100_VALUCHANGE_SENSITIVITY));
+
+					// update reaction monitored protocols element
+					auto reactMoniProtosTextValue = String(DS100_1_PROCESSINGPROTOCOL_ID) + "," + String(DS100_2_PROCESSINGPROTOCOL_ID);
+					auto reactMoniProtosXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REACTMONIPROTOS));
+					if (!reactMoniProtosXmlElement)
+						reactMoniProtosXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REACTMONIPROTOS));
+					auto reactMoniProtosTextXmlElement = reactMoniProtosXmlElement->getFirstChildElement();
+					if (reactMoniProtosTextXmlElement && reactMoniProtosTextXmlElement->isTextElement())
+						reactMoniProtosTextXmlElement->setText(reactMoniProtosTextValue);
+					else
+						reactMoniProtosXmlElement->addTextElement(reactMoniProtosTextValue);
 				}
 				break;
 			case EM_Extend:
@@ -2251,6 +2284,17 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 						precisionTextXmlElement->setText(String(DS100_VALUCHANGE_SENSITIVITY));
 					else
 						precisionXmlElement->addTextElement(String(DS100_VALUCHANGE_SENSITIVITY));
+
+					// update reaction monitored protocols element
+					auto reactMoniProtosTextValue = String(DS100_1_PROCESSINGPROTOCOL_ID) + "," + String(DS100_2_PROCESSINGPROTOCOL_ID);
+					auto reactMoniProtosXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REACTMONIPROTOS));
+					if (!reactMoniProtosXmlElement)
+						reactMoniProtosXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REACTMONIPROTOS));
+					auto reactMoniProtosTextXmlElement = reactMoniProtosXmlElement->getFirstChildElement();
+					if (reactMoniProtosTextXmlElement && reactMoniProtosTextXmlElement->isTextElement())
+						reactMoniProtosTextXmlElement->setText(reactMoniProtosTextValue);
+					else
+						reactMoniProtosXmlElement->addTextElement(reactMoniProtosTextValue);
 				}
 				break;																					
 			case EM_Mirror:
@@ -2285,6 +2329,17 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 						precisionTextXmlElement->setText(String(DS100_VALUCHANGE_SENSITIVITY));
 					else if (precisionTextXmlElement)
 						precisionXmlElement->addTextElement(String(DS100_VALUCHANGE_SENSITIVITY));
+
+					// update reaction monitored protocols element
+					auto reactMoniProtosTextValue = String(DS100_1_PROCESSINGPROTOCOL_ID) + "," + String(DS100_2_PROCESSINGPROTOCOL_ID);
+					auto reactMoniProtosXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REACTMONIPROTOS));
+					if (!reactMoniProtosXmlElement)
+						reactMoniProtosXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REACTMONIPROTOS));
+					auto reactMoniProtosTextXmlElement = reactMoniProtosXmlElement->getFirstChildElement();
+					if (reactMoniProtosTextXmlElement && reactMoniProtosTextXmlElement->isTextElement())
+						reactMoniProtosTextXmlElement->setText(reactMoniProtosTextValue);
+					else
+						reactMoniProtosXmlElement->addTextElement(reactMoniProtosTextValue);
 				}
 				break;
 			default:

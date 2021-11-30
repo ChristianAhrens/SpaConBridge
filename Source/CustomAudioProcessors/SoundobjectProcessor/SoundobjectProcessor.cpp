@@ -461,21 +461,10 @@ void SoundobjectProcessor::SetMappingId(DataChangeParticipant changeSource, Mapp
 {
 	if (m_mappingId != mappingId)
 	{
-		DataChangeType dct = DCT_MappingID;
-
 		m_mappingId = mappingId;
 
-		// If the user changes the coodinate mapping and we are in Receive mode, then the position
-		// of the X/Y sliders will update automatically to reflect the new mapping in the DS100.
-		// However, in Send-only mode we need to manually poll the DS100's position for the new mapping once.
-		if ((GetComsMode() & CM_Rx) != CM_Rx)
-		{
-			dct |= DCT_ComsMode;
-			m_comsMode |= CM_PollOnce;
-		}
-
 		// Signal change to other modules in the procssor.
-		SetParameterChanged(changeSource, dct);
+		SetParameterChanged(changeSource, DCT_MappingID);
         
         // finally trigger config update
         if (changeSource != DCP_Init)

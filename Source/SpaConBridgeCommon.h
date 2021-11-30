@@ -200,8 +200,6 @@ const Colour GetProtocolBridgingColour(ProtocolBridgingType type);
 static constexpr ComsMode CM_Off =			0x0000; //< OSC communication is inactive.
 static constexpr ComsMode CM_Rx =			0x0001; //< The Plug-in sends only requests, and accepts all responses, but sends no SET commands.
 static constexpr ComsMode CM_Tx =			0x0002; //< The Plug-in sends SET commands when necessary. It sends no requests, and ignores all responses.
-static constexpr ComsMode CM_PollOnce =		0x0004; //< The X/Y coordinates have been requested once after a MappingID change. This flag is removed once the response is received.
-static constexpr ComsMode CM_Sync =			(CM_Rx | CM_Tx); //< The Plug-in sends SET commands when necessary, else sends requests, and accepts all responses.
 
 /**
  * Invalid ProcessorId used to signal when selection in CMultiSoundobjectSlider is empty etc..

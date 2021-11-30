@@ -1537,7 +1537,7 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 				// Check if a SET command was recently sent out and might currently be on transit to the device.
 				// If so, ignore the incoming message so that our local data does not jump back to a now outdated value.
 				bool ignoreResponse = processor->IsParamInTransit(change);
-				bool isReceiveMode = ((mode & (CM_Rx | CM_PollOnce)) != 0);
+				bool isReceiveMode = ((mode & CM_Rx) == CM_Rx);
 				bool processorIsAttentive = !(processor->PopParameterChanged(DCP_Host, change));
 
 				// Only pass on new positions to processors that are in RX mode.
@@ -1555,14 +1555,6 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 								// Set the processor's new position.
 								processor->SetParameterValue(DCP_Protocol, SPI_ParamIdx_X, static_cast<float*>(msgData._payload)[0]);
 								processor->SetParameterValue(DCP_Protocol, SPI_ParamIdx_Y, static_cast<float*>(msgData._payload)[1]);
-							}
-
-							// A request was sent to the DS100 by the Controller because this processor was in CM_PollOnce mode.
-							// Since the response was now processed, set the processor back into it's original mode.
-							if ((mode & CM_PollOnce) == CM_PollOnce)
-							{
-								mode &= ~CM_PollOnce;
-								processor->SetComsMode(DCP_Host, mode);
 							}
 						}
 					}
@@ -1600,7 +1592,7 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 				// Check if a SET command was recently sent out and might currently be on transit to the device.
 				// If so, ignore the incoming message so that our local data does not jump back to a now outdated value.
 				bool ignoreResponse = processor->IsParamInTransit(change);
-				bool isReceiveMode = ((mode & (CM_Rx | CM_PollOnce)) != 0);
+				bool isReceiveMode = ((mode & CM_Rx) == CM_Rx);
 				bool processorIsAttentive = !(processor->PopParameterChanged(DCP_Host, change));
 
 				// Only pass on new positions to processors that are in RX mode.
@@ -1636,7 +1628,7 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 				// Check if a SET command was recently sent out and might currently be on transit to the device.
 				// If so, ignore the incoming message so that our local data does not jump back to a now outdated value.
 				bool ignoreResponse = processor->IsParamInTransit(change);
-				bool isReceiveMode = ((mode & (CM_Rx | CM_PollOnce)) != 0);
+				bool isReceiveMode = ((mode & CM_Rx) == CM_Rx);
 				bool processorIsAttentive = !(processor->PopParameterChanged(DCP_Host, change));
 
 				// Only pass on new positions to processors that are in RX mode.

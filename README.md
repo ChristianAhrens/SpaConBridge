@@ -140,12 +140,25 @@ The selection in Sound Object table and the currently active tab can be external
 All Sound Objects assigned to the selected DS100 mapping area are shown simultaneously. The dropdown on the bottom can be used to switch the selection to one of the four available mapping areas.
 The selection / multiselection in Sound Object table is followed here and reflected in Sound Object circle sizing - selected objects are shown enlarged.
 
+![Showreel.006.png](Resources/Documentation/Showreel/Showreel.006.png "Multislider Bkg+Names")
+
+A custom background image can be assigned for each of the four mapping areas.
+Visualization of the MatrixInput ChannelName corresponding to the SoundObject can be activated with a toggle button in the lower right corner of the page.
+
+![Showreel.007.png](Resources/Documentation/Showreel/Showreel.007.png "Multislider En-Space Send")
+
+Visualization of the En-Space send gain per SoundObject can be activated with a toggle button in the lower right corner of the page. The value is represented by 'wing' like reverberation elements on the right and left side of each SoundObject.
+
+![Showreel.008.png](Resources/Documentation/Showreel/Showreel.008.png "Multislider Spread")
+
+Visualization of the Spread factor per SoundObject can be activated with a toggle button in the lower right corner of the page. The value is represented by transparent circles around each SoundObject.
+
 
 <a name="matrixiotable" />
 
 ### Matrix Inputs/Outputs Table
 
-![Showreel.006.png](Resources/Documentation/Showreel/Showreel.006.png "Matrix IO Table Overview")
+![Showreel.009.png](Resources/Documentation/Showreel/Showreel.009.png "Matrix IO Table Overview")
 
 On the left side (landscape) or top (portrait) of the page, a table for visualization and control of DS100 matrix input channels is shown and on the right side or bottom of the page, a table for matrix outputs.
 Every row in both of the tables corresponds to an active Matrix Input or Output, meaning that it is shown on UI and its values can be received from DS100. This does not affect the pure protocol bridging in underlying module. E.g. in case an external OSC input sends new gain values for a channel that is not present in the table, the values will still be bridged to DS100. This needs to be kept in mind if muting the input data from a protocol for a Matrix Input/Output is desired!
@@ -155,7 +168,7 @@ Every row in both of the tables corresponds to an active Matrix Input or Output,
 
 ### Scenes
 
-![Showreel.007.png](Resources/Documentation/Showreel/Showreel.007.png "Scenes")
+![Showreel.010.png](Resources/Documentation/Showreel/Showreel.010.png "Scenes")
 
 Scenes page constantly reads the currently active Scene Index, Name and Comment from DS100 (low refresh rate) and displays the values in text editors.
 
@@ -170,7 +183,7 @@ Direct recall entries must be unique, therefor a direct recall entry for a Scene
 
 ### En-Space
 
-![Showreel.008.png](Resources/Documentation/Showreel/Showreel.008.png "En-Space")
+![Showreel.011.png](Resources/Documentation/Showreel/Showreel.011.png "En-Space")
 
 En-Space page constantly reads the currently active room id, predelay factor and rear level values and displays them on UI.
 The values can be modified by the user through given UI elements.
@@ -180,7 +193,7 @@ The values can be modified by the user through given UI elements.
 
 ### Statistics
 
-![Showreel.009.png](Resources/Documentation/Showreel/Showreel.009.png "Protocol Bridging Statistics")
+![Showreel.012.png](Resources/Documentation/Showreel/Showreel.012.png "Protocol Bridging Statistics")
 
 Statistics page shows a graphical representation for current bridging protocol load (messages per second) for every active protocol and a tabular log view of the last 200 received messages. The graphical representation shown describes the raw incoming data rate only and contains no information on actual bridging.
 Both plot and log are refreshed at a small rate to keep the performance impact on the host system resources low.
@@ -190,7 +203,7 @@ Both plot and log are refreshed at a small rate to keep the performance impact o
 
 ### Settings
 
-![Showreel.0010.png](Resources/Documentation/Showreel/Showreel.010.png "General Settings")
+![Showreel.0013.png](Resources/Documentation/Showreel/Showreel.013.png "General Settings")
 
 Settings page is structured in sections.
 
@@ -226,6 +239,7 @@ Depending on the available horizontal UI resolution, buttons are hidden. 'Show r
 - Matrix Input ReverbSendGain
 - Sound Object Spread
 - Sound Object Delay Mode
+- Matrix Input ChannelName
 
 
 <a name="matrixinputuiparameters" />

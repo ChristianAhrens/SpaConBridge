@@ -1,6 +1,6 @@
 ## Generic d&b OSC bridging settings
 
-![Showreel.014.png](../Showreel/Showreel.014.png "Generic OSC bridging settings")
+![Showreel.017.png](../Showreel/Showreel.017.png "Generic OSC bridging settings")
 
 _This bridging protocol implementation is also used for communication with DS100 and follows d&b [DS100 OSC protocol specification](https://www.dbaudio.com/assets/products/downloads/manuals-documentation/electronics/dbaudio-osc-protocol-ds100-1.3.0-en.pdf). In addition to this, two OSC comands specific to SoundscapeBridgeApp are implemented ("/RemoteProtocolBridge/SoundObjectSelect", "/RemoteProtocolBridge/UIElementIndexSelect")._
 

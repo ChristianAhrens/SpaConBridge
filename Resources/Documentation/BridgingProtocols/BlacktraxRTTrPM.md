@@ -1,6 +1,6 @@
 ## Blacktrax RTTrPM bridging settings
 
-![Showreel.013.png](../Showreel/Showreel.013.png "Blacktrax RTTrPM Bridging Settings")
+![Showreel.016.png](../Showreel/Showreel.016.png "Blacktrax RTTrPM Bridging Settings")
 
 Minimal video tutorial for example setup with Blacktrax simulation software (Simulator software package can be obtained from Blacktrax at https://blacktrax.cast-soft.com/developer/):
 

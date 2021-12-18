@@ -2434,32 +2434,6 @@ const std::vector<RemoteObject> Controller::GetActivatedSoundObjectRemoteObjects
 }
 
 /**
- * Activates the remote objects in protocol bridge proxy corresponding to given source/mapping via proxy bridge object
- * @param soundobjectId	The soundsource object id to activate
- * @param mappingId	The soundsource mapping id to activate
- */
-void Controller::ActivateSoundobjectId(SoundobjectId soundobjectId, MappingId mappingId)
-{
-	ignoreUnused(soundobjectId);
-	ignoreUnused(mappingId);
-
-	UpdateActiveSoundobjects();
-}
-
-/**
- * Deactivates the remote objects in protocol bridge proxy corresponding to given source/mapping via proxy bridge object
- * @param soundobjectId	The soundsource object id to activate
- * @param mappingId	The soundsource mapping id to activate
- */
-void Controller::DeactivateSoundobjectId(SoundobjectId soundobjectId, MappingId mappingId)
-{
-	ignoreUnused(soundobjectId);
-	ignoreUnused(mappingId);
-
-	UpdateActiveSoundobjects();
-}
-
-/**
  * Updates the soundobjects that are currently being actively handled.
  */
 void Controller::UpdateActiveSoundobjects()
@@ -2589,28 +2563,6 @@ const std::vector<RemoteObject> Controller::GetActivatedMatrixInputRemoteObjects
 }
 
 /**
- * Activates the remote objects in protocol bridge proxy corresponding to given MatrixChannel/mapping via proxy bridge object
- * @param matrixChannelId	The soundsource object id to activate
- */
-void Controller::ActivateMatrixInputId(MatrixInputId matrixInputId)
-{
-	ignoreUnused(matrixInputId);
-
-	UpdateActiveMatrixInputs();
-}
-
-/**
- * Deactivates the remote objects in protocol bridge proxy corresponding to given MatrixChannel/mapping via proxy bridge object
- * @param matrixChannelId	The soundsource object id to activate
- */
-void Controller::DeactivateMatrixInputId(MatrixInputId matrixInputId)
-{
-	ignoreUnused(matrixInputId);
-
-	UpdateActiveMatrixInputs();
-}
-
-/**
  * Updates the matrix inputs that are currently being actively handled.
  */
 void Controller::UpdateActiveMatrixInputs()
@@ -2737,28 +2689,6 @@ const std::vector<RemoteObject> Controller::GetActivatedMatrixOutputRemoteObject
 		}
 	}
 	return activeRemoteObjects;
-}
-
-/**
- * Activates the remote objects in protocol bridge proxy corresponding to given MatrixChannel/mapping via proxy bridge object
- * @param matrixChannelId	The soundsource object id to activate
- */
-void Controller::ActivateMatrixOutputId(MatrixOutputId MatrixOutputId)
-{
-	ignoreUnused(MatrixOutputId);
-
-	UpdateActiveMatrixOutputs();
-}
-
-/**
- * Deactivates the remote objects in protocol bridge proxy corresponding to given MatrixChannel/mapping via proxy bridge object
- * @param matrixChannelId	The soundsource object id to activate
- */
-void Controller::DeactivateMatrixOutputId(MatrixOutputId MatrixOutputId)
-{
-	ignoreUnused(MatrixOutputId);
-
-	UpdateActiveMatrixOutputs();
 }
 
 /**

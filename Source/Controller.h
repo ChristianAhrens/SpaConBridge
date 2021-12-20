@@ -113,8 +113,6 @@ public:
 	SoundobjectProcessor* GetSoundobjectProcessor(SoundobjectProcessorId processorId) const;
 	std::vector<SoundobjectProcessorId> GetSoundobjectProcessorIds() const;
 
-	JUCE_DEPRECATED(void ActivateSoundobjectId(SoundobjectId soundobjectId, MappingId mappingId));
-	JUCE_DEPRECATED(void DeactivateSoundobjectId(SoundobjectId soundobjectId, MappingId mappingId));
 	void UpdateActiveSoundobjects();
 
 	void SetSelectedSoundobjectProcessorIds(const std::vector<SoundobjectProcessorId>& processorIds, bool clearPrevSelection);
@@ -133,8 +131,6 @@ public:
 	MatrixInputProcessor* GetMatrixInputProcessor(MatrixInputProcessorId processorId) const;
 	std::vector<MatrixInputProcessorId> GetMatrixInputProcessorIds() const;
 
-	JUCE_DEPRECATED(void ActivateMatrixInputId(MatrixInputId matrixInputId));
-	JUCE_DEPRECATED(void DeactivateMatrixInputId(MatrixInputId matrixInputId));
 	void UpdateActiveMatrixInputs();
 
 	void SetSelectedMatrixInputProcessorIds(const std::vector<MatrixInputProcessorId>& processorIds, bool clearPrevSelection);
@@ -153,8 +149,6 @@ public:
 	MatrixOutputProcessor* GetMatrixOutputProcessor(MatrixOutputProcessorId processorId) const;
 	std::vector<MatrixOutputProcessorId> GetMatrixOutputProcessorIds() const;
 
-	JUCE_DEPRECATED(void ActivateMatrixOutputId(MatrixOutputId matrixOutputId));
-	JUCE_DEPRECATED(void DeactivateMatrixOutputId(MatrixOutputId matrixOutputId));
 	void UpdateActiveMatrixOutputs();
 
 	void SetSelectedMatrixOutputProcessorIds(const std::vector<MatrixOutputProcessorId>& processorIds, bool clearPrevSelection);

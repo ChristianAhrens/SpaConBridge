@@ -1,7 +1,7 @@
 #define MyAppName "SpaConBridge"
 #define MyAppExeName "SpaConBridge.exe"
-#define MyAppExePath "..\..\..\Builds\VisualStudio2019\x64\Release\App\SpaConBridge.exe"
-#define MyAppVersion GetVersionNumbersString("..\..\..\Builds\VisualStudio2019\x64\Release\App\SpaConBridge.exe")
+#define MyAppExePath "..\..\..\Builds\VisualStudio2022\x64\Release\App\SpaConBridge.exe"
+#define MyAppVersion GetVersionNumbersString("..\..\..\Builds\VisualStudio2022\x64\Release\App\SpaConBridge.exe")
 #define MyAppPublisher "Christian Ahrens"
 #define MyAppURL "https://www.github.com/ChristianAhrens/SpaConBridge"
 
@@ -21,7 +21,7 @@ LicenseFile=..\..\..\LICENSE
 InfoAfterFile=..\..\..\CHANGELOG.md
 PrivilegesRequired=lowest
 OutputBaseFilename="{#MyAppName}Setup_v{#MyAppVersion}"
-SetupIconFile=..\..\..\Builds\VisualStudio2019\icon.ico
+SetupIconFile=..\..\..\Builds\VisualStudio2022\icon.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern

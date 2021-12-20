@@ -262,6 +262,15 @@ void PageContainerComponent::buttonClicked(Button* button)
 	else if (m_helpButton && m_helpButton.get() == button)
 	{
 		auto helpURLString = GetRepositoryBaseWebUrl() + "README.md";
+
+		if (m_tabbedComponent)
+		{
+			auto currentPageId = GetPageIdFromName(m_tabbedComponent->getCurrentTabName());
+			auto currentPageIdentificationString = GetDocumentationSectionIdentification(currentPageId);
+			if (currentPageIdentificationString.isNotEmpty())
+				helpURLString += "/" + currentPageIdentificationString;
+		}
+
 		URL(helpURLString).launchInDefaultBrowser();
 	}
 }

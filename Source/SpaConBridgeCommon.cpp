@@ -242,6 +242,34 @@ String GetDocumentationBaseWebUrl()
 }
 
 /**
+ * Helper method to query web documentation (on gitub) section identification string.
+ * @param	pageId	The id of the page (documentation section) to get the identification string for.
+ * @return	The identification string for the given documentation section.
+ */
+String GetDocumentationSectionIdentification(UIPageId pageId)
+{
+	switch (pageId)
+	{
+	case UPI_SoundObjects:
+		return "#sound-object-table";
+	case UPI_MultiSlider:
+		return "#twodimensionalpositionslider";
+	case UPI_MatrixIOs:
+		return "#matrix-inputsoutputs-table";
+	case UPI_Scenes:
+		return "#scenes";
+	case UPI_EnSpace:
+		return "#en-space";
+	case UPI_Statistics:
+		return "#statistics";
+	case UPI_Settings:
+		return "#settings";
+	default:
+		return "";
+	}
+}
+
+/**
  * Helper method to get a user readable error title string for a given error code.
  * @param	errorCode	The errorcode to get a title string for.
  * @return	The title string for the errorcode given.

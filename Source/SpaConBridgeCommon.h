@@ -252,6 +252,7 @@ enum ActiveParallelModeDS100
  */
 String GetRepositoryBaseWebUrl();
 String GetDocumentationBaseWebUrl();
+String GetDocumentationSectionIdentification(UIPageId pageId);
 
 
 /**

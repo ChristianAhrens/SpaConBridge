@@ -1,16 +1,18 @@
 ![Showreel.001.png](Resources/Documentation/Showreel/Showreel.001.png "SpaConBridge Headline Icons")
 
-SpaConBridge (Spatial Control Bridge) is a **PRIVATELY** created and driven project. It currently is in **EXPERIMENTAL** development.
+SpaConBridge (Spatial Control Bridge) is a **PRIVATELY** created and driven project.
 
 Its sourcecode and prebuilt binaries are made publicly available to enable interested users to experiment, extend and create own adaptations.
 
 There is no guarantee for compatibility inbetween versions or for the implemented functionality to be reliable for professional use at all. Use what is provided here at your own risk!
 
-See [LATEST RELEASE](../../releases/latest) for available binary packages.
+See [LATEST RELEASE](../../releases/latest) for available binary packages or join iOS TestFlight Beta:
+<img src="Resources/AppStore/TestFlightQRCode.png" alt="TestFlight QR Code" width="25%">
 
-![Platform:macOS](https://img.shields.io/badge/platform-iOS-lightgrey)
+![Platform:iOS](https://img.shields.io/badge/platform-iOS-lightgrey)
 ![Platform:macOS](https://img.shields.io/badge/platform-macOS-lightgrey)
-![Platform:macOS](https://img.shields.io/badge/platform-Windows-lightgrey)
+![Platform:windows](https://img.shields.io/badge/platform-Windows-lightgrey)
+
 
 <table>
 <tr>

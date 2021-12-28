@@ -4,7 +4,13 @@ All notable changes to SpaConBridge will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [Unreleased]### Added
+
+### Changed
+
+### Fixed
+
+## [0.5.2] - 2021-12-28
 ### Added
 - Added support for external querying of all currently known bridging values via OSC
 - Added Projucer VisualStudio2022 exporter

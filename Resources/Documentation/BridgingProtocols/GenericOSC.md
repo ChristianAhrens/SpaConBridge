@@ -17,12 +17,11 @@ _Minimal video tutorial for example setup with OSC input from OSControl software
 | _/dbaudio1/matrixinput/reverbsendgain_ | Matrix Input ReverbSendGain          |  |
 | _/dbaudio1/positioning/source_spread_ | Sound Object Spread                  |  |
 | _/dbaudio1/positioning/source_delaymode_ | Sound Object Delay Mode              |  |
-| _/RemoteProtocolBridge/SoundObjectSelect_ | SoundscapeBridgeApp Sound Object Select | _Used to externally (de-)select a sound object_ |
-| _/RemoteProtocolBridge/UIElementIndexSelect_ | SoundscapeBridgeApp UI Element Index Select | _Used to externally switch between tabs_ |
+| _/RemoteProtocolBridge/SoundObjectSelect_ | SpaConBridge Sound Object Select | _Used to externally (de-)select a sound object_ |
+| _/RemoteProtocolBridge/UIElementIndexSelect_ | SpaConBridge UI Element Index Select | _Used to externally switch between tabs_ |
+| _/RemoteProtocolBridge/cachedValues_ | SpaConBridge value cache sending trigger | _Used to externally query all internally known cached object values_ |
 
-### Implemented Soundscape remote objects for protocol bridging *
-
-&ast; String remote objects have not been tested at all. All others should work ok, but extensive testing is still pending.
+### Implemented Soundscape remote objects for protocol bridging
 
 | External OSC input | Internal remote object | |
 | -- | -- | -- |

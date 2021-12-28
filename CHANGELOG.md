@@ -6,10 +6,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+- Added support for external querying of all currently known bridging values via OSC
+- Added Projucer VisualStudio2022 exporter
 
 ### Changed
+- Removed Zeroconf DS100 discovery UI elements for platforms that are not supported (Windows)
+- Modified bottom left help button to open the section of help contents that match the currently active page
 
 ### Fixed
+- Fixed compilation with JUCE 6.1.3
 
 ## [0.5.0] - 2021-11-30
 ### Added

@@ -28,6 +28,13 @@
 #include <TextWithImageButton.h>
 #include <MidiLearnerComponent.h>
 
+#if JUCE_WINDOWS
+#ifdef SERVUS_USE_WINDNS
+#define ZEROCONF_SUPPORTED
+#endif
+#else
+#define ZEROCONF_SUPPORTED
+#endif
 
 namespace SpaConBridge
 {
@@ -135,7 +142,10 @@ private:
 	std::unique_ptr<Label>										m_DS100IntervalLabel;
 	std::unique_ptr<TextEditor>									m_DS100IpAddressEdit;
 	std::unique_ptr<Label>										m_DS100IpAddressLabel;
+
+#ifdef ZEROCONF_SUPPORTED
 	std::unique_ptr<JUCEAppBasics::ZeroconfDiscoverComponent>	m_DS100ZeroconfDiscovery;
+#endif
 
 	std::unique_ptr<JUCEAppBasics::SplitButtonComponent>		m_SecondDS100ModeButton;
 	std::unique_ptr<Label>										m_SecondDS100ModeLabel;

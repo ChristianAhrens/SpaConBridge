@@ -175,7 +175,10 @@ const juce::Image* MultiSoundobjectSlider::GetBackgroundImage(MappingAreaId mapp
 void MultiSoundobjectSlider::SetBackgroundImage(MappingAreaId mappingAreaId, const juce::Image& backgroundImage)
 {
 	if (HasBackgroundImage(mappingAreaId))
+	{
+		removeChildComponent(m_backgroundImages.at(mappingAreaId).get());
 		m_backgroundImages.erase(mappingAreaId);
+	}
 	
 	auto imageComponent = std::make_unique<ImageComponent>();
 	imageComponent->setImage(backgroundImage);

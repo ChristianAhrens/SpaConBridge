@@ -499,6 +499,8 @@ void PageComponentManager::LoadImageForMappingFromFile(MappingAreaId mappingArea
         return;
     }
     
+	if (m_multiSliderBackgrounds.count(mappingArea) != 0)
+		m_multiSliderBackgrounds.erase(mappingArea);
 	m_multiSliderBackgrounds.insert(std::make_pair(mappingArea, image));
 
 	if (m_pageContainer)

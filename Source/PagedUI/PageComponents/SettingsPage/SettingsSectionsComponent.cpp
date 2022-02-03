@@ -517,7 +517,37 @@ void SettingsSectionsComponent::createGenericMIDISettingsSection()
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMatrixOutputMuteLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMatrixOutputMuteLearner.get(), true, false);
 
+	m_GenericMIDINextSceneLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
+		static_cast<std::int16_t>(ROI_Scene_Next),
+		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
+	m_GenericMIDINextSceneLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+	m_GenericMIDINextSceneLabel = std::make_unique<Label>("GenericMIDINextSceneLearner", "Next Scene");
+	m_GenericMIDINextSceneLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDINextSceneLabel->attachToComponent(m_GenericMIDINextSceneLearner.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDINextSceneLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDINextSceneLearner.get(), true, false);
+
+	m_GenericMIDIPrevSceneLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
+		static_cast<std::int16_t>(ROI_Scene_Previous),
+		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
+	m_GenericMIDIPrevSceneLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+	m_GenericMIDIPrevSceneLabel = std::make_unique<Label>("GenericMIDIPrevSceneLearner", "Previous Scene");
+	m_GenericMIDIPrevSceneLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIPrevSceneLabel->attachToComponent(m_GenericMIDIPrevSceneLearner.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIPrevSceneLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIPrevSceneLearner.get(), true, false);
+
+	m_GenericMIDIRecallSceneAssigner = std::make_unique<SceneIndexToMidiAssignerComponent>(
+		static_cast<std::int16_t>(ROI_Scene_Recall));
+	//m_GenericMIDIRecallSceneAssigner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+	m_GenericMIDIRecallSceneLabel = std::make_unique<Label>("GenericMIDIRecallSceneAssigner", "Recall Scene");
+	m_GenericMIDIRecallSceneLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIRecallSceneLabel->attachToComponent(m_GenericMIDIRecallSceneAssigner.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIRecallSceneLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIRecallSceneAssigner.get(), true, false);
+
 	m_GenericMIDIBridgingSettings->resized();
+
 }
 
 /**
@@ -1412,6 +1442,21 @@ void SettingsSectionsComponent::processUpdatedGenericMIDIConfig()
 	{
 		m_GenericMIDIMatrixOutputMuteLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
 		m_GenericMIDIMatrixOutputMuteLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIMatrixOutputMuteLearner->getReferredId())));
+	}
+	if (m_GenericMIDINextSceneLearner)
+	{
+		m_GenericMIDINextSceneLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
+		m_GenericMIDINextSceneLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDINextSceneLearner->getReferredId())));
+	}
+	if (m_GenericMIDIPrevSceneLearner)
+	{
+		m_GenericMIDIPrevSceneLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
+		m_GenericMIDIPrevSceneLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIPrevSceneLearner->getReferredId())));
+	}
+	if (m_GenericMIDIRecallSceneAssigner)
+	{
+		m_GenericMIDIRecallSceneAssigner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
+		//m_GenericMIDIRecallSceneAssigner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIRecallSceneAssigner->getReferredId())));
 	}
 }
 

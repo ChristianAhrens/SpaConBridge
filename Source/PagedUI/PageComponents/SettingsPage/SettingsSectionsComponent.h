@@ -22,6 +22,7 @@
 #include "../HeaderWithElmListComponent.h"
 
 #include "../../../SpaConBridgeCommon.h"
+#include "SceneIndexToMidiAssignerComponent.h"
 
 #include <ZeroconfDiscoverComponent.h>
 #include <SplitButtonComponent.h>
@@ -221,6 +222,12 @@ private:
 	std::unique_ptr<Label>										m_GenericMIDIMatrixOutputGainLabel;
 	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDIMatrixOutputMuteLearner;
 	std::unique_ptr<Label>										m_GenericMIDIMatrixOutputMuteLabel;
+	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDINextSceneLearner;
+	std::unique_ptr<Label>										m_GenericMIDINextSceneLabel;
+	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDIPrevSceneLearner;
+	std::unique_ptr<Label>										m_GenericMIDIPrevSceneLabel;
+	std::unique_ptr<SceneIndexToMidiAssignerComponent>			m_GenericMIDIRecallSceneAssigner;
+	std::unique_ptr<Label>										m_GenericMIDIRecallSceneLabel;
 
 	// ADM OSC settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_ADMOSCBridgingSettings;

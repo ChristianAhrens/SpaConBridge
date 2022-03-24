@@ -162,8 +162,8 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 
 #ifdef ZEROCONF_SUPPORTED
 	m_DS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>(false, false);
-	m_DS100ZeroconfDiscovery->onServiceSelected = [=](JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info) { handleDS100ServiceSelected(type, info); };
-	m_DS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC, RX_PORT_DS100_HOST);
+	m_DS100ZeroconfDiscovery->onServiceSelected = [=](JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, ZeroconfSearcher::ZeroconfSearcher::ServiceInfo* info) { handleDS100ServiceSelected(type, info); };
+	m_DS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC);
 	m_DS100Settings->addComponent(m_DS100ZeroconfDiscovery.get(), true, false);
 #endif
 
@@ -203,8 +203,8 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 
 #ifdef ZEROCONF_SUPPORTED
 	m_SecondDS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>(false, false);
-	m_SecondDS100ZeroconfDiscovery->onServiceSelected = [=](JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info) { handleSecondDS100ServiceSelected(type, info); };
-	m_SecondDS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC, RX_PORT_DS100_HOST);
+	m_SecondDS100ZeroconfDiscovery->onServiceSelected = [=](JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, ZeroconfSearcher::ZeroconfSearcher::ServiceInfo* info) { handleSecondDS100ServiceSelected(type, info); };
+	m_SecondDS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC);
 	m_DS100Settings->addComponent(m_SecondDS100ZeroconfDiscovery.get(), true, false);
 #endif
 
@@ -649,7 +649,7 @@ void SettingsSectionsComponent::paint(Graphics& g)
 {
 	// Paint background to cover the controls behind this overlay.
 	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
-	g.fillRect(Rectangle<int>(0, 0, getLocalBounds().getWidth(), getLocalBounds().getHeight()));
+	g.fillRect(juce::Rectangle<int>(0, 0, getLocalBounds().getWidth(), getLocalBounds().getHeight()));
 }
 
 /**
@@ -1430,7 +1430,7 @@ void SettingsSectionsComponent::processUpdatedADMOSCConfig()
  * @param type	The service type that was selected
  * @param info	The detailed info on the service that was selected
  */
-void SettingsSectionsComponent::handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info)
+void SettingsSectionsComponent::handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, ZeroconfSearcher::ZeroconfSearcher::ServiceInfo* info)
 {
 	ignoreUnused(type);
 
@@ -1449,7 +1449,7 @@ void SettingsSectionsComponent::handleDS100ServiceSelected(JUCEAppBasics::Zeroco
  * @param type	The service type that was selected
  * @param info	The detailed info on the service that was selected
  */
-void SettingsSectionsComponent::handleSecondDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info)
+void SettingsSectionsComponent::handleSecondDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, ZeroconfSearcher::ZeroconfSearcher::ServiceInfo* info)
 {
 	ignoreUnused(type);
 

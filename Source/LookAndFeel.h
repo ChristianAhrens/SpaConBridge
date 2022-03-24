@@ -91,7 +91,7 @@ public:
 		bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override;
 
 	//==============================================================================
-	void drawAlertBox(Graphics&, AlertWindow&, const Rectangle< int >& textArea,
+	void drawAlertBox(Graphics&, AlertWindow&, const juce::Rectangle<int>& textArea,
 		TextLayout&) override;
 
 private:

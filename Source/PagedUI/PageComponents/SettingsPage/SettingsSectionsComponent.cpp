@@ -539,7 +539,7 @@ void SettingsSectionsComponent::createGenericMIDISettingsSection()
 
 	m_GenericMIDIRecallSceneAssigner = std::make_unique<SceneIndexToMidiAssignerComponent>(
 		static_cast<std::int16_t>(ROI_Scene_Recall));
-	//m_GenericMIDIRecallSceneAssigner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+	m_GenericMIDIRecallSceneAssigner->onAssignmentsSet = [=](Component* sender, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& scenesToMidiAssi) { handleScenesToMidiAssiSet(sender, scenesToMidiAssi); };
 	m_GenericMIDIRecallSceneLabel = std::make_unique<Label>("GenericMIDIRecallSceneAssigner", "Recall Scene");
 	m_GenericMIDIRecallSceneLabel->setJustificationType(Justification::centredLeft);
 	m_GenericMIDIRecallSceneLabel->attachToComponent(m_GenericMIDIRecallSceneAssigner.get(), true);
@@ -1580,6 +1580,23 @@ void SettingsSectionsComponent::handleMidiAssiSet(Component* sender, const JUCEA
 		auto ctrl = Controller::GetInstance();
 		if (ctrl)
 			ctrl->SetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(learnerComponent->getReferredId()), midiAssi);
+	}
+}
+
+/**
+ * Callback method to be registered with SceneIndexToMidiAssignerComponent to handle scene index to midi assignment selection.
+ * @param sender	The SceneIndexToMidiAssignerComponent that sent the assignment.
+ * @param scenesToMidiAssi	The sent assignment that was chosen by user
+ */
+void SettingsSectionsComponent::handleScenesToMidiAssiSet(Component* sender, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& scenesToMidiAssi)
+{
+	if (sender == m_GenericMIDIRecallSceneAssigner.get())
+	{
+		DBG(String(__FUNCTION__) + " assignments:");
+		for (auto const& assi : scenesToMidiAssi)
+		{
+			DBG(assi.first + " : " + assi.second.serializeToHexString());
+		}
 	}
 }
 

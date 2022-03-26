@@ -90,6 +90,7 @@ private:
 
 	//==============================================================================
 	void handleMidiAssiSet(Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi);
+	void handleScenesToMidiAssiSet(Component* sender, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& scenesToMidiAssi);
 
 	//==============================================================================
 	void processUpdatedGeneralConfig();

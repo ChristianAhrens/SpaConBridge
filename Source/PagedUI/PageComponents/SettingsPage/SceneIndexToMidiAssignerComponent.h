@@ -40,9 +40,6 @@ public:
     void buttonClicked(Button*) override;
 
     //==============================================================================
-    void lookAndFeelChanged() override;
-
-    //==============================================================================
     std::function<void(Component*, std::map<String,JUCEAppBasics::MidiCommandRangeAssignment>)> onAssignmentsSet;
     
     //==============================================================================
@@ -56,7 +53,8 @@ private:
     class LearnerPopupCustomComponent : public PopupMenu::CustomComponent
     {
     public:
-        LearnerPopupCustomComponent(std::int16_t refId, const String& sceneIndex, const JUCEAppBasics::MidiCommandRangeAssignment& currentAssi)
+        LearnerPopupCustomComponent(std::int16_t refId, const String& sceneIndex, const String& deviceIdentifier, const JUCEAppBasics::MidiCommandRangeAssignment& currentAssi)
+            : PopupMenu::CustomComponent(false)
         {
             m_sceneIndex = sceneIndex;
 
@@ -66,9 +64,10 @@ private:
             addAndMakeVisible(m_sceneIndexEdit.get());
 
             m_learnerComponent = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(refId, JUCEAppBasics::MidiLearnerComponent::AT_Trigger);
+            m_learnerComponent->setSelectedDeviceIdentifier(deviceIdentifier);
             m_learnerComponent->setCurrentMidiAssi(currentAssi);
             addAndMakeVisible(m_learnerComponent.get());
-            m_learnerComponent->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { /*handleMidiAssiSet(sender, midiAssi);*/ };
+            m_learnerComponent->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
         }
         ~LearnerPopupCustomComponent()
         {
@@ -98,6 +97,17 @@ private:
             idealWidth = 205;
             idealHeight = 25;
         }
+
+        void handleMidiAssiSet(Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi)
+        {
+            auto learnerComponent = dynamic_cast<JUCEAppBasics::MidiLearnerComponent*>(sender);
+            if (learnerComponent && onAssignmentSet)
+            {
+                onAssignmentSet(this, m_sceneIndex, midiAssi);
+            }
+        }
+
+        std::function<void(Component*, const String&, const JUCEAppBasics::MidiCommandRangeAssignment&)> onAssignmentSet;
 
     private:
         String m_sceneIndex;
@@ -150,22 +160,19 @@ private:
     void triggerEditAssignments();
     void addAssignmentComponent();
     void updatePopupMenu();
-    void handlePopupResult();
+    void handlePopupResult(int resultingAssiIdx);
 
-    std::unique_ptr<TextEditor> m_currentMidiAssisLabel;
-    std::unique_ptr<TextButton> m_editAssignmentsButton;
-    String                      m_deviceIdentifier;
-    String                      m_deviceName;
-    PopupMenu                   m_popup;
-    //std::map<JUCEAppBasics::MidiCommandRangeAssignment::CommandType, std::map<int, JUCEAppBasics::MidiCommandRangeAssignment>>    m_learnedDirectAssis;
-    //std::map<JUCEAppBasics::MidiCommandRangeAssignment::CommandType, std::map<int, JUCEAppBasics::MidiCommandRangeAssignment>>    m_learnedValueRangeAssis;
-    //std::map<JUCEAppBasics::MidiCommandRangeAssignment::CommandType, std::map<int, JUCEAppBasics::MidiCommandRangeAssignment>>    m_learnedCommandAndValueRangeAssis;
+    std::unique_ptr<TextEditor>                                 m_currentMidiAssisLabel;
+    std::unique_ptr<TextButton>                                 m_editAssignmentsButton;
+    String                                                      m_deviceIdentifier;
+    String                                                      m_deviceName;
+    PopupMenu                                                   m_popup;
 
     std::unique_ptr<AddItemCustomComponent>                     m_addItemComponent;
     std::vector<std::unique_ptr<LearnerPopupCustomComponent>>   m_assignmentComponents;
     
-    std::unique_ptr<MidiInput>                  m_midiInput;
-    std::int16_t                                m_referredId{ -1 };
+    std::unique_ptr<MidiInput>                                  m_midiInput;
+    std::int16_t                                                m_referredId{ -1 };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SceneIndexToMidiAssignerComponent)
 };

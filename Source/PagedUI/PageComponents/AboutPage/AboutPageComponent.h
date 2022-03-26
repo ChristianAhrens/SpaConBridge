@@ -53,10 +53,6 @@ private:
 	std::unique_ptr<Label>				m_materialLabel;		/**> MATERIAL.IO copyright label. */
 	std::unique_ptr<HyperlinkButton>	m_materialLink;			/**> Hyperlink to material.io. */
 
-	std::unique_ptr<Drawable>           m_servusIconDrawable;	/**> HBP (Servus) icon drawable. */
-	std::unique_ptr<Label>				m_servusLabel;			/**> HBP (Servus) copyright label. */
-	std::unique_ptr<HyperlinkButton>	m_servusLink;			/**> Hyperlink to HBP Servus on github. */
-
 	std::unique_ptr<TextEditor>         m_licenseGPLv3Field;	/**> Text field containing Licensing info. */
 	std::unique_ptr<TextEditor>         m_licenseAPACHEv2Field;	/**> Text field containing Licensing info. */
 	std::unique_ptr<TextEditor>         m_licenseLGPLv3Field;	/**> Text field containing Licensing info. */

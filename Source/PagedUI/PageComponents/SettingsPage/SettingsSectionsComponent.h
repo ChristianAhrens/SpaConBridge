@@ -28,13 +28,7 @@
 #include <TextWithImageButton.h>
 #include <MidiLearnerComponent.h>
 
-#if JUCE_WINDOWS
-#ifdef SERVUS_USE_WINDNS
 #define ZEROCONF_SUPPORTED
-#endif
-#else
-#define ZEROCONF_SUPPORTED
-#endif
 
 namespace SpaConBridge
 {
@@ -90,8 +84,8 @@ private:
 	void textEditorUpdated(TextEditor&);
 
 	//==============================================================================
-	void handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info);
-	void handleSecondDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info);
+	void handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, ZeroconfSearcher::ZeroconfSearcher::ServiceInfo* info);
+	void handleSecondDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, ZeroconfSearcher::ZeroconfSearcher::ServiceInfo* info);
 
 	//==============================================================================
 	void handleMidiAssiSet(Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi);

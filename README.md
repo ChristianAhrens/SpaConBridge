@@ -220,9 +220,10 @@ DS100 OSC communication protocol is always active. The IP address can be manuall
 
 For details on the settings for the implemented protocols, see the individual documentation
   * [d&b DS100 signal bridge communication](Resources/Documentation/BridgingProtocols/DS100.md)
+  * [Generic d&b OSC protocol communication](Resources/Documentation/BridgingProtocols/GenericOSC.md)
+  * [d&b DAW plugin communication](Resources/Documentation/BridgingProtocols/DAWPlugin.md)
   * [DiGiCo SD series mixing console communication](Resources/Documentation/BridgingProtocols/DiGiCoOSC.md)
   * [Blacktrax tracking system communication *](Resources/Documentation/BridgingProtocols/BlacktraxRTTrPM.md)
-  * [Generic d&b OSC protocol communication](Resources/Documentation/BridgingProtocols/GenericOSC.md)
   * [Generic MIDI communication](Resources/Documentation/BridgingProtocols/GenericMIDI.md)
   * [Yamaha OSC communication *](Resources/Documentation/BridgingProtocols/YamahaOSC.md)
   * [ADM OSC communication *](Resources/Documentation/BridgingProtocols/ADMOSC.md)

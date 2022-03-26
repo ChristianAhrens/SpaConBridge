@@ -47,6 +47,7 @@ public:
 	{
 		SLS_None,
 		SLS_DiGiCo,
+		SLS_DAWPlugin,
 		SLS_BlacktraxRTTrPM,
 		SLS_GenericOSC,
 		SLS_GenericMIDI,

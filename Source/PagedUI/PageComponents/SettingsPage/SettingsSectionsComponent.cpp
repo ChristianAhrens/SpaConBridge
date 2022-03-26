@@ -50,6 +50,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	createGeneralSettingsSection();
 	createDS100SettingsSection();
 	createDiGiCoSettingsSection();
+	createDAWPluginSettingsSection();
 	createRTTrPMSettingsSection();
 	createGenericOSCSettingsSection();
 	createGenericMIDISettingsSection();
@@ -253,6 +254,32 @@ void SettingsSectionsComponent::createDiGiCoSettingsSection()
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoRemotePortEdit.get(), true, false);
 
 	m_DiGiCoBridgingSettings->resized();
+}
+
+/**
+* Helper method to create and setup objects for DiGiCo settings section
+ */
+void SettingsSectionsComponent::createDAWPluginSettingsSection()
+{
+	// DAWPlugin settings section
+	m_DAWPluginBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
+	m_DAWPluginBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_DAWPlugin) + " Bridging");
+	m_DAWPluginBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_DAWPlugin) + " Bridging Settings");
+	m_DAWPluginBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/DAWPlugin.md"));
+	m_DAWPluginBridgingSettings->setHasActiveToggle(true);
+	m_DAWPluginBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
+	addAndMakeVisible(m_DAWPluginBridgingSettings.get());
+
+	m_DAWPluginIpAddressEdit = std::make_unique<TextEditor>();
+	m_DAWPluginIpAddressEdit->addListener(this);
+	m_DAWPluginIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
+	m_DAWPluginIpAddressLabel = std::make_unique<Label>("DAWPluginIpAddressEdit", "IP Address");
+	m_DAWPluginIpAddressLabel->setJustificationType(Justification::centred);
+	m_DAWPluginIpAddressLabel->attachToComponent(m_DAWPluginIpAddressEdit.get(), true);
+	m_DAWPluginBridgingSettings->addComponent(m_DAWPluginIpAddressLabel.get(), false, false);
+	m_DAWPluginBridgingSettings->addComponent(m_DAWPluginIpAddressEdit.get(), true, false);
+
+	m_DAWPluginBridgingSettings->resized();
 }
 
 /**
@@ -663,9 +690,10 @@ void SettingsSectionsComponent::resized()
 	auto minHeight = 
 		(m_GeneralSettings->getHeight() + (2 * margin))
 		+ (m_DS100Settings->getHeight() + (2 * margin))
+		+ (m_GenericOSCBridgingSettings->getHeight() + (2 * margin))
+		+ (m_DAWPluginBridgingSettings->getHeight() + (2 * margin))
 		+ (m_DiGiCoBridgingSettings->getHeight() + (2 * margin))
 		+ (m_RTTrPMBridgingSettings->getHeight() + (2 * margin))
-		+ (m_GenericOSCBridgingSettings->getHeight() + (2 * margin))
 		+ (m_GenericMIDIBridgingSettings->getHeight() + (2 * margin))
 		+ (m_ADMOSCBridgingSettings->getHeight() + (2 * margin))
 		+ (m_YamahaOSCBridgingSettings->getHeight() + (2 * margin));
@@ -691,14 +719,17 @@ void SettingsSectionsComponent::resized()
 		FlexItem(*m_DS100Settings.get())
 			.withHeight(static_cast<float>(m_DS100Settings->getHeight()))
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
+		FlexItem(*m_GenericOSCBridgingSettings.get())
+			.withHeight(static_cast<float>(m_GenericOSCBridgingSettings->getHeight()))
+			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
+		FlexItem(*m_DAWPluginBridgingSettings.get())
+			.withHeight(static_cast<float>(m_DAWPluginBridgingSettings->getHeight()))
+			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
 		FlexItem(*m_DiGiCoBridgingSettings.get())
 			.withHeight(static_cast<float>(m_DiGiCoBridgingSettings->getHeight()))
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
 		FlexItem(*m_RTTrPMBridgingSettings.get())
 			.withHeight(static_cast<float>(m_RTTrPMBridgingSettings->getHeight()))
-			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
-		FlexItem(*m_GenericOSCBridgingSettings.get())
-			.withHeight(static_cast<float>(m_GenericOSCBridgingSettings->getHeight()))
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
 		FlexItem(*m_GenericMIDIBridgingSettings.get())
 			.withHeight(static_cast<float>(m_GenericMIDIBridgingSettings->getHeight()))
@@ -907,6 +938,10 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 	else if (m_DiGiCoRemotePortEdit && m_DiGiCoRemotePortEdit.get() == &editor)
 		ctrl->SetBridgingRemotePort(PBT_DiGiCo, m_DiGiCoRemotePortEdit->getText().getIntValue());
 
+	// DAWPlugin settings section
+	else if (m_DAWPluginIpAddressEdit && m_DAWPluginIpAddressEdit.get() == &editor)
+		ctrl->SetBridgingIpAddress(PBT_DAWPlugin, m_DAWPluginIpAddressEdit->getText());
+
 	// RTTrPM settings section
 	else if (m_RTTrPMListeningPortEdit && m_RTTrPMListeningPortEdit.get() == &editor)
 		ctrl->SetBridgingListeningPort(PBT_BlacktraxRTTrPM, m_RTTrPMListeningPortEdit->getText().getIntValue());
@@ -1025,6 +1060,8 @@ void SettingsSectionsComponent::setSettingsSectionActiveState(HeaderWithElmListC
 	ProtocolBridgingType sectionType = PBT_None;
 	if (settingsSection == m_DiGiCoBridgingSettings.get())
 		sectionType = PBT_DiGiCo;
+	if (settingsSection == m_DAWPluginBridgingSettings.get())
+		sectionType = PBT_DAWPlugin;
 	else if (settingsSection == m_RTTrPMBridgingSettings.get())
 		sectionType = PBT_BlacktraxRTTrPM;
 	else if (settingsSection == m_GenericOSCBridgingSettings.get())
@@ -1104,6 +1141,7 @@ void SettingsSectionsComponent::processUpdatedConfig()
 	processUpdatedGeneralConfig();
 	processUpdatedDS100Config();
 	processUpdatedDiGiCoConfig();
+	processUpdatedDAWPluginConfig();
 	processUpdatedRTTrPMConfig();
 	processUpdatedGenericOSCConfig();
 	processUpdatedGenericMIDIConfig();
@@ -1207,6 +1245,23 @@ void SettingsSectionsComponent::processUpdatedDiGiCoConfig()
 		m_DiGiCoListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_DiGiCo)), false);
 	if (m_DiGiCoRemotePortEdit)
 		m_DiGiCoRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_DiGiCo)), false);
+}
+
+/**
+ * Helper method to update objects for DAWPlugin settings section with updated config
+ */
+void SettingsSectionsComponent::processUpdatedDAWPluginConfig()
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
+	// DAWPlugin settings section
+	auto DAWPluginBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_DAWPlugin) == PBT_DAWPlugin;
+	if (m_DAWPluginBridgingSettings)
+		m_DAWPluginBridgingSettings->setToggleActiveState(DAWPluginBridgingActive);
+	if (m_DAWPluginIpAddressEdit)
+		m_DAWPluginIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_DAWPlugin));
 }
 
 /**

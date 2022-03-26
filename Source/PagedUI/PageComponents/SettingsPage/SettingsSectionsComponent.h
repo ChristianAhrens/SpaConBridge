@@ -94,6 +94,7 @@ private:
 	void processUpdatedGeneralConfig();
 	void processUpdatedDS100Config();
 	void processUpdatedDiGiCoConfig();
+	void processUpdatedDAWPluginConfig();
 	void processUpdatedRTTrPMConfig();
 	void processUpdatedGenericOSCConfig();
 	void processUpdatedGenericMIDIConfig();
@@ -104,6 +105,7 @@ private:
 	void createGeneralSettingsSection();
 	void createDS100SettingsSection();
 	void createDiGiCoSettingsSection();
+	void createDAWPluginSettingsSection();
 	void createRTTrPMSettingsSection();
 	void createGenericOSCSettingsSection();
 	void createGenericMIDISettingsSection();
@@ -162,6 +164,11 @@ private:
 	std::unique_ptr<Label>										m_DiGiCoListeningPortLabel;
 	std::unique_ptr<TextEditor>									m_DiGiCoRemotePortEdit;
 	std::unique_ptr<Label>										m_DiGiCoRemotePortLabel;
+
+	// Soundscape DAW Plugin settings section
+	std::unique_ptr<HeaderWithElmListComponent>					m_DAWPluginBridgingSettings;
+	std::unique_ptr<TextEditor>									m_DAWPluginIpAddressEdit;
+	std::unique_ptr<Label>										m_DAWPluginIpAddressLabel;
 
 	// RTTrPM settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_RTTrPMBridgingSettings;

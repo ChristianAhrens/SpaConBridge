@@ -188,6 +188,8 @@ void StatisticsPlot::ResetStatisticsPlot()
 	auto bridgingTypes = ctrl->GetActiveProtocolBridging() | PBT_DS100; // DS100 is not a bridging protocol, even though it is part of the enum PBT. Needs special handling therefor.
 	if ((bridgingTypes & PBT_DiGiCo) == PBT_DiGiCo)
 		m_plottedBridgingTypes.add(PBT_DiGiCo);
+	if ((bridgingTypes & PBT_DAWPlugin) == PBT_DAWPlugin)
+		m_plottedBridgingTypes.add(PBT_DAWPlugin);
 	if ((bridgingTypes & PBT_BlacktraxRTTrPM) == PBT_BlacktraxRTTrPM)
 		m_plottedBridgingTypes.add(PBT_BlacktraxRTTrPM);
 	if ((bridgingTypes & PBT_GenericOSC) == PBT_GenericOSC)

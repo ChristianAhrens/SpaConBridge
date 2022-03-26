@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 ### Added
 - Zeroconf discovery of DS100 devices on Windows OS
+- Added support for d&b DAW plugin bridging
 
 ### Changed
 - Replaced Servus zeroconf discovery with mdns based selfmade implementation

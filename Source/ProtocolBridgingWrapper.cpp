@@ -210,6 +210,9 @@ bool ProtocolBridgingWrapper::setStateXml(XmlElement* stateXml)
 			auto digicoProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DIGICO_PROCESSINGPROTOCOL_ID));
 			if (digicoProtocolXmlElement)
 				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_DiGiCo, *digicoProtocolXmlElement));
+			auto DAWPluginProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DAWPLUGIN_PROCESSINGPROTOCOL_ID));
+			if (DAWPluginProtocolXmlElement)
+				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_DAWPlugin, *DAWPluginProtocolXmlElement));
 			auto RTTrPMProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(RTTRPM_PROCESSINGPROTOCOL_ID));
 			if (RTTrPMProtocolXmlElement)
 				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_BlacktraxRTTrPM, *RTTrPMProtocolXmlElement));
@@ -361,6 +364,18 @@ bool ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridg
 		}
 	}
 
+	// DAWPlugin protocol - RoleB
+	{
+		auto DAWPluginBridgingXmlElement = SetupDAWPluginBridgingProtocol();
+		if (DAWPluginBridgingXmlElement)
+		{
+			m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_DAWPlugin, *DAWPluginBridgingXmlElement));
+
+			if ((bridgingProtocolsToActivate & PBT_DAWPlugin) == PBT_DAWPlugin)
+				nodeXmlElement->addChildElement(DAWPluginBridgingXmlElement.release());
+		}
+	}
+
 	// RTTrPM protocol - RoleB
 	{
 		auto RTTrPMBridgingXmlElement = SetupRTTrPMBridgingProtocol();
@@ -452,6 +467,42 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupDiGiCoBridgingProtocol
 		auto hostPortXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
 		if (hostPortXmlElement)
 			hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_DIGICO_HOST);
+
+		auto ipAdressXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
+		if (ipAdressXmlElement)
+			ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
+
+		auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
+		auto mutedObjects = std::vector<RemoteObject>();
+		if (mutedObjsXmlElement)
+			ProcessingEngineConfig::WriteMutedObjects(mutedObjsXmlElement, mutedObjects);
+	}
+
+	return protocolBXmlElement;
+}
+
+/**
+ * Method to create the default DAW Plugin bridging protocol xml element.
+ * @return	The protocol xml element that was created
+ */
+std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupDAWPluginBridgingProtocol()
+{
+	// DAWPlugin protocol - RoleB
+	auto protocolBXmlElement = std::make_unique<XmlElement>(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLB));
+	if (protocolBXmlElement)
+	{
+		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), DAWPLUGIN_PROCESSINGPROTOCOL_ID);
+
+		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), ProcessingEngineConfig::ProtocolTypeToString(PT_OSCProtocol));
+		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::USESACTIVEOBJ), 0);
+
+		auto clientPortXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+		if (clientPortXmlElement)
+			clientPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_DS100_HOST);
+
+		auto hostPortXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
+		if (hostPortXmlElement)
+			hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_DS100_DEVICE);
 
 		auto ipAdressXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
 		if (ipAdressXmlElement)
@@ -1729,6 +1780,10 @@ ProtocolBridgingType ProtocolBridgingWrapper::GetActiveBridgingProtocols()
 		if (protocolXmlElement)
 			activeBridgingTypes |= PBT_DiGiCo;
 
+		protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DAWPLUGIN_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+			activeBridgingTypes |= PBT_DAWPlugin;
+
 		protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(RTTRPM_PROCESSINGPROTOCOL_ID));
 		if (protocolXmlElement)
 			activeBridgingTypes |= PBT_BlacktraxRTTrPM;
@@ -1766,6 +1821,8 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 		// we need to do something, since currently active protocols are not what the user wants any more
 		auto addDiGiCoBridging = ((desiredActiveBridgingTypes & PBT_DiGiCo) && !(currentlyActiveBridgingTypes & PBT_DiGiCo));
 		auto removeDiGiCoBridging = (!(desiredActiveBridgingTypes & PBT_DiGiCo) && (currentlyActiveBridgingTypes & PBT_DiGiCo));
+		auto addDAWPluginBridging = ((desiredActiveBridgingTypes & PBT_DAWPlugin) && !(currentlyActiveBridgingTypes & PBT_DAWPlugin));
+		auto removeDAWPluginBridging = (!(desiredActiveBridgingTypes & PBT_DAWPlugin) && (currentlyActiveBridgingTypes & PBT_DAWPlugin));
 		auto addRTTrPMBridging = ((desiredActiveBridgingTypes & PBT_BlacktraxRTTrPM) && !(currentlyActiveBridgingTypes & PBT_BlacktraxRTTrPM));
 		auto removeRTTrPMBridging = (!(desiredActiveBridgingTypes & PBT_BlacktraxRTTrPM) && (currentlyActiveBridgingTypes & PBT_BlacktraxRTTrPM));
 		auto addGenericOSCBridging = ((desiredActiveBridgingTypes & PBT_GenericOSC) && !(currentlyActiveBridgingTypes & PBT_GenericOSC));
@@ -1790,6 +1847,20 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 				if (protocolXmlElement)
 				{
 					m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_DiGiCo, *protocolXmlElement));
+					nodeXmlElement->removeChildElement(protocolXmlElement, true);
+				}
+			}
+
+			if (addDAWPluginBridging)
+			{
+				nodeXmlElement->addChildElement(std::make_unique<XmlElement>(m_bridgingProtocolCacheMap.at(PBT_DAWPlugin)).release());
+			}
+			else if (removeDAWPluginBridging)
+			{
+				auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DAWPLUGIN_PROCESSINGPROTOCOL_ID));
+				if (protocolXmlElement)
+				{
+					m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_DAWPlugin, *protocolXmlElement));
 					nodeXmlElement->removeChildElement(protocolXmlElement, true);
 				}
 			}
@@ -2698,6 +2769,142 @@ int ProtocolBridgingWrapper::GetDiGiCoRemotePort()
 bool ProtocolBridgingWrapper::SetDiGiCoRemotePort(int remotePort, bool dontSendNotification)
 {
 	return SetProtocolRemotePort(DIGICO_PROCESSINGPROTOCOL_ID, remotePort, dontSendNotification);
+}
+
+/**
+ * Gets the mute state of the given source
+ * @param soundobjectProcessorId The id of the Processor for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteDAWPluginSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId)
+{
+	return GetMuteProtocolSoundobjectProcessorId(DAWPLUGIN_PROCESSINGPROTOCOL_ID, soundobjectProcessorId);
+}
+
+/**
+ * Sets the given source to be (un-)muted
+ * @param soundobjectProcessorId The id of the source that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteDAWPluginSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolSoundobjectProcessorId(DAWPLUGIN_PROCESSINGPROTOCOL_ID, soundobjectProcessorId);
+	else
+		return SetUnmuteProtocolSoundobjectProcessorId(DAWPLUGIN_PROCESSINGPROTOCOL_ID, soundobjectProcessorId);
+}
+
+/**
+ * Sets the given sources to be (un-)muted
+ * @param soundobjectProcessorIds The ids of the Processors that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteDAWPluginSoundobjectProcessorIds(const std::vector<SoundobjectProcessorId>& soundobjectProcessorIds, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolSoundobjectProcessorIds(DAWPLUGIN_PROCESSINGPROTOCOL_ID, soundobjectProcessorIds);
+	else
+		return SetUnmuteProtocolSoundobjectProcessorIds(DAWPLUGIN_PROCESSINGPROTOCOL_ID, soundobjectProcessorIds);
+}
+
+/**
+ * Gets the mute state of the given MatrixInputProcessor
+ * @param matrixInputProcessorId The id of the matrixInputProcessor for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteDAWPluginMatrixInputProcessorId(MatrixInputProcessorId matrixInputProcessorId)
+{
+	return GetMuteProtocolMatrixInputProcessorId(DAWPLUGIN_PROCESSINGPROTOCOL_ID, matrixInputProcessorId);
+}
+
+/**
+ * Sets the given MatrixInputProcessor to be (un-)muted
+ * @param matrixInputProcessorId The id of the matrixInputProcessor that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteDAWPluginMatrixInputProcessorId(MatrixInputProcessorId matrixInputProcessorId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixInputProcessorId(DAWPLUGIN_PROCESSINGPROTOCOL_ID, matrixInputProcessorId);
+	else
+		return SetUnmuteProtocolMatrixInputProcessorId(DAWPLUGIN_PROCESSINGPROTOCOL_ID, matrixInputProcessorId);
+}
+
+/**
+ * Sets the given MatrixInputProcessors to be (un-)muted
+ * @param matrixInputProcessorIds The ids of the matrixInputProcessors that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteDAWPluginMatrixInputProcessorIds(const std::vector<MatrixInputProcessorId>& matrixInputProcessorIds, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixInputProcessorIds(DAWPLUGIN_PROCESSINGPROTOCOL_ID, matrixInputProcessorIds);
+	else
+		return SetUnmuteProtocolMatrixInputProcessorIds(DAWPLUGIN_PROCESSINGPROTOCOL_ID, matrixInputProcessorIds);
+}
+
+/**
+ * Gets the mute state of the given matrixOutputProcessor
+ * @param matrixOutputProcessorId The id of the matrixOutputProcessor for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteDAWPluginMatrixOutputProcessorId(MatrixOutputProcessorId matrixOutputProcessorId)
+{
+	return GetMuteProtocolMatrixOutputProcessorId(DAWPLUGIN_PROCESSINGPROTOCOL_ID, matrixOutputProcessorId);
+}
+
+/**
+ * Sets the given MatrixOutputProcessor to be (un-)muted
+ * @param matrixOutputProcessorId The id of the matrixOutputProcessor that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteDAWPluginMatrixOutputProcessorId(MatrixOutputProcessorId matrixOutputProcessorId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixOutputProcessorId(DAWPLUGIN_PROCESSINGPROTOCOL_ID, matrixOutputProcessorId);
+	else
+		return SetUnmuteProtocolMatrixOutputProcessorId(DAWPLUGIN_PROCESSINGPROTOCOL_ID, matrixOutputProcessorId);
+}
+
+/**
+ * Sets the given MatrixOutputProcessors to be (un-)muted
+ * @param matrixOutputProcessorIds The ids of the matrixOutput that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteDAWPluginMatrixOutputProcessorIds(const std::vector<MatrixOutputProcessorId>& matrixOutputProcessorIds, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixOutputProcessorIds(DAWPLUGIN_PROCESSINGPROTOCOL_ID, matrixOutputProcessorIds);
+	else
+		return SetUnmuteProtocolMatrixOutputProcessorIds(DAWPLUGIN_PROCESSINGPROTOCOL_ID, matrixOutputProcessorIds);
+}
+
+/**
+ * Gets the currently set DiGiCo client ip address.
+ * This method forwards the call to the generic implementation.
+ * @return	The ip address string
+ */
+String ProtocolBridgingWrapper::GetDAWPluginIpAddress()
+{
+	return GetProtocolIpAddress(DAWPLUGIN_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol client ip address.
+ * This method forwards the call to the generic implementation.
+ * @param ipAddress	The new ip address string
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetDAWPluginIpAddress(String ipAddress, bool dontSendNotification)
+{
+	return SetProtocolIpAddress(DAWPLUGIN_PROCESSINGPROTOCOL_ID, ipAddress, dontSendNotification);
 }
 
 /**

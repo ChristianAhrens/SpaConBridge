@@ -68,6 +68,7 @@ static constexpr int DS100_2_PROCESSINGPROTOCOL_ID = 6;
 static constexpr int GENERICMIDI_PROCESSINGPROTOCOL_ID = 7;
 static constexpr int YAMAHAOSC_PROCESSINGPROTOCOL_ID = 8;
 static constexpr int ADMOSC_PROCESSINGPROTOCOL_ID = 9;
+static constexpr int DAWPLUGIN_PROCESSINGPROTOCOL_ID = 10;
 
 class ProtocolBridgingWrapper :
 	public ProcessingEngineNode::NodeListener,
@@ -162,6 +163,22 @@ public:
 	bool SetDiGiCoListeningPort(int listeningPort, bool dontSendNotification = false);
 	int GetDiGiCoRemotePort();
 	bool SetDiGiCoRemotePort(int remotePort, bool dontSendNotification = false);
+
+	//==========================================================================
+	bool GetMuteDAWPluginSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId);
+	bool SetMuteDAWPluginSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId, bool mute = true);
+	bool SetMuteDAWPluginSoundobjectProcessorIds(const std::vector<SoundobjectProcessorId>& soundobjectProcessorIds, bool mute = true);
+				
+	bool GetMuteDAWPluginMatrixInputProcessorId(MatrixInputProcessorId matrixInputProcessorId);
+	bool SetMuteDAWPluginMatrixInputProcessorId(MatrixInputProcessorId matrixInputProcessorId, bool mute = true);
+	bool SetMuteDAWPluginMatrixInputProcessorIds(const std::vector<MatrixInputProcessorId>& matrixInputProcessorIds, bool mute = true);
+				
+	bool GetMuteDAWPluginMatrixOutputProcessorId(MatrixOutputProcessorId matrixOutputProcessorId);
+	bool SetMuteDAWPluginMatrixOutputProcessorId(MatrixOutputProcessorId matrixOutputProcessorId, bool mute = true);
+	bool SetMuteDAWPluginMatrixOutputProcessorIds(const std::vector<MatrixOutputProcessorId>& matrixOutputProcessorIds, bool mute = true);
+
+	String GetDAWPluginIpAddress();
+	bool SetDAWPluginIpAddress(String ipAddress, bool dontSendNotification = false);
 
 	//==========================================================================
 	bool GetMuteRTTrPMSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId);
@@ -337,6 +354,7 @@ private:
 	bool SetBridgingNodeStateXml(XmlElement* stateXml, bool dontSendNotification = false);
 	bool SetupBridgingNode(const ProtocolBridgingType bridgingProtocolsToActivate = PBT_None);
 	std::unique_ptr<XmlElement> SetupDiGiCoBridgingProtocol();
+	std::unique_ptr<XmlElement> SetupDAWPluginBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupRTTrPMBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupGenericOSCBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupGenericMIDIBridgingProtocol();

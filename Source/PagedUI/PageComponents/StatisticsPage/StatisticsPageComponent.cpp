@@ -142,6 +142,10 @@ void StatisticsPageComponent::HandleMessageData(NodeId nodeId, ProtocolId sender
 		bridgingProtocol = PBT_DiGiCo;
 		logSource = StatisticsLog::StatisticsLogSource::SLS_DiGiCo;
 		break;
+	case DAWPLUGIN_PROCESSINGPROTOCOL_ID:
+		bridgingProtocol = PBT_DAWPlugin;
+		logSource = StatisticsLog::StatisticsLogSource::SLS_DAWPlugin;
+		break;
 	case RTTRPM_PROCESSINGPROTOCOL_ID:
 		bridgingProtocol = PBT_BlacktraxRTTrPM;
 		logSource = StatisticsLog::StatisticsLogSource::SLS_BlacktraxRTTrPM;

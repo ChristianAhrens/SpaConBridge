@@ -271,6 +271,8 @@ String StatisticsLog::GetLogSourceName(StatisticsLogSource logSourceType)
 	{
 	case SLS_DiGiCo:
 		return GetProtocolBridgingShortName(PBT_DiGiCo);
+	case SLS_DAWPlugin:
+		return GetProtocolBridgingShortName(PBT_DAWPlugin);
 	case SLS_BlacktraxRTTrPM:
 		return GetProtocolBridgingShortName(PBT_BlacktraxRTTrPM);
 	case SLS_GenericOSC:
@@ -306,6 +308,8 @@ const Colour StatisticsLog::GetLogSourceColour(StatisticsLogSource logSourceType
 	{
 	case SLS_DiGiCo:
 		return GetProtocolBridgingColour(PBT_DiGiCo);
+	case SLS_DAWPlugin:
+		return GetProtocolBridgingColour(PBT_DAWPlugin);
 	case SLS_BlacktraxRTTrPM:
 		return GetProtocolBridgingColour(PBT_BlacktraxRTTrPM);
 	case SLS_GenericOSC:

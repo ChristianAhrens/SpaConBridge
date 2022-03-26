@@ -100,6 +100,8 @@ String GetProtocolBridgingShortName(ProtocolBridgingType type)
 	{
 		case PBT_DiGiCo:
 			return "DiGiCo";
+		case PBT_DAWPlugin:
+			return "DAW";
 		case PBT_GenericOSC:
 			return "OSC";
 		case PBT_BlacktraxRTTrPM:
@@ -133,8 +135,10 @@ String GetProtocolBridgingNiceName(ProtocolBridgingType type)
 	{
 	case PBT_DiGiCo:
 		return "DiGiCo OSC";
+	case PBT_DAWPlugin:
+		return "d&b DAW Plugin";
 	case PBT_GenericOSC:
-		return "Generic d&b OSC";
+		return "d&b Generic OSC";
 	case PBT_BlacktraxRTTrPM:
 		return "Blacktrax RTTrPM";
 	case PBT_GenericMIDI:
@@ -166,6 +170,8 @@ String GetProtocolBridgingSystemName(ProtocolBridgingType type)
 	{
 	case PBT_DiGiCo:
 		return "DiGiCoOSC";
+	case PBT_DAWPlugin:
+		return "DAWPlugin";
 	case PBT_GenericOSC:
 		return "GenericOSC";
 	case PBT_BlacktraxRTTrPM:
@@ -199,6 +205,8 @@ const Colour GetProtocolBridgingColour(ProtocolBridgingType type)
 	{
 	case PBT_DiGiCo:
 		return Colour(140, 46, 52);
+	case PBT_DAWPlugin:
+		return Colour(180, 180, 180);
 	case PBT_GenericOSC:
 		return Colour(255, 217, 115);
 	case PBT_BlacktraxRTTrPM:

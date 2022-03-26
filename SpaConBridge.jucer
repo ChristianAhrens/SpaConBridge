@@ -3,9 +3,9 @@
 <JUCERPROJECT id="MFvkL5" name="SpaConBridge" projectType="guiapp" version="0.5.3"
               bundleIdentifier="com.ChristianAhrens.SpaConBridge" companyName="Christian Ahrens"
               companyEmail="christianahrens@me.com" displaySplashScreen="0"
-              reportAppUsage="0" companyCopyright="2021" jucerFormatVersion="1"
-              headerPath="../../submodules/RemoteProtocolBridgeCore/Source&#10;../../submodules/JUCE-AppBasics/Source&#10;../../submodules/Servus/"
-              defines="SERVUS_STATIC" companyWebsite="https://github.com/ChristianAhrens/SpaConBridge">
+              reportAppUsage="0" companyCopyright="2022" jucerFormatVersion="1"
+              headerPath="../../submodules/RemoteProtocolBridgeCore/Source&#10;../../submodules/JUCE-AppBasics/Source"
+              companyWebsite="https://github.com/ChristianAhrens/SpaConBridge">
   <MAINGROUP id="cS7SrP" name="SpaConBridge">
     <GROUP id="{F93FDF74-FF39-A47E-E403-31E5ADA7ADD3}" name="submodules">
       <GROUP id="{9CCE33BC-DFA0-AFFB-5206-C2377252AD64}" name="RemoteProtocolBridgeCore">

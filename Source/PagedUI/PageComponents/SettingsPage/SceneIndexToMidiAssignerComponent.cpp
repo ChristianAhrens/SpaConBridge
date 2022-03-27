@@ -125,6 +125,9 @@ void SceneIndexToMidiAssignerComponent::processAssignmentResults(Component* send
 void SceneIndexToMidiAssignerComponent::setCurrentScenesToMidiAssignments(const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& currentAssignments)
 {
     m_currentScenesToMidiAssignments = currentAssignments;
+
+    if (m_currentMidiAssisLabel)
+        m_currentMidiAssisLabel->setText(String(m_currentScenesToMidiAssignments.size()) + " assignments");
 }
 
 void SceneIndexToMidiAssignerComponent::setSelectedDeviceIdentifier(const String& deviceIdentifier)

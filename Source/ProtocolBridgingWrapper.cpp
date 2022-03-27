@@ -1504,23 +1504,33 @@ std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> ProtocolBridgingWrap
 {
 	auto scenesToMidiAssiMap = std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>();
 
-	//auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
-	//if (nodeXmlElement)
-	//{
-	//	auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
-	//	if (protocolXmlElement)
-	//	{
-	//		auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
-	//		if (assiMapXmlElement)
-	//		{
-	//			auto assiMapHexStringTextXmlElement = assiMapXmlElement->getFirstChildElement();
-	//			if (assiMapHexStringTextXmlElement && assiMapHexStringTextXmlElement->isTextElement())
-	//			{
-	//				midiAssiMap.deserializeFromHexString(assiMapHexStringTextXmlElement->getText());
-	//			}
-	//		}
-	//	}
-	//}
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+			if (assiMapXmlElement)
+			{
+				for (auto assiMapSubXmlElement : assiMapXmlElement->getChildIterator())
+				{
+					if (assiMapSubXmlElement && assiMapSubXmlElement->getTagName().startsWith("ScnIdx_"))
+					{
+						auto scnIdx = assiMapSubXmlElement->getTagName().replaceFirstOccurrenceOf("ScnIdx_", "").replaceCharacter('-', '.');
+						auto assiMapSubHexStringTextXmlElement = assiMapSubXmlElement->getFirstChildElement();
+						if (assiMapSubHexStringTextXmlElement && assiMapSubHexStringTextXmlElement->isTextElement())
+						{
+							auto midiAssiMap = JUCEAppBasics::MidiCommandRangeAssignment();
+							midiAssiMap.deserializeFromHexString(assiMapSubHexStringTextXmlElement->getText());
+
+							scenesToMidiAssiMap.insert(std::make_pair(scnIdx, midiAssiMap));
+						}
+					}
+				}
+			}
+		}
+	}
 
 	return scenesToMidiAssiMap;
 }

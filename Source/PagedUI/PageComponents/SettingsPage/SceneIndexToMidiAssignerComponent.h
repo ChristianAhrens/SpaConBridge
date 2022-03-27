@@ -93,7 +93,8 @@ private:
         std::function<void(Component*, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>&)> onAssigningFinished;
 
     private:
-        bool isAvailableUiAreaExceeded();
+        bool IsAvailableUiAreaExceeded();
+        String GetNextSceneIndex();
 
         std::vector<std::unique_ptr<AssignmentEditComponent>>   m_editComponents;
         std::unique_ptr<TextButton>                             m_addButton;

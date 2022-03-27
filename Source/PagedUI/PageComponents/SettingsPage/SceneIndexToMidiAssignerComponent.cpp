@@ -212,7 +212,7 @@ SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::AssignmentsListi
         m_editComponents.push_back(std::make_unique<AssignmentEditComponent>(refId++, m_deviceIdentifier, assignment.first, assignment.second));
         addAndMakeVisible(m_editComponents.back().get());
 
-        if (isAvailableUiAreaExceeded())
+        if (IsAvailableUiAreaExceeded())
         {
             m_addButton->setEnabled(false);
             break;
@@ -282,18 +282,17 @@ void SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::resized()
     fb.performLayout(bounds.reduced(4));
 
     if (m_addButton)
-        m_addButton->setEnabled(!isAvailableUiAreaExceeded());
+        m_addButton->setEnabled(!IsAvailableUiAreaExceeded());
 }
 
 void SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::buttonClicked(Button* button)
 {
     if (m_addButton && m_addButton.get() == button)
     {
-        m_editComponents.push_back(std::make_unique<AssignmentEditComponent>(static_cast<int16_t>(m_editComponents.size()), m_deviceIdentifier, "1.00", JUCEAppBasics::MidiCommandRangeAssignment()));
+        m_editComponents.push_back(std::make_unique<AssignmentEditComponent>(static_cast<int16_t>(m_editComponents.size()), m_deviceIdentifier, GetNextSceneIndex(), JUCEAppBasics::MidiCommandRangeAssignment()));
         addAndMakeVisible(m_editComponents.back().get());
 
-        if (isAvailableUiAreaExceeded())
-            m_addButton->setEnabled(false);
+        m_addButton->setEnabled(!IsAvailableUiAreaExceeded());
 
         resized();
     }
@@ -304,9 +303,14 @@ void SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::buttonClick
     }
 }
 
-bool SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::isAvailableUiAreaExceeded()
+bool SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::IsAvailableUiAreaExceeded()
 {
     auto bounds = getLocalBounds().reduced(55, 25).toFloat();
+
+    // don't mess up when ui simply is not yet initialized
+    if (bounds.getWidth() == 0 && bounds.getHeight() == 0)
+        return false;
+
     auto w = bounds.getWidth();
     auto h = bounds.getHeight();
 
@@ -323,6 +327,21 @@ bool SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::isAvailable
     }
 
     return true;
+}
+
+String SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::GetNextSceneIndex()
+{
+    auto maxIdx = 0.0f;
+    for (auto const& edit : m_editComponents)
+    {
+        auto idx = edit->GetSceneIndex().getFloatValue();
+        if (idx > maxIdx)
+            maxIdx = idx;
+    }
+    
+    auto newMajorIdx = maxIdx + 1;
+
+    return String(newMajorIdx) + ".00";
 }
 
 

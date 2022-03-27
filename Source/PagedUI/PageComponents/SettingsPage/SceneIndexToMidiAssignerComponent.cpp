@@ -68,7 +68,10 @@ void SceneIndexToMidiAssignerComponent::buttonClicked(Button* button)
 void SceneIndexToMidiAssignerComponent::triggerEditAssignments()
 {
     m_assignmentsEditionOverlay = std::make_unique<AssignmentsListingComponent>(m_deviceIdentifier, m_currentScenesToMidiAssignments);
-    m_assignmentsEditionOverlay->onAssigningFinished = [&](void) { finishEditAssignments(); };
+    m_assignmentsEditionOverlay->onAssigningFinished = [&](Component* sender, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& midiAssignments) {
+        processAssignmentResults(sender, midiAssignments);
+        finishEditAssignments();
+    };
 
     auto pageMgr = SpaConBridge::PageComponentManager::GetInstance();
     if (pageMgr)
@@ -104,8 +107,19 @@ void SceneIndexToMidiAssignerComponent::processAssignmentResult(Component* sende
 
     if (m_currentMidiAssisLabel)
         m_currentMidiAssisLabel->setText(String(m_currentScenesToMidiAssignments.size()) + " assignments");
+}
 
-    finishEditAssignments();
+void SceneIndexToMidiAssignerComponent::processAssignmentResults(Component* sender, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& midiAssignments)
+{
+    ignoreUnused(sender);
+
+    m_currentScenesToMidiAssignments = midiAssignments;
+
+    if (onAssignmentsSet)
+        onAssignmentsSet(this, m_currentScenesToMidiAssignments);
+
+    if (m_currentMidiAssisLabel)
+        m_currentMidiAssisLabel->setText(String(m_currentScenesToMidiAssignments.size()) + " assignments");
 }
 
 void SceneIndexToMidiAssignerComponent::setCurrentScenesToMidiAssignments(const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& currentAssignments)
@@ -133,9 +147,11 @@ SceneIndexToMidiAssignerComponent::AssignmentEditComponent::AssignmentEditCompon
 {
     m_sceneIndex = sceneIndex;
 
+    m_sceneIndexEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(6, "1234567890."); // 6 digits: "99.999"
+
     m_sceneIndexEdit = std::make_unique<TextEditor>("SceneIndexEditor");
     m_sceneIndexEdit->setText(sceneIndex);
-    //m_sceneIndexEdit->setInputFilter()
+    m_sceneIndexEdit->setInputFilter(m_sceneIndexEditFilter.get(), false);
     addAndMakeVisible(m_sceneIndexEdit.get());
 
     m_learnerComponent = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(refId, JUCEAppBasics::MidiLearnerComponent::AT_Trigger);
@@ -194,10 +210,9 @@ SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::AssignmentsListi
     for (auto const& assignment : initialAssignments)
     {
         m_editComponents.push_back(std::make_unique<AssignmentEditComponent>(refId++, m_deviceIdentifier, assignment.first, assignment.second));
-        //m_editComponents.back()->onAssignmentSet
         addAndMakeVisible(m_editComponents.back().get());
 
-        if (m_editComponents.size() >= 72)
+        if (isAvailableUiAreaExceeded())
         {
             m_addButton->setEnabled(false);
             break;
@@ -252,24 +267,32 @@ void SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::resized()
     for (auto const& editComponent : m_editComponents)
         editsBox.items.add(juce::FlexItem(*editComponent).withHeight(25.0f).withWidth(205.0f).withMargin(2));
 
+    juce::FlexBox controlsBox;
+    controlsBox.flexWrap = juce::FlexBox::Wrap::wrap;
+    controlsBox.flexDirection = juce::FlexBox::Direction::row;
+    controlsBox.justifyContent = juce::FlexBox::JustifyContent::flexEnd;
+    controlsBox.items.add(juce::FlexItem(*m_addButton).withHeight(25.0f).withWidth(205.0f).withMargin(2));
+    controlsBox.items.add(juce::FlexItem(*m_closeButton).withHeight(25.0f).withWidth(205.0f).withMargin(2));
+
     juce::FlexBox fb;
     fb.flexDirection = juce::FlexBox::Direction::column;
     fb.items.add(juce::FlexItem(editsBox).withFlex(2.5));
     fb.items.add(juce::FlexItem().withHeight(2));
-    fb.items.add(juce::FlexItem(*m_addButton).withHeight(25.0f).withWidth(205.0f).withMargin(2));
-    fb.items.add(juce::FlexItem(*m_closeButton).withHeight(25.0f).withWidth(205.0f).withMargin(2));
+    fb.items.add(juce::FlexItem(controlsBox).withHeight(27.0f));
     fb.performLayout(bounds.reduced(4));
+
+    if (m_addButton)
+        m_addButton->setEnabled(!isAvailableUiAreaExceeded());
 }
 
 void SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::buttonClicked(Button* button)
 {
-    if (m_addButton.get() == button)
+    if (m_addButton && m_addButton.get() == button)
     {
         m_editComponents.push_back(std::make_unique<AssignmentEditComponent>(static_cast<int16_t>(m_editComponents.size()), m_deviceIdentifier, "1.00", JUCEAppBasics::MidiCommandRangeAssignment()));
-        //m_editComponents.back()->onAssignmentSet
         addAndMakeVisible(m_editComponents.back().get());
 
-        if (m_editComponents.size() >= 72)
+        if (isAvailableUiAreaExceeded())
             m_addButton->setEnabled(false);
 
         resized();
@@ -277,8 +300,30 @@ void SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::buttonClick
     else if (m_closeButton.get() == button)
     {
         if (onAssigningFinished)
-            onAssigningFinished();
+            onAssigningFinished(this, GetCurrentAssignments());
     }
 }
+
+bool SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::isAvailableUiAreaExceeded()
+{
+    auto bounds = getLocalBounds().reduced(55, 25).toFloat();
+    auto w = bounds.getWidth();
+    auto h = bounds.getHeight();
+
+    // substract controls height
+    h -= 33.0f;
+    if (h > 0)
+    {
+        auto totalElmsHeight = static_cast<float>(33 * (m_editComponents.size() + 1)); // one additional edit, to achieve the 'forecast' behaviour of the method
+        auto colCount = static_cast<int>((totalElmsHeight / h) + 0.5f);
+
+        auto requiredWidth = colCount * 210;
+
+        return requiredWidth >= w;
+    }
+
+    return true;
+}
+
 
 }

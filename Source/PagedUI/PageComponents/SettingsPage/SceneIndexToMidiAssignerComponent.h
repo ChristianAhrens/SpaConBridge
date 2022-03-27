@@ -69,8 +69,9 @@ private:
     private:
         String m_sceneIndex;
 
-        std::unique_ptr<TextEditor>                             m_sceneIndexEdit;
-        std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>    m_learnerComponent;
+        std::unique_ptr<TextEditor>                                 m_sceneIndexEdit;
+        std::unique_ptr<TextEditor::LengthAndCharacterRestriction>  m_sceneIndexEditFilter;
+        std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>        m_learnerComponent;
     };
 
     class AssignmentsListingComponent : public Component, public Button::Listener
@@ -89,9 +90,11 @@ private:
         void buttonClicked(Button*) override;
 
         //==============================================================================
-        std::function<void()> onAssigningFinished;
+        std::function<void(Component*, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>&)> onAssigningFinished;
 
     private:
+        bool isAvailableUiAreaExceeded();
+
         std::vector<std::unique_ptr<AssignmentEditComponent>>   m_editComponents;
         std::unique_ptr<TextButton>                             m_addButton;
         std::unique_ptr<TextButton>                             m_closeButton;
@@ -103,6 +106,7 @@ private:
     void triggerEditAssignments();
     void finishEditAssignments();
     void processAssignmentResult(Component* sender, const String& sceneIndex, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssignment);
+    void processAssignmentResults(Component* sender, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& midiAssignments);
 
     std::unique_ptr<TextEditor>                                 m_currentMidiAssisLabel;
     std::unique_ptr<TextButton>                                 m_editAssignmentsButton;

@@ -3474,6 +3474,48 @@ bool Controller::SetBridgingMidiAssignmentMapping(ProtocolBridgingType bridgingT
 	}
 }
 
+std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> Controller::GetBridgingScenesToMidiAssignmentMapping(ProtocolBridgingType bridgingType, RemoteObjectIdentifier remoteObjectId)
+{
+	switch (bridgingType)
+	{
+	case PBT_GenericMIDI:
+		return m_protocolBridge.GetGenericMIDIScenesAssignmentMapping(remoteObjectId);
+	case PBT_BlacktraxRTTrPM:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_YamahaOSC:
+	case PBT_ADMOSC:
+	case PBT_HUI:
+	case PBT_DS100:
+	case PBT_DAWPlugin:
+	default:
+		jassertfalse;
+		return std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>();
+	}
+}
+
+bool Controller::SetBridgingScenesToMidiAssignmentMapping(ProtocolBridgingType bridgingType, RemoteObjectIdentifier remoteObjectId, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& scenesToMidiAssignmentMapping, bool dontSendNotification)
+{
+	switch (bridgingType)
+	{
+	case PBT_GenericMIDI:
+		return m_protocolBridge.SetGenericMIDIScenesAssignmentMapping(remoteObjectId, scenesToMidiAssignmentMapping, dontSendNotification);
+	case PBT_BlacktraxRTTrPM:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_YamahaOSC:
+	case PBT_ADMOSC:
+	case PBT_HUI:
+	case PBT_DS100:
+	case PBT_DAWPlugin:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
 int Controller::GetBridgingXAxisInverted(ProtocolBridgingType bridgingType)
 {
 	switch (bridgingType)

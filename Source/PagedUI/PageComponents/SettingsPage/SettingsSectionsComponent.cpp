@@ -540,11 +540,6 @@ void SettingsSectionsComponent::createGenericMIDISettingsSection()
 	m_GenericMIDIRecallSceneAssigner = std::make_unique<SceneIndexToMidiAssignerComponent>(
 		static_cast<std::int16_t>(ROI_Scene_Recall));
 	m_GenericMIDIRecallSceneAssigner->onAssignmentsSet = [=](Component* sender, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& scenesToMidiAssi) { handleScenesToMidiAssiSet(sender, scenesToMidiAssi); };
-	m_GenericMIDIRecallSceneAssigner->setCurrentScenesToMidiAssignments(std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>{
-		std::make_pair("1.00", JUCEAppBasics::MidiCommandRangeAssignment()), 
-		std::make_pair("2.00", JUCEAppBasics::MidiCommandRangeAssignment()),
-		std::make_pair("3.00", JUCEAppBasics::MidiCommandRangeAssignment()),
-		std::make_pair("4.00", JUCEAppBasics::MidiCommandRangeAssignment())});
 	m_GenericMIDIRecallSceneLabel = std::make_unique<Label>("GenericMIDIRecallSceneAssigner", "Recall Scene");
 	m_GenericMIDIRecallSceneLabel->setJustificationType(Justification::centredLeft);
 	m_GenericMIDIRecallSceneLabel->attachToComponent(m_GenericMIDIRecallSceneAssigner.get(), true);
@@ -1461,7 +1456,7 @@ void SettingsSectionsComponent::processUpdatedGenericMIDIConfig()
 	if (m_GenericMIDIRecallSceneAssigner)
 	{
 		m_GenericMIDIRecallSceneAssigner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
-		//m_GenericMIDIRecallSceneAssigner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIRecallSceneAssigner->getReferredId())));
+		m_GenericMIDIRecallSceneAssigner->setCurrentScenesToMidiAssignments(ctrl->GetBridgingScenesToMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIRecallSceneAssigner->getReferredId())));
 	}
 }
 
@@ -1595,13 +1590,11 @@ void SettingsSectionsComponent::handleMidiAssiSet(Component* sender, const JUCEA
  */
 void SettingsSectionsComponent::handleScenesToMidiAssiSet(Component* sender, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& scenesToMidiAssi)
 {
-	if (sender == m_GenericMIDIRecallSceneAssigner.get())
+	if (m_GenericMIDIRecallSceneAssigner && sender == m_GenericMIDIRecallSceneAssigner.get())
 	{
-		DBG(String(__FUNCTION__) + " assignments:");
-		for (auto const& assi : scenesToMidiAssi)
-		{
-			DBG(assi.first + " : " + assi.second.serializeToHexString());
-		}
+		auto ctrl = Controller::GetInstance();
+		if (ctrl)
+			ctrl->SetBridgingScenesToMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIRecallSceneAssigner->getReferredId()), scenesToMidiAssi);
 	}
 }
 

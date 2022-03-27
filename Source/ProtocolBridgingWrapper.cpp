@@ -1535,41 +1535,51 @@ std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> ProtocolBridgingWrap
  */
 bool ProtocolBridgingWrapper::SetMidiScenesAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& assignmentMapping, bool dontSendNotification)
 {
-	DBG(String(__FUNCTION__) + " assignments:");
-	for (auto const& assi : assignmentMapping)
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
 	{
-		DBG(assi.first + " : " + assi.second.serializeToHexString());
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+			if (assiMapXmlElement)
+			{
+				for (auto const& assi : assignmentMapping)
+				{
+					auto assiMapHexString = assi.second.serializeToHexString();
+					auto assiMapSubXmlElement = protocolXmlElement->getChildByName("ScnIdx_" + assi.first.replaceCharacter('.', '-'));
+					if(assiMapSubXmlElement)
+					{
+						auto assiMapSubHexStringTextXmlElement = assiMapSubXmlElement->getFirstChildElement();
+						if (assiMapSubHexStringTextXmlElement && assiMapSubHexStringTextXmlElement->isTextElement())
+							assiMapSubHexStringTextXmlElement->setText(assiMapHexString);
+						else
+							assiMapSubXmlElement->addTextElement(assiMapHexString);
+					}
+					else
+					{
+						auto assiMapSubXmlElement = assiMapXmlElement->createNewChildElement("ScnIdx_" + assi.first.replaceCharacter('.', '-'));
+						assiMapSubXmlElement->addTextElement(assiMapHexString);
+					}
+				}
+			}
+			else
+			{
+				assiMapXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+				for (auto const& assi : assignmentMapping)
+				{
+					auto assiMapSubXmlElement = assiMapXmlElement->createNewChildElement("ScnIdx_" + assi.first.replaceCharacter('.', '-'));
+					auto assiMapHexString = assi.second.serializeToHexString();
+					assiMapSubXmlElement->addTextElement(assiMapHexString);
+				}
+			}
+		}
+		else
+			return false;
+	
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
 	}
-
-	//auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
-	//if (nodeXmlElement)
-	//{
-	//	auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
-	//	if (protocolXmlElement)
-	//	{
-	//		auto assiMapHexString = assignmentMapping.serializeToHexString();
-	//
-	//		auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
-	//		if (assiMapXmlElement)
-	//		{
-	//			auto assiMapHexStringTextXmlElement = assiMapXmlElement->getFirstChildElement();
-	//			if (assiMapHexStringTextXmlElement && assiMapHexStringTextXmlElement->isTextElement())
-	//				assiMapHexStringTextXmlElement->setText(assiMapHexString);
-	//			else
-	//				assiMapXmlElement->addTextElement(assiMapHexString);
-	//		}
-	//		else
-	//		{
-	//			assiMapXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
-	//			assiMapXmlElement->addTextElement(assiMapHexString);
-	//		}
-	//	}
-	//	else
-	//		return false;
-	//
-	//	return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
-	//}
-	//else
+	else
 		return false;
 }
 

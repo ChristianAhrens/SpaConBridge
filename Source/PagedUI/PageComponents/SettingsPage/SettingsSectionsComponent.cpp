@@ -540,6 +540,11 @@ void SettingsSectionsComponent::createGenericMIDISettingsSection()
 	m_GenericMIDIRecallSceneAssigner = std::make_unique<SceneIndexToMidiAssignerComponent>(
 		static_cast<std::int16_t>(ROI_Scene_Recall));
 	m_GenericMIDIRecallSceneAssigner->onAssignmentsSet = [=](Component* sender, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& scenesToMidiAssi) { handleScenesToMidiAssiSet(sender, scenesToMidiAssi); };
+	m_GenericMIDIRecallSceneAssigner->setCurrentScenesToMidiAssignments(std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>{
+		std::make_pair("1.00", JUCEAppBasics::MidiCommandRangeAssignment()), 
+		std::make_pair("2.00", JUCEAppBasics::MidiCommandRangeAssignment()),
+		std::make_pair("3.00", JUCEAppBasics::MidiCommandRangeAssignment()),
+		std::make_pair("4.00", JUCEAppBasics::MidiCommandRangeAssignment())});
 	m_GenericMIDIRecallSceneLabel = std::make_unique<Label>("GenericMIDIRecallSceneAssigner", "Recall Scene");
 	m_GenericMIDIRecallSceneLabel->setJustificationType(Justification::centredLeft);
 	m_GenericMIDIRecallSceneLabel->attachToComponent(m_GenericMIDIRecallSceneAssigner.get(), true);

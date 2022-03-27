@@ -19,6 +19,8 @@
 #include "SceneIndexToMidiAssignerComponent.h"
 
 #include "Image_utils.h"
+#include "../../PageContainerComponent.h"
+#include "../../PageComponentManager.h"
 
 namespace SpaConBridge
 {
@@ -39,8 +41,6 @@ SceneIndexToMidiAssignerComponent::SceneIndexToMidiAssignerComponent(std::int16_
 	addAndMakeVisible(m_editAssignmentsButton.get());
     lookAndFeelChanged();
 
-    m_addItemComponent = std::make_unique<AddItemCustomComponent>();
-    m_addItemComponent->onAddItemClicked = [=](Component* sender) { ignoreUnused(sender); addAssignmentComponent(); };
 }
 
 SceneIndexToMidiAssignerComponent::~SceneIndexToMidiAssignerComponent()
@@ -65,108 +65,57 @@ void SceneIndexToMidiAssignerComponent::buttonClicked(Button* button)
 	}
 }
 
-void SceneIndexToMidiAssignerComponent::addAssignmentComponent()
-{
-    m_assignmentComponents.push_back(std::make_unique<LearnerPopupCustomComponent>(m_referredId, "1.00", m_deviceIdentifier, JUCEAppBasics::MidiCommandRangeAssignment()));
-    m_assignmentComponents.back()->onAssignmentSet = [this](Component* sender, const String& sceneIndex, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssignment) {
-        ignoreUnused(sender);
-        ignoreUnused(sceneIndex);
-        ignoreUnused(midiAssignment);
-
-        std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> scenesToMidiAssi;
-        for (auto const& assignmentComponent : m_assignmentComponents)
-            scenesToMidiAssi.insert(std::make_pair(assignmentComponent->GetSceneIndex(), assignmentComponent->GetCurrentAssignment()));
-
-        if (onAssignmentsSet)
-            onAssignmentsSet(this, scenesToMidiAssi);
-
-        if (m_currentMidiAssisLabel)
-            m_currentMidiAssisLabel->setText(String(scenesToMidiAssi.size()) + " assignments");
-    };
-    
-    m_popup.dismissAllActiveMenus();
-   
-    updatePopupMenu();
-}
-
-void SceneIndexToMidiAssignerComponent::updatePopupMenu()
-{
-    m_popup.clear();
-
-    if (m_assignmentComponents.empty())
-        m_popup.addItem(1, "No assignments present", false);
-    else
-    {
-        auto resultId = 1;
-        for (auto const& assignmentComponent : m_assignmentComponents)
-        {
-            PopupMenu::Item newItem;
-            newItem.setID(resultId);
-            newItem.setCustomComponent(assignmentComponent.get());
-            m_popup.addItem(newItem);
-            resultId++;
-        }
-    }
-
-    m_popup.addSeparator();
-
-    PopupMenu::Item newItem;
-    newItem.setID(-1);
-    newItem.setCustomComponent(m_addItemComponent.get());
-    m_popup.addItem(newItem);
-
-    m_popup.showMenuAsync(PopupMenu::Options(), [this](int resultingAssiIdx) { 
-        handlePopupResult(resultingAssiIdx); });
-}
-
 void SceneIndexToMidiAssignerComponent::triggerEditAssignments()
 {
-    updatePopupMenu();
+    m_assignmentsEditionOverlay = std::make_unique<AssignmentsListingComponent>(m_deviceIdentifier, m_currentScenesToMidiAssignments);
+    m_assignmentsEditionOverlay->onAssigningFinished = [&](void) { finishEditAssignments(); };
+
+    auto pageMgr = SpaConBridge::PageComponentManager::GetInstance();
+    if (pageMgr)
+    {
+        auto pageContainer = pageMgr->GetPageContainer();
+        if (pageContainer)
+            pageContainer->SetOverlayComponent(m_assignmentsEditionOverlay.get());
+    }
 }
 
-void SceneIndexToMidiAssignerComponent::handlePopupResult(int resultingAssiIdx)
+void SceneIndexToMidiAssignerComponent::finishEditAssignments()
 {
-    std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> scenesToMidiAssi;
-    for (auto const& assignmentComponent : m_assignmentComponents)
+
+    auto pageMgr = SpaConBridge::PageComponentManager::GetInstance();
+    if (pageMgr)
     {
-        scenesToMidiAssi.insert(std::make_pair(assignmentComponent->GetSceneIndex(), assignmentComponent->GetCurrentAssignment()));
+        auto pageContainer = pageMgr->GetPageContainer();
+        if (pageContainer)
+            pageContainer->ClearOverlayComponent();
     }
 
+    m_assignmentsEditionOverlay.reset();
+}
+
+void SceneIndexToMidiAssignerComponent::processAssignmentResult(Component* sender, const String& sceneIndex, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssignment)
+{
+    ignoreUnused(sender);
+
+    m_currentScenesToMidiAssignments[sceneIndex] = midiAssignment;
+
     if (onAssignmentsSet)
-        onAssignmentsSet(this, scenesToMidiAssi);
+        onAssignmentsSet(this, m_currentScenesToMidiAssignments);
 
-                                DBG(String(__FUNCTION__) + " resultingAssiIdx:" + String(resultingAssiIdx));
-                                return;
+    if (m_currentMidiAssisLabel)
+        m_currentMidiAssisLabel->setText(String(m_currentScenesToMidiAssignments.size()) + " assignments");
 
-    m_assignmentComponents.clear();
+    finishEditAssignments();
+}
 
-    m_popup.clear();
+void SceneIndexToMidiAssignerComponent::setCurrentScenesToMidiAssignments(const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& currentAssignments)
+{
+    m_currentScenesToMidiAssignments = currentAssignments;
 }
 
 void SceneIndexToMidiAssignerComponent::setSelectedDeviceIdentifier(const String& deviceIdentifier)
 {
-    // a new deviceIdx cancels all ongoing action
-    m_popup.dismissAllActiveMenus();
-
-    // sanity check of incoming deviceIdx
-    auto midiDevicesInfos = juce::MidiInput::getAvailableDevices();
-    bool newMidiDeviceFound = false;
-    for (auto const& midiDeviceInfo : midiDevicesInfos)
-    {
-        if (midiDeviceInfo.identifier == deviceIdentifier)
-        {
-            newMidiDeviceFound = true;
-            m_deviceIdentifier = midiDeviceInfo.identifier;
-            m_deviceName = midiDeviceInfo.name;
-            break;
-        }
-    }
-
-    if (!newMidiDeviceFound)
-    {
-        m_deviceIdentifier.clear();
-        m_deviceName.clear();
-    }
+    m_deviceIdentifier = deviceIdentifier;
 }
 
 void SceneIndexToMidiAssignerComponent::setReferredId(std::int16_t refId)
@@ -177,6 +126,159 @@ void SceneIndexToMidiAssignerComponent::setReferredId(std::int16_t refId)
 std::int16_t SceneIndexToMidiAssignerComponent::getReferredId() const
 {
     return m_referredId;
+}
+
+SceneIndexToMidiAssignerComponent::AssignmentEditComponent::AssignmentEditComponent(std::int16_t refId, const String& deviceIdentifier, const String& sceneIndex, const JUCEAppBasics::MidiCommandRangeAssignment& currentAssi)
+    : Component("AssignmentEditComponent")
+{
+    m_sceneIndex = sceneIndex;
+
+    m_sceneIndexEdit = std::make_unique<TextEditor>("SceneIndexEditor");
+    m_sceneIndexEdit->setText(sceneIndex);
+    //m_sceneIndexEdit->setInputFilter()
+    addAndMakeVisible(m_sceneIndexEdit.get());
+
+    m_learnerComponent = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(refId, JUCEAppBasics::MidiLearnerComponent::AT_Trigger);
+    m_learnerComponent->setSelectedDeviceIdentifier(deviceIdentifier);
+    m_learnerComponent->setCurrentMidiAssi(currentAssi);
+    addAndMakeVisible(m_learnerComponent.get());
+    m_learnerComponent->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+
+}
+SceneIndexToMidiAssignerComponent::AssignmentEditComponent::~AssignmentEditComponent()
+{
+
+}
+
+const String SceneIndexToMidiAssignerComponent::AssignmentEditComponent::GetSceneIndex()
+{
+    return m_sceneIndexEdit->getText();
+}
+
+const JUCEAppBasics::MidiCommandRangeAssignment& SceneIndexToMidiAssignerComponent::AssignmentEditComponent::GetCurrentAssignment()
+{
+    return m_learnerComponent->getCurrentMidiAssi();
+}
+
+void SceneIndexToMidiAssignerComponent::AssignmentEditComponent::resized()
+{
+    auto bounds = getLocalBounds();
+
+    m_learnerComponent->setBounds(bounds.removeFromRight(static_cast<int>(0.7f * bounds.getWidth()) - 2));
+    bounds.removeFromRight(4);
+    m_sceneIndexEdit->setBounds(bounds);
+}
+
+void SceneIndexToMidiAssignerComponent::AssignmentEditComponent::handleMidiAssiSet(Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi)
+{
+    auto learnerComponent = dynamic_cast<JUCEAppBasics::MidiLearnerComponent*>(sender);
+    if (learnerComponent && onAssignmentSet)
+    {
+        onAssignmentSet(this, m_sceneIndex, midiAssi);
+    }
+}
+
+SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::AssignmentsListingComponent(const String& deviceIdentifier, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& initialAssignments) 
+{
+    m_deviceIdentifier = deviceIdentifier;
+
+    m_addButton = std::make_unique<TextButton>("Add assignment");
+    m_addButton->addListener(this);
+    addAndMakeVisible(m_addButton.get());
+
+    m_closeButton = std::make_unique<TextButton>("Close");
+    m_closeButton->addListener(this);
+    addAndMakeVisible(m_closeButton.get());
+
+    auto refId = std::int16_t(1);
+    for (auto const& assignment : initialAssignments)
+    {
+        m_editComponents.push_back(std::make_unique<AssignmentEditComponent>(refId++, m_deviceIdentifier, assignment.first, assignment.second));
+        //m_editComponents.back()->onAssignmentSet
+        addAndMakeVisible(m_editComponents.back().get());
+
+        if (m_editComponents.size() >= 72)
+        {
+            m_addButton->setEnabled(false);
+            break;
+        }
+    }
+}
+
+SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::~AssignmentsListingComponent() 
+{
+}
+
+std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::GetCurrentAssignments() 
+{
+    std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> currentAssignments;
+    for (auto const& editComponent : m_editComponents)
+    {
+        currentAssignments.insert(std::make_pair(editComponent->GetSceneIndex(), editComponent->GetCurrentAssignment()));
+    }
+
+    return currentAssignments;
+}
+
+void SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::paint(Graphics& g) 
+{
+    // Transparent background overlay
+    g.setColour(Colours::black);
+    g.setOpacity(0.5f);
+    g.fillRect(getLocalBounds());
+    g.setOpacity(1.0f);
+
+    auto bounds = getLocalBounds().reduced(55, 25);
+
+    g.setColour(getLookAndFeel().findColour(AlertWindow::outlineColourId));
+    g.drawRect(bounds.toFloat(), 1.0f);
+
+    bounds.reduce(1, 1);
+    g.reduceClipRegion(bounds);
+
+    // Background
+    g.setColour(getLookAndFeel().findColour(AlertWindow::backgroundColourId));
+    g.fillRect(bounds.toFloat());
+}
+
+void SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::resized() 
+{
+    auto bounds = getLocalBounds().reduced(55, 25);
+
+    juce::FlexBox editsBox;
+    editsBox.flexWrap = juce::FlexBox::Wrap::wrap;
+    editsBox.flexDirection = juce::FlexBox::Direction::column;
+    editsBox.justifyContent = juce::FlexBox::JustifyContent::flexStart;
+    for (auto const& editComponent : m_editComponents)
+        editsBox.items.add(juce::FlexItem(*editComponent).withHeight(25.0f).withWidth(205.0f).withMargin(2));
+
+    juce::FlexBox fb;
+    fb.flexDirection = juce::FlexBox::Direction::column;
+    fb.items.add(juce::FlexItem(editsBox).withFlex(2.5));
+    fb.items.add(juce::FlexItem().withHeight(2));
+    fb.items.add(juce::FlexItem(*m_addButton).withHeight(25.0f).withWidth(205.0f).withMargin(2));
+    fb.items.add(juce::FlexItem(*m_closeButton).withHeight(25.0f).withWidth(205.0f).withMargin(2));
+    fb.performLayout(bounds.reduced(4));
+}
+
+void SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::buttonClicked(Button* button)
+{
+    if (m_addButton.get() == button)
+    {
+        m_editComponents.push_back(std::make_unique<AssignmentEditComponent>(static_cast<int16_t>(m_editComponents.size()), m_deviceIdentifier, "1.00", JUCEAppBasics::MidiCommandRangeAssignment()));
+        //m_editComponents.back()->onAssignmentSet
+        addAndMakeVisible(m_editComponents.back().get());
+
+        if (m_editComponents.size() >= 72)
+            m_addButton->setEnabled(false);
+
+        resized();
+    }
+    else if (m_closeButton.get() == button)
+    {
+        if (onAssigningFinished)
+            onAssigningFinished();
+    }
 }
 
 }

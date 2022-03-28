@@ -1513,18 +1513,21 @@ std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> ProtocolBridgingWrap
 			auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
 			if (assiMapXmlElement)
 			{
-				for (auto assiMapSubXmlElement : assiMapXmlElement->getChildIterator())
+				if (assiMapXmlElement->getIntAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MULTIVALUE)) == 1)
 				{
-					if (assiMapSubXmlElement && assiMapSubXmlElement->getTagName().startsWith("ScnIdx_"))
+					for (auto assiMapSubXmlElement : assiMapXmlElement->getChildIterator())
 					{
-						auto scnIdx = assiMapSubXmlElement->getTagName().replaceFirstOccurrenceOf("ScnIdx_", "").replaceCharacter('-', '.');
-						auto assiMapSubHexStringTextXmlElement = assiMapSubXmlElement->getFirstChildElement();
-						if (assiMapSubHexStringTextXmlElement && assiMapSubHexStringTextXmlElement->isTextElement())
+						if (assiMapSubXmlElement && assiMapSubXmlElement->getTagName().startsWith("ScnIdx_"))
 						{
-							auto midiAssiMap = JUCEAppBasics::MidiCommandRangeAssignment();
-							midiAssiMap.deserializeFromHexString(assiMapSubHexStringTextXmlElement->getText());
+							auto scnIdx = assiMapSubXmlElement->getTagName().replaceFirstOccurrenceOf("ScnIdx_", "").replaceCharacter('-', '.');
+							auto assiMapSubHexStringTextXmlElement = assiMapSubXmlElement->getFirstChildElement();
+							if (assiMapSubHexStringTextXmlElement && assiMapSubHexStringTextXmlElement->isTextElement())
+							{
+								auto midiAssiMap = JUCEAppBasics::MidiCommandRangeAssignment();
+								midiAssiMap.deserializeFromHexString(assiMapSubHexStringTextXmlElement->getText());
 
-							scenesToMidiAssiMap.insert(std::make_pair(scnIdx, midiAssiMap));
+								scenesToMidiAssiMap.insert(std::make_pair(scnIdx, midiAssiMap));
+							}
 						}
 					}
 				}
@@ -1554,11 +1557,13 @@ bool ProtocolBridgingWrapper::SetMidiScenesAssignmentMapping(ProtocolId protocol
 			auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
 			if (assiMapXmlElement)
 			{
+				assiMapXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MULTIVALUE), 1);
 				for (auto const& assi : assignmentMapping)
 				{
 					auto assiMapHexString = assi.second.serializeToHexString();
-					auto assiMapSubXmlElement = protocolXmlElement->getChildByName("ScnIdx_" + assi.first.replaceCharacter('.', '-'));
-					if(assiMapSubXmlElement)
+
+					auto assiMapSubXmlElement = assiMapXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::VALUE), assi.first);
+					if (assiMapSubXmlElement)
 					{
 						auto assiMapSubHexStringTextXmlElement = assiMapSubXmlElement->getFirstChildElement();
 						if (assiMapSubHexStringTextXmlElement && assiMapSubHexStringTextXmlElement->isTextElement())
@@ -1568,7 +1573,8 @@ bool ProtocolBridgingWrapper::SetMidiScenesAssignmentMapping(ProtocolId protocol
 					}
 					else
 					{
-						auto assiMapSubXmlElement = assiMapXmlElement->createNewChildElement("ScnIdx_" + assi.first.replaceCharacter('.', '-'));
+						assiMapSubXmlElement = assiMapXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::VALTOCMDASSI));
+						assiMapSubXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::VALUE), assi.first);
 						assiMapSubXmlElement->addTextElement(assiMapHexString);
 					}
 				}
@@ -1576,9 +1582,11 @@ bool ProtocolBridgingWrapper::SetMidiScenesAssignmentMapping(ProtocolId protocol
 			else
 			{
 				assiMapXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+				assiMapXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MULTIVALUE), 1);
 				for (auto const& assi : assignmentMapping)
 				{
-					auto assiMapSubXmlElement = assiMapXmlElement->createNewChildElement("ScnIdx_" + assi.first.replaceCharacter('.', '-'));
+					auto assiMapSubXmlElement = assiMapXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::VALTOCMDASSI));
+					assiMapSubXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::VALUE), assi.first);
 					auto assiMapHexString = assi.second.serializeToHexString();
 					assiMapSubXmlElement->addTextElement(assiMapHexString);
 				}

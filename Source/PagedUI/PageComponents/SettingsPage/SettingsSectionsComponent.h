@@ -133,6 +133,8 @@ private:
 	std::unique_ptr<ComboBox>									m_LookAndFeelSelect;
 	std::unique_ptr<Label>										m_LookAndFeelLabel;
 	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_StaticObjectsPollingButton;
+	std::unique_ptr<TextEditor>									m_SystemIpInfoEdit;
+	std::unique_ptr<Label>										m_SystemIpInfoLabel;
 
 	// DS100 settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_DS100Settings;

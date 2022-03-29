@@ -124,6 +124,15 @@ void SettingsSectionsComponent::createGeneralSettingsSection()
 	m_StaticObjectsPollingButton->addListener(this);
 	m_GeneralSettings->addComponent(m_StaticObjectsPollingButton.get(), true, false);
 
+	m_SystemIpInfoEdit = std::make_unique<TextEditor>();
+	m_SystemIpInfoEdit->setText(juce::IPAddress::getLocalAddress().toString());
+	m_SystemIpInfoLabel = std::make_unique<Label>("SystemIpInfoLabel", JUCEApplication::getInstance()->getApplicationName() + " IP");
+	m_SystemIpInfoLabel->setJustificationType(Justification::centred);
+	m_SystemIpInfoLabel->attachToComponent(m_SystemIpInfoEdit.get(), true);
+	m_GeneralSettings->addComponent(m_SystemIpInfoLabel.get(), false, false);
+	m_GeneralSettings->addComponent(m_SystemIpInfoEdit.get(), true, false);
+	m_SystemIpInfoEdit->setEnabled(false);
+
 	m_GeneralSettings->resized();
 
 	// trigger lookAndFeelChanged once to initially setup drawablebuttons

@@ -212,7 +212,7 @@ void PageContainerComponent::resized()
 		}
 	}
 
-	bottomBarFB.performLayout(getLocalBounds().removeFromBottom(45));
+	bottomBarFB.performLayout(getLocalBounds().removeFromBottom(40));
 
 	// Name and Version label
 	m_versionStringLabel->setBounds(w - 89, 3, 55, 25);

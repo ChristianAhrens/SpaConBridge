@@ -74,11 +74,37 @@ private:
         std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>        m_learnerComponent;
     };
 
-    class AssignmentsListingComponent : public Component, public Button::Listener
+    class AssignmentsListingComponent : public Component
     {
     public:
         AssignmentsListingComponent(const String& deviceIdentifier, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& initialAssignments);
         ~AssignmentsListingComponent();
+
+        std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> GetCurrentAssignments();
+        bool AddAssignment();
+        void ClearAssignments();
+
+        //==============================================================================
+        void resized() override;
+
+        //==============================================================================
+        std::function<void(Component*, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>&)> onAssigningFinished;
+
+    private:
+        bool IsAvailableUiAreaExceeded();
+        String GetNextSceneIndex();
+
+        std::vector<std::unique_ptr<AssignmentEditComponent>>   m_editComponents;
+        
+        String m_deviceIdentifier;
+
+    };
+
+    class AssignmentsViewingComponent : public Component, public Button::Listener
+    {
+    public:
+        AssignmentsViewingComponent(const String& deviceIdentifier, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& initialAssignments);
+        ~AssignmentsViewingComponent();
 
         std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> GetCurrentAssignments();
 
@@ -93,13 +119,14 @@ private:
         std::function<void(Component*, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>&)> onAssigningFinished;
 
     private:
-        bool IsAvailableUiAreaExceeded();
-        String GetNextSceneIndex();
+        std::unique_ptr<AssignmentsListingComponent>    m_contentComponent;
+        std::unique_ptr<Viewport>					    m_contentViewport;
+        std::unique_ptr<TextButton>                     m_addButton;
+        std::unique_ptr<TextButton>                     m_clearButton;
+        std::unique_ptr<TextButton>                     m_exportButton;
+        std::unique_ptr<TextButton>                     m_importButton;
+        std::unique_ptr<TextButton>                     m_closeButton;
 
-        std::vector<std::unique_ptr<AssignmentEditComponent>>   m_editComponents;
-        std::unique_ptr<TextButton>                             m_addButton;
-        std::unique_ptr<TextButton>                             m_closeButton;
-        
         String m_deviceIdentifier;
 
     };
@@ -112,7 +139,7 @@ private:
     std::unique_ptr<TextEditor>                                 m_currentMidiAssisLabel;
     std::unique_ptr<TextButton>                                 m_editAssignmentsButton;
 
-    std::unique_ptr<AssignmentsListingComponent>                m_assignmentsEditionOverlay;
+    std::unique_ptr<AssignmentsViewingComponent>                m_assignmentsEditionOverlay;
 
     String                                                      m_deviceIdentifier;
     String                                                      m_deviceName;

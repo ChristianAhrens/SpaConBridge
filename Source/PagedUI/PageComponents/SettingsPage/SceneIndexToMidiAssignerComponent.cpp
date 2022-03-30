@@ -67,7 +67,7 @@ void SceneIndexToMidiAssignerComponent::buttonClicked(Button* button)
 
 void SceneIndexToMidiAssignerComponent::triggerEditAssignments()
 {
-    m_assignmentsEditionOverlay = std::make_unique<AssignmentsListingComponent>(m_deviceIdentifier, m_currentScenesToMidiAssignments);
+    m_assignmentsEditionOverlay = std::make_unique<AssignmentsViewingComponent>(m_deviceIdentifier, m_currentScenesToMidiAssignments);
     m_assignmentsEditionOverlay->onAssigningFinished = [&](Component* sender, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& midiAssignments) {
         processAssignmentResults(sender, midiAssignments);
         finishEditAssignments();
@@ -164,6 +164,7 @@ SceneIndexToMidiAssignerComponent::AssignmentEditComponent::AssignmentEditCompon
     m_learnerComponent->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
 
 }
+
 SceneIndexToMidiAssignerComponent::AssignmentEditComponent::~AssignmentEditComponent()
 {
 
@@ -201,25 +202,11 @@ SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::AssignmentsListi
 {
     m_deviceIdentifier = deviceIdentifier;
 
-    m_addButton = std::make_unique<TextButton>("Add assignment");
-    m_addButton->addListener(this);
-    addAndMakeVisible(m_addButton.get());
-
-    m_closeButton = std::make_unique<TextButton>("Close");
-    m_closeButton->addListener(this);
-    addAndMakeVisible(m_closeButton.get());
-
     auto refId = std::int16_t(1);
     for (auto const& assignment : initialAssignments)
     {
         m_editComponents.push_back(std::make_unique<AssignmentEditComponent>(refId++, m_deviceIdentifier, assignment.first, assignment.second));
         addAndMakeVisible(m_editComponents.back().get());
-
-        if (IsAvailableUiAreaExceeded())
-        {
-            m_addButton->setEnabled(false);
-            break;
-        }
     }
 }
 
@@ -238,30 +225,25 @@ std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> SceneIndexToMidiAssi
     return currentAssignments;
 }
 
-void SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::paint(Graphics& g) 
+bool SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::AddAssignment()
 {
-    // Transparent background overlay
-    g.setColour(Colours::black);
-    g.setOpacity(0.5f);
-    g.fillRect(getLocalBounds());
-    g.setOpacity(1.0f);
+    m_editComponents.push_back(std::make_unique<AssignmentEditComponent>(static_cast<int16_t>(m_editComponents.size()), m_deviceIdentifier, GetNextSceneIndex(), JUCEAppBasics::MidiCommandRangeAssignment()));
+    addAndMakeVisible(m_editComponents.back().get());
 
-    auto bounds = getLocalBounds().reduced(55, 25);
+    resized();
 
-    g.setColour(getLookAndFeel().findColour(AlertWindow::outlineColourId));
-    g.drawRect(bounds.toFloat(), 1.0f);
+    return !IsAvailableUiAreaExceeded();
+}
 
-    bounds.reduce(1, 1);
-    g.reduceClipRegion(bounds);
-
-    // Background
-    g.setColour(getLookAndFeel().findColour(AlertWindow::backgroundColourId));
-    g.fillRect(bounds.toFloat());
+void SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::ClearAssignments()
+{
+    m_editComponents.clear();
+    resized();
 }
 
 void SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::resized() 
 {
-    auto bounds = getLocalBounds().reduced(55, 25);
+    auto bounds = getLocalBounds();
 
     juce::FlexBox editsBox;
     editsBox.flexWrap = juce::FlexBox::Wrap::wrap;
@@ -269,41 +251,7 @@ void SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::resized()
     editsBox.justifyContent = juce::FlexBox::JustifyContent::flexStart;
     for (auto const& editComponent : m_editComponents)
         editsBox.items.add(juce::FlexItem(*editComponent).withHeight(25.0f).withWidth(205.0f).withMargin(2));
-
-    juce::FlexBox controlsBox;
-    controlsBox.flexWrap = juce::FlexBox::Wrap::wrap;
-    controlsBox.flexDirection = juce::FlexBox::Direction::row;
-    controlsBox.justifyContent = juce::FlexBox::JustifyContent::flexEnd;
-    controlsBox.items.add(juce::FlexItem(*m_addButton).withHeight(25.0f).withWidth(205.0f).withMargin(2));
-    controlsBox.items.add(juce::FlexItem(*m_closeButton).withHeight(25.0f).withWidth(205.0f).withMargin(2));
-
-    juce::FlexBox fb;
-    fb.flexDirection = juce::FlexBox::Direction::column;
-    fb.items.add(juce::FlexItem(editsBox).withFlex(2.5));
-    fb.items.add(juce::FlexItem().withHeight(2));
-    fb.items.add(juce::FlexItem(controlsBox).withHeight(27.0f));
-    fb.performLayout(bounds.reduced(4));
-
-    if (m_addButton)
-        m_addButton->setEnabled(!IsAvailableUiAreaExceeded());
-}
-
-void SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::buttonClicked(Button* button)
-{
-    if (m_addButton && m_addButton.get() == button)
-    {
-        m_editComponents.push_back(std::make_unique<AssignmentEditComponent>(static_cast<int16_t>(m_editComponents.size()), m_deviceIdentifier, GetNextSceneIndex(), JUCEAppBasics::MidiCommandRangeAssignment()));
-        addAndMakeVisible(m_editComponents.back().get());
-
-        m_addButton->setEnabled(!IsAvailableUiAreaExceeded());
-
-        resized();
-    }
-    else if (m_closeButton.get() == button)
-    {
-        if (onAssigningFinished)
-            onAssigningFinished(this, GetCurrentAssignments());
-    }
+    editsBox.performLayout(bounds.reduced(4));
 }
 
 bool SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::IsAvailableUiAreaExceeded()
@@ -342,9 +290,106 @@ String SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::GetNextSc
             maxIdx = idx;
     }
     
-    auto newMajorIdx = maxIdx + 1;
+    auto newMajorIdx = static_cast<int>(maxIdx) + 1;
 
     return String(newMajorIdx) + ".00";
+}
+
+SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::AssignmentsViewingComponent(const String& deviceIdentifier, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& initialAssignments)
+{
+    m_deviceIdentifier = deviceIdentifier;
+
+    m_contentComponent = std::make_unique<AssignmentsListingComponent>(deviceIdentifier, initialAssignments);
+    m_contentViewport = std::make_unique<Viewport>();
+    m_contentViewport->setViewedComponent(m_contentComponent.get(), false);
+    addAndMakeVisible(m_contentViewport.get());
+
+    m_addButton = std::make_unique<TextButton>("Add assignment");
+    m_addButton->addListener(this);
+    addAndMakeVisible(m_addButton.get());
+
+    m_clearButton = std::make_unique<TextButton>("Clear");
+    m_clearButton->addListener(this);
+    addAndMakeVisible(m_clearButton.get());
+
+    m_exportButton = std::make_unique<TextButton>("Export");
+    m_exportButton->addListener(this);
+    addAndMakeVisible(m_exportButton.get());
+
+    m_importButton = std::make_unique<TextButton>("Import");
+    m_importButton->addListener(this);
+    addAndMakeVisible(m_importButton.get());
+
+    m_closeButton = std::make_unique<TextButton>("Close");
+    m_closeButton->addListener(this);
+    addAndMakeVisible(m_closeButton.get());
+
+}
+
+SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::~AssignmentsViewingComponent()
+{
+}
+
+std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::GetCurrentAssignments()
+{
+    return m_contentComponent ? m_contentComponent->GetCurrentAssignments() : std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>();
+}
+
+void SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::paint(Graphics& g)
+{
+    // Transparent background overlay
+    g.setColour(Colours::black);
+    g.setOpacity(0.5f);
+    g.fillRect(getLocalBounds());
+    g.setOpacity(1.0f);
+
+    auto bounds = getLocalBounds().reduced(55, 25);
+
+    g.setColour(getLookAndFeel().findColour(AlertWindow::outlineColourId));
+    g.drawRect(bounds.toFloat(), 1.0f);
+
+    bounds.reduce(1, 1);
+    g.reduceClipRegion(bounds);
+
+    // Background
+    g.setColour(getLookAndFeel().findColour(AlertWindow::backgroundColourId));
+    g.fillRect(bounds.toFloat());
+}
+
+void SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::resized()
+{
+    auto bounds = getLocalBounds().reduced(55, 25);
+
+    auto controlsBounds = bounds.removeFromBottom(35);
+    m_addButton->setBounds(controlsBounds.removeFromLeft(105).reduced(6));
+    m_clearButton->setBounds(controlsBounds.removeFromLeft(60).reduced(0, 6));
+    controlsBounds.removeFromLeft(40);
+    m_exportButton->setBounds(controlsBounds.removeFromLeft(70).reduced(6));
+    m_importButton->setBounds(controlsBounds.removeFromLeft(70).reduced(0, 6));
+    m_closeButton->setBounds(controlsBounds.removeFromRight(60).reduced(6));
+
+    bounds.reduce(2, 2);
+    m_contentViewport->setBounds(bounds);
+
+    bounds.reduce(4, 0);
+    m_contentComponent->setBounds(bounds);
+}
+
+void SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::buttonClicked(Button* button)
+{
+    if (m_addButton && m_addButton.get() == button)
+    {
+        m_contentComponent->AddAssignment();
+    }
+    else if (m_clearButton && m_clearButton.get() == button)
+    {
+        m_contentComponent->ClearAssignments();
+    }
+    else if (m_closeButton && m_closeButton.get() == button)
+    {
+        if (onAssigningFinished)
+            onAssigningFinished(this, GetCurrentAssignments());
+    }
 }
 
 

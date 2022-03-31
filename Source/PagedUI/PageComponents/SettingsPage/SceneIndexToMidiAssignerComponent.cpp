@@ -184,7 +184,7 @@ void SceneIndexToMidiAssignerComponent::AssignmentEditComponent::resized()
 {
     auto bounds = getLocalBounds();
 
-    m_learnerComponent->setBounds(bounds.removeFromRight(static_cast<int>(0.7f * bounds.getWidth()) - 2));
+    m_learnerComponent->setBounds(bounds.removeFromRight(static_cast<int>(0.75f * bounds.getWidth()) - 2));
     bounds.removeFromRight(4);
     m_sceneIndexEdit->setBounds(bounds);
 }
@@ -214,6 +214,24 @@ SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::~AssignmentsList
 {
 }
 
+void SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::setWidth(int width)
+{
+    auto editsCount = m_editComponents.size();
+    auto fittingColumnCount = static_cast<int>(width / (m_editorWidth + 2.0f * m_editorMargin));
+    auto totalEditsHeight = (editsCount + 1) * (m_editorHeight + 2.0f * m_editorMargin);
+    auto minRequiredHeight = static_cast<int>(totalEditsHeight / fittingColumnCount);
+
+    if (minRequiredHeight < m_minHeight)
+        setSize(width, m_minHeight);
+    else
+        setSize(width, minRequiredHeight);
+}
+
+void SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::setMinHeight(int height)
+{
+    m_minHeight = height;
+}
+
 std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::GetCurrentAssignments() 
 {
     std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> currentAssignments;
@@ -241,6 +259,15 @@ void SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::ClearAssign
     resized();
 }
 
+void SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::paint(Graphics& g)
+{
+    auto bounds = getLocalBounds();
+
+    // Background
+    g.setColour(getLookAndFeel().findColour(AlertWindow::backgroundColourId).darker());
+    g.fillRect(bounds.toFloat());
+}
+
 void SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::resized() 
 {
     auto bounds = getLocalBounds();
@@ -250,8 +277,8 @@ void SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::resized()
     editsBox.flexDirection = juce::FlexBox::Direction::column;
     editsBox.justifyContent = juce::FlexBox::JustifyContent::flexStart;
     for (auto const& editComponent : m_editComponents)
-        editsBox.items.add(juce::FlexItem(*editComponent).withHeight(25.0f).withWidth(205.0f).withMargin(2));
-    editsBox.performLayout(bounds.reduced(4));
+        editsBox.items.add(juce::FlexItem(*editComponent).withHeight(m_editorHeight).withWidth(m_editorWidth).withMargin(m_editorMargin));
+    editsBox.performLayout(bounds.reduced(static_cast<int>(2.0f * m_editorMargin)));
 }
 
 bool SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::IsAvailableUiAreaExceeded()
@@ -368,11 +395,12 @@ void SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::resized()
     m_importButton->setBounds(controlsBounds.removeFromLeft(70).reduced(0, 6));
     m_closeButton->setBounds(controlsBounds.removeFromRight(60).reduced(6));
 
-    bounds.reduce(2, 2);
+    bounds.removeFromTop(6);
+    bounds.reduce(6, 0);
     m_contentViewport->setBounds(bounds);
 
-    bounds.reduce(4, 0);
-    m_contentComponent->setBounds(bounds);
+    m_contentComponent->setMinHeight(bounds.getHeight() - 2);
+    m_contentComponent->setWidth(bounds.getWidth() - 2);
 }
 
 void SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::buttonClicked(Button* button)
@@ -380,10 +408,14 @@ void SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::buttonClick
     if (m_addButton && m_addButton.get() == button)
     {
         m_contentComponent->AddAssignment();
+
+        resized();
     }
     else if (m_clearButton && m_clearButton.get() == button)
     {
         m_contentComponent->ClearAssignments();
+
+        resized();
     }
     else if (m_closeButton && m_closeButton.get() == button)
     {

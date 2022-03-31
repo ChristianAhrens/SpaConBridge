@@ -80,11 +80,15 @@ private:
         AssignmentsListingComponent(const String& deviceIdentifier, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& initialAssignments);
         ~AssignmentsListingComponent();
 
+        void setWidth(int width);
+        void setMinHeight(int height);
+
         std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> GetCurrentAssignments();
         bool AddAssignment();
         void ClearAssignments();
 
         //==============================================================================
+        void paint(Graphics&) override;
         void resized() override;
 
         //==============================================================================
@@ -95,8 +99,12 @@ private:
         String GetNextSceneIndex();
 
         std::vector<std::unique_ptr<AssignmentEditComponent>>   m_editComponents;
-        
-        String m_deviceIdentifier;
+        String                                                  m_deviceIdentifier;
+        int                                                     m_minHeight;
+
+        const float m_editorWidth = 225.0f;
+        const float m_editorHeight = 25.0f;
+        const float m_editorMargin = 2.0f;
 
     };
 

@@ -21,6 +21,7 @@
 #include <JuceHeader.h>
 
 #include <MidiLearnerComponent.h>
+#include <TextWithImageButton.h>
 
 namespace SpaConBridge
 {
@@ -120,6 +121,9 @@ private:
         void paint(Graphics&) override;
         void resized() override;
 
+        //==========================================================================
+        void lookAndFeelChanged() override;
+
         //==============================================================================
         void buttonClicked(Button*) override;
 
@@ -131,8 +135,8 @@ private:
         std::unique_ptr<Viewport>					    m_contentViewport;
         std::unique_ptr<TextButton>                     m_addButton;
         std::unique_ptr<TextButton>                     m_clearButton;
-        std::unique_ptr<TextButton>                     m_exportButton;
-        std::unique_ptr<TextButton>                     m_importButton;
+        std::unique_ptr<DrawableButton>                 m_exportButton;
+        std::unique_ptr<DrawableButton>                 m_importButton;
         std::unique_ptr<TextButton>                     m_closeButton;
 
         String m_deviceIdentifier;

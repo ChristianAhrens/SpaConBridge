@@ -331,7 +331,7 @@ SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::AssignmentsViewi
     m_contentViewport->setViewedComponent(m_contentComponent.get(), false);
     addAndMakeVisible(m_contentViewport.get());
 
-    m_addButton = std::make_unique<TextButton>("Add assignment");
+    m_addButton = std::make_unique<TextButton>("Add");
     m_addButton->addListener(this);
     addAndMakeVisible(m_addButton.get());
 
@@ -339,17 +339,21 @@ SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::AssignmentsViewi
     m_clearButton->addListener(this);
     addAndMakeVisible(m_clearButton.get());
 
-    m_exportButton = std::make_unique<TextButton>("Export");
+    m_exportButton = std::make_unique<DrawableButton>("Export", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+    m_exportButton->setTooltip("Export assignments");
     m_exportButton->addListener(this);
     addAndMakeVisible(m_exportButton.get());
 
-    m_importButton = std::make_unique<TextButton>("Import");
+    m_importButton = std::make_unique<DrawableButton>("Import", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+    m_importButton->setTooltip("Import assignments");
     m_importButton->addListener(this);
     addAndMakeVisible(m_importButton.get());
 
     m_closeButton = std::make_unique<TextButton>("Close");
     m_closeButton->addListener(this);
     addAndMakeVisible(m_closeButton.get());
+
+    lookAndFeelChanged();
 
 }
 
@@ -370,7 +374,7 @@ void SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::paint(Graph
     g.fillRect(getLocalBounds());
     g.setOpacity(1.0f);
 
-    auto bounds = getLocalBounds().reduced(55, 25);
+    auto bounds = getLocalBounds().reduced(45, 25);
 
     g.setColour(getLookAndFeel().findColour(AlertWindow::outlineColourId));
     g.drawRect(bounds.toFloat(), 1.0f);
@@ -385,14 +389,26 @@ void SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::paint(Graph
 
 void SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::resized()
 {
-    auto bounds = getLocalBounds().reduced(55, 25);
+    auto bounds = getLocalBounds().reduced(45, 25);
 
     auto controlsBounds = bounds.removeFromBottom(35);
-    m_addButton->setBounds(controlsBounds.removeFromLeft(105).reduced(6));
-    m_clearButton->setBounds(controlsBounds.removeFromLeft(60).reduced(0, 6));
-    controlsBounds.removeFromLeft(40);
-    m_exportButton->setBounds(controlsBounds.removeFromLeft(70).reduced(6));
-    m_importButton->setBounds(controlsBounds.removeFromLeft(70).reduced(0, 6));
+    m_addButton->setBounds(controlsBounds.removeFromLeft(45).reduced(6));
+    m_clearButton->setBounds(controlsBounds.removeFromLeft(50).reduced(0, 6));
+
+    if (controlsBounds.getWidth() > 122)
+    {
+        m_exportButton->setVisible(true);
+        m_importButton->setVisible(true);
+
+        m_exportButton->setBounds(controlsBounds.removeFromLeft(37).reduced(6));
+        m_importButton->setBounds(controlsBounds.removeFromLeft(25).reduced(0, 6));
+    }
+    else
+    {
+        m_exportButton->setVisible(false);
+        m_importButton->setVisible(false);
+    }
+
     m_closeButton->setBounds(controlsBounds.removeFromRight(60).reduced(6));
 
     bounds.removeFromTop(6);
@@ -401,6 +417,15 @@ void SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::resized()
 
     m_contentComponent->setMinHeight(bounds.getHeight() - 2);
     m_contentComponent->setWidth(bounds.getWidth() - 2);
+}
+
+void SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::lookAndFeelChanged()
+{
+    Component::lookAndFeelChanged();
+
+    // Update drawable button images with updated lookAndFeel colours
+    UpdateDrawableButtonImages(m_importButton, BinaryData::folder_open24px_svg, &getLookAndFeel());
+    UpdateDrawableButtonImages(m_exportButton, BinaryData::save24px_svg, &getLookAndFeel());
 }
 
 void SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::buttonClicked(Button* button)
@@ -421,6 +446,14 @@ void SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::buttonClick
     {
         if (onAssigningFinished)
             onAssigningFinished(this, GetCurrentAssignments());
+    }
+    else if (m_importButton && m_importButton.get() == button)
+    {
+
+    }
+    else if (m_exportButton && m_exportButton.get() == button)
+    {
+
     }
 }
 

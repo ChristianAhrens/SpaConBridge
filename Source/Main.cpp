@@ -81,17 +81,17 @@ public:
             m_mainComponent = std::make_unique<MainSpaConBridgeComponent>([=](DbLookAndFeelBase::LookAndFeelType type) { updateLookAndFeel(type); }, [=](bool fullscreenWindow) { setWindowMode(fullscreenWindow); });
 #else
             m_mainComponent = std::make_unique<MainSpaConBridgeComponent>([=](DbLookAndFeelBase::LookAndFeelType type) { updateLookAndFeel(type); });
+#endif
 
+            setUsingNativeTitleBar(true);
+            setContentOwned(m_mainComponent.get(), true);
+            
 #if JUCE_IOS || JUCE_ANDROID
             setFullScreen(true);
 #else
             setResizable(true, true);
             centreWithSize(getWidth(), getHeight());
 #endif
-#endif
-
-            setUsingNativeTitleBar(true);
-            setContentOwned(m_mainComponent.get(), true);
 
             setVisible(true);
         }

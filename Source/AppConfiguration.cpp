@@ -64,6 +64,18 @@ bool AppConfiguration::isValid(const std::unique_ptr<XmlElement>& xmlConfig)
 		else
 			return false;
 
+#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
+		auto fullscreenWindowModeXmlElement = uiCfgSectionElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::FULLSCREENWINDOWMODE));
+		if (fullscreenWindowModeXmlElement)
+		{
+			auto fullscreenWindowModeTextElement = fullscreenWindowModeXmlElement->getFirstChildElement();
+			if (!fullscreenWindowModeTextElement || !fullscreenWindowModeTextElement->isTextElement())
+				return false;
+		}
+		else
+			return false;
+#endif
+
 	}
 	else
 		return false;

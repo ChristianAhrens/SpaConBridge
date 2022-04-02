@@ -18,6 +18,8 @@
 
 #include <JuceHeader.h>
 
+#include "SpaConBridgeCommon.h"
+
 #include "MainSpaConBridgeComponent.h"
 
 #include "LookAndFeel.h"
@@ -75,7 +77,11 @@ public:
         {
             updateLookAndFeel();
 
+#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
+            m_mainComponent = std::make_unique<MainSpaConBridgeComponent>([=](DbLookAndFeelBase::LookAndFeelType type) { updateLookAndFeel(type); }, [=](bool fullscreenWindow) { setWindowMode(fullscreenWindow); });
+#else
             m_mainComponent = std::make_unique<MainSpaConBridgeComponent>([=](DbLookAndFeelBase::LookAndFeelType type) { updateLookAndFeel(type); });
+#endif
 
             setUsingNativeTitleBar(true);
             setContentOwned(m_mainComponent.get(), true);
@@ -125,6 +131,23 @@ public:
 
             Desktop::getInstance().setDefaultLookAndFeel(m_customLookAndFeel.get());
         }
+
+#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
+        void setWindowMode(bool fullscreenWindow)
+        {
+            if (fullscreenWindow)
+            {
+                setResizable(false, false);
+                setFullScreen(true);
+            }
+            else
+            {
+                setFullScreen(false);
+                setResizable(true, true);
+                centreWithSize(getWidth(), getHeight());
+            }
+        }
+#endif
 
     private:
         std::unique_ptr<LookAndFeel>                m_customLookAndFeel; // our own look and feel implementation instance

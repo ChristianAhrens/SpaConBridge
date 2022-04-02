@@ -117,6 +117,15 @@ void SettingsSectionsComponent::createGeneralSettingsSection()
 	m_GeneralSettings->addComponent(m_LookAndFeelLabel.get(), false, false);
 	m_GeneralSettings->addComponent(m_LookAndFeelSelect.get(), true, false);
 
+#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
+	m_ToggleFullscreenButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Fullscreen window mode");
+	m_ToggleFullscreenButton->setTooltip("Toggle fullscreen window mode.");
+	m_ToggleFullscreenButton->setImagePosition(Justification::centredLeft);
+	m_ToggleFullscreenButton->setClickingTogglesState(true);
+	m_ToggleFullscreenButton->addListener(this);
+	m_GeneralSettings->addComponent(m_ToggleFullscreenButton.get(), true, false);
+#endif
+
 	m_StaticObjectsPollingButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Show Soundobject names");
 	m_StaticObjectsPollingButton->setClickingTogglesState(true);
 	m_StaticObjectsPollingButton->setTooltip("Show object names in " + GetPageNameFromId(UPI_SoundObjects) + " and " + GetPageNameFromId(UPI_MultiSlider) + " Page.");
@@ -809,6 +818,9 @@ void SettingsSectionsComponent::lookAndFeelChanged()
 	UpdateDrawableButtonImages(m_ADMOSCSwapXYButton, BinaryData::compare_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_ADMOSCDisableSendingButton, BinaryData::mobiledata_off24px_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_GenericOSCDisableSendingButton, BinaryData::mobiledata_off24px_svg, &getLookAndFeel());
+#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
+	UpdateDrawableButtonImages(m_ToggleFullscreenButton, BinaryData::open_in_full24px_svg, &getLookAndFeel());
+#endif
 }
 
 /**
@@ -849,6 +861,10 @@ void SettingsSectionsComponent::buttonClicked(Button* button)
 	}
 	if (m_StaticObjectsPollingButton.get() == button)
 		ctrl->SetStaticRemoteObjectsPollingEnabled(DCP_Settings, m_StaticObjectsPollingButton->getToggleState());
+#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
+	if (m_ToggleFullscreenButton.get() == button)
+		pageMgr->SetFullscreenWindowMode(m_ToggleFullscreenButton->getToggleState(), false);
+#endif
 
 	// ADM-OSC Settings section
 	else if (m_ADMOSCInvertXButton.get() == button)
@@ -1226,6 +1242,10 @@ void SettingsSectionsComponent::processUpdatedGeneralConfig()
 		m_StatisticsPageButton->setToggleState(std::find(pageMgr->GetEnabledPages().begin(), pageMgr->GetEnabledPages().end(), UPI_Statistics) != pageMgr->GetEnabledPages().end(), dontSendNotification);
 	if (m_LookAndFeelSelect)
 		m_LookAndFeelSelect->setSelectedId(pageMgr->GetLookAndFeelType(), dontSendNotification);
+#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
+	if (m_ToggleFullscreenButton)
+		m_ToggleFullscreenButton->setToggleState(pageMgr->IsFullscreenWindowMode(), dontSendNotification);
+#endif
 
 	auto ctrl = Controller::GetInstance();
 	if (ctrl && m_StaticObjectsPollingButton)

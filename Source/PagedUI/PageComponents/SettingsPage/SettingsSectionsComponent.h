@@ -132,6 +132,9 @@ private:
 	std::unique_ptr<Label>										m_EnabledPagesLabel;
 	std::unique_ptr<ComboBox>									m_LookAndFeelSelect;
 	std::unique_ptr<Label>										m_LookAndFeelLabel;
+#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
+	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_ToggleFullscreenButton;
+#endif
 	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_StaticObjectsPollingButton;
 	std::unique_ptr<TextEditor>									m_SystemIpInfoEdit;
 	std::unique_ptr<Label>										m_SystemIpInfoLabel;

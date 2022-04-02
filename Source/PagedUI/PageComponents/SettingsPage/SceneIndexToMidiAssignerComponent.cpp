@@ -309,6 +309,8 @@ bool SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::ReadAssignm
         addAndMakeVisible(m_editComponents.back().get());
     }
 
+    resized();
+
     return !m_editComponents.empty();
 }
 

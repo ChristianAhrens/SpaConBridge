@@ -235,12 +235,13 @@ void PageContainerComponent::resized()
 	m_scenesPage->setBounds(rect);
 	m_enSpacePage->setBounds(rect);
 
-	// finally resize the aboutpage, if visible and therefor on top of everything else at all
-	if (m_aboutPage && m_aboutPage->isVisible())
+	// finally resize the overlay component, if set, visible and therefor on top of everything else at all
+	if (m_overlayComponent && m_overlayComponent->isVisible())
 	{
-		m_aboutPage->setBounds(getLocalBounds());
-		m_aboutPage->toFront(false);
+		m_overlayComponent->setBounds(getLocalBounds());
+		m_overlayComponent->toFront(false);
 	}
+	
 }
 
 /**
@@ -280,16 +281,30 @@ void PageContainerComponent::buttonClicked(Button* button)
  */
 void PageContainerComponent::toggleAboutPage()
 {
-	if (m_aboutPage && m_aboutPage->isVisible())
+	if (m_aboutPage)
 	{
-		m_aboutPage->setVisible(false);
-		removeChildComponent(m_aboutPage.get());
+		if (m_aboutPage->isVisible())
+		{
+			auto pageMgr = SpaConBridge::PageComponentManager::GetInstance();
+			if (pageMgr)
+			{
+				auto pageContainer = pageMgr->GetPageContainer();
+				if (pageContainer)
+					pageContainer->ClearOverlayComponent();
+			}
+		}
+		else
+		{
+			m_aboutPage->setVisible(true);
+			auto pageMgr = SpaConBridge::PageComponentManager::GetInstance();
+			if (pageMgr)
+			{
+				auto pageContainer = pageMgr->GetPageContainer();
+				if (pageContainer)
+					pageContainer->SetOverlayComponent(m_aboutPage.get());
+			}
+		}
 	}
-	else
-	{
-		addAndMakeVisible(m_aboutPage.get());
-	}
-	resized();
 }
 
 /**
@@ -803,6 +818,33 @@ void PageContainerComponent::RemoveMultiSliderPageBackgroundImage(MappingAreaId 
 {
 	if (m_multiSliderPage)
 		m_multiSliderPage->RemoveBackgroundImage(mappingAreaId);
+}
+
+void PageContainerComponent::SetOverlayComponent(Component* componentToOverlay)
+{
+	if (componentToOverlay != nullptr)
+	{
+		m_overlayComponent = componentToOverlay;
+
+		addAndMakeVisible(m_overlayComponent);
+
+		resized();
+		repaint();
+	}
+}
+
+void PageContainerComponent::ClearOverlayComponent()
+{
+	if (m_overlayComponent)
+	{
+		m_overlayComponent->setVisible(false);
+		removeChildComponent(m_overlayComponent);
+	}
+
+	m_overlayComponent = nullptr;
+
+	resized();
+	repaint();
 }
 
 

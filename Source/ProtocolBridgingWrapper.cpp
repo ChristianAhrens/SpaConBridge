@@ -1441,7 +1441,9 @@ JUCEAppBasics::MidiCommandRangeAssignment ProtocolBridgingWrapper::GetMidiAssign
                 auto assiMapHexStringTextXmlElement = assiMapXmlElement->getFirstChildElement();
                 if (assiMapHexStringTextXmlElement && assiMapHexStringTextXmlElement->isTextElement())
                 {
-                    midiAssiMap.deserializeFromHexString(assiMapHexStringTextXmlElement->getText());
+					auto midiAssiStr = assiMapHexStringTextXmlElement->getText();
+					if (midiAssiStr.isNotEmpty())
+						midiAssiMap.deserializeFromHexString(midiAssiStr);
                 }
             }
         }
@@ -1492,6 +1494,111 @@ bool ProtocolBridgingWrapper::SetMidiAssignmentMapping(ProtocolId protocolId, Re
     }
     else
         return false;
+}
+
+/**
+ * Gets the currently set scenes to midi assignment mapping for a given remote object, if available, for the given protocol.
+ * @param protocolId	The id of the protocol to get the scenes to midi assignment for.
+ * @param remoteObjectId	The remote object to get the scenes to midi mapping for.
+ * @return	The requested scenes to midi assignment mapping
+ */
+std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> ProtocolBridgingWrapper::GetMidiScenesAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId)
+{
+	auto scenesToMidiAssiMap = std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>();
+
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+			if (assiMapXmlElement)
+			{
+				if (assiMapXmlElement->getIntAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MULTIVALUE)) == 1)
+				{
+					for (auto assiMapSubXmlElement : assiMapXmlElement->getChildIterator())
+					{
+						auto scnIdx = assiMapSubXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::VALUE));
+						auto assiMapSubHexStringTextXmlElement = assiMapSubXmlElement->getFirstChildElement();
+						if (assiMapSubHexStringTextXmlElement && assiMapSubHexStringTextXmlElement->isTextElement())
+						{
+							auto midiAssi = JUCEAppBasics::MidiCommandRangeAssignment();
+
+							auto midiAssiStr = assiMapSubHexStringTextXmlElement->getText();
+							if (midiAssiStr.isNotEmpty() && midiAssi.deserializeFromHexString(midiAssiStr))
+								scenesToMidiAssiMap.insert(std::make_pair(scnIdx, midiAssi));
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return scenesToMidiAssiMap;
+}
+
+/**
+ * Sets the desired scenes to midi assignment mapping for a given remote object.
+ * @param protocolId	The id of the protocol to set the scenes to midi assignment for.
+ * @param remoteObjectId	The remote object to set the scenes to midi mapping for.
+ * @param assignmentMapping	The scenes to midi mapping to set for the remote object.
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetMidiScenesAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& assignmentMapping, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+			if (assiMapXmlElement)
+			{
+				assiMapXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MULTIVALUE), 1);
+				for (auto const& assi : assignmentMapping)
+				{
+					auto assiMapHexString = assi.second.serializeToHexString();
+
+					auto assiMapSubXmlElement = assiMapXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::VALUE), assi.first);
+					if (assiMapSubXmlElement)
+					{
+						auto assiMapSubHexStringTextXmlElement = assiMapSubXmlElement->getFirstChildElement();
+						if (assiMapSubHexStringTextXmlElement && assiMapSubHexStringTextXmlElement->isTextElement())
+							assiMapSubHexStringTextXmlElement->setText(assiMapHexString);
+						else
+							assiMapSubXmlElement->addTextElement(assiMapHexString);
+					}
+					else
+					{
+						assiMapSubXmlElement = assiMapXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::VALTOCMDASSI));
+						assiMapSubXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::VALUE), assi.first);
+						assiMapSubXmlElement->addTextElement(assiMapHexString);
+					}
+				}
+			}
+			else
+			{
+				assiMapXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+				assiMapXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MULTIVALUE), 1);
+				for (auto const& assi : assignmentMapping)
+				{
+					auto assiMapSubXmlElement = assiMapXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::VALTOCMDASSI));
+					assiMapSubXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::VALUE), assi.first);
+					auto assiMapHexString = assi.second.serializeToHexString();
+					assiMapSubXmlElement->addTextElement(assiMapHexString);
+				}
+			}
+		}
+		else
+			return false;
+	
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
 }
 
 /**
@@ -3466,6 +3573,30 @@ JUCEAppBasics::MidiCommandRangeAssignment ProtocolBridgingWrapper::GetGenericMID
 bool ProtocolBridgingWrapper::SetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification)
 {
 	return SetMidiAssignmentMapping(GENERICMIDI_PROCESSINGPROTOCOL_ID, remoteObjectId, assignmentMapping, dontSendNotification);
+}
+
+/**
+ * Gets the desired scenes to midi assignment mapping for a given remote object.
+ * This method forwards the call to the generic implementation.
+ * @param remoteObjectId	The remote object to get the scenes to midi mapping for.
+ * @return	The requested scenes to midi assignment mapping
+ */
+std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> ProtocolBridgingWrapper::GetGenericMIDIScenesAssignmentMapping(RemoteObjectIdentifier remoteObjectId)
+{
+	return GetMidiScenesAssignmentMapping(GENERICMIDI_PROCESSINGPROTOCOL_ID, remoteObjectId);
+}
+
+/**
+ * Sets the desired scenes to midi assignment mapping for a given remote object.
+ * This method forwards the call to the generic implementation.
+ * @param remoteObjectId	The remote object to set the scenes to midi mapping for.
+ * @param assignmentMapping	The scenes to midi mapping to set for the remote object.
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetGenericMIDIScenesAssignmentMapping(RemoteObjectIdentifier remoteObjectId, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& scenesToMidiAssignmentMapping, bool dontSendNotification)
+{
+	return SetMidiScenesAssignmentMapping(GENERICMIDI_PROCESSINGPROTOCOL_ID, remoteObjectId, scenesToMidiAssignmentMapping, dontSendNotification);
 }
 
 /**

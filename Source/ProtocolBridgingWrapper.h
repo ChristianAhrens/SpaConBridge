@@ -241,6 +241,8 @@ public:
 	bool SetGenericMIDIOutputDeviceIdentifier(const String& MIDIInputDeviceIdentifier, bool dontSendNotification = false);
 	JUCEAppBasics::MidiCommandRangeAssignment GetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId);
 	bool SetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification = false);
+	std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> GetGenericMIDIScenesAssignmentMapping(RemoteObjectIdentifier remoteObjectId);
+	bool SetGenericMIDIScenesAssignmentMapping(RemoteObjectIdentifier remoteObjectId, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& scenesToMidiAssignmentMapping, bool dontSendNotification = false);
 	int GetGenericMIDIMappingArea();
 	bool SetGenericMIDIMappingArea(int mappingAreaId, bool dontSendNotification = false);
 
@@ -338,6 +340,8 @@ private:
 	bool SetProtocolOutputDeviceIdentifier(ProtocolId protocolId, const String& outputDeviceIdentifier, bool dontSendNotification = false);
 	JUCEAppBasics::MidiCommandRangeAssignment GetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId);
 	bool SetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification = false);
+	std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> GetMidiScenesAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId);
+	bool SetMidiScenesAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& assignmentMapping, bool dontSendNotification = false);
 	int GetProtocolXAxisInverted(ProtocolId protocolId);
 	bool SetProtocolXAxisInverted(ProtocolId protocolId, int inverted, bool dontSendNotification = false);
 	int GetProtocolYAxisInverted(ProtocolId protocolId);

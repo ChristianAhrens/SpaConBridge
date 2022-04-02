@@ -294,7 +294,11 @@ enum SpaConBridgeErrorCode
 	SEC_SaveConfig_CannotWrite,
 	SEC_LoadImage_CannotAccess,
 	SEC_LoadImage_CannotRead,
-	SEC_LoadImage_InvalidImage
+	SEC_LoadImage_InvalidImage,
+	SEC_LoadScnIdxToMIDI_CannotAccess,
+	SEC_LoadScnIdxToMIDI_InvalidFile,
+	SEC_SaveScnIdxToMIDI_CannotAccess,
+	SEC_SaveScnIdxToMIDI_CannotWrite,
 };
 
 /**
@@ -310,7 +314,6 @@ void ShowUserErrorNotification(const SpaConBridgeErrorCode errorCode);
 bool UpdateDrawableButtonImages(const std::unique_ptr<DrawableButton>& drawableButton, const String& binarySVGStringData, LookAndFeel* lookAndFeel);
 bool UpdateDrawableButtonImages(const std::unique_ptr<JUCEAppBasics::TextWithImageButton>& drawableButton, const String& binarySVGStringData, LookAndFeel* lookAndFeel);
 bool UpdateDrawableButtonImages(DrawableButton* drawableButton, const String& binarySVGStringData, LookAndFeel* lookAndFeel);
-
 
 
 } // namespace SpaConBridge

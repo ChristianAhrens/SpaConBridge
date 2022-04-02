@@ -259,6 +259,59 @@ void SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::ClearAssign
     resized();
 }
 
+const String SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::DumpCurrentAssignmentsToCsvString()
+{
+    auto csvString = String();
+
+    csvString += "SceneIndex;MidiAssignment;\n";
+    for (auto const& editComponent : m_editComponents)
+    {
+        csvString += editComponent->GetSceneIndex() + ";" + editComponent->GetCurrentAssignment().serializeToHexString() + ";\n";
+    }
+
+    return csvString;
+}
+
+bool SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::ReadAssignmentsFromCsvString(const String& csvAssignmentsString)
+{
+    std::map<String, String> assignments;
+
+    auto separatedCsvAssignmentStrings = StringArray();
+    separatedCsvAssignmentStrings.addTokens(csvAssignmentsString, "\n", "");
+
+    if (separatedCsvAssignmentStrings.size() > 1 && separatedCsvAssignmentStrings[0] == "SceneIndex;MidiAssignment;")
+        separatedCsvAssignmentStrings.remove(0);
+    else
+        return false;
+
+    for (auto const& csvAssignmentString : separatedCsvAssignmentStrings)
+    {
+        auto csvAssignmentStringElements = StringArray();
+        csvAssignmentStringElements.addTokens(csvAssignmentString, ";", "");
+
+        if (csvAssignmentStringElements.size() != 3)
+            continue;
+
+        assignments.insert(std::make_pair(csvAssignmentStringElements[0], csvAssignmentStringElements[1]));
+    }
+
+    if (assignments.empty())
+        return false;
+
+    m_editComponents.clear();
+    auto refId = std::int16_t(1);
+    for (auto const& assignment : assignments)
+    {
+        JUCEAppBasics::MidiCommandRangeAssignment assi;
+        if (!assi.deserializeFromHexString(assignment.second))
+            continue;
+        m_editComponents.push_back(std::make_unique<AssignmentEditComponent>(refId++, m_deviceIdentifier, assignment.first, assi));
+        addAndMakeVisible(m_editComponents.back().get());
+    }
+
+    return !m_editComponents.empty();
+}
+
 void SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::paint(Graphics& g)
 {
     auto bounds = getLocalBounds();
@@ -318,8 +371,10 @@ String SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::GetNextSc
     }
     
     auto newMajorIdx = static_cast<int>(maxIdx) + 1;
-
-    return String(newMajorIdx) + ".00";
+    if (newMajorIdx < 100)
+        return String(newMajorIdx) + ".00";
+    else
+        return String("99.999");
 }
 
 SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::AssignmentsViewingComponent(const String& deviceIdentifier, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& initialAssignments)
@@ -332,25 +387,25 @@ SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::AssignmentsViewi
     addAndMakeVisible(m_contentViewport.get());
 
     m_addButton = std::make_unique<TextButton>("Add");
-    m_addButton->addListener(this);
+    m_addButton->onClick = [this] { onAddClicked(); };
     addAndMakeVisible(m_addButton.get());
 
     m_clearButton = std::make_unique<TextButton>("Clear");
-    m_clearButton->addListener(this);
+    m_clearButton->onClick = [this] { onClearClicked(); };
     addAndMakeVisible(m_clearButton.get());
 
     m_exportButton = std::make_unique<DrawableButton>("Export", DrawableButton::ButtonStyle::ImageOnButtonBackground);
     m_exportButton->setTooltip("Export assignments");
-    m_exportButton->addListener(this);
+    m_exportButton->onClick = [this] { onExportClicked(); };
     addAndMakeVisible(m_exportButton.get());
 
     m_importButton = std::make_unique<DrawableButton>("Import", DrawableButton::ButtonStyle::ImageOnButtonBackground);
     m_importButton->setTooltip("Import assignments");
-    m_importButton->addListener(this);
+    m_importButton->onClick = [this] { onImportClicked(); };
     addAndMakeVisible(m_importButton.get());
 
     m_closeButton = std::make_unique<TextButton>("Close");
-    m_closeButton->addListener(this);
+    m_closeButton->onClick = [this] { onCloseClicked(); };
     addAndMakeVisible(m_closeButton.get());
 
     lookAndFeelChanged();
@@ -428,34 +483,104 @@ void SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::lookAndFeel
     UpdateDrawableButtonImages(m_exportButton, BinaryData::save24px_svg, &getLookAndFeel());
 }
 
-void SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::buttonClicked(Button* button)
+void SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::onAddClicked()
 {
-    if (m_addButton && m_addButton.get() == button)
-    {
-        m_contentComponent->AddAssignment();
+    m_contentComponent->AddAssignment();
 
-        resized();
-    }
-    else if (m_clearButton && m_clearButton.get() == button)
-    {
-        m_contentComponent->ClearAssignments();
-
-        resized();
-    }
-    else if (m_closeButton && m_closeButton.get() == button)
-    {
-        if (onAssigningFinished)
-            onAssigningFinished(this, GetCurrentAssignments());
-    }
-    else if (m_importButton && m_importButton.get() == button)
-    {
-
-    }
-    else if (m_exportButton && m_exportButton.get() == button)
-    {
-
-    }
+    resized();
 }
+
+void SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::onClearClicked()
+{
+    m_contentComponent->ClearAssignments();
+
+    resized();
+}
+
+void SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::onExportClicked()
+{
+    // prepare a default filename suggestion based on current date and app name
+    auto initialFolderPathName = File::getSpecialLocation(File::userDocumentsDirectory).getFullPathName();
+    auto initialFileNameSuggestion = Time::getCurrentTime().formatted("%Y-%m-%d_") + JUCEApplication::getInstance()->getApplicationName() + "_scnIdxToMidiMapping";
+    auto initialFilePathSuggestion = initialFolderPathName + File::getSeparatorString() + initialFileNameSuggestion;
+    auto initialFileSuggestion = File(initialFilePathSuggestion);
+
+    // create the file chooser dialog
+    auto chooser = std::make_unique<FileChooser>("Save current Scene Index to MIDI mapping file as...",
+        initialFileSuggestion, "*.csv", true, false, this);
+    // and trigger opening it
+    chooser->launchAsync(FileBrowserComponent::saveMode, [this](const FileChooser& chooser)
+        {
+            auto file = chooser.getResult();
+
+            // verify that the result is valid (ok clicked)
+            if (!file.getFullPathName().isEmpty())
+            {
+                // enforce the .config extension
+                if (file.getFileExtension() != ".csv")
+                    file = file.withFileExtension(".csv");
+
+                if (file.hasWriteAccess())
+                {
+                    FileOutputStream outputStream(file);
+                    if (outputStream.openedOk())
+                    {
+                        outputStream.setPosition(0);
+                        outputStream.truncate();
+
+                        if (m_contentComponent)
+                        {
+                            outputStream.writeText(m_contentComponent->DumpCurrentAssignmentsToCsvString(), false, false, nullptr);
+                            outputStream.flush();
+                        }
+                    }
+                    else
+                        ShowUserErrorNotification(SEC_SaveScnIdxToMIDI_CannotWrite);
+                }
+                else
+                    ShowUserErrorNotification(SEC_SaveScnIdxToMIDI_CannotAccess);
+                
+            }
+            delete static_cast<const FileChooser*>(&chooser);
+        });
+    chooser.release();
+}
+
+void SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::onImportClicked()
+{
+    // create the file chooser dialog
+    auto chooser = std::make_unique<FileChooser>("Select a Scene Index to MIDI mapping file to import...",
+        File::getSpecialLocation(File::userDocumentsDirectory), String(), true, false, this); // all filepatterns are allowed for loading (currently seems to not work on iOS and not be regarded on macOS at all)
+    // and trigger opening it
+    chooser->launchAsync(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, [this](const FileChooser& chooser)
+        {
+            auto file = chooser.getResult();
+
+            // verify that the result is valid (ok clicked)
+            if (!file.getFullPathName().isEmpty())
+            {
+                FileInputStream inputStream(file);
+                if (inputStream.openedOk())
+                {
+                    auto csvFileContents = inputStream.readEntireStreamAsString();
+                    if (m_contentComponent)
+                        if (!m_contentComponent->ReadAssignmentsFromCsvString(csvFileContents))
+                            ShowUserErrorNotification(SEC_LoadScnIdxToMIDI_InvalidFile);
+                }
+                else
+                    ShowUserErrorNotification(SEC_LoadScnIdxToMIDI_CannotAccess);
+            }
+            delete static_cast<const FileChooser*>(&chooser);
+        });
+    chooser.release();
+}
+
+void SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::onCloseClicked()
+{
+    if (onAssigningFinished)
+        onAssigningFinished(this, GetCurrentAssignments());
+}
+
 
 
 }

@@ -62,12 +62,14 @@ private:
 
         void handleMidiAssiSet(Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi);
 
+        //==============================================================================
         std::function<void(Component*, const String&, const JUCEAppBasics::MidiCommandRangeAssignment&)> onAssignmentSet;
 
         //==============================================================================
         void resized() override;
 
     private:
+        //==============================================================================
         String m_sceneIndex;
 
         std::unique_ptr<TextEditor>                                 m_sceneIndexEdit;
@@ -84,9 +86,14 @@ private:
         void setWidth(int width);
         void setMinHeight(int height);
 
+        //==============================================================================
         std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> GetCurrentAssignments();
         bool AddAssignment();
         void ClearAssignments();
+
+        //==============================================================================
+        const String DumpCurrentAssignmentsToCsvString();
+        bool ReadAssignmentsFromCsvString(const String& csvAssignmentsString);
 
         //==============================================================================
         void paint(Graphics&) override;
@@ -96,26 +103,36 @@ private:
         std::function<void(Component*, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>&)> onAssigningFinished;
 
     private:
+        //==============================================================================
         bool IsAvailableUiAreaExceeded();
         String GetNextSceneIndex();
 
+        //==============================================================================
         std::vector<std::unique_ptr<AssignmentEditComponent>>   m_editComponents;
         String                                                  m_deviceIdentifier;
         int                                                     m_minHeight;
 
+        //==============================================================================
         const float m_editorWidth = 225.0f;
         const float m_editorHeight = 25.0f;
         const float m_editorMargin = 2.0f;
 
     };
 
-    class AssignmentsViewingComponent : public Component, public Button::Listener
+    class AssignmentsViewingComponent : public Component
     {
     public:
         AssignmentsViewingComponent(const String& deviceIdentifier, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& initialAssignments);
         ~AssignmentsViewingComponent();
 
         std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> GetCurrentAssignments();
+
+        //==============================================================================
+        void onAddClicked();
+        void onClearClicked();
+        void onExportClicked();
+        void onImportClicked();
+        void onCloseClicked();
 
         //==============================================================================
         void paint(Graphics&) override;
@@ -125,12 +142,10 @@ private:
         void lookAndFeelChanged() override;
 
         //==============================================================================
-        void buttonClicked(Button*) override;
-
-        //==============================================================================
         std::function<void(Component*, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>&)> onAssigningFinished;
 
     private:
+        //==============================================================================
         std::unique_ptr<AssignmentsListingComponent>    m_contentComponent;
         std::unique_ptr<Viewport>					    m_contentViewport;
         std::unique_ptr<TextButton>                     m_addButton;

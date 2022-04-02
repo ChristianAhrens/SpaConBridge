@@ -205,8 +205,14 @@ SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::AssignmentsListi
     auto refId = std::int16_t(1);
     for (auto const& assignment : initialAssignments)
     {
-        m_editComponents.push_back(std::make_unique<AssignmentEditComponent>(refId++, m_deviceIdentifier, assignment.first, assignment.second));
-        addAndMakeVisible(m_editComponents.back().get());
+        auto floatSceneIndex = assignment.first.getFloatValue();
+        auto isValidSceneIndex = (1.0f <= floatSceneIndex && 99.999 >= floatSceneIndex);
+        if (isValidSceneIndex)
+        {
+            auto stringSceneIndex = String(floatSceneIndex, 2);
+            m_editComponents.push_back(std::make_unique<AssignmentEditComponent>(refId++, m_deviceIdentifier, stringSceneIndex, assignment.second));
+            addAndMakeVisible(m_editComponents.back().get());
+        }
     }
 }
 
@@ -303,10 +309,16 @@ bool SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::ReadAssignm
     for (auto const& assignment : assignments)
     {
         JUCEAppBasics::MidiCommandRangeAssignment assi;
-        if (assignment.second.isEmpty() || !assi.deserializeFromHexString(assignment.second))
-            continue;
-        m_editComponents.push_back(std::make_unique<AssignmentEditComponent>(refId++, m_deviceIdentifier, assignment.first, assi));
-        addAndMakeVisible(m_editComponents.back().get());
+        if (assignment.second.isNotEmpty())
+            assi.deserializeFromHexString(assignment.second);
+        auto floatSceneIndex = assignment.first.getFloatValue();
+        auto isValidSceneIndex = (1.0f <= floatSceneIndex && 99.999 >= floatSceneIndex);
+        if (isValidSceneIndex)
+        {
+            auto stringSceneIndex = String(floatSceneIndex, 2);
+            m_editComponents.push_back(std::make_unique<AssignmentEditComponent>(refId++, m_deviceIdentifier, stringSceneIndex, assi));
+            addAndMakeVisible(m_editComponents.back().get());
+        }
     }
 
     resized();

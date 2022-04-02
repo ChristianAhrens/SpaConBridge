@@ -38,21 +38,12 @@ namespace SpaConBridge
 
 //==============================================================================
 MainSpaConBridgeComponent::MainSpaConBridgeComponent()
-#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
-    : MainSpaConBridgeComponent(nullptr, nullptr)
-#else
     : MainSpaConBridgeComponent(nullptr)
-#endif
 {
 }
 
-#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
-MainSpaConBridgeComponent::MainSpaConBridgeComponent(std::function<void(DbLookAndFeelBase::LookAndFeelType)> lafUpdateCallback, std::function<void(bool)> windowModeUpdateCallback)
-    : onUpdateLookAndFeel(lafUpdateCallback), onSetWindowMode(windowModeUpdateCallback)
-#else
 MainSpaConBridgeComponent::MainSpaConBridgeComponent(std::function<void(DbLookAndFeelBase::LookAndFeelType)> lafUpdateCallback)
     : onUpdateLookAndFeel(lafUpdateCallback)
-#endif
 {
     addChildComponent(WaitingEntertainerComponent::GetInstance());
 

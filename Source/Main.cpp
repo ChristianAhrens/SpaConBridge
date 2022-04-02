@@ -77,11 +77,7 @@ public:
         {
             updateLookAndFeel();
 
-#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
-            m_mainComponent = std::make_unique<MainSpaConBridgeComponent>([=](DbLookAndFeelBase::LookAndFeelType type) { updateLookAndFeel(type); }, [=](bool fullscreenWindow) { setWindowMode(fullscreenWindow); });
-#else
             m_mainComponent = std::make_unique<MainSpaConBridgeComponent>([=](DbLookAndFeelBase::LookAndFeelType type) { updateLookAndFeel(type); });
-#endif
 
             setUsingNativeTitleBar(true);
             setContentOwned(m_mainComponent.get(), true);
@@ -94,6 +90,11 @@ public:
 #endif
 
             setVisible(true);
+
+#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
+            m_mainComponent->onSetWindowMode = [=](bool fullscreenWindowMode) { setWindowMode(fullscreenWindowMode); };
+            m_mainComponent->onConfigUpdated();
+#endif
         }
 
         void closeButtonPressed() override
@@ -136,16 +137,9 @@ public:
         void setWindowMode(bool fullscreenWindow)
         {
             if (fullscreenWindow)
-            {
-                setResizable(false, false);
-                setFullScreen(true);
-            }
+                Desktop::getInstance().setKioskModeComponent(getTopLevelComponent(), false);
             else
-            {
-                setFullScreen(false);
-                setResizable(true, true);
-                centreWithSize(getWidth(), getHeight());
-            }
+                Desktop::getInstance().setKioskModeComponent(nullptr, false);
         }
 #endif
 

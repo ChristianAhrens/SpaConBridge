@@ -38,11 +38,7 @@ class MainSpaConBridgeComponent :    public juce::Component,
 {
 public:
     MainSpaConBridgeComponent();
-#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
-    MainSpaConBridgeComponent(std::function<void(DbLookAndFeelBase::LookAndFeelType)> lafUpdateCallback, std::function<void(bool)> windowModeUpdateCallback);
-#else
     MainSpaConBridgeComponent(std::function<void(DbLookAndFeelBase::LookAndFeelType)> lafUpdateCallback);
-#endif
     ~MainSpaConBridgeComponent() override;
 
     //==========================================================================

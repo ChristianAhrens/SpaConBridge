@@ -107,6 +107,13 @@ void SettingsSectionsComponent::createGeneralSettingsSection()
 	m_GeneralSettings->addComponent(m_EnabledPagesLabel.get(), false, false);
 	m_GeneralSettings->addComponent(m_PageEnableButtonContainer.get(), true, false);
 
+	m_StaticObjectsPollingButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Show Soundobject names");
+	m_StaticObjectsPollingButton->setClickingTogglesState(true);
+	m_StaticObjectsPollingButton->setTooltip("Show object names in " + GetPageNameFromId(UPI_SoundObjects) + " and " + GetPageNameFromId(UPI_MultiSlider) + " Page.");
+	m_StaticObjectsPollingButton->setImagePosition(Justification::centredLeft);
+	m_StaticObjectsPollingButton->addListener(this);
+	m_GeneralSettings->addComponent(m_StaticObjectsPollingButton.get(), true, false);
+
 	m_LookAndFeelSelect = std::make_unique<ComboBox>();
 	m_LookAndFeelSelect->addItem(DbLookAndFeelBase::getLookAndFeelName(DbLookAndFeelBase::LAFT_Dark), DbLookAndFeelBase::LAFT_Dark);
 	m_LookAndFeelSelect->addItem(DbLookAndFeelBase::getLookAndFeelName(DbLookAndFeelBase::LAFT_Light), DbLookAndFeelBase::LAFT_Light);
@@ -125,13 +132,6 @@ void SettingsSectionsComponent::createGeneralSettingsSection()
 	m_ToggleFullscreenButton->addListener(this);
 	m_GeneralSettings->addComponent(m_ToggleFullscreenButton.get(), true, false);
 #endif
-
-	m_StaticObjectsPollingButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Show Soundobject names");
-	m_StaticObjectsPollingButton->setClickingTogglesState(true);
-	m_StaticObjectsPollingButton->setTooltip("Show object names in " + GetPageNameFromId(UPI_SoundObjects) + " and " + GetPageNameFromId(UPI_MultiSlider) + " Page.");
-	m_StaticObjectsPollingButton->setImagePosition(Justification::centredLeft);
-	m_StaticObjectsPollingButton->addListener(this);
-	m_GeneralSettings->addComponent(m_StaticObjectsPollingButton.get(), true, false);
 
 	m_SystemIpInfoEdit = std::make_unique<TextEditor>();
 	m_SystemIpInfoEdit->setText(juce::IPAddress::getLocalAddress().toString());

@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "SpaConBridgeCommon.h"
 #include "AppConfiguration.h"
 #include "LookAndFeel.h"
 

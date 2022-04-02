@@ -24,8 +24,8 @@
 
 #include <RemoteProtocolBridgeCommon.h>
 
-#if JUCE_WINDOWS || LINUX
-#define USE_FULLSCREEN_WINDOWMODE_TOGGLE 0
+#if LINUX
+#define USE_FULLSCREEN_WINDOWMODE_TOGGLE 1
 #endif
 
 

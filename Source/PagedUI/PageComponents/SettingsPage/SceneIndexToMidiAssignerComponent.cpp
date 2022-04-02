@@ -157,7 +157,7 @@ SceneIndexToMidiAssignerComponent::AssignmentEditComponent::AssignmentEditCompon
     m_sceneIndexEdit->setInputFilter(m_sceneIndexEditFilter.get(), false);
     addAndMakeVisible(m_sceneIndexEdit.get());
 
-    m_learnerComponent = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(refId, JUCEAppBasics::MidiLearnerComponent::AT_Trigger);
+    m_learnerComponent = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(refId, JUCEAppBasics::MidiLearnerComponent::AssignmentType(0x01)); // xcode has some weired linker issue with resolving AT_Trigger constexpr here... ?!
     m_learnerComponent->setSelectedDeviceIdentifier(deviceIdentifier);
     m_learnerComponent->setCurrentMidiAssi(currentAssi);
     addAndMakeVisible(m_learnerComponent.get());

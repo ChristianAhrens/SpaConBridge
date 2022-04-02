@@ -3648,10 +3648,11 @@ int Controller::GetBridgingDataSendingDisabled(ProtocolBridgingType bridgingType
 	{
 	case PBT_ADMOSC:
 		return m_protocolBridge.GetADMOSCDataSendingDisabled();
+	case PBT_GenericOSC:
+		return m_protocolBridge.GetGenericOSCDataSendingDisabled();
 	case PBT_GenericMIDI:
 	case PBT_BlacktraxRTTrPM:
 	case PBT_DiGiCo:
-	case PBT_GenericOSC:
 	case PBT_YamahaSQ:
 	case PBT_YamahaOSC:
 	case PBT_HUI:
@@ -3669,10 +3670,11 @@ bool Controller::SetBridgingDataSendingDisabled(ProtocolBridgingType bridgingTyp
 	{
 	case PBT_ADMOSC:
 		return m_protocolBridge.SetADMOSCDataSendingDisabled(disabled, dontSendNotification);
+	case PBT_GenericOSC:
+		return m_protocolBridge.SetGenericOSCDataSendingDisabled(disabled, dontSendNotification);
 	case PBT_GenericMIDI:
 	case PBT_BlacktraxRTTrPM:
 	case PBT_DiGiCo:
-	case PBT_GenericOSC:
 	case PBT_YamahaSQ:
 	case PBT_YamahaOSC:
 	case PBT_HUI:

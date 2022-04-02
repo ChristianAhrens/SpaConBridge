@@ -221,6 +221,8 @@ public:
 	bool SetGenericOSCListeningPort(int listeningPort, bool dontSendNotification = false);
 	int GetGenericOSCRemotePort();
 	bool SetGenericOSCRemotePort(int remotePort, bool dontSendNotification = false);
+	int GetGenericOSCDataSendingDisabled();
+	bool SetGenericOSCDataSendingDisabled(int disabled, bool dontSendNotification = false);
 
 	//==========================================================================
 	bool GetMuteGenericMIDISoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId);

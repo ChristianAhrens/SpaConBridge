@@ -379,6 +379,13 @@ void SettingsSectionsComponent::createGenericOSCSettingsSection()
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCRemotePortLabel.get(), false, false);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCRemotePortEdit.get(), true, false);
 
+	m_GenericOSCDisableSendingButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Disable OSC return channel");
+	m_GenericOSCDisableSendingButton->setTooltip("Disable sending of value changes to Generic OSC input devices.");
+	m_GenericOSCDisableSendingButton->setImagePosition(Justification::centredLeft);
+	m_GenericOSCDisableSendingButton->setClickingTogglesState(true);
+	m_GenericOSCDisableSendingButton->addListener(this);
+	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCDisableSendingButton.get(), true, false);
+
 	m_GenericOSCBridgingSettings->resized();
 }
 
@@ -801,6 +808,7 @@ void SettingsSectionsComponent::lookAndFeelChanged()
 	UpdateDrawableButtonImages(m_ADMOSCInvertYButton, BinaryData::flip_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_ADMOSCSwapXYButton, BinaryData::compare_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_ADMOSCDisableSendingButton, BinaryData::mobiledata_off24px_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_GenericOSCDisableSendingButton, BinaryData::mobiledata_off24px_svg, &getLookAndFeel());
 }
 
 /**
@@ -858,6 +866,12 @@ void SettingsSectionsComponent::buttonClicked(Button* button)
 	else if (m_ADMOSCDisableSendingButton.get() == button)
 	{
 		ctrl->SetBridgingDataSendingDisabled(PBT_ADMOSC, m_ADMOSCDisableSendingButton->getToggleState() ? 1 : 0);
+	}
+
+	// Generic OSC Settings section
+	else if (m_GenericOSCDisableSendingButton.get() == button)
+	{
+		ctrl->SetBridgingDataSendingDisabled(PBT_GenericOSC, m_GenericOSCDisableSendingButton->getToggleState() ? 1 : 0);
 	}
 }
 
@@ -1352,6 +1366,8 @@ void SettingsSectionsComponent::processUpdatedGenericOSCConfig()
 		m_GenericOSCListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_GenericOSC)), false);
 	if (m_GenericOSCRemotePortEdit)
 		m_GenericOSCRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_GenericOSC)), false);
+	if (m_GenericOSCDisableSendingButton)
+		m_GenericOSCDisableSendingButton->setToggleState(1 == ctrl->GetBridgingDataSendingDisabled(PBT_GenericOSC), dontSendNotification);
 }
 
 /**

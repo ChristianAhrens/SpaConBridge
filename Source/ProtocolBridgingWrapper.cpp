@@ -576,6 +576,10 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupGenericOSCBridgingProt
 		if (ipAdressXmlElement)
 			ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
 
+		auto dataSendingDisabledXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATASENDINGDISABLED));
+		if (dataSendingDisabledXmlElement)
+			dataSendingDisabledXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
+
 		auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
 		auto mutedObjects = std::vector<RemoteObject>();
 		if (mutedObjsXmlElement)
@@ -1822,7 +1826,12 @@ bool ProtocolBridgingWrapper::SetProtocolDataSendingDisabled(ProtocolId protocol
 				dataSendingDisabledXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), disabled);
 			}
 			else
-				return false;
+			{
+				dataSendingDisabledXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATASENDINGDISABLED));
+				dataSendingDisabledXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), disabled);
+
+				return true;
+			}
 		}
 		else
 			return false;
@@ -3391,6 +3400,22 @@ int ProtocolBridgingWrapper::GetGenericOSCRemotePort()
 bool ProtocolBridgingWrapper::SetGenericOSCRemotePort(int remotePort, bool dontSendNotification)
 {
 	return SetProtocolRemotePort(GENERICOSC_PROCESSINGPROTOCOL_ID, remotePort, dontSendNotification);
+}
+
+/**
+*
+*/
+int ProtocolBridgingWrapper::GetGenericOSCDataSendingDisabled()
+{
+	return GetProtocolDataSendingDisabled(GENERICOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+*
+*/
+bool ProtocolBridgingWrapper::SetGenericOSCDataSendingDisabled(int disabled, bool dontSendNotification)
+{
+	return SetProtocolDataSendingDisabled(GENERICOSC_PROCESSINGPROTOCOL_ID, disabled, dontSendNotification);
 }
 
 /**

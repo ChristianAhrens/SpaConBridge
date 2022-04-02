@@ -1441,7 +1441,9 @@ JUCEAppBasics::MidiCommandRangeAssignment ProtocolBridgingWrapper::GetMidiAssign
                 auto assiMapHexStringTextXmlElement = assiMapXmlElement->getFirstChildElement();
                 if (assiMapHexStringTextXmlElement && assiMapHexStringTextXmlElement->isTextElement())
                 {
-                    midiAssiMap.deserializeFromHexString(assiMapHexStringTextXmlElement->getText());
+					auto midiAssiStr = assiMapHexStringTextXmlElement->getText();
+					if (midiAssiStr.isNotEmpty())
+						midiAssiMap.deserializeFromHexString(midiAssiStr);
                 }
             }
         }
@@ -1522,7 +1524,9 @@ std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> ProtocolBridgingWrap
 						if (assiMapSubHexStringTextXmlElement && assiMapSubHexStringTextXmlElement->isTextElement())
 						{
 							auto midiAssi = JUCEAppBasics::MidiCommandRangeAssignment();
-							if (midiAssi.deserializeFromHexString(assiMapSubHexStringTextXmlElement->getText()))
+
+							auto midiAssiStr = assiMapSubHexStringTextXmlElement->getText();
+							if (midiAssiStr.isNotEmpty() && midiAssi.deserializeFromHexString(midiAssiStr))
 								scenesToMidiAssiMap.insert(std::make_pair(scnIdx, midiAssi));
 						}
 					}

@@ -303,7 +303,7 @@ bool SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::ReadAssignm
     for (auto const& assignment : assignments)
     {
         JUCEAppBasics::MidiCommandRangeAssignment assi;
-        if (!assi.deserializeFromHexString(assignment.second))
+        if (assignment.second.isEmpty() || !assi.deserializeFromHexString(assignment.second))
             continue;
         m_editComponents.push_back(std::make_unique<AssignmentEditComponent>(refId++, m_deviceIdentifier, assignment.first, assi));
         addAndMakeVisible(m_editComponents.back().get());

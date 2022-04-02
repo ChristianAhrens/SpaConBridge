@@ -24,6 +24,10 @@
 
 #include <RemoteProtocolBridgeCommon.h>
 
+#if LINUX || JUCE_WINDOWS
+#define USE_FULLSCREEN_WINDOWMODE_TOGGLE 1
+#endif
+
 
 namespace SpaConBridge
 {

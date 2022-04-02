@@ -18,6 +18,8 @@
 
 #include <JuceHeader.h>
 
+#include "SpaConBridgeCommon.h"
+
 #include "MainSpaConBridgeComponent.h"
 
 #include "LookAndFeel.h"
@@ -79,7 +81,7 @@ public:
 
             setUsingNativeTitleBar(true);
             setContentOwned(m_mainComponent.get(), true);
-
+            
 #if JUCE_IOS || JUCE_ANDROID
             setFullScreen(true);
 #else
@@ -88,6 +90,11 @@ public:
 #endif
 
             setVisible(true);
+
+#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
+            m_mainComponent->onSetWindowMode = [=](bool fullscreenWindowMode) { setWindowMode(fullscreenWindowMode); };
+            m_mainComponent->onConfigUpdated();
+#endif
         }
 
         void closeButtonPressed() override
@@ -125,6 +132,16 @@ public:
 
             Desktop::getInstance().setDefaultLookAndFeel(m_customLookAndFeel.get());
         }
+
+#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
+        void setWindowMode(bool fullscreenWindow)
+        {
+            if (fullscreenWindow)
+                Desktop::getInstance().setKioskModeComponent(getTopLevelComponent(), false);
+            else
+                Desktop::getInstance().setKioskModeComponent(nullptr, false);
+        }
+#endif
 
     private:
         std::unique_ptr<LookAndFeel>                m_customLookAndFeel; // our own look and feel implementation instance

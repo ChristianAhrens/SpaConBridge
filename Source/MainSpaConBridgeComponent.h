@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "SpaConBridgeCommon.h"
 #include "AppConfiguration.h"
 #include "LookAndFeel.h"
 
@@ -52,6 +53,9 @@ public:
 
     //==========================================================================
     std::function<void(DbLookAndFeelBase::LookAndFeelType)>	onUpdateLookAndFeel;
+#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
+    std::function<void(bool)> onSetWindowMode;
+#endif
 
 private:
     std::unique_ptr<AppConfiguration>   m_config;

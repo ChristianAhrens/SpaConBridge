@@ -105,6 +105,12 @@ public:
 	DbLookAndFeelBase::LookAndFeelType GetLookAndFeelType() const;
 	void SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType, bool dontUpdateConfig);
 
+#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
+	//==============================================================================
+	bool IsFullscreenWindowMode() const;
+	void SetFullscreenWindowMode(bool fullscreen, bool dontUpdateConfig);
+#endif
+
 	//==============================================================================
 	std::unique_ptr<XmlElement> createStateXml() override;
 	bool setStateXml(XmlElement* stateXml) override;
@@ -120,6 +126,10 @@ protected:
 	DbLookAndFeelBase::LookAndFeelType	m_lookAndFeelType{ DbLookAndFeelBase::LAFT_InvalidFirst };	/**< Remember the currently selected look and feel type. */
 
 	std::map<MappingAreaId, Image>	m_multiSliderBackgrounds;	/**< The background images to use for multislider. */
+
+#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
+	bool								m_fullscreenWindowMode{ false };
+#endif
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PageComponentManager)
 };

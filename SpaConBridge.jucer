@@ -292,6 +292,8 @@
                   file="submodules/JUCE-AppBasics/Resources/Images/keyboard_arrow_up-24px.svg"/>
             <FILE id="Jc6pvI" name="mobiledata_off-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/mobiledata_off-24px.svg"/>
+            <FILE id="ivAap7" name="open_in_full-24px.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/open_in_full-24px.svg"/>
             <FILE id="icu6GT" name="push_pin_black_24dp.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/push_pin_black_24dp.svg"/>
             <FILE id="UWlhHT" name="remove-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/remove-24px.svg"/>

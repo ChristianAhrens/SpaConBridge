@@ -1,9 +1,9 @@
 ## Generic MIDI bridging settings
 
-![Showreel.018.png](../Showreel/Showreel.018.png "Generic MIDI bridging settings")
+![Showreel.019.png](../Showreel/Showreel.019.png "Generic MIDI bridging settings")
 
 Assignment of mapping between MIDI input commmands and internal Soundscape parameters is done using the provided 'MIDI learner' training functionality.
-This can be activated clicking on the learner trigger buttons and brings up a popup menu that lists the incoming MIDI data preprocessed into usable mapping types
+This can be activated clicking on the learner trigger buttons and brings up a popup menu that lists the incoming MIDI data preprocessed into usable mapping types. Clearing the current assignment is possible with the dedicated Clear button per assignment.
 | Mapping Type | |
 | -- | -- |
 | Single Trigger | Every incoming Note On/Off MIDI command is listed as single trigger. This is useful to map to Sound Object selection remote object, e.g. when using a MIDI controller device with multiple buttons that can be used to select a Sound Object in SoundscapeBridgeApp UI this way. |
@@ -11,6 +11,10 @@ This can be activated clicking on the learner trigger buttons and brings up a po
 | Command+Value Range | This is an extension of Value Range mappings. A new entry is generated whenn incoming MIDI commands are of the same command type. E.g. a MIDI device with multiple rotary controls that map to MIDI ctrl0, ctrl1, ctrl2, ... can be used to create a Command+Value Range mapping. When triggering the rotary for ctrl0 and ctrl1, a possible mapping spanning from ctrl0-ctrl1 is created. When triggering the rotary for ctrl2, the mapping span is extended to ctrl0-ctrl2. |
 
 As soon as the desired MIDI mapping is learned, it can be selected from the listing and in consequence is assigned to the remote object. MIDI mappings currently cannot be cleared but only new ones selected as replacement. Deactivating the Generic MIDI bridging protocol and reactivating can be used as workaround, since this clears all learned assignments.
+
+![Showreel.020.png](../Showreel/Showreel.020.png "Generic MIDI overlay for Scene Index to MIDI assignment mapping")
+
+For internal Soundscape parameter 'Scene Recall' that refers to a dedicated Scene Index value (1.00 ... 99.999), a mapping between Scene Index values and MIDI input commands can be setup in an overlay UI accessible by clicking the 'Edit assignments' button for 'Recall Scene' Soundscape parameter.
 
 _Minimal video tutorial for example setup with Allen&Heath Qu-16 Mixing Console as TCP/IP MIDI input/output (using Allen&Heath Midi Control utility https://www.allen-heath.com/midi-control/):_
 

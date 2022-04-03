@@ -2,7 +2,7 @@
 
 **ADM OSC bridging support is purely experimental - if you are interested in this functionality and have the means to try it out, feedback is welcome!**
 
-![Showreel.020.png](../Showreel/Showreel.020.png "ADM OSC bridging settings")
+![Showreel.022.png](../Showreel/Showreel.022.png "ADM OSC bridging settings")
 
 
 ### Implemented OSC messages

@@ -46,8 +46,6 @@ _[![SpaConBridge v0.3.1 Introduction](https://img.youtube.com/vi/ozhQxKidtWc/0.j
 
 **Known Issues:**
 
-* Zeroconf is not working in builds for Windows OS  
-__Note:__ Needs to be implemented...
 * LookAndFeel change does not reliably update colour scheme for all UI elements  
 __Note:__ Suspicion: Underlying UI framework issue is the cause for this
 * MIDI device listing is not updated during runtime  

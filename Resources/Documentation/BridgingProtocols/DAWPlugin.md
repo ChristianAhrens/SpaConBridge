@@ -1,8 +1,8 @@
 ## d&b Soundscape DAW plugin bridging settings
 
-![Showreel.021.png](../Showreel/Showreel.021.png "Soundscape DAW plugin bridging settings")
+![Showreel.016.png](../Showreel/Showreel.016.png "Soundscape DAW plugin bridging settings")
 
-_This bridging protocol is the same as [Generic OSC](GenericOSC.md) and is only available separately to allow using both a DiGiCo SD series console and other OSC input at the same time, both using d&b [DS100 OSC protocol specification](https://www.dbaudio.com/assets/products/downloads/manuals-documentation/electronics/dbaudio-osc-protocol-ds100-1.3.0-en.pdf)._
+_This bridging protocol is the same as [Generic OSC](GenericOSC.md) and is available to use d&b Soundscape Plug-in through SpaConBridge to allow using SpaConBridge dual DS100 redundancy/extend mode features._
 
 
 ### Supported OSC messages for bridging that are also visible in app UI

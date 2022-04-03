@@ -205,6 +205,8 @@ Both plot and log are refreshed at a small rate to keep the performance impact o
 
 ![Showreel.0013.png](Resources/Documentation/Showreel/Showreel.013.png "General Settings")
 
+![Showreel.0014.png](Resources/Documentation/Showreel/Showreel.014.png "General Settings - Windows kiosk mode")
+
 Settings page is structured in sections.
 
 The first section allows configuration of application related parameters and is always active.

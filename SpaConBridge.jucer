@@ -328,8 +328,6 @@
     </GROUP>
     <GROUP id="{DA3507CD-D9BE-4153-5873-D44DBA9EAF0C}" name="Resources">
       <GROUP id="{5FBD4EDA-A4BE-1C72-49FC-FCB143B5F140}" name="Images">
-        <FILE id="ZpU8yN" name="HumanBrainProjectLogo.png" compile="0" resource="1"
-              file="Resources/Images/HumanBrainProjectLogo.png"/>
         <FILE id="bSDxmA" name="logo_juce.svg" compile="0" resource="1" file="Resources/Images/logo_juce.svg"/>
         <FILE id="vQJzrZ" name="MaterialDesignLogo.png" compile="0" resource="1"
               file="Resources/Images/MaterialDesignLogo.png"/>

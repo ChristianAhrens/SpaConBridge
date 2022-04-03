@@ -50,6 +50,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	createGeneralSettingsSection();
 	createDS100SettingsSection();
 	createDiGiCoSettingsSection();
+	createDAWPluginSettingsSection();
 	createRTTrPMSettingsSection();
 	createGenericOSCSettingsSection();
 	createGenericMIDISettingsSection();
@@ -106,6 +107,13 @@ void SettingsSectionsComponent::createGeneralSettingsSection()
 	m_GeneralSettings->addComponent(m_EnabledPagesLabel.get(), false, false);
 	m_GeneralSettings->addComponent(m_PageEnableButtonContainer.get(), true, false);
 
+	m_StaticObjectsPollingButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Show Soundobject names");
+	m_StaticObjectsPollingButton->setClickingTogglesState(true);
+	m_StaticObjectsPollingButton->setTooltip("Show object names in " + GetPageNameFromId(UPI_SoundObjects) + " and " + GetPageNameFromId(UPI_MultiSlider) + " Page.");
+	m_StaticObjectsPollingButton->setImagePosition(Justification::centredLeft);
+	m_StaticObjectsPollingButton->addListener(this);
+	m_GeneralSettings->addComponent(m_StaticObjectsPollingButton.get(), true, false);
+
 	m_LookAndFeelSelect = std::make_unique<ComboBox>();
 	m_LookAndFeelSelect->addItem(DbLookAndFeelBase::getLookAndFeelName(DbLookAndFeelBase::LAFT_Dark), DbLookAndFeelBase::LAFT_Dark);
 	m_LookAndFeelSelect->addItem(DbLookAndFeelBase::getLookAndFeelName(DbLookAndFeelBase::LAFT_Light), DbLookAndFeelBase::LAFT_Light);
@@ -116,12 +124,23 @@ void SettingsSectionsComponent::createGeneralSettingsSection()
 	m_GeneralSettings->addComponent(m_LookAndFeelLabel.get(), false, false);
 	m_GeneralSettings->addComponent(m_LookAndFeelSelect.get(), true, false);
 
-	m_StaticObjectsPollingButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Show Soundobject names");
-	m_StaticObjectsPollingButton->setClickingTogglesState(true);
-	m_StaticObjectsPollingButton->setTooltip("Show object names in " + GetPageNameFromId(UPI_SoundObjects) + " and " + GetPageNameFromId(UPI_MultiSlider) + " Page.");
-	m_StaticObjectsPollingButton->setImagePosition(Justification::centredLeft);
-	m_StaticObjectsPollingButton->addListener(this);
-	m_GeneralSettings->addComponent(m_StaticObjectsPollingButton.get(), true, false);
+#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
+	m_ToggleFullscreenButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Fullscreen window mode");
+	m_ToggleFullscreenButton->setTooltip("Toggle fullscreen window mode.");
+	m_ToggleFullscreenButton->setImagePosition(Justification::centredLeft);
+	m_ToggleFullscreenButton->setClickingTogglesState(true);
+	m_ToggleFullscreenButton->addListener(this);
+	m_GeneralSettings->addComponent(m_ToggleFullscreenButton.get(), true, false);
+#endif
+
+	m_SystemIpInfoEdit = std::make_unique<TextEditor>();
+	m_SystemIpInfoEdit->setText(juce::IPAddress::getLocalAddress().toString());
+	m_SystemIpInfoLabel = std::make_unique<Label>("SystemIpInfoLabel", JUCEApplication::getInstance()->getApplicationName() + " IP");
+	m_SystemIpInfoLabel->setJustificationType(Justification::centred);
+	m_SystemIpInfoLabel->attachToComponent(m_SystemIpInfoEdit.get(), true);
+	m_GeneralSettings->addComponent(m_SystemIpInfoLabel.get(), false, false);
+	m_GeneralSettings->addComponent(m_SystemIpInfoEdit.get(), true, false);
+	m_SystemIpInfoEdit->setEnabled(false);
 
 	m_GeneralSettings->resized();
 
@@ -162,8 +181,8 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 
 #ifdef ZEROCONF_SUPPORTED
 	m_DS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>(false, false);
-	m_DS100ZeroconfDiscovery->onServiceSelected = [=](JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info) { handleDS100ServiceSelected(type, info); };
-	m_DS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC, RX_PORT_DS100_HOST);
+	m_DS100ZeroconfDiscovery->onServiceSelected = [=](JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, ZeroconfSearcher::ZeroconfSearcher::ServiceInfo* info) { handleDS100ServiceSelected(type, info); };
+	m_DS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC);
 	m_DS100Settings->addComponent(m_DS100ZeroconfDiscovery.get(), true, false);
 #endif
 
@@ -203,8 +222,8 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 
 #ifdef ZEROCONF_SUPPORTED
 	m_SecondDS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>(false, false);
-	m_SecondDS100ZeroconfDiscovery->onServiceSelected = [=](JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info) { handleSecondDS100ServiceSelected(type, info); };
-	m_SecondDS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC, RX_PORT_DS100_HOST);
+	m_SecondDS100ZeroconfDiscovery->onServiceSelected = [=](JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, ZeroconfSearcher::ZeroconfSearcher::ServiceInfo* info) { handleSecondDS100ServiceSelected(type, info); };
+	m_SecondDS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC);
 	m_DS100Settings->addComponent(m_SecondDS100ZeroconfDiscovery.get(), true, false);
 #endif
 
@@ -253,6 +272,32 @@ void SettingsSectionsComponent::createDiGiCoSettingsSection()
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoRemotePortEdit.get(), true, false);
 
 	m_DiGiCoBridgingSettings->resized();
+}
+
+/**
+* Helper method to create and setup objects for DiGiCo settings section
+ */
+void SettingsSectionsComponent::createDAWPluginSettingsSection()
+{
+	// DAWPlugin settings section
+	m_DAWPluginBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
+	m_DAWPluginBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_DAWPlugin) + " Bridging");
+	m_DAWPluginBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_DAWPlugin) + " Bridging Settings");
+	m_DAWPluginBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/DAWPlugin.md"));
+	m_DAWPluginBridgingSettings->setHasActiveToggle(true);
+	m_DAWPluginBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
+	addAndMakeVisible(m_DAWPluginBridgingSettings.get());
+
+	m_DAWPluginIpAddressEdit = std::make_unique<TextEditor>();
+	m_DAWPluginIpAddressEdit->addListener(this);
+	m_DAWPluginIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
+	m_DAWPluginIpAddressLabel = std::make_unique<Label>("DAWPluginIpAddressEdit", "IP Address");
+	m_DAWPluginIpAddressLabel->setJustificationType(Justification::centred);
+	m_DAWPluginIpAddressLabel->attachToComponent(m_DAWPluginIpAddressEdit.get(), true);
+	m_DAWPluginBridgingSettings->addComponent(m_DAWPluginIpAddressLabel.get(), false, false);
+	m_DAWPluginBridgingSettings->addComponent(m_DAWPluginIpAddressEdit.get(), true, false);
+
+	m_DAWPluginBridgingSettings->resized();
 }
 
 /**
@@ -342,6 +387,13 @@ void SettingsSectionsComponent::createGenericOSCSettingsSection()
 	m_GenericOSCRemotePortLabel->attachToComponent(m_GenericOSCRemotePortEdit.get(), true);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCRemotePortLabel.get(), false, false);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCRemotePortEdit.get(), true, false);
+
+	m_GenericOSCDisableSendingButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Disable OSC return channel");
+	m_GenericOSCDisableSendingButton->setTooltip("Disable sending of value changes to Generic OSC input devices.");
+	m_GenericOSCDisableSendingButton->setImagePosition(Justification::centredLeft);
+	m_GenericOSCDisableSendingButton->setClickingTogglesState(true);
+	m_GenericOSCDisableSendingButton->addListener(this);
+	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCDisableSendingButton.get(), true, false);
 
 	m_GenericOSCBridgingSettings->resized();
 }
@@ -490,7 +542,37 @@ void SettingsSectionsComponent::createGenericMIDISettingsSection()
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMatrixOutputMuteLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMatrixOutputMuteLearner.get(), true, false);
 
+	m_GenericMIDINextSceneLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
+		static_cast<std::int16_t>(ROI_Scene_Next),
+		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
+	m_GenericMIDINextSceneLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+	m_GenericMIDINextSceneLabel = std::make_unique<Label>("GenericMIDINextSceneLearner", "Next Scene");
+	m_GenericMIDINextSceneLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDINextSceneLabel->attachToComponent(m_GenericMIDINextSceneLearner.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDINextSceneLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDINextSceneLearner.get(), true, false);
+
+	m_GenericMIDIPrevSceneLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
+		static_cast<std::int16_t>(ROI_Scene_Previous),
+		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
+	m_GenericMIDIPrevSceneLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+	m_GenericMIDIPrevSceneLabel = std::make_unique<Label>("GenericMIDIPrevSceneLearner", "Previous Scene");
+	m_GenericMIDIPrevSceneLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIPrevSceneLabel->attachToComponent(m_GenericMIDIPrevSceneLearner.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIPrevSceneLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIPrevSceneLearner.get(), true, false);
+
+	m_GenericMIDIRecallSceneAssigner = std::make_unique<SceneIndexToMidiAssignerComponent>(
+		static_cast<std::int16_t>(ROI_Scene_Recall));
+	m_GenericMIDIRecallSceneAssigner->onAssignmentsSet = [=](Component* sender, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& scenesToMidiAssi) { handleScenesToMidiAssiSet(sender, scenesToMidiAssi); };
+	m_GenericMIDIRecallSceneLabel = std::make_unique<Label>("GenericMIDIRecallSceneAssigner", "Recall Scene");
+	m_GenericMIDIRecallSceneLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDIRecallSceneLabel->attachToComponent(m_GenericMIDIRecallSceneAssigner.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIRecallSceneLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIRecallSceneAssigner.get(), true, false);
+
 	m_GenericMIDIBridgingSettings->resized();
+
 }
 
 /**
@@ -649,7 +731,7 @@ void SettingsSectionsComponent::paint(Graphics& g)
 {
 	// Paint background to cover the controls behind this overlay.
 	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
-	g.fillRect(Rectangle<int>(0, 0, getLocalBounds().getWidth(), getLocalBounds().getHeight()));
+	g.fillRect(juce::Rectangle<int>(0, 0, getLocalBounds().getWidth(), getLocalBounds().getHeight()));
 }
 
 /**
@@ -663,9 +745,10 @@ void SettingsSectionsComponent::resized()
 	auto minHeight = 
 		(m_GeneralSettings->getHeight() + (2 * margin))
 		+ (m_DS100Settings->getHeight() + (2 * margin))
+		+ (m_GenericOSCBridgingSettings->getHeight() + (2 * margin))
+		+ (m_DAWPluginBridgingSettings->getHeight() + (2 * margin))
 		+ (m_DiGiCoBridgingSettings->getHeight() + (2 * margin))
 		+ (m_RTTrPMBridgingSettings->getHeight() + (2 * margin))
-		+ (m_GenericOSCBridgingSettings->getHeight() + (2 * margin))
 		+ (m_GenericMIDIBridgingSettings->getHeight() + (2 * margin))
 		+ (m_ADMOSCBridgingSettings->getHeight() + (2 * margin))
 		+ (m_YamahaOSCBridgingSettings->getHeight() + (2 * margin));
@@ -691,14 +774,17 @@ void SettingsSectionsComponent::resized()
 		FlexItem(*m_DS100Settings.get())
 			.withHeight(static_cast<float>(m_DS100Settings->getHeight()))
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
+		FlexItem(*m_GenericOSCBridgingSettings.get())
+			.withHeight(static_cast<float>(m_GenericOSCBridgingSettings->getHeight()))
+			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
+		FlexItem(*m_DAWPluginBridgingSettings.get())
+			.withHeight(static_cast<float>(m_DAWPluginBridgingSettings->getHeight()))
+			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
 		FlexItem(*m_DiGiCoBridgingSettings.get())
 			.withHeight(static_cast<float>(m_DiGiCoBridgingSettings->getHeight()))
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
 		FlexItem(*m_RTTrPMBridgingSettings.get())
 			.withHeight(static_cast<float>(m_RTTrPMBridgingSettings->getHeight()))
-			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
-		FlexItem(*m_GenericOSCBridgingSettings.get())
-			.withHeight(static_cast<float>(m_GenericOSCBridgingSettings->getHeight()))
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
 		FlexItem(*m_GenericMIDIBridgingSettings.get())
 			.withHeight(static_cast<float>(m_GenericMIDIBridgingSettings->getHeight()))
@@ -731,6 +817,10 @@ void SettingsSectionsComponent::lookAndFeelChanged()
 	UpdateDrawableButtonImages(m_ADMOSCInvertYButton, BinaryData::flip_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_ADMOSCSwapXYButton, BinaryData::compare_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_ADMOSCDisableSendingButton, BinaryData::mobiledata_off24px_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_GenericOSCDisableSendingButton, BinaryData::mobiledata_off24px_svg, &getLookAndFeel());
+#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
+	UpdateDrawableButtonImages(m_ToggleFullscreenButton, BinaryData::open_in_full24px_svg, &getLookAndFeel());
+#endif
 }
 
 /**
@@ -771,6 +861,10 @@ void SettingsSectionsComponent::buttonClicked(Button* button)
 	}
 	if (m_StaticObjectsPollingButton.get() == button)
 		ctrl->SetStaticRemoteObjectsPollingEnabled(DCP_Settings, m_StaticObjectsPollingButton->getToggleState());
+#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
+	if (m_ToggleFullscreenButton.get() == button)
+		pageMgr->SetFullscreenWindowMode(m_ToggleFullscreenButton->getToggleState(), false);
+#endif
 
 	// ADM-OSC Settings section
 	else if (m_ADMOSCInvertXButton.get() == button)
@@ -788,6 +882,12 @@ void SettingsSectionsComponent::buttonClicked(Button* button)
 	else if (m_ADMOSCDisableSendingButton.get() == button)
 	{
 		ctrl->SetBridgingDataSendingDisabled(PBT_ADMOSC, m_ADMOSCDisableSendingButton->getToggleState() ? 1 : 0);
+	}
+
+	// Generic OSC Settings section
+	else if (m_GenericOSCDisableSendingButton.get() == button)
+	{
+		ctrl->SetBridgingDataSendingDisabled(PBT_GenericOSC, m_GenericOSCDisableSendingButton->getToggleState() ? 1 : 0);
 	}
 }
 
@@ -907,6 +1007,10 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 	else if (m_DiGiCoRemotePortEdit && m_DiGiCoRemotePortEdit.get() == &editor)
 		ctrl->SetBridgingRemotePort(PBT_DiGiCo, m_DiGiCoRemotePortEdit->getText().getIntValue());
 
+	// DAWPlugin settings section
+	else if (m_DAWPluginIpAddressEdit && m_DAWPluginIpAddressEdit.get() == &editor)
+		ctrl->SetBridgingIpAddress(PBT_DAWPlugin, m_DAWPluginIpAddressEdit->getText());
+
 	// RTTrPM settings section
 	else if (m_RTTrPMListeningPortEdit && m_RTTrPMListeningPortEdit.get() == &editor)
 		ctrl->SetBridgingListeningPort(PBT_BlacktraxRTTrPM, m_RTTrPMListeningPortEdit->getText().getIntValue());
@@ -1025,6 +1129,8 @@ void SettingsSectionsComponent::setSettingsSectionActiveState(HeaderWithElmListC
 	ProtocolBridgingType sectionType = PBT_None;
 	if (settingsSection == m_DiGiCoBridgingSettings.get())
 		sectionType = PBT_DiGiCo;
+	if (settingsSection == m_DAWPluginBridgingSettings.get())
+		sectionType = PBT_DAWPlugin;
 	else if (settingsSection == m_RTTrPMBridgingSettings.get())
 		sectionType = PBT_BlacktraxRTTrPM;
 	else if (settingsSection == m_GenericOSCBridgingSettings.get())
@@ -1104,6 +1210,7 @@ void SettingsSectionsComponent::processUpdatedConfig()
 	processUpdatedGeneralConfig();
 	processUpdatedDS100Config();
 	processUpdatedDiGiCoConfig();
+	processUpdatedDAWPluginConfig();
 	processUpdatedRTTrPMConfig();
 	processUpdatedGenericOSCConfig();
 	processUpdatedGenericMIDIConfig();
@@ -1135,6 +1242,10 @@ void SettingsSectionsComponent::processUpdatedGeneralConfig()
 		m_StatisticsPageButton->setToggleState(std::find(pageMgr->GetEnabledPages().begin(), pageMgr->GetEnabledPages().end(), UPI_Statistics) != pageMgr->GetEnabledPages().end(), dontSendNotification);
 	if (m_LookAndFeelSelect)
 		m_LookAndFeelSelect->setSelectedId(pageMgr->GetLookAndFeelType(), dontSendNotification);
+#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
+	if (m_ToggleFullscreenButton)
+		m_ToggleFullscreenButton->setToggleState(pageMgr->IsFullscreenWindowMode(), dontSendNotification);
+#endif
 
 	auto ctrl = Controller::GetInstance();
 	if (ctrl && m_StaticObjectsPollingButton)
@@ -1210,6 +1321,23 @@ void SettingsSectionsComponent::processUpdatedDiGiCoConfig()
 }
 
 /**
+ * Helper method to update objects for DAWPlugin settings section with updated config
+ */
+void SettingsSectionsComponent::processUpdatedDAWPluginConfig()
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
+	// DAWPlugin settings section
+	auto DAWPluginBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_DAWPlugin) == PBT_DAWPlugin;
+	if (m_DAWPluginBridgingSettings)
+		m_DAWPluginBridgingSettings->setToggleActiveState(DAWPluginBridgingActive);
+	if (m_DAWPluginIpAddressEdit)
+		m_DAWPluginIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_DAWPlugin));
+}
+
+/**
  * Helper method to update objects for RTTrPM settings section with updated config
  */
 void SettingsSectionsComponent::processUpdatedRTTrPMConfig()
@@ -1258,6 +1386,8 @@ void SettingsSectionsComponent::processUpdatedGenericOSCConfig()
 		m_GenericOSCListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_GenericOSC)), false);
 	if (m_GenericOSCRemotePortEdit)
 		m_GenericOSCRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_GenericOSC)), false);
+	if (m_GenericOSCDisableSendingButton)
+		m_GenericOSCDisableSendingButton->setToggleState(1 == ctrl->GetBridgingDataSendingDisabled(PBT_GenericOSC), dontSendNotification);
 }
 
 /**
@@ -1358,6 +1488,21 @@ void SettingsSectionsComponent::processUpdatedGenericMIDIConfig()
 		m_GenericMIDIMatrixOutputMuteLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
 		m_GenericMIDIMatrixOutputMuteLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIMatrixOutputMuteLearner->getReferredId())));
 	}
+	if (m_GenericMIDINextSceneLearner)
+	{
+		m_GenericMIDINextSceneLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
+		m_GenericMIDINextSceneLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDINextSceneLearner->getReferredId())));
+	}
+	if (m_GenericMIDIPrevSceneLearner)
+	{
+		m_GenericMIDIPrevSceneLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
+		m_GenericMIDIPrevSceneLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIPrevSceneLearner->getReferredId())));
+	}
+	if (m_GenericMIDIRecallSceneAssigner)
+	{
+		m_GenericMIDIRecallSceneAssigner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
+		m_GenericMIDIRecallSceneAssigner->setCurrentScenesToMidiAssignments(ctrl->GetBridgingScenesToMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIRecallSceneAssigner->getReferredId())));
+	}
 }
 
 /**
@@ -1430,7 +1575,7 @@ void SettingsSectionsComponent::processUpdatedADMOSCConfig()
  * @param type	The service type that was selected
  * @param info	The detailed info on the service that was selected
  */
-void SettingsSectionsComponent::handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info)
+void SettingsSectionsComponent::handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, ZeroconfSearcher::ZeroconfSearcher::ServiceInfo* info)
 {
 	ignoreUnused(type);
 
@@ -1449,7 +1594,7 @@ void SettingsSectionsComponent::handleDS100ServiceSelected(JUCEAppBasics::Zeroco
  * @param type	The service type that was selected
  * @param info	The detailed info on the service that was selected
  */
-void SettingsSectionsComponent::handleSecondDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info)
+void SettingsSectionsComponent::handleSecondDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, ZeroconfSearcher::ZeroconfSearcher::ServiceInfo* info)
 {
 	ignoreUnused(type);
 
@@ -1480,6 +1625,21 @@ void SettingsSectionsComponent::handleMidiAssiSet(Component* sender, const JUCEA
 		auto ctrl = Controller::GetInstance();
 		if (ctrl)
 			ctrl->SetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(learnerComponent->getReferredId()), midiAssi);
+	}
+}
+
+/**
+ * Callback method to be registered with SceneIndexToMidiAssignerComponent to handle scene index to midi assignment selection.
+ * @param sender	The SceneIndexToMidiAssignerComponent that sent the assignment.
+ * @param scenesToMidiAssi	The sent assignment that was chosen by user
+ */
+void SettingsSectionsComponent::handleScenesToMidiAssiSet(Component* sender, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& scenesToMidiAssi)
+{
+	if (m_GenericMIDIRecallSceneAssigner && sender == m_GenericMIDIRecallSceneAssigner.get())
+	{
+		auto ctrl = Controller::GetInstance();
+		if (ctrl)
+			ctrl->SetBridgingScenesToMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIRecallSceneAssigner->getReferredId()), scenesToMidiAssi);
 	}
 }
 

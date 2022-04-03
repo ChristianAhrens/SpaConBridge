@@ -210,6 +210,9 @@ bool ProtocolBridgingWrapper::setStateXml(XmlElement* stateXml)
 			auto digicoProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DIGICO_PROCESSINGPROTOCOL_ID));
 			if (digicoProtocolXmlElement)
 				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_DiGiCo, *digicoProtocolXmlElement));
+			auto DAWPluginProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DAWPLUGIN_PROCESSINGPROTOCOL_ID));
+			if (DAWPluginProtocolXmlElement)
+				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_DAWPlugin, *DAWPluginProtocolXmlElement));
 			auto RTTrPMProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(RTTRPM_PROCESSINGPROTOCOL_ID));
 			if (RTTrPMProtocolXmlElement)
 				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_BlacktraxRTTrPM, *RTTrPMProtocolXmlElement));
@@ -361,6 +364,18 @@ bool ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridg
 		}
 	}
 
+	// DAWPlugin protocol - RoleB
+	{
+		auto DAWPluginBridgingXmlElement = SetupDAWPluginBridgingProtocol();
+		if (DAWPluginBridgingXmlElement)
+		{
+			m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_DAWPlugin, *DAWPluginBridgingXmlElement));
+
+			if ((bridgingProtocolsToActivate & PBT_DAWPlugin) == PBT_DAWPlugin)
+				nodeXmlElement->addChildElement(DAWPluginBridgingXmlElement.release());
+		}
+	}
+
 	// RTTrPM protocol - RoleB
 	{
 		auto RTTrPMBridgingXmlElement = SetupRTTrPMBridgingProtocol();
@@ -467,6 +482,42 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupDiGiCoBridgingProtocol
 }
 
 /**
+ * Method to create the default DAW Plugin bridging protocol xml element.
+ * @return	The protocol xml element that was created
+ */
+std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupDAWPluginBridgingProtocol()
+{
+	// DAWPlugin protocol - RoleB
+	auto protocolBXmlElement = std::make_unique<XmlElement>(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLB));
+	if (protocolBXmlElement)
+	{
+		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), DAWPLUGIN_PROCESSINGPROTOCOL_ID);
+
+		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), ProcessingEngineConfig::ProtocolTypeToString(PT_OSCProtocol));
+		protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::USESACTIVEOBJ), 0);
+
+		auto clientPortXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+		if (clientPortXmlElement)
+			clientPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_DS100_HOST);
+
+		auto hostPortXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
+		if (hostPortXmlElement)
+			hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_DS100_DEVICE);
+
+		auto ipAdressXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
+		if (ipAdressXmlElement)
+			ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
+
+		auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
+		auto mutedObjects = std::vector<RemoteObject>();
+		if (mutedObjsXmlElement)
+			ProcessingEngineConfig::WriteMutedObjects(mutedObjsXmlElement, mutedObjects);
+	}
+
+	return protocolBXmlElement;
+}
+
+/**
  * Method to create the default blacktrax RTTrPM bridging protocol xml element.
  * @return	The protocol xml element that was created
  */
@@ -524,6 +575,10 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupGenericOSCBridgingProt
 		auto ipAdressXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
 		if (ipAdressXmlElement)
 			ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
+
+		auto dataSendingDisabledXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATASENDINGDISABLED));
+		if (dataSendingDisabledXmlElement)
+			dataSendingDisabledXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
 
 		auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
 		auto mutedObjects = std::vector<RemoteObject>();
@@ -1390,7 +1445,9 @@ JUCEAppBasics::MidiCommandRangeAssignment ProtocolBridgingWrapper::GetMidiAssign
                 auto assiMapHexStringTextXmlElement = assiMapXmlElement->getFirstChildElement();
                 if (assiMapHexStringTextXmlElement && assiMapHexStringTextXmlElement->isTextElement())
                 {
-                    midiAssiMap.deserializeFromHexString(assiMapHexStringTextXmlElement->getText());
+					auto midiAssiStr = assiMapHexStringTextXmlElement->getText();
+					if (midiAssiStr.isNotEmpty())
+						midiAssiMap.deserializeFromHexString(midiAssiStr);
                 }
             }
         }
@@ -1441,6 +1498,111 @@ bool ProtocolBridgingWrapper::SetMidiAssignmentMapping(ProtocolId protocolId, Re
     }
     else
         return false;
+}
+
+/**
+ * Gets the currently set scenes to midi assignment mapping for a given remote object, if available, for the given protocol.
+ * @param protocolId	The id of the protocol to get the scenes to midi assignment for.
+ * @param remoteObjectId	The remote object to get the scenes to midi mapping for.
+ * @return	The requested scenes to midi assignment mapping
+ */
+std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> ProtocolBridgingWrapper::GetMidiScenesAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId)
+{
+	auto scenesToMidiAssiMap = std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>();
+
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+			if (assiMapXmlElement)
+			{
+				if (assiMapXmlElement->getIntAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MULTIVALUE)) == 1)
+				{
+					for (auto assiMapSubXmlElement : assiMapXmlElement->getChildIterator())
+					{
+						auto scnIdx = assiMapSubXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::VALUE));
+						auto assiMapSubHexStringTextXmlElement = assiMapSubXmlElement->getFirstChildElement();
+						if (assiMapSubHexStringTextXmlElement && assiMapSubHexStringTextXmlElement->isTextElement())
+						{
+							auto midiAssi = JUCEAppBasics::MidiCommandRangeAssignment();
+
+							auto midiAssiStr = assiMapSubHexStringTextXmlElement->getText();
+							if (midiAssiStr.isNotEmpty() && midiAssi.deserializeFromHexString(midiAssiStr))
+								scenesToMidiAssiMap.insert(std::make_pair(scnIdx, midiAssi));
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return scenesToMidiAssiMap;
+}
+
+/**
+ * Sets the desired scenes to midi assignment mapping for a given remote object.
+ * @param protocolId	The id of the protocol to set the scenes to midi assignment for.
+ * @param remoteObjectId	The remote object to set the scenes to midi mapping for.
+ * @param assignmentMapping	The scenes to midi mapping to set for the remote object.
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetMidiScenesAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& assignmentMapping, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+			if (assiMapXmlElement)
+			{
+				assiMapXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MULTIVALUE), 1);
+				for (auto const& assi : assignmentMapping)
+				{
+					auto assiMapHexString = assi.second.serializeToHexString();
+
+					auto assiMapSubXmlElement = assiMapXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::VALUE), assi.first);
+					if (assiMapSubXmlElement)
+					{
+						auto assiMapSubHexStringTextXmlElement = assiMapSubXmlElement->getFirstChildElement();
+						if (assiMapSubHexStringTextXmlElement && assiMapSubHexStringTextXmlElement->isTextElement())
+							assiMapSubHexStringTextXmlElement->setText(assiMapHexString);
+						else
+							assiMapSubXmlElement->addTextElement(assiMapHexString);
+					}
+					else
+					{
+						assiMapSubXmlElement = assiMapXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::VALTOCMDASSI));
+						assiMapSubXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::VALUE), assi.first);
+						assiMapSubXmlElement->addTextElement(assiMapHexString);
+					}
+				}
+			}
+			else
+			{
+				assiMapXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+				assiMapXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MULTIVALUE), 1);
+				for (auto const& assi : assignmentMapping)
+				{
+					auto assiMapSubXmlElement = assiMapXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::VALTOCMDASSI));
+					assiMapSubXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::VALUE), assi.first);
+					auto assiMapHexString = assi.second.serializeToHexString();
+					assiMapSubXmlElement->addTextElement(assiMapHexString);
+				}
+			}
+		}
+		else
+			return false;
+	
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
 }
 
 /**
@@ -1664,7 +1826,12 @@ bool ProtocolBridgingWrapper::SetProtocolDataSendingDisabled(ProtocolId protocol
 				dataSendingDisabledXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), disabled);
 			}
 			else
-				return false;
+			{
+				dataSendingDisabledXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATASENDINGDISABLED));
+				dataSendingDisabledXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), disabled);
+
+				return true;
+			}
 		}
 		else
 			return false;
@@ -1729,6 +1896,10 @@ ProtocolBridgingType ProtocolBridgingWrapper::GetActiveBridgingProtocols()
 		if (protocolXmlElement)
 			activeBridgingTypes |= PBT_DiGiCo;
 
+		protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DAWPLUGIN_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+			activeBridgingTypes |= PBT_DAWPlugin;
+
 		protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(RTTRPM_PROCESSINGPROTOCOL_ID));
 		if (protocolXmlElement)
 			activeBridgingTypes |= PBT_BlacktraxRTTrPM;
@@ -1766,6 +1937,8 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 		// we need to do something, since currently active protocols are not what the user wants any more
 		auto addDiGiCoBridging = ((desiredActiveBridgingTypes & PBT_DiGiCo) && !(currentlyActiveBridgingTypes & PBT_DiGiCo));
 		auto removeDiGiCoBridging = (!(desiredActiveBridgingTypes & PBT_DiGiCo) && (currentlyActiveBridgingTypes & PBT_DiGiCo));
+		auto addDAWPluginBridging = ((desiredActiveBridgingTypes & PBT_DAWPlugin) && !(currentlyActiveBridgingTypes & PBT_DAWPlugin));
+		auto removeDAWPluginBridging = (!(desiredActiveBridgingTypes & PBT_DAWPlugin) && (currentlyActiveBridgingTypes & PBT_DAWPlugin));
 		auto addRTTrPMBridging = ((desiredActiveBridgingTypes & PBT_BlacktraxRTTrPM) && !(currentlyActiveBridgingTypes & PBT_BlacktraxRTTrPM));
 		auto removeRTTrPMBridging = (!(desiredActiveBridgingTypes & PBT_BlacktraxRTTrPM) && (currentlyActiveBridgingTypes & PBT_BlacktraxRTTrPM));
 		auto addGenericOSCBridging = ((desiredActiveBridgingTypes & PBT_GenericOSC) && !(currentlyActiveBridgingTypes & PBT_GenericOSC));
@@ -1790,6 +1963,20 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 				if (protocolXmlElement)
 				{
 					m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_DiGiCo, *protocolXmlElement));
+					nodeXmlElement->removeChildElement(protocolXmlElement, true);
+				}
+			}
+
+			if (addDAWPluginBridging)
+			{
+				nodeXmlElement->addChildElement(std::make_unique<XmlElement>(m_bridgingProtocolCacheMap.at(PBT_DAWPlugin)).release());
+			}
+			else if (removeDAWPluginBridging)
+			{
+				auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DAWPLUGIN_PROCESSINGPROTOCOL_ID));
+				if (protocolXmlElement)
+				{
+					m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_DAWPlugin, *protocolXmlElement));
 					nodeXmlElement->removeChildElement(protocolXmlElement, true);
 				}
 			}
@@ -2701,6 +2888,142 @@ bool ProtocolBridgingWrapper::SetDiGiCoRemotePort(int remotePort, bool dontSendN
 }
 
 /**
+ * Gets the mute state of the given source
+ * @param soundobjectProcessorId The id of the Processor for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteDAWPluginSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId)
+{
+	return GetMuteProtocolSoundobjectProcessorId(DAWPLUGIN_PROCESSINGPROTOCOL_ID, soundobjectProcessorId);
+}
+
+/**
+ * Sets the given source to be (un-)muted
+ * @param soundobjectProcessorId The id of the source that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteDAWPluginSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolSoundobjectProcessorId(DAWPLUGIN_PROCESSINGPROTOCOL_ID, soundobjectProcessorId);
+	else
+		return SetUnmuteProtocolSoundobjectProcessorId(DAWPLUGIN_PROCESSINGPROTOCOL_ID, soundobjectProcessorId);
+}
+
+/**
+ * Sets the given sources to be (un-)muted
+ * @param soundobjectProcessorIds The ids of the Processors that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteDAWPluginSoundobjectProcessorIds(const std::vector<SoundobjectProcessorId>& soundobjectProcessorIds, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolSoundobjectProcessorIds(DAWPLUGIN_PROCESSINGPROTOCOL_ID, soundobjectProcessorIds);
+	else
+		return SetUnmuteProtocolSoundobjectProcessorIds(DAWPLUGIN_PROCESSINGPROTOCOL_ID, soundobjectProcessorIds);
+}
+
+/**
+ * Gets the mute state of the given MatrixInputProcessor
+ * @param matrixInputProcessorId The id of the matrixInputProcessor for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteDAWPluginMatrixInputProcessorId(MatrixInputProcessorId matrixInputProcessorId)
+{
+	return GetMuteProtocolMatrixInputProcessorId(DAWPLUGIN_PROCESSINGPROTOCOL_ID, matrixInputProcessorId);
+}
+
+/**
+ * Sets the given MatrixInputProcessor to be (un-)muted
+ * @param matrixInputProcessorId The id of the matrixInputProcessor that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteDAWPluginMatrixInputProcessorId(MatrixInputProcessorId matrixInputProcessorId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixInputProcessorId(DAWPLUGIN_PROCESSINGPROTOCOL_ID, matrixInputProcessorId);
+	else
+		return SetUnmuteProtocolMatrixInputProcessorId(DAWPLUGIN_PROCESSINGPROTOCOL_ID, matrixInputProcessorId);
+}
+
+/**
+ * Sets the given MatrixInputProcessors to be (un-)muted
+ * @param matrixInputProcessorIds The ids of the matrixInputProcessors that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteDAWPluginMatrixInputProcessorIds(const std::vector<MatrixInputProcessorId>& matrixInputProcessorIds, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixInputProcessorIds(DAWPLUGIN_PROCESSINGPROTOCOL_ID, matrixInputProcessorIds);
+	else
+		return SetUnmuteProtocolMatrixInputProcessorIds(DAWPLUGIN_PROCESSINGPROTOCOL_ID, matrixInputProcessorIds);
+}
+
+/**
+ * Gets the mute state of the given matrixOutputProcessor
+ * @param matrixOutputProcessorId The id of the matrixOutputProcessor for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteDAWPluginMatrixOutputProcessorId(MatrixOutputProcessorId matrixOutputProcessorId)
+{
+	return GetMuteProtocolMatrixOutputProcessorId(DAWPLUGIN_PROCESSINGPROTOCOL_ID, matrixOutputProcessorId);
+}
+
+/**
+ * Sets the given MatrixOutputProcessor to be (un-)muted
+ * @param matrixOutputProcessorId The id of the matrixOutputProcessor that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteDAWPluginMatrixOutputProcessorId(MatrixOutputProcessorId matrixOutputProcessorId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixOutputProcessorId(DAWPLUGIN_PROCESSINGPROTOCOL_ID, matrixOutputProcessorId);
+	else
+		return SetUnmuteProtocolMatrixOutputProcessorId(DAWPLUGIN_PROCESSINGPROTOCOL_ID, matrixOutputProcessorId);
+}
+
+/**
+ * Sets the given MatrixOutputProcessors to be (un-)muted
+ * @param matrixOutputProcessorIds The ids of the matrixOutput that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteDAWPluginMatrixOutputProcessorIds(const std::vector<MatrixOutputProcessorId>& matrixOutputProcessorIds, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixOutputProcessorIds(DAWPLUGIN_PROCESSINGPROTOCOL_ID, matrixOutputProcessorIds);
+	else
+		return SetUnmuteProtocolMatrixOutputProcessorIds(DAWPLUGIN_PROCESSINGPROTOCOL_ID, matrixOutputProcessorIds);
+}
+
+/**
+ * Gets the currently set DiGiCo client ip address.
+ * This method forwards the call to the generic implementation.
+ * @return	The ip address string
+ */
+String ProtocolBridgingWrapper::GetDAWPluginIpAddress()
+{
+	return GetProtocolIpAddress(DAWPLUGIN_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol client ip address.
+ * This method forwards the call to the generic implementation.
+ * @param ipAddress	The new ip address string
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetDAWPluginIpAddress(String ipAddress, bool dontSendNotification)
+{
+	return SetProtocolIpAddress(DAWPLUGIN_PROCESSINGPROTOCOL_ID, ipAddress, dontSendNotification);
+}
+
+/**
  * Gets the mute state of the given soundobject processor
  * @param soundobjectProcessorId The id of the source for which the mute state shall be returned
  * @return The mute state
@@ -3080,6 +3403,22 @@ bool ProtocolBridgingWrapper::SetGenericOSCRemotePort(int remotePort, bool dontS
 }
 
 /**
+*
+*/
+int ProtocolBridgingWrapper::GetGenericOSCDataSendingDisabled()
+{
+	return GetProtocolDataSendingDisabled(GENERICOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+*
+*/
+bool ProtocolBridgingWrapper::SetGenericOSCDataSendingDisabled(int disabled, bool dontSendNotification)
+{
+	return SetProtocolDataSendingDisabled(GENERICOSC_PROCESSINGPROTOCOL_ID, disabled, dontSendNotification);
+}
+
+/**
  * Gets the mute state of the given soundobject processor
  * @param soundobjectProcessorId The id of the source for which the mute state shall be returned
  * @return The mute state
@@ -3259,6 +3598,30 @@ JUCEAppBasics::MidiCommandRangeAssignment ProtocolBridgingWrapper::GetGenericMID
 bool ProtocolBridgingWrapper::SetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification)
 {
 	return SetMidiAssignmentMapping(GENERICMIDI_PROCESSINGPROTOCOL_ID, remoteObjectId, assignmentMapping, dontSendNotification);
+}
+
+/**
+ * Gets the desired scenes to midi assignment mapping for a given remote object.
+ * This method forwards the call to the generic implementation.
+ * @param remoteObjectId	The remote object to get the scenes to midi mapping for.
+ * @return	The requested scenes to midi assignment mapping
+ */
+std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> ProtocolBridgingWrapper::GetGenericMIDIScenesAssignmentMapping(RemoteObjectIdentifier remoteObjectId)
+{
+	return GetMidiScenesAssignmentMapping(GENERICMIDI_PROCESSINGPROTOCOL_ID, remoteObjectId);
+}
+
+/**
+ * Sets the desired scenes to midi assignment mapping for a given remote object.
+ * This method forwards the call to the generic implementation.
+ * @param remoteObjectId	The remote object to set the scenes to midi mapping for.
+ * @param assignmentMapping	The scenes to midi mapping to set for the remote object.
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetGenericMIDIScenesAssignmentMapping(RemoteObjectIdentifier remoteObjectId, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& scenesToMidiAssignmentMapping, bool dontSendNotification)
+{
+	return SetMidiScenesAssignmentMapping(GENERICMIDI_PROCESSINGPROTOCOL_ID, remoteObjectId, scenesToMidiAssignmentMapping, dontSendNotification);
 }
 
 /**

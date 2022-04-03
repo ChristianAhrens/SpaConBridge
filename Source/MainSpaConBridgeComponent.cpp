@@ -243,6 +243,21 @@ void MainSpaConBridgeComponent::onConfigUpdated()
                     onUpdateLookAndFeel(lookAndFeelType);
             }
         }
+
+#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
+        auto fullscreenWindowModeXmlElement = uiCfgState->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::FULLSCREENWINDOWMODE));
+        if (fullscreenWindowModeXmlElement)
+        {
+            auto fullscreenWindowModeTextElement = fullscreenWindowModeXmlElement->getFirstChildElement();
+            if (fullscreenWindowModeTextElement && fullscreenWindowModeTextElement->isTextElement())
+            {
+                auto fullscreen = 1 == static_cast<DbLookAndFeelBase::LookAndFeelType>(fullscreenWindowModeTextElement->getText().getIntValue());
+
+                if (onSetWindowMode)
+                    onSetWindowMode(fullscreen);
+            }
+        }
+#endif
     }
 }
 

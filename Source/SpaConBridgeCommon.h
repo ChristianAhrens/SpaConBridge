@@ -24,6 +24,10 @@
 
 #include <RemoteProtocolBridgeCommon.h>
 
+#if LINUX || JUCE_WINDOWS
+#define USE_FULLSCREEN_WINDOWMODE_TOGGLE 1
+#endif
+
 
 namespace SpaConBridge
 {
@@ -185,9 +189,10 @@ static constexpr ProtocolBridgingType PBT_YamahaSQ			= 0x00000010;
 static constexpr ProtocolBridgingType PBT_HUI				= 0x00000020;
 static constexpr ProtocolBridgingType PBT_YamahaOSC			= 0x00000040;
 static constexpr ProtocolBridgingType PBT_ADMOSC			= 0x00000080;
+static constexpr ProtocolBridgingType PBT_DAWPlugin			= 0x00000100;
 static constexpr ProtocolBridgingType PBT_DS100				= 0x10000000;
 
-static const std::vector<ProtocolBridgingType> ProtocolBridgingTypes{ PBT_DiGiCo, PBT_BlacktraxRTTrPM, PBT_GenericOSC, PBT_GenericMIDI, PBT_YamahaSQ, PBT_HUI, PBT_YamahaOSC, PBT_ADMOSC, PBT_DS100 };
+static const std::vector<ProtocolBridgingType> ProtocolBridgingTypes{ PBT_DiGiCo, PBT_DAWPlugin, PBT_BlacktraxRTTrPM, PBT_GenericOSC, PBT_GenericMIDI, PBT_YamahaSQ, PBT_HUI, PBT_YamahaOSC, PBT_ADMOSC, PBT_DS100 };
 
 String GetProtocolBridgingShortName(ProtocolBridgingType type);
 String GetProtocolBridgingNiceName(ProtocolBridgingType type);
@@ -293,7 +298,11 @@ enum SpaConBridgeErrorCode
 	SEC_SaveConfig_CannotWrite,
 	SEC_LoadImage_CannotAccess,
 	SEC_LoadImage_CannotRead,
-	SEC_LoadImage_InvalidImage
+	SEC_LoadImage_InvalidImage,
+	SEC_LoadScnIdxToMIDI_CannotAccess,
+	SEC_LoadScnIdxToMIDI_InvalidFile,
+	SEC_SaveScnIdxToMIDI_CannotAccess,
+	SEC_SaveScnIdxToMIDI_CannotWrite,
 };
 
 /**
@@ -309,7 +318,6 @@ void ShowUserErrorNotification(const SpaConBridgeErrorCode errorCode);
 bool UpdateDrawableButtonImages(const std::unique_ptr<DrawableButton>& drawableButton, const String& binarySVGStringData, LookAndFeel* lookAndFeel);
 bool UpdateDrawableButtonImages(const std::unique_ptr<JUCEAppBasics::TextWithImageButton>& drawableButton, const String& binarySVGStringData, LookAndFeel* lookAndFeel);
 bool UpdateDrawableButtonImages(DrawableButton* drawableButton, const String& binarySVGStringData, LookAndFeel* lookAndFeel);
-
 
 
 } // namespace SpaConBridge

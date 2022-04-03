@@ -22,19 +22,14 @@
 #include "../HeaderWithElmListComponent.h"
 
 #include "../../../SpaConBridgeCommon.h"
+#include "SceneIndexToMidiAssignerComponent.h"
 
 #include <ZeroconfDiscoverComponent.h>
 #include <SplitButtonComponent.h>
 #include <TextWithImageButton.h>
 #include <MidiLearnerComponent.h>
 
-#if JUCE_WINDOWS
-#ifdef SERVUS_USE_WINDNS
 #define ZEROCONF_SUPPORTED
-#endif
-#else
-#define ZEROCONF_SUPPORTED
-#endif
 
 namespace SpaConBridge
 {
@@ -90,16 +85,18 @@ private:
 	void textEditorUpdated(TextEditor&);
 
 	//==============================================================================
-	void handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info);
-	void handleSecondDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, JUCEAppBasics::ZeroconfDiscoverComponent::ServiceInfo* info);
+	void handleDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, ZeroconfSearcher::ZeroconfSearcher::ServiceInfo* info);
+	void handleSecondDS100ServiceSelected(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, ZeroconfSearcher::ZeroconfSearcher::ServiceInfo* info);
 
 	//==============================================================================
 	void handleMidiAssiSet(Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi);
+	void handleScenesToMidiAssiSet(Component* sender, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& scenesToMidiAssi);
 
 	//==============================================================================
 	void processUpdatedGeneralConfig();
 	void processUpdatedDS100Config();
 	void processUpdatedDiGiCoConfig();
+	void processUpdatedDAWPluginConfig();
 	void processUpdatedRTTrPMConfig();
 	void processUpdatedGenericOSCConfig();
 	void processUpdatedGenericMIDIConfig();
@@ -110,6 +107,7 @@ private:
 	void createGeneralSettingsSection();
 	void createDS100SettingsSection();
 	void createDiGiCoSettingsSection();
+	void createDAWPluginSettingsSection();
 	void createRTTrPMSettingsSection();
 	void createGenericOSCSettingsSection();
 	void createGenericMIDISettingsSection();
@@ -134,7 +132,12 @@ private:
 	std::unique_ptr<Label>										m_EnabledPagesLabel;
 	std::unique_ptr<ComboBox>									m_LookAndFeelSelect;
 	std::unique_ptr<Label>										m_LookAndFeelLabel;
+#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
+	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_ToggleFullscreenButton;
+#endif
 	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_StaticObjectsPollingButton;
+	std::unique_ptr<TextEditor>									m_SystemIpInfoEdit;
+	std::unique_ptr<Label>										m_SystemIpInfoLabel;
 
 	// DS100 settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_DS100Settings;
@@ -169,6 +172,11 @@ private:
 	std::unique_ptr<TextEditor>									m_DiGiCoRemotePortEdit;
 	std::unique_ptr<Label>										m_DiGiCoRemotePortLabel;
 
+	// Soundscape DAW Plugin settings section
+	std::unique_ptr<HeaderWithElmListComponent>					m_DAWPluginBridgingSettings;
+	std::unique_ptr<TextEditor>									m_DAWPluginIpAddressEdit;
+	std::unique_ptr<Label>										m_DAWPluginIpAddressLabel;
+
 	// RTTrPM settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_RTTrPMBridgingSettings;
 	std::unique_ptr<TextEditor>									m_RTTrPMListeningPortEdit;
@@ -188,7 +196,8 @@ private:
 	std::unique_ptr<TextEditor>									m_GenericOSCListeningPortEdit;
 	std::unique_ptr<Label>										m_GenericOSCListeningPortLabel;
 	std::unique_ptr<TextEditor>									m_GenericOSCRemotePortEdit;
-	std::unique_ptr<Label>										m_GenericOSCRemotePortLabel;
+	std::unique_ptr<Label>										m_GenericOSCRemotePortLabel; 
+	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_GenericOSCDisableSendingButton;
 
 	// Generic MIDI settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_GenericMIDIBridgingSettings;
@@ -220,6 +229,12 @@ private:
 	std::unique_ptr<Label>										m_GenericMIDIMatrixOutputGainLabel;
 	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDIMatrixOutputMuteLearner;
 	std::unique_ptr<Label>										m_GenericMIDIMatrixOutputMuteLabel;
+	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDINextSceneLearner;
+	std::unique_ptr<Label>										m_GenericMIDINextSceneLabel;
+	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDIPrevSceneLearner;
+	std::unique_ptr<Label>										m_GenericMIDIPrevSceneLabel;
+	std::unique_ptr<SceneIndexToMidiAssignerComponent>			m_GenericMIDIRecallSceneAssigner;
+	std::unique_ptr<Label>										m_GenericMIDIRecallSceneLabel;
 
 	// ADM OSC settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_ADMOSCBridgingSettings;

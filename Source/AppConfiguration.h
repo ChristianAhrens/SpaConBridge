@@ -57,6 +57,7 @@ public:
         BACKGROUNDIMAGES,
         BACKGROUND,
         STATICOBJECTSPOLLING,
+        FULLSCREENWINDOWMODE,
     };
     static String getTagName(TagID ID)
     {
@@ -114,6 +115,8 @@ public:
             return "Bkg";
         case STATICOBJECTSPOLLING:
             return "StaticObjectsPolling";
+        case FULLSCREENWINDOWMODE:
+            return "FullscreenWindowmode";
 		default:
 			return "INVALID";
         }

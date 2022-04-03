@@ -187,6 +187,10 @@ public:
 	void SetMultiSliderPageBackgroundImage(MappingAreaId mappingAreaId, const juce::Image& backgroundImage);
 	void RemoveMultiSliderPageBackgroundImage(MappingAreaId mappingAreaId);
 
+	//==============================================================================
+	void SetOverlayComponent(Component* componentToOverlay);
+	void ClearOverlayComponent();
+
 private:
 	//==============================================================================
 	void toggleAboutPage();
@@ -219,6 +223,8 @@ private:
 	std::unique_ptr<AboutPageComponent>				m_aboutPage;			/**> Container for about component. */
 	std::unique_ptr<ScenesPageComponent>			m_scenesPage;			/**> Container for scenes component. */
 	std::unique_ptr<EnSpacePageComponent>			m_enSpacePage;			/**> Container for EnSpace component. */
+
+	Component* m_overlayComponent{ nullptr };
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PageContainerComponent)
 };

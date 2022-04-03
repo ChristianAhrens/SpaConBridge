@@ -68,6 +68,7 @@ static constexpr int DS100_2_PROCESSINGPROTOCOL_ID = 6;
 static constexpr int GENERICMIDI_PROCESSINGPROTOCOL_ID = 7;
 static constexpr int YAMAHAOSC_PROCESSINGPROTOCOL_ID = 8;
 static constexpr int ADMOSC_PROCESSINGPROTOCOL_ID = 9;
+static constexpr int DAWPLUGIN_PROCESSINGPROTOCOL_ID = 10;
 
 class ProtocolBridgingWrapper :
 	public ProcessingEngineNode::NodeListener,
@@ -164,6 +165,22 @@ public:
 	bool SetDiGiCoRemotePort(int remotePort, bool dontSendNotification = false);
 
 	//==========================================================================
+	bool GetMuteDAWPluginSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId);
+	bool SetMuteDAWPluginSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId, bool mute = true);
+	bool SetMuteDAWPluginSoundobjectProcessorIds(const std::vector<SoundobjectProcessorId>& soundobjectProcessorIds, bool mute = true);
+				
+	bool GetMuteDAWPluginMatrixInputProcessorId(MatrixInputProcessorId matrixInputProcessorId);
+	bool SetMuteDAWPluginMatrixInputProcessorId(MatrixInputProcessorId matrixInputProcessorId, bool mute = true);
+	bool SetMuteDAWPluginMatrixInputProcessorIds(const std::vector<MatrixInputProcessorId>& matrixInputProcessorIds, bool mute = true);
+				
+	bool GetMuteDAWPluginMatrixOutputProcessorId(MatrixOutputProcessorId matrixOutputProcessorId);
+	bool SetMuteDAWPluginMatrixOutputProcessorId(MatrixOutputProcessorId matrixOutputProcessorId, bool mute = true);
+	bool SetMuteDAWPluginMatrixOutputProcessorIds(const std::vector<MatrixOutputProcessorId>& matrixOutputProcessorIds, bool mute = true);
+
+	String GetDAWPluginIpAddress();
+	bool SetDAWPluginIpAddress(String ipAddress, bool dontSendNotification = false);
+
+	//==========================================================================
 	bool GetMuteRTTrPMSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId);
 	bool SetMuteRTTrPMSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId, bool mute = true);
 	bool SetMuteRTTrPMSoundobjectProcessorIds(const std::vector<SoundobjectId>& soundobjectProcessorIds, bool mute = true);
@@ -204,6 +221,8 @@ public:
 	bool SetGenericOSCListeningPort(int listeningPort, bool dontSendNotification = false);
 	int GetGenericOSCRemotePort();
 	bool SetGenericOSCRemotePort(int remotePort, bool dontSendNotification = false);
+	int GetGenericOSCDataSendingDisabled();
+	bool SetGenericOSCDataSendingDisabled(int disabled, bool dontSendNotification = false);
 
 	//==========================================================================
 	bool GetMuteGenericMIDISoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId);
@@ -224,6 +243,8 @@ public:
 	bool SetGenericMIDIOutputDeviceIdentifier(const String& MIDIInputDeviceIdentifier, bool dontSendNotification = false);
 	JUCEAppBasics::MidiCommandRangeAssignment GetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId);
 	bool SetGenericMIDIAssignmentMapping(RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification = false);
+	std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> GetGenericMIDIScenesAssignmentMapping(RemoteObjectIdentifier remoteObjectId);
+	bool SetGenericMIDIScenesAssignmentMapping(RemoteObjectIdentifier remoteObjectId, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& scenesToMidiAssignmentMapping, bool dontSendNotification = false);
 	int GetGenericMIDIMappingArea();
 	bool SetGenericMIDIMappingArea(int mappingAreaId, bool dontSendNotification = false);
 
@@ -321,6 +342,8 @@ private:
 	bool SetProtocolOutputDeviceIdentifier(ProtocolId protocolId, const String& outputDeviceIdentifier, bool dontSendNotification = false);
 	JUCEAppBasics::MidiCommandRangeAssignment GetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId);
 	bool SetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification = false);
+	std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> GetMidiScenesAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId);
+	bool SetMidiScenesAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& assignmentMapping, bool dontSendNotification = false);
 	int GetProtocolXAxisInverted(ProtocolId protocolId);
 	bool SetProtocolXAxisInverted(ProtocolId protocolId, int inverted, bool dontSendNotification = false);
 	int GetProtocolYAxisInverted(ProtocolId protocolId);
@@ -337,6 +360,7 @@ private:
 	bool SetBridgingNodeStateXml(XmlElement* stateXml, bool dontSendNotification = false);
 	bool SetupBridgingNode(const ProtocolBridgingType bridgingProtocolsToActivate = PBT_None);
 	std::unique_ptr<XmlElement> SetupDiGiCoBridgingProtocol();
+	std::unique_ptr<XmlElement> SetupDAWPluginBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupRTTrPMBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupGenericOSCBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupGenericMIDIBridgingProtocol();

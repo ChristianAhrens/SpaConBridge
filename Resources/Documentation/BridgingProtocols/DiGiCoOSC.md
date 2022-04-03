@@ -1,8 +1,8 @@
 ## DiGiCo OSC bridging settings
 
-![Showreel.015.png](../Showreel/Showreel.015.png "DiGiCo OSC bridging settings")
+![Showreel.018.png](../Showreel/Showreel.018.png "DiGiCo OSC bridging settings")
 
-_This bridging protocol is the same as [Generic OSC](GenericOSC.md) and is only available separately to allow using both a DiGiCo SD series console and other OSC input at the same time, both using d&b [DS100 OSC protocol specification](https://www.dbaudio.com/assets/products/downloads/manuals-documentation/electronics/dbaudio-osc-protocol-ds100-1.3.0-en.pdf)._
+_This bridging protocol is the same as [Generic OSC](GenericOSC.md) and is available separately to allow using both a DiGiCo SD series console and other OSC input at the same time._
 
 
 ### Supported OSC messages for bridging that are also visible in app UI

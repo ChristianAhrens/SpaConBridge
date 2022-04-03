@@ -42,7 +42,7 @@ AboutPageContentComponent::AboutPageContentComponent()
 	addAndMakeVisible(m_appIconDrawable.get());
 	// App info label
 	String infoString = JUCEApplication::getInstance()->getApplicationName() + String(" V") + String(JUCE_STRINGIFY(JUCE_APP_VERSION)) + String("\n")
-                    + String("Copyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2021 - Christian Ahrens,\n")
+                    + String("Copyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2022 - Christian Ahrens,\n")
                     + JUCEApplication::getInstance()->getApplicationName() + String(" uses GPLv3");
 	m_appInfoLabel = std::make_unique<Label>("Version", infoString);
 	m_appInfoLabel->setJustificationType(Justification::topLeft);
@@ -84,21 +84,6 @@ AboutPageContentComponent::AboutPageContentComponent()
 	m_materialLink->setFont(Font(13.0, Font::plain), false /* do not resize */);
 	m_materialLink->setJustificationType(Justification::centredLeft);
 	addAndMakeVisible(m_materialLink.get());
-
-	// HBP (Servus) icon drawable
-	m_servusIconDrawable = Drawable::createFromImageData(BinaryData::HumanBrainProjectLogo_png, BinaryData::HumanBrainProjectLogo_pngSize);
-	addAndMakeVisible(m_servusIconDrawable.get());
-	// HBP (Servus) copyright label
-	String servusLabelString = String("Servus Zeroconf API.\nCopyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2014 - 2015, Human Brain Project\nServus uses LGPLv3");
-	m_servusLabel = std::make_unique<Label>("ServusLabel", servusLabelString);
-	m_servusLabel->setJustificationType(Justification::topRight);
-	m_servusLabel->setFont(Font(13.0, Font::plain));
-	addAndMakeVisible(m_servusLabel.get());
-	// HBP (Servus) github link
-	m_servusLink = std::make_unique<HyperlinkButton>("Servus on GitHub", URL("https://github.com/HBPVIS/Servus"));
-	m_servusLink->setFont(Font(13.0, Font::plain), false /* do not resize */);
-	m_servusLink->setJustificationType(Justification::centredLeft);
-	addAndMakeVisible(m_servusLink.get());
 
 	// GPLv3 License
 	String LicenseGPLv3(BinaryData::COPYING, BinaryData::COPYINGSize);
@@ -170,14 +155,12 @@ void AboutPageContentComponent::resized()
 	auto juceDrawableHeight = 35;
 	auto materialInfoHeight = 80;
 	auto materialDrawableHeight = 52;
-	auto servusInfoHeight = 80;
-	auto servusDrawableHeight = 48;
 
 	auto GPLv3LicenseHeight = 8810;
 	auto APACHEv2LicenseHeight = 2680;
 	auto LGPLv3LicenseHeight = 2200;
 
-	auto totalHeight =  appInfoHeight + appInfoLinkHeight + spacing + juceInfoHeight + materialInfoHeight + servusInfoHeight + infoSpacing + GPLv3LicenseHeight + spacing + APACHEv2LicenseHeight + spacing + LGPLv3LicenseHeight;
+	auto totalHeight =  appInfoHeight + appInfoLinkHeight + spacing + juceInfoHeight + materialInfoHeight + infoSpacing + GPLv3LicenseHeight + spacing + APACHEv2LicenseHeight + spacing + LGPLv3LicenseHeight;
 	setBounds(Rectangle<int>(getLocalBounds().getWidth(), totalHeight));
 
 	auto bounds = getLocalBounds().reduced(spacing, spacing);
@@ -218,17 +201,6 @@ void AboutPageContentComponent::resized()
 	m_materialLabel->setBounds(materialLabelBounds);
 	// material link below info
 	m_materialLink->setBounds(materialLinkBounds.removeFromBottom(materialLinkBounds.getHeight() - materialDrawableHeight + 10));
-
-	// servus copyright text right of the logo
-	auto servusInfoBounds = bounds.removeFromTop(servusInfoHeight).removeFromLeft(370);
-	auto servusDrawableBounds = servusInfoBounds.removeFromLeft(100);
-	auto servusLinkBounds = servusDrawableBounds;
-	servusDrawableBounds = servusDrawableBounds.removeFromTop(servusDrawableHeight);
-	m_servusIconDrawable->setTransformToFit(servusDrawableBounds.removeFromLeft(servusDrawableHeight).toFloat(), RectanglePlacement(RectanglePlacement::stretchToFit));
-	auto servusLabelBounds = servusInfoBounds.removeFromRight(270);
-	m_servusLabel->setBounds(servusLabelBounds);
-	// servus link below info
-	m_servusLink->setBounds(servusLinkBounds.removeFromBottom(servusLinkBounds.getHeight() - servusDrawableHeight + 10));
 
 	// GPLv3 Textfield
 	auto GPLv3Bounds = bounds.removeFromTop(GPLv3LicenseHeight);

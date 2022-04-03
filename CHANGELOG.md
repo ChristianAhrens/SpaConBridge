@@ -4,9 +4,16 @@ All notable changes to SpaConBridge will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]### Added
+## [Unreleased]
+### Added
+- Added support for SceneRecall via MIDI (extended config UI + MIDI protocol processing)
+- Added Zeroconf discovery of DS100 devices on Windows OS
+- Added fullscreen kiosk mode on Windows OS
+- Added support for d&b DAW plugin bridging
+- Added support for disabling Generic OSC 'return channel'
 
 ### Changed
+- Replaced Servus zeroconf discovery with mdns based selfmade implementation
 
 ### Fixed
 

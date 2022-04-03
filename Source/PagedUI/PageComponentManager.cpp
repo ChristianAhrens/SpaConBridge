@@ -499,6 +499,8 @@ void PageComponentManager::LoadImageForMappingFromFile(MappingAreaId mappingArea
         return;
     }
     
+	if (m_multiSliderBackgrounds.count(mappingArea) != 0)
+		m_multiSliderBackgrounds.erase(mappingArea);
 	m_multiSliderBackgrounds.insert(std::make_pair(mappingArea, image));
 
 	if (m_pageContainer)
@@ -534,7 +536,6 @@ DbLookAndFeelBase::LookAndFeelType PageComponentManager::GetLookAndFeelType() co
  * Setter for the look and feel enum type member.
  * @param lookAndFeelType	The look and feel type to set
  * @param dontUpdateConfig	Indication if the configuration update shall be triggerd as well
- * @return The selected mapping area.
  */
 void PageComponentManager::SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType lookAndFeelType, bool dontUpdateConfig)
 {
@@ -545,6 +546,32 @@ void PageComponentManager::SetLookAndFeelType(DbLookAndFeelBase::LookAndFeelType
 		triggerConfigurationUpdate(true); // we do want to include watcher update, since only that way the whole application is set to new LAFT (onConfigUpdated in main component)
 	}
 }
+
+#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
+/**
+ * Getter for the fullscreen windowmode member value.
+ * @return The bool indication if current windowmode is fullscreen.
+ */
+bool PageComponentManager::IsFullscreenWindowMode() const
+{
+	return m_fullscreenWindowMode;
+}
+
+/**
+ * Setter for the fullscreen windowmode member.
+ * @param fullscreen	The bool indicator if setting to fullscreen or non-fullscreen shall be performed
+ * @param dontUpdateConfig	Indication if the configuration update shall be triggerd as well
+ */
+void PageComponentManager::SetFullscreenWindowMode(bool fullscreen, bool dontUpdateConfig)
+{
+	m_fullscreenWindowMode = fullscreen;
+
+	if (!dontUpdateConfig)
+	{
+		triggerConfigurationUpdate(true); // we do want to include watcher update, since only that way the whole application is set to new LAFT (onConfigUpdated in main component)
+	}
+}
+#endif
 
 /**
  * Overriden from AppConfiguration::XmlConfigurableElement to set this objects' settings
@@ -588,6 +615,20 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
 				retVal = false;
 		}
 	}
+
+#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
+	auto fullscreenWindowModeXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::FULLSCREENWINDOWMODE));
+	if (fullscreenWindowModeXmlElement)
+	{
+		auto fullscreenWindowModeTextElement = fullscreenWindowModeXmlElement->getFirstChildElement();
+		if (fullscreenWindowModeTextElement && fullscreenWindowModeTextElement->isTextElement())
+		{
+			auto fullscreen = 1 == fullscreenWindowModeTextElement->getText().getIntValue();
+
+			SetFullscreenWindowMode(fullscreen, true);
+		}
+	}
+#endif
 
 	auto activeTabXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::ACTIVETAB));
 	if (activeTabXmlElement)
@@ -837,6 +878,12 @@ std::unique_ptr<XmlElement> PageComponentManager::createStateXml()
 		auto lookAndFeelXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::LOOKANDFEELTYPE));
 		if (lookAndFeelXmlElement)
 			lookAndFeelXmlElement->addTextElement(String((GetLookAndFeelType() == DbLookAndFeelBase::LAFT_InvalidFirst) ? DbLookAndFeelBase::LAFT_Dark : GetLookAndFeelType()));
+
+#if USE_FULLSCREEN_WINDOWMODE_TOGGLE
+		auto fullscreenWindowModeXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::FULLSCREENWINDOWMODE));
+		if (fullscreenWindowModeXmlElement)
+			fullscreenWindowModeXmlElement->addTextElement(String(IsFullscreenWindowMode() ? 1 : 0));
+#endif
 
 		auto soundobjectTableXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTTABLE));
 		if (soundobjectTableXmlElement)

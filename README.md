@@ -46,8 +46,6 @@ _[![SpaConBridge v0.3.1 Introduction](https://img.youtube.com/vi/ozhQxKidtWc/0.j
 
 **Known Issues:**
 
-* Zeroconf is not working in builds for Windows OS  
-__Note:__ Needs to be implemented...
 * LookAndFeel change does not reliably update colour scheme for all UI elements  
 __Note:__ Suspicion: Underlying UI framework issue is the cause for this
 * MIDI device listing is not updated during runtime  
@@ -207,6 +205,8 @@ Both plot and log are refreshed at a small rate to keep the performance impact o
 
 ![Showreel.0013.png](Resources/Documentation/Showreel/Showreel.013.png "General Settings")
 
+![Showreel.0014.png](Resources/Documentation/Showreel/Showreel.014.png "General Settings - Windows kiosk mode")
+
 Settings page is structured in sections.
 
 The first section allows configuration of application related parameters and is always active.
@@ -220,9 +220,10 @@ DS100 OSC communication protocol is always active. The IP address can be manuall
 
 For details on the settings for the implemented protocols, see the individual documentation
   * [d&b DS100 signal bridge communication](Resources/Documentation/BridgingProtocols/DS100.md)
+  * [Generic d&b OSC protocol communication](Resources/Documentation/BridgingProtocols/GenericOSC.md)
+  * [d&b DAW plugin communication](Resources/Documentation/BridgingProtocols/DAWPlugin.md)
   * [DiGiCo SD series mixing console communication](Resources/Documentation/BridgingProtocols/DiGiCoOSC.md)
   * [Blacktrax tracking system communication *](Resources/Documentation/BridgingProtocols/BlacktraxRTTrPM.md)
-  * [Generic d&b OSC protocol communication](Resources/Documentation/BridgingProtocols/GenericOSC.md)
   * [Generic MIDI communication](Resources/Documentation/BridgingProtocols/GenericMIDI.md)
   * [Yamaha OSC communication *](Resources/Documentation/BridgingProtocols/YamahaOSC.md)
   * [ADM OSC communication *](Resources/Documentation/BridgingProtocols/ADMOSC.md)

@@ -37,7 +37,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../../SpaConBridgeCommon.h"
 #include "../../AppConfiguration.h"
-#include "../../submodules/JUCE-AppBasics/Source/ColourAndSizePickerComponent.h"
+#include "../../../submodules/JUCE-AppBasics/Source/ColourAndSizePickerComponent.h"
 
 
 namespace SpaConBridge

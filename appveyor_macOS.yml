@@ -1,0 +1,14 @@
+version: 1.0.{build}
+branches:
+  only:
+  - master
+  - development
+image: macOS-Monterey
+install:
+  - cd "$APPVEYOR_BUILD_FOLDER"
+  - git submodule update --init --recursive
+build_script:
+- sh: >-
+    cd Resources/Deployment/macOS
+
+    ./build_project.sh

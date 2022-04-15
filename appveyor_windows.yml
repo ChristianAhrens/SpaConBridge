@@ -11,4 +11,4 @@ build_script:
 - cmd: >-
     cd Resources/Deployment/Windows
     
-    create_installer.bat
+    build_project.bat

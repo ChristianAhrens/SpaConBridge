@@ -1,7 +1,7 @@
 @echo off
 
 set INNOSETUPDIR=C:\Program Files (x86)\Inno Setup 6
-set WORKSPACE=..\..\..\
+set WORKSPACE=..\..\..
 echo.
 
 echo Using variables:

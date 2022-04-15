@@ -1,7 +1,7 @@
 @echo off
 
 set VSDIR=C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE
-set WORKSPACE=..\..\..\
+set WORKSPACE=..\..\..
 set JUCEDIR=%WORKSPACE%\submodules\JUCE
 set PROJUCERVSDIR=%JUCEDIR%\extras\Projucer\Builds\VisualStudio2022
 echo.

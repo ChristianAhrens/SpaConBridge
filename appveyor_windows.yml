@@ -11,4 +11,7 @@ build_script:
 - cmd: >-
     cd Resources/Deployment/Windows
     
-    build_project.bat
+    create_installer.bat
+artifacts:
+- path: SpaConBridgeSetup*.exe
+  name: Installer Binary

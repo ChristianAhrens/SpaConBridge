@@ -9,9 +9,13 @@ There is no guarantee for compatibility inbetween versions or for the implemente
 See [LATEST RELEASE](../../releases/latest) for available binary packages or join iOS TestFlight Beta:
 <img src="Resources/AppStore/TestFlightQRCode.png" alt="TestFlight QR Code" width="25%">
 
-![Platform:iOS](https://img.shields.io/badge/platform-iOS-lightgrey)
+**Appveyor CI build status**
+
+![Platform:windows](https://img.shields.io/badge/platform-Windows-lightgrey) [![Build status](https://ci.appveyor.com/api/projects/status/q8ovnf5q9hr2strn?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/spaconbridge)
+
 ![Platform:macOS](https://img.shields.io/badge/platform-macOS-lightgrey)
-![Platform:windows](https://img.shields.io/badge/platform-Windows-lightgrey)
+
+![Platform:iOS](https://img.shields.io/badge/platform-iOS-lightgrey)
 
 
 <table>

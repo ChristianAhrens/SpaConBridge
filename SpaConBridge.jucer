@@ -555,17 +555,17 @@
         <CONFIGURATION isDebug="0" name="Release"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_osc"/>
-        <MODULEPATH id="juce_opengl"/>
-        <MODULEPATH id="juce_gui_extra"/>
-        <MODULEPATH id="juce_gui_basics"/>
-        <MODULEPATH id="juce_graphics"/>
-        <MODULEPATH id="juce_events"/>
-        <MODULEPATH id="juce_data_structures"/>
-        <MODULEPATH id="juce_core"/>
-        <MODULEPATH id="juce_audio_processors"/>
-        <MODULEPATH id="juce_audio_devices"/>
-        <MODULEPATH id="juce_audio_basics"/>
+        <MODULEPATH id="juce_osc" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="submodules/JUCE/modules"/>
       </MODULEPATHS>
     </VS2022>
     <XCODE_MAC targetFolder="Builds/MacOSX" smallIcon="qJTuNs" bigIcon="qJTuNs"
@@ -575,17 +575,17 @@
         <CONFIGURATION isDebug="0" name="Release"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_osc"/>
-        <MODULEPATH id="juce_opengl"/>
-        <MODULEPATH id="juce_gui_extra"/>
-        <MODULEPATH id="juce_gui_basics"/>
-        <MODULEPATH id="juce_graphics"/>
-        <MODULEPATH id="juce_events"/>
-        <MODULEPATH id="juce_data_structures"/>
-        <MODULEPATH id="juce_core"/>
-        <MODULEPATH id="juce_audio_processors"/>
-        <MODULEPATH id="juce_audio_basics"/>
-        <MODULEPATH id="juce_audio_devices" path="../../../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_osc" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="submodules/JUCE/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
     <XCODE_IPHONE targetFolder="Builds/iOS" smallIcon="ljOsyU" bigIcon="ljOsyU"
@@ -601,17 +601,17 @@
         <CONFIGURATION isDebug="0" name="Release"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_osc"/>
-        <MODULEPATH id="juce_opengl"/>
-        <MODULEPATH id="juce_gui_extra"/>
-        <MODULEPATH id="juce_gui_basics"/>
-        <MODULEPATH id="juce_graphics"/>
-        <MODULEPATH id="juce_events"/>
-        <MODULEPATH id="juce_data_structures"/>
-        <MODULEPATH id="juce_core"/>
-        <MODULEPATH id="juce_audio_processors"/>
-        <MODULEPATH id="juce_audio_basics"/>
-        <MODULEPATH id="juce_audio_devices" path="../../../../../../JUCE/modules"/>
+        <MODULEPATH id="juce_osc" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_opengl" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="submodules/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="submodules/JUCE/modules"/>
       </MODULEPATHS>
     </XCODE_IPHONE>
   </EXPORTFORMATS>

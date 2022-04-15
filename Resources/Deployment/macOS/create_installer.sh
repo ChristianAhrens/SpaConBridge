@@ -10,19 +10,14 @@ echo "Using certificate $CodeSignCertName for codesigning."
 echo "Using AppleId $NotarizationUser and bundle name $AppBundleId for notarization."
 
 # set convenience variables
-JUCEDir=/Applications/JUCE
-ProjucerPath="$JUCEDir"/Projucer.app/Contents/MacOS/Projucer
-JucerProjectPath=SpaConBridge.jucer
-XCodeProjectPath=Builds/MacOSX/SpaConBridge.xcodeproj
 AppBundlePath=Builds/MacOSX/build/Release
 CreateDmgPath=submodules/create-dmg/create-dmg
 DmgTargetPath=SpaConBridge.dmg
 
-# export projucer project
-"$ProjucerPath" --resave "$JucerProjectPath"
-
-# Start the build
-xcodebuild -project "$XCodeProjectPath" -configuration Release -jobs 8
+# build the project
+cd Resources/Deployment/macOS
+./build_project.sh
+cd ../../../
 
 # create project disk image
 test -f "$DmgTargetPath" && rm "$DmgTargetPath"

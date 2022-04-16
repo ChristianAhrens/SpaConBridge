@@ -9,10 +9,13 @@ JucerProjectPath=SpaConBridge.jucer
 ProjectMakefilePath=Builds/LinuxMakefile
 
 # build projucer
-make "$ProjucerMakefilePath"
+cd "$ProjucerMakefilePath"
+make
+cd ../../../../../..
 
 # export projucer project
 "$ProjucerBinPath" --resave "$JucerProjectPath"
 
 # start building the project
-make "$ProjectMakefilePath"
+cd "$ProjectMakefilePath"
+make

@@ -15,3 +15,10 @@ build_script:
 artifacts:
 - path: SpaConBridgeSetup*.exe
   name: Installer Binary
+notifications:
+- provider: Email
+  to:
+  - christianahrens@me.com
+  on_build_success: false
+  on_build_failure: true
+  on_build_status_changed: false

@@ -434,10 +434,10 @@
                   file="Source/PagedUI/PageComponents/SettingsPage/SettingsSectionsComponent.h"/>
           </GROUP>
           <GROUP id="{AE87B67F-F38C-02B1-7766-C315A14B1AA5}" name="MultisurfacePage">
-            <FILE id="iZVABT" name="MultisurfacePageComponent.cpp" compile="1"
-                  resource="0" file="Source/PagedUI/PageComponents/MultisurfacePage/MultisurfacePageComponent.cpp"/>
-            <FILE id="g1pfot" name="MultisurfacePageComponent.h" compile="0" resource="0"
-                  file="Source/PagedUI/PageComponents/MultisurfacePage/MultisurfacePageComponent.h"/>
+            <FILE id="IBiEGK" name="MultisurfacePageComponent.cpp" compile="1"
+                  resource="0" file="Source/PagedUI/PageComponents/MultiSurfacePage/MultisurfacePageComponent.cpp"/>
+            <FILE id="A6wGp1" name="MultisurfacePageComponent.h" compile="0" resource="0"
+                  file="Source/PagedUI/PageComponents/MultiSurfacePage/MultisurfacePageComponent.h"/>
           </GROUP>
           <GROUP id="{59435D02-8728-9CA1-282E-B7B15C7B9CAB}" name="MatrixIOPage">
             <FILE id="KD60wJ" name="MatrixChannelTableComponentBase.cpp" compile="1"

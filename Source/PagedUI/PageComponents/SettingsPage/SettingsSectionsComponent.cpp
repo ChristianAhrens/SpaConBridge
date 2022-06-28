@@ -895,7 +895,7 @@ void SettingsSectionsComponent::buttonClicked(Button* button)
  * Reimplemented from SplitButtonComponent Listener.
  * @param buttonId	The uid of a button element of the splitbutton component
  */
-void SettingsSectionsComponent::buttonClicked(JUCEAppBasics::SplitButtonComponent* button, uint64 buttonId)
+void SettingsSectionsComponent::buttonClicked(JUCEAppBasics::SplitButtonComponent* button, std::uint64_t buttonId)
 {
 	auto ctrl = Controller::GetInstance();
 	if (!ctrl)

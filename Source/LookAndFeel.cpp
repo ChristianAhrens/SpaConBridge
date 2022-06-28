@@ -124,7 +124,11 @@ void DbLookAndFeelBase::drawButtonBackground(	Graphics& g,
 	auto cornerSize = 2.0f;
 	auto bounds = button.getLocalBounds().toFloat().reduced(0.5f, 0.5f);
 
-	auto baseColour = backgroundColour.withMultipliedSaturation(button.hasKeyboardFocus(true) ? 1.3f : 0.9f)
+	// Original JUCE code uses multiplied saturation also depending on keyboardfocus. This results in ugly colours with our common red and blue buttons, so we eliminate this handling.
+	//	auto baseColour = backgroundColour.withMultipliedSaturation(button.hasKeyboardFocus(true) ? 1.3f : 0.9f)
+	//		.withMultipliedAlpha(button.isEnabled() ? 1.0f : 0.5f);
+
+	auto baseColour = backgroundColour.withMultipliedSaturation(0.9f)
 		.withMultipliedAlpha(button.isEnabled() ? 1.0f : 0.5f);
 
 	if (shouldDrawButtonAsDown || shouldDrawButtonAsHighlighted)

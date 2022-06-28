@@ -347,10 +347,8 @@ GestureManagedAudioParameterChoice::GestureManagedAudioParameterChoice(	const St
 												const String& name,
 												const StringArray& choices,
 												int defaultItemIndex,
-												const String& label,
-												std::function<String(int, int)> stringFromIndex,
-												std::function<int(const String&)> indexFromString)
-	: AudioParameterChoice(parameterID, name, choices, defaultItemIndex, label, stringFromIndex, indexFromString)
+												const AudioParameterChoiceAttributes& attributes)
+	: AudioParameterChoice(parameterID, name, choices, defaultItemIndex, attributes)
 {
 	m_ticksSinceLastChange = GESTURE_LENGTH_IN_TICKS + 1;
 }

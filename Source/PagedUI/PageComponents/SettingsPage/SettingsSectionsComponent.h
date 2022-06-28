@@ -65,7 +65,7 @@ public:
 	void buttonClicked(Button* button) override;
 
 	//==========================================================================
-	void buttonClicked(JUCEAppBasics::SplitButtonComponent* button, uint64 buttonId) override;
+	void buttonClicked(JUCEAppBasics::SplitButtonComponent* button, std::uint64_t buttonId) override;
 
 	//==========================================================================
 	void textEditorReturnKeyPressed(TextEditor&) override;

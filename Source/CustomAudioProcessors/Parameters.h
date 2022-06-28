@@ -134,9 +134,7 @@ public:
 							const String& name,
 							const StringArray& choices,
 							int defaultItemIndex,
-							const String& label = String(),
-							std::function<String(int index, int maximumStringLength)> stringFromIndex = nullptr,
-							std::function<int(const String& text)> indexFromString = nullptr);
+							const AudioParameterChoiceAttributes& attributes = {});
 
 	~GestureManagedAudioParameterChoice() override;
 

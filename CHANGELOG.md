@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.6.1] - 2022-06-28
+### Added
+
+### Changed
+- Updated JUCE framework reference to 7.0.0
+
+### Fixed
+- Fixed SoundObject colour picker refreshing issue
+- Fixed SoundObject Mute/RxTx Button colour shading depending on irrelevant Keyboard input focus state
+
 ## [0.6.0] - 2022-04-03
 ### Added
 - Added support for SceneRecall via MIDI (extended config UI + MIDI protocol processing)

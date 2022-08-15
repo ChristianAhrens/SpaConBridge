@@ -86,7 +86,17 @@ public:
             setFullScreen(true);
 #else
             setResizable(true, true);
+
+#if LINUX
+            // special behaviour for Linux (RBP 2,2" Adafruit SPI Display usecase):
+            // start in maximized window mode to prevent that on small screens only the central 
+            // grey area of the ui fits on the screen, seeming as if it was not working, 
+            // even though only the initial fit-to-screen is missing.
+            setFullScreen(true);
+#else
             centreWithSize(getWidth(), getHeight());
+#endif
+
 #endif
 
             setVisible(true);

@@ -1038,18 +1038,26 @@ void TableModelComponent::selectedRowsChanged(int lastRowSelected)
 {
 	if (m_table)
 	{
-		if (m_table->getSelectedRows().isEmpty())
-		{
-			if (onCurrentSelectedProcessorChanged)
-				onCurrentSelectedProcessorChanged(SpaConBridge::INVALID_PROCESSOR_ID);
-			m_tableControlBar->SetRemoveEnabled(false);
-		}
-		else
+		if (m_table->getSelectedRows().size() == 1)
 		{
 			if (onCurrentSelectedProcessorChanged)
 				onCurrentSelectedProcessorChanged(GetProcessorIdForRow(lastRowSelected));
 			m_tableControlBar->SetRemoveEnabled(true);
 		}
+		else if (m_table->getSelectedRows().isEmpty())
+		{
+			if (onCurrentSelectedProcessorChanged)
+				onCurrentSelectedProcessorChanged(SpaConBridge::INVALID_PROCESSOR_ID);
+			m_tableControlBar->SetRemoveEnabled(false);
+		}
+		else if (m_table->getSelectedRows().size() > 1)
+		{
+			if (onCurrentSelectedProcessorChanged)
+				onCurrentSelectedProcessorChanged(SpaConBridge::INVALID_PROCESSOR_ID);
+			m_tableControlBar->SetRemoveEnabled(true);
+		}
+		else
+			jassertfalse;
         
         m_table->grabKeyboardFocus();
 	}

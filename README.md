@@ -13,6 +13,7 @@ See [LATEST RELEASE](../../releases/latest) for available binary packages or joi
 |:----------------|:-----|
 |Windows Visual Studio| [![Build status](https://ci.appveyor.com/api/projects/status/q8ovnf5q9hr2strn?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/spaconbridge) |
 |macOS Xcode| [![Build status](https://ci.appveyor.com/api/projects/status/vl7c8gs1me9v4vr9?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/spaconbridge-9i76q) |
+|Linux makefile| [![Build status](https://ci.appveyor.com/api/projects/status/yojaxom72rayd0qq?svg=true)](https://ci.appveyor.com/project/ChristianAhrens/spaconbridge-ef3ua) |
 
 
 **Supported plattforms**
@@ -20,6 +21,7 @@ See [LATEST RELEASE](../../releases/latest) for available binary packages or joi
 ![Platform:windows](https://img.shields.io/badge/platform-Windows-lightgrey)
 ![Platform:macOS](https://img.shields.io/badge/platform-macOS-lightgrey)
 ![Platform:iOS](https://img.shields.io/badge/platform-iOS-lightgrey)
+![Platform:Linux](https://img.shields.io/badge/platform-Linux-lightgrey)
 
 <table>
 <tr>

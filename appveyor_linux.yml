@@ -11,22 +11,34 @@ init:
 # juce_audio_devices:     libasound2-dev libjack-jackd2-dev
 # juce_audio_processors:  ladspa-sdk
 # juce_gui_basics:        libx11-dev libxcomposite-dev libxcursor-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev
+# juce_opengl:            libglu1-mesa-dev mesa-common-dev
 - sh: >-
     yes | sudo apt-get update
+    
     yes | sudo apt install g++ make
+
     yes | sudo apt install libcurl4-openssl-dev
+
     yes | sudo apt install libfreetype6-dev
+
     yes | sudo apt install libasound2-dev libjack-jackd2-dev
+
     yes | sudo apt install ladspa-sdk
+
     yes | sudo apt install libx11-dev libxcomposite-dev libxcursor-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev
+
+    yes | sudo apt install libglu1-mesa-dev mesa-common-dev
 install:
 - sh: >-
     cd "$APPVEYOR_BUILD_FOLDER"
+
     git submodule update --init --recursive
 build_script:
 - sh: >-
     cd Resources/Deployment/Linux
+
     sudo chmod +x build_project.sh
+
     ./build_project.sh
 notifications:
 - provider: Email

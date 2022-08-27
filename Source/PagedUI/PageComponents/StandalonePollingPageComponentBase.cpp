@@ -35,8 +35,8 @@ namespace SpaConBridge
 /**
  * Class constructor.
  */
-StandalonePollingPageComponentBase::StandalonePollingPageComponentBase(PageComponentType type)
-	: PageComponentBase(type)
+StandalonePollingPageComponentBase::StandalonePollingPageComponentBase(UIPageId id)
+	: PageComponentBase(id)
 {
 	m_elementsContainer = std::make_unique<HeaderWithElmListComponent>();
 	m_borderedElementsContainer = std::make_unique<BorderedComponentContainer>();

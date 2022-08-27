@@ -58,7 +58,7 @@ PageComponentManager::PageComponentManager()
 	// Initialization of members to a usable default makes sense 
 	// when no config xml is available on app start and therefor 
 	// init values of this instance are going to be used for default config.
-	m_activePage = UPI_SoundObjects;
+	m_activePage = UPI_Soundobjects;
 	for (int id = UPI_InvalidMin + 1; id < UPI_InvalidMax; id++) m_enabledPages.push_back(static_cast<UIPageId>(id));
 	m_lookAndFeelType = DbLookAndFeelBase::LAFT_Dark;
 

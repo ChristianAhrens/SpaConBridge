@@ -53,13 +53,14 @@ typedef juce::uint8 ComsMode;
 enum UIPageId
 {
 	UPI_InvalidMin = 0,
-	UPI_SoundObjects,
-	UPI_MultiSlider,
+	UPI_Soundobjects,
+	UPI_MultiSoundobjects,
 	UPI_MatrixIOs,
 	UPI_Scenes,
 	UPI_EnSpace,
 	UPI_Statistics,
 	UPI_Settings,
+	UPI_About,
 	UPI_InvalidMax
 };
 String GetPageNameFromId(UIPageId pageId);

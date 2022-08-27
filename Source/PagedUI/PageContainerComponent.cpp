@@ -106,8 +106,8 @@ PageContainerComponent::PageContainerComponent()
 
 	// Add the page tabs.
 	m_tabbedComponent->SetIsHandlingChanges(false);
-	m_tabbedComponent->addTab(GetPageNameFromId(UPI_SoundObjects), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_soundobjectsPage.get(), false, UPI_SoundObjects);
-	m_tabbedComponent->addTab(GetPageNameFromId(UPI_MultiSlider), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSoundobjectsPage.get(), false, UPI_MultiSlider);
+	m_tabbedComponent->addTab(GetPageNameFromId(UPI_Soundobjects), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_soundobjectsPage.get(), false, UPI_Soundobjects);
+	m_tabbedComponent->addTab(GetPageNameFromId(UPI_MultiSoundobjects), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSoundobjectsPage.get(), false, UPI_MultiSoundobjects);
 	m_tabbedComponent->addTab(GetPageNameFromId(UPI_MatrixIOs), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_matrixIOPage.get(), false, UPI_MatrixIOs);
 	m_tabbedComponent->addTab(GetPageNameFromId(UPI_Scenes), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_scenesPage.get(), false, UPI_Scenes);
 	m_tabbedComponent->addTab(GetPageNameFromId(UPI_EnSpace), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_enSpacePage.get(), false, UPI_EnSpace);
@@ -363,11 +363,11 @@ void PageContainerComponent::UpdateGui(bool init)
 
 		switch (currentPageId)
 		{
-		case UPI_SoundObjects:
+		case UPI_Soundobjects:
 			updateSoundObjects = true;
 			startRefreshSoundObjects = true;
 			break;
-		case UPI_MultiSlider:
+		case UPI_MultiSoundobjects:
 			updateMultiSoundobjects = true;
 			startRefreshMultiSoundobjects = true;
 			break;
@@ -503,6 +503,15 @@ void PageContainerComponent::SetPagesBeingInitialized(bool initializing)
 void PageContainerComponent::SetActivePage(UIPageId pageId)
 {
 	jassert(pageId > UPI_InvalidMin && pageId < UPI_InvalidMax);
+
+	m_soundobjectsPage->SetPageIsVisible(UPI_Soundobjects == pageId);
+	m_multiSoundobjectsPage->SetPageIsVisible(UPI_MultiSoundobjects == pageId);
+	m_matrixIOPage->SetPageIsVisible(UPI_MatrixIOs == pageId);
+	m_settingsPage->SetPageIsVisible(UPI_Settings == pageId);
+	m_statisticsPage->SetPageIsVisible(UPI_Statistics == pageId);
+	m_scenesPage->SetPageIsVisible(UPI_Scenes == pageId);
+	m_enSpacePage->SetPageIsVisible(UPI_EnSpace == pageId);
+
 	m_tabbedComponent->setCurrentTabIndex(m_tabbedComponent->getTabNames().indexOf(GetPageNameFromId(pageId)));
 }
 
@@ -521,17 +530,17 @@ void PageContainerComponent::SetEnabledPages(const std::vector<UIPageId>& enable
 	// start clearing currently enabled tabs and recreate the ones to be enabled from now on
 	m_tabbedComponent->clearTabs();
 
-	auto SoundObjectsPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_SoundObjects) != enabledPages.end();
-	auto MultiSliderPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_MultiSlider) != enabledPages.end();
+	auto SoundObjectsPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_Soundobjects) != enabledPages.end();
+	auto MultiSliderPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_MultiSoundobjects) != enabledPages.end();
 	auto MatrixIOsPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_MatrixIOs) != enabledPages.end();
 	auto ScenesPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_Scenes) != enabledPages.end();
 	auto EnSpacePageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_EnSpace) != enabledPages.end();
 	auto StatisticsPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_Statistics) != enabledPages.end();
 
 	if (SoundObjectsPageEnabled)
-		m_tabbedComponent->addTab(GetPageNameFromId(UPI_SoundObjects), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_soundobjectsPage.get(), false, UPI_SoundObjects);
+		m_tabbedComponent->addTab(GetPageNameFromId(UPI_Soundobjects), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_soundobjectsPage.get(), false, UPI_Soundobjects);
 	if (MultiSliderPageEnabled)
-		m_tabbedComponent->addTab(GetPageNameFromId(UPI_MultiSlider), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSoundobjectsPage.get(), false, UPI_MultiSlider);
+		m_tabbedComponent->addTab(GetPageNameFromId(UPI_MultiSoundobjects), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSoundobjectsPage.get(), false, UPI_MultiSoundobjects);
 	if (MatrixIOsPageEnabled)
 		m_tabbedComponent->addTab(GetPageNameFromId(UPI_MatrixIOs), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_matrixIOPage.get(), false, UPI_MatrixIOs);
 	if (ScenesPageEnabled)
@@ -861,10 +870,10 @@ void CustomDrawableTabBarButton::updateDrawableButtonImageColours()
 	String imageName;
 	switch (m_pageId)
 	{
-	case UPI_SoundObjects:
+	case UPI_Soundobjects:
 		imageName = BinaryData::vertical_split24px_svg;
 		break;
-	case UPI_MultiSlider:
+	case UPI_MultiSoundobjects:
 		imageName = BinaryData::grain24px_svg;
 		break;
     case UPI_MatrixIOs:

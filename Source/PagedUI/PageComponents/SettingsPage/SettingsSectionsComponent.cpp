@@ -73,12 +73,12 @@ void SettingsSectionsComponent::createGeneralSettingsSection()
 	m_PageEnableButtonContainer->SetSpacing(5);
 	m_SoundObjectPageButton = std::make_unique<DrawableButton>("SoundObjectPage", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_SoundObjectPageButton->setClickingTogglesState(true);
-	m_SoundObjectPageButton->setTooltip("Enable " + GetPageNameFromId(UPI_SoundObjects) + " Page");
+	m_SoundObjectPageButton->setTooltip("Enable " + GetPageNameFromId(UPI_Soundobjects) + " Page");
 	m_SoundObjectPageButton->addListener(this);
 	m_PageEnableButtonContainer->AddComponent(m_SoundObjectPageButton.get());
 	m_MultisurfacePageButton = std::make_unique<DrawableButton>("MultisurfacePage", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_MultisurfacePageButton->setClickingTogglesState(true);
-	m_MultisurfacePageButton->setTooltip("Enable " + GetPageNameFromId(UPI_MultiSlider) + " Page");
+	m_MultisurfacePageButton->setTooltip("Enable " + GetPageNameFromId(UPI_MultiSoundobjects) + " Page");
 	m_MultisurfacePageButton->addListener(this);
 	m_PageEnableButtonContainer->AddComponent(m_MultisurfacePageButton.get());
 	m_MatrixIOPageButton = std::make_unique<DrawableButton>("MatrixIOPage", DrawableButton::ButtonStyle::ImageOnButtonBackground);
@@ -109,7 +109,7 @@ void SettingsSectionsComponent::createGeneralSettingsSection()
 
 	m_StaticObjectsPollingButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Show Soundobject names");
 	m_StaticObjectsPollingButton->setClickingTogglesState(true);
-	m_StaticObjectsPollingButton->setTooltip("Show object names in " + GetPageNameFromId(UPI_SoundObjects) + " and " + GetPageNameFromId(UPI_MultiSlider) + " Page.");
+	m_StaticObjectsPollingButton->setTooltip("Show object names in " + GetPageNameFromId(UPI_Soundobjects) + " and " + GetPageNameFromId(UPI_MultiSoundobjects) + " Page.");
 	m_StaticObjectsPollingButton->setImagePosition(Justification::centredLeft);
 	m_StaticObjectsPollingButton->addListener(this);
 	m_GeneralSettings->addComponent(m_StaticObjectsPollingButton.get(), true, false);
@@ -846,9 +846,9 @@ void SettingsSectionsComponent::buttonClicked(Button* button)
 	{
 		auto enabledPages = std::vector<UIPageId>();
 		if (m_SoundObjectPageButton && m_SoundObjectPageButton->getToggleState())
-			enabledPages.push_back(UPI_SoundObjects);
+			enabledPages.push_back(UPI_Soundobjects);
 		if (m_MultisurfacePageButton && m_MultisurfacePageButton->getToggleState())
-			enabledPages.push_back(UPI_MultiSlider);
+			enabledPages.push_back(UPI_MultiSoundobjects);
 		if (m_MatrixIOPageButton && m_MatrixIOPageButton->getToggleState())
 			enabledPages.push_back(UPI_MatrixIOs);
 		if (m_ScenesPageButton && m_ScenesPageButton->getToggleState())
@@ -1229,9 +1229,9 @@ void SettingsSectionsComponent::processUpdatedGeneralConfig()
 
 	// General settings section
 	if (m_SoundObjectPageButton)
-		m_SoundObjectPageButton->setToggleState(std::find(pageMgr->GetEnabledPages().begin(), pageMgr->GetEnabledPages().end(), UPI_SoundObjects) != pageMgr->GetEnabledPages().end(), dontSendNotification);
+		m_SoundObjectPageButton->setToggleState(std::find(pageMgr->GetEnabledPages().begin(), pageMgr->GetEnabledPages().end(), UPI_Soundobjects) != pageMgr->GetEnabledPages().end(), dontSendNotification);
 	if (m_MultisurfacePageButton)
-		m_MultisurfacePageButton->setToggleState(std::find(pageMgr->GetEnabledPages().begin(), pageMgr->GetEnabledPages().end(), UPI_MultiSlider) != pageMgr->GetEnabledPages().end(), dontSendNotification);
+		m_MultisurfacePageButton->setToggleState(std::find(pageMgr->GetEnabledPages().begin(), pageMgr->GetEnabledPages().end(), UPI_MultiSoundobjects) != pageMgr->GetEnabledPages().end(), dontSendNotification);
 	if (m_MatrixIOPageButton)
 		m_MatrixIOPageButton->setToggleState(std::find(pageMgr->GetEnabledPages().begin(), pageMgr->GetEnabledPages().end(), UPI_MatrixIOs) != pageMgr->GetEnabledPages().end(), dontSendNotification);
 	if (m_ScenesPageButton)

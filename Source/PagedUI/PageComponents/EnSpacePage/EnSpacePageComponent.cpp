@@ -37,7 +37,7 @@ namespace SpaConBridge
  * Class constructor.
  */
 EnSpacePageComponent::EnSpacePageComponent()
-	: StandalonePollingPageComponentBase(PCT_EnSpace)
+	: StandalonePollingPageComponentBase(UIPageId::UPI_EnSpace)
 {
 	AddStandalonePollingObject(ROI_MatrixSettings_ReverbRoomId, RemoteObjectAddressing());
 	AddStandalonePollingObject(ROI_MatrixSettings_ReverbPredelayFactor, RemoteObjectAddressing());

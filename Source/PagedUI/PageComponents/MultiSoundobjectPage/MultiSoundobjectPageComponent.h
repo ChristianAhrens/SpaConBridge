@@ -39,6 +39,9 @@ public:
 	~MultiSoundobjectPageComponent() override;
 
 	//==============================================================================
+	void SetPageIsVisible(bool visible) override;
+
+	//==============================================================================
 	void UpdateGui(bool init) override;
 
 protected:

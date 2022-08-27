@@ -230,7 +230,7 @@ void AboutPageContentComponent::resized()
  * Class constructor.
  */
 AboutPageComponent::AboutPageComponent()
-	: PageComponentBase(PCT_About)
+	: PageComponentBase(UIPageId::UPI_About)
 {
 	// Close button
 	m_closeButton = std::make_unique<DrawableButton>("Close", DrawableButton::ButtonStyle::ImageFitted);

@@ -40,7 +40,7 @@ namespace SpaConBridge
  * Class constructor.
  */
 StatisticsPageComponent::StatisticsPageComponent()
-	: PageComponentBase(PCT_Statistics)
+	: PageComponentBase(UIPageId::UPI_Statistics)
 {
 	m_plotComponent = std::make_unique<StatisticsPlot>();
 	addAndMakeVisible(m_plotComponent.get());

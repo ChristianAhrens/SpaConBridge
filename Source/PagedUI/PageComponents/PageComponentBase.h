@@ -21,6 +21,8 @@
 
 #include <JuceHeader.h>
 
+#include "../../SpaConBridgeCommon.h"
+
 
 namespace SpaConBridge
 {
@@ -33,32 +35,19 @@ namespace SpaConBridge
 class PageComponentBase : public Component
 {
 public:
-
-	/**
-	 * Overlay types. There can only be one active at the time.
-	 */
-	enum PageComponentType
-	{
-		PCT_Unknown = 0,
-		PCT_Overview,
-		PCT_MultiSlide,
-        PCT_MatrixIOs,
-		PCT_Settings,
-		PCT_Statistics,
-		PCT_About,
-		PCT_Scenes,
-		PCT_EnSpace,
-	};
-
-	explicit PageComponentBase(PageComponentType type);
+	explicit PageComponentBase(UIPageId id);
 	~PageComponentBase() override;
 
 	//==============================================================================
-	PageComponentType GetPageComponentType() const;
+	UIPageId GetPageId() const;
 
 	//==============================================================================
 	bool IsPageInitializing() const;
 	void SetPageIsInitializing(bool initializing);
+
+	//==============================================================================
+	bool IsPageVisible() const;
+	virtual void SetPageIsVisible(bool visible);
 
 	//==============================================================================
 	virtual void UpdateGui(bool init) = 0;
@@ -67,8 +56,9 @@ protected:
 	bool	IsPortraitAspectRatio();
 
 private:
-	PageComponentType	m_pageComponentType{ PCT_Unknown };	/**> Type of page as specified by the PageComponentType enum. */
-	bool				m_isInitializing{ false };
+	UIPageId	m_pageId{ UIPageId::UPI_InvalidMin };	/**> Type of page as specified by the UIPageId enum. */
+	bool		m_isInitializing{ false };
+	bool		m_isVisible{ false };
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PageComponentBase)
 };

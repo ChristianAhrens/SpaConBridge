@@ -48,13 +48,14 @@ namespace SpaConBridge
  * Class constructor.
  */
 SoundobjectTablePageComponent::SoundobjectTablePageComponent()
-	: PageComponentBase(PCT_Overview)
+	: PageComponentBase(UIPageId::UPI_Soundobjects)
 {
 	// Create the layouting manger/slider objects
 	m_layoutManager = std::make_unique<StretchableLayoutManager>();
 	m_layoutManager->setItemLayout(0, -1, -1, -1);
 
 	m_isHorizontalSlider = true;
+	m_multiSoundobjectsActive = false;
 
 	// Create the table model/component.
 	m_soundobjectsTable = std::make_unique<SoundobjectTableComponent>();
@@ -132,6 +133,9 @@ void SoundobjectTablePageComponent::paint(Graphics& g)
  */
 void SoundobjectTablePageComponent::resized()
 {
+	if (!IsPageVisible())
+		return;
+
 	auto layoutingMargins = 8;
 	auto layoutingBounds = getLocalBounds().reduced(layoutingMargins);
 	auto layoutOrigX = layoutingMargins;
@@ -247,11 +251,21 @@ void SoundobjectTablePageComponent::SetSoundsourceProcessorEditorActive(Soundobj
  */
 void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool active)
 {
-	auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
-
 	m_multiSoundobjectsActive = active;
 
-	if (m_multiSoundobjectsActive)
+	resized();
+}
+
+/**
+ * Reimplemented from PageComponentBase to add or remove the multiSoundobject component to this page's layouting
+ * depending on visibility. 
+ * Call is forwarded to baseimplementation afterwards.
+ * @param	initializing	The visible state to set.
+ */
+void SoundobjectTablePageComponent::SetPageIsVisible(bool visible)
+{
+	auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
+	if (visible)
 	{
 		addAndMakeVisible(multiSoundobjectComponent.get());
 	}
@@ -260,9 +274,10 @@ void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool acti
 		removeChildComponent(multiSoundobjectComponent.get());
 	}
 
+	PageComponentBase::SetPageIsVisible(visible);
+
 	resized();
 }
-
 
 /**
  * If any relevant parameters have been marked as changed, update the table contents.

@@ -39,7 +39,7 @@ namespace SpaConBridge
  * Class constructor.
  */
 MultiSoundobjectPageComponent::MultiSoundobjectPageComponent()
-	: PageComponentBase(PCT_MultiSlide)
+	: PageComponentBase(UIPageId::UPI_MultiSoundobjects)
 {
 	auto pageManager = PageComponentManager::GetInstance();
 	if (pageManager)
@@ -69,6 +69,9 @@ MultiSoundobjectPageComponent::~MultiSoundobjectPageComponent()
  */
 void MultiSoundobjectPageComponent::resized()
 {
+	if (!IsPageVisible())
+		return;
+
 	auto pageManager = PageComponentManager::GetInstance();
 	if (pageManager)
 	{
@@ -76,6 +79,29 @@ void MultiSoundobjectPageComponent::resized()
 		if (multiSoundobjectComponent)
 			multiSoundobjectComponent->setBounds(getLocalBounds());
 	}
+}
+
+/**
+ * Reimplemented from PageComponentBase to add or remove the multiSoundobject component to this page's layouting
+ * depending on visibility.
+ * Call is forwarded to baseimplementation afterwards.
+ * @param	initializing	The visible state to set.
+ */
+void MultiSoundobjectPageComponent::SetPageIsVisible(bool visible)
+{
+	auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
+	if (visible)
+	{
+		addAndMakeVisible(multiSoundobjectComponent.get());
+	}
+	else
+	{
+		removeChildComponent(multiSoundobjectComponent.get());
+	}
+
+	PageComponentBase::SetPageIsVisible(visible);
+
+	resized();
 }
 
 /**

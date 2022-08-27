@@ -323,7 +323,8 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 			textLabel = paramsKV.second._objectName;
 		else
 			textLabel = String(paramsKV.second._id);
-		auto font = Font(11.0, Font::plain);
+		auto fontSizeScaleFactor = 2.0f * paramsKV.second._size;
+		auto font = Font(11.0 * fontSizeScaleFactor, Font::plain);
 		auto fontDependantWidth = static_cast<float>(font.getStringWidth(textLabel));
 		g.setFont(font);
 		g.drawText(textLabel, Rectangle<float>(x - (0.5f * fontDependantWidth), y + 3, fontDependantWidth, knobSize * 2.0f), Justification::centred, true);

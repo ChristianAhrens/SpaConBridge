@@ -39,7 +39,7 @@ namespace SpaConBridge
  * Class constructor.
  */
 ScenesPageComponent::ScenesPageComponent()
-	: StandalonePollingPageComponentBase(PCT_Scenes)
+	: StandalonePollingPageComponentBase(UIPageId::UPI_Scenes)
 {
 	AddStandalonePollingObject(ROI_Scene_SceneIndex, RemoteObjectAddressing());
 	AddStandalonePollingObject(ROI_Scene_SceneName, RemoteObjectAddressing());

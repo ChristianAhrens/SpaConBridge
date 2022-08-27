@@ -135,7 +135,7 @@ class StandalonePollingPageComponentBase :	public PageComponentBase,
 											public ProtocolBridgingWrapper::Listener
 {
 public:
-	explicit StandalonePollingPageComponentBase(PageComponentType type);
+	explicit StandalonePollingPageComponentBase(UIPageId id);
 	~StandalonePollingPageComponentBase() override;
 
 	HeaderWithElmListComponent* GetElementsContainer();

@@ -19,9 +19,9 @@
 
 #pragma once
 
-#include <JuceHeader.h>
+#include "../PageComponentBase.h"
 
-#include "../../SpaConBridgeCommon.h"
+#include "../../../SpaConBridgeCommon.h"
 
 
 namespace SpaConBridge
@@ -29,38 +29,28 @@ namespace SpaConBridge
 
 
 /**
- * Abstract class PageComponentBase.
- * Must be reimplemented to provide a component for an app page.
+ * Class MultiSoundobjectPageComponent is just a component which contains the multi-source slider
+ * and the mapping selection control.
  */
-class PageComponentBase : public Component
+class MultiSoundobjectPageComponent :	public PageComponentBase
 {
 public:
-	explicit PageComponentBase(UIPageId id);
-	~PageComponentBase() override;
+	MultiSoundobjectPageComponent();
+	~MultiSoundobjectPageComponent() override;
 
 	//==============================================================================
-	UIPageId GetPageId() const;
+	void SetPageIsVisible(bool visible) override;
 
 	//==============================================================================
-	bool IsPageInitializing() const;
-	void SetPageIsInitializing(bool initializing);
-
-	//==============================================================================
-	bool IsPageVisible() const;
-	virtual void SetPageIsVisible(bool visible);
-
-	//==============================================================================
-	virtual void UpdateGui(bool init) = 0;
+	void UpdateGui(bool init) override;
 
 protected:
-	bool	IsPortraitAspectRatio();
+	//==============================================================================
+	void resized() override;
 
 private:
-	UIPageId	m_pageId{ UIPageId::UPI_InvalidMin };	/**> Type of page as specified by the UIPageId enum. */
-	bool		m_isInitializing{ false };
-	bool		m_isVisible{ false };
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PageComponentBase)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSoundobjectPageComponent)
 };
 
 

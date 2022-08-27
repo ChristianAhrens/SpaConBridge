@@ -52,10 +52,14 @@ public:
 	int GetRowHeight();
 
 	//==============================================================================
+	void SetPageIsVisible(bool visible) override;
+
+	//==============================================================================
 	void UpdateGui(bool init) override;
 
 	//==============================================================================
 	void SetSoundsourceProcessorEditorActive(SoundobjectProcessorId processorId);
+	void SetMultiSoundobjectComponentActive(bool active);
 
 	//==========================================================================
 	void onConfigUpdated() override;
@@ -70,8 +74,11 @@ private:
 	std::unique_ptr<SoundobjectProcessorEditor>		m_selectedProcessorInstanceEditor;	/**< The processor editor component corresponding to the selected row */
 
 	bool											m_isHorizontalSlider;				/**< Indication if the layout slider currently is shown horizontally (vs. vertically). */
+	int												m_layoutManagerItemCount{ 0 };		/**< Helper to keep track of the pages layouting 'mode'. */
 	std::unique_ptr<StretchableLayoutManager>		m_layoutManager;					/**< The layout manager object instance. */
 	std::unique_ptr<StretchableLayoutResizerBar>	m_layoutResizerBar;					/**< The layout slider object instance. */
+
+	bool	m_multiSoundobjectsActive;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SoundobjectTablePageComponent)
 };

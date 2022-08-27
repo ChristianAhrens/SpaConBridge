@@ -19,6 +19,7 @@
 
 #include "PageComponentBase.h"
 
+#include "../../SpaConBridgeCommon.h"
 
 namespace SpaConBridge
 {
@@ -33,10 +34,10 @@ namespace SpaConBridge
 /**
  * Class constructor.
  */
-PageComponentBase::PageComponentBase(PageComponentType type)
+PageComponentBase::PageComponentBase(UIPageId id)
 	: Component()
 {
-	m_pageComponentType = type;
+	m_pageId = id;
 }
 
 /**
@@ -47,11 +48,11 @@ PageComponentBase::~PageComponentBase()
 }
 
 /**
- * Get this PageComponent's type.
+ * Get this PageComponent's id.
  */
-PageComponentBase::PageComponentType PageComponentBase::GetPageComponentType() const
+UIPageId PageComponentBase::GetPageId() const
 {
-	return m_pageComponentType;
+	return m_pageId;
 }
 
 /**
@@ -70,6 +71,24 @@ bool PageComponentBase::IsPageInitializing() const
 void PageComponentBase::SetPageIsInitializing(bool initializing)
 {
 	m_isInitializing = initializing;
+}
+
+/**
+ * Get this PageComponent's visible state.
+ * @return	True if the page is currently set to visible state, false if not.
+ */
+bool PageComponentBase::IsPageVisible() const
+{
+	return m_isVisible;
+}
+
+/**
+ * Set this PageComponent's visible state.
+ * @param	initializing	The visible state to set.
+ */
+void PageComponentBase::SetPageIsVisible(bool visible)
+{
+	m_isVisible = visible;
 }
 
 /**

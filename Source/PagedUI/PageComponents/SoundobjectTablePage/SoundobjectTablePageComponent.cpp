@@ -21,12 +21,15 @@
 
 #include "SoundobjectTableComponent.h"
 
+#include "../../PageComponentManager.h"
+
 #include "../../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
 #include "../../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessorEditor.h"
 
-#include "../../../SoundobjectSlider.h"
 #include "../../../Controller.h"
 #include "../../../LookAndFeel.h"
+#include "../../../MultiSoundobjectComponent.h"
+#include "../../../SoundobjectSlider.h"
 
 #include <Image_utils.h>
 
@@ -45,13 +48,15 @@ namespace SpaConBridge
  * Class constructor.
  */
 SoundobjectTablePageComponent::SoundobjectTablePageComponent()
-	: PageComponentBase(PCT_Overview)
+	: PageComponentBase(UIPageId::UPI_Soundobjects)
 {
 	// Create the layouting manger/slider objects
 	m_layoutManager = std::make_unique<StretchableLayoutManager>();
 	m_layoutManager->setItemLayout(0, -1, -1, -1);
+	m_layoutManagerItemCount = 1;
 
 	m_isHorizontalSlider = true;
+	m_multiSoundobjectsActive = false;
 
 	// Create the table model/component.
 	m_soundobjectsTable = std::make_unique<SoundobjectTableComponent>();
@@ -70,6 +75,9 @@ SoundobjectTablePageComponent::SoundobjectTablePageComponent()
 		auto config = SpaConBridge::AppConfiguration::getInstance();
 		if (config)
 			config->triggerConfigurationDump(false);
+	};
+	m_soundobjectsTable->onMultiProcessorsSelectionChanged = [=](bool multiselected) {
+		SetMultiSoundobjectComponentActive(multiselected);
 	};
 	addAndMakeVisible(m_soundobjectsTable.get());
 
@@ -126,6 +134,9 @@ void SoundobjectTablePageComponent::paint(Graphics& g)
  */
 void SoundobjectTablePageComponent::resized()
 {
+	if (!IsPageVisible())
+		return;
+
 	auto layoutingMargins = 8;
 	auto layoutingBounds = getLocalBounds().reduced(layoutingMargins);
 	auto layoutOrigX = layoutingMargins;
@@ -133,8 +144,17 @@ void SoundobjectTablePageComponent::resized()
 	auto layoutWidth = layoutingBounds.getWidth();
 	auto layoutHeight = layoutingBounds.getHeight();
 
-	if (m_selectedProcessorInstanceEditor)
+	if (m_selectedProcessorInstanceEditor || m_multiSoundobjectsActive)
 	{
+		if (m_layoutManagerItemCount != 3)
+		{
+			m_layoutManager->clearAllItems();
+			m_layoutManager->setItemLayout(0, -0.05, -1, -0.5);
+			m_layoutManager->setItemLayout(1, 6, 6, 6);
+			m_layoutManager->setItemLayout(2, -0.05, -1, -0.5);
+			m_layoutManagerItemCount = 3;
+		}
+
 		auto isPortrait = IsPortraitAspectRatio();
 		if (m_isHorizontalSlider != !isPortrait)
 		{
@@ -144,11 +164,30 @@ void SoundobjectTablePageComponent::resized()
 			addAndMakeVisible(m_layoutResizerBar.get());
 		}
 
-		Component* comps[] = { m_soundobjectsTable.get(), m_layoutResizerBar.get(), m_selectedProcessorInstanceEditor.get() };
-		m_layoutManager->layOutComponents(comps, 3, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, isPortrait, true);
+		if (m_multiSoundobjectsActive)
+		{
+			auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
+			if (multiSoundobjectComponent)
+			{
+				Component* comps[] = { m_soundobjectsTable.get(), m_layoutResizerBar.get(), multiSoundobjectComponent.get() };
+				m_layoutManager->layOutComponents(comps, 3, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, isPortrait, true);
+			}
+		}
+		else
+		{
+			Component* comps[] = { m_soundobjectsTable.get(), m_layoutResizerBar.get(), m_selectedProcessorInstanceEditor.get() };
+			m_layoutManager->layOutComponents(comps, 3, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, isPortrait, true);
+		}
 	}
 	else
 	{
+		if (m_layoutManagerItemCount != 1)
+		{
+			m_layoutManager->clearAllItems();
+			m_layoutManager->setItemLayout(0, -1, -1, -1);
+			m_layoutManagerItemCount = 1;
+		}
+
 		Component* comps[] = { m_soundobjectsTable.get() };
 		m_layoutManager->layOutComponents(comps, 1, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, false, true);
 	}
@@ -161,36 +200,17 @@ void SoundobjectTablePageComponent::SetSoundsourceProcessorEditorActive(Soundobj
 {
 	if (processorId == INVALID_PROCESSOR_ID)
 	{
-		// reconfigure the layoutmanager if a processoreditor is cleared without a new one being activated
+		// remove processoreditor from layout and clean up instances
 		if (m_selectedProcessorInstanceEditor)
-		{
-			m_layoutManager->clearAllItems();
-			m_layoutManager->setItemLayout(0, -1, -1, -1);
-		}
-
-		// remove slider and processoreditor from layout and clean up instances
-		if (m_selectedProcessorInstanceEditor || m_layoutResizerBar)
 		{
 			removeChildComponent(m_selectedProcessorInstanceEditor.get());
 			m_selectedProcessorInstanceEditor.reset();
-
-			removeChildComponent(m_layoutResizerBar.get());
-			m_layoutResizerBar.reset();
 
 			resized();
 		}
 	}
 	else
 	{
-		// reconfigure the layoutmanager if a processoreditor is becoming visible initially
-		if (!m_selectedProcessorInstanceEditor)
-		{
-			m_layoutManager->clearAllItems();
-			m_layoutManager->setItemLayout(0, -0.05, -1, -0.5);
-			m_layoutManager->setItemLayout(1, 6, 6, 6);
-			m_layoutManager->setItemLayout(2, -0.05, -1, -0.5);
-		}
-
 		// create slider and processoreditor instances and add them to layouting
 		auto ctrl = Controller::GetInstance();
 		if (ctrl)
@@ -225,6 +245,70 @@ void SoundobjectTablePageComponent::SetSoundsourceProcessorEditorActive(Soundobj
 }
 
 /**
+ * Function to be called from model when the current selection
+ * has changed in a way that the currently displayed multisurface must be hidden
+ * or the currently not displayed multisurface must be shown
+ * @param active	True if the multisurface shall be shown, false if hidden.
+ */
+void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool active)
+{
+	m_multiSoundobjectsActive = active;
+
+	if (m_multiSoundobjectsActive)
+	{
+		if (!m_layoutResizerBar)
+		{
+			m_layoutResizerBar = std::make_unique<StretchableLayoutResizerBar>(m_layoutManager.get(), 1, m_isHorizontalSlider);
+			addAndMakeVisible(m_layoutResizerBar.get());
+		}
+
+		auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
+		if (multiSoundobjectComponent && this != multiSoundobjectComponent->getParentComponent())
+		{
+			multiSoundobjectComponent->SetShowSelectedOnly(true);
+			addAndMakeVisible(multiSoundobjectComponent.get());
+		}
+	}
+	else if (!m_multiSoundobjectsActive)
+	{
+		auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
+		if (multiSoundobjectComponent && this == multiSoundobjectComponent->getParentComponent())
+		{
+			removeChildComponent(multiSoundobjectComponent.get());
+		}
+	}
+
+	resized();
+}
+
+/**
+ * Reimplemented from PageComponentBase to add or remove the multiSoundobject component to this page's layouting
+ * depending on visibility. 
+ * Call is forwarded to baseimplementation afterwards.
+ * @param	initializing	The visible state to set.
+ */
+void SoundobjectTablePageComponent::SetPageIsVisible(bool visible)
+{
+	auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
+	if (multiSoundobjectComponent)
+	{
+		if (!visible && this == multiSoundobjectComponent->getParentComponent())
+		{
+			removeChildComponent(multiSoundobjectComponent.get());
+		}
+		else if (m_multiSoundobjectsActive && visible && this != multiSoundobjectComponent->getParentComponent())
+		{
+			multiSoundobjectComponent->SetShowSelectedOnly(true);
+			addAndMakeVisible(multiSoundobjectComponent.get());
+		}
+	}
+
+	PageComponentBase::SetPageIsVisible(visible);
+
+	resized();
+}
+
+/**
  * If any relevant parameters have been marked as changed, update the table contents.
  * @param init	True to ignore any changed flags and update the procssor parameters
  *				in the GUI anyway. Good for when opening the Overview for the first time.
@@ -255,6 +339,15 @@ void SoundobjectTablePageComponent::UpdateGui(bool init)
 					m_soundobjectsTable->UpdateTable();
 				}
 			}
+		}
+	}
+
+	if (m_multiSoundobjectsActive)
+	{
+		auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
+		if (multiSoundobjectComponent)
+		{
+			multiSoundobjectComponent->UpdateGui(false);
 		}
 	}
 }

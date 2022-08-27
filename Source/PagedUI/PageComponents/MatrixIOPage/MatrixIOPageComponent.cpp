@@ -44,7 +44,7 @@ namespace SpaConBridge
  * Class constructor.
  */
 MatrixIOPageComponent::MatrixIOPageComponent()
-	: PageComponentBase(PCT_MatrixIOs)
+	: PageComponentBase(UIPageId::UPI_MatrixIOs)
 {
 	m_inputsComponent = std::make_unique<MatrixInputTableComponent>();
 	m_inputsComponent->onCurrentCollapseStateChanged = [=](bool collapsed) {

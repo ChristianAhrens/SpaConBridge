@@ -19,9 +19,7 @@
 
 #pragma once
 
-#include "../PageComponentBase.h"
-
-#include "../../../SpaConBridgeCommon.h"
+#include "SpaConBridgeCommon.h"
 
 
 namespace SpaConBridge
@@ -33,19 +31,19 @@ namespace SpaConBridge
 class MultiSoundobjectSlider;
 
 /**
- * Class MultiSurfacePageComponent is just a component which contains the multi-source slider
+ * Class MultiSoundobjectComponent is just a component which contains the multi-source slider
  * and the mapping selection control.
  */
-class MultiSurfacePageComponent :	public PageComponentBase,
+class MultiSoundobjectComponent :	public Component,
 									public ComboBox::Listener,
 									public ToggleButton::Listener
 {
 public:
-	MultiSurfacePageComponent();
-	~MultiSurfacePageComponent() override;
+	MultiSoundobjectComponent();
+	~MultiSoundobjectComponent() override;
 
 	//==============================================================================
-	void UpdateGui(bool init) override;
+	void UpdateGui(bool init);
 
 	//==============================================================================
 	MappingAreaId GetSelectedMapping() const;
@@ -59,6 +57,9 @@ public:
 	const juce::Image* GetBackgroundImage(MappingAreaId mappingAreaId);
 	void SetBackgroundImage(MappingAreaId mappingAreaId, const juce::Image& backgroundImage);
 	void RemoveBackgroundImage(MappingAreaId mappingAreaId);
+	
+	bool IsShowingSelectedOnly() const;
+	void SetShowSelectedOnly(bool selectedOnly);
 
 	//==============================================================================
 	void lookAndFeelChanged() override;
@@ -75,7 +76,7 @@ protected:
 	void buttonClicked(Button* button) override;
 
 private:
-	std::unique_ptr<MultiSoundobjectSlider>	m_multiSliderSurface;	/**> Multi-source 2D-Slider. */
+	std::unique_ptr<MultiSoundobjectSlider>	m_multiSoundobjectSlider;	/**> Multi-source 2D-Slider. */
 
 	std::unique_ptr<ComboBox>			m_mappingAreaSelect;	/**> ComboBox selector for the coordinate mapping area. */
 	std::unique_ptr<DrawableButton>		m_loadImage;			/**< Button to load background image. */
@@ -88,7 +89,7 @@ private:
 	std::unique_ptr<DrawableButton>		m_spreadEnable;			/**> Checkbox for spread factor enable. */
 
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSurfacePageComponent)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSoundobjectComponent)
 };
 
 

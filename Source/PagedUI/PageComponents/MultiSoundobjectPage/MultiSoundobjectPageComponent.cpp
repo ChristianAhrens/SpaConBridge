@@ -77,7 +77,12 @@ void MultiSoundobjectPageComponent::resized()
 	{
 		auto& multiSoundobjectComponent = pageManager->GetMultiSoundobjectComponent();
 		if (multiSoundobjectComponent)
+		{
+			if (this != multiSoundobjectComponent->getParentComponent())
+				addAndMakeVisible(multiSoundobjectComponent.get());
+
 			multiSoundobjectComponent->setBounds(getLocalBounds());
+		}
 	}
 }
 
@@ -90,11 +95,7 @@ void MultiSoundobjectPageComponent::resized()
 void MultiSoundobjectPageComponent::SetPageIsVisible(bool visible)
 {
 	auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
-	if (visible)
-	{
-		addAndMakeVisible(multiSoundobjectComponent.get());
-	}
-	else
+	if (!visible && multiSoundobjectComponent)
 	{
 		removeChildComponent(multiSoundobjectComponent.get());
 	}

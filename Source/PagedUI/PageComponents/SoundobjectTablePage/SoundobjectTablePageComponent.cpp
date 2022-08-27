@@ -53,6 +53,7 @@ SoundobjectTablePageComponent::SoundobjectTablePageComponent()
 	// Create the layouting manger/slider objects
 	m_layoutManager = std::make_unique<StretchableLayoutManager>();
 	m_layoutManager->setItemLayout(0, -1, -1, -1);
+	m_layoutManagerItemCount = 1;
 
 	m_isHorizontalSlider = true;
 	m_multiSoundobjectsActive = false;
@@ -145,6 +146,15 @@ void SoundobjectTablePageComponent::resized()
 
 	if (m_selectedProcessorInstanceEditor || m_multiSoundobjectsActive)
 	{
+		if (m_layoutManagerItemCount != 3)
+		{
+			m_layoutManager->clearAllItems();
+			m_layoutManager->setItemLayout(0, -0.05, -1, -0.5);
+			m_layoutManager->setItemLayout(1, 6, 6, 6);
+			m_layoutManager->setItemLayout(2, -0.05, -1, -0.5);
+			m_layoutManagerItemCount = 3;
+		}
+
 		auto isPortrait = IsPortraitAspectRatio();
 		if (m_isHorizontalSlider != !isPortrait)
 		{
@@ -157,8 +167,11 @@ void SoundobjectTablePageComponent::resized()
 		if (m_multiSoundobjectsActive)
 		{
 			auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
-			Component* comps[] = { m_soundobjectsTable.get(), m_layoutResizerBar.get(), multiSoundobjectComponent.get() };
-			m_layoutManager->layOutComponents(comps, 3, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, isPortrait, true);
+			if (multiSoundobjectComponent)
+			{
+				Component* comps[] = { m_soundobjectsTable.get(), m_layoutResizerBar.get(), multiSoundobjectComponent.get() };
+				m_layoutManager->layOutComponents(comps, 3, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, isPortrait, true);
+			}
 		}
 		else
 		{
@@ -168,6 +181,13 @@ void SoundobjectTablePageComponent::resized()
 	}
 	else
 	{
+		if (m_layoutManagerItemCount != 1)
+		{
+			m_layoutManager->clearAllItems();
+			m_layoutManager->setItemLayout(0, -1, -1, -1);
+			m_layoutManagerItemCount = 1;
+		}
+
 		Component* comps[] = { m_soundobjectsTable.get() };
 		m_layoutManager->layOutComponents(comps, 1, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, false, true);
 	}
@@ -180,36 +200,17 @@ void SoundobjectTablePageComponent::SetSoundsourceProcessorEditorActive(Soundobj
 {
 	if (processorId == INVALID_PROCESSOR_ID)
 	{
-		// reconfigure the layoutmanager if a processoreditor is cleared without a new one being activated
+		// remove processoreditor from layout and clean up instances
 		if (m_selectedProcessorInstanceEditor)
-		{
-			m_layoutManager->clearAllItems();
-			m_layoutManager->setItemLayout(0, -1, -1, -1);
-		}
-
-		// remove slider and processoreditor from layout and clean up instances
-		if (m_selectedProcessorInstanceEditor || m_layoutResizerBar)
 		{
 			removeChildComponent(m_selectedProcessorInstanceEditor.get());
 			m_selectedProcessorInstanceEditor.reset();
-
-			removeChildComponent(m_layoutResizerBar.get());
-			m_layoutResizerBar.reset();
 
 			resized();
 		}
 	}
 	else
 	{
-		// reconfigure the layoutmanager if a processoreditor is becoming visible initially
-		if (!m_selectedProcessorInstanceEditor)
-		{
-			m_layoutManager->clearAllItems();
-			m_layoutManager->setItemLayout(0, -0.05, -1, -0.5);
-			m_layoutManager->setItemLayout(1, 6, 6, 6);
-			m_layoutManager->setItemLayout(2, -0.05, -1, -0.5);
-		}
-
 		// create slider and processoreditor instances and add them to layouting
 		auto ctrl = Controller::GetInstance();
 		if (ctrl)
@@ -253,6 +254,29 @@ void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool acti
 {
 	m_multiSoundobjectsActive = active;
 
+	if (m_multiSoundobjectsActive)
+	{
+		if (!m_layoutResizerBar)
+		{
+			m_layoutResizerBar = std::make_unique<StretchableLayoutResizerBar>(m_layoutManager.get(), 1, m_isHorizontalSlider);
+			addAndMakeVisible(m_layoutResizerBar.get());
+		}
+
+		auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
+		if (multiSoundobjectComponent && this != multiSoundobjectComponent->getParentComponent())
+		{
+			addAndMakeVisible(multiSoundobjectComponent.get());
+		}
+	}
+	else if (!m_multiSoundobjectsActive)
+	{
+		auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
+		if (multiSoundobjectComponent && this == multiSoundobjectComponent->getParentComponent())
+		{
+			removeChildComponent(multiSoundobjectComponent.get());
+		}
+	}
+
 	resized();
 }
 
@@ -265,13 +289,13 @@ void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool acti
 void SoundobjectTablePageComponent::SetPageIsVisible(bool visible)
 {
 	auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
-	if (visible)
-	{
-		addAndMakeVisible(multiSoundobjectComponent.get());
-	}
-	else
+	if (!visible && multiSoundobjectComponent && this == multiSoundobjectComponent->getParentComponent())
 	{
 		removeChildComponent(multiSoundobjectComponent.get());
+	}
+	else if(visible && multiSoundobjectComponent && this != multiSoundobjectComponent->getParentComponent())
+	{
+		addAndMakeVisible(multiSoundobjectComponent.get());
 	}
 
 	PageComponentBase::SetPageIsVisible(visible);

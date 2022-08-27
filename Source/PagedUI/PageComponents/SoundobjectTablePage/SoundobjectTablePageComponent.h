@@ -74,6 +74,7 @@ private:
 	std::unique_ptr<SoundobjectProcessorEditor>		m_selectedProcessorInstanceEditor;	/**< The processor editor component corresponding to the selected row */
 
 	bool											m_isHorizontalSlider;				/**< Indication if the layout slider currently is shown horizontally (vs. vertically). */
+	int												m_layoutManagerItemCount{ 0 };		/**< Helper to keep track of the pages layouting 'mode'. */
 	std::unique_ptr<StretchableLayoutManager>		m_layoutManager;					/**< The layout manager object instance. */
 	std::unique_ptr<StretchableLayoutResizerBar>	m_layoutResizerBar;					/**< The layout slider object instance. */
 

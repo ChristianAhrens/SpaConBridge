@@ -483,6 +483,31 @@ void MultiSoundobjectComponent::RemoveBackgroundImage(MappingAreaId mappingAreaI
 }
 
 /**
+ * Getter for the show selected only state
+ * @return	The show selected only state.
+ */
+bool MultiSoundobjectComponent::IsShowingSelectedOnly() const
+{
+	if (m_multiSoundobjectSlider)
+		return m_multiSoundobjectSlider->IsShowingSelectedSoundobjectsOnly();
+	else
+		return false;
+}
+
+/**
+ * Setter for the show selected only state
+ * @param selectedOnly	The show selected only state to set.
+ */
+void MultiSoundobjectComponent::SetShowSelectedOnly(bool selectedOnly)
+{
+	if (m_multiSoundobjectSlider)
+		m_multiSoundobjectSlider->SetShowSelectedSoundobjectsOnly(selectedOnly);
+
+	// Trigger an update on the multi-slider
+	UpdateGui(true);
+}
+
+/**
  * Reimplemented method to handle changed look and feel data.
  * This makes shure the add/remove buttons' svg images are colored correctly.
  */

@@ -265,6 +265,7 @@ void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool acti
 		auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
 		if (multiSoundobjectComponent && this != multiSoundobjectComponent->getParentComponent())
 		{
+			multiSoundobjectComponent->SetShowSelectedOnly(true);
 			addAndMakeVisible(multiSoundobjectComponent.get());
 		}
 	}
@@ -289,13 +290,17 @@ void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool acti
 void SoundobjectTablePageComponent::SetPageIsVisible(bool visible)
 {
 	auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
-	if (!visible && multiSoundobjectComponent && this == multiSoundobjectComponent->getParentComponent())
+	if (multiSoundobjectComponent)
 	{
-		removeChildComponent(multiSoundobjectComponent.get());
-	}
-	else if(m_multiSoundobjectsActive && visible && multiSoundobjectComponent && this != multiSoundobjectComponent->getParentComponent())
-	{
-		addAndMakeVisible(multiSoundobjectComponent.get());
+		if (!visible && this == multiSoundobjectComponent->getParentComponent())
+		{
+			removeChildComponent(multiSoundobjectComponent.get());
+		}
+		else if (m_multiSoundobjectsActive && visible && this != multiSoundobjectComponent->getParentComponent())
+		{
+			multiSoundobjectComponent->SetShowSelectedOnly(true);
+			addAndMakeVisible(multiSoundobjectComponent.get());
+		}
 	}
 
 	PageComponentBase::SetPageIsVisible(visible);

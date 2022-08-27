@@ -57,6 +57,9 @@ public:
 	const juce::Image* GetBackgroundImage(MappingAreaId mappingAreaId);
 	void SetBackgroundImage(MappingAreaId mappingAreaId, const juce::Image& backgroundImage);
 	void RemoveBackgroundImage(MappingAreaId mappingAreaId);
+	
+	bool IsShowingSelectedOnly() const;
+	void SetShowSelectedOnly(bool selectedOnly);
 
 	//==============================================================================
 	void lookAndFeelChanged() override;

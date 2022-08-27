@@ -95,9 +95,16 @@ void MultiSoundobjectPageComponent::resized()
 void MultiSoundobjectPageComponent::SetPageIsVisible(bool visible)
 {
 	auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
-	if (!visible && multiSoundobjectComponent)
+	if (multiSoundobjectComponent)
 	{
-		removeChildComponent(multiSoundobjectComponent.get());
+		if (!visible && multiSoundobjectComponent)
+		{
+			removeChildComponent(multiSoundobjectComponent.get());
+		}
+		else if (visible)
+		{
+			multiSoundobjectComponent->SetShowSelectedOnly(false);
+		}
 	}
 
 	PageComponentBase::SetPageIsVisible(visible);

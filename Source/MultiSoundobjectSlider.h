@@ -86,6 +86,9 @@ public:
 	void SetBackgroundImage(MappingAreaId mappingAreaId, const juce::Image& backgroundImage);
 	void RemoveBackgroundImage(MappingAreaId mappingAreaId);
 
+	bool IsShowingSelectedSoundobjectsOnly();
+	void SetShowSelectedSoundobjectsOnly(bool selectedOnly);
+
 	void UpdateParameters(const ParameterCache& positions);
 
 	void paintOverChildren (Graphics& g) override;
@@ -99,15 +102,16 @@ public:
 private:
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSoundobjectSlider)
-	SoundobjectProcessorId										m_currentlyDraggedId;		/**< ProcessorId of the currently selected knob, if any. */
-	std::vector<SoundobjectId>									m_highlightedIds;			/**< SourceIds of the currently highlighted knobs, if any. */
-	ParameterCache												m_cachedParameters;			/**< To save us from iterating over all Soundobject Processors at every click, cache their current parametervalues.
-																							 *	 Keys are the SoundobjectProcessorId of each object processor. */
-	bool														m_spreadEnabled;			/**< Flag indication, if SO spread factor visu shall be painted for individual SOs. */
-	bool														m_reverbSndGainEnabled;		/**< Flag indication, if SO reverb send gaind visu shall be painted for individual SOs. */
-	bool														m_soundObjectNamesEnabled;	/**< Flag indication, if SO name strings shall be painted for individual SOs. */
-	MappingAreaId												m_selectedMapping;			/**< Remember the last selected coordinate mapping for the multi-slider. */
-	std::map<MappingAreaId, std::unique_ptr<ImageComponent>>	m_backgroundImages;			/**< Map of background images for the four Mapping Areas that can be displayed. */
+	SoundobjectProcessorId										m_currentlyDraggedId;				/**< ProcessorId of the currently selected knob, if any. */
+	std::vector<SoundobjectId>									m_highlightedIds;					/**< SourceIds of the currently highlighted knobs, if any. */
+	ParameterCache												m_cachedParameters;					/**< To save us from iterating over all Soundobject Processors at every click, cache their current parametervalues.
+																									 *	 Keys are the SoundobjectProcessorId of each object processor. */
+	bool														m_spreadEnabled{ false };			/**< Flag indication, if SO spread factor visu shall be painted for individual SOs. */
+	bool														m_reverbSndGainEnabled{ false };	/**< Flag indication, if SO reverb send gaind visu shall be painted for individual SOs. */
+	bool														m_soundObjectNamesEnabled{ false };	/**< Flag indication, if SO name strings shall be painted for individual SOs. */
+	MappingAreaId												m_selectedMapping;					/**< Remember the last selected coordinate mapping for the multi-slider. */
+	std::map<MappingAreaId, std::unique_ptr<ImageComponent>>	m_backgroundImages;					/**< Map of background images for the four Mapping Areas that can be displayed. */
+	bool														m_showSelectedOnly{ false };		/**< Indication if only selected SO shall be visualized. */
 };
 
 

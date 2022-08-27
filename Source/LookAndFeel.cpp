@@ -242,6 +242,15 @@ void DbLookAndFeelBase::drawAlertBox(	Graphics& g,
 	textLayout.draw(g, alertBounds.toFloat());
 }
 
+/**
+ * Reimplemented nearly code-cloned method of LookAndFeel_V4 to get a nicer selected/active colour.
+ */
+void DbLookAndFeelBase::drawStretchableLayoutResizerBar(Graphics& g, int /*w*/, int /*h*/, bool /*isVerticalBar*/,
+	bool isMouseOver, bool isMouseDragging)
+{
+	if (isMouseOver || isMouseDragging)
+		g.fillAll(GetDbColor(DbColor::HighlightColor));
+}
 
 DarkDbLookAndFeel::DarkDbLookAndFeel()
 {

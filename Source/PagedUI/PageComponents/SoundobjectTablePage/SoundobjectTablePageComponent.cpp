@@ -63,6 +63,17 @@ namespace SpaConBridge
 SoundobjectTablePageComponent::SoundobjectTablePageComponent()
 	: PageComponentBase(PCT_Overview)
 {
+	// Create the layouting manger/slider objects
+	m_layoutManager = std::make_unique<StretchableLayoutManager>();
+	m_layoutManager->setItemLayout(0, -0.05, -1, -0.5);
+	m_layoutManager->setItemLayout(1, 6, 6, 6);
+	m_layoutManager->setItemLayout(2, -0.05, -1, -0.5);
+
+	m_isHorizontalSlider = true;
+
+	m_layoutResizerBar = std::make_unique<StretchableLayoutResizerBar>(m_layoutManager.get(), 1, m_isHorizontalSlider);
+	addAndMakeVisible(m_layoutResizerBar.get());
+
 	// Create the table model/component.
 	m_soundobjectsTable = std::make_unique<SoundobjectTableComponent>();
 	m_soundobjectsTable->onCurrentSelectedProcessorChanged = [=](SoundobjectProcessorId id) { 
@@ -136,47 +147,32 @@ void SoundobjectTablePageComponent::paint(Graphics& g)
  */
 void SoundobjectTablePageComponent::resized()
 {
-	auto bounds = getLocalBounds();
-
-	// flexbox for table and editor as column or row layout depending on aspect ratio
-	FlexBox tableAndEditorFlex;
-	FlexItem::Margin tableMargin{ 8 };
-	FlexItem::Margin editorMargin{ 8 };
-	auto isPortrait = IsPortraitAspectRatio();
-	if (isPortrait)
-	{
-		tableAndEditorFlex.flexDirection = FlexBox::Direction::column;
-		if (m_selectedProcessorInstanceEditor)
-		{
-			tableMargin = FlexItem::Margin(8, 8, 4, 8);
-			editorMargin = FlexItem::Margin(4, 8, 8, 8);
-		}
-		else
-			tableMargin = FlexItem::Margin(8, 8, 8, 8);
-	}
-	else
-	{
-		tableAndEditorFlex.flexDirection = FlexBox::Direction::row;
-		if (m_selectedProcessorInstanceEditor)
-		{
-			tableMargin = FlexItem::Margin(8, 4, 8, 8);
-			editorMargin = FlexItem::Margin(8, 8, 8, 4);
-		}
-		else
-			tableMargin = FlexItem::Margin(8, 8, 8, 8);
-	}
-
-	tableAndEditorFlex.justifyContent = FlexBox::JustifyContent::center;
+	auto layoutingMargins = 8;
+	auto layoutingBounds = getLocalBounds().reduced(layoutingMargins);
+	auto layoutOrigX = layoutingMargins;
+	auto layoutOrigY = layoutingMargins;
+	auto layoutWidth = layoutingBounds.getWidth();
+	auto layoutHeight = layoutingBounds.getHeight();
 
 	if (m_selectedProcessorInstanceEditor)
 	{
-		tableAndEditorFlex.items.add(FlexItem(*m_soundobjectsTable).withFlex(1).withMargin(tableMargin));
-		tableAndEditorFlex.items.add(FlexItem(*m_selectedProcessorInstanceEditor.get()).withFlex(1).withMargin(editorMargin));
+		auto isPortrait = IsPortraitAspectRatio();
+		if (m_isHorizontalSlider != !isPortrait)
+		{
+			m_isHorizontalSlider = !isPortrait;
+			removeChildComponent(m_layoutResizerBar.get());
+			m_layoutResizerBar = std::make_unique<StretchableLayoutResizerBar>(m_layoutManager.get(), 1, m_isHorizontalSlider);
+			addAndMakeVisible(m_layoutResizerBar.get());
+		}
+
+		Component* comps[] = { m_soundobjectsTable.get(), m_layoutResizerBar.get(), m_selectedProcessorInstanceEditor.get() };
+		m_layoutManager->layOutComponents(comps, 3, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, isPortrait, true);
 	}
 	else
-		tableAndEditorFlex.items.add(FlexItem(*m_soundobjectsTable).withFlex(1).withMargin(tableMargin));
-	
-	tableAndEditorFlex.performLayout(bounds.toFloat());
+	{
+		Component* comps[] = { m_soundobjectsTable.get() };
+		m_layoutManager->layOutComponents(comps, 1, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, false, true);
+	}
 }
 
 /**
@@ -186,10 +182,14 @@ void SoundobjectTablePageComponent::SetSoundsourceProcessorEditorActive(Soundobj
 {
 	if (processorId == INVALID_PROCESSOR_ID)
 	{
-		if (m_selectedProcessorInstanceEditor)
+		if (m_selectedProcessorInstanceEditor || m_layoutResizerBar)
 		{
 			removeChildComponent(m_selectedProcessorInstanceEditor.get());
 			m_selectedProcessorInstanceEditor.reset();
+
+			removeChildComponent(m_layoutResizerBar.get());
+			m_layoutResizerBar.reset();
+
 			resized();
 		}
 	}
@@ -213,6 +213,13 @@ void SoundobjectTablePageComponent::SetSoundsourceProcessorEditorActive(Soundobj
 						addAndMakeVisible(m_selectedProcessorInstanceEditor.get());
 						m_selectedProcessorInstanceEditor->UpdateGui(true);
 					}
+
+					m_isHorizontalSlider = !IsPortraitAspectRatio();
+					removeChildComponent(m_layoutResizerBar.get());
+					m_layoutResizerBar.reset();
+					m_layoutResizerBar = std::make_unique<StretchableLayoutResizerBar>(m_layoutManager.get(), 1, m_isHorizontalSlider);
+					addAndMakeVisible(m_layoutResizerBar.get());
+
 					resized();
 				}
 			}

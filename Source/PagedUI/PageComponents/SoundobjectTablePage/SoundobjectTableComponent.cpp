@@ -159,7 +159,10 @@ void SoundobjectTableComponent::selectedRowsChanged(int lastRowSelected)
 {
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
+	{
 		ctrl->SetSelectedSoundobjectProcessorIds(GetProcessorIdsForRows(GetSelectedRows()), true);
+		ctrl->SetParameterChanged(DCP_SoundobjectTable, DCT_ProcessorSelection);
+	}
 
 	TableModelComponent::selectedRowsChanged(lastRowSelected);
 }

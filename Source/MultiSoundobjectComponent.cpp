@@ -219,12 +219,34 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 
 	if (m_multiSoundobjectSlider)
 	{
-		if (	ctrl->PopParameterChanged(DCP_MultiSlider, DCT_NumProcessors) 
-			|| (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_ProcessorSelection)) 
-			|| (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_SoundobjectColourAndSize)) 
-			|| (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_RefreshInterval)))
+#ifdef DEBUG
+		if (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_NumProcessors))
+		{
+			DBG(String(__FUNCTION__) + String(" ctrl update DCT_NumProcessors"));
 			update = true;
-		
+		}
+		if (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_ProcessorSelection))
+		{
+			DBG(String(__FUNCTION__) + String(" ctrl update DCT_ProcessorSelection"));
+			update = true;
+		}
+		if (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_SoundobjectColourAndSize))
+		{
+			DBG(String(__FUNCTION__) + String(" ctrl update DCT_SoundobjectColourAndSize"));
+			update = true;
+		}
+		if (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_RefreshInterval))
+		{
+			DBG(String(__FUNCTION__) + String(" ctrl update DCT_RefreshInterval"));
+			update = true;
+		}
+#else
+		if (ctrl->PopParameterChanged(DCP_MultiSlider, (DCT_NumProcessors | DCT_ProcessorSelection | DCT_SoundobjectColourAndSize | DCT_RefreshInterval)))
+		{
+			update = true;
+		}
+#endif
+
 		// Iterate through all procssor instances and see if anything changed there.
 		// At the same time collect all sources positions for updating.
 		MultiSoundobjectSlider::ParameterCache cachedParameters;
@@ -248,8 +270,28 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 					cachedParameters.insert(std::make_pair(processorId, MultiSoundobjectSlider::SoundobjectParameters(soundobjectId, pos, spread, reverbSendGain, selected, colour, size, objectName)));
 				}
 
-				if (processor->PopParameterChanged(DCP_MultiSlider, (DCT_SoundobjectProcessorConfig | DCT_SoundobjectParameters)))
+#ifdef DEBUG
+				if (processor->PopParameterChanged(DCP_MultiSlider, DCT_SoundobjectProcessorConfig))
+				{
+					DBG(String(__FUNCTION__) + String(" processor update DCT_SoundobjectProcessorConfig"));
 					update = true;
+				}
+				if (processor->PopParameterChanged(DCP_MultiSlider, DCT_SoundobjectParameters))
+				{
+					DBG(String(__FUNCTION__) + String(" processor update DCT_SoundobjectParameters"));
+					update = true;
+				}
+				if (processor->PopParameterChanged(DCP_MultiSlider, DCT_ProcessorSelection))
+				{
+					DBG(String(__FUNCTION__) + String(" processor update DCT_ProcessorSelection"));
+					update = true;
+				}
+#else
+				if (processor->PopParameterChanged(DCP_MultiSlider, (DCT_SoundobjectProcessorConfig | DCT_SoundobjectParameters | DCT_ProcessorSelection)))
+				{
+					update = true;
+				}
+#endif
 			}
 		}
 

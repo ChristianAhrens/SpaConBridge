@@ -293,7 +293,7 @@ void SoundobjectTablePageComponent::SetPageIsVisible(bool visible)
 	{
 		removeChildComponent(multiSoundobjectComponent.get());
 	}
-	else if(visible && multiSoundobjectComponent && this != multiSoundobjectComponent->getParentComponent())
+	else if(m_multiSoundobjectsActive && visible && multiSoundobjectComponent && this != multiSoundobjectComponent->getParentComponent())
 	{
 		addAndMakeVisible(multiSoundobjectComponent.get());
 	}

@@ -33,16 +33,16 @@ namespace SpaConBridge
 class MultiSoundobjectSlider;
 
 /**
- * Class MultiSurfacePageComponent is just a component which contains the multi-source slider
+ * Class MultiSoundobjectPageComponent is just a component which contains the multi-source slider
  * and the mapping selection control.
  */
-class MultiSurfacePageComponent :	public PageComponentBase,
+class MultiSoundobjectPageComponent :	public PageComponentBase,
 									public ComboBox::Listener,
 									public ToggleButton::Listener
 {
 public:
-	MultiSurfacePageComponent();
-	~MultiSurfacePageComponent() override;
+	MultiSoundobjectPageComponent();
+	~MultiSoundobjectPageComponent() override;
 
 	//==============================================================================
 	void UpdateGui(bool init) override;
@@ -88,7 +88,7 @@ private:
 	std::unique_ptr<DrawableButton>		m_spreadEnable;			/**> Checkbox for spread factor enable. */
 
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSurfacePageComponent)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSoundobjectPageComponent)
 };
 
 

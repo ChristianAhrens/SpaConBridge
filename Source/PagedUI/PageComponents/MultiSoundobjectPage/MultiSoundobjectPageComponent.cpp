@@ -17,7 +17,7 @@
  */
 
 
-#include "MultisurfacePageComponent.h"
+#include "MultiSoundobjectPageComponent.h"
 
 #include "../../PageComponentManager.h"
 
@@ -34,14 +34,14 @@ namespace SpaConBridge
 
 /*
 ===============================================================================
- Class MultiSurfacePageComponent
+ Class MultiSoundobjectPageComponent
 ===============================================================================
 */
 
 /**
  * Class constructor.
  */
-MultiSurfacePageComponent::MultiSurfacePageComponent()
+MultiSoundobjectPageComponent::MultiSoundobjectPageComponent()
 	: PageComponentBase(PCT_MultiSlide)
 {
 	// Add multi-slider
@@ -100,7 +100,7 @@ MultiSurfacePageComponent::MultiSurfacePageComponent()
 /**
  * Class destructor.
  */
-MultiSurfacePageComponent::~MultiSurfacePageComponent()
+MultiSoundobjectPageComponent::~MultiSoundobjectPageComponent()
 {
 }
 
@@ -108,7 +108,7 @@ MultiSurfacePageComponent::~MultiSurfacePageComponent()
  * Reimplemented to paint background.
  * @param g		Graphics context that must be used to do the drawing operations.
  */
-void MultiSurfacePageComponent::paint(Graphics& g)
+void MultiSoundobjectPageComponent::paint(Graphics& g)
 {
 	// Paint background to cover the controls behind this overlay.
 	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
@@ -118,7 +118,7 @@ void MultiSurfacePageComponent::paint(Graphics& g)
 /**
  * Reimplemented to resize and re-postion controls on the overview window.
  */
-void MultiSurfacePageComponent::resized()
+void MultiSoundobjectPageComponent::resized()
 {
 	auto margin = 5;
 	auto bounds = getLocalBounds().reduced(margin);
@@ -179,7 +179,7 @@ void MultiSurfacePageComponent::resized()
  * @param init	True to ignore any changed flags and update the procssor parameters
  *				in the GUI anyway. Good for when opening the Overview for the first time.
  */
-void MultiSurfacePageComponent::UpdateGui(bool init)
+void MultiSoundobjectPageComponent::UpdateGui(bool init)
 {
 	auto ctrl = Controller::GetInstance();
 	if (!ctrl)
@@ -267,7 +267,7 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
  * Called when a ComboBox has its selected item changed. 
  * @param comboBox	The combo box which has changed.
  */
-void MultiSurfacePageComponent::comboBoxChanged(ComboBox *comboBox)
+void MultiSoundobjectPageComponent::comboBoxChanged(ComboBox *comboBox)
 {
 	if (GetSelectedMapping() != comboBox->getSelectedId())
 	{
@@ -288,7 +288,7 @@ void MultiSurfacePageComponent::comboBoxChanged(ComboBox *comboBox)
  * Called when a button has been clicked.
  * @param button	The button that was clicked.
  */
-void MultiSurfacePageComponent::buttonClicked(Button* button)
+void MultiSoundobjectPageComponent::buttonClicked(Button* button)
 {
 	if (m_loadImage.get() == button)
 	{
@@ -356,7 +356,7 @@ void MultiSurfacePageComponent::buttonClicked(Button* button)
  * Get the currently selected coordinate mapping used for the multi-slider.
  * @return The selected mapping area.
  */
-MappingAreaId MultiSurfacePageComponent::GetSelectedMapping() const
+MappingAreaId MultiSoundobjectPageComponent::GetSelectedMapping() const
 {
 	if (m_multiSliderSurface)
 		return m_multiSliderSurface->GetSelectedMapping();
@@ -368,7 +368,7 @@ MappingAreaId MultiSurfacePageComponent::GetSelectedMapping() const
  * Set the currently selected coordinate mapping used for the multi-slider.
  * @param mapping	The new selected mapping area.
  */
-bool MultiSurfacePageComponent::SetSelectedMapping(MappingAreaId mapping)
+bool MultiSoundobjectPageComponent::SetSelectedMapping(MappingAreaId mapping)
 {
 	if (m_multiSliderSurface)
 	{
@@ -389,7 +389,7 @@ bool MultiSurfacePageComponent::SetSelectedMapping(MappingAreaId mapping)
  * Getter for the reverb enabled state
  * @return	The enabled state.
  */
-bool MultiSurfacePageComponent::IsReverbEnabled() const
+bool MultiSoundobjectPageComponent::IsReverbEnabled() const
 {
 	if (m_multiSliderSurface)
 		return m_multiSliderSurface->IsReverbSndGainEnabled();
@@ -401,7 +401,7 @@ bool MultiSurfacePageComponent::IsReverbEnabled() const
  * Setter for the reverb enabled state
  * @param enabled	The enabled state to set.
  */
-void MultiSurfacePageComponent::SetReverbEnabled(bool enabled)
+void MultiSoundobjectPageComponent::SetReverbEnabled(bool enabled)
 {
 	if (m_multiSliderSurface)
 		m_multiSliderSurface->SetReverbSndGainEnabled(enabled);
@@ -414,7 +414,7 @@ void MultiSurfacePageComponent::SetReverbEnabled(bool enabled)
  * Getter for the spread enabled state
  * @return	The enabled state.
  */
-bool MultiSurfacePageComponent::IsSpreadEnabled() const
+bool MultiSoundobjectPageComponent::IsSpreadEnabled() const
 {
 	if (m_multiSliderSurface)
 		return m_multiSliderSurface->IsSpreadEnabled();
@@ -426,7 +426,7 @@ bool MultiSurfacePageComponent::IsSpreadEnabled() const
  * Setter for the spread enabled state
  * @param enabled	The enabled state to set.
  */
-void MultiSurfacePageComponent::SetSpreadEnabled(bool enabled)
+void MultiSoundobjectPageComponent::SetSpreadEnabled(bool enabled)
 {
 	if (m_multiSliderSurface)
 		m_multiSliderSurface->SetSpreadEnabled(enabled);
@@ -440,7 +440,7 @@ void MultiSurfacePageComponent::SetSpreadEnabled(bool enabled)
  * @param	mappingAreaId	The id of the mapping area to get the currently used background image for
  * @return	A pointer to the currently used image, nullptr if none is set.
  */
-const juce::Image* MultiSurfacePageComponent::GetBackgroundImage(MappingAreaId mappingAreaId)
+const juce::Image* MultiSoundobjectPageComponent::GetBackgroundImage(MappingAreaId mappingAreaId)
 {
 	if (m_multiSliderSurface)
 		return m_multiSliderSurface->GetBackgroundImage(mappingAreaId);
@@ -453,7 +453,7 @@ const juce::Image* MultiSurfacePageComponent::GetBackgroundImage(MappingAreaId m
  * @param	mappingAreaId	The id of the mapping area to set the background image for
  * @param	backgroundImage	The image to set as background
  */
-void MultiSurfacePageComponent::SetBackgroundImage(MappingAreaId mappingAreaId, const juce::Image& backgroundImage)
+void MultiSoundobjectPageComponent::SetBackgroundImage(MappingAreaId mappingAreaId, const juce::Image& backgroundImage)
 {
 	if (m_multiSliderSurface)
 	{
@@ -470,7 +470,7 @@ void MultiSurfacePageComponent::SetBackgroundImage(MappingAreaId mappingAreaId, 
  * Helper method to remove the background image for given mapping area.
  * @param	mappingAreaId	The id of the mapping area to remove the background image of
  */
-void MultiSurfacePageComponent::RemoveBackgroundImage(MappingAreaId mappingAreaId)
+void MultiSoundobjectPageComponent::RemoveBackgroundImage(MappingAreaId mappingAreaId)
 {
 	if (m_multiSliderSurface)
 	{
@@ -487,7 +487,7 @@ void MultiSurfacePageComponent::RemoveBackgroundImage(MappingAreaId mappingAreaI
  * Reimplemented method to handle changed look and feel data.
  * This makes shure the add/remove buttons' svg images are colored correctly.
  */
-void MultiSurfacePageComponent::lookAndFeelChanged()
+void MultiSoundobjectPageComponent::lookAndFeelChanged()
 {
 	// first forward the call to base implementation
 	Component::lookAndFeelChanged();

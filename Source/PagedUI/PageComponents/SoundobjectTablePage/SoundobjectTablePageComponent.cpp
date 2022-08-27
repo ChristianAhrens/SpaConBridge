@@ -336,6 +336,15 @@ void SoundobjectTablePageComponent::UpdateGui(bool init)
 			}
 		}
 	}
+
+	if (m_multiSoundobjectsActive)
+	{
+		auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
+		if (multiSoundobjectComponent)
+		{
+			multiSoundobjectComponent->UpdateGui(false);
+		}
+	}
 }
 
 /**

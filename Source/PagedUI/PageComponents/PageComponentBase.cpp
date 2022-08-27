@@ -89,8 +89,6 @@ bool PageComponentBase::IsPageVisible() const
 void PageComponentBase::SetPageIsVisible(bool visible)
 {
 	m_isVisible = visible;
-
-	DBG(String(__FUNCTION__) + GetPageNameFromId(GetPageId()) + String(visible ? " became visible" : " was hidden"));
 }
 
 /**

@@ -56,6 +56,7 @@ public:
 
 	//==============================================================================
 	void SetSoundsourceProcessorEditorActive(SoundobjectProcessorId processorId);
+	void SetMultiSoundobjectComponentActive(bool active);
 
 	//==========================================================================
 	void onConfigUpdated() override;
@@ -72,6 +73,8 @@ private:
 	bool											m_isHorizontalSlider;				/**< Indication if the layout slider currently is shown horizontally (vs. vertically). */
 	std::unique_ptr<StretchableLayoutManager>		m_layoutManager;					/**< The layout manager object instance. */
 	std::unique_ptr<StretchableLayoutResizerBar>	m_layoutResizerBar;					/**< The layout slider object instance. */
+
+	bool	m_multiSoundobjectsActive;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SoundobjectTablePageComponent)
 };

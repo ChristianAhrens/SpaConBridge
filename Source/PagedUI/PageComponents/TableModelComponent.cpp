@@ -1042,18 +1042,24 @@ void TableModelComponent::selectedRowsChanged(int lastRowSelected)
 		{
 			if (onCurrentSelectedProcessorChanged)
 				onCurrentSelectedProcessorChanged(GetProcessorIdForRow(lastRowSelected));
+			if (onMultiProcessorsSelectionChanged)
+				onMultiProcessorsSelectionChanged(false);
 			m_tableControlBar->SetRemoveEnabled(true);
 		}
 		else if (m_table->getSelectedRows().isEmpty())
 		{
 			if (onCurrentSelectedProcessorChanged)
 				onCurrentSelectedProcessorChanged(SpaConBridge::INVALID_PROCESSOR_ID);
+			if (onMultiProcessorsSelectionChanged)
+				onMultiProcessorsSelectionChanged(false);
 			m_tableControlBar->SetRemoveEnabled(false);
 		}
 		else if (m_table->getSelectedRows().size() > 1)
 		{
 			if (onCurrentSelectedProcessorChanged)
 				onCurrentSelectedProcessorChanged(SpaConBridge::INVALID_PROCESSOR_ID);
+			if (onMultiProcessorsSelectionChanged)
+				onMultiProcessorsSelectionChanged(true);
 			m_tableControlBar->SetRemoveEnabled(true);
 		}
 		else

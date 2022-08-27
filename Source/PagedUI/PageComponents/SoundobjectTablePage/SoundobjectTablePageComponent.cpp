@@ -21,12 +21,15 @@
 
 #include "SoundobjectTableComponent.h"
 
+#include "../../PageComponentManager.h"
+
 #include "../../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
 #include "../../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessorEditor.h"
 
-#include "../../../SoundobjectSlider.h"
 #include "../../../Controller.h"
 #include "../../../LookAndFeel.h"
+#include "../../../MultiSoundobjectComponent.h"
+#include "../../../SoundobjectSlider.h"
 
 #include <Image_utils.h>
 
@@ -70,6 +73,9 @@ SoundobjectTablePageComponent::SoundobjectTablePageComponent()
 		auto config = SpaConBridge::AppConfiguration::getInstance();
 		if (config)
 			config->triggerConfigurationDump(false);
+	};
+	m_soundobjectsTable->onMultiProcessorsSelectionChanged = [=](bool multiselected) {
+		SetMultiSoundobjectComponentActive(multiselected);
 	};
 	addAndMakeVisible(m_soundobjectsTable.get());
 
@@ -133,7 +139,7 @@ void SoundobjectTablePageComponent::resized()
 	auto layoutWidth = layoutingBounds.getWidth();
 	auto layoutHeight = layoutingBounds.getHeight();
 
-	if (m_selectedProcessorInstanceEditor)
+	if (m_selectedProcessorInstanceEditor || m_multiSoundobjectsActive)
 	{
 		auto isPortrait = IsPortraitAspectRatio();
 		if (m_isHorizontalSlider != !isPortrait)
@@ -144,8 +150,17 @@ void SoundobjectTablePageComponent::resized()
 			addAndMakeVisible(m_layoutResizerBar.get());
 		}
 
-		Component* comps[] = { m_soundobjectsTable.get(), m_layoutResizerBar.get(), m_selectedProcessorInstanceEditor.get() };
-		m_layoutManager->layOutComponents(comps, 3, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, isPortrait, true);
+		if (m_multiSoundobjectsActive)
+		{
+			auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
+			Component* comps[] = { m_soundobjectsTable.get(), m_layoutResizerBar.get(), multiSoundobjectComponent.get() };
+			m_layoutManager->layOutComponents(comps, 3, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, isPortrait, true);
+		}
+		else
+		{
+			Component* comps[] = { m_soundobjectsTable.get(), m_layoutResizerBar.get(), m_selectedProcessorInstanceEditor.get() };
+			m_layoutManager->layOutComponents(comps, 3, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, isPortrait, true);
+		}
 	}
 	else
 	{
@@ -223,6 +238,31 @@ void SoundobjectTablePageComponent::SetSoundsourceProcessorEditorActive(Soundobj
 		}
 	}
 }
+
+/**
+ * Function to be called from model when the current selection
+ * has changed in a way that the currently displayed multisurface must be hidden
+ * or the currently not displayed multisurface must be shown
+ * @param active	True if the multisurface shall be shown, false if hidden.
+ */
+void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool active)
+{
+	auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
+
+	m_multiSoundobjectsActive = active;
+
+	if (m_multiSoundobjectsActive)
+	{
+		addAndMakeVisible(multiSoundobjectComponent.get());
+	}
+	else
+	{
+		removeChildComponent(multiSoundobjectComponent.get());
+	}
+
+	resized();
+}
+
 
 /**
  * If any relevant parameters have been marked as changed, update the table contents.

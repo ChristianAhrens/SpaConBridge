@@ -126,6 +126,7 @@ public:
 	std::function<void(juce::int32)>	onCurrentSelectedProcessorChanged;
 	std::function<void(int)>			onCurrentRowHeightChanged;
 	std::function<void(bool)>			onCurrentCollapseStateChanged;
+	std::function<void(bool)>			onMultiProcessorsSelectionChanged;
 
 protected:
 	//==============================================================================

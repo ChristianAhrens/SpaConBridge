@@ -436,8 +436,8 @@
           <GROUP id="{AE87B67F-F38C-02B1-7766-C315A14B1AA5}" name="MultiSoundobjectPage">
             <FILE id="IBiEGK" name="MultiSoundobjectPageComponent.cpp" compile="1"
                   resource="0" file="Source/PagedUI/PageComponents/MultiSoundobjectPage/MultiSoundobjectPageComponent.cpp"/>
-            <FILE id="A6wGp1" name="MultiSoundobjectPageComponent.h" compile="0" resource="0"
-                  file="Source/PagedUI/PageComponents/MultiSoundobjectPage/MultiSoundobjectPageComponent.h"/>
+            <FILE id="A6wGp1" name="MultiSoundobjectPageComponent.h" compile="0"
+                  resource="0" file="Source/PagedUI/PageComponents/MultiSoundobjectPage/MultiSoundobjectPageComponent.h"/>
           </GROUP>
           <GROUP id="{59435D02-8728-9CA1-282E-B7B15C7B9CAB}" name="MatrixIOPage">
             <FILE id="KD60wJ" name="MatrixChannelTableComponentBase.cpp" compile="1"
@@ -501,6 +501,10 @@
         <FILE id="H1EAfS" name="PageContainerComponent.h" compile="0" resource="0"
               file="Source/PagedUI/PageContainerComponent.h"/>
       </GROUP>
+      <FILE id="cjzzIw" name="MultiSoundobjectComponent.cpp" compile="1"
+            resource="0" file="Source/MultiSoundobjectComponent.cpp"/>
+      <FILE id="QSCEhO" name="MultiSoundobjectComponent.h" compile="0" resource="0"
+            file="Source/MultiSoundobjectComponent.h"/>
       <FILE id="J4dNBL" name="MultiSoundobjectSlider.cpp" compile="1" resource="0"
             file="Source/MultiSoundobjectSlider.cpp"/>
       <FILE id="y4weUd" name="MultiSoundobjectSlider.h" compile="0" resource="0"
@@ -655,7 +659,8 @@
                JUCE_USE_LAME_AUDIO_FORMAT="0" JUCE_USE_WINDOWS_MEDIA_FORMAT="0"
                JUCE_VST3_CAN_REPLACE_VST2="0" JUCE_FORCE_USE_LEGACY_PARAM_IDS="0"
                JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE="0" JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS="1"
-               JUCE_STANDALONE_FILTER_WINDOW_USE_KIOSK_MODE="0" JUCE_PLUGINHOST_VST3="0" JUCE_WEB_BROWSER="0"/>
+               JUCE_STANDALONE_FILTER_WINDOW_USE_KIOSK_MODE="0" JUCE_PLUGINHOST_VST3="0"
+               JUCE_WEB_BROWSER="0"/>
   <LIVE_SETTINGS>
     <WINDOWS/>
     <OSX/>

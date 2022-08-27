@@ -88,7 +88,7 @@ PageContainerComponent::PageContainerComponent()
 
 	// Create the pages.
 	m_soundobjectsPage = std::make_unique<SoundobjectTablePageComponent>();
-	m_multiSliderPage = std::make_unique<MultiSoundobjectPageComponent>();
+	m_multiSoundobjectsPage = std::make_unique<MultiSoundobjectPageComponent>();
     m_matrixIOPage = std::make_unique<MatrixIOPageComponent>();
 	m_statisticsPage = std::make_unique<StatisticsPageComponent>();
 	m_scenesPage = std::make_unique<ScenesPageComponent>();
@@ -107,7 +107,7 @@ PageContainerComponent::PageContainerComponent()
 	// Add the page tabs.
 	m_tabbedComponent->SetIsHandlingChanges(false);
 	m_tabbedComponent->addTab(GetPageNameFromId(UPI_SoundObjects), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_soundobjectsPage.get(), false, UPI_SoundObjects);
-	m_tabbedComponent->addTab(GetPageNameFromId(UPI_MultiSlider), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSliderPage.get(), false, UPI_MultiSlider);
+	m_tabbedComponent->addTab(GetPageNameFromId(UPI_MultiSlider), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSoundobjectsPage.get(), false, UPI_MultiSlider);
 	m_tabbedComponent->addTab(GetPageNameFromId(UPI_MatrixIOs), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_matrixIOPage.get(), false, UPI_MatrixIOs);
 	m_tabbedComponent->addTab(GetPageNameFromId(UPI_Scenes), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_scenesPage.get(), false, UPI_Scenes);
 	m_tabbedComponent->addTab(GetPageNameFromId(UPI_EnSpace), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_enSpacePage.get(), false, UPI_EnSpace);
@@ -211,7 +211,7 @@ void PageContainerComponent::resized()
 	// Resize overview table container.
 	auto rect = Rectangle<int>(0, 44, w, getLocalBounds().getHeight() - 89);
 	m_soundobjectsPage->setBounds(rect);
-	m_multiSliderPage->setBounds(rect);
+	m_multiSoundobjectsPage->setBounds(rect);
     m_matrixIOPage->setBounds(rect);
 	m_settingsPage->setBounds(rect);
 	m_statisticsPage->setBounds(rect);
@@ -348,8 +348,8 @@ void PageContainerComponent::UpdateGui(bool init)
 		// starting of refresh timer only when page is visible.
 		auto updateSoundObjects = init;
 		auto startRefreshSoundObjects = false;
-		auto updateMultiSlider = init;
-		auto startRefreshMultiSlider = false;
+		auto updateMultiSoundobjects = init;
+		auto startRefreshMultiSoundobjects = false;
 		auto updateMatrixIOs = init;
 		auto startRefreshMatrixIOs = false;
 		auto updateScenes = init;
@@ -368,8 +368,8 @@ void PageContainerComponent::UpdateGui(bool init)
 			startRefreshSoundObjects = true;
 			break;
 		case UPI_MultiSlider:
-			updateMultiSlider = true;
-			startRefreshMultiSlider = true;
+			updateMultiSoundobjects = true;
+			startRefreshMultiSoundobjects = true;
 			break;
 		case UPI_MatrixIOs:
 			updateMatrixIOs = true;
@@ -406,12 +406,12 @@ void PageContainerComponent::UpdateGui(bool init)
 				startTimer(GUI_UPDATE_RATE_SLOW);
 		}
 
-		if (updateMultiSlider)
+		if (updateMultiSoundobjects)
 		{
-			if (m_multiSliderPage)
-				m_multiSliderPage->UpdateGui(init);
+			if (m_multiSoundobjectsPage)
+				m_multiSoundobjectsPage->UpdateGui(init);
 		}
-		if (startRefreshMultiSlider)
+		if (startRefreshMultiSoundobjects)
 		{
 			if (getTimerInterval() != GUI_UPDATE_RATE_FAST)
 				startTimer(GUI_UPDATE_RATE_FAST);
@@ -486,7 +486,7 @@ void PageContainerComponent::SetPagesBeingInitialized(bool initializing)
 	m_tabbedComponent->SetIsHandlingChanges(!initializing);
 
 	m_soundobjectsPage->SetPageIsInitializing(initializing);
-	m_multiSliderPage->SetPageIsInitializing(initializing);
+	m_multiSoundobjectsPage->SetPageIsInitializing(initializing);
 	m_matrixIOPage->SetPageIsInitializing(initializing);
 	m_settingsPage->SetPageIsInitializing(initializing);
 	m_statisticsPage->SetPageIsInitializing(initializing);
@@ -531,7 +531,7 @@ void PageContainerComponent::SetEnabledPages(const std::vector<UIPageId>& enable
 	if (SoundObjectsPageEnabled)
 		m_tabbedComponent->addTab(GetPageNameFromId(UPI_SoundObjects), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_soundobjectsPage.get(), false, UPI_SoundObjects);
 	if (MultiSliderPageEnabled)
-		m_tabbedComponent->addTab(GetPageNameFromId(UPI_MultiSlider), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSliderPage.get(), false, UPI_MultiSlider);
+		m_tabbedComponent->addTab(GetPageNameFromId(UPI_MultiSlider), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSoundobjectsPage.get(), false, UPI_MultiSlider);
 	if (MatrixIOsPageEnabled)
 		m_tabbedComponent->addTab(GetPageNameFromId(UPI_MatrixIOs), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_matrixIOPage.get(), false, UPI_MatrixIOs);
 	if (ScenesPageEnabled)
@@ -711,96 +711,6 @@ void PageContainerComponent::SetScenesPagePinnedScenes(const std::vector<std::pa
 {
 	if (m_scenesPage)
 		m_scenesPage->SetPinnedScenes(pinnedScenes);
-}
-
-/**
- * Getter for the selected mapping area of MultiSlider Page
- * @return	The selected mapping area.
- */
-MappingAreaId PageContainerComponent::GetMultiSliderPageMappingArea()
-{
-	if (m_multiSliderPage)
-		return m_multiSliderPage->GetSelectedMapping();
-	else
-	{
-		jassertfalse;
-		return MappingAreaId::MAI_Invalid;
-	}
-}
-
-/**
- * Setter for the selected mapping area of MultiSlider Page
- * @param mappingArea	The mapping area to select.
- */
-void PageContainerComponent::SetMultiSliderPageMappingArea(MappingAreaId mappingArea)
-{
-	if (m_multiSliderPage)
-		m_multiSliderPage->SetSelectedMapping(mappingArea);
-}
-
-/**
- * Getter for the reverb enabled state of MultiSlider Page
- * @return	The enabled state.
- */
-bool PageContainerComponent::IsMultiSliderPageReverbEnabled()
-{
-	if (m_multiSliderPage)
-		return m_multiSliderPage->IsReverbEnabled();
-	else
-		return false;
-}
-
-/**
- * Setter for the reverb enabled state of MultiSlider Page
- * @param enabled	The enabled state to set.
- */
-void PageContainerComponent::SetMultiSliderPageReverbEnabled(bool enabled)
-{
-	if (m_multiSliderPage)
-		m_multiSliderPage->SetReverbEnabled(enabled);
-}
-
-/**
- * Getter for the spread enabled state of MultiSlider Page
- * @return	The enabled state.
- */
-bool PageContainerComponent::IsMultiSliderPageSpreadEnabled()
-{
-	if (m_multiSliderPage)
-		return m_multiSliderPage->IsSpreadEnabled();
-	else
-		return false;
-}
-
-/**
- * Setter for the spread enabled state of MultiSlider Page
- * @param enabled	The enabled state to set.
- */
-void PageContainerComponent::SetMultiSliderPageSpreadEnabled(bool enabled)
-{
-	if (m_multiSliderPage)
-		m_multiSliderPage->SetSpreadEnabled(enabled);
-}
-
-/**
- * Setter for the background image for given mapping area.
- * @param	mappingAreaId	The id of the mapping area to set the background image for
- * @param	backgroundImage	The image to set as background
- */
-void PageContainerComponent::SetMultiSliderPageBackgroundImage(MappingAreaId mappingAreaId, const juce::Image& backgroundImage)
-{
-	if (m_multiSliderPage)
-		m_multiSliderPage->SetBackgroundImage(mappingAreaId, backgroundImage);
-}
-
-/**
- * Helper method to remove the background image for given mapping area.
- * @param	mappingAreaId	The id of the mapping area to remove the background image of
- */
-void PageContainerComponent::RemoveMultiSliderPageBackgroundImage(MappingAreaId mappingAreaId)
-{
-	if (m_multiSliderPage)
-		m_multiSliderPage->RemoveBackgroundImage(mappingAreaId);
 }
 
 void PageContainerComponent::SetOverlayComponent(Component* componentToOverlay)

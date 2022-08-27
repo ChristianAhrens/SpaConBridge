@@ -159,18 +159,6 @@ public:
 	void SetScenesPagePinnedScenes(const std::vector<std::pair<std::pair<int, int>, std::string>>& pinnedScenes);
 
 	//==============================================================================
-	MappingAreaId GetMultiSliderPageMappingArea();
-	void SetMultiSliderPageMappingArea(MappingAreaId mappingArea);
-
-	bool IsMultiSliderPageReverbEnabled();
-	void SetMultiSliderPageReverbEnabled(bool enabled);
-	bool IsMultiSliderPageSpreadEnabled();
-	void SetMultiSliderPageSpreadEnabled(bool enabled);
-
-	void SetMultiSliderPageBackgroundImage(MappingAreaId mappingAreaId, const juce::Image& backgroundImage);
-	void RemoveMultiSliderPageBackgroundImage(MappingAreaId mappingAreaId);
-
-	//==============================================================================
 	void SetOverlayComponent(Component* componentToOverlay);
 	void ClearOverlayComponent();
 
@@ -190,22 +178,22 @@ private:
 
 private:
 	//==============================================================================
-	std::unique_ptr<Label>							m_versionLabel;			/**> App version label. */
-	std::unique_ptr<Label>							m_versionStringLabel;	/**> "Version" string. */
-	std::unique_ptr<ImageButton>					m_logoButton;			/**> App logo button triggering about page. */
-	std::unique_ptr<DrawableButton>					m_helpButton;			/**< Button to open the github readme url. */
-	std::unique_ptr<TextButton>						m_onlineButton;			/**> Online/Offline toggle button. */
-	std::unique_ptr<LedComponent>					m_connectedLed1st;		/**> Button used as Connected indicator LED for first DS100. */
-	std::unique_ptr<LedComponent>					m_connectedLed2nd;		/**> Button used as Connected indicator LED for second DS100. */
-	std::unique_ptr<CustomButtonTabbedComponent>	m_tabbedComponent;		/**> A container for tabs. */
-	std::unique_ptr<SoundobjectTablePageComponent>	m_soundobjectsPage;		/**> The actual table container inside this component. */
-	std::unique_ptr<MultiSoundobjectPageComponent>	m_multiSliderPage;		/**> Container for multi-slider. */
-    std::unique_ptr<MatrixIOPageComponent>          m_matrixIOPage;         /**> Container for matrix inputs/outputs. */
-	std::unique_ptr<SettingsPageComponent>			m_settingsPage;			/**> Container for settings component. */
-	std::unique_ptr<StatisticsPageComponent>		m_statisticsPage;		/**> Container for statistics component. */
-	std::unique_ptr<AboutPageComponent>				m_aboutPage;			/**> Container for about component. */
-	std::unique_ptr<ScenesPageComponent>			m_scenesPage;			/**> Container for scenes component. */
-	std::unique_ptr<EnSpacePageComponent>			m_enSpacePage;			/**> Container for EnSpace component. */
+	std::unique_ptr<Label>							m_versionLabel;				/**< App version label. */
+	std::unique_ptr<Label>							m_versionStringLabel;		/**< "Version" string. */
+	std::unique_ptr<ImageButton>					m_logoButton;				/**< App logo button triggering about page. */
+	std::unique_ptr<DrawableButton>					m_helpButton;				/**< Button to open the github readme url. */
+	std::unique_ptr<TextButton>						m_onlineButton;				/**< Online/Offline toggle button. */
+	std::unique_ptr<LedComponent>					m_connectedLed1st;			/**< Button used as Connected indicator LED for first DS100. */
+	std::unique_ptr<LedComponent>					m_connectedLed2nd;			/**< Button used as Connected indicator LED for second DS100. */
+	std::unique_ptr<CustomButtonTabbedComponent>	m_tabbedComponent;			/**< A container for tabs. */
+	std::unique_ptr<SoundobjectTablePageComponent>	m_soundobjectsPage;			/**< The actual table container inside this component. */
+	std::unique_ptr<MultiSoundobjectPageComponent>	m_multiSoundobjectsPage;	/**< Container for multi-slider. */
+    std::unique_ptr<MatrixIOPageComponent>          m_matrixIOPage;				/**< Container for matrix inputs/outputs. */
+	std::unique_ptr<SettingsPageComponent>			m_settingsPage;				/**< Container for settings component. */
+	std::unique_ptr<StatisticsPageComponent>		m_statisticsPage;			/**< Container for statistics component. */
+	std::unique_ptr<AboutPageComponent>				m_aboutPage;				/**< Container for about component. */
+	std::unique_ptr<ScenesPageComponent>			m_scenesPage;				/**< Container for scenes component. */
+	std::unique_ptr<EnSpacePageComponent>			m_enSpacePage;				/**< Container for EnSpace component. */
 
 	Component* m_overlayComponent{ nullptr };
 

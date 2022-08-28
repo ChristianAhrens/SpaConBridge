@@ -1,36 +1,20 @@
-/*
-===============================================================================
-
-Copyright (C) 2019 d&b audiotechnik GmbH & Co. KG. All Rights Reserved.
-
-This file was originally part of the Soundscape VST, AU, and AAX Plug-in and now in a derived version is part of SpaConBridge.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice,
-this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
-
-3. The name of the author may not be used to endorse or promote products
-derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY d&b audiotechnik GmbH & Co. KG "AS IS" AND ANY
-EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-===============================================================================
-*/
+/* Copyright(c) 2020 - 2022, Christian Ahrens
+ *
+ * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 
 #include "PageComponentManager.h"
@@ -39,6 +23,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
 #include "../Controller.h"
+#include "../MultiSoundobjectComponent.h"
 #include "../SoundobjectSlider.h"
 
 #include <Image_utils.h>
@@ -73,9 +58,11 @@ PageComponentManager::PageComponentManager()
 	// Initialization of members to a usable default makes sense 
 	// when no config xml is available on app start and therefor 
 	// init values of this instance are going to be used for default config.
-	m_activePage = UPI_SoundObjects;
+	m_activePage = UPI_Soundobjects;
 	for (int id = UPI_InvalidMin + 1; id < UPI_InvalidMax; id++) m_enabledPages.push_back(static_cast<UIPageId>(id));
 	m_lookAndFeelType = DbLookAndFeelBase::LAFT_Dark;
+
+	m_multiSoundobjectComponent = std::make_unique<MultiSoundobjectComponent>();
 }
 
 /**
@@ -373,14 +360,23 @@ void PageComponentManager::SetScenesPagePinnedScenes(const std::vector<std::pair
 }
 
 /**
- * Proxy Getter for the selected mapping area in MultiSlider Page.
- * Forwards the call to PageContainerComponent.
- * @return	The selected mapping area in MultiSlider Page.
+ * Getter for the internal multi soundobject component to be able to use it in different places of the ui
+ * @return	The internal member component.
  */
-MappingAreaId PageComponentManager::GetMultiSliderMappingArea()
+std::unique_ptr<MultiSoundobjectComponent>& PageComponentManager::GetMultiSoundobjectComponent()
 {
-	if (m_pageContainer)
-		return m_pageContainer->GetMultiSliderPageMappingArea();
+	return m_multiSoundobjectComponent;
+}
+
+/**
+ * Proxy Getter for the selected mapping area in MultiSoundobject Page.
+ * Forwards the call to PageContainerComponent.
+ * @return	The selected mapping area in MultiSoundobject Page.
+ */
+MappingAreaId PageComponentManager::GetMultiSoundobjectMappingArea()
+{
+	if (m_multiSoundobjectComponent)
+		return m_multiSoundobjectComponent->GetSelectedMapping();
 	else
 	{
 		jassertfalse;
@@ -389,15 +385,15 @@ MappingAreaId PageComponentManager::GetMultiSliderMappingArea()
 }
 
 /**
- * Proxy Setter for the selected mapping area in MultiSlider Page.
+ * Proxy Setter for the selected mapping area in MultiSoundobject Page.
  * Forwards the call to PageContainerComponent.
- * @param mappingArea	The selected mapping area in MultiSlider Page.
+ * @param mappingArea	The selected mapping area in MultiSoundobject Page.
  * @param dontSendNotification	Indication if the configuration update shall be triggerd as well
  */
-void PageComponentManager::SetMultiSliderMappingArea(MappingAreaId mappingArea, bool dontSendNotification)
+void PageComponentManager::SetMultiSoundobjectMappingArea(MappingAreaId mappingArea, bool dontSendNotification)
 {
-	if (m_pageContainer)
-		m_pageContainer->SetMultiSliderPageMappingArea(mappingArea);
+	if (m_multiSoundobjectComponent)
+		m_multiSoundobjectComponent->SetSelectedMapping(mappingArea);
 
 	if (!dontSendNotification)
 	{
@@ -406,14 +402,14 @@ void PageComponentManager::SetMultiSliderMappingArea(MappingAreaId mappingArea, 
 }
 
 /**
- * Proxy Getter for the reverb enabled state in MultiSlider Page.
+ * Proxy Getter for the reverb enabled state in MultiSoundobject Page.
  * Forwards the call to PageContainerComponent.
- * @return	The reverb enabled state in MultiSlider Page.
+ * @return	The reverb enabled state in MultiSoundobject Page.
  */
-bool PageComponentManager::IsMultiSliderReverbEnabled()
+bool PageComponentManager::IsMultiSoundobjectReverbEnabled()
 {
-	if (m_pageContainer)
-		return m_pageContainer->IsMultiSliderPageReverbEnabled();
+	if (m_multiSoundobjectComponent)
+		return m_multiSoundobjectComponent->IsReverbEnabled();
 	else
 	{
 		jassertfalse;
@@ -422,15 +418,15 @@ bool PageComponentManager::IsMultiSliderReverbEnabled()
 }
 
 /**
- * Proxy Setter for the reverb enabled state in MultiSlider Page.
+ * Proxy Setter for the reverb enabled state in MultiSoundobject Page.
  * Forwards the call to PageContainerComponent.
- * @param enabled	The reverb enabled state in MultiSlider Page.
+ * @param enabled	The reverb enabled state in MultiSoundobject Page.
  * @param dontSendNotification	Indication if the configuration update shall be triggerd as well
  */
-void PageComponentManager::SetMultiSliderReverbEnabled(bool enabled, bool dontSendNotification)
+void PageComponentManager::SetMultiSoundobjectReverbEnabled(bool enabled, bool dontSendNotification)
 {
-	if (m_pageContainer)
-		m_pageContainer->SetMultiSliderPageReverbEnabled(enabled);
+	if (m_multiSoundobjectComponent)
+		m_multiSoundobjectComponent->SetReverbEnabled(enabled);
 
 	if (!dontSendNotification)
 	{
@@ -439,14 +435,14 @@ void PageComponentManager::SetMultiSliderReverbEnabled(bool enabled, bool dontSe
 }
 
 /**
- * Proxy Getter for the spread enabled state in MultiSlider Page.
+ * Proxy Getter for the spread enabled state in MultiSoundobject Page.
  * Forwards the call to PageContainerComponent.
- * @return	The spread enabled state in MultiSlider Page.
+ * @return	The spread enabled state in MultiSoundobject Page.
  */
-bool PageComponentManager::IsMultiSliderSpreadEnabled()
+bool PageComponentManager::IsMultiSoundobjectSpreadEnabled()
 {
-	if (m_pageContainer)
-		return m_pageContainer->IsMultiSliderPageSpreadEnabled();
+	if (m_multiSoundobjectComponent)
+		return m_multiSoundobjectComponent->IsSpreadEnabled();
 	else
 	{
 		jassertfalse;
@@ -455,15 +451,15 @@ bool PageComponentManager::IsMultiSliderSpreadEnabled()
 }
 
 /**
- * Proxy Setter for the spread enabled state in MultiSlider Page.
+ * Proxy Setter for the spread enabled state in MultiSoundobject Page.
  * Forwards the call to PageContainerComponent.
- * @param enabled	The spread enabled state in MultiSlider Page.
+ * @param enabled	The spread enabled state in MultiSoundobject Page.
  * @param dontSendNotification	Indication if the configuration update shall be triggerd as well
  */
-void PageComponentManager::SetMultiSliderSpreadEnabled(bool enabled, bool dontSendNotification)
+void PageComponentManager::SetMultiSoundobjectSpreadEnabled(bool enabled, bool dontSendNotification)
 {
-	if (m_pageContainer)
-		m_pageContainer->SetMultiSliderPageSpreadEnabled(enabled);
+	if (m_multiSoundobjectComponent)
+		m_multiSoundobjectComponent->SetSpreadEnabled(enabled);
 
 	if (!dontSendNotification)
 	{
@@ -499,12 +495,12 @@ void PageComponentManager::LoadImageForMappingFromFile(MappingAreaId mappingArea
         return;
     }
     
-	if (m_multiSliderBackgrounds.count(mappingArea) != 0)
-		m_multiSliderBackgrounds.erase(mappingArea);
-	m_multiSliderBackgrounds.insert(std::make_pair(mappingArea, image));
+	if (m_multiSoundobjectBackgrounds.count(mappingArea) != 0)
+		m_multiSoundobjectBackgrounds.erase(mappingArea);
+	m_multiSoundobjectBackgrounds.insert(std::make_pair(mappingArea, image));
 
-	if (m_pageContainer)
-		m_pageContainer->SetMultiSliderPageBackgroundImage(mappingArea, m_multiSliderBackgrounds.at(mappingArea));
+	if (m_multiSoundobjectComponent)
+		m_multiSoundobjectComponent->SetBackgroundImage(mappingArea, m_multiSoundobjectBackgrounds.at(mappingArea));
 
 	triggerConfigurationUpdate(false);
 }
@@ -515,10 +511,10 @@ void PageComponentManager::LoadImageForMappingFromFile(MappingAreaId mappingArea
  */
 void PageComponentManager::RemoveImageForMapping(MappingAreaId mappingArea)
 {
-	m_multiSliderBackgrounds.erase(mappingArea);
+	m_multiSoundobjectBackgrounds.erase(mappingArea);
 
-	if (m_pageContainer)
-		m_pageContainer->RemoveMultiSliderPageBackgroundImage(mappingArea);
+	if (m_multiSoundobjectComponent)
+		m_multiSoundobjectComponent->RemoveBackgroundImage(mappingArea);
 
 	triggerConfigurationUpdate(false);
 }
@@ -776,10 +772,10 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
 		}
 	}
 
-	auto multisliderPageXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MULTISLIDER));
-	if (multisliderPageXmlElement)
+	auto MultiSoundobjectPageXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MULTISLIDER));
+	if (MultiSoundobjectPageXmlElement)
 	{
-		auto mappingAreaXmlElement = multisliderPageXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MAPPINGAREA));
+		auto mappingAreaXmlElement = MultiSoundobjectPageXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MAPPINGAREA));
 		if (mappingAreaXmlElement)
 		{
 			auto mappingAreaTextXmlElement = mappingAreaXmlElement->getFirstChildElement();
@@ -787,10 +783,10 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
 			{
 				auto mappingArea = static_cast<MappingAreaId>(mappingAreaTextXmlElement->getText().getIntValue());
 
-				SetMultiSliderMappingArea(mappingArea, true);
+				SetMultiSoundobjectMappingArea(mappingArea, true);
 			}
 		}
-		auto reverbEnabledXmlElement = multisliderPageXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::REVERBENABLED));
+		auto reverbEnabledXmlElement = MultiSoundobjectPageXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::REVERBENABLED));
 		if (reverbEnabledXmlElement)
 		{
 			auto reverbEnabledTextXmlElement = reverbEnabledXmlElement->getFirstChildElement();
@@ -798,10 +794,10 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
 			{
 				auto reverbEnabled = (reverbEnabledTextXmlElement->getText().getIntValue()==1);
 
-				SetMultiSliderReverbEnabled(reverbEnabled, true);
+				SetMultiSoundobjectReverbEnabled(reverbEnabled, true);
 			}
 		}
-		auto spreadEnabledXmlElement = multisliderPageXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SPREADENABLED));
+		auto spreadEnabledXmlElement = MultiSoundobjectPageXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SPREADENABLED));
 		if (spreadEnabledXmlElement)
 		{
 			auto spreadEnabledTextXmlElement = spreadEnabledXmlElement->getFirstChildElement();
@@ -809,10 +805,10 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
 			{
 				auto spreadEnabled = (spreadEnabledTextXmlElement->getText().getIntValue() == 1);
 
-				SetMultiSliderSpreadEnabled(spreadEnabled, true);
+				SetMultiSoundobjectSpreadEnabled(spreadEnabled, true);
 			}
 		}
-		auto backgroundImagesXmlElement = multisliderPageXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::BACKGROUNDIMAGES));
+		auto backgroundImagesXmlElement = MultiSoundobjectPageXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::BACKGROUNDIMAGES));
 		if (backgroundImagesXmlElement)
 		{
 			for (int i = MAI_First; i <= MAI_Fourth; i++)
@@ -825,18 +821,18 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
 					if (pngData.fromBase64Encoding(bkgXmlElement->getStringAttribute("pngData", String())))
 					{
 						MemoryInputStream inputStream(pngData.getData(), pngData.getSize(), true);
-						m_multiSliderBackgrounds.insert(std::make_pair(mapping, ImageFileFormat::loadFrom(inputStream)));
+						m_multiSoundobjectBackgrounds.insert(std::make_pair(mapping, ImageFileFormat::loadFrom(inputStream)));
 
-						if (m_pageContainer)
-							m_pageContainer->SetMultiSliderPageBackgroundImage(mapping, m_multiSliderBackgrounds.at(mapping));
+						if (m_multiSoundobjectComponent)
+							m_multiSoundobjectComponent->SetBackgroundImage(mapping, m_multiSoundobjectBackgrounds.at(mapping));
 					}
 				}
 				else
 				{
-					m_multiSliderBackgrounds.erase(mapping);
+					m_multiSoundobjectBackgrounds.erase(mapping);
 
-					if (m_pageContainer)
-						m_pageContainer->RemoveMultiSliderPageBackgroundImage(mapping);
+					if (m_multiSoundobjectComponent)
+						m_multiSoundobjectComponent->RemoveBackgroundImage(mapping);
 				}
 			}
 		}
@@ -937,35 +933,35 @@ std::unique_ptr<XmlElement> PageComponentManager::createStateXml()
 			}
 		}
 
-		auto multisliderPageXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MULTISLIDER));
-		if (multisliderPageXmlElement)
+		auto MultiSoundobjectPageXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MULTISLIDER));
+		if (MultiSoundobjectPageXmlElement)
 		{
-			auto mappingAreaXmlElement = multisliderPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MAPPINGAREA));
+			auto mappingAreaXmlElement = MultiSoundobjectPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MAPPINGAREA));
 			if (mappingAreaXmlElement)
-				mappingAreaXmlElement->addTextElement(String(GetMultiSliderMappingArea()));
+				mappingAreaXmlElement->addTextElement(String(GetMultiSoundobjectMappingArea()));
 
-			auto reverbEnabledXmlElement = multisliderPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::REVERBENABLED));
+			auto reverbEnabledXmlElement = MultiSoundobjectPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::REVERBENABLED));
 			if (reverbEnabledXmlElement)
-				reverbEnabledXmlElement->addTextElement(String(IsMultiSliderReverbEnabled() ? 1 : 0));
+				reverbEnabledXmlElement->addTextElement(String(IsMultiSoundobjectReverbEnabled() ? 1 : 0));
 
-			auto spreadEnabledXmlElement = multisliderPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SPREADENABLED));
+			auto spreadEnabledXmlElement = MultiSoundobjectPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SPREADENABLED));
 			if (spreadEnabledXmlElement)
-				spreadEnabledXmlElement->addTextElement(String(IsMultiSliderSpreadEnabled() ? 1 : 0));
+				spreadEnabledXmlElement->addTextElement(String(IsMultiSoundobjectSpreadEnabled() ? 1 : 0));
 
-			auto backgroundImagesXmlElement = multisliderPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::BACKGROUNDIMAGES));
+			auto backgroundImagesXmlElement = MultiSoundobjectPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::BACKGROUNDIMAGES));
 			if (backgroundImagesXmlElement)
 			{
 				for (int i = MAI_First; i <= MAI_Fourth; i++)
 				{
 					auto mapping = static_cast<MappingAreaId>(i);
-					if (m_multiSliderBackgrounds.count(mapping) > 0 && m_multiSliderBackgrounds.at(mapping).isValid())
+					if (m_multiSoundobjectBackgrounds.count(mapping) > 0 && m_multiSoundobjectBackgrounds.at(mapping).isValid())
 					{
 						auto bkgXmlElement = backgroundImagesXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::BACKGROUND) + String(mapping));
 						if (bkgXmlElement)
 						{
 							MemoryOutputStream outputStream;
 							PNGImageFormat formattedImage;
-							formattedImage.writeImageToStream(m_multiSliderBackgrounds.at(mapping), outputStream);
+							formattedImage.writeImageToStream(m_multiSoundobjectBackgrounds.at(mapping), outputStream);
 							MemoryBlock pngData(outputStream.getData(), outputStream.getDataSize());
 
 							bkgXmlElement->setAttribute("pngData", pngData.toBase64Encoding());

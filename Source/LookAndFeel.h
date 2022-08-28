@@ -1,4 +1,4 @@
-/* Copyright (c) 2020-2021, Christian Ahrens
+/* Copyright (c) 2020-2022, Christian Ahrens
  *
  * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
  *
@@ -93,6 +93,9 @@ public:
 	//==============================================================================
 	void drawAlertBox(Graphics&, AlertWindow&, const juce::Rectangle<int>& textArea,
 		TextLayout&) override;
+
+	//==============================================================================
+	void drawStretchableLayoutResizerBar(Graphics&, int, int, bool, bool, bool) override;
 
 private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DbLookAndFeelBase)

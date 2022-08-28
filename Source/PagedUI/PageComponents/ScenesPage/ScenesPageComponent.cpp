@@ -1,4 +1,4 @@
-/* Copyright (c) 2020-2021, Christian Ahrens
+/* Copyright (c) 2020-2022, Christian Ahrens
  *
  * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
  *
@@ -39,7 +39,7 @@ namespace SpaConBridge
  * Class constructor.
  */
 ScenesPageComponent::ScenesPageComponent()
-	: StandalonePollingPageComponentBase(PCT_Scenes)
+	: StandalonePollingPageComponentBase(UIPageId::UPI_Scenes)
 {
 	AddStandalonePollingObject(ROI_Scene_SceneIndex, RemoteObjectAddressing());
 	AddStandalonePollingObject(ROI_Scene_SceneName, RemoteObjectAddressing());

@@ -1,4 +1,4 @@
-/* Copyright (c) 2020-2021, Christian Ahrens
+/* Copyright (c) 2020-2022, Christian Ahrens
  *
  * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
  *
@@ -41,7 +41,7 @@ namespace SpaConBridge
  * Class constructor.
  */
 SettingsPageComponent::SettingsPageComponent()
-	: PageComponentBase(PCT_Settings)
+	: PageComponentBase(UIPageId::UPI_Settings)
 {
 	// Apply button for when raw config is visible
 	m_settingsRawApplyButton = std::make_unique<TextButton>("Apply");

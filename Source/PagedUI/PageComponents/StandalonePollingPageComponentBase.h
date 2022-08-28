@@ -1,4 +1,4 @@
-/* Copyright (c) 2020-2021, Christian Ahrens
+/* Copyright (c) 2020-2022, Christian Ahrens
  *
  * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
  *
@@ -135,7 +135,7 @@ class StandalonePollingPageComponentBase :	public PageComponentBase,
 											public ProtocolBridgingWrapper::Listener
 {
 public:
-	explicit StandalonePollingPageComponentBase(PageComponentType type);
+	explicit StandalonePollingPageComponentBase(UIPageId id);
 	~StandalonePollingPageComponentBase() override;
 
 	HeaderWithElmListComponent* GetElementsContainer();

@@ -1,45 +1,29 @@
-/*
-===============================================================================
-
-Copyright (C) 2019 d&b audiotechnik GmbH & Co. KG. All Rights Reserved.
-
-This file was originally part of the Soundscape VST, AU, and AAX Plug-in and now in a derived version is part of SpaConBridge.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice,
-this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
-
-3. The name of the author may not be used to endorse or promote products
-derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY d&b audiotechnik GmbH & Co. KG "AS IS" AND ANY
-EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-===============================================================================
-*/
+/* Copyright (c) 2020-2022, Christian Ahrens
+ *
+ * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 
-#include "MultisurfacePageComponent.h"
+#include "MultiSoundobjectComponent.h"
 
-#include "../../PageComponentManager.h"
+#include "PagedUI/PageComponentManager.h"
 
-#include "../../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
-#include "../../../Controller.h"
-#include "../../../MultiSoundobjectSlider.h"
+#include "CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
+#include "Controller.h"
+#include "MultiSoundobjectSlider.h"
 
 #include <Image_utils.h>
 
@@ -50,19 +34,18 @@ namespace SpaConBridge
 
 /*
 ===============================================================================
- Class MultiSurfacePageComponent
+ Class MultiSoundobjectComponent
 ===============================================================================
 */
 
 /**
  * Class constructor.
  */
-MultiSurfacePageComponent::MultiSurfacePageComponent()
-	: PageComponentBase(PCT_MultiSlide)
+MultiSoundobjectComponent::MultiSoundobjectComponent()
 {
 	// Add multi-slider
-	m_multiSliderSurface = std::make_unique<MultiSoundobjectSlider>();
-	addAndMakeVisible(m_multiSliderSurface.get());
+	m_multiSoundobjectSlider = std::make_unique<MultiSoundobjectSlider>();
+	addAndMakeVisible(m_multiSoundobjectSlider.get());
 
 	// Mapping selector
 	m_mappingAreaSelect = std::make_unique<ComboBox>("Coordinate mapping");
@@ -116,7 +99,7 @@ MultiSurfacePageComponent::MultiSurfacePageComponent()
 /**
  * Class destructor.
  */
-MultiSurfacePageComponent::~MultiSurfacePageComponent()
+MultiSoundobjectComponent::~MultiSoundobjectComponent()
 {
 }
 
@@ -124,7 +107,7 @@ MultiSurfacePageComponent::~MultiSurfacePageComponent()
  * Reimplemented to paint background.
  * @param g		Graphics context that must be used to do the drawing operations.
  */
-void MultiSurfacePageComponent::paint(Graphics& g)
+void MultiSoundobjectComponent::paint(Graphics& g)
 {
 	// Paint background to cover the controls behind this overlay.
 	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
@@ -134,7 +117,7 @@ void MultiSurfacePageComponent::paint(Graphics& g)
 /**
  * Reimplemented to resize and re-postion controls on the overview window.
  */
-void MultiSurfacePageComponent::resized()
+void MultiSoundobjectComponent::resized()
 {
 	auto margin = 5;
 	auto bounds = getLocalBounds().reduced(margin);
@@ -159,12 +142,12 @@ void MultiSurfacePageComponent::resized()
 	bounds.removeFromBottom(margin);
 	bounds.reduce(margin, margin);
 
-	if (m_multiSliderSurface)
+	if (m_multiSoundobjectSlider)
 	{
 		auto multiSliderBounds = bounds;
 		auto multiSliderAspect = multiSliderBounds.toFloat().getAspectRatio();
 
-		auto backgroundImage = m_multiSliderSurface->GetBackgroundImage(GetSelectedMapping());
+		auto backgroundImage = m_multiSoundobjectSlider->GetBackgroundImage(GetSelectedMapping());
 		if (backgroundImage)
 		{
 			auto imageBounds = backgroundImage->getBounds().toFloat();
@@ -186,7 +169,7 @@ void MultiSurfacePageComponent::resized()
 			}
 		}
 
-		m_multiSliderSurface->setBounds(multiSliderBounds);
+		m_multiSoundobjectSlider->setBounds(multiSliderBounds);
 	}
 }
 
@@ -195,7 +178,7 @@ void MultiSurfacePageComponent::resized()
  * @param init	True to ignore any changed flags and update the procssor parameters
  *				in the GUI anyway. Good for when opening the Overview for the first time.
  */
-void MultiSurfacePageComponent::UpdateGui(bool init)
+void MultiSoundobjectComponent::UpdateGui(bool init)
 {
 	auto ctrl = Controller::GetInstance();
 	if (!ctrl)
@@ -229,19 +212,41 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 	if (ctrl->IsStaticRemoteObjectsPollingEnabled() != m_objectNamesEnable->getToggleState())
 	{
 		m_objectNamesEnable->setToggleState(ctrl->IsStaticRemoteObjectsPollingEnabled(), dontSendNotification);
-		if (m_multiSliderSurface)
-			m_multiSliderSurface->SetSoundobjectNamesEnabled(ctrl->IsStaticRemoteObjectsPollingEnabled());
+		if (m_multiSoundobjectSlider)
+			m_multiSoundobjectSlider->SetSoundobjectNamesEnabled(ctrl->IsStaticRemoteObjectsPollingEnabled());
 		update = true;
 	}
 
-	if (m_multiSliderSurface)
+	if (m_multiSoundobjectSlider)
 	{
-		if (	ctrl->PopParameterChanged(DCP_MultiSlider, DCT_NumProcessors) 
-			|| (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_ProcessorSelection)) 
-			|| (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_SoundobjectColourAndSize)) 
-			|| (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_RefreshInterval)))
+#ifdef DEBUG
+		if (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_NumProcessors))
+		{
+			DBG(String(__FUNCTION__) + String(" ctrl update DCT_NumProcessors"));
 			update = true;
-		
+		}
+		if (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_ProcessorSelection))
+		{
+			DBG(String(__FUNCTION__) + String(" ctrl update DCT_ProcessorSelection"));
+			update = true;
+		}
+		if (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_SoundobjectColourAndSize))
+		{
+			DBG(String(__FUNCTION__) + String(" ctrl update DCT_SoundobjectColourAndSize"));
+			update = true;
+		}
+		if (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_RefreshInterval))
+		{
+			DBG(String(__FUNCTION__) + String(" ctrl update DCT_RefreshInterval"));
+			update = true;
+		}
+#else
+		if (ctrl->PopParameterChanged(DCP_MultiSlider, (DCT_NumProcessors | DCT_ProcessorSelection | DCT_SoundobjectColourAndSize | DCT_RefreshInterval)))
+		{
+			update = true;
+		}
+#endif
+
 		// Iterate through all procssor instances and see if anything changed there.
 		// At the same time collect all sources positions for updating.
 		MultiSoundobjectSlider::ParameterCache cachedParameters;
@@ -265,16 +270,36 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
 					cachedParameters.insert(std::make_pair(processorId, MultiSoundobjectSlider::SoundobjectParameters(soundobjectId, pos, spread, reverbSendGain, selected, colour, size, objectName)));
 				}
 
-				if (processor->PopParameterChanged(DCP_MultiSlider, (DCT_SoundobjectProcessorConfig | DCT_SoundobjectParameters)))
+#ifdef DEBUG
+				if (processor->PopParameterChanged(DCP_MultiSlider, DCT_SoundobjectProcessorConfig))
+				{
+					DBG(String(__FUNCTION__) + String(" processor update DCT_SoundobjectProcessorConfig"));
 					update = true;
+				}
+				if (processor->PopParameterChanged(DCP_MultiSlider, DCT_SoundobjectParameters))
+				{
+					DBG(String(__FUNCTION__) + String(" processor update DCT_SoundobjectParameters"));
+					update = true;
+				}
+				if (processor->PopParameterChanged(DCP_MultiSlider, DCT_ProcessorSelection))
+				{
+					DBG(String(__FUNCTION__) + String(" processor update DCT_ProcessorSelection"));
+					update = true;
+				}
+#else
+				if (processor->PopParameterChanged(DCP_MultiSlider, (DCT_SoundobjectProcessorConfig | DCT_SoundobjectParameters | DCT_ProcessorSelection)))
+				{
+					update = true;
+				}
+#endif
 			}
 		}
 
-		if (update && m_multiSliderSurface)
+		if (update && m_multiSoundobjectSlider)
 		{
 			// Update all nipple positions on the 2D-Slider.
-			m_multiSliderSurface->UpdateParameters(cachedParameters);
-			m_multiSliderSurface->repaint();
+			m_multiSoundobjectSlider->UpdateParameters(cachedParameters);
+			m_multiSoundobjectSlider->repaint();
 		}
 	}
 }
@@ -283,7 +308,7 @@ void MultiSurfacePageComponent::UpdateGui(bool init)
  * Called when a ComboBox has its selected item changed. 
  * @param comboBox	The combo box which has changed.
  */
-void MultiSurfacePageComponent::comboBoxChanged(ComboBox *comboBox)
+void MultiSoundobjectComponent::comboBoxChanged(ComboBox *comboBox)
 {
 	if (GetSelectedMapping() != comboBox->getSelectedId())
 	{
@@ -304,7 +329,7 @@ void MultiSurfacePageComponent::comboBoxChanged(ComboBox *comboBox)
  * Called when a button has been clicked.
  * @param button	The button that was clicked.
  */
-void MultiSurfacePageComponent::buttonClicked(Button* button)
+void MultiSoundobjectComponent::buttonClicked(Button* button)
 {
 	if (m_loadImage.get() == button)
 	{
@@ -359,8 +384,8 @@ void MultiSurfacePageComponent::buttonClicked(Button* button)
 		{
 			ctrl->SetStaticRemoteObjectsPollingEnabled(DCP_MultiSlider, button->getToggleState());
 			
-			if (m_multiSliderSurface)
-				m_multiSliderSurface->SetSoundobjectNamesEnabled(button->getToggleState());
+			if (m_multiSoundobjectSlider)
+				m_multiSoundobjectSlider->SetSoundobjectNamesEnabled(button->getToggleState());
 			
 			// Trigger an update on the multi-slider
 			UpdateGui(true);
@@ -372,10 +397,10 @@ void MultiSurfacePageComponent::buttonClicked(Button* button)
  * Get the currently selected coordinate mapping used for the multi-slider.
  * @return The selected mapping area.
  */
-MappingAreaId MultiSurfacePageComponent::GetSelectedMapping() const
+MappingAreaId MultiSoundobjectComponent::GetSelectedMapping() const
 {
-	if (m_multiSliderSurface)
-		return m_multiSliderSurface->GetSelectedMapping();
+	if (m_multiSoundobjectSlider)
+		return m_multiSoundobjectSlider->GetSelectedMapping();
 	else
 		return MappingAreaId::MAI_First;
 }
@@ -384,11 +409,11 @@ MappingAreaId MultiSurfacePageComponent::GetSelectedMapping() const
  * Set the currently selected coordinate mapping used for the multi-slider.
  * @param mapping	The new selected mapping area.
  */
-bool MultiSurfacePageComponent::SetSelectedMapping(MappingAreaId mapping)
+bool MultiSoundobjectComponent::SetSelectedMapping(MappingAreaId mapping)
 {
-	if (m_multiSliderSurface)
+	if (m_multiSoundobjectSlider)
 	{
-		m_multiSliderSurface->SetSelectedMapping(mapping);
+		m_multiSoundobjectSlider->SetSelectedMapping(mapping);
 
 		resized();
 
@@ -405,10 +430,10 @@ bool MultiSurfacePageComponent::SetSelectedMapping(MappingAreaId mapping)
  * Getter for the reverb enabled state
  * @return	The enabled state.
  */
-bool MultiSurfacePageComponent::IsReverbEnabled() const
+bool MultiSoundobjectComponent::IsReverbEnabled() const
 {
-	if (m_multiSliderSurface)
-		return m_multiSliderSurface->IsReverbSndGainEnabled();
+	if (m_multiSoundobjectSlider)
+		return m_multiSoundobjectSlider->IsReverbSndGainEnabled();
 	else
 		return false;
 }
@@ -417,10 +442,10 @@ bool MultiSurfacePageComponent::IsReverbEnabled() const
  * Setter for the reverb enabled state
  * @param enabled	The enabled state to set.
  */
-void MultiSurfacePageComponent::SetReverbEnabled(bool enabled)
+void MultiSoundobjectComponent::SetReverbEnabled(bool enabled)
 {
-	if (m_multiSliderSurface)
-		m_multiSliderSurface->SetReverbSndGainEnabled(enabled);
+	if (m_multiSoundobjectSlider)
+		m_multiSoundobjectSlider->SetReverbSndGainEnabled(enabled);
 
 	// Trigger an update on the multi-slider
 	UpdateGui(true);
@@ -430,10 +455,10 @@ void MultiSurfacePageComponent::SetReverbEnabled(bool enabled)
  * Getter for the spread enabled state
  * @return	The enabled state.
  */
-bool MultiSurfacePageComponent::IsSpreadEnabled() const
+bool MultiSoundobjectComponent::IsSpreadEnabled() const
 {
-	if (m_multiSliderSurface)
-		return m_multiSliderSurface->IsSpreadEnabled();
+	if (m_multiSoundobjectSlider)
+		return m_multiSoundobjectSlider->IsSpreadEnabled();
 	else
 		return false;
 }
@@ -442,10 +467,10 @@ bool MultiSurfacePageComponent::IsSpreadEnabled() const
  * Setter for the spread enabled state
  * @param enabled	The enabled state to set.
  */
-void MultiSurfacePageComponent::SetSpreadEnabled(bool enabled)
+void MultiSoundobjectComponent::SetSpreadEnabled(bool enabled)
 {
-	if (m_multiSliderSurface)
-		m_multiSliderSurface->SetSpreadEnabled(enabled);
+	if (m_multiSoundobjectSlider)
+		m_multiSoundobjectSlider->SetSpreadEnabled(enabled);
 
 	// Trigger an update on the multi-slider
 	UpdateGui(true);
@@ -456,10 +481,10 @@ void MultiSurfacePageComponent::SetSpreadEnabled(bool enabled)
  * @param	mappingAreaId	The id of the mapping area to get the currently used background image for
  * @return	A pointer to the currently used image, nullptr if none is set.
  */
-const juce::Image* MultiSurfacePageComponent::GetBackgroundImage(MappingAreaId mappingAreaId)
+const juce::Image* MultiSoundobjectComponent::GetBackgroundImage(MappingAreaId mappingAreaId)
 {
-	if (m_multiSliderSurface)
-		return m_multiSliderSurface->GetBackgroundImage(mappingAreaId);
+	if (m_multiSoundobjectSlider)
+		return m_multiSoundobjectSlider->GetBackgroundImage(mappingAreaId);
 	else
 		return nullptr;
 }
@@ -469,11 +494,11 @@ const juce::Image* MultiSurfacePageComponent::GetBackgroundImage(MappingAreaId m
  * @param	mappingAreaId	The id of the mapping area to set the background image for
  * @param	backgroundImage	The image to set as background
  */
-void MultiSurfacePageComponent::SetBackgroundImage(MappingAreaId mappingAreaId, const juce::Image& backgroundImage)
+void MultiSoundobjectComponent::SetBackgroundImage(MappingAreaId mappingAreaId, const juce::Image& backgroundImage)
 {
-	if (m_multiSliderSurface)
+	if (m_multiSoundobjectSlider)
 	{
-		m_multiSliderSurface->SetBackgroundImage(mappingAreaId, backgroundImage);
+		m_multiSoundobjectSlider->SetBackgroundImage(mappingAreaId, backgroundImage);
 
 		resized();
 
@@ -486,11 +511,11 @@ void MultiSurfacePageComponent::SetBackgroundImage(MappingAreaId mappingAreaId, 
  * Helper method to remove the background image for given mapping area.
  * @param	mappingAreaId	The id of the mapping area to remove the background image of
  */
-void MultiSurfacePageComponent::RemoveBackgroundImage(MappingAreaId mappingAreaId)
+void MultiSoundobjectComponent::RemoveBackgroundImage(MappingAreaId mappingAreaId)
 {
-	if (m_multiSliderSurface)
+	if (m_multiSoundobjectSlider)
 	{
-		m_multiSliderSurface->RemoveBackgroundImage(mappingAreaId);
+		m_multiSoundobjectSlider->RemoveBackgroundImage(mappingAreaId);
 
 		resized();
 
@@ -500,10 +525,35 @@ void MultiSurfacePageComponent::RemoveBackgroundImage(MappingAreaId mappingAreaI
 }
 
 /**
+ * Getter for the show selected only state
+ * @return	The show selected only state.
+ */
+bool MultiSoundobjectComponent::IsShowingSelectedOnly() const
+{
+	if (m_multiSoundobjectSlider)
+		return m_multiSoundobjectSlider->IsShowingSelectedSoundobjectsOnly();
+	else
+		return false;
+}
+
+/**
+ * Setter for the show selected only state
+ * @param selectedOnly	The show selected only state to set.
+ */
+void MultiSoundobjectComponent::SetShowSelectedOnly(bool selectedOnly)
+{
+	if (m_multiSoundobjectSlider)
+		m_multiSoundobjectSlider->SetShowSelectedSoundobjectsOnly(selectedOnly);
+
+	// Trigger an update on the multi-slider
+	UpdateGui(true);
+}
+
+/**
  * Reimplemented method to handle changed look and feel data.
  * This makes shure the add/remove buttons' svg images are colored correctly.
  */
-void MultiSurfacePageComponent::lookAndFeelChanged()
+void MultiSoundobjectComponent::lookAndFeelChanged()
 {
 	// first forward the call to base implementation
 	Component::lookAndFeelChanged();

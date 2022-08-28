@@ -1,4 +1,4 @@
-/* Copyright (c) 2020-2021, Christian Ahrens
+/* Copyright (c) 2020-2022, Christian Ahrens
  *
  * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
  *
@@ -230,7 +230,7 @@ void AboutPageContentComponent::resized()
  * Class constructor.
  */
 AboutPageComponent::AboutPageComponent()
-	: PageComponentBase(PCT_About)
+	: PageComponentBase(UIPageId::UPI_About)
 {
 	// Close button
 	m_closeButton = std::make_unique<DrawableButton>("Close", DrawableButton::ButtonStyle::ImageFitted);

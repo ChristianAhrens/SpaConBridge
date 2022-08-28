@@ -1,48 +1,35 @@
-/*
-===============================================================================
-
-Copyright (C) 2019 d&b audiotechnik GmbH & Co. KG. All Rights Reserved.
-
-This file was originally part of the Soundscape VST, AU, and AAX Plug-in and now in a derived version is part of SpaConBridge.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice,
-this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
-
-3. The name of the author may not be used to endorse or promote products
-derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY d&b audiotechnik GmbH & Co. KG "AS IS" AND ANY
-EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-===============================================================================
-*/
+/* Copyright (c) 2020-2022, Christian Ahrens
+ *
+ * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
+ *
+ * This library is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License version 3.0 as published
+ * by the Free Software Foundation.
+ *
+ * This library is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this library; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
 
 
 #include "SoundobjectTablePageComponent.h"
 
 #include "SoundobjectTableComponent.h"
 
+#include "../../PageComponentManager.h"
+
 #include "../../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
 #include "../../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessorEditor.h"
 
-#include "../../../SoundobjectSlider.h"
 #include "../../../Controller.h"
 #include "../../../LookAndFeel.h"
+#include "../../../MultiSoundobjectComponent.h"
+#include "../../../SoundobjectSlider.h"
 
 #include <Image_utils.h>
 
@@ -61,8 +48,16 @@ namespace SpaConBridge
  * Class constructor.
  */
 SoundobjectTablePageComponent::SoundobjectTablePageComponent()
-	: PageComponentBase(PCT_Overview)
+	: PageComponentBase(UIPageId::UPI_Soundobjects)
 {
+	// Create the layouting manger/slider objects
+	m_layoutManager = std::make_unique<StretchableLayoutManager>();
+	m_layoutManager->setItemLayout(0, -1, -1, -1);
+	m_layoutManagerItemCount = 1;
+
+	m_isHorizontalSlider = true;
+	m_multiSoundobjectsActive = false;
+
 	// Create the table model/component.
 	m_soundobjectsTable = std::make_unique<SoundobjectTableComponent>();
 	m_soundobjectsTable->onCurrentSelectedProcessorChanged = [=](SoundobjectProcessorId id) { 
@@ -80,6 +75,9 @@ SoundobjectTablePageComponent::SoundobjectTablePageComponent()
 		auto config = SpaConBridge::AppConfiguration::getInstance();
 		if (config)
 			config->triggerConfigurationDump(false);
+	};
+	m_soundobjectsTable->onMultiProcessorsSelectionChanged = [=](bool multiselected) {
+		SetMultiSoundobjectComponentActive(multiselected);
 	};
 	addAndMakeVisible(m_soundobjectsTable.get());
 
@@ -136,47 +134,63 @@ void SoundobjectTablePageComponent::paint(Graphics& g)
  */
 void SoundobjectTablePageComponent::resized()
 {
-	auto bounds = getLocalBounds();
+	if (!IsPageVisible())
+		return;
 
-	// flexbox for table and editor as column or row layout depending on aspect ratio
-	FlexBox tableAndEditorFlex;
-	FlexItem::Margin tableMargin{ 8 };
-	FlexItem::Margin editorMargin{ 8 };
-	auto isPortrait = IsPortraitAspectRatio();
-	if (isPortrait)
+	auto layoutingMargins = 8;
+	auto layoutingBounds = getLocalBounds().reduced(layoutingMargins);
+	auto layoutOrigX = layoutingMargins;
+	auto layoutOrigY = layoutingMargins;
+	auto layoutWidth = layoutingBounds.getWidth();
+	auto layoutHeight = layoutingBounds.getHeight();
+
+	if (m_selectedProcessorInstanceEditor || m_multiSoundobjectsActive)
 	{
-		tableAndEditorFlex.flexDirection = FlexBox::Direction::column;
-		if (m_selectedProcessorInstanceEditor)
+		if (m_layoutManagerItemCount != 3)
 		{
-			tableMargin = FlexItem::Margin(8, 8, 4, 8);
-			editorMargin = FlexItem::Margin(4, 8, 8, 8);
+			m_layoutManager->clearAllItems();
+			m_layoutManager->setItemLayout(0, -0.05, -1, -0.5);
+			m_layoutManager->setItemLayout(1, 6, 6, 6);
+			m_layoutManager->setItemLayout(2, -0.05, -1, -0.5);
+			m_layoutManagerItemCount = 3;
+		}
+
+		auto isPortrait = IsPortraitAspectRatio();
+		if (m_isHorizontalSlider != !isPortrait)
+		{
+			m_isHorizontalSlider = !isPortrait;
+			removeChildComponent(m_layoutResizerBar.get());
+			m_layoutResizerBar = std::make_unique<StretchableLayoutResizerBar>(m_layoutManager.get(), 1, m_isHorizontalSlider);
+			addAndMakeVisible(m_layoutResizerBar.get());
+		}
+
+		if (m_multiSoundobjectsActive)
+		{
+			auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
+			if (multiSoundobjectComponent)
+			{
+				Component* comps[] = { m_soundobjectsTable.get(), m_layoutResizerBar.get(), multiSoundobjectComponent.get() };
+				m_layoutManager->layOutComponents(comps, 3, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, isPortrait, true);
+			}
 		}
 		else
-			tableMargin = FlexItem::Margin(8, 8, 8, 8);
+		{
+			Component* comps[] = { m_soundobjectsTable.get(), m_layoutResizerBar.get(), m_selectedProcessorInstanceEditor.get() };
+			m_layoutManager->layOutComponents(comps, 3, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, isPortrait, true);
+		}
 	}
 	else
 	{
-		tableAndEditorFlex.flexDirection = FlexBox::Direction::row;
-		if (m_selectedProcessorInstanceEditor)
+		if (m_layoutManagerItemCount != 1)
 		{
-			tableMargin = FlexItem::Margin(8, 4, 8, 8);
-			editorMargin = FlexItem::Margin(8, 8, 8, 4);
+			m_layoutManager->clearAllItems();
+			m_layoutManager->setItemLayout(0, -1, -1, -1);
+			m_layoutManagerItemCount = 1;
 		}
-		else
-			tableMargin = FlexItem::Margin(8, 8, 8, 8);
-	}
 
-	tableAndEditorFlex.justifyContent = FlexBox::JustifyContent::center;
-
-	if (m_selectedProcessorInstanceEditor)
-	{
-		tableAndEditorFlex.items.add(FlexItem(*m_soundobjectsTable).withFlex(1).withMargin(tableMargin));
-		tableAndEditorFlex.items.add(FlexItem(*m_selectedProcessorInstanceEditor.get()).withFlex(1).withMargin(editorMargin));
+		Component* comps[] = { m_soundobjectsTable.get() };
+		m_layoutManager->layOutComponents(comps, 1, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, false, true);
 	}
-	else
-		tableAndEditorFlex.items.add(FlexItem(*m_soundobjectsTable).withFlex(1).withMargin(tableMargin));
-	
-	tableAndEditorFlex.performLayout(bounds.toFloat());
 }
 
 /**
@@ -186,15 +200,18 @@ void SoundobjectTablePageComponent::SetSoundsourceProcessorEditorActive(Soundobj
 {
 	if (processorId == INVALID_PROCESSOR_ID)
 	{
+		// remove processoreditor from layout and clean up instances
 		if (m_selectedProcessorInstanceEditor)
 		{
 			removeChildComponent(m_selectedProcessorInstanceEditor.get());
 			m_selectedProcessorInstanceEditor.reset();
+
 			resized();
 		}
 	}
 	else
 	{
+		// create slider and processoreditor instances and add them to layouting
 		auto ctrl = Controller::GetInstance();
 		if (ctrl)
 		{
@@ -213,11 +230,82 @@ void SoundobjectTablePageComponent::SetSoundsourceProcessorEditorActive(Soundobj
 						addAndMakeVisible(m_selectedProcessorInstanceEditor.get());
 						m_selectedProcessorInstanceEditor->UpdateGui(true);
 					}
+
+					m_isHorizontalSlider = !IsPortraitAspectRatio();
+					removeChildComponent(m_layoutResizerBar.get());
+					m_layoutResizerBar.reset();
+					m_layoutResizerBar = std::make_unique<StretchableLayoutResizerBar>(m_layoutManager.get(), 1, m_isHorizontalSlider);
+					addAndMakeVisible(m_layoutResizerBar.get());
+
 					resized();
 				}
 			}
 		}
 	}
+}
+
+/**
+ * Function to be called from model when the current selection
+ * has changed in a way that the currently displayed multisurface must be hidden
+ * or the currently not displayed multisurface must be shown
+ * @param active	True if the multisurface shall be shown, false if hidden.
+ */
+void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool active)
+{
+	m_multiSoundobjectsActive = active;
+
+	if (m_multiSoundobjectsActive)
+	{
+		if (!m_layoutResizerBar)
+		{
+			m_layoutResizerBar = std::make_unique<StretchableLayoutResizerBar>(m_layoutManager.get(), 1, m_isHorizontalSlider);
+			addAndMakeVisible(m_layoutResizerBar.get());
+		}
+
+		auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
+		if (multiSoundobjectComponent && this != multiSoundobjectComponent->getParentComponent())
+		{
+			multiSoundobjectComponent->SetShowSelectedOnly(true);
+			addAndMakeVisible(multiSoundobjectComponent.get());
+		}
+	}
+	else if (!m_multiSoundobjectsActive)
+	{
+		auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
+		if (multiSoundobjectComponent && this == multiSoundobjectComponent->getParentComponent())
+		{
+			removeChildComponent(multiSoundobjectComponent.get());
+		}
+	}
+
+	resized();
+}
+
+/**
+ * Reimplemented from PageComponentBase to add or remove the multiSoundobject component to this page's layouting
+ * depending on visibility. 
+ * Call is forwarded to baseimplementation afterwards.
+ * @param	initializing	The visible state to set.
+ */
+void SoundobjectTablePageComponent::SetPageIsVisible(bool visible)
+{
+	auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
+	if (multiSoundobjectComponent)
+	{
+		if (!visible && this == multiSoundobjectComponent->getParentComponent())
+		{
+			removeChildComponent(multiSoundobjectComponent.get());
+		}
+		else if (m_multiSoundobjectsActive && visible && this != multiSoundobjectComponent->getParentComponent())
+		{
+			multiSoundobjectComponent->SetShowSelectedOnly(true);
+			addAndMakeVisible(multiSoundobjectComponent.get());
+		}
+	}
+
+	PageComponentBase::SetPageIsVisible(visible);
+
+	resized();
 }
 
 /**
@@ -251,6 +339,15 @@ void SoundobjectTablePageComponent::UpdateGui(bool init)
 					m_soundobjectsTable->UpdateTable();
 				}
 			}
+		}
+	}
+
+	if (m_multiSoundobjectsActive)
+	{
+		auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
+		if (multiSoundobjectComponent)
+		{
+			multiSoundobjectComponent->UpdateGui(false);
 		}
 	}
 }

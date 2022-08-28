@@ -1,4 +1,4 @@
-/* Copyright (c) 2020-2021, Christian Ahrens
+/* Copyright (c) 2020-2022, Christian Ahrens
  *
  * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
  *
@@ -40,10 +40,10 @@ String GetPageNameFromId(UIPageId pageId)
 	{
 		case UPI_InvalidMin:
 			return "InvalidMin";
-		case UPI_SoundObjects:
-			return "SoundObjects";
-		case UPI_MultiSlider:
-			return "MultiSlider";
+		case UPI_Soundobjects:
+			return "Soundobjects";
+		case UPI_MultiSoundobjects:
+			return "MultiSoundobjects";
 		case UPI_MatrixIOs:
 			return "MatrixIOs";
 		case UPI_Scenes:
@@ -69,10 +69,10 @@ UIPageId GetPageIdFromName(String pageName)
 {
 	if (pageName == GetPageNameFromId(UPI_InvalidMin))
 		return UPI_InvalidMin;
-	if (pageName == GetPageNameFromId(UPI_SoundObjects))
-		return UPI_SoundObjects;
-	if (pageName == GetPageNameFromId(UPI_MultiSlider))
-		return UPI_MultiSlider;
+	if (pageName == GetPageNameFromId(UPI_Soundobjects))
+		return UPI_Soundobjects;
+	if (pageName == GetPageNameFromId(UPI_MultiSoundobjects))
+		return UPI_MultiSoundobjects;
 	if (pageName == GetPageNameFromId(UPI_MatrixIOs))
 		return UPI_MatrixIOs;
 	if (pageName == GetPageNameFromId(UPI_Scenes))
@@ -258,9 +258,9 @@ String GetDocumentationSectionIdentification(UIPageId pageId)
 {
 	switch (pageId)
 	{
-	case UPI_SoundObjects:
+	case UPI_Soundobjects:
 		return "#sound-object-table";
-	case UPI_MultiSlider:
+	case UPI_MultiSoundobjects:
 		return "#twodimensionalpositionslider";
 	case UPI_MatrixIOs:
 		return "#matrix-inputsoutputs-table";

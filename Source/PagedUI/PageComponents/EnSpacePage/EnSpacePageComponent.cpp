@@ -1,4 +1,4 @@
-/* Copyright (c) 2020-2021, Christian Ahrens
+/* Copyright (c) 2020-2022, Christian Ahrens
  *
  * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
  *
@@ -37,7 +37,7 @@ namespace SpaConBridge
  * Class constructor.
  */
 EnSpacePageComponent::EnSpacePageComponent()
-	: StandalonePollingPageComponentBase(PCT_EnSpace)
+	: StandalonePollingPageComponentBase(UIPageId::UPI_EnSpace)
 {
 	AddStandalonePollingObject(ROI_MatrixSettings_ReverbRoomId, RemoteObjectAddressing());
 	AddStandalonePollingObject(ROI_MatrixSettings_ReverbPredelayFactor, RemoteObjectAddressing());

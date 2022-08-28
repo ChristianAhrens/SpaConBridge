@@ -1,4 +1,4 @@
-/* Copyright (c) 2020-2021, Christian Ahrens
+/* Copyright (c) 2020-2022, Christian Ahrens
  *
  * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
  *
@@ -35,8 +35,8 @@ namespace SpaConBridge
 /**
  * Class constructor.
  */
-StandalonePollingPageComponentBase::StandalonePollingPageComponentBase(PageComponentType type)
-	: PageComponentBase(type)
+StandalonePollingPageComponentBase::StandalonePollingPageComponentBase(UIPageId id)
+	: PageComponentBase(id)
 {
 	m_elementsContainer = std::make_unique<HeaderWithElmListComponent>();
 	m_borderedElementsContainer = std::make_unique<BorderedComponentContainer>();

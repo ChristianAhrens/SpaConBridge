@@ -1,4 +1,4 @@
-/* Copyright (c) 2020-2021, Christian Ahrens
+/* Copyright (c) 2020-2022, Christian Ahrens
  *
  * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
  *
@@ -159,7 +159,10 @@ void SoundobjectTableComponent::selectedRowsChanged(int lastRowSelected)
 {
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
+	{
 		ctrl->SetSelectedSoundobjectProcessorIds(GetProcessorIdsForRows(GetSelectedRows()), true);
+		ctrl->SetParameterChanged(DCP_SoundobjectTable, DCT_ProcessorSelection);
+	}
 
 	TableModelComponent::selectedRowsChanged(lastRowSelected);
 }

@@ -1,4 +1,4 @@
-/* Copyright (c) 2020-2021, Christian Ahrens
+/* Copyright (c) 2020-2022, Christian Ahrens
  *
  * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
  *
@@ -203,6 +203,24 @@ void MultiSoundobjectSlider::RemoveBackgroundImage(MappingAreaId mappingAreaId)
 }
 
 /**
+ * Getter for the 'show only selected' state member.
+ * @return True if internal member is set to show only selected SO.
+ */
+bool MultiSoundobjectSlider::IsShowingSelectedSoundobjectsOnly()
+{
+	return m_showSelectedOnly;
+}
+
+/**
+ * Setter for the 'show only selected' state member.
+ * @param	selectedOnly	True if internal member shall be set to show only selected SO.
+ */
+void MultiSoundobjectSlider::SetShowSelectedSoundobjectsOnly(bool selectedOnly)
+{
+	m_showSelectedOnly = selectedOnly;
+}
+
+/**
  * Reimplemented paint event function.
  * Components can override this method to draw their content. The paint() method gets called when 
  * a region of a component needs redrawing, either because the component's repaint() method has 
@@ -241,8 +259,10 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 
 	for (auto const& paramsKV : m_cachedParameters)
 	{
-
 		auto const& selected = paramsKV.second._selected;
+
+		if (m_showSelectedOnly && !selected)
+			continue;
 
 		auto knobColour = paramsKV.second._colour;
 
@@ -323,7 +343,8 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 			textLabel = paramsKV.second._objectName;
 		else
 			textLabel = String(paramsKV.second._id);
-		auto font = Font(11.0, Font::plain);
+		auto fontSizeScaleFactor = static_cast<float>(2.0f * paramsKV.second._size);
+		auto font = Font(11.0f * fontSizeScaleFactor, Font::plain);
 		auto fontDependantWidth = static_cast<float>(font.getStringWidth(textLabel));
 		g.setFont(font);
 		g.drawText(textLabel, Rectangle<float>(x - (0.5f * fontDependantWidth), y + 3, fontDependantWidth, knobSize * 2.0f), Justification::centred, true);

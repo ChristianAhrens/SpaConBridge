@@ -19,7 +19,9 @@
 
 #pragma once
 
-#include <JuceHeader.h>
+#include "../PageComponentBase.h"
+
+#include "../../../SpaConBridgeCommon.h"
 
 
 namespace SpaConBridge
@@ -27,30 +29,28 @@ namespace SpaConBridge
 
 
 /**
- * LevelMeterSlider class provides a read-only slider that uses HorizontalBar Sliderstyle.
+ * Class MultiSoundobjectPageComponent is just a component which contains the multi-source slider
+ * and the mapping selection control.
  */
-class LevelMeterSlider  : public Slider
+class MultiSoundobjectPageComponent :	public PageComponentBase
 {
 public:
-	enum LevelMeterMode
-	{
-		LMM_Invalid = 0,
-		LMM_ReadOnly,
-		LMM_Normal
-	};
+	MultiSoundobjectPageComponent();
+	~MultiSoundobjectPageComponent() override;
 
-public:
-	LevelMeterSlider(const String& componentName, LevelMeterMode mode);
-	~LevelMeterSlider() override;
+	//==============================================================================
+	void SetPageIsVisible(bool visible) override;
 
-	void mouseDown (const MouseEvent& e) override;
-	void mouseDrag (const MouseEvent& e) override;
-	void mouseUp (const MouseEvent& e) override;
+	//==============================================================================
+	void UpdateGui(bool init) override;
+
+protected:
+	//==============================================================================
+	void resized() override;
 
 private:
-	LevelMeterMode m_levelMeterMode{ LMM_Invalid };
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LevelMeterSlider)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSoundobjectPageComponent)
 };
 
 

@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
-## [0.7.0] - 2022-08-28
+## [0.7.1] - 2022-08-28
 ### Added
 - Extended support for multiselection in SoundObject table (Multi SoundObject UI shown instead of single SoundObject Editor)
 

@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.7.0] - 2022-08-28
+### Added
+- Extended support for multiselection in SoundObject table (Multi SoundObject UI shown instead of single SoundObject Editor)
+
+### Changed
+- Refactored SoundObjects page layouting to provide a UI resizing slider inbetween right/left, top/down UI contents
+- Updated JUCE framework reference to 7.0.2
+- Updated submodule JUCE-AppBasics for improved xml config handling performance (multithreaded disk IO)
+
+### Fixed
+
 ## [0.6.1] - 2022-06-28
 ### Added
 

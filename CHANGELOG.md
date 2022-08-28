@@ -4,10 +4,14 @@ All notable changes to SpaConBridge will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.7.0] - 2022-08-28
 ### Added
+- Extended support for multiselection in SoundObject table (Multi SoundObject UI shown instead of single SoundObject Editor)
 
 ### Changed
+- Refactored SoundObjects page layouting to provide a UI resizing slider inbetween right/left, top/down UI contents
+- Updated JUCE framework reference to 7.0.2
+- Updated submodule JUCE-AppBasics for improved xml config handling performance (multithreaded disk IO)
 
 ### Fixed
 

@@ -38,6 +38,35 @@ class SoundobjectProcessorEditor;
 
 
 /**
+ * Reimplementation of basic resizerbar for custom painting implementation
+ */
+class TriplePointResizerBar : public StretchableLayoutResizerBar
+{
+public:
+    TriplePointResizerBar(StretchableLayoutManager* layoutToUse, int itemIndexInLayout, bool isBarVertical);
+    ~TriplePointResizerBar() override;
+    
+    void paint(Graphics& g) override;
+};
+
+/**
+ * Class BlackFrameMultiSoundobjectComponentHelper is a minimal helper to draw a black frame around the MultiSoundobjectComponent
+ * when used in SoundobjectTablePageComonent and handles its adding/removing from the class's ownership
+ */
+class BlackFrameMultiSoundobjectComponentHelper : public Component
+{
+public:
+    BlackFrameMultiSoundobjectComponentHelper();
+    ~BlackFrameMultiSoundobjectComponentHelper() override;
+    
+    void paint(Graphics& g) override;
+    void resized() override;
+    
+    void addInternalComponent();
+    void removeInternalComponent();
+};
+
+/**
  * Class SoundobjectTablePageComponent is just a component which contains the overview table 
  * and it's quick selection buttons.
  */
@@ -76,9 +105,10 @@ private:
 	bool											m_isHorizontalSlider;				/**< Indication if the layout slider currently is shown horizontally (vs. vertically). */
 	int												m_layoutManagerItemCount{ 0 };		/**< Helper to keep track of the pages layouting 'mode'. */
 	std::unique_ptr<StretchableLayoutManager>		m_layoutManager;					/**< The layout manager object instance. */
-	std::unique_ptr<StretchableLayoutResizerBar>	m_layoutResizerBar;					/**< The layout slider object instance. */
+	std::unique_ptr<TriplePointResizerBar>	        m_layoutResizerBar;					/**< The layout slider object instance. */
 
-	bool	m_multiSoundobjectsActive;
+	bool	                                                    m_multiSoundobjectsActive;
+    std::unique_ptr<BlackFrameMultiSoundobjectComponentHelper>  m_multiSoundobjectComponentContainer;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SoundobjectTablePageComponent)
 };

@@ -37,6 +37,130 @@
 namespace SpaConBridge
 {
 
+/*
+===============================================================================
+ Class TriplePointResizerBar
+===============================================================================
+*/
+
+/**
+ * Class constructor.
+ */
+TriplePointResizerBar::TriplePointResizerBar(StretchableLayoutManager* layoutToUse,
+                             int itemIndexInLayout,
+                             bool isBarVertical)
+    : StretchableLayoutResizerBar(layoutToUse,
+                                  itemIndexInLayout,
+                                  isBarVertical)
+{
+}
+
+/**
+ * Class destructor.
+ */
+TriplePointResizerBar::~TriplePointResizerBar()
+{
+}
+
+/**
+ * Reimplemented to paint background and handle indication circles.
+ * @param g        Graphics context that must be used to do the drawing operations.
+ */
+void TriplePointResizerBar::paint(Graphics& g)
+{
+    StretchableLayoutResizerBar::paint(g);
+
+    auto bounds = getLocalBounds();
+    auto ellipse = juce::Rectangle<float>(0, 0, 4, 4);
+    ellipse.setCentre(bounds.getCentre().toFloat());
+    g.setColour(getLookAndFeel().findColour(Label::textColourId));
+    if (bounds.getWidth() < bounds.getHeight())
+    {
+        g.fillEllipse(ellipse);
+        ellipse.setCentre(ellipse.getCentre() + Point<float>(0, 10));
+        g.fillEllipse(ellipse);
+        ellipse.setCentre(ellipse.getCentre() + Point<float>(0, -20));
+        g.fillEllipse(ellipse);
+    }
+    else
+    {
+        g.fillEllipse(ellipse);
+        ellipse.setCentre(ellipse.getCentre() + Point<float>(10, 0));
+        g.fillEllipse(ellipse);
+        ellipse.setCentre(ellipse.getCentre() + Point<float>(-20, 0));
+        g.fillEllipse(ellipse);
+    }
+}
+
+
+/*
+===============================================================================
+ Class BlackFrameMultiSoundobjectComponentHelper
+===============================================================================
+*/
+
+/**
+ * Class constructor.
+ */
+BlackFrameMultiSoundobjectComponentHelper::BlackFrameMultiSoundobjectComponentHelper()
+{
+    
+}
+
+/**
+ * Class destructor.
+ */
+BlackFrameMultiSoundobjectComponentHelper::~BlackFrameMultiSoundobjectComponentHelper()
+{
+    
+}
+
+/**
+ * Reimplemented paint method to achieve having a framing black 1px rect around the embedded component.
+ * @param g     The graphics object to use for painting
+ */
+void BlackFrameMultiSoundobjectComponentHelper::paint(Graphics& g)
+{
+    Component::paint(g);
+    
+    g.setColour(getLookAndFeel().findColour(TextEditor::outlineColourId));
+    g.drawRect(getLocalBounds());
+}
+
+/**
+ * Reimplemented resized method to achieve resizing of the multiSoundobjectComponent to full extent of this component
+ */
+void BlackFrameMultiSoundobjectComponentHelper::resized()
+{
+    auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
+    if (multiSoundobjectComponent)
+        multiSoundobjectComponent->setBounds(getLocalBounds().reduced(1));
+}
+
+/**
+ * Helper to add the multiSoundobjectComponent to this component's UI handling
+ */
+void BlackFrameMultiSoundobjectComponentHelper::addInternalComponent()
+{
+    auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
+    if (multiSoundobjectComponent && this != multiSoundobjectComponent->getParentComponent())
+    {
+        addAndMakeVisible(multiSoundobjectComponent.get());
+    }
+}
+
+/**
+ * Helper to remove the multiSoundobjectComponent from this component's UI handling
+ */
+void BlackFrameMultiSoundobjectComponentHelper::removeInternalComponent()
+{
+    auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
+    if (multiSoundobjectComponent && this == multiSoundobjectComponent->getParentComponent())
+    {
+        removeChildComponent(multiSoundobjectComponent.get());
+    }
+}
+
 
 /*
 ===============================================================================
@@ -57,6 +181,9 @@ SoundobjectTablePageComponent::SoundobjectTablePageComponent()
 
 	m_isHorizontalSlider = true;
 	m_multiSoundobjectsActive = false;
+    
+    m_multiSoundobjectComponentContainer = std::make_unique<BlackFrameMultiSoundobjectComponentHelper>();
+    addAndMakeVisible(m_multiSoundobjectComponentContainer.get());
 
 	// Create the table model/component.
 	m_soundobjectsTable = std::make_unique<SoundobjectTableComponent>();
@@ -150,7 +277,11 @@ void SoundobjectTablePageComponent::resized()
 		{
 			m_layoutManager->clearAllItems();
 			m_layoutManager->setItemLayout(0, -0.05, -1, -0.5);
-			m_layoutManager->setItemLayout(1, 6, 6, 6);
+#if JUCE_IOS || JUCE_ANDROID
+            m_layoutManager->setItemLayout(1, 16, 16, 16);
+#else
+			m_layoutManager->setItemLayout(1, 8, 8, 8);
+#endif
 			m_layoutManager->setItemLayout(2, -0.05, -1, -0.5);
 			m_layoutManagerItemCount = 3;
 		}
@@ -160,18 +291,14 @@ void SoundobjectTablePageComponent::resized()
 		{
 			m_isHorizontalSlider = !isPortrait;
 			removeChildComponent(m_layoutResizerBar.get());
-			m_layoutResizerBar = std::make_unique<StretchableLayoutResizerBar>(m_layoutManager.get(), 1, m_isHorizontalSlider);
+			m_layoutResizerBar = std::make_unique<TriplePointResizerBar>(m_layoutManager.get(), 1, m_isHorizontalSlider);
 			addAndMakeVisible(m_layoutResizerBar.get());
 		}
 
 		if (m_multiSoundobjectsActive)
 		{
-			auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
-			if (multiSoundobjectComponent)
-			{
-				Component* comps[] = { m_soundobjectsTable.get(), m_layoutResizerBar.get(), multiSoundobjectComponent.get() };
-				m_layoutManager->layOutComponents(comps, 3, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, isPortrait, true);
-			}
+            Component* comps[] = { m_soundobjectsTable.get(), m_layoutResizerBar.get(), m_multiSoundobjectComponentContainer.get()};
+            m_layoutManager->layOutComponents(comps, 3, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, isPortrait, true);
 		}
 		else
 		{
@@ -234,7 +361,7 @@ void SoundobjectTablePageComponent::SetSoundsourceProcessorEditorActive(Soundobj
 					m_isHorizontalSlider = !IsPortraitAspectRatio();
 					removeChildComponent(m_layoutResizerBar.get());
 					m_layoutResizerBar.reset();
-					m_layoutResizerBar = std::make_unique<StretchableLayoutResizerBar>(m_layoutManager.get(), 1, m_isHorizontalSlider);
+					m_layoutResizerBar = std::make_unique<TriplePointResizerBar>(m_layoutManager.get(), 1, m_isHorizontalSlider);
 					addAndMakeVisible(m_layoutResizerBar.get());
 
 					resized();
@@ -258,24 +385,21 @@ void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool acti
 	{
 		if (!m_layoutResizerBar)
 		{
-			m_layoutResizerBar = std::make_unique<StretchableLayoutResizerBar>(m_layoutManager.get(), 1, m_isHorizontalSlider);
+			m_layoutResizerBar = std::make_unique<TriplePointResizerBar>(m_layoutManager.get(), 1, m_isHorizontalSlider);
 			addAndMakeVisible(m_layoutResizerBar.get());
 		}
-
-		auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
-		if (multiSoundobjectComponent && this != multiSoundobjectComponent->getParentComponent())
-		{
-			multiSoundobjectComponent->SetShowSelectedOnly(true);
-			addAndMakeVisible(multiSoundobjectComponent.get());
-		}
+        
+        auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
+        if (multiSoundobjectComponent)
+            multiSoundobjectComponent->SetShowSelectedOnly(true);
+        m_multiSoundobjectComponentContainer->addInternalComponent();
 	}
-	else if (!m_multiSoundobjectsActive)
+	else
 	{
-		auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
-		if (multiSoundobjectComponent && this == multiSoundobjectComponent->getParentComponent())
-		{
-			removeChildComponent(multiSoundobjectComponent.get());
-		}
+        m_multiSoundobjectComponentContainer->removeInternalComponent();
+        
+        if (!m_selectedProcessorInstanceEditor)
+            m_layoutResizerBar.reset();
 	}
 
 	resized();
@@ -289,19 +413,18 @@ void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool acti
  */
 void SoundobjectTablePageComponent::SetPageIsVisible(bool visible)
 {
-	auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
-	if (multiSoundobjectComponent)
-	{
-		if (!visible && this == multiSoundobjectComponent->getParentComponent())
-		{
-			removeChildComponent(multiSoundobjectComponent.get());
-		}
-		else if (m_multiSoundobjectsActive && visible && this != multiSoundobjectComponent->getParentComponent())
-		{
-			multiSoundobjectComponent->SetShowSelectedOnly(true);
-			addAndMakeVisible(multiSoundobjectComponent.get());
-		}
-	}
+    if (!visible)
+    {
+        m_multiSoundobjectComponentContainer->removeInternalComponent();
+        m_layoutResizerBar.reset();
+    }
+    else if (m_multiSoundobjectsActive && visible)
+    {
+        auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
+        if (multiSoundobjectComponent)
+            multiSoundobjectComponent->SetShowSelectedOnly(true);
+        m_multiSoundobjectComponentContainer->addInternalComponent();
+    }
 
 	PageComponentBase::SetPageIsVisible(visible);
 

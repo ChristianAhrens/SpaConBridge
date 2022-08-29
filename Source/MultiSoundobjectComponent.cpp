@@ -219,7 +219,7 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 
 	if (m_multiSoundobjectSlider)
 	{
-#ifdef DEBUG
+#ifdef UNDEF//DEBUG
 		if (ctrl->PopParameterChanged(DCP_MultiSlider, DCT_NumProcessors))
 		{
 			DBG(String(__FUNCTION__) + String(" ctrl update DCT_NumProcessors"));
@@ -270,7 +270,7 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 					cachedParameters.insert(std::make_pair(processorId, MultiSoundobjectSlider::SoundobjectParameters(soundobjectId, pos, spread, reverbSendGain, selected, colour, size, objectName)));
 				}
 
-#ifdef DEBUG
+#ifdef UNDEF//DEBUG
 				if (processor->PopParameterChanged(DCP_MultiSlider, DCT_SoundobjectProcessorConfig))
 				{
 					DBG(String(__FUNCTION__) + String(" processor update DCT_SoundobjectProcessorConfig"));

@@ -278,6 +278,15 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 		auto metaInfoSize = 6 * refKnobSize;
 		auto innerRadius = 0.5f * knobSize;
 
+		// Paint 'currently dragged crosshair'
+		if (m_currentlyDraggedId == paramsKV.first)
+		{
+			auto& crosshairColour = knobColour;
+			g.setColour(crosshairColour);
+			g.drawLine(0, y, w, y, 1);
+			g.drawLine(x, 0, x, h, 1);
+		}
+
 		// Paint spread if enabled
 		if (m_spreadEnabled)
 		{
@@ -484,6 +493,9 @@ void MultiSoundobjectSlider::mouseUp(const MouseEvent& e)
 
 		// De-select knob.
 		m_currentlyDraggedId = INVALID_PROCESSOR_ID;
+
+		// trigger single repaint to get rid of 'currently dragged crosshair'
+		repaint();
 	}
 }
 

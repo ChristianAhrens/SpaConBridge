@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.7.2] - 2022-08-29
+### Added
+- Soundobject 'currently dragged' crosshair inidication on MultiSoundobject UI
+- SoundobjectTable resize bar triple-dot drag option indication
+
+### Changed
+- Better SoundobjectTable resize bar usability through increased width on touch enabled platforms
+- Better SoundobjectTable multiselection usability for iOS/iPadOS (row click toggles selection)
+
+### Fixed
+- Linux buildability
+
 ## [0.7.1] - 2022-08-28
 ### Added
 - Extended support for multiselection in SoundObject table (Multi SoundObject UI shown instead of single SoundObject Editor)

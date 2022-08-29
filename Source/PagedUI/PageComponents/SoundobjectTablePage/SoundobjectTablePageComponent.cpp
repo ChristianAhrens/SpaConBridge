@@ -122,9 +122,12 @@ BlackFrameMultiSoundobjectComponentHelper::~BlackFrameMultiSoundobjectComponentH
 void BlackFrameMultiSoundobjectComponentHelper::paint(Graphics& g)
 {
     Component::paint(g);
-    
-    g.setColour(getLookAndFeel().findColour(TextEditor::outlineColourId));
-    g.drawRect(getLocalBounds());
+    auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
+    if (multiSoundobjectComponent && this == multiSoundobjectComponent->getParentComponent())
+    {
+        g.setColour(getLookAndFeel().findColour(TextEditor::outlineColourId));
+        g.drawRect(getLocalBounds());
+    }
 }
 
 /**

@@ -65,7 +65,11 @@ SoundobjectTableComponent::SoundobjectTableComponent()
 	{
 		table->setHeader(std::make_unique<BridgingAwareTableHeaderComponent>(tableColumns, BridgingAwareTableHeaderComponent::TC_SoundobjectID));
 		table->setOutlineThickness(1);
+#if JUCE_IOS || JUCE_ANDROID
+		table->setClickingTogglesRowSelection(true);
+#else
 		table->setClickingTogglesRowSelection(false);
+#endif
 		table->setMultipleSelectionEnabled(true);
 	}
 	

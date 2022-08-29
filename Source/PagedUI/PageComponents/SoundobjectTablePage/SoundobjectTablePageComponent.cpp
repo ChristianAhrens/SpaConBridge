@@ -276,51 +276,66 @@ void SoundobjectTablePageComponent::resized()
 
 	if (m_selectedProcessorInstanceEditor || m_multiSoundobjectsActive)
 	{
-		if (m_layoutManagerItemCount != 3)
-		{
-			m_layoutManager->clearAllItems();
-			m_layoutManager->setItemLayout(0, -0.05, -1, -0.5);
-#if JUCE_IOS || JUCE_ANDROID
-            m_layoutManager->setItemLayout(1, 16, 16, 16);
-#else
-			m_layoutManager->setItemLayout(1, 8, 8, 8);
-#endif
-			m_layoutManager->setItemLayout(2, -0.05, -1, -0.5);
-			m_layoutManagerItemCount = 3;
-		}
-
-		auto isPortrait = IsPortraitAspectRatio();
-		if (m_isHorizontalSlider != !isPortrait)
-		{
-			m_isHorizontalSlider = !isPortrait;
-			removeChildComponent(m_layoutResizerBar.get());
-			m_layoutResizerBar = std::make_unique<TriplePointResizerBar>(m_layoutManager.get(), 1, m_isHorizontalSlider);
-			addAndMakeVisible(m_layoutResizerBar.get());
-		}
+		activateStretchableSplitLayout();
 
 		if (m_multiSoundobjectsActive)
 		{
             Component* comps[] = { m_soundobjectsTable.get(), m_layoutResizerBar.get(), m_multiSoundobjectComponentContainer.get()};
-            m_layoutManager->layOutComponents(comps, 3, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, isPortrait, true);
+            m_layoutManager->layOutComponents(comps, 3, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, IsPortraitAspectRatio(), true);
+			// unclear why but another explicit resize on the multicomponent is required for correct resize behaviour
+			m_multiSoundobjectComponentContainer->resized();
 		}
 		else
 		{
 			Component* comps[] = { m_soundobjectsTable.get(), m_layoutResizerBar.get(), m_selectedProcessorInstanceEditor.get() };
-			m_layoutManager->layOutComponents(comps, 3, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, isPortrait, true);
+			m_layoutManager->layOutComponents(comps, 3, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, IsPortraitAspectRatio(), true);
 		}
 	}
 	else
 	{
-		if (m_layoutManagerItemCount != 1)
-		{
-			m_layoutManager->clearAllItems();
-			m_layoutManager->setItemLayout(0, -1, -1, -1);
-			m_layoutManagerItemCount = 1;
-		}
+		deactivateStretchableSplitLayout();
 
 		Component* comps[] = { m_soundobjectsTable.get() };
 		m_layoutManager->layOutComponents(comps, 1, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, false, true);
 	}
+}
+
+void SoundobjectTablePageComponent::activateStretchableSplitLayout()
+{
+	if (m_layoutManagerItemCount != 3)
+	{
+		m_layoutManager->clearAllItems();
+		m_layoutManager->setItemLayout(0, -0.05, -1, -0.5);
+#if JUCE_IOS || JUCE_ANDROID
+		m_layoutManager->setItemLayout(1, 16, 16, 16);
+#else
+		m_layoutManager->setItemLayout(1, 8, 8, 8);
+#endif
+		m_layoutManager->setItemLayout(2, -0.05, -1, -0.5);
+		m_layoutManagerItemCount = 3;
+	}
+
+	auto isPortrait = IsPortraitAspectRatio();
+	if (m_isHorizontalSlider != !isPortrait || !m_layoutResizerBar)
+	{
+		m_isHorizontalSlider = !isPortrait;
+		removeChildComponent(m_layoutResizerBar.get());
+		m_layoutResizerBar = std::make_unique<TriplePointResizerBar>(m_layoutManager.get(), 1, m_isHorizontalSlider);
+		addAndMakeVisible(m_layoutResizerBar.get());
+	}
+}
+
+void SoundobjectTablePageComponent::deactivateStretchableSplitLayout()
+{
+	if (m_layoutManagerItemCount != 1)
+	{
+		m_layoutManager->clearAllItems();
+		m_layoutManager->setItemLayout(0, -1, -1, -1);
+		m_layoutManagerItemCount = 1;
+	}
+
+	removeChildComponent(m_layoutResizerBar.get());
+	m_layoutResizerBar.reset();
 }
 
 /**
@@ -361,12 +376,6 @@ void SoundobjectTablePageComponent::SetSoundsourceProcessorEditorActive(Soundobj
 						m_selectedProcessorInstanceEditor->UpdateGui(true);
 					}
 
-					m_isHorizontalSlider = !IsPortraitAspectRatio();
-					removeChildComponent(m_layoutResizerBar.get());
-					m_layoutResizerBar.reset();
-					m_layoutResizerBar = std::make_unique<TriplePointResizerBar>(m_layoutManager.get(), 1, m_isHorizontalSlider);
-					addAndMakeVisible(m_layoutResizerBar.get());
-
 					resized();
 				}
 			}
@@ -386,12 +395,6 @@ void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool acti
 
 	if (m_multiSoundobjectsActive)
 	{
-		if (!m_layoutResizerBar)
-		{
-			m_layoutResizerBar = std::make_unique<TriplePointResizerBar>(m_layoutManager.get(), 1, m_isHorizontalSlider);
-			addAndMakeVisible(m_layoutResizerBar.get());
-		}
-        
         auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
         if (multiSoundobjectComponent)
             multiSoundobjectComponent->SetShowSelectedOnly(true);
@@ -400,9 +403,6 @@ void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool acti
 	else
 	{
         m_multiSoundobjectComponentContainer->removeInternalComponent();
-        
-        if (!m_selectedProcessorInstanceEditor)
-            m_layoutResizerBar.reset();
 	}
 
 	resized();
@@ -419,7 +419,6 @@ void SoundobjectTablePageComponent::SetPageIsVisible(bool visible)
     if (!visible)
     {
         m_multiSoundobjectComponentContainer->removeInternalComponent();
-        m_layoutResizerBar.reset();
     }
     else if (m_multiSoundobjectsActive && visible)
     {

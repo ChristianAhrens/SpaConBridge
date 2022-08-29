@@ -98,6 +98,10 @@ protected:
 	void paint(Graphics&) override;
 	void resized() override;
 
+	//==============================================================================
+	void activateStretchableSplitLayout();
+	void deactivateStretchableSplitLayout();
+
 private:
 	std::unique_ptr<SoundobjectTableComponent>		m_soundobjectsTable;				/**< The actual table model / component inside this component. */
 	std::unique_ptr<SoundobjectProcessorEditor>		m_selectedProcessorInstanceEditor;	/**< The processor editor component corresponding to the selected row */

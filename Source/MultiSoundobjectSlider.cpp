@@ -428,6 +428,8 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
 			break;
 		}
 	}
+    
+    DualPointMultitouchCatcherComponent::mouseDown(e);
 }
 
 /**
@@ -454,6 +456,8 @@ void MultiSoundobjectSlider::mouseDrag(const MouseEvent& e)
 			}
 		}
 	}
+    
+    DualPointMultitouchCatcherComponent::mouseDrag(e);
 }
 
 /**
@@ -497,6 +501,8 @@ void MultiSoundobjectSlider::mouseUp(const MouseEvent& e)
 		// trigger single repaint to get rid of 'currently dragged crosshair'
 		repaint();
 	}
+    
+    DualPointMultitouchCatcherComponent::mouseUp(e);
 }
 
 /**
@@ -504,7 +510,7 @@ void MultiSoundobjectSlider::mouseUp(const MouseEvent& e)
  * @param p1	First multitouch point
  * @param p2	Second multitouch point
  */
-void MultiSoundobjectSlider::dualPointMultitouchStarted(Point<int> p1, Point<int> p2)
+void MultiSoundobjectSlider::dualPointMultitouchStarted(const Point<int>& p1, const Point<int>& p2)
 {
 	DBG(String(__FUNCTION__) + String(" P1:") + p1.toString() + String(" P2:") + p2.toString());
 }
@@ -514,7 +520,7 @@ void MultiSoundobjectSlider::dualPointMultitouchStarted(Point<int> p1, Point<int
  * @param p1	First multitouch point
  * @param p2	Second multitouch point
  */
-void MultiSoundobjectSlider::dualPointMultitouchUpdated(Point<int> p1, Point<int> p2)
+void MultiSoundobjectSlider::dualPointMultitouchUpdated(const Point<int>& p1, const Point<int>& p2)
 {
 	DBG(String(__FUNCTION__) + String(" P1:") + p1.toString() + String(" P2:") + p2.toString());
 }

@@ -101,8 +101,8 @@ public:
 	void mouseDrag (const MouseEvent& e) override;
 	void mouseUp (const MouseEvent& e) override;
 
-	void dualPointMultitouchStarted(Point<int> p1, Point<int> p2) override;
-	void dualPointMultitouchUpdated(Point<int> p1, Point<int> p2) override;
+	void dualPointMultitouchStarted(const Point<int>& p1, const Point<int>& p2) override;
+	void dualPointMultitouchUpdated(const Point<int>& p1, const Point<int>& p2) override;
 	void dualPointMultitouchFinished() override;
 
 private:

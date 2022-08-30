@@ -22,6 +22,8 @@
 #include <JuceHeader.h>
 #include "SpaConBridgeCommon.h"
 
+#include "DualPointMultitouchCatcherComponent.h"
+
 
 namespace SpaConBridge
 {
@@ -30,7 +32,7 @@ namespace SpaConBridge
 /**
  * SoundobjectSlider for displaying and controlling multiple sources.
  */
-class MultiSoundobjectSlider  : public Component
+class MultiSoundobjectSlider  : public JUCEAppBasics::DualPointMultitouchCatcherComponent
 {
 public:
 	struct SoundobjectParameters
@@ -98,6 +100,10 @@ public:
 	void mouseDown (const MouseEvent& e) override;
 	void mouseDrag (const MouseEvent& e) override;
 	void mouseUp (const MouseEvent& e) override;
+
+	void dualPointMultitouchStarted(Point<int> p1, Point<int> p2) override;
+	void dualPointMultitouchUpdated(Point<int> p1, Point<int> p2) override;
+	void dualPointMultitouchFinished() override;
 
 private:
 

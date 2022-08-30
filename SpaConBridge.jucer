@@ -218,6 +218,10 @@
           </GROUP>
         </GROUP>
         <GROUP id="{AEF488F2-ECE4-B5B0-0BC4-9A3644EF8A18}" name="Source">
+          <FILE id="CRqn2u" name="DualPointMultitouchCatcherComponent.cpp" compile="1"
+                resource="0" file="submodules/JUCE-AppBasics/Source/DualPointMultitouchCatcherComponent.cpp"/>
+          <FILE id="O4EHdQ" name="DualPointMultitouchCatcherComponent.h" compile="0"
+                resource="0" file="submodules/JUCE-AppBasics/Source/DualPointMultitouchCatcherComponent.h"/>
           <FILE id="g72R4R" name="ColourAndSizePickerComponent.cpp" compile="1"
                 resource="0" file="submodules/JUCE-AppBasics/Source/ColourAndSizePickerComponent.cpp"/>
           <FILE id="gwMBZq" name="ColourAndSizePickerComponent.h" compile="0"

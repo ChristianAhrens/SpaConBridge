@@ -500,6 +500,34 @@ void MultiSoundobjectSlider::mouseUp(const MouseEvent& e)
 }
 
 /**
+ * Implementation of pure virtual method to notify multitouch guesture start
+ * @param p1	First multitouch point
+ * @param p2	Second multitouch point
+ */
+void MultiSoundobjectSlider::dualPointMultitouchStarted(Point<int> p1, Point<int> p2)
+{
+	DBG(String(__FUNCTION__) + String(" P1:") + p1.toString() + String(" P2:") + p2.toString());
+}
+
+/**
+ * Implementation of pure virtual method to notify multitouch guesture update
+ * @param p1	First multitouch point
+ * @param p2	Second multitouch point
+ */
+void MultiSoundobjectSlider::dualPointMultitouchUpdated(Point<int> p1, Point<int> p2)
+{
+	DBG(String(__FUNCTION__) + String(" P1:") + p1.toString() + String(" P2:") + p2.toString());
+}
+
+/**
+ * Implementation of pure virtual method to notify multitouch guesture end
+ */
+void MultiSoundobjectSlider::dualPointMultitouchFinished()
+{
+	DBG(String(__FUNCTION__));
+}
+
+/**
  * Update the local hash of processorIds and their current parameters.
  * @param parameters	Map where the keys are the processorIds of each soundobject, while values are pairs of the corresponding 
  *						soundobject number and position coordinates (0.0 to 1.0), spread, reverbSendGain and select state. 

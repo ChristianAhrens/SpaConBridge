@@ -378,6 +378,11 @@ void MultiSoundobjectSlider::resized()
  */
 void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
 {
+    DualPointMultitouchCatcherComponent::mouseDown(e);
+    
+    if (GetPrimaryMouseInputSourceIndex() != e.source.getIndex())
+        return;
+    
 	float w = static_cast<float>(getLocalBounds().getWidth());
 	float h = static_cast<float>(getLocalBounds().getHeight());
 
@@ -428,8 +433,6 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
 			break;
 		}
 	}
-    
-    DualPointMultitouchCatcherComponent::mouseDown(e);
 }
 
 /**
@@ -438,6 +441,11 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
  */
 void MultiSoundobjectSlider::mouseDrag(const MouseEvent& e)
 {
+    DualPointMultitouchCatcherComponent::mouseDrag(e);
+    
+    if (GetPrimaryMouseInputSourceIndex() != e.source.getIndex())
+        return;
+    
 	if (m_currentlyDraggedId != INVALID_PROCESSOR_ID)
 	{
 		auto ctrl = Controller::GetInstance();
@@ -456,8 +464,6 @@ void MultiSoundobjectSlider::mouseDrag(const MouseEvent& e)
 			}
 		}
 	}
-    
-    DualPointMultitouchCatcherComponent::mouseDrag(e);
 }
 
 /**
@@ -467,7 +473,10 @@ void MultiSoundobjectSlider::mouseDrag(const MouseEvent& e)
  */
 void MultiSoundobjectSlider::mouseUp(const MouseEvent& e)
 {
-	ignoreUnused(e);
+    DualPointMultitouchCatcherComponent::mouseUp(e);
+    
+    if (GetPrimaryMouseInputSourceIndex() != e.source.getIndex())
+        return;
 
 	if (m_currentlyDraggedId != INVALID_PROCESSOR_ID)
 	{
@@ -501,8 +510,6 @@ void MultiSoundobjectSlider::mouseUp(const MouseEvent& e)
 		// trigger single repaint to get rid of 'currently dragged crosshair'
 		repaint();
 	}
-    
-    DualPointMultitouchCatcherComponent::mouseUp(e);
 }
 
 /**
@@ -512,7 +519,7 @@ void MultiSoundobjectSlider::mouseUp(const MouseEvent& e)
  */
 void MultiSoundobjectSlider::dualPointMultitouchStarted(const Point<int>& p1, const Point<int>& p2)
 {
-	DBG(String(__FUNCTION__) + String(" P1:") + p1.toString() + String(" P2:") + p2.toString());
+	DBG(String(__FUNCTION__) + String(" (P1:") + p1.toString() + String(") (P2:") + p2.toString() + String(")"));
 }
 
 /**

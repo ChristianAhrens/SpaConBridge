@@ -430,6 +430,7 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
 			}
 
 			// Found a knob to select, skip the rest.
+            repaint();
 			break;
 		}
 	}

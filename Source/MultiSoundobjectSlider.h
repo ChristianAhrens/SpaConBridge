@@ -35,6 +35,13 @@ namespace SpaConBridge
 class MultiSoundobjectSlider  : public JUCEAppBasics::DualPointMultitouchCatcherComponent
 {
 public:
+    enum MultiTouchDirectionTarget
+    {
+        MTDT_PendingInputDecision,
+        MTDT_HorizontalEnSpaceSendGain,
+        MTDT_VerticalSpread
+    };
+    
 	struct SoundobjectParameters
 	{
 		SoundobjectParameters() : 
@@ -68,6 +75,23 @@ public:
 		String			_objectName;
 	};
 	typedef std::map<SoundobjectProcessorId, SoundobjectParameters> ParameterCache;
+    
+    struct MultiTouchPoints
+    {
+        MultiTouchPoints() :
+            _p1(juce::Point<int>(0, 0)),
+            _p2_init(juce::Point<int>(0, 0)),
+            _p2(juce::Point<int>(0, 0))
+        {};
+        
+        bool isEmpty(){ return _p1.isOrigin() && _p2.isOrigin() && _p2_init.isOrigin(); };
+        void clear(){ _p1 = juce::Point<int>(0, 0); _p2 = juce::Point<int>(0, 0); _p2_init = juce::Point<int>(0, 0); };
+        bool hasNotableValue(){ return _p2_init != _p2; };
+        
+        Point<int> _p1;
+        Point<int> _p2_init;
+        Point<int> _p2;
+    };
 
 	MultiSoundobjectSlider();
 	MultiSoundobjectSlider(bool spreadEnabled, bool reverbSndGainEnabled);
@@ -101,23 +125,29 @@ public:
 	void mouseDrag (const MouseEvent& e) override;
 	void mouseUp (const MouseEvent& e) override;
 
-	void dualPointMultitouchStarted(const Point<int>& p1, const Point<int>& p2) override;
-	void dualPointMultitouchUpdated(const Point<int>& p1, const Point<int>& p2) override;
+	void dualPointMultitouchStarted(const juce::Point<int>& p1, const juce::Point<int>& p2) override;
+	void dualPointMultitouchUpdated(const juce::Point<int>& p1, const juce::Point<int>& p2) override;
 	void dualPointMultitouchFinished() override;
 
 private:
+    void updateMultiTouch(const juce::Point<int>& p1, const juce::Point<int>& p2);
+    float getMultiTouchFactorValue();
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSoundobjectSlider)
-	SoundobjectProcessorId										m_currentlyDraggedId;				/**< ProcessorId of the currently selected knob, if any. */
-	std::vector<SoundobjectId>									m_highlightedIds;					/**< SourceIds of the currently highlighted knobs, if any. */
-	ParameterCache												m_cachedParameters;					/**< To save us from iterating over all Soundobject Processors at every click, cache their current parametervalues.
-																									 *	 Keys are the SoundobjectProcessorId of each object processor. */
-	bool														m_spreadEnabled{ false };			/**< Flag indication, if SO spread factor visu shall be painted for individual SOs. */
-	bool														m_reverbSndGainEnabled{ false };	/**< Flag indication, if SO reverb send gaind visu shall be painted for individual SOs. */
-	bool														m_soundObjectNamesEnabled{ false };	/**< Flag indication, if SO name strings shall be painted for individual SOs. */
-	MappingAreaId												m_selectedMapping;					/**< Remember the last selected coordinate mapping for the multi-slider. */
-	std::map<MappingAreaId, std::unique_ptr<ImageComponent>>	m_backgroundImages;					/**< Map of background images for the four Mapping Areas that can be displayed. */
-	bool														m_showSelectedOnly{ false };		/**< Indication if only selected SO shall be visualized. */
+	SoundobjectProcessorId										m_currentlyDraggedId;				                        /**< ProcessorId of the currently selected knob, if any. */
+	std::vector<SoundobjectId>									m_highlightedIds;					                        /**< SourceIds of the currently highlighted knobs, if any. */
+	ParameterCache												m_cachedParameters;					                        /**< To save us from iterating over all Soundobject Processors at every click, cache their current parametervalues.
+																									                         *	 Keys are the SoundobjectProcessorId of each object processor. */
+	bool														m_spreadEnabled{ false };			                        /**< Flag indication, if SO spread factor visu shall be painted for individual SOs. */
+	bool														m_reverbSndGainEnabled{ false };	                        /**< Flag indication, if SO reverb send gaind visu shall be painted for individual SOs. */
+	bool														m_soundObjectNamesEnabled{ false };	                        /**< Flag indication, if SO name strings shall be painted for individual SOs. */
+	MappingAreaId												m_selectedMapping;					                        /**< Remember the last selected coordinate mapping for the multi-slider. */
+	std::map<MappingAreaId, std::unique_ptr<ImageComponent>>	m_backgroundImages;					                        /**< Map of background images for the four Mapping Areas that can be displayed. */
+	bool														m_showSelectedOnly{ false };		                        /**< Indication if only selected SO shall be visualized. */
+    MultiTouchPoints                                            m_multiTouchPoints;                                         /**< The two multitouch points currently tracked. */
+    MultiTouchDirectionTarget                                   m_multiTouchTargetOperation{ MTDT_PendingInputDecision };   /**< Enum value defining how current multitouch input is interpreted. */
+    float                                                       m_multiTouchModValue{ 1.0f };
+    
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSoundobjectSlider)
 };
 
 

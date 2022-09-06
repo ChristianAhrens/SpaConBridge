@@ -162,6 +162,8 @@ public:
 	bool isValid() override;
     static bool isValid(const std::unique_ptr<XmlElement>& xmlConfig);
 
+    bool ResetToDefault();
+
 private:
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AppConfiguration)

@@ -102,4 +102,48 @@ bool AppConfiguration::isValid(const std::unique_ptr<XmlElement>& xmlConfig)
 	return true;
 }
 
+bool AppConfiguration::ResetToDefault()
+{
+	auto xmlConfig = juce::parseXML(String(BinaryData::Default_config, BinaryData::Default_configSize));
+	if (xmlConfig)
+	{
+
+		if (SpaConBridge::AppConfiguration::isValid(xmlConfig))
+		{
+
+			SetFlushAndUpdateDisabled();
+			if (resetConfigState(std::move(xmlConfig)))
+			{
+				ResetFlushAndUpdateDisabled();
+				return true;
+			}
+			else
+			{
+				jassertfalse; // stop here when debugging, since invalid configurations often lead to endless debugging sessions until this simple explanation was found...
+				ResetFlushAndUpdateDisabled();
+
+				// ...and trigger generation of a valid config if not.
+				triggerConfigurationDump();
+			}
+		}
+		else
+		{
+			jassertfalse; // stop here when debugging, since invalid configurations often lead to endless debugging sessions until this simple explanation was found...
+
+			// ...and trigger generation of a valid config if not.
+			triggerConfigurationDump();
+		}
+	}
+	else
+	{
+		jassertfalse; // stop here when debugging, since invalid configurations often lead to endless debugging sessions until this simple explanation was found...
+
+		// ...and trigger generation of a valid config if not.
+		triggerConfigurationDump();
+	}
+
+	return false;
+}
+
+
 }

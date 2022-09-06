@@ -50,6 +50,7 @@ public:
 
 	//==========================================================================
 	void onApplyClicked();
+	void onResetToDefaultClicked();
 	void onLoadConfigClicked();
 	void onSaveConfigClicked();
 	void onToggleRawConfigVisible();
@@ -73,6 +74,7 @@ private:
 	std::unique_ptr<Viewport>					m_settingsViewport;
 
 	std::unique_ptr<TextButton>		m_settingsRawApplyButton;
+	std::unique_ptr<TextButton>		m_settingsResetToDefaultButton;
 	std::unique_ptr<TextEditor>		m_settingsRawEditor;
 
 	std::unique_ptr<JUCEAppBasics::TextWithImageButton>	m_loadConfigButton;

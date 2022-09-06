@@ -47,6 +47,10 @@ public:
     ~TriplePointResizerBar() override;
     
     void paint(Graphics& g) override;
+
+	void mouseUp(const MouseEvent& e) override;
+
+	std::function<void()>	onResizeBarMoved;
 };
 
 /**
@@ -80,6 +84,9 @@ public:
 	void SetRowHeight(int height);
 	int GetRowHeight();
 
+	void SetResizeBarRatio(float ratio);
+	float GetResizeBarRatio();
+
 	//==============================================================================
 	void SetPageIsVisible(bool visible) override;
 
@@ -109,7 +116,8 @@ private:
 	bool											m_isHorizontalSlider;				/**< Indication if the layout slider currently is shown horizontally (vs. vertically). */
 	int												m_layoutManagerItemCount{ 0 };		/**< Helper to keep track of the pages layouting 'mode'. */
 	std::unique_ptr<StretchableLayoutManager>		m_layoutManager;					/**< The layout manager object instance. */
-	std::unique_ptr<TriplePointResizerBar>	        m_layoutResizerBar;					/**< The layout slider object instance. */
+	std::unique_ptr<TriplePointResizerBar>	        m_layoutResizeBar;					/**< The layout slider object instance. */
+	float											m_resizeBarRatio{ 0.5f };			/**< The size ratio of table vs. details contents devided by the resizerbar. */
 
 	bool	                                                    m_multiSoundobjectsActive;
     std::unique_ptr<BlackFrameMultiSoundobjectComponentHelper>  m_multiSoundobjectComponentContainer;

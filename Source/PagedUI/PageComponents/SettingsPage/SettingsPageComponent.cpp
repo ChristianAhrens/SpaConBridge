@@ -47,6 +47,10 @@ SettingsPageComponent::SettingsPageComponent()
 	m_settingsRawApplyButton = std::make_unique<TextButton>("Apply");
 	m_settingsRawApplyButton->onClick = [this] { onApplyClicked(); };
 	addAndMakeVisible(m_settingsRawApplyButton.get());
+	// Reset to default button for when raw config is visible
+	m_settingsResetToDefaultButton = std::make_unique<TextButton>("Reset config to default");
+	m_settingsResetToDefaultButton->onClick = [this] { onResetToDefaultClicked(); };
+	addAndMakeVisible(m_settingsResetToDefaultButton.get());
 	// Text editor for when raw config is visible
 	m_settingsRawEditor = std::make_unique<TextEditor>();
 	m_settingsRawEditor->setMultiLine(true, false);
@@ -157,7 +161,9 @@ void SettingsPageComponent::resized()
 	}
 
 	// raw config textfield, etc. - not always visible!
-	m_settingsRawApplyButton->setBounds(bounds.removeFromTop(25));
+	auto buttonHeadBounds = bounds.removeFromTop(25);
+	m_settingsRawApplyButton->setBounds(buttonHeadBounds.removeFromLeft(static_cast<int>(0.5f * buttonHeadBounds.getWidth())));
+	m_settingsResetToDefaultButton->setBounds(buttonHeadBounds);
 	m_settingsRawEditor->setBounds(bounds);
 }
 
@@ -235,6 +241,18 @@ void SettingsPageComponent::onApplyClicked()
 }
 
 /**
+ *
+ */
+void SettingsPageComponent::onResetToDefaultClicked()
+{
+	auto config = dynamic_cast<AppConfiguration*>(SpaConBridge::AppConfiguration::getInstance());
+	if (config != nullptr)
+	{
+		config->ResetToDefault();
+	}
+}
+
+/**
  * Method to be used as callback for load button click reaction.
  */
 void SettingsPageComponent::onLoadConfigClicked()
@@ -305,6 +323,8 @@ void SettingsPageComponent::onToggleRawConfigVisible()
 		{
 			m_settingsRawApplyButton->setVisible(true);
 			m_settingsRawApplyButton->toFront(true);
+			m_settingsResetToDefaultButton->setVisible(true);
+			m_settingsResetToDefaultButton->toFront(true);
 			m_settingsRawEditor->setVisible(true);
 			m_settingsRawEditor->toFront(true);
 
@@ -314,6 +334,7 @@ void SettingsPageComponent::onToggleRawConfigVisible()
 		else
 		{
 			m_settingsRawApplyButton->setVisible(false);
+			m_settingsResetToDefaultButton->setVisible(false);
 			m_settingsRawEditor->setVisible(false);
 		}
 	}

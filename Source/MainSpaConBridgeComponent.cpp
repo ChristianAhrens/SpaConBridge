@@ -57,43 +57,7 @@ MainSpaConBridgeComponent::MainSpaConBridgeComponent(std::function<void(DbLookAn
     // check if config creation was able to read a valid config from disk...
     if (!m_config->isValid())
     {
-        auto xmlConfig = juce::parseXML(String(BinaryData::Default_config, BinaryData::Default_configSize));
-        if (xmlConfig)
-        {
-
-            if (SpaConBridge::AppConfiguration::isValid(xmlConfig))
-            {
-
-                m_config->SetFlushAndUpdateDisabled();
-                if (m_config->resetConfigState(std::move(xmlConfig)))
-                {
-                    m_config->ResetFlushAndUpdateDisabled();
-                }
-                else
-                {
-                    jassertfalse; // stop here when debugging, since invalid configurations often lead to endless debugging sessions until this simple explanation was found...
-                    m_config->ResetFlushAndUpdateDisabled();
-
-                    // ...and trigger generation of a valid config if not.
-                    m_config->triggerConfigurationDump();
-                }
-            }
-            else
-            {
-                jassertfalse; // stop here when debugging, since invalid configurations often lead to endless debugging sessions until this simple explanation was found...
-
-                // ...and trigger generation of a valid config if not.
-                m_config->triggerConfigurationDump();
-            }
-        }
-        else
-        {
-            jassertfalse; // stop here when debugging, since invalid configurations often lead to endless debugging sessions until this simple explanation was found...
-
-            // ...and trigger generation of a valid config if not.
-            m_config->triggerConfigurationDump();
-        }
-
+        m_config->ResetToDefault();
     }
 
     // add this main component to watchers

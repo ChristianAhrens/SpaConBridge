@@ -198,6 +198,33 @@ void PageComponentManager::SetEnabledPages(const std::vector<UIPageId>& enabledP
 }
 
 /**
+ * Proxy Getter for the resizer bar ratio in sound objects table.
+ * Forwards call to PageContainerComponent.
+ * @return	The resizer bar ratio.
+ */
+float PageComponentManager::GetSoundobjectTableResizeBarRatio()
+{
+	if (m_pageContainer)
+		return m_pageContainer->GetSoundobjectTableResizeBarRatio();
+	else
+	{
+		jassertfalse;
+		return 0.5f;
+	}
+}
+
+/**
+ * Proxy Setter for the resizer bar ratio in sound objects table.
+ * Forwards call to PageContainerComponent.
+ * @param pos	The resizer bar ratio.
+ */
+void PageComponentManager::SetSoundobjectTableResizeBarRatio(float ratio)
+{
+	if (m_pageContainer)
+		m_pageContainer->SetSoundobjectTableResizeBarRatio(ratio);
+}
+
+/**
  * Proxy Getter for the row height in sound objects table.
  * Forwards call to PageContainerComponent.
  * @return	The table row height.
@@ -679,6 +706,18 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
 					retVal = false;
 			}
 		}
+
+		auto resizeBarRatioXmlElement = soundobjectTableXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::RESIZERBARRATIO));
+		if (resizeBarRatioXmlElement)
+		{
+			auto resizeBarRatioTextXmlElement = resizeBarRatioXmlElement->getFirstChildElement();
+			if (resizeBarRatioTextXmlElement && resizeBarRatioTextXmlElement->isTextElement())
+			{
+				auto resizerBarRatio = resizeBarRatioTextXmlElement->getText().getFloatValue();
+
+				SetSoundobjectTableResizeBarRatio(resizerBarRatio);
+			}
+		}
 	}
 
 	auto matrixInputTableXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXINPUTTABLE));
@@ -887,6 +926,10 @@ std::unique_ptr<XmlElement> PageComponentManager::createStateXml()
 			auto rowHeightXmlElement = soundobjectTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::ROWHEIGHT));
 			if (rowHeightXmlElement)
 				rowHeightXmlElement->addTextElement(String(GetSoundobjectTableRowHeight()));
+
+			auto resizeBarRatioXmlElement = soundobjectTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::RESIZERBARRATIO));
+			if (resizeBarRatioXmlElement)
+				resizeBarRatioXmlElement->addTextElement(String(GetSoundobjectTableResizeBarRatio()));
 		}
 
 		auto matrixInputTableXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXINPUTTABLE));

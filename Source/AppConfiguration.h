@@ -58,6 +58,7 @@ public:
         BACKGROUND,
         STATICOBJECTSPOLLING,
         FULLSCREENWINDOWMODE,
+        RESIZERBARRATIO,
     };
     static String getTagName(TagID ID)
     {
@@ -117,6 +118,8 @@ public:
             return "StaticObjectsPolling";
         case FULLSCREENWINDOWMODE:
             return "FullscreenWindowmode";
+        case RESIZERBARRATIO:
+            return "ResizeBarRatio";
 		default:
 			return "INVALID";
         }

@@ -141,6 +141,10 @@ public:
 	void SetEnabledPages(const std::vector<UIPageId>& enabledPages);
 
 	//==============================================================================
+	float GetSoundobjectTableResizeBarRatio();
+	void SetSoundobjectTableResizeBarRatio(float ratio);
+
+	//==============================================================================
 	int GetSoundobjectTableRowHeight();
 	void SetSoundobjectTableRowHeight(int height);
 	int GetMatrixInputTableRowHeight();

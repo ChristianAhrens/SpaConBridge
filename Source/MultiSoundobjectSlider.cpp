@@ -278,44 +278,57 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 		auto metaInfoSize = 6 * refKnobSize;
 		auto innerRadius = 0.5f * knobSize;
 
-		// Paint 'currently dragged crosshair'
 		if (m_currentlyDraggedId == paramsKV.first)
 		{
+			// Paint 'currently dragged crosshair'
 			auto& crosshairColour = knobColour;
 			g.setColour(crosshairColour);
 			g.drawLine(0, y, w, y, 1);
 			g.drawLine(x, 0, x, h, 1);
+
+			// Paint 'currently dual-multitouch points indication'
+			auto& p1 = m_multiTouchPoints._p1;
+			auto& p2 = m_multiTouchPoints._p2;
+			switch (m_multiTouchTargetOperation)
+			{
+			case MTDT_HorizontalEnSpaceSendGain:
+			{
+				g.setColour(crosshairColour);
+				g.drawDashedLine(Line<float>(p1.toFloat().getX(), 0.0f, p1.toFloat().getX(), h), dashLengths, 2, lineThickness);
+				g.drawDashedLine(Line<float>(p2.toFloat().getX(), 0.0f, p2.toFloat().getX(), h), dashLengths, 2, lineThickness);
+				g.setOpacity(0.15f);
+				g.fillRect(Rectangle<float>(p1.toFloat().getX(), 0.0f, p2.toFloat().getX() - p1.toFloat().getX(), h));
+
+				auto font = Font(18.0f, Font::plain);
+				auto textLabel = String("EnSpace Gain ") + String(paramsKV.second._reverbSndGain);
+				auto fontDependantWidth = static_cast<float>(font.getStringWidth(textLabel));
+				g.setFont(font);
+				g.setOpacity(1.0f);
+				g.drawText(textLabel, p2.getX() + 18, p2.getY(), 160, 18, Justification::centredLeft, true);
+			}
+			break;
+			case MTDT_VerticalSpread:
+			{
+				g.setColour(crosshairColour);
+				g.drawDashedLine(Line<float>(0.0f, p1.toFloat().getY(), w, p1.toFloat().getY()), dashLengths, 2, lineThickness);
+				g.drawDashedLine(Line<float>(0.0f, p2.toFloat().getY(), w, p2.toFloat().getY()), dashLengths, 2, lineThickness);
+				g.setOpacity(0.15f);
+				g.fillRect(Rectangle<float>(0.0f, p1.toFloat().getY(), w, p2.toFloat().getY() - p1.toFloat().getY()));
+
+				auto font = Font(18.0f, Font::plain);
+				auto textLabel = String("Spread Factor ") + String(paramsKV.second._spread);
+				auto fontDependantWidth = static_cast<float>(font.getStringWidth(textLabel));
+				g.setFont(font);
+				g.setOpacity(1.0f);
+				g.drawText(textLabel, p2.getX() + 18, p2.getY(), 160, 18, Justification::centredLeft, true);
+			}
+			break;
+			case MTDT_PendingInputDecision:
+			default:
+				break;
+			}
 		}
         
-        // Paint 'currently dual-multitouch points indication'
-        auto& p1 = m_multiTouchPoints._p1;
-        auto& p2 = m_multiTouchPoints._p2;
-        auto& crosshairColour = knobColour;
-        switch (m_multiTouchTargetOperation)
-        {
-        case MTDT_HorizontalEnSpaceSendGain:
-            {
-                g.setColour(crosshairColour);
-                g.drawDashedLine(Line<float>(p1.toFloat().getX(), 0.0f, p1.toFloat().getX(), h), dashLengths, 2, lineThickness);
-                g.drawDashedLine(Line<float>(p2.toFloat().getX(), 0.0f, p2.toFloat().getX(), h), dashLengths, 2, lineThickness);
-                g.setOpacity(0.15f);
-                g.fillRect(Rectangle<float>(p1.toFloat().getX(), 0.0f, p2.toFloat().getX() - p1.toFloat().getX(), h));
-            }
-            break;
-        case MTDT_VerticalSpread:
-            {
-                g.setColour(crosshairColour);
-                g.drawDashedLine(Line<float>(0.0f, p1.toFloat().getY(), w, p1.toFloat().getY()), dashLengths, 2, lineThickness);
-                g.drawDashedLine(Line<float>(0.0f, p2.toFloat().getY(), w, p2.toFloat().getY()), dashLengths, 2, lineThickness);
-                g.setOpacity(0.15f);
-                g.fillRect(Rectangle<float>(0.0f, p1.toFloat().getY(), w, p2.toFloat().getY() - p1.toFloat().getY()));
-            }
-            break;
-        case MTDT_PendingInputDecision:
-        default:
-            break;
-        }
-
 		// Paint spread if enabled
 		if (m_spreadEnabled)
 		{

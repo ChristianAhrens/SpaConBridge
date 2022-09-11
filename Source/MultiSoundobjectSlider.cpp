@@ -587,7 +587,7 @@ void MultiSoundobjectSlider::dualPointMultitouchUpdated(const juce::Point<int>& 
                     case MTDT_VerticalSpread:
                         {
                             auto spreadFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_Positioning_SourceSpread);
-                            auto newVal = jlimit(spreadFactorRange.getStart(), spreadFactorRange.getEnd(), m_multiTouchModValue + getMultiTouchFactorValue() * spreadFactorRange.getLength());
+                            auto newVal = jlimit(spreadFactorRange.getStart(), spreadFactorRange.getEnd(), m_multiTouchModValue - getMultiTouchFactorValue() * spreadFactorRange.getLength());
                             DBG(String(__FUNCTION__) + String(" updating Spread factor to ") + String(newVal));
                             processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_ObjectSpread, newVal);
                         }
@@ -595,7 +595,7 @@ void MultiSoundobjectSlider::dualPointMultitouchUpdated(const juce::Point<int>& 
                     case MTDT_HorizontalEnSpaceSendGain:
                         {
                             auto enSpacGainFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
-                            auto newVal = jlimit(enSpacGainFactorRange.getStart(), enSpacGainFactorRange.getEnd(), m_multiTouchModValue + getMultiTouchFactorValue() * enSpacGainFactorRange.getLength());
+                            auto newVal = jlimit(enSpacGainFactorRange.getStart(), enSpacGainFactorRange.getEnd(), m_multiTouchModValue - getMultiTouchFactorValue() * enSpacGainFactorRange.getLength());
                             DBG(String(__FUNCTION__) + String(" updating EnSpace send gain to ") + String(newVal));
                             processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_ReverbSendGain, newVal);
                         }

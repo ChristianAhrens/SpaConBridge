@@ -472,7 +472,7 @@ void MultiSoundobjectSlider::mouseDrag(const MouseEvent& e)
 {
     DualPointMultitouchCatcherComponent::mouseDrag(e);
     
-    if (GetPrimaryMouseInputSourceIndex() != e.source.getIndex())
+    if (GetPrimaryMouseInputSourceIndex() != e.source.getIndex() || IsInFakeALTMultiTouch())
         return;
     
 	if (m_currentlyDraggedId != INVALID_PROCESSOR_ID)
@@ -504,7 +504,7 @@ void MultiSoundobjectSlider::mouseUp(const MouseEvent& e)
 {
     DualPointMultitouchCatcherComponent::mouseUp(e);
     
-    if (GetPrimaryMouseInputSourceIndex() != e.source.getIndex())
+    if (GetPrimaryMouseInputSourceIndex() != e.source.getIndex() || IsInFakeALTMultiTouch())
         return;
 
 	if (m_currentlyDraggedId != INVALID_PROCESSOR_ID)

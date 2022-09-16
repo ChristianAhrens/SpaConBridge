@@ -289,6 +289,7 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 			// Paint 'currently dual-multitouch points indication'
 			auto& p1 = m_multiTouchPoints._p1;
 			auto& p2 = m_multiTouchPoints._p2;
+            auto goodVisibilityDistance = 20;
 			switch (m_multiTouchTargetOperation)
 			{
 			case MTDT_HorizontalEnSpaceSendGain:
@@ -298,13 +299,21 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 				g.drawDashedLine(Line<float>(p2.toFloat().getX(), 0.0f, p2.toFloat().getX(), h), dashLengths, 2, lineThickness);
 				g.setOpacity(0.15f);
 				g.fillRect(Rectangle<float>(p1.toFloat().getX(), 0.0f, p2.toFloat().getX() - p1.toFloat().getX(), h));
-
-				auto font = Font(18.0f, Font::plain);
-				auto textLabel = String("EnSpace Gain ") + String(paramsKV.second._reverbSndGain);
-				auto fontDependantWidth = static_cast<float>(font.getStringWidth(textLabel));
-				g.setFont(font);
-				g.setOpacity(1.0f);
-				g.drawText(textLabel, p2.getX() + 18, p2.getY(), 160, 18, Justification::centredLeft, true);
+                
+				auto font = Font(goodVisibilityDistance, Font::plain);
+                g.setFont(font);
+                g.setOpacity(1.0f);
+				auto textLabel = String("EnSpace Gain ") + String(paramsKV.second._reverbSndGain) + String("dB");
+				auto fontDependantWidth = font.getStringWidth(textLabel);
+                auto fontLeftOfMouse = (getWidth() - p2.getX() - goodVisibilityDistance) < fontDependantWidth;
+                if (fontLeftOfMouse)
+                {
+                    g.drawText(textLabel, p2.getX() - goodVisibilityDistance - fontDependantWidth, p2.getY(), fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
+                }
+                else
+                {
+                    g.drawText(textLabel, p2.getX() + goodVisibilityDistance, p2.getY(), fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
+                }
 			}
 			break;
 			case MTDT_VerticalSpread:
@@ -315,12 +324,20 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 				g.setOpacity(0.15f);
 				g.fillRect(Rectangle<float>(0.0f, p1.toFloat().getY(), w, p2.toFloat().getY() - p1.toFloat().getY()));
 
-				auto font = Font(18.0f, Font::plain);
+				auto font = Font(goodVisibilityDistance, Font::plain);
+                g.setFont(font);
+                g.setOpacity(1.0f);
 				auto textLabel = String("Spread Factor ") + String(paramsKV.second._spread);
-				auto fontDependantWidth = static_cast<float>(font.getStringWidth(textLabel));
-				g.setFont(font);
-				g.setOpacity(1.0f);
-				g.drawText(textLabel, p2.getX() + 18, p2.getY(), 160, 18, Justification::centredLeft, true);
+				auto fontDependantWidth = font.getStringWidth(textLabel);
+                auto fontLeftOfMouse = (getWidth() - p2.getX() - goodVisibilityDistance) < fontDependantWidth;
+                if (fontLeftOfMouse)
+                {
+                    g.drawText(textLabel, p2.getX() - goodVisibilityDistance - fontDependantWidth, p2.getY(), fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
+                }
+                else
+                {
+                    g.drawText(textLabel, p2.getX() + goodVisibilityDistance, p2.getY(), fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
+                }
 			}
 			break;
 			case MTDT_PendingInputDecision:

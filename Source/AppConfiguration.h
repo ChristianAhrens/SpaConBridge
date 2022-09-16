@@ -59,6 +59,7 @@ public:
         STATICOBJECTSPOLLING,
         FULLSCREENWINDOWMODE,
         RESIZERBARRATIO,
+        SINGLESELECTIONONLY,
     };
     static String getTagName(TagID ID)
     {
@@ -120,6 +121,8 @@ public:
             return "FullscreenWindowmode";
         case RESIZERBARRATIO:
             return "ResizeBarRatio";
+        case SINGLESELECTIONONLY:
+            return "SingleSelectionOnly";
 		default:
 			return "INVALID";
         }

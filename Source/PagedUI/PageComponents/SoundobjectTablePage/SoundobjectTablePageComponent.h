@@ -87,6 +87,9 @@ public:
 	void SetResizeBarRatio(float ratio);
 	float GetResizeBarRatio();
 
+	void SetSingleSelectionOnly(bool singleSelectionOnly);
+	bool GetSingleSelectionOnly();
+
 	//==============================================================================
 	void SetPageIsVisible(bool visible) override;
 

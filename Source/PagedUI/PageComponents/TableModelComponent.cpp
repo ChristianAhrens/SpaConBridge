@@ -1216,6 +1216,9 @@ void TableModelComponent::onCollapseToggled(bool collapsed)
 void TableModelComponent::onAllowSingleSelectionOnlyToggled(bool singleSelectionOnly)
 {
 	SetSingleSelectionOnly(singleSelectionOnly);
+
+	if (onCurrentSingleSelectionOnlyStateChanged)
+		onCurrentSingleSelectionOnlyStateChanged(singleSelectionOnly);
 }
 
 

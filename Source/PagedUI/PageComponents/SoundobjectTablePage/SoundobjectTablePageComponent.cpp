@@ -219,6 +219,14 @@ SoundobjectTablePageComponent::SoundobjectTablePageComponent()
 	m_soundobjectsTable->onMultiProcessorsSelectionChanged = [=](bool multiselected) {
 		SetMultiSoundobjectComponentActive(multiselected);
 	};
+	m_soundobjectsTable->onCurrentSingleSelectionOnlyStateChanged = [=](bool singleSelectionOnly) {
+		ignoreUnused(singleSelectionOnly);
+		if (IsPageInitializing())
+			return;
+		auto config = SpaConBridge::AppConfiguration::getInstance();
+		if (config)
+			config->triggerConfigurationDump(false);
+	};
 	addAndMakeVisible(m_soundobjectsTable.get());
 
 	// register this object as config watcher
@@ -282,6 +290,28 @@ void SoundobjectTablePageComponent::SetResizeBarRatio(float ratio)
 float SoundobjectTablePageComponent::GetResizeBarRatio()
 {
 	return m_resizeBarRatio;
+}
+
+/**
+ * Setter for the single selection only flag in sound objects table.
+ * @param singleSelectionOnly	The single selection only flag.
+ */
+void SoundobjectTablePageComponent::SetSingleSelectionOnly(bool singleSelectionOnly)
+{
+	if (m_soundobjectsTable)
+		m_soundobjectsTable->SetSingleSelectionOnly(singleSelectionOnly);
+}
+
+/**
+ * Getter for the single selection only flag in sound objects table.
+ * @return	The single selection only flag.
+ */
+bool SoundobjectTablePageComponent::GetSingleSelectionOnly()
+{
+	if (m_soundobjectsTable)
+		return m_soundobjectsTable->IsSingleSelectionOnly();
+	else
+		return 0;
 }
 
 /**

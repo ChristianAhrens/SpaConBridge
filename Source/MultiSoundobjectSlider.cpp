@@ -300,7 +300,7 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 				g.setOpacity(0.15f);
 				g.fillRect(Rectangle<float>(p1.toFloat().getX(), 0.0f, p2.toFloat().getX() - p1.toFloat().getX(), h));
                 
-				auto font = Font(goodVisibilityDistance, Font::plain);
+				auto font = Font(static_cast<float>(goodVisibilityDistance), Font::plain);
                 g.setFont(font);
                 g.setOpacity(1.0f);
 				auto textLabel = String("EnSpace Gain ") + String(paramsKV.second._reverbSndGain) + String("dB");
@@ -324,7 +324,7 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 				g.setOpacity(0.15f);
 				g.fillRect(Rectangle<float>(0.0f, p1.toFloat().getY(), w, p2.toFloat().getY() - p1.toFloat().getY()));
 
-				auto font = Font(goodVisibilityDistance, Font::plain);
+				auto font = Font(static_cast<float>(goodVisibilityDistance), Font::plain);
                 g.setFont(font);
                 g.setOpacity(1.0f);
 				auto textLabel = String("Spread Factor ") + String(paramsKV.second._spread);

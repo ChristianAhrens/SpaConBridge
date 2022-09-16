@@ -208,7 +208,7 @@ SoundobjectTablePageComponent::SoundobjectTablePageComponent()
 		if (config)
 			config->triggerConfigurationDump(false);
 	};
-	m_soundobjectsTable->onCurrentRowHeightChanged = [=](int rowHeight) { 
+	m_soundobjectsTable->onCurrentRowHeightChanged = [=](int rowHeight) {
 		ignoreUnused(rowHeight);
 		if (IsPageInitializing())
 			return;
@@ -216,11 +216,8 @@ SoundobjectTablePageComponent::SoundobjectTablePageComponent()
 		if (config)
 			config->triggerConfigurationDump(false);
 	};
-	m_soundobjectsTable->onMultiProcessorsSelectionChanged = [=](bool multiselected) {
-		SetMultiSoundobjectComponentActive(multiselected);
-	};
 	m_soundobjectsTable->onCurrentSingleSelectionOnlyStateChanged = [=](bool singleSelectionOnly) {
-		ignoreUnused(singleSelectionOnly);
+		SetMultiSoundobjectComponentActive(!singleSelectionOnly);
 		if (IsPageInitializing())
 			return;
 		auto config = SpaConBridge::AppConfiguration::getInstance();
@@ -300,6 +297,8 @@ void SoundobjectTablePageComponent::SetSingleSelectionOnly(bool singleSelectionO
 {
 	if (m_soundobjectsTable)
 		m_soundobjectsTable->SetSingleSelectionOnly(singleSelectionOnly);
+
+	SetMultiSoundobjectComponentActive(!singleSelectionOnly);
 }
 
 /**
@@ -435,7 +434,7 @@ void SoundobjectTablePageComponent::SetSoundsourceProcessorEditorActive(Soundobj
 			resized();
 		}
 	}
-	else
+	else if (!m_multiSoundobjectsActive)
 	{
 		// create slider and processoreditor instances and add them to layouting
 		auto ctrl = Controller::GetInstance();
@@ -476,6 +475,8 @@ void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool acti
 
 	if (m_multiSoundobjectsActive)
 	{
+		SetSoundsourceProcessorEditorActive(INVALID_PROCESSOR_ID);
+
         auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
         if (multiSoundobjectComponent)
             multiSoundobjectComponent->SetShowSelectedOnly(true);
@@ -484,6 +485,13 @@ void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool acti
 	else
 	{
         m_multiSoundobjectComponentContainer->removeInternalComponent();
+		
+		if (Controller* ctrl = Controller::GetInstance())
+		{
+			auto selectedProcessorIds = ctrl->GetSelectedSoundobjectProcessorIds();
+			if (selectedProcessorIds.size() == 1)
+				SetSoundsourceProcessorEditorActive(selectedProcessorIds.at(0));
+		}
 	}
 
 	resized();

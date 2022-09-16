@@ -41,10 +41,14 @@ public:
 		LD_Vertical
 	};
 public:
-	TableControlBarComponent(bool canCollapse = false, const String& componentName = String());
+	TableControlBarComponent(bool canCollapse = false, bool canToggleSingleSelectionOnly = false, const String& componentName = String());
 	~TableControlBarComponent() override;
 
 	void SetLayoutDirection(LayoutDirection direction);
+	bool IsSingleSelectionOnlyTogglable();
+	void SetSingleSelectionOnlyTogglable(bool togglable);
+	bool IsSingleSelectionOnly();
+	void SetSingleSelectionOnly(bool singleSelectionOnly);
 	void SetRemoveEnabled(bool enabled);
 	void SetRowHeightSliderValue(int rowHeight);
 	void SetCollapsed(bool collapsed);
@@ -62,13 +66,14 @@ public:
 	void rowHeightChanged(int rowHeight) override;
 
 	//==============================================================================
-	std::function<void(bool collapsed)> onCollapsClick;
+	std::function<void(bool)> onCollapsClick;
 	std::function<void()> onAddClick;
 	std::function<void()> onAddMultipleClick;
 	std::function<void()> onRemoveClick;
+	std::function<void(bool)> onSingleSelectionOnlyClick;
 	std::function<void()> onSelectAllClick;
 	std::function<void()> onSelectNoneClick;
-	std::function<void(int height)> onHeightChanged;
+	std::function<void(int)> onHeightChanged;
 
 protected:
 	//==============================================================================
@@ -82,12 +87,14 @@ private:
 	std::unique_ptr<DrawableButton>		m_removeInstance;		/**> Button to remove the selected processor instance */
 	std::unique_ptr<DrawableButton>		m_addMultipleInstances;	/**> Button to add multiple processor instances */
 	std::unique_ptr<RowHeightSlider>	m_heightSlider;			/**> Special slider component instance to modify table row height. */
+	std::unique_ptr<DrawableButton>		m_singleSelectionOnly;	/**> Single selection only mode button. */
 	std::unique_ptr<DrawableButton>		m_selectAll;			/**> Select all rows button. */
 	std::unique_ptr<DrawableButton>		m_selectNone;			/**> Select no rows button. */
 
-	bool			m_canCollapse{ false };				/**> Bool flag to indicate if this table control bar instance shall allow toggling collapse state or not. */
-	bool			m_collapsed{ false };				/**> Bool flag holding the current collapsed state or false if this instance is not able to collapse. */
-	LayoutDirection	m_layoutDirection{ LD_Horizontal };	/**> Determines if elements should be arranged in a vertical or horizontal layout. */
+	bool			m_singleSelectionOnlyTogglable{ false };	/**> Bool flag to indicate if this table control bar instance shall allow toggling singleSelectionOnlyMode. */
+	bool			m_canCollapse{ false };						/**> Bool flag to indicate if this table control bar instance shall allow toggling collapse state or not. */
+	bool			m_collapsed{ false };						/**> Bool flag holding the current collapsed state or false if this instance is not able to collapse. */
+	LayoutDirection	m_layoutDirection{ LD_Horizontal };			/**> Determines if elements should be arranged in a vertical or horizontal layout. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TableControlBarComponent)
 };

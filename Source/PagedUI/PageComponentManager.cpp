@@ -225,6 +225,33 @@ void PageComponentManager::SetSoundobjectTableResizeBarRatio(float ratio)
 }
 
 /**
+ * Proxy Getter for the single selection only flag in sound objects table.
+ * Forwards call to PageContainerComponent.
+ * @return	The single selection only flag.
+ */
+bool PageComponentManager::GetSoundobjectTableSingleSelectionOnly()
+{
+	if (m_pageContainer)
+		return m_pageContainer->GetSoundobjectTableSingleSelectionOnly();
+	else
+	{
+		jassertfalse;
+		return false;
+	}
+}
+
+/**
+ * Proxy Setter for the single selection only flag in sound objects table.
+ * Forwards call to PageContainerComponent.
+ * @param singleSelectionOnly	The single selection only flag.
+ */
+void PageComponentManager::SetSoundobjectTableSingleSelectionOnly(bool singleSelectionOnly)
+{
+	if (m_pageContainer)
+		m_pageContainer->SetSoundobjectTableSingleSelectionOnly(singleSelectionOnly);
+}
+
+/**
  * Proxy Getter for the row height in sound objects table.
  * Forwards call to PageContainerComponent.
  * @return	The table row height.
@@ -718,6 +745,18 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
 				SetSoundobjectTableResizeBarRatio(resizerBarRatio);
 			}
 		}
+
+		auto singleSelectionOnlyXmlElement = soundobjectTableXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SINGLESELECTIONONLY));
+		if (singleSelectionOnlyXmlElement)
+		{
+			auto singleSelectionOnlyTextXmlElement = singleSelectionOnlyXmlElement->getFirstChildElement();
+			if (singleSelectionOnlyTextXmlElement && singleSelectionOnlyTextXmlElement->isTextElement())
+			{
+				auto singleSelectionOnly = singleSelectionOnlyTextXmlElement->getText().getIntValue() == 0 ? false : true;
+
+				SetSoundobjectTableSingleSelectionOnly(singleSelectionOnly);
+			}
+		}
 	}
 
 	auto matrixInputTableXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXINPUTTABLE));
@@ -930,6 +969,10 @@ std::unique_ptr<XmlElement> PageComponentManager::createStateXml()
 			auto resizeBarRatioXmlElement = soundobjectTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::RESIZERBARRATIO));
 			if (resizeBarRatioXmlElement)
 				resizeBarRatioXmlElement->addTextElement(String(GetSoundobjectTableResizeBarRatio()));
+
+			auto singleSelectionOnlyXmlElement = soundobjectTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SINGLESELECTIONONLY));
+			if (singleSelectionOnlyXmlElement)
+				singleSelectionOnlyXmlElement->addTextElement(String(GetSoundobjectTableSingleSelectionOnly() ? 1 : 0));
 		}
 
 		auto matrixInputTableXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXINPUTTABLE));

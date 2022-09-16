@@ -39,10 +39,11 @@ namespace SpaConBridge
 /**
  * Object constructor.
  */
-TableControlBarComponent::TableControlBarComponent(bool canCollapse, const String& componentName)
+TableControlBarComponent::TableControlBarComponent(bool canCollapse, bool canToggleSingleSelectionOnly, const String& componentName)
 	: Component(componentName)
 {
 	m_canCollapse = canCollapse;
+	m_singleSelectionOnlyTogglable = canToggleSingleSelectionOnly;
 
 	// optional Collapse Button
 	if (m_canCollapse)
@@ -70,6 +71,13 @@ TableControlBarComponent::TableControlBarComponent(bool canCollapse, const Strin
 	m_addMultipleInstances->addListener(this);
 	m_addMultipleInstances->setTooltip("Add multiple rows");
 	addAndMakeVisible(m_addMultipleInstances.get());
+
+	// Create selection mode toggle button
+	m_singleSelectionOnly = std::make_unique<DrawableButton>("singleSelOnly", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	m_singleSelectionOnly->setClickingTogglesState(true);
+	m_singleSelectionOnly->addListener(this);
+	m_singleSelectionOnly->setTooltip("Disable multiselection");
+	addAndMakeVisible(m_singleSelectionOnly.get());
 
 	// Create quick selection buttons
 	m_selectAll = std::make_unique<DrawableButton>("all", DrawableButton::ButtonStyle::ImageOnButtonBackground);
@@ -114,6 +122,48 @@ void TableControlBarComponent::SetLayoutDirection(LayoutDirection direction)
 	UpdateCollapsedButton();
 
 	resized();
+}
+
+/**
+ * Helper method to get the allowingsingleselection state
+ * @return	The internal allowingsingleselection state value
+ */
+bool TableControlBarComponent::IsSingleSelectionOnlyTogglable()
+{
+	return m_singleSelectionOnlyTogglable;
+}
+
+/**
+ * Helper method to set the allowingsingleselection button to enabled/disabled
+ * @param	enabled		Determines if the allowingsingleselection should be set to enabled or disabled
+ */
+void TableControlBarComponent::SetSingleSelectionOnlyTogglable(bool togglable)
+{
+	m_singleSelectionOnlyTogglable = togglable;
+
+	resized();
+}
+
+/**
+ * Helper method to get the toggle state of single selection only button
+ * @return	True if only single selection is allowed, false if not
+ */
+bool TableControlBarComponent::IsSingleSelectionOnly()
+{
+	if (m_singleSelectionOnly)
+		return m_singleSelectionOnly->getToggleState();
+	else
+		return false;
+}
+
+/**
+ * Helper method to set the toggle state of single selection only button
+ * @param	singleSelectionOnly		Determines if only single selection is allowed
+ */
+void TableControlBarComponent::SetSingleSelectionOnly(bool singleSelectionOnly)
+{
+	if (m_singleSelectionOnly)
+		m_singleSelectionOnly->setToggleState(singleSelectionOnly, dontSendNotification);
 }
 
 /**
@@ -171,6 +221,7 @@ void TableControlBarComponent::lookAndFeelChanged()
 	UpdateDrawableButtonImages(m_addInstance, BinaryData::add24px_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_removeInstance, BinaryData::remove24px_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_addMultipleInstances, BinaryData::add_batch24dp_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_singleSelectionOnly, BinaryData::rule_one24px_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_selectAll, BinaryData::rule_checked24px_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_selectNone, BinaryData::rule_unchecked24px_svg, &getLookAndFeel());
 
@@ -213,7 +264,19 @@ void TableControlBarComponent::UpdateCollapsedButton()
  */
 void TableControlBarComponent::buttonClicked(Button* button)
 {
-	if (button == m_selectAll.get())
+	if (nullptr == button)
+	{
+		return;
+	}
+	else if (button == m_singleSelectionOnly.get())
+	{
+		if (onSingleSelectionOnlyClick)
+			onSingleSelectionOnlyClick(m_singleSelectionOnly->getToggleState());
+
+		m_selectAll->setEnabled(!m_singleSelectionOnly->getToggleState());
+		m_selectNone->setEnabled(!m_singleSelectionOnly->getToggleState());
+	}
+	else if (button == m_selectAll.get())
 	{
 		if (onSelectAllClick)
 			onSelectAllClick();
@@ -319,14 +382,25 @@ void TableControlBarComponent::resized()
 		else
 			mainFB.items.add(FlexItem(*m_addInstance.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 4)));
 
-		mainFB.items.addArray({
-			FlexItem(*m_addMultipleInstances.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
-			FlexItem(*m_removeInstance.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
-			FlexItem().withFlex(1).withHeight(30),
-			FlexItem(*m_selectAll.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
-			FlexItem(*m_selectNone.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
-			FlexItem(*m_heightSlider.get()).withWidth(90).withMargin(FlexItem::Margin(2, 4, 3, 2)),
-			});
+		if (IsSingleSelectionOnlyTogglable())
+			mainFB.items.addArray({
+				FlexItem(*m_addMultipleInstances.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
+				FlexItem(*m_removeInstance.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
+				FlexItem().withFlex(1).withHeight(30),
+				FlexItem(*m_singleSelectionOnly.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
+				FlexItem(*m_selectAll.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
+				FlexItem(*m_selectNone.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
+				FlexItem(*m_heightSlider.get()).withWidth(90).withMargin(FlexItem::Margin(2, 4, 3, 2)),
+				});
+		else
+			mainFB.items.addArray({
+				FlexItem(*m_addMultipleInstances.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
+				FlexItem(*m_removeInstance.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
+				FlexItem().withFlex(1).withHeight(30),
+				FlexItem(*m_selectAll.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
+				FlexItem(*m_selectNone.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
+				FlexItem(*m_heightSlider.get()).withWidth(90).withMargin(FlexItem::Margin(2, 4, 3, 2)),
+				});
 
 		mainFB.performLayout(bounds.reduced(0, 1));
 	}
@@ -348,14 +422,26 @@ void TableControlBarComponent::resized()
 		else
 			mainFB.items.add(FlexItem(*m_addInstance.get()).withHeight(25).withMargin(FlexItem::Margin(4, 2, 2, 3)));
 
-		mainFB.items.addArray({
-			FlexItem(*m_addMultipleInstances.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
-			FlexItem(*m_removeInstance.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
-			FlexItem().withFlex(1).withWidth(30),
-			FlexItem(*m_selectAll.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
-			FlexItem(*m_selectNone.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
-			FlexItem(*m_heightSlider.get()).withHeight(90).withMargin(FlexItem::Margin(2, 2, 4, 3)),
-			});
+		if (IsSingleSelectionOnlyTogglable())
+			mainFB.items.addArray({
+				FlexItem(*m_addMultipleInstances.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
+				FlexItem(*m_removeInstance.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
+				FlexItem().withFlex(1).withWidth(30),
+				FlexItem(*m_singleSelectionOnly.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
+				FlexItem(*m_selectAll.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
+				FlexItem(*m_selectNone.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
+				FlexItem(*m_heightSlider.get()).withHeight(90).withMargin(FlexItem::Margin(2, 2, 4, 3)),
+				});
+		else
+			mainFB.items.addArray({
+				FlexItem(*m_addMultipleInstances.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
+				FlexItem(*m_removeInstance.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
+				FlexItem().withFlex(1).withWidth(30),
+				FlexItem(*m_selectAll.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
+				FlexItem(*m_selectNone.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
+				FlexItem(*m_heightSlider.get()).withHeight(90).withMargin(FlexItem::Margin(2, 2, 4, 3)),
+				});
+
 
 		mainFB.performLayout(bounds.reduced(1, 0));
 	}

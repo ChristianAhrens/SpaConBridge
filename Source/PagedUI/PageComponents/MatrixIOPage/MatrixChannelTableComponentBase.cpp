@@ -35,14 +35,12 @@ namespace SpaConBridge
  * Class constructor.
  */
 MatrixChannelTableComponentBase::MatrixChannelTableComponentBase()
-	: TableModelComponent(ControlBarPosition::CBP_Bottom, true)
+	: TableModelComponent(ControlBarPosition::CBP_Bottom, true, false)
 {
 	auto table = GetTable();
 	if (table)
 	{
-		table->setOutlineThickness(1);
 		table->setClickingTogglesRowSelection(false);
-		table->setMultipleSelectionEnabled(true);
 	}
 }
 

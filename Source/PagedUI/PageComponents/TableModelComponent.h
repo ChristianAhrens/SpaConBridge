@@ -67,8 +67,7 @@ public:
 	};
 
 public:
-
-	TableModelComponent(ControlBarPosition pos = ControlBarPosition::CBP_Bottom, bool tableCanCollapse = false);
+	TableModelComponent(ControlBarPosition pos = ControlBarPosition::CBP_Bottom, bool tableCanCollapse = false, bool tableCanAllowSingleSelectionOnly = false);
 	~TableModelComponent() override;
 
 	void SetModel(TableListBoxModel* model);
@@ -106,6 +105,12 @@ public:
 	bool IsCollapsed();
 	void SetCollapsed(bool collapsed);
 
+	bool IsSingleSelectionOnlyTogglable();
+	void SetSingleSelectionOnlyTogglable(bool singleSelectionOnlyTogglable);
+
+	bool IsSingleSelectionOnly();
+	void SetSingleSelectionOnly(bool singleSelectionOnly);
+
 	std::vector<int> GetSelectedRows() const;
 	void SetSelectedRows(const std::vector<int>& rows);
 	void SelectAllRows(bool all);
@@ -127,6 +132,7 @@ public:
 	std::function<void(int)>			onCurrentRowHeightChanged;
 	std::function<void(bool)>			onCurrentCollapseStateChanged;
 	std::function<void(bool)>			onMultiProcessorsSelectionChanged;
+	std::function<void(bool)>			onCurrentSingleSelectionOnlyStateChanged;
 
 protected:
 	//==============================================================================
@@ -139,6 +145,7 @@ protected:
 	void onDeselectAllProcessors();
 	void onRowHeightSlided(int height);
 	void onCollapseToggled(bool collapsed);
+	void onAllowSingleSelectionOnlyToggled(bool singleSelectionOnly);
 
 private:
 	std::unique_ptr<TableListBox>				m_table;					/**> The table component itself. */

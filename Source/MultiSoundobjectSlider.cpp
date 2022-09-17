@@ -431,7 +431,7 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
 {
     DualPointMultitouchCatcherComponent::mouseDown(e);
     
-    if (GetPrimaryMouseInputSourceIndex() != e.source.getIndex())
+    if (GetPrimaryMouseInputSourceIndex() != e.source.getIndex()) // dont check IsInFakeALTMultiTouch() here but somewhere below to allow to perform the click-hit-check first
         return;
     
 	float w = static_cast<float>(getLocalBounds().getWidth());
@@ -463,19 +463,23 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
 			// Set this source as "selected" and begin a drag gesture.
 			m_currentlyDraggedId = paramsKV.first;
 
-			auto ctrl = Controller::GetInstance();
-			if (ctrl)
+			if (!IsInFakeALTMultiTouch())
 			{
-				auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
-				jassert(processor);
-				if (processor)
+				auto ctrl = Controller::GetInstance();
+				if (ctrl)
 				{
-					auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
-					if (param)
-						param->BeginGuiGesture();
-					param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_Y]);
-					if (param)
-						param->BeginGuiGesture();
+					auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
+					jassert(processor);
+					if (processor)
+					{
+						DBG(String(__FUNCTION__) + String(" forwarded to xy processing -> BeginGuiGesture"));
+						auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
+						if (param)
+							param->BeginGuiGesture();
+						param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_Y]);
+						if (param)
+							param->BeginGuiGesture();
+					}
 				}
 			}
 
@@ -510,6 +514,7 @@ void MultiSoundobjectSlider::mouseDrag(const MouseEvent& e)
 				float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / getLocalBounds().getWidth())));
 				float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / getLocalBounds().getHeight())));
 
+				DBG(String(__FUNCTION__) + String(" forwarded to xy processing -> SetParameterValue"));
 				processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, x);
 				processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, y);
 			}
@@ -539,6 +544,7 @@ void MultiSoundobjectSlider::mouseUp(const MouseEvent& e)
 				auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
 				if (processor)
 				{
+					DBG(String(__FUNCTION__) + String(" forwarded to xy processing -> EndGuiGesture"));
 					auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
 					if (param)
 						param->EndGuiGesture();
@@ -551,6 +557,7 @@ void MultiSoundobjectSlider::mouseUp(const MouseEvent& e)
 					float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / getLocalBounds().getWidth())));
 					float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / getLocalBounds().getHeight())));
 
+					DBG(String(__FUNCTION__) + String(" -> SetParameterValue"));
 					processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, x);
 					processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, y);
 				}
@@ -631,8 +638,6 @@ void MultiSoundobjectSlider::dualPointMultitouchUpdated(const juce::Point<int>& 
  */
 void MultiSoundobjectSlider::dualPointMultitouchFinished()
 {
-	DBG(String(__FUNCTION__));
-    
     if (m_currentlyDraggedId != INVALID_PROCESSOR_ID)
     {
         auto ctrl = Controller::GetInstance();
@@ -645,14 +650,18 @@ void MultiSoundobjectSlider::dualPointMultitouchFinished()
                 {
                     case MTDT_VerticalSpread:
                         {
+							DBG(String(__FUNCTION__) + String(" vertical Spread factor modification gesture finished"));
                             auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ObjectSpread]);
+							jassert(param);
                             if (param)
                                 param->EndGuiGesture();
                         }
                         break;
                     case MTDT_HorizontalEnSpaceSendGain:
                         {
+							DBG(String(__FUNCTION__) + String(" horizontal EnSpace send gain modification gesture finished"));
                             auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ReverbSendGain]);
+							jassert(param);
                             if (param)
                                 param->EndGuiGesture();
                         }
@@ -707,25 +716,25 @@ void MultiSoundobjectSlider::updateMultiTouch(const juce::Point<int>& p1, const 
                     auto verticalDelta = std::fabs(m_multiTouchPoints._p2_init.getY() - m_multiTouchPoints._p2.getY());
                     if (horizontalDelta > verticalDelta)
                     {
-                        GestureManagedAudioParameterFloat* param;
-                        param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ObjectSpread]);
-                        if (param)
-                            param->BeginGuiGesture();
+						auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ReverbSendGain]);
+						jassert(param);
+						if (param)
+							param->BeginGuiGesture();
                         
-                        auto spreadFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_Positioning_SourceSpread);
-                        m_multiTouchModValue = jmap(processor->GetParameterValue(SPI_ParamIdx_ObjectSpread), spreadFactorRange.getStart(), spreadFactorRange.getEnd(), 0.0f, 1.0f);
+                        auto enSpaceGainRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
+                        m_multiTouchModValue = jmap(processor->GetParameterValue(SPI_ParamIdx_ReverbSendGain), enSpaceGainRange.getStart(), enSpaceGainRange.getEnd(), 0.0f, 1.0f);
                         m_multiTouchTargetOperation = MTDT_HorizontalEnSpaceSendGain;
                         DBG(String(__FUNCTION__) + String(" horizontal EnSpace send gain modification gesture detected (startval ") + String(m_multiTouchModValue) + String(")"));
                     }
                     else if (horizontalDelta < verticalDelta)
                     {
-                        GestureManagedAudioParameterFloat* param;
-                        param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ReverbSendGain]);
+                        auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ObjectSpread]);
+						jassert(param);
                         if (param)
                             param->BeginGuiGesture();
                         
-                        auto spreadFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
-                        m_multiTouchModValue = jmap(processor->GetParameterValue(SPI_ParamIdx_ReverbSendGain), spreadFactorRange.getStart(), spreadFactorRange.getEnd(), 0.0f, 1.0f);
+                        auto spreadFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_Positioning_SourceSpread);
+                        m_multiTouchModValue = jmap(processor->GetParameterValue(SPI_ParamIdx_ObjectSpread), spreadFactorRange.getStart(), spreadFactorRange.getEnd(), 0.0f, 1.0f);
                         m_multiTouchTargetOperation = MTDT_VerticalSpread;
                         DBG(String(__FUNCTION__) + String(" vertical Spread factor modification gesture detected (startval ") + String(m_multiTouchModValue) + String(")"));
                     }

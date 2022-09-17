@@ -305,15 +305,11 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
                 g.setOpacity(1.0f);
 				auto textLabel = String("EnSpace Gain ") + String(paramsKV.second._reverbSndGain) + String("dB");
 				auto fontDependantWidth = font.getStringWidth(textLabel);
-                auto fontLeftOfMouse = (getWidth() - p2.getX() - goodVisibilityDistance) < fontDependantWidth;
-                if (fontLeftOfMouse)
-                {
-                    g.drawText(textLabel, p2.getX() - goodVisibilityDistance - fontDependantWidth, p2.getY(), fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
-                }
+                auto textLeftOfMouse = (getWidth() - p2.getX() - goodVisibilityDistance) < fontDependantWidth;
+                if (textLeftOfMouse)
+                    g.drawText(textLabel, goodVisibilityDistance, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
                 else
-                {
-                    g.drawText(textLabel, p2.getX() + goodVisibilityDistance, p2.getY(), fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
-                }
+                    g.drawText(textLabel, getWidth() - goodVisibilityDistance - fontDependantWidth, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
 			}
 			break;
 			case MTDT_VerticalSpread:
@@ -329,15 +325,11 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
                 g.setOpacity(1.0f);
 				auto textLabel = String("Spread Factor ") + String(paramsKV.second._spread);
 				auto fontDependantWidth = font.getStringWidth(textLabel);
-                auto fontLeftOfMouse = (getWidth() - p2.getX() - goodVisibilityDistance) < fontDependantWidth;
-                if (fontLeftOfMouse)
-                {
-                    g.drawText(textLabel, p2.getX() - goodVisibilityDistance - fontDependantWidth, p2.getY(), fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
-                }
+                auto textBelowMouse = (p2.getY() - goodVisibilityDistance) < goodVisibilityDistance;
+                if (textBelowMouse)
+                    g.drawText(textLabel, goodVisibilityDistance, getHeight() - 2 * goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
                 else
-                {
-                    g.drawText(textLabel, p2.getX() + goodVisibilityDistance, p2.getY(), fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
-                }
+                    g.drawText(textLabel, goodVisibilityDistance, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
 			}
 			break;
 			case MTDT_PendingInputDecision:

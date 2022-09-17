@@ -309,7 +309,7 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
                 if (textLeftOfMouse)
                     g.drawText(textLabel, goodVisibilityDistance, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
                 else
-                    g.drawText(textLabel, getWidth() - goodVisibilityDistance - fontDependantWidth, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
+                    g.drawText(textLabel, getWidth() - goodVisibilityDistance - fontDependantWidth, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centredLeft, true);
 			}
 			break;
 			case MTDT_VerticalSpread:
@@ -524,41 +524,47 @@ void MultiSoundobjectSlider::mouseDrag(const MouseEvent& e)
  */
 void MultiSoundobjectSlider::mouseUp(const MouseEvent& e)
 {
+	auto wasInFakeALTMultiTouch = IsInFakeALTMultiTouch();
+	auto isntPrimaryMouse = GetPrimaryMouseInputSourceIndex() != e.source.getIndex();
+
     DualPointMultitouchCatcherComponent::mouseUp(e);
-    
-    if (GetPrimaryMouseInputSourceIndex() != e.source.getIndex() || IsInFakeALTMultiTouch())
-        return;
 
 	if (m_currentlyDraggedId != INVALID_PROCESSOR_ID)
 	{
-		auto ctrl = Controller::GetInstance();
-		if (ctrl)
+		if (!(wasInFakeALTMultiTouch || isntPrimaryMouse))
 		{
-			auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
-			if (processor)
+			auto ctrl = Controller::GetInstance();
+			if (ctrl)
 			{
-				auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
-				if (param)
-					param->EndGuiGesture();
-				param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_Y]);
-				if (param)
-					param->EndGuiGesture();
+				auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
+				if (processor)
+				{
+					auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
+					if (param)
+						param->EndGuiGesture();
+					param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_Y]);
+					if (param)
+						param->EndGuiGesture();
 
-				// Get mouse pixel-wise position and scale it between 0 and 1.
-				Point<int> pos = e.getPosition();
-				float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / getLocalBounds().getWidth())));
-				float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / getLocalBounds().getHeight())));
+					// Get mouse pixel-wise position and scale it between 0 and 1.
+					Point<int> pos = e.getPosition();
+					float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / getLocalBounds().getWidth())));
+					float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / getLocalBounds().getHeight())));
 
-				processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, x);
-				processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, y);
+					processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, x);
+					processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, y);
+				}
 			}
 		}
 
-		// De-select knob.
-		m_currentlyDraggedId = INVALID_PROCESSOR_ID;
+		if (!isntPrimaryMouse)
+		{
+			// De-select knob.
+			m_currentlyDraggedId = INVALID_PROCESSOR_ID;
 
-		// trigger single repaint to get rid of 'currently dragged crosshair'
-		repaint();
+			// trigger single repaint to get rid of 'currently dragged crosshair'
+			repaint();
+		}
 	}
 }
 

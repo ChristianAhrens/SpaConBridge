@@ -289,7 +289,7 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 			// Paint 'currently dual-multitouch points indication'
 			auto& p1 = m_multiTouchPoints._p1;
 			auto& p2 = m_multiTouchPoints._p2;
-            auto goodVisibilityDistance = 20;
+            auto goodVisibilityDistance = 16;
 			switch (m_multiTouchTargetOperation)
 			{
 			case MTDT_HorizontalEnSpaceSendGain:

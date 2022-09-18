@@ -69,21 +69,21 @@ UIPageId GetPageIdFromName(String pageName)
 {
 	if (pageName == GetPageNameFromId(UPI_InvalidMin))
 		return UPI_InvalidMin;
-	if (pageName == GetPageNameFromId(UPI_Soundobjects))
+	else if (pageName == GetPageNameFromId(UPI_Soundobjects))
 		return UPI_Soundobjects;
-	if (pageName == GetPageNameFromId(UPI_MultiSoundobjects))
+	else if (pageName == GetPageNameFromId(UPI_MultiSoundobjects))
 		return UPI_MultiSoundobjects;
-	if (pageName == GetPageNameFromId(UPI_MatrixIOs))
+	else if (pageName == GetPageNameFromId(UPI_MatrixIOs))
 		return UPI_MatrixIOs;
-	if (pageName == GetPageNameFromId(UPI_Scenes))
+	else if (pageName == GetPageNameFromId(UPI_Scenes))
 		return UPI_Scenes;
-	if (pageName == GetPageNameFromId(UPI_EnSpace))
+	else if (pageName == GetPageNameFromId(UPI_EnSpace))
 		return UPI_EnSpace;
-	if (pageName == GetPageNameFromId(UPI_Statistics))
+	else if (pageName == GetPageNameFromId(UPI_Statistics))
 		return UPI_Statistics;
-	if (pageName == GetPageNameFromId(UPI_Settings))
+	else if (pageName == GetPageNameFromId(UPI_Settings))
 		return UPI_Settings;
-	if (pageName == GetPageNameFromId(UPI_InvalidMax))
+	else if (pageName == GetPageNameFromId(UPI_InvalidMax))
 		return UPI_InvalidMax;
 	else
 		return UPI_InvalidMin;

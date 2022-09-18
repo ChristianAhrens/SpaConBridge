@@ -693,7 +693,11 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
 				SetActivePage(pageId, true);
 			}
 			else
+			{
+				// set a valid default to not leave the user with a blank page in case of an error
+				SetActivePage(UPI_Soundobjects, true);
 				retVal = false;
+			}
 		}
 	}
 

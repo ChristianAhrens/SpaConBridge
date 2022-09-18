@@ -141,39 +141,58 @@ Table multiselection allows editing of mute state for multiple Sound Objects and
 ![Showreel.004.png](Resources/Documentation/Showreel/Showreel.004.png "Sound Object Table Selection")
 
 Following the selection in Sound Object table, the corresponding Soundscape parameters are shown in an editing area.
-The UI layout is designed to adapt to the available screen real estate of the device SpaConBridge is used on. Depending on the screen geometry a vertical or horizontal layout of table and parameter editing area is used. On small screens, legend annotation and control value displays are hidden. (useful for Tablet landscape vs. portrait rotation, small Smartphone screens, embedded device touchscreens, ...)
+The UI layout is designed to adapt to the available screen real estate of the device SpaConBridge is used on. Depending on the screen geometry a vertical or horizontal layout of table and parameter editing area is used. 
+
+On small screens, legend annotation and control value displays are hidden. (useful for Tablet landscape vs. portrait rotation, small Smartphone screens, embedded device touchscreens, ...)
 
 The selection in Sound Object table and the currently active tab can be externally controlled by bridging protocols that support the commands 'SpaConBridge Sound Object Select' and 'SpaConBridge UI Element Index Select'.
+
+![Showreel.005.png](Resources/Documentation/Showreel/Showreel.005.png "Sound Object Table Selection")
+
+The table control bar contains a toggle button that allows switching between single- and multiselection mode of the table. Depending on the mode, either the single sound object editor is shown on the right (horizontal layout) or below (vertical layout) or the multi sound object visualization area is shown. In case the latter is shown, only those sound objects that are selected in the table are visible.
 
 
 <a name="twodimensionalpositionslider" />
 
 ### Multi Sound Object XY Pad
 
-![Showreel.005.png](Resources/Documentation/Showreel/Showreel.005.png "Multislider")
+![Showreel.006.png](Resources/Documentation/Showreel/Showreel.006.png "Multislider")
 
 All Sound Objects assigned to the selected DS100 mapping area are shown simultaneously. The dropdown on the bottom can be used to switch the selection to one of the four available mapping areas.
 The selection / multiselection in Sound Object table is followed here and reflected in Sound Object circle sizing - selected objects are shown enlarged.
 
-![Showreel.006.png](Resources/Documentation/Showreel/Showreel.006.png "Multislider Bkg+Names")
+![Showreel.007.png](Resources/Documentation/Showreel/Showreel.007.png "Multislider Bkg+Names")
 
 A custom background image can be assigned for each of the four mapping areas.
 Visualization of the MatrixInput ChannelName corresponding to the SoundObject can be activated with a toggle button in the lower right corner of the page.
 
-![Showreel.007.png](Resources/Documentation/Showreel/Showreel.007.png "Multislider En-Space Send")
+![Showreel.008.png](Resources/Documentation/Showreel/Showreel.008.png "Multislider En-Space Send")
 
 Visualization of the En-Space send gain per SoundObject can be activated with a toggle button in the lower right corner of the page. The value is represented by 'wing' like reverberation elements on the right and left side of each SoundObject.
 
-![Showreel.008.png](Resources/Documentation/Showreel/Showreel.008.png "Multislider Spread")
+![Showreel.009.png](Resources/Documentation/Showreel/Showreel.009.png "Multislider En-Space Send Multitouch")
+
+On devices that support multitouch input, a horizontal pinch gesture can be used to modify the En-Space send gain value. The gesture should be performed by first touching the sound object that shall be modified with a finger and then use a second finger to drag left or right. Dragging to the right increases the value, to the left decreases it.
+
+Alternatively the mode can be used with a keyboard+mouse setup as well by clicking on the sound object to be modified, then pressing the ALT key on the keyboard and dragging the mouse while still pressing the primary mousekey.
+
+![Showreel.010.png](Resources/Documentation/Showreel/Showreel.010.png "Multislider Spread")
 
 Visualization of the Spread factor per SoundObject can be activated with a toggle button in the lower right corner of the page. The value is represented by transparent circles around each SoundObject.
+
+![Showreel.011.png](Resources/Documentation/Showreel/Showreel.011.png "Multislider Spread Multitouch")
+
+
+On devices that support multitouch input, a vertical pinch gesture can be used to modify the Spread Factor value. The gesture should be performed by first touching the sound object that shall be modified with a finger and then use a second finger to drag up or down. Dragging up increases the value, down decreases it.
+
+Alternatively the mode can be used with a keyboard+mouse setup as well by clicking on the sound object to be modified, then pressing the ALT key on the keyboard and dragging the mouse while still pressing the primary mousekey.
 
 
 <a name="matrixiotable" />
 
 ### Matrix Inputs/Outputs Table
 
-![Showreel.009.png](Resources/Documentation/Showreel/Showreel.009.png "Matrix IO Table Overview")
+![Showreel.012.png](Resources/Documentation/Showreel/Showreel.012.png "Matrix IO Table Overview")
 
 On the left side (landscape) or top (portrait) of the page, a table for visualization and control of DS100 matrix input channels is shown and on the right side or bottom of the page, a table for matrix outputs.
 Every row in both of the tables corresponds to an active Matrix Input or Output, meaning that it is shown on UI and its values can be received from DS100. This does not affect the pure protocol bridging in underlying module. E.g. in case an external OSC input sends new gain values for a channel that is not present in the table, the values will still be bridged to DS100. This needs to be kept in mind if muting the input data from a protocol for a Matrix Input/Output is desired!
@@ -183,7 +202,7 @@ Every row in both of the tables corresponds to an active Matrix Input or Output,
 
 ### Scenes
 
-![Showreel.010.png](Resources/Documentation/Showreel/Showreel.010.png "Scenes")
+![Showreel.013.png](Resources/Documentation/Showreel/Showreel.013.png "Scenes")
 
 Scenes page constantly reads the currently active Scene Index, Name and Comment from DS100 (low refresh rate) and displays the values in text editors.
 
@@ -198,7 +217,7 @@ Direct recall entries must be unique, therefor a direct recall entry for a Scene
 
 ### En-Space
 
-![Showreel.011.png](Resources/Documentation/Showreel/Showreel.011.png "En-Space")
+![Showreel.014.png](Resources/Documentation/Showreel/Showreel.014.png "En-Space")
 
 En-Space page constantly reads the currently active room id, predelay factor and rear level values and displays them on UI.
 The values can be modified by the user through given UI elements.
@@ -208,7 +227,7 @@ The values can be modified by the user through given UI elements.
 
 ### Statistics
 
-![Showreel.012.png](Resources/Documentation/Showreel/Showreel.012.png "Protocol Bridging Statistics")
+![Showreel.015.png](Resources/Documentation/Showreel/Showreel.015.png "Protocol Bridging Statistics")
 
 Statistics page shows a graphical representation for current bridging protocol load (messages per second) for every active protocol and a tabular log view of the last 200 received messages. The graphical representation shown describes the raw incoming data rate only and contains no information on actual bridging.
 Both plot and log are refreshed at a small rate to keep the performance impact on the host system resources low.
@@ -218,9 +237,9 @@ Both plot and log are refreshed at a small rate to keep the performance impact o
 
 ### Settings
 
-![Showreel.0013.png](Resources/Documentation/Showreel/Showreel.013.png "General Settings")
+![Showreel.0016.png](Resources/Documentation/Showreel/Showreel.016.png "General Settings")
 
-![Showreel.0014.png](Resources/Documentation/Showreel/Showreel.014.png "General Settings - Windows kiosk mode")
+![Showreel.0017.png](Resources/Documentation/Showreel/Showreel.017.png "General Settings - Windows kiosk mode")
 
 Settings page is structured in sections.
 

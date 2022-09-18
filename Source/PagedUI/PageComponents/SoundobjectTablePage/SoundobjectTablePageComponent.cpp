@@ -473,7 +473,7 @@ void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool acti
 {
 	m_multiSoundobjectsActive = active;
 
-	if (m_multiSoundobjectsActive)
+	if (m_multiSoundobjectsActive && IsPageVisible())
 	{
 		SetSoundsourceProcessorEditorActive(INVALID_PROCESSOR_ID);
 

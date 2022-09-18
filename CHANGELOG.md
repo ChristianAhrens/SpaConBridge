@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.8.0] - 2022-09-18
+### Added
+- User selectable single-/multiselection mode in SoundobjectTable
+- Two-finger multitouch support on MultiSoundobject UI to modify Spread Factor and EnSpace Send Gain
+- Option to reset config to default in raw config view on settings page
+
+### Changed
+- Dynamically hide elements of TableControlBar depending on available screen space
+
+### Fixed
+- Fixed SoundobjectTable page remaining blank on initial app start until changing tabs manually
+
 ## [0.7.2] - 2022-08-29
 ### Added
 - Soundobject 'currently dragged' crosshair inidication on MultiSoundobject UI

@@ -748,7 +748,6 @@ float MultiSoundobjectSlider::getMultiTouchFactorValue()
         {
             case MTDT_HorizontalEnSpaceSendGain:
                 {
-                    auto p1 = m_multiTouchPoints._p1.toFloat().getX();
                     auto p2 = m_multiTouchPoints._p2.toFloat().getX();
                     auto p2_init = m_multiTouchPoints._p2_init.toFloat().getX();
                     
@@ -761,7 +760,6 @@ float MultiSoundobjectSlider::getMultiTouchFactorValue()
                 break;
             case MTDT_VerticalSpread:
                 {
-                    auto p1 = m_multiTouchPoints._p1.toFloat().getY();
                     auto p2 = m_multiTouchPoints._p2.toFloat().getY();
                     auto p2_init = m_multiTouchPoints._p2_init.toFloat().getY();
                     

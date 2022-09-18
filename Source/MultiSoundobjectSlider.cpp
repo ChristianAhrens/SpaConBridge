@@ -287,7 +287,7 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 			g.drawLine(x, 0, x, h, 1);
 
 			// Paint 'currently dual-multitouch points indication'
-			auto& p1 = m_multiTouchPoints._p1;
+			auto& p1 = m_multiTouchPoints._p2_init;
 			auto& p2 = m_multiTouchPoints._p2;
             auto goodVisibilityDistance = 16;
 			switch (m_multiTouchTargetOperation)

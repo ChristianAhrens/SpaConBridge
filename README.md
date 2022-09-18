@@ -40,6 +40,12 @@ See [LATEST RELEASE](../../releases/latest) for available binary packages or joi
 <td><img src="Resources/Documentation/SpaConBridge_on-macOS.png" alt="SpaConBridge on macOS" width="100%"></td>
 <td><img src="Resources/Documentation/SpaConBridge_on-Windows.png" alt="SpaConBridge on Windows" width="85%"></td>
 </tr>
+<tr>
+<th>Linux</th>
+</tr>
+<tr>
+<td><img src="Resources/Documentation/SpaConBridge_on-Linux.png" alt="SpaConBridge on Windows" width="85%"></td>
+</tr>
 </table>
 
 SpaConBridge was created with the idea in mind to have both a simple ui to monitor or control Sound Object parameters of a d&b audiotechnik Soundscape system, esp. the DS100 Signal Engine, via OSC protocol and at the same time the possibility of controlling interfacing with external control data input (MIDI device, OSC control app, ...).

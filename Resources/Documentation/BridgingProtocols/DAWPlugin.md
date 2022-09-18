@@ -1,6 +1,6 @@
 ## d&b Soundscape DAW plugin bridging settings
 
-![Showreel.017.png](../Showreel/Showreel.017.png "Soundscape DAW plugin bridging settings")
+![Showreel.020.png](../Showreel/Showreel.020.png "Soundscape DAW plugin bridging settings")
 
 _This bridging protocol is the same as [Generic OSC](GenericOSC.md) and is available to use d&b Soundscape Plug-in through SpaConBridge to allow using SpaConBridge dual DS100 redundancy/extend mode features._
 

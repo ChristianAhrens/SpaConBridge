@@ -218,6 +218,10 @@
           </GROUP>
         </GROUP>
         <GROUP id="{AEF488F2-ECE4-B5B0-0BC4-9A3644EF8A18}" name="Source">
+          <FILE id="CRqn2u" name="DualPointMultitouchCatcherComponent.cpp" compile="1"
+                resource="0" file="submodules/JUCE-AppBasics/Source/DualPointMultitouchCatcherComponent.cpp"/>
+          <FILE id="O4EHdQ" name="DualPointMultitouchCatcherComponent.h" compile="0"
+                resource="0" file="submodules/JUCE-AppBasics/Source/DualPointMultitouchCatcherComponent.h"/>
           <FILE id="g72R4R" name="ColourAndSizePickerComponent.cpp" compile="1"
                 resource="0" file="submodules/JUCE-AppBasics/Source/ColourAndSizePickerComponent.cpp"/>
           <FILE id="gwMBZq" name="ColourAndSizePickerComponent.h" compile="0"
@@ -299,6 +303,8 @@
             <FILE id="UWlhHT" name="remove-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/remove-24px.svg"/>
             <FILE id="eGKYMH" name="rule_checked-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/rule_checked-24px.svg"/>
+            <FILE id="JuPvS9" name="rule_one-24px.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/rule_one-24px.svg"/>
             <FILE id="NIoQ4P" name="rule_unchecked-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/rule_unchecked-24px.svg"/>
             <FILE id="f9cDvj" name="save-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/save-24px.svg"/>

@@ -66,12 +66,13 @@ namespace SpaConBridge
 /**
  * Class constructor.
  */
-TableModelComponent::TableModelComponent(ControlBarPosition pos, bool tableCanCollapse)
+TableModelComponent::TableModelComponent(ControlBarPosition pos, bool tableCanCollapse, bool tableCanAllowSingleSelectionOnly)
 {
     // Create our table component and add it to this component.
     m_table = std::make_unique<TableListBox>();
+	m_table->setOutlineThickness(1);
     addAndMakeVisible(m_table.get());
-    m_tableControlBar = std::make_unique<TableControlBarComponent>(tableCanCollapse);
+    m_tableControlBar = std::make_unique<TableControlBarComponent>(tableCanCollapse, tableCanAllowSingleSelectionOnly);
     addAndMakeVisible(m_tableControlBar.get());
 
     m_tableControlBar->onAddClick = [=] { onAddProcessor(); };
@@ -81,8 +82,11 @@ TableModelComponent::TableModelComponent(ControlBarPosition pos, bool tableCanCo
     m_tableControlBar->onSelectNoneClick = [=] { onDeselectAllProcessors(); };
     m_tableControlBar->onHeightChanged = [=](int height) { onRowHeightSlided(height); };
     m_tableControlBar->onCollapsClick = [=](bool collapsed) { onCollapseToggled(collapsed); };
+	m_tableControlBar->onSingleSelectionOnlyClick = [=](bool singleSelectionOnly) { onAllowSingleSelectionOnlyToggled(singleSelectionOnly); };
 
 	SetControlBarPosition(pos);
+
+	SetSingleSelectionOnly(false);
 }
 
 /**
@@ -262,6 +266,66 @@ void TableModelComponent::SetCollapsed(bool collapsed)
 
 	// trigger overall resizing
 	resized();
+}
+
+/**
+ * Helper method to get the singleSelectionOnlyTogglable state of the internal table & control bar components.
+ *
+ * @return	True if singleSelectionOnlyTogglable, false if not
+ */
+bool TableModelComponent::IsSingleSelectionOnlyTogglable()
+{
+	if (m_tableControlBar)
+		return m_tableControlBar->IsSingleSelectionOnlyTogglable();
+	else
+		return false;
+}
+
+/**
+ * Helper method to set a new singleSelectionAllowedOnly state of the internal table & control bar components
+ *
+ * @param	singleSelectionOnly	The new singleSelectionAllowedOnly state of the internal table & control bar components
+ */
+void TableModelComponent::SetSingleSelectionOnlyTogglable(bool singleSelectionOnlyTogglable)
+{
+	if (m_tableControlBar)
+		m_tableControlBar->SetSingleSelectionOnlyTogglable(singleSelectionOnlyTogglable);
+	if (singleSelectionOnlyTogglable && !IsSingleSelectionOnly())
+		SetSingleSelectionOnly(true);
+}
+
+/**
+ * Helper method to get the singleSelectionOnly state of the internal table & control bar components.
+ *
+ * @return	True if singleSelectionOnly, false if not
+ */
+bool TableModelComponent::IsSingleSelectionOnly()
+{
+	if (m_tableControlBar)
+		return m_tableControlBar->IsSingleSelectionOnly();
+	else
+		return false;
+}
+
+/**
+ * Helper method to set a new singleSelectionAllowedOnly state of the internal table & control bar components
+ *
+ * @param	singleSelectionOnly	The new singleSelectionAllowedOnly state of the internal table & control bar components
+ */
+void TableModelComponent::SetSingleSelectionOnly(bool singleSelectionOnly)
+{
+	if (m_tableControlBar)
+		m_tableControlBar->SetSingleSelectionOnly(singleSelectionOnly);
+	if (m_table)
+	{
+		m_table->setMultipleSelectionEnabled(!singleSelectionOnly);
+
+		if (singleSelectionOnly && 1 < GetSelectedRows().size())
+		{
+			auto selectedRow = m_table->getSelectedRow();
+			SetSelectedRows(std::vector<juce::int32>(std::initializer_list<juce::int32>({ selectedRow })));
+		}
+	}
 }
 
 /**
@@ -1143,6 +1207,18 @@ void TableModelComponent::onCollapseToggled(bool collapsed)
 {
 	if (onCurrentCollapseStateChanged)
 		onCurrentCollapseStateChanged(collapsed);
+}
+
+/**
+ * Helper method to be used as function callback to toggle the multiselectionenabled state of table member.
+ * @param	singleSelectionOnly		The new singleSelectionOnly state
+ */
+void TableModelComponent::onAllowSingleSelectionOnlyToggled(bool singleSelectionOnly)
+{
+	SetSingleSelectionOnly(singleSelectionOnly);
+
+	if (onCurrentSingleSelectionOnlyStateChanged)
+		onCurrentSingleSelectionOnlyStateChanged(singleSelectionOnly);
 }
 
 

@@ -58,6 +58,8 @@ public:
         BACKGROUND,
         STATICOBJECTSPOLLING,
         FULLSCREENWINDOWMODE,
+        RESIZERBARRATIO,
+        SINGLESELECTIONONLY,
     };
     static String getTagName(TagID ID)
     {
@@ -117,6 +119,10 @@ public:
             return "StaticObjectsPolling";
         case FULLSCREENWINDOWMODE:
             return "FullscreenWindowmode";
+        case RESIZERBARRATIO:
+            return "ResizeBarRatio";
+        case SINGLESELECTIONONLY:
+            return "SingleSelectionOnly";
 		default:
 			return "INVALID";
         }
@@ -161,6 +167,8 @@ public:
 
 	bool isValid() override;
     static bool isValid(const std::unique_ptr<XmlElement>& xmlConfig);
+
+    bool ResetToDefault();
 
 private:
 

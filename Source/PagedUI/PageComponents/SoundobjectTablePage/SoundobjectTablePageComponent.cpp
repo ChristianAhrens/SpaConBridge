@@ -91,6 +91,16 @@ void TriplePointResizerBar::paint(Graphics& g)
         g.fillEllipse(ellipse);
     }
 }
+/**
+ * Reimplemented to notify the world about mouse up events and potentially changed resizer bar position.
+ * @param e        Mouse event to react to.
+ */
+void TriplePointResizerBar::mouseUp(const MouseEvent& e)
+{
+	if (e.getDistanceFromDragStart() > 0 && onResizeBarMoved)
+		onResizeBarMoved();
+	StretchableLayoutResizerBar::mouseUp(e);
+}
 
 
 /*
@@ -198,7 +208,7 @@ SoundobjectTablePageComponent::SoundobjectTablePageComponent()
 		if (config)
 			config->triggerConfigurationDump(false);
 	};
-	m_soundobjectsTable->onCurrentRowHeightChanged = [=](int rowHeight) { 
+	m_soundobjectsTable->onCurrentRowHeightChanged = [=](int rowHeight) {
 		ignoreUnused(rowHeight);
 		if (IsPageInitializing())
 			return;
@@ -206,8 +216,13 @@ SoundobjectTablePageComponent::SoundobjectTablePageComponent()
 		if (config)
 			config->triggerConfigurationDump(false);
 	};
-	m_soundobjectsTable->onMultiProcessorsSelectionChanged = [=](bool multiselected) {
-		SetMultiSoundobjectComponentActive(multiselected);
+	m_soundobjectsTable->onCurrentSingleSelectionOnlyStateChanged = [=](bool singleSelectionOnly) {
+		SetMultiSoundobjectComponentActive(!singleSelectionOnly);
+		if (IsPageInitializing())
+			return;
+		auto config = SpaConBridge::AppConfiguration::getInstance();
+		if (config)
+			config->triggerConfigurationDump(false);
 	};
 	addAndMakeVisible(m_soundobjectsTable.get());
 
@@ -247,6 +262,58 @@ int SoundobjectTablePageComponent::GetRowHeight()
 }
 
 /**
+ * Setter for the resizer bar ratio in internal layout
+ * @param	float  The position ratio to set.
+ */
+void SoundobjectTablePageComponent::SetResizeBarRatio(float ratio)
+{
+	m_resizeBarRatio = ratio;
+	auto size = static_cast<float>(IsPortraitAspectRatio() ? getHeight() : getWidth());
+	auto resultingNewPosition = static_cast<int>(size * ratio);
+
+	if (m_layoutManager && m_layoutManager->getItemCurrentPosition(1) != resultingNewPosition)
+	{
+		m_layoutManager->setItemPosition(1, resultingNewPosition);
+
+		if (m_layoutResizeBar)
+			m_layoutResizeBar->hasBeenMoved();
+	}
+}
+
+/**
+ * Getter for the resizer bar ratio in internal layout
+ * @return	The current position ratio.
+ */
+float SoundobjectTablePageComponent::GetResizeBarRatio()
+{
+	return m_resizeBarRatio;
+}
+
+/**
+ * Setter for the single selection only flag in sound objects table.
+ * @param singleSelectionOnly	The single selection only flag.
+ */
+void SoundobjectTablePageComponent::SetSingleSelectionOnly(bool singleSelectionOnly)
+{
+	if (m_soundobjectsTable)
+		m_soundobjectsTable->SetSingleSelectionOnly(singleSelectionOnly);
+
+	SetMultiSoundobjectComponentActive(!singleSelectionOnly);
+}
+
+/**
+ * Getter for the single selection only flag in sound objects table.
+ * @return	The single selection only flag.
+ */
+bool SoundobjectTablePageComponent::GetSingleSelectionOnly()
+{
+	if (m_soundobjectsTable)
+		return m_soundobjectsTable->IsSingleSelectionOnly();
+	else
+		return 0;
+}
+
+/**
  * Reimplemented to paint background and frame.
  * @param g		Graphics context that must be used to do the drawing operations.
  */
@@ -280,14 +347,14 @@ void SoundobjectTablePageComponent::resized()
 
 		if (m_multiSoundobjectsActive)
 		{
-            Component* comps[] = { m_soundobjectsTable.get(), m_layoutResizerBar.get(), m_multiSoundobjectComponentContainer.get()};
+            Component* comps[] = { m_soundobjectsTable.get(), m_layoutResizeBar.get(), m_multiSoundobjectComponentContainer.get()};
             m_layoutManager->layOutComponents(comps, 3, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, IsPortraitAspectRatio(), true);
 			// unclear why but another explicit resize on the multicomponent is required for correct resize behaviour
 			m_multiSoundobjectComponentContainer->resized();
 		}
 		else
 		{
-			Component* comps[] = { m_soundobjectsTable.get(), m_layoutResizerBar.get(), m_selectedProcessorInstanceEditor.get() };
+			Component* comps[] = { m_soundobjectsTable.get(), m_layoutResizeBar.get(), m_selectedProcessorInstanceEditor.get() };
 			m_layoutManager->layOutComponents(comps, 3, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, IsPortraitAspectRatio(), true);
 		}
 	}
@@ -316,12 +383,25 @@ void SoundobjectTablePageComponent::activateStretchableSplitLayout()
 	}
 
 	auto isPortrait = IsPortraitAspectRatio();
-	if (m_isHorizontalSlider != !isPortrait || !m_layoutResizerBar)
+	if (m_isHorizontalSlider != !isPortrait || !m_layoutResizeBar)
 	{
 		m_isHorizontalSlider = !isPortrait;
-		removeChildComponent(m_layoutResizerBar.get());
-		m_layoutResizerBar = std::make_unique<TriplePointResizerBar>(m_layoutManager.get(), 1, m_isHorizontalSlider);
-		addAndMakeVisible(m_layoutResizerBar.get());
+		removeChildComponent(m_layoutResizeBar.get());
+		m_layoutResizeBar = std::make_unique<TriplePointResizerBar>(m_layoutManager.get(), 1, m_isHorizontalSlider);
+		m_layoutResizeBar->onResizeBarMoved = [this]() {
+			auto size = static_cast<float>(IsPortraitAspectRatio() ? getHeight() : getWidth());
+			if (m_layoutManager && size != 0.0f)
+			{
+				m_resizeBarRatio = m_layoutManager->getItemCurrentPosition(1) / size;
+
+				auto config = SpaConBridge::AppConfiguration::getInstance();
+				if (config)
+					config->triggerConfigurationDump(false);
+			}
+		};
+		addAndMakeVisible(m_layoutResizeBar.get());
+		resized();
+		SetResizeBarRatio(m_resizeBarRatio);
 	}
 }
 
@@ -334,8 +414,8 @@ void SoundobjectTablePageComponent::deactivateStretchableSplitLayout()
 		m_layoutManagerItemCount = 1;
 	}
 
-	removeChildComponent(m_layoutResizerBar.get());
-	m_layoutResizerBar.reset();
+	removeChildComponent(m_layoutResizeBar.get());
+	m_layoutResizeBar.reset();
 }
 
 /**
@@ -354,7 +434,7 @@ void SoundobjectTablePageComponent::SetSoundsourceProcessorEditorActive(Soundobj
 			resized();
 		}
 	}
-	else
+	else if (!m_multiSoundobjectsActive)
 	{
 		// create slider and processoreditor instances and add them to layouting
 		auto ctrl = Controller::GetInstance();
@@ -393,8 +473,10 @@ void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool acti
 {
 	m_multiSoundobjectsActive = active;
 
-	if (m_multiSoundobjectsActive)
+	if (m_multiSoundobjectsActive && IsPageVisible())
 	{
+		SetSoundsourceProcessorEditorActive(INVALID_PROCESSOR_ID);
+
         auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
         if (multiSoundobjectComponent)
             multiSoundobjectComponent->SetShowSelectedOnly(true);
@@ -403,6 +485,13 @@ void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool acti
 	else
 	{
         m_multiSoundobjectComponentContainer->removeInternalComponent();
+		
+		if (Controller* ctrl = Controller::GetInstance())
+		{
+			auto selectedProcessorIds = ctrl->GetSelectedSoundobjectProcessorIds();
+			if (selectedProcessorIds.size() == 1)
+				SetSoundsourceProcessorEditorActive(selectedProcessorIds.at(0));
+		}
 	}
 
 	resized();

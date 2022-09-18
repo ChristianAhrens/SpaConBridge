@@ -278,15 +278,66 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 		auto metaInfoSize = 6 * refKnobSize;
 		auto innerRadius = 0.5f * knobSize;
 
-		// Paint 'currently dragged crosshair'
 		if (m_currentlyDraggedId == paramsKV.first)
 		{
+			// Paint 'currently dragged crosshair'
 			auto& crosshairColour = knobColour;
 			g.setColour(crosshairColour);
 			g.drawLine(0, y, w, y, 1);
 			g.drawLine(x, 0, x, h, 1);
-		}
 
+			// Paint 'currently dual-multitouch points indication'
+			auto& p1 = m_multiTouchPoints._p2_init;
+			auto& p2 = m_multiTouchPoints._p2;
+            auto goodVisibilityDistance = 16;
+			switch (m_multiTouchTargetOperation)
+			{
+			case MTDT_HorizontalEnSpaceSendGain:
+			{
+				g.setColour(crosshairColour);
+				g.drawDashedLine(Line<float>(p1.toFloat().getX(), 0.0f, p1.toFloat().getX(), h), dashLengths, 2, lineThickness);
+				g.drawDashedLine(Line<float>(p2.toFloat().getX(), 0.0f, p2.toFloat().getX(), h), dashLengths, 2, lineThickness);
+				g.setOpacity(0.15f);
+				g.fillRect(Rectangle<float>(p1.toFloat().getX(), 0.0f, p2.toFloat().getX() - p1.toFloat().getX(), h));
+                
+				auto font = Font(static_cast<float>(goodVisibilityDistance), Font::plain);
+                g.setFont(font);
+                g.setOpacity(1.0f);
+				auto textLabel = String("EnSpace Gain ") + String(paramsKV.second._reverbSndGain) + String("dB");
+				auto fontDependantWidth = font.getStringWidth(textLabel);
+                auto textLeftOfMouse = (getWidth() - p2.getX() - goodVisibilityDistance) < fontDependantWidth;
+                if (textLeftOfMouse)
+                    g.drawText(textLabel, goodVisibilityDistance, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
+                else
+                    g.drawText(textLabel, getWidth() - goodVisibilityDistance - fontDependantWidth, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centredLeft, true);
+			}
+			break;
+			case MTDT_VerticalSpread:
+			{
+				g.setColour(crosshairColour);
+				g.drawDashedLine(Line<float>(0.0f, p1.toFloat().getY(), w, p1.toFloat().getY()), dashLengths, 2, lineThickness);
+				g.drawDashedLine(Line<float>(0.0f, p2.toFloat().getY(), w, p2.toFloat().getY()), dashLengths, 2, lineThickness);
+				g.setOpacity(0.15f);
+				g.fillRect(Rectangle<float>(0.0f, p1.toFloat().getY(), w, p2.toFloat().getY() - p1.toFloat().getY()));
+
+				auto font = Font(static_cast<float>(goodVisibilityDistance), Font::plain);
+                g.setFont(font);
+                g.setOpacity(1.0f);
+				auto textLabel = String("Spread Factor ") + String(paramsKV.second._spread);
+				auto fontDependantWidth = font.getStringWidth(textLabel);
+                auto textBelowMouse = (p2.getY() - goodVisibilityDistance) < goodVisibilityDistance;
+                if (textBelowMouse)
+                    g.drawText(textLabel, goodVisibilityDistance, getHeight() - 2 * goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
+                else
+                    g.drawText(textLabel, goodVisibilityDistance, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
+			}
+			break;
+			case MTDT_PendingInputDecision:
+			default:
+				break;
+			}
+		}
+        
 		// Paint spread if enabled
 		if (m_spreadEnabled)
 		{
@@ -378,6 +429,11 @@ void MultiSoundobjectSlider::resized()
  */
 void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
 {
+    DualPointMultitouchCatcherComponent::mouseDown(e);
+    
+    if (GetPrimaryMouseInputSourceIndex() != e.source.getIndex()) // dont check IsInFakeALTMultiTouch() here but somewhere below to allow to perform the click-hit-check first
+        return;
+    
 	float w = static_cast<float>(getLocalBounds().getWidth());
 	float h = static_cast<float>(getLocalBounds().getHeight());
 
@@ -407,24 +463,27 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
 			// Set this source as "selected" and begin a drag gesture.
 			m_currentlyDraggedId = paramsKV.first;
 
-			auto ctrl = Controller::GetInstance();
-			if (ctrl)
+			if (!IsInFakeALTMultiTouch())
 			{
-				auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
-				jassert(processor);
-				if (processor)
+				auto ctrl = Controller::GetInstance();
+				if (ctrl)
 				{
-					GestureManagedAudioParameterFloat* param;
-					param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
-					if (param)
-						param->BeginGuiGesture();
-					param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_Y]);
-					if (param)
-						param->BeginGuiGesture();
+					auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
+					jassert(processor);
+					if (processor)
+					{
+						auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
+						if (param)
+							param->BeginGuiGesture();
+						param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_Y]);
+						if (param)
+							param->BeginGuiGesture();
+					}
 				}
 			}
 
 			// Found a knob to select, skip the rest.
+            repaint();
 			break;
 		}
 	}
@@ -436,6 +495,11 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
  */
 void MultiSoundobjectSlider::mouseDrag(const MouseEvent& e)
 {
+    DualPointMultitouchCatcherComponent::mouseDrag(e);
+    
+    if (GetPrimaryMouseInputSourceIndex() != e.source.getIndex() || IsInFakeALTMultiTouch())
+        return;
+    
 	if (m_currentlyDraggedId != INVALID_PROCESSOR_ID)
 	{
 		auto ctrl = Controller::GetInstance();
@@ -463,40 +527,256 @@ void MultiSoundobjectSlider::mouseDrag(const MouseEvent& e)
  */
 void MultiSoundobjectSlider::mouseUp(const MouseEvent& e)
 {
-	ignoreUnused(e);
+	auto wasInFakeALTMultiTouch = IsInFakeALTMultiTouch();
+	auto isntPrimaryMouse = GetPrimaryMouseInputSourceIndex() != e.source.getIndex();
+
+    DualPointMultitouchCatcherComponent::mouseUp(e);
 
 	if (m_currentlyDraggedId != INVALID_PROCESSOR_ID)
 	{
-		auto ctrl = Controller::GetInstance();
-		if (ctrl)
+		if (!(wasInFakeALTMultiTouch || isntPrimaryMouse))
 		{
-			auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
-			if (processor)
+			auto ctrl = Controller::GetInstance();
+			if (ctrl)
 			{
-				GestureManagedAudioParameterFloat* param;
-				param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
-				if (param)
-					param->EndGuiGesture();
-				param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_Y]);
-				if (param)
-					param->EndGuiGesture();
+				auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
+				if (processor)
+				{
+					auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
+					if (param)
+						param->EndGuiGesture();
+					param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_Y]);
+					if (param)
+						param->EndGuiGesture();
 
-				// Get mouse pixel-wise position and scale it between 0 and 1.
-				Point<int> pos = e.getPosition();
-				float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / getLocalBounds().getWidth())));
-				float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / getLocalBounds().getHeight())));
+					// Get mouse pixel-wise position and scale it between 0 and 1.
+					Point<int> pos = e.getPosition();
+					float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / getLocalBounds().getWidth())));
+					float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / getLocalBounds().getHeight())));
 
-				processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, x);
-				processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, y);
+					processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, x);
+					processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, y);
+				}
 			}
 		}
 
-		// De-select knob.
-		m_currentlyDraggedId = INVALID_PROCESSOR_ID;
+		if (!isntPrimaryMouse)
+		{
+			// De-select knob.
+			m_currentlyDraggedId = INVALID_PROCESSOR_ID;
 
-		// trigger single repaint to get rid of 'currently dragged crosshair'
-		repaint();
+			// trigger single repaint to get rid of 'currently dragged crosshair'
+			repaint();
+		}
 	}
+}
+
+/**
+ * Implementation of pure virtual method to notify multitouch guesture start
+ * @param p1	First multitouch point
+ * @param p2	Second multitouch point
+ */
+void MultiSoundobjectSlider::dualPointMultitouchStarted(const juce::Point<int>& p1, const juce::Point<int>& p2)
+{
+    updateMultiTouch(p1, p2);
+    
+    repaint();
+}
+
+/**
+ * Implementation of pure virtual method to notify multitouch guesture update
+ * @param p1	First multitouch point
+ * @param p2	Second multitouch point
+ */
+void MultiSoundobjectSlider::dualPointMultitouchUpdated(const juce::Point<int>& p1, const juce::Point<int>& p2)
+{
+    updateMultiTouch(p1, p2);
+    
+    if (m_currentlyDraggedId != INVALID_PROCESSOR_ID)
+    {
+        auto ctrl = Controller::GetInstance();
+        if (ctrl)
+        {
+            auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
+            if (processor)
+            {
+                switch (m_multiTouchTargetOperation)
+                {
+                    case MTDT_VerticalSpread:
+                        {
+                            auto spreadFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_Positioning_SourceSpread);
+                            auto newVal = jlimit(spreadFactorRange.getStart(), spreadFactorRange.getEnd(), m_multiTouchModValue - getMultiTouchFactorValue() * spreadFactorRange.getLength());
+                            processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_ObjectSpread, newVal);
+                        }
+                        break;
+                    case MTDT_HorizontalEnSpaceSendGain:
+                        {
+                            auto enSpacGainFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
+                            auto newVal = jlimit(enSpacGainFactorRange.getStart(), enSpacGainFactorRange.getEnd(), m_multiTouchModValue - getMultiTouchFactorValue() * enSpacGainFactorRange.getLength());
+                            processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_ReverbSendGain, newVal);
+                        }
+                        break;
+                    case MTDT_PendingInputDecision:
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+    
+    repaint();
+}
+
+/**
+ * Implementation of pure virtual method to notify multitouch guesture end
+ */
+void MultiSoundobjectSlider::dualPointMultitouchFinished()
+{
+    if (m_currentlyDraggedId != INVALID_PROCESSOR_ID)
+    {
+        auto ctrl = Controller::GetInstance();
+        if (ctrl)
+        {
+            auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
+            if (processor)
+            {
+                switch (m_multiTouchTargetOperation)
+                {
+                    case MTDT_VerticalSpread:
+                        {
+                            auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ObjectSpread]);
+							jassert(param);
+                            if (param)
+                                param->EndGuiGesture();
+                        }
+                        break;
+                    case MTDT_HorizontalEnSpaceSendGain:
+                        {
+                            auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ReverbSendGain]);
+							jassert(param);
+                            if (param)
+                                param->EndGuiGesture();
+                        }
+                        break;
+                    case MTDT_PendingInputDecision:
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+    
+    updateMultiTouch(juce::Point<int>(0, 0), juce::Point<int>(0, 0));
+    
+    repaint();
+}
+
+/**
+ * Helper method to process the current two multitouch points into what multitouch operation shall be performed.
+ */
+void MultiSoundobjectSlider::updateMultiTouch(const juce::Point<int>& p1, const juce::Point<int>& p2)
+{
+    if(p1.isOrigin() && p2.isOrigin())
+    {
+        m_multiTouchPoints.clear();
+        m_multiTouchTargetOperation = MTDT_PendingInputDecision;
+        m_multiTouchModValue = 1.0f;
+    }
+    else if (m_multiTouchPoints.isEmpty())
+    {
+        m_multiTouchPoints._p1 = p1;
+        m_multiTouchPoints._p2_init = p2;
+        m_multiTouchTargetOperation = MTDT_PendingInputDecision;
+        m_multiTouchModValue = 1.0f;
+    }
+    else
+    {
+        m_multiTouchPoints._p1 = p1;
+        m_multiTouchPoints._p2 = p2;
+        
+        auto validDraggedId = (m_currentlyDraggedId != INVALID_PROCESSOR_ID);
+        auto isInitialUpdate = (MTDT_PendingInputDecision == m_multiTouchTargetOperation);
+        if (validDraggedId && isInitialUpdate)
+        {
+            auto ctrl = Controller::GetInstance();
+            if (ctrl)
+            {
+                auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
+                if (processor)
+                {
+                    auto horizontalDelta = std::fabs(m_multiTouchPoints._p2_init.getX() - m_multiTouchPoints._p2.getX());
+                    auto verticalDelta = std::fabs(m_multiTouchPoints._p2_init.getY() - m_multiTouchPoints._p2.getY());
+                    if (horizontalDelta > verticalDelta)
+                    {
+						auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ReverbSendGain]);
+						jassert(param);
+						if (param)
+							param->BeginGuiGesture();
+                        
+                        auto enSpaceGainRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
+                        m_multiTouchModValue = jmap(processor->GetParameterValue(SPI_ParamIdx_ReverbSendGain), enSpaceGainRange.getStart(), enSpaceGainRange.getEnd(), 0.0f, 1.0f);
+                        m_multiTouchTargetOperation = MTDT_HorizontalEnSpaceSendGain;
+                    }
+                    else if (horizontalDelta < verticalDelta)
+                    {
+                        auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ObjectSpread]);
+						jassert(param);
+                        if (param)
+                            param->BeginGuiGesture();
+                        
+                        auto spreadFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_Positioning_SourceSpread);
+                        m_multiTouchModValue = jmap(processor->GetParameterValue(SPI_ParamIdx_ObjectSpread), spreadFactorRange.getStart(), spreadFactorRange.getEnd(), 0.0f, 1.0f);
+                        m_multiTouchTargetOperation = MTDT_VerticalSpread;
+                    }
+                }
+            }
+        }
+        else
+            return;
+    }
+}
+
+/**
+ * Helper method to get a unity factor from the currently available two touch point values, depending on the current target operation mode.
+ * @return  The unity factor or 1 as default.
+ */
+float MultiSoundobjectSlider::getMultiTouchFactorValue()
+{
+    if (m_multiTouchPoints.hasNotableValue())
+    {
+        switch (m_multiTouchTargetOperation)
+        {
+            case MTDT_HorizontalEnSpaceSendGain:
+                {
+                    auto p2 = m_multiTouchPoints._p2.toFloat().getX();
+                    auto p2_init = m_multiTouchPoints._p2_init.toFloat().getX();
+                    
+                    auto deltaP2 = -1.0f * (p2 - p2_init);
+                    if (getWidth() != 0.0f)
+                        return deltaP2 / getWidth();
+                    else
+                        return 0.0f;
+                }
+                break;
+            case MTDT_VerticalSpread:
+                {
+                    auto p2 = m_multiTouchPoints._p2.toFloat().getY();
+                    auto p2_init = m_multiTouchPoints._p2_init.toFloat().getY();
+                    
+                    auto deltaP2 = p2 - p2_init;
+                    if (getHeight() != 0.0f)
+                        return deltaP2 / getHeight();
+                    else
+                        return 0.0f;
+                }
+                break;
+            case MTDT_PendingInputDecision:
+            default:
+                break;
+        };
+    }
+    
+    return 1.0f;
 }
 
 /**

@@ -573,6 +573,56 @@ void PageContainerComponent::lookAndFeelChanged()
 }
 
 /**
+ * Getter for the resizer bar ratio in sound objects table
+ * @return	The resizer bar ratio.
+ */
+float PageContainerComponent::GetSoundobjectTableResizeBarRatio()
+{
+	if (m_soundobjectsPage)
+		return m_soundobjectsPage->GetResizeBarRatio();
+	else
+	{
+		jassertfalse;
+		return 0.5f;
+	}
+}
+
+/**
+ * Setter for the resizer bar ratio in sound objects table
+ * @param ratio	The resizer bar ratio.
+ */
+void PageContainerComponent::SetSoundobjectTableResizeBarRatio(float ratio)
+{
+	if (m_soundobjectsPage)
+		return m_soundobjectsPage->SetResizeBarRatio(ratio);
+}
+
+/**
+ * Getter for the single selection only flag in sound objects table.
+ * @return	The single selection only flag.
+ */
+bool PageContainerComponent::GetSoundobjectTableSingleSelectionOnly()
+{
+	if (m_soundobjectsPage)
+		return m_soundobjectsPage->GetSingleSelectionOnly();
+	else
+	{
+		jassertfalse;
+		return false;
+	}
+}
+
+/**
+ * Setter for the single selection only flag in sound objects table.
+ * @param singleSelectionOnly	The single selection only flag.
+ */
+void PageContainerComponent::SetSoundobjectTableSingleSelectionOnly(bool singleSelectionOnly)
+{
+	if (m_soundobjectsPage)
+		m_soundobjectsPage->SetSingleSelectionOnly(singleSelectionOnly);
+}
+
+/**
  * Getter for the row height in sound objects table
  * @return	The table row height.
  */

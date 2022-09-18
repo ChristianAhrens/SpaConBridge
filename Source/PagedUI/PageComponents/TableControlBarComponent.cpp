@@ -39,10 +39,11 @@ namespace SpaConBridge
 /**
  * Object constructor.
  */
-TableControlBarComponent::TableControlBarComponent(bool canCollapse, const String& componentName)
+TableControlBarComponent::TableControlBarComponent(bool canCollapse, bool canToggleSingleSelectionOnly, const String& componentName)
 	: Component(componentName)
 {
 	m_canCollapse = canCollapse;
+	m_singleSelectionOnlyTogglable = canToggleSingleSelectionOnly;
 
 	// optional Collapse Button
 	if (m_canCollapse)
@@ -70,6 +71,13 @@ TableControlBarComponent::TableControlBarComponent(bool canCollapse, const Strin
 	m_addMultipleInstances->addListener(this);
 	m_addMultipleInstances->setTooltip("Add multiple rows");
 	addAndMakeVisible(m_addMultipleInstances.get());
+
+	// Create selection mode toggle button
+	m_singleSelectionOnly = std::make_unique<DrawableButton>("singleSelOnly", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	m_singleSelectionOnly->setClickingTogglesState(true);
+	m_singleSelectionOnly->addListener(this);
+	m_singleSelectionOnly->setTooltip("Disable multiselection");
+	addAndMakeVisible(m_singleSelectionOnly.get());
 
 	// Create quick selection buttons
 	m_selectAll = std::make_unique<DrawableButton>("all", DrawableButton::ButtonStyle::ImageOnButtonBackground);
@@ -114,6 +122,48 @@ void TableControlBarComponent::SetLayoutDirection(LayoutDirection direction)
 	UpdateCollapsedButton();
 
 	resized();
+}
+
+/**
+ * Helper method to get the allowingsingleselection state
+ * @return	The internal allowingsingleselection state value
+ */
+bool TableControlBarComponent::IsSingleSelectionOnlyTogglable()
+{
+	return m_singleSelectionOnlyTogglable;
+}
+
+/**
+ * Helper method to set the allowingsingleselection button to enabled/disabled
+ * @param	enabled		Determines if the allowingsingleselection should be set to enabled or disabled
+ */
+void TableControlBarComponent::SetSingleSelectionOnlyTogglable(bool togglable)
+{
+	m_singleSelectionOnlyTogglable = togglable;
+
+	resized();
+}
+
+/**
+ * Helper method to get the toggle state of single selection only button
+ * @return	True if only single selection is allowed, false if not
+ */
+bool TableControlBarComponent::IsSingleSelectionOnly()
+{
+	if (m_singleSelectionOnly)
+		return m_singleSelectionOnly->getToggleState();
+	else
+		return false;
+}
+
+/**
+ * Helper method to set the toggle state of single selection only button
+ * @param	singleSelectionOnly		Determines if only single selection is allowed
+ */
+void TableControlBarComponent::SetSingleSelectionOnly(bool singleSelectionOnly)
+{
+	if (m_singleSelectionOnly)
+		m_singleSelectionOnly->setToggleState(singleSelectionOnly, dontSendNotification);
 }
 
 /**
@@ -171,6 +221,7 @@ void TableControlBarComponent::lookAndFeelChanged()
 	UpdateDrawableButtonImages(m_addInstance, BinaryData::add24px_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_removeInstance, BinaryData::remove24px_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_addMultipleInstances, BinaryData::add_batch24dp_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_singleSelectionOnly, BinaryData::rule_one24px_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_selectAll, BinaryData::rule_checked24px_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_selectNone, BinaryData::rule_unchecked24px_svg, &getLookAndFeel());
 
@@ -213,7 +264,19 @@ void TableControlBarComponent::UpdateCollapsedButton()
  */
 void TableControlBarComponent::buttonClicked(Button* button)
 {
-	if (button == m_selectAll.get())
+	if (nullptr == button)
+	{
+		return;
+	}
+	else if (button == m_singleSelectionOnly.get())
+	{
+		if (onSingleSelectionOnlyClick)
+			onSingleSelectionOnlyClick(m_singleSelectionOnly->getToggleState());
+
+		m_selectAll->setEnabled(!m_singleSelectionOnly->getToggleState());
+		m_selectNone->setEnabled(!m_singleSelectionOnly->getToggleState());
+	}
+	else if (button == m_selectAll.get())
 	{
 		if (onSelectAllClick)
 			onSelectAllClick();
@@ -303,6 +366,44 @@ void TableControlBarComponent::resized()
 	auto bounds = getLocalBounds();
 	if (m_layoutDirection == LD_Horizontal)
 	{
+		// collect required widths for items...
+		auto itemWidthSymMargin = 2 + 25 + 2;
+		auto itemWidthAsymMargin = 2 + 25 + 4;
+		auto sliderWidthAsymMargin = 2 + 90 + 4;
+		auto minRequiredWidth = 0;
+		if (m_canCollapse && m_toggleCollapse)
+			minRequiredWidth += itemWidthSymMargin + itemWidthAsymMargin;
+		else
+			minRequiredWidth += itemWidthAsymMargin;
+		if (IsSingleSelectionOnlyTogglable())
+			minRequiredWidth += 5 * itemWidthSymMargin + sliderWidthAsymMargin;
+		else
+			minRequiredWidth += 4 * itemWidthSymMargin + sliderWidthAsymMargin;
+		// ...and decide on that basis what items cannot be shown
+		auto sliderCanBeShown = true;
+		auto selectCtlsCanBeShown = true;
+		auto nothingCanBeShown = false;
+		if (getWidth() <= minRequiredWidth)
+		{
+			sliderCanBeShown = false;
+			if (getWidth() <= (minRequiredWidth - sliderWidthAsymMargin + 2))
+			{
+				selectCtlsCanBeShown = false;
+				if (getWidth() <= (minRequiredWidth - sliderWidthAsymMargin - 2 * itemWidthSymMargin))
+					nothingCanBeShown = true;
+			}
+		}
+
+		// hide/show items tepending on the outcome above
+		m_addInstance->setVisible(!nothingCanBeShown);
+		m_addMultipleInstances->setVisible(!nothingCanBeShown);
+		m_removeInstance->setVisible(!nothingCanBeShown);
+		m_singleSelectionOnly->setVisible(!nothingCanBeShown);
+		m_selectAll->setVisible(!nothingCanBeShown && selectCtlsCanBeShown);
+		m_selectNone->setVisible(!nothingCanBeShown && selectCtlsCanBeShown);
+		m_heightSlider->setVisible(!nothingCanBeShown && sliderCanBeShown);
+
+		// perform the actual layouting
 		// flexbox for bottom buttons
 		FlexBox mainFB;
 		mainFB.flexDirection = FlexBox::Direction::row;
@@ -310,28 +411,81 @@ void TableControlBarComponent::resized()
 		mainFB.alignContent = FlexBox::AlignContent::center;
 
 		if (m_canCollapse && m_toggleCollapse)
+			mainFB.items.add(FlexItem(*m_toggleCollapse.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 4)));
+
+		if (!nothingCanBeShown)
 		{
-			mainFB.items.addArray({
-				FlexItem(*m_toggleCollapse.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 4)),
-				FlexItem(*m_addInstance.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
-				});
+			if (m_canCollapse)
+				mainFB.items.add(FlexItem(*m_addInstance.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)));
+			else
+				mainFB.items.add(FlexItem(*m_addInstance.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 4)));
+
+			mainFB.items.add(FlexItem(*m_addMultipleInstances.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)));
+			mainFB.items.add(FlexItem(*m_removeInstance.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)));
+			mainFB.items.add(FlexItem().withFlex(1).withHeight(30));
+			if (IsSingleSelectionOnlyTogglable())
+			{
+				if (selectCtlsCanBeShown)
+					mainFB.items.add(FlexItem(*m_singleSelectionOnly.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)));
+				else
+					mainFB.items.add(FlexItem(*m_singleSelectionOnly.get()).withWidth(25).withMargin(FlexItem::Margin(2, 4, 3, 2)));
+			}
+			if (selectCtlsCanBeShown)
+			{
+				mainFB.items.add(FlexItem(*m_selectAll.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)));
+				if (sliderCanBeShown)
+					mainFB.items.add(FlexItem(*m_selectNone.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)));
+				else
+					mainFB.items.add(FlexItem(*m_selectNone.get()).withWidth(25).withMargin(FlexItem::Margin(2, 4, 3, 2)));
+			}
+			if (sliderCanBeShown)
+				mainFB.items.add(FlexItem(*m_heightSlider.get()).withWidth(90).withMargin(FlexItem::Margin(2, 4, 3, 2)));
 		}
 		else
-			mainFB.items.add(FlexItem(*m_addInstance.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 4)));
-
-		mainFB.items.addArray({
-			FlexItem(*m_addMultipleInstances.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
-			FlexItem(*m_removeInstance.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
-			FlexItem().withFlex(1).withHeight(30),
-			FlexItem(*m_selectAll.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
-			FlexItem(*m_selectNone.get()).withWidth(25).withMargin(FlexItem::Margin(2, 2, 3, 2)),
-			FlexItem(*m_heightSlider.get()).withWidth(90).withMargin(FlexItem::Margin(2, 4, 3, 2)),
-			});
+			mainFB.items.add(FlexItem().withFlex(1).withHeight(30));
 
 		mainFB.performLayout(bounds.reduced(0, 1));
 	}
 	else if (m_layoutDirection == LD_Vertical)
 	{
+		// collect required widths for items...
+		auto itemHeightSymMargin = 2 + 25 + 2;
+		auto itemHeightAsymMargin = 2 + 25 + 4;
+		auto sliderHeightAsymMargin = 2 + 90 + 4;
+		auto minRequiredHeight = 0;
+		if (m_canCollapse && m_toggleCollapse)
+			minRequiredHeight += itemHeightSymMargin + itemHeightAsymMargin;
+		else
+			minRequiredHeight += itemHeightAsymMargin;
+		if (IsSingleSelectionOnlyTogglable())
+			minRequiredHeight += 5 * itemHeightSymMargin + sliderHeightAsymMargin;
+		else
+			minRequiredHeight += 4 * itemHeightSymMargin + sliderHeightAsymMargin;
+		// ...and decide on that basis what items cannot be shown
+		auto sliderCanBeShown = true;
+		auto selectCtlsCanBeShown = true;
+		auto nothingCanBeShown = false;
+		if (getHeight() <= minRequiredHeight)
+		{
+			sliderCanBeShown = false;
+			if (getHeight() <= (minRequiredHeight - sliderHeightAsymMargin + 2))
+			{
+				selectCtlsCanBeShown = false;
+				if (getHeight() <= (minRequiredHeight - sliderHeightAsymMargin - 2 * itemHeightSymMargin))
+					nothingCanBeShown = true;
+			}
+		}
+
+		// hide/show items tepending on the outcome above
+		m_addInstance->setVisible(!nothingCanBeShown);
+		m_addMultipleInstances->setVisible(!nothingCanBeShown);
+		m_removeInstance->setVisible(!nothingCanBeShown);
+		m_singleSelectionOnly->setVisible(!nothingCanBeShown);
+		m_selectAll->setVisible(!nothingCanBeShown && selectCtlsCanBeShown);
+		m_selectNone->setVisible(!nothingCanBeShown && selectCtlsCanBeShown);
+		m_heightSlider->setVisible(!nothingCanBeShown && sliderCanBeShown);
+
+		// perform the actual layouting
 		// flexbox for bottom buttons
 		FlexBox mainFB;
 		mainFB.flexDirection = FlexBox::Direction::column;
@@ -339,23 +493,38 @@ void TableControlBarComponent::resized()
 		mainFB.alignContent = FlexBox::AlignContent::center;
 
 		if (m_canCollapse && m_toggleCollapse)
+			mainFB.items.add(FlexItem(*m_toggleCollapse.get()).withHeight(25).withMargin(FlexItem::Margin(4, 2, 2, 3)));
+
+		if (!nothingCanBeShown)
 		{
-			mainFB.items.addArray({
-				FlexItem(*m_toggleCollapse.get()).withHeight(25).withMargin(FlexItem::Margin(4, 2, 2, 3)),
-				FlexItem(*m_addInstance.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
-				});
+			if (m_canCollapse)
+				mainFB.items.add(FlexItem(*m_addInstance.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)));
+			else
+				mainFB.items.add(FlexItem(*m_addInstance.get()).withHeight(25).withMargin(FlexItem::Margin(4, 2, 2, 3)));
+
+			mainFB.items.add(FlexItem(*m_addMultipleInstances.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)));
+			mainFB.items.add(FlexItem(*m_removeInstance.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)));
+			mainFB.items.add(FlexItem().withFlex(1).withWidth(30));
+			if (IsSingleSelectionOnlyTogglable())
+			{
+				if (selectCtlsCanBeShown)
+					mainFB.items.add(FlexItem(*m_singleSelectionOnly.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)));
+				else
+					mainFB.items.add(FlexItem(*m_singleSelectionOnly.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 4, 3)));
+			}
+			if (selectCtlsCanBeShown)
+			{
+				mainFB.items.add(FlexItem(*m_selectAll.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)));
+				if (sliderCanBeShown)
+					mainFB.items.add(FlexItem(*m_selectNone.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)));
+				else
+					mainFB.items.add(FlexItem(*m_selectNone.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 4, 3)));
+			}
+			if (sliderCanBeShown)
+				mainFB.items.add(FlexItem(*m_heightSlider.get()).withHeight(90).withMargin(FlexItem::Margin(2, 2, 4, 3)));
 		}
 		else
-			mainFB.items.add(FlexItem(*m_addInstance.get()).withHeight(25).withMargin(FlexItem::Margin(4, 2, 2, 3)));
-
-		mainFB.items.addArray({
-			FlexItem(*m_addMultipleInstances.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
-			FlexItem(*m_removeInstance.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
-			FlexItem().withFlex(1).withWidth(30),
-			FlexItem(*m_selectAll.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
-			FlexItem(*m_selectNone.get()).withHeight(25).withMargin(FlexItem::Margin(2, 2, 2, 3)),
-			FlexItem(*m_heightSlider.get()).withHeight(90).withMargin(FlexItem::Margin(2, 2, 4, 3)),
-			});
+			mainFB.items.add(FlexItem().withFlex(1).withWidth(30));
 
 		mainFB.performLayout(bounds.reduced(1, 0));
 	}

@@ -40,7 +40,7 @@ namespace SpaConBridge
  * Class constructor.
  */
 SoundobjectTableComponent::SoundobjectTableComponent()
-	: TableModelComponent()
+	: TableModelComponent(ControlBarPosition::CBP_Bottom, false, true)
 {
 	SetTableType(TT_Soundobjects);
 
@@ -64,13 +64,12 @@ SoundobjectTableComponent::SoundobjectTableComponent()
 	if (table)
 	{
 		table->setHeader(std::make_unique<BridgingAwareTableHeaderComponent>(tableColumns, BridgingAwareTableHeaderComponent::TC_SoundobjectID));
-		table->setOutlineThickness(1);
+
 #if JUCE_IOS || JUCE_ANDROID
 		table->setClickingTogglesRowSelection(true);
 #else
 		table->setClickingTogglesRowSelection(false);
 #endif
-		table->setMultipleSelectionEnabled(true);
 	}
 	
 	SetRowHeight(RowHeightSlider::_Min);

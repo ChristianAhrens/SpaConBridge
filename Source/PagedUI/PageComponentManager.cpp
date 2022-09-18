@@ -198,6 +198,60 @@ void PageComponentManager::SetEnabledPages(const std::vector<UIPageId>& enabledP
 }
 
 /**
+ * Proxy Getter for the resizer bar ratio in sound objects table.
+ * Forwards call to PageContainerComponent.
+ * @return	The resizer bar ratio.
+ */
+float PageComponentManager::GetSoundobjectTableResizeBarRatio()
+{
+	if (m_pageContainer)
+		return m_pageContainer->GetSoundobjectTableResizeBarRatio();
+	else
+	{
+		jassertfalse;
+		return 0.5f;
+	}
+}
+
+/**
+ * Proxy Setter for the resizer bar ratio in sound objects table.
+ * Forwards call to PageContainerComponent.
+ * @param pos	The resizer bar ratio.
+ */
+void PageComponentManager::SetSoundobjectTableResizeBarRatio(float ratio)
+{
+	if (m_pageContainer)
+		m_pageContainer->SetSoundobjectTableResizeBarRatio(ratio);
+}
+
+/**
+ * Proxy Getter for the single selection only flag in sound objects table.
+ * Forwards call to PageContainerComponent.
+ * @return	The single selection only flag.
+ */
+bool PageComponentManager::GetSoundobjectTableSingleSelectionOnly()
+{
+	if (m_pageContainer)
+		return m_pageContainer->GetSoundobjectTableSingleSelectionOnly();
+	else
+	{
+		jassertfalse;
+		return false;
+	}
+}
+
+/**
+ * Proxy Setter for the single selection only flag in sound objects table.
+ * Forwards call to PageContainerComponent.
+ * @param singleSelectionOnly	The single selection only flag.
+ */
+void PageComponentManager::SetSoundobjectTableSingleSelectionOnly(bool singleSelectionOnly)
+{
+	if (m_pageContainer)
+		m_pageContainer->SetSoundobjectTableSingleSelectionOnly(singleSelectionOnly);
+}
+
+/**
  * Proxy Getter for the row height in sound objects table.
  * Forwards call to PageContainerComponent.
  * @return	The table row height.
@@ -639,7 +693,11 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
 				SetActivePage(pageId, true);
 			}
 			else
+			{
+				// set a valid default to not leave the user with a blank page in case of an error
+				SetActivePage(UPI_Soundobjects, true);
 				retVal = false;
+			}
 		}
 	}
 
@@ -677,6 +735,30 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
 				}
 				else
 					retVal = false;
+			}
+		}
+
+		auto resizeBarRatioXmlElement = soundobjectTableXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::RESIZERBARRATIO));
+		if (resizeBarRatioXmlElement)
+		{
+			auto resizeBarRatioTextXmlElement = resizeBarRatioXmlElement->getFirstChildElement();
+			if (resizeBarRatioTextXmlElement && resizeBarRatioTextXmlElement->isTextElement())
+			{
+				auto resizerBarRatio = resizeBarRatioTextXmlElement->getText().getFloatValue();
+
+				SetSoundobjectTableResizeBarRatio(resizerBarRatio);
+			}
+		}
+
+		auto singleSelectionOnlyXmlElement = soundobjectTableXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SINGLESELECTIONONLY));
+		if (singleSelectionOnlyXmlElement)
+		{
+			auto singleSelectionOnlyTextXmlElement = singleSelectionOnlyXmlElement->getFirstChildElement();
+			if (singleSelectionOnlyTextXmlElement && singleSelectionOnlyTextXmlElement->isTextElement())
+			{
+				auto singleSelectionOnly = singleSelectionOnlyTextXmlElement->getText().getIntValue() == 0 ? false : true;
+
+				SetSoundobjectTableSingleSelectionOnly(singleSelectionOnly);
 			}
 		}
 	}
@@ -887,6 +969,14 @@ std::unique_ptr<XmlElement> PageComponentManager::createStateXml()
 			auto rowHeightXmlElement = soundobjectTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::ROWHEIGHT));
 			if (rowHeightXmlElement)
 				rowHeightXmlElement->addTextElement(String(GetSoundobjectTableRowHeight()));
+
+			auto resizeBarRatioXmlElement = soundobjectTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::RESIZERBARRATIO));
+			if (resizeBarRatioXmlElement)
+				resizeBarRatioXmlElement->addTextElement(String(GetSoundobjectTableResizeBarRatio()));
+
+			auto singleSelectionOnlyXmlElement = soundobjectTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SINGLESELECTIONONLY));
+			if (singleSelectionOnlyXmlElement)
+				singleSelectionOnlyXmlElement->addTextElement(String(GetSoundobjectTableSingleSelectionOnly() ? 1 : 0));
 		}
 
 		auto matrixInputTableXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXINPUTTABLE));

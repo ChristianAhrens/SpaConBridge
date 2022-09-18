@@ -1,6 +1,6 @@
 ## DiGiCo OSC bridging settings
 
-![Showreel.018.png](../Showreel/Showreel.018.png "DiGiCo OSC bridging settings")
+![Showreel.021.png](../Showreel/Showreel.021.png "DiGiCo OSC bridging settings")
 
 _This bridging protocol is the same as [Generic OSC](GenericOSC.md) and is available separately to allow using both a DiGiCo SD series console and other OSC input at the same time._
 

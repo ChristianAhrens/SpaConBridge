@@ -42,9 +42,11 @@ See [LATEST RELEASE](../../releases/latest) for available binary packages or joi
 </tr>
 <tr>
 <th>Linux</th>
+<th>Raspberry Pi OS (Raspbian)</th>
 </tr>
 <tr>
-<td><img src="Resources/Documentation/SpaConBridge_on-Linux.png" alt="SpaConBridge on Windows" width="85%"></td>
+<td><img src="Resources/Documentation/SpaConBridge_on-Linux.png" alt="SpaConBridge on Linux" width="100%"></td>
+<td><img src="Resources/Documentation/SpaConBridge_on-RaspberryPi.png" alt="SpaConBridge on RaspberryPi" width="55%"></td>
 </tr>
 </table>
 

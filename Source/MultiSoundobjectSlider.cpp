@@ -531,16 +531,17 @@ void MultiSoundobjectSlider::mouseUp(const MouseEvent& e)
 {
 	auto wasInFakeALTMultiTouch = IsInFakeALTMultiTouch();
 	auto isntPrimaryMouse = GetPrimaryMouseInputSourceIndex() != e.source.getIndex();
+    auto validDraggedId = (m_currentlyDraggedId != INVALID_PROCESSOR_ID);
 
     DualPointMultitouchCatcherComponent::mouseUp(e);
 
-	if (m_currentlyDraggedId != INVALID_PROCESSOR_ID)
-	{
-		if (!(wasInFakeALTMultiTouch || isntPrimaryMouse))
-		{
-			auto ctrl = Controller::GetInstance();
-			if (ctrl)
-			{
+    if (!(wasInFakeALTMultiTouch || isntPrimaryMouse))
+    {
+        auto ctrl = Controller::GetInstance();
+        if (ctrl)
+        {
+            if (validDraggedId)
+            {
 				auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
 				if (processor)
 				{
@@ -628,7 +629,19 @@ void MultiSoundobjectSlider::dualPointMultitouchUpdated(const juce::Point<int>& 
         }
         else
         {
-            DBG(String(__FUNCTION__) + String(" now we would have to update abs/rel mod of multi soundobject spread/enspacegain values"));
+            for (auto const& paramsKV : m_cachedParameters)
+            {
+                auto const& selected = paramsKV.second._selected;
+                
+                if (selected)
+                {
+                    auto processor = ctrl->GetSoundobjectProcessor(paramsKV.second._id);
+                    if (processor)
+                    {
+                        DBG(String(__FUNCTION__) + String(" now we would have to update abs/rel mod of multi soundobject") + String(processor->GetSoundobjectId()) + String(" spread/enspacegain values"));
+                    }
+                }
+            }
         }
     }
     repaint();
@@ -672,7 +685,19 @@ void MultiSoundobjectSlider::dualPointMultitouchFinished()
         }
         else
         {
-                DBG(String(__FUNCTION__) + String(" now we would have to finish abs/rel mod of multi soundobject spread/enspacegain values"));
+            for (auto const& paramsKV : m_cachedParameters)
+            {
+                auto const& selected = paramsKV.second._selected;
+                
+                if (selected)
+                {
+                    auto processor = ctrl->GetSoundobjectProcessor(paramsKV.second._id);
+                    if (processor)
+                    {
+                        DBG(String(__FUNCTION__) + String(" now we would have to finish abs/rel mod of multi soundobject") + String(processor->GetSoundobjectId()) + String(" spread/enspacegain values"));
+                    }
+                }
+            }
         }
     }
     
@@ -733,7 +758,19 @@ void MultiSoundobjectSlider::updateMultiTouch(const juce::Point<int>& p1, const 
                 }
                 else
                 {
-                    DBG(String(__FUNCTION__) + String(" now we would have to do initial abs/rel mod of multi soundobject spread/enspacegain values"));
+                    for (auto const& paramsKV : m_cachedParameters)
+                    {
+                        auto const& selected = paramsKV.second._selected;
+                        
+                        if (selected)
+                        {
+                            auto processor = ctrl->GetSoundobjectProcessor(paramsKV.second._id);
+                            if (processor)
+                            {
+                                DBG(String(__FUNCTION__) + String(" now we would have to do initial abs/rel mod of multi soundobject") + String(processor->GetSoundobjectId()) + String(" spread/enspacegain values"));
+                            }
+                        }
+                    }
                 }
                 
                 m_multiTouchTargetOperation = isEnSpaceGainChange ? MTDT_HorizontalEnSpaceSendGain : MTDT_HorizontalEnSpaceSendGain;

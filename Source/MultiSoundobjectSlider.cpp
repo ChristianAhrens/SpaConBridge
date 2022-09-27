@@ -53,7 +53,9 @@ MultiSoundobjectSlider::MultiSoundobjectSlider() :
 MultiSoundobjectSlider::MultiSoundobjectSlider(bool spreadEnabled, bool reverbSndGainEnabled) :
 	m_currentlyDraggedId(INVALID_PROCESSOR_ID),
 	m_spreadEnabled(spreadEnabled),
-	m_reverbSndGainEnabled(reverbSndGainEnabled)
+	m_reverbSndGainEnabled(reverbSndGainEnabled),
+    m_soundObjectNamesEnabled(false),
+    m_selectedMapping(MappingAreaId::MAI_First)
 {
 }
 
@@ -632,37 +634,43 @@ void MultiSoundobjectSlider::dualPointMultitouchUpdated(const juce::Point<int>& 
  */
 void MultiSoundobjectSlider::dualPointMultitouchFinished()
 {
-    if (m_currentlyDraggedId != INVALID_PROCESSOR_ID)
+    auto validDraggedId = (m_currentlyDraggedId != INVALID_PROCESSOR_ID);
+    
+    auto ctrl = Controller::GetInstance();
+    if (ctrl)
     {
-        auto ctrl = Controller::GetInstance();
-        if (ctrl)
+        if (validDraggedId)
         {
             auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
             if (processor)
             {
+                auto param = static_cast<GestureManagedAudioParameterFloat*>(nullptr);
+                
                 switch (m_multiTouchTargetOperation)
                 {
                     case MTDT_VerticalSpread:
-                        {
-                            auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ObjectSpread]);
-							jassert(param);
-                            if (param)
-                                param->EndGuiGesture();
-                        }
+                    {
+                        param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ObjectSpread]);
+                        jassert(param);
+                    }
                         break;
                     case MTDT_HorizontalEnSpaceSendGain:
-                        {
-                            auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ReverbSendGain]);
-							jassert(param);
-                            if (param)
-                                param->EndGuiGesture();
-                        }
+                    {
+                        param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ReverbSendGain]);
+                        jassert(param);                    }
                         break;
                     case MTDT_PendingInputDecision:
                     default:
                         break;
                 }
+                
+                if (param)
+                    param->EndGuiGesture();
             }
+        }
+        else
+        {
+                DBG(String(__FUNCTION__) + String(" now we would have to finish abs/rel mod of multi soundobject spread/enspacegain values"));
         }
     }
     
@@ -696,38 +704,35 @@ void MultiSoundobjectSlider::updateMultiTouch(const juce::Point<int>& p1, const 
         
         auto validDraggedId = (m_currentlyDraggedId != INVALID_PROCESSOR_ID);
         auto isInitialUpdate = (MTDT_PendingInputDecision == m_multiTouchTargetOperation);
-        if (validDraggedId && isInitialUpdate)
+        if (isInitialUpdate)
         {
+            auto horizontalDelta = std::fabs(m_multiTouchPoints._p2_init.getX() - m_multiTouchPoints._p2.getX());
+            auto verticalDelta = std::fabs(m_multiTouchPoints._p2_init.getY() - m_multiTouchPoints._p2.getY());
+            auto isEnSpaceGainChange = horizontalDelta > verticalDelta;
+            auto isSpreadFactorChange = horizontalDelta < verticalDelta;
+            
             auto ctrl = Controller::GetInstance();
-            if (ctrl)
+            if (ctrl && (isEnSpaceGainChange || isSpreadFactorChange))
             {
-                auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
-                if (processor)
+                // if a soundobject is selected, modify its value absolute and directly
+                if (validDraggedId)
                 {
-                    auto horizontalDelta = std::fabs(m_multiTouchPoints._p2_init.getX() - m_multiTouchPoints._p2.getX());
-                    auto verticalDelta = std::fabs(m_multiTouchPoints._p2_init.getY() - m_multiTouchPoints._p2.getY());
-                    if (horizontalDelta > verticalDelta)
+                    auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
+                    if (processor)
                     {
-						auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ReverbSendGain]);
-						jassert(param);
-						if (param)
-							param->BeginGuiGesture();
-                        
-                        auto enSpaceGainRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
-                        m_multiTouchModValue = jmap(processor->GetParameterValue(SPI_ParamIdx_ReverbSendGain), enSpaceGainRange.getStart(), enSpaceGainRange.getEnd(), 0.0f, 1.0f);
-                        m_multiTouchTargetOperation = MTDT_HorizontalEnSpaceSendGain;
-                    }
-                    else if (horizontalDelta < verticalDelta)
-                    {
-                        auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ObjectSpread]);
-						jassert(param);
+                        auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[isEnSpaceGainChange ? SPI_ParamIdx_ReverbSendGain : SPI_ParamIdx_ObjectSpread]);
+                        jassert(param);
                         if (param)
                             param->BeginGuiGesture();
-                        
-                        auto spreadFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_Positioning_SourceSpread);
-                        m_multiTouchModValue = jmap(processor->GetParameterValue(SPI_ParamIdx_ObjectSpread), spreadFactorRange.getStart(), spreadFactorRange.getEnd(), 0.0f, 1.0f);
-                        m_multiTouchTargetOperation = MTDT_VerticalSpread;
+                            
+                        auto paramValRange = ProcessingEngineConfig::GetRemoteObjectRange(isEnSpaceGainChange ? ROI_MatrixInput_ReverbSendGain : ROI_Positioning_SourceSpread);
+                        m_multiTouchModValue = jmap(processor->GetParameterValue(isEnSpaceGainChange ? SPI_ParamIdx_ReverbSendGain : SPI_ParamIdx_ObjectSpread), paramValRange.getStart(), paramValRange.getEnd(), 0.0f, 1.0f);
+                        m_multiTouchTargetOperation = isEnSpaceGainChange ? MTDT_HorizontalEnSpaceSendGain : MTDT_HorizontalEnSpaceSendGain;
                     }
+                }
+                else
+                {
+                    DBG(String(__FUNCTION__) + String(" now we would have to do abs/rel mod of multi soundobject spread/enspacegain values"));
                 }
             }
         }
@@ -744,13 +749,13 @@ float MultiSoundobjectSlider::getMultiTouchFactorValue()
 {
     if (m_multiTouchPoints.hasNotableValue())
     {
+        auto p2 = m_multiTouchPoints._p2.toFloat().getX();
+        auto p2_init = m_multiTouchPoints._p2_init.toFloat().getX();
+        
         switch (m_multiTouchTargetOperation)
         {
             case MTDT_HorizontalEnSpaceSendGain:
-                {
-                    auto p2 = m_multiTouchPoints._p2.toFloat().getX();
-                    auto p2_init = m_multiTouchPoints._p2_init.toFloat().getX();
-                    
+                {   
                     auto deltaP2 = -1.0f * (p2 - p2_init);
                     if (getWidth() != 0.0f)
                         return deltaP2 / getWidth();
@@ -760,9 +765,6 @@ float MultiSoundobjectSlider::getMultiTouchFactorValue()
                 break;
             case MTDT_VerticalSpread:
                 {
-                    auto p2 = m_multiTouchPoints._p2.toFloat().getY();
-                    auto p2_init = m_multiTouchPoints._p2_init.toFloat().getY();
-                    
                     auto deltaP2 = p2 - p2_init;
                     if (getHeight() != 0.0f)
                         return deltaP2 / getHeight();

@@ -411,6 +411,68 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 		g.setFont(font);
 		g.drawText(textLabel, Rectangle<float>(x - (0.5f * fontDependantWidth), y + 3, fontDependantWidth, knobSize * 2.0f), Justification::centred, true);
 	}
+    
+    auto noSingleSoundobjectCurrentlyEdited = INVALID_PROCESSOR_ID == m_currentlyDraggedId;
+    auto multitouchInputActive = MTDT_PendingInputDecision != m_multiTouchTargetOperation;
+    if (noSingleSoundobjectCurrentlyEdited && multitouchInputActive)
+    {
+        // Paint 'multi soundobject editing dual-multitouch points indication'
+        auto& p1 = m_multiTouchPoints._p2_init;
+        auto& p2 = m_multiTouchPoints._p2;
+        auto goodVisibilityDistance = 16;
+        auto multitouchIndicationColour = getLookAndFeel().findColour(TextButton::buttonColourId).brighter(0.15f);
+        switch (m_multiTouchTargetOperation)
+        {
+            case MTDT_HorizontalEnSpaceSendGain:
+            {
+                g.setColour(multitouchIndicationColour);
+                g.drawDashedLine(Line<float>(p1.toFloat().getX(), 0.0f, p1.toFloat().getX(), h), dashLengths, 2, lineThickness);
+                g.drawDashedLine(Line<float>(p2.toFloat().getX(), 0.0f, p2.toFloat().getX(), h), dashLengths, 2, lineThickness);
+                g.setOpacity(0.15f);
+                g.fillRect(Rectangle<float>(p1.toFloat().getX(), 0.0f, p2.toFloat().getX() - p1.toFloat().getX(), h));
+                
+                auto font = Font(static_cast<float>(goodVisibilityDistance), Font::plain);
+                g.setFont(font);
+                g.setOpacity(1.0f);
+                auto enSpacGainFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
+                auto enSpacGainChangeVal = jlimit(enSpacGainFactorRange.getStart(), enSpacGainFactorRange.getEnd(), getMultiTouchFactorValue() * enSpacGainFactorRange.getLength());
+                auto textLabel = String("EnSpace Gain ") + String(enSpacGainChangeVal) + String("dB");
+                auto fontDependantWidth = font.getStringWidth(textLabel);
+                auto textLeftOfMouse = (getWidth() - p2.getX() - goodVisibilityDistance) < fontDependantWidth;
+                if (textLeftOfMouse)
+                    g.drawText(textLabel, goodVisibilityDistance, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
+                else
+                    g.drawText(textLabel, getWidth() - goodVisibilityDistance - fontDependantWidth, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centredLeft, true);
+            }
+                break;
+            case MTDT_VerticalSpread:
+            {
+                g.setColour(multitouchIndicationColour);
+                g.drawDashedLine(Line<float>(0.0f, p1.toFloat().getY(), w, p1.toFloat().getY()), dashLengths, 2, lineThickness);
+                g.drawDashedLine(Line<float>(0.0f, p2.toFloat().getY(), w, p2.toFloat().getY()), dashLengths, 2, lineThickness);
+                g.setOpacity(0.15f);
+                g.fillRect(Rectangle<float>(0.0f, p1.toFloat().getY(), w, p2.toFloat().getY() - p1.toFloat().getY()));
+                
+                auto font = Font(static_cast<float>(goodVisibilityDistance), Font::plain);
+                g.setFont(font);
+                g.setOpacity(1.0f);
+                auto spreadFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_Positioning_SourceSpread);
+                auto spreadFactorChangeVal = jlimit(spreadFactorRange.getStart(), spreadFactorRange.getEnd(), getMultiTouchFactorValue() * spreadFactorRange.getLength());
+                auto textLabel = String("Spread Factor ") + String(spreadFactorChangeVal);
+                auto fontDependantWidth = font.getStringWidth(textLabel);
+                auto textBelowMouse = (p2.getY() - goodVisibilityDistance) < goodVisibilityDistance;
+                if (textBelowMouse)
+                    g.drawText(textLabel, goodVisibilityDistance, getHeight() - 2 * goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
+                else
+                    g.drawText(textLabel, goodVisibilityDistance, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
+            }
+                break;
+            case MTDT_PendingInputDecision:
+                jassertfalse;
+            default:
+                break;
+        }
+    }
 }
 
 /**

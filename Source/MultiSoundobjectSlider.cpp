@@ -424,48 +424,48 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
         switch (m_multiTouchTargetOperation)
         {
             case MTDT_HorizontalEnSpaceSendGain:
-            {
-                g.setColour(multitouchIndicationColour);
-                g.drawDashedLine(Line<float>(p1.toFloat().getX(), 0.0f, p1.toFloat().getX(), h), dashLengths, 2, lineThickness);
-                g.drawDashedLine(Line<float>(p2.toFloat().getX(), 0.0f, p2.toFloat().getX(), h), dashLengths, 2, lineThickness);
-                g.setOpacity(0.15f);
-                g.fillRect(Rectangle<float>(p1.toFloat().getX(), 0.0f, p2.toFloat().getX() - p1.toFloat().getX(), h));
-                
-                auto font = Font(static_cast<float>(goodVisibilityDistance), Font::plain);
-                g.setFont(font);
-                g.setOpacity(1.0f);
-                auto enSpacGainFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
-                auto enSpacGainChangeVal = jlimit(enSpacGainFactorRange.getStart(), enSpacGainFactorRange.getEnd(), getMultiTouchFactorValue() * enSpacGainFactorRange.getLength());
-                auto textLabel = String("EnSpace Gain ") + String(enSpacGainChangeVal) + String("dB");
-                auto fontDependantWidth = font.getStringWidth(textLabel);
-                auto textLeftOfMouse = (getWidth() - p2.getX() - goodVisibilityDistance) < fontDependantWidth;
-                if (textLeftOfMouse)
-                    g.drawText(textLabel, goodVisibilityDistance, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
-                else
-                    g.drawText(textLabel, getWidth() - goodVisibilityDistance - fontDependantWidth, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centredLeft, true);
-            }
+                {
+                    g.setColour(multitouchIndicationColour);
+                    g.drawDashedLine(Line<float>(p1.toFloat().getX(), 0.0f, p1.toFloat().getX(), h), dashLengths, 2, lineThickness);
+                    g.drawDashedLine(Line<float>(p2.toFloat().getX(), 0.0f, p2.toFloat().getX(), h), dashLengths, 2, lineThickness);
+                    g.setOpacity(0.15f);
+                    g.fillRect(Rectangle<float>(p1.toFloat().getX(), 0.0f, p2.toFloat().getX() - p1.toFloat().getX(), h));
+                    
+                    auto font = Font(static_cast<float>(goodVisibilityDistance), Font::plain);
+                    g.setFont(font);
+                    g.setOpacity(1.0f);
+                    auto enSpacGainFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
+                    auto enSpacGainChangeVal = jlimit(enSpacGainFactorRange.getStart(), enSpacGainFactorRange.getEnd(), -1.0f * getMultiTouchFactorValue() * enSpacGainFactorRange.getLength());
+                    auto textLabel = String("EnSpace Gain ") + String(enSpacGainChangeVal) + String("dB");
+                    auto fontDependantWidth = font.getStringWidth(textLabel);
+                    auto textLeftOfMouse = (getWidth() - p2.getX() - goodVisibilityDistance) < fontDependantWidth;
+                    if (textLeftOfMouse)
+                        g.drawText(textLabel, goodVisibilityDistance, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
+                    else
+                        g.drawText(textLabel, getWidth() - goodVisibilityDistance - fontDependantWidth, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centredLeft, true);
+                }
                 break;
             case MTDT_VerticalSpread:
-            {
-                g.setColour(multitouchIndicationColour);
-                g.drawDashedLine(Line<float>(0.0f, p1.toFloat().getY(), w, p1.toFloat().getY()), dashLengths, 2, lineThickness);
-                g.drawDashedLine(Line<float>(0.0f, p2.toFloat().getY(), w, p2.toFloat().getY()), dashLengths, 2, lineThickness);
-                g.setOpacity(0.15f);
-                g.fillRect(Rectangle<float>(0.0f, p1.toFloat().getY(), w, p2.toFloat().getY() - p1.toFloat().getY()));
-                
-                auto font = Font(static_cast<float>(goodVisibilityDistance), Font::plain);
-                g.setFont(font);
-                g.setOpacity(1.0f);
-                auto spreadFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_Positioning_SourceSpread);
-                auto spreadFactorChangeVal = jlimit(spreadFactorRange.getStart(), spreadFactorRange.getEnd(), getMultiTouchFactorValue() * spreadFactorRange.getLength());
-                auto textLabel = String("Spread Factor ") + String(spreadFactorChangeVal);
-                auto fontDependantWidth = font.getStringWidth(textLabel);
-                auto textBelowMouse = (p2.getY() - goodVisibilityDistance) < goodVisibilityDistance;
-                if (textBelowMouse)
-                    g.drawText(textLabel, goodVisibilityDistance, getHeight() - 2 * goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
-                else
-                    g.drawText(textLabel, goodVisibilityDistance, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
-            }
+                {
+                    g.setColour(multitouchIndicationColour);
+                    g.drawDashedLine(Line<float>(0.0f, p1.toFloat().getY(), w, p1.toFloat().getY()), dashLengths, 2, lineThickness);
+                    g.drawDashedLine(Line<float>(0.0f, p2.toFloat().getY(), w, p2.toFloat().getY()), dashLengths, 2, lineThickness);
+                    g.setOpacity(0.15f);
+                    g.fillRect(Rectangle<float>(0.0f, p1.toFloat().getY(), w, p2.toFloat().getY() - p1.toFloat().getY()));
+                    
+                    auto font = Font(static_cast<float>(goodVisibilityDistance), Font::plain);
+                    g.setFont(font);
+                    g.setOpacity(1.0f);
+                    auto spreadFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_Positioning_SourceSpread);
+                    auto spreadFactorChangeVal = jlimit(spreadFactorRange.getStart(), spreadFactorRange.getEnd(), -1.0f * getMultiTouchFactorValue() * spreadFactorRange.getLength());
+                    auto textLabel = String("Spread Factor ") + String(spreadFactorChangeVal);
+                    auto fontDependantWidth = font.getStringWidth(textLabel);
+                    auto textBelowMouse = (p2.getY() - goodVisibilityDistance) < goodVisibilityDistance;
+                    if (textBelowMouse)
+                        g.drawText(textLabel, goodVisibilityDistance, getHeight() - 2 * goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
+                    else
+                        g.drawText(textLabel, goodVisibilityDistance, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
+                }
                 break;
             case MTDT_PendingInputDecision:
                 jassertfalse;
@@ -677,14 +677,14 @@ void MultiSoundobjectSlider::dualPointMultitouchUpdated(const juce::Point<int>& 
                     case MTDT_VerticalSpread:
                     {
                         auto spreadFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_Positioning_SourceSpread);
-                        auto newVal = jlimit(spreadFactorRange.getStart(), spreadFactorRange.getEnd(), m_multiTouchModValue - getMultiTouchFactorValue() * spreadFactorRange.getLength());
+                        auto newVal = jlimit(spreadFactorRange.getStart(), spreadFactorRange.getEnd(), m_multiTouchModNormalValue - getMultiTouchFactorValue() * spreadFactorRange.getLength());
                         processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_ObjectSpread, newVal);
                     }
                         break;
                     case MTDT_HorizontalEnSpaceSendGain:
                     {
                         auto enSpacGainFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
-                        auto newVal = jlimit(enSpacGainFactorRange.getStart(), enSpacGainFactorRange.getEnd(), m_multiTouchModValue - getMultiTouchFactorValue() * enSpacGainFactorRange.getLength());
+                        auto newVal = jlimit(enSpacGainFactorRange.getStart(), enSpacGainFactorRange.getEnd(), m_multiTouchModNormalValue - getMultiTouchFactorValue() * enSpacGainFactorRange.getLength());
                         processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_ReverbSendGain, newVal);
                     }
                         break;
@@ -709,8 +709,8 @@ void MultiSoundobjectSlider::dualPointMultitouchUpdated(const juce::Point<int>& 
                             case MTDT_VerticalSpread:
                             {
                                 auto spreadFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_Positioning_SourceSpread);
-                                auto oldVal = jmap(processor->GetParameterValue(SPI_ParamIdx_ObjectSpread), spreadFactorRange.getStart(), spreadFactorRange.getEnd(), 0.0f, 1.0f);
-                                auto newVal = jlimit(spreadFactorRange.getStart(), spreadFactorRange.getEnd(), oldVal - getMultiTouchFactorValue() * spreadFactorRange.getLength());
+                                auto oldNormalVal = jmap(processor->GetParameterValue(SPI_ParamIdx_ObjectSpread), spreadFactorRange.getStart(), spreadFactorRange.getEnd(), 0.0f, 1.0f);
+                                auto newVal = jlimit(spreadFactorRange.getStart(), spreadFactorRange.getEnd(), oldNormalVal - getMultiTouchFactorValue() * spreadFactorRange.getLength());
                                 processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_ObjectSpread, newVal);
                                 
                                 DBG(String(__FUNCTION__) + String(" updating abs/rel mod of multi soundobject") + String(processor->GetSoundobjectId()) + String(" spread param to ") + String(newVal));
@@ -719,9 +719,9 @@ void MultiSoundobjectSlider::dualPointMultitouchUpdated(const juce::Point<int>& 
                                 break;
                             case MTDT_HorizontalEnSpaceSendGain:
                             {
-                                auto enSpacGainFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
-                                auto oldVal = jmap(processor->GetParameterValue(SPI_ParamIdx_ReverbSendGain), enSpacGainFactorRange.getStart(), enSpacGainFactorRange.getEnd(), 0.0f, 1.0f);
-                                auto newVal = jlimit(enSpacGainFactorRange.getStart(), enSpacGainFactorRange.getEnd(), oldVal - getMultiTouchFactorValue() * enSpacGainFactorRange.getLength());
+                                auto enSpacGainRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
+                                auto oldNormalVal = jmap(processor->GetParameterValue(SPI_ParamIdx_ReverbSendGain), enSpacGainRange.getStart(), enSpacGainRange.getEnd(), 0.0f, 1.0f);
+                                auto newVal = jlimit(enSpacGainRange.getStart(), enSpacGainRange.getEnd(), oldNormalVal - getMultiTouchFactorValue() * enSpacGainRange.getLength());
                                 processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_ReverbSendGain, newVal);
                                 
                                 DBG(String(__FUNCTION__) + String(" updating abs/rel mod of multi soundobject") + String(processor->GetSoundobjectId()) + String(" enspacegain param to ") + String(newVal));
@@ -831,14 +831,14 @@ void MultiSoundobjectSlider::updateMultiTouch(const juce::Point<int>& p1, const 
     {
         m_multiTouchPoints.clear();
         m_multiTouchTargetOperation = MTDT_PendingInputDecision;
-        m_multiTouchModValue = 1.0f;
+        m_multiTouchModNormalValue = 1.0f;
     }
     else if (m_multiTouchPoints.isEmpty())
     {
         m_multiTouchPoints._p1 = p1;
         m_multiTouchPoints._p2_init = p2;
         m_multiTouchTargetOperation = MTDT_PendingInputDecision;
-        m_multiTouchModValue = 1.0f;
+        m_multiTouchModNormalValue = 1.0f;
     }
     else
     {
@@ -869,7 +869,7 @@ void MultiSoundobjectSlider::updateMultiTouch(const juce::Point<int>& p1, const 
                             param->BeginGuiGesture();
                             
                         auto paramValRange = ProcessingEngineConfig::GetRemoteObjectRange(isEnSpaceGainChange ? ROI_MatrixInput_ReverbSendGain : ROI_Positioning_SourceSpread);
-                        m_multiTouchModValue = jmap(processor->GetParameterValue(isEnSpaceGainChange ? SPI_ParamIdx_ReverbSendGain : SPI_ParamIdx_ObjectSpread), paramValRange.getStart(), paramValRange.getEnd(), 0.0f, 1.0f);
+                        m_multiTouchModNormalValue = jmap(processor->GetParameterValue(isEnSpaceGainChange ? SPI_ParamIdx_ReverbSendGain : SPI_ParamIdx_ObjectSpread), paramValRange.getStart(), paramValRange.getEnd(), 0.0f, 1.0f);
                     }
                 }
                 else

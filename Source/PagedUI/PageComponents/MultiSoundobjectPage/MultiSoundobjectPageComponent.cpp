@@ -103,7 +103,7 @@ void MultiSoundobjectPageComponent::SetPageIsVisible(bool visible)
 		}
 		else if (visible)
 		{
-			multiSoundobjectComponent->SetShowSelectedOnly(false);
+			multiSoundobjectComponent->SetHandleSelectedOnly(false);
 		}
 	}
 

@@ -206,18 +206,18 @@ void MultiSoundobjectSlider::RemoveBackgroundImage(MappingAreaId mappingAreaId)
  * Getter for the 'show only selected' state member.
  * @return True if internal member is set to show only selected SO.
  */
-bool MultiSoundobjectSlider::IsShowingSelectedSoundobjectsOnly()
+bool MultiSoundobjectSlider::IsHandlingSelectedSoundobjectsOnly()
 {
-	return m_showSelectedOnly;
+	return m_handleSelectedOnly;
 }
 
 /**
  * Setter for the 'show only selected' state member.
  * @param	selectedOnly	True if internal member shall be set to show only selected SO.
  */
-void MultiSoundobjectSlider::SetShowSelectedSoundobjectsOnly(bool selectedOnly)
+void MultiSoundobjectSlider::SetHandleSelectedSoundobjectsOnly(bool selectedOnly)
 {
-	m_showSelectedOnly = selectedOnly;
+	m_handleSelectedOnly = selectedOnly;
 }
 
 /**
@@ -261,7 +261,7 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 	{
 		auto const& selected = paramsKV.second._selected;
 
-		if (m_showSelectedOnly && !selected)
+		if (m_handleSelectedOnly && !selected)
 			continue;
 
 		auto knobColour = paramsKV.second._colour;
@@ -444,6 +444,11 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
 
 	for (auto const& paramsKV : m_cachedParameters)
 	{
+        auto const& selected = paramsKV.second._selected;
+
+        if (m_handleSelectedOnly && !selected)
+            continue;
+        
 		// Map the x/y coordinates to the pixel-wise dimensions of the surface area.
 		auto const& pt = paramsKV.second._pos;
 		float x = pt.x * w;

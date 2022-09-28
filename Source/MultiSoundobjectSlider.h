@@ -112,8 +112,8 @@ public:
 	void SetBackgroundImage(MappingAreaId mappingAreaId, const juce::Image& backgroundImage);
 	void RemoveBackgroundImage(MappingAreaId mappingAreaId);
 
-	bool IsShowingSelectedSoundobjectsOnly();
-	void SetShowSelectedSoundobjectsOnly(bool selectedOnly);
+	bool IsHandlingSelectedSoundobjectsOnly();
+	void SetHandleSelectedSoundobjectsOnly(bool selectedOnly);
 
 	void UpdateParameters(const ParameterCache& positions);
 
@@ -142,7 +142,7 @@ private:
 	bool														m_soundObjectNamesEnabled{ false };	                        /**< Flag indication, if SO name strings shall be painted for individual SOs. */
 	MappingAreaId												m_selectedMapping;					                        /**< Remember the last selected coordinate mapping for the multi-slider. */
 	std::map<MappingAreaId, std::unique_ptr<ImageComponent>>	m_backgroundImages;					                        /**< Map of background images for the four Mapping Areas that can be displayed. */
-	bool														m_showSelectedOnly{ false };		                        /**< Indication if only selected SO shall be visualized. */
+	bool														m_handleSelectedOnly{ false };		                        /**< Indication if only selected SO shall be visualized. */
     MultiTouchPoints                                            m_multiTouchPoints;                                         /**< The two multitouch points currently tracked. */
     MultiTouchDirectionTarget                                   m_multiTouchTargetOperation{ MTDT_PendingInputDecision };   /**< Enum value defining how current multitouch input is interpreted. */
     float                                                       m_multiTouchModValue{ 1.0f };

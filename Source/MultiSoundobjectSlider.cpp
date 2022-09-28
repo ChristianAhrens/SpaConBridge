@@ -412,9 +412,9 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 		g.drawText(textLabel, Rectangle<float>(x - (0.5f * fontDependantWidth), y + 3, fontDependantWidth, knobSize * 2.0f), Justification::centred, true);
 	}
     
-    auto noSingleSoundobjectCurrentlyEdited = INVALID_PROCESSOR_ID == m_currentlyDraggedId;
+    auto singleSoundobjectCurrentlyEdited = INVALID_PROCESSOR_ID != m_currentlyDraggedId;
     auto multitouchInputActive = MTDT_PendingInputDecision != m_multiTouchTargetOperation;
-    if (noSingleSoundobjectCurrentlyEdited && multitouchInputActive)
+    if (!singleSoundobjectCurrentlyEdited && multitouchInputActive)
     {
         // Paint 'multi soundobject editing dual-multitouch points indication'
         auto& p1 = m_multiTouchPoints._p2_init;
@@ -894,7 +894,7 @@ void MultiSoundobjectSlider::updateMultiTouch(const juce::Point<int>& p1, const 
                     }
                 }
                 
-                m_multiTouchTargetOperation = isEnSpaceGainChange ? MTDT_HorizontalEnSpaceSendGain : MTDT_HorizontalEnSpaceSendGain;
+                m_multiTouchTargetOperation = isEnSpaceGainChange ? MTDT_HorizontalEnSpaceSendGain : MTDT_VerticalSpread;
             }
         }
         else

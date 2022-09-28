@@ -479,7 +479,7 @@ void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool acti
 
         auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
         if (multiSoundobjectComponent)
-            multiSoundobjectComponent->SetShowSelectedOnly(true);
+            multiSoundobjectComponent->SetHandleSelectedOnly(true);
         m_multiSoundobjectComponentContainer->addInternalComponent();
 	}
 	else
@@ -513,7 +513,7 @@ void SoundobjectTablePageComponent::SetPageIsVisible(bool visible)
     {
         auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
         if (multiSoundobjectComponent)
-            multiSoundobjectComponent->SetShowSelectedOnly(true);
+            multiSoundobjectComponent->SetHandleSelectedOnly(true);
         m_multiSoundobjectComponentContainer->addInternalComponent();
     }
 

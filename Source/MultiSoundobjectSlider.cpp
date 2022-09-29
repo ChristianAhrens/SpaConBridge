@@ -669,6 +669,7 @@ void MultiSoundobjectSlider::dualPointMultitouchUpdated(const juce::Point<int>& 
     {
         if (validDraggedId)
         {
+            auto& id = m_currentlyDraggedId;
             auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
             if (processor)
             {
@@ -677,14 +678,14 @@ void MultiSoundobjectSlider::dualPointMultitouchUpdated(const juce::Point<int>& 
                     case MTDT_VerticalSpread:
                     {
                         auto spreadFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_Positioning_SourceSpread);
-                        auto newVal = jlimit(spreadFactorRange.getStart(), spreadFactorRange.getEnd(), m_multiTouchModNormalValue - getMultiTouchFactorValue() * spreadFactorRange.getLength());
+                        auto newVal = jlimit(spreadFactorRange.getStart(), spreadFactorRange.getEnd(), m_multiTouchModNormalValues.at(id) - getMultiTouchFactorValue() * spreadFactorRange.getLength());
                         processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_ObjectSpread, newVal);
                     }
                         break;
                     case MTDT_HorizontalEnSpaceSendGain:
                     {
                         auto enSpacGainFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
-                        auto newVal = jlimit(enSpacGainFactorRange.getStart(), enSpacGainFactorRange.getEnd(), m_multiTouchModNormalValue - getMultiTouchFactorValue() * enSpacGainFactorRange.getLength());
+                        auto newVal = jlimit(enSpacGainFactorRange.getStart(), enSpacGainFactorRange.getEnd(), m_multiTouchModNormalValues.at(id) - getMultiTouchFactorValue() * enSpacGainFactorRange.getLength());
                         processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_ReverbSendGain, newVal);
                     }
                         break;
@@ -701,7 +702,8 @@ void MultiSoundobjectSlider::dualPointMultitouchUpdated(const juce::Point<int>& 
                 auto const& selected = paramsKV.second._selected;
                 if (selected)
                 {
-                    auto processor = ctrl->GetSoundobjectProcessor(paramsKV.second._id);
+                    auto& id = paramsKV.second._id;
+                    auto processor = ctrl->GetSoundobjectProcessor(id);
                     if (processor)
                     {
                         switch (m_multiTouchTargetOperation)
@@ -709,8 +711,7 @@ void MultiSoundobjectSlider::dualPointMultitouchUpdated(const juce::Point<int>& 
                             case MTDT_VerticalSpread:
                             {
                                 auto spreadFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_Positioning_SourceSpread);
-                                auto oldNormalVal = jmap(processor->GetParameterValue(SPI_ParamIdx_ObjectSpread), spreadFactorRange.getStart(), spreadFactorRange.getEnd(), 0.0f, 1.0f);
-                                auto newVal = jlimit(spreadFactorRange.getStart(), spreadFactorRange.getEnd(), oldNormalVal - getMultiTouchFactorValue() * spreadFactorRange.getLength());
+                                auto newVal = jlimit(spreadFactorRange.getStart(), spreadFactorRange.getEnd(), m_multiTouchModNormalValues.at(id) - getMultiTouchFactorValue() * spreadFactorRange.getLength());
                                 processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_ObjectSpread, newVal);
                                 
                                 DBG(String(__FUNCTION__) + String(" updating abs/rel mod of multi soundobject") + String(processor->GetSoundobjectId()) + String(" spread param to ") + String(newVal));
@@ -720,8 +721,7 @@ void MultiSoundobjectSlider::dualPointMultitouchUpdated(const juce::Point<int>& 
                             case MTDT_HorizontalEnSpaceSendGain:
                             {
                                 auto enSpacGainRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
-                                auto oldNormalVal = jmap(processor->GetParameterValue(SPI_ParamIdx_ReverbSendGain), enSpacGainRange.getStart(), enSpacGainRange.getEnd(), 0.0f, 1.0f);
-                                auto newVal = jlimit(enSpacGainRange.getStart(), enSpacGainRange.getEnd(), oldNormalVal - getMultiTouchFactorValue() * enSpacGainRange.getLength());
+                                auto newVal = jlimit(enSpacGainRange.getStart(), enSpacGainRange.getEnd(), m_multiTouchModNormalValues.at(id) - getMultiTouchFactorValue() * enSpacGainRange.getLength());
                                 processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_ReverbSendGain, newVal);
                                 
                                 DBG(String(__FUNCTION__) + String(" updating abs/rel mod of multi soundobject") + String(processor->GetSoundobjectId()) + String(" enspacegain param to ") + String(newVal));
@@ -831,14 +831,14 @@ void MultiSoundobjectSlider::updateMultiTouch(const juce::Point<int>& p1, const 
     {
         m_multiTouchPoints.clear();
         m_multiTouchTargetOperation = MTDT_PendingInputDecision;
-        m_multiTouchModNormalValue = 1.0f;
+        m_multiTouchModNormalValues.clear();
     }
     else if (m_multiTouchPoints.isEmpty())
     {
         m_multiTouchPoints._p1 = p1;
         m_multiTouchPoints._p2_init = p2;
         m_multiTouchTargetOperation = MTDT_PendingInputDecision;
-        m_multiTouchModNormalValue = 1.0f;
+        m_multiTouchModNormalValues.clear();
     }
     else
     {
@@ -860,6 +860,7 @@ void MultiSoundobjectSlider::updateMultiTouch(const juce::Point<int>& p1, const 
                 // if a soundobject is selected, modify its value absolute and directly
                 if (validDraggedId)
                 {
+                    auto& id = m_currentlyDraggedId;
                     auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
                     if (processor)
                     {
@@ -869,7 +870,7 @@ void MultiSoundobjectSlider::updateMultiTouch(const juce::Point<int>& p1, const 
                             param->BeginGuiGesture();
                             
                         auto paramValRange = ProcessingEngineConfig::GetRemoteObjectRange(isEnSpaceGainChange ? ROI_MatrixInput_ReverbSendGain : ROI_Positioning_SourceSpread);
-                        m_multiTouchModNormalValue = jmap(processor->GetParameterValue(isEnSpaceGainChange ? SPI_ParamIdx_ReverbSendGain : SPI_ParamIdx_ObjectSpread), paramValRange.getStart(), paramValRange.getEnd(), 0.0f, 1.0f);
+                        m_multiTouchModNormalValues[id] = jmap(processor->GetParameterValue(isEnSpaceGainChange ? SPI_ParamIdx_ReverbSendGain : SPI_ParamIdx_ObjectSpread), paramValRange.getStart(), paramValRange.getEnd(), 0.0f, 1.0f);
                     }
                 }
                 else
@@ -880,7 +881,8 @@ void MultiSoundobjectSlider::updateMultiTouch(const juce::Point<int>& p1, const 
                         
                         if (selected)
                         {
-                            auto processor = ctrl->GetSoundobjectProcessor(paramsKV.second._id);
+                            auto& id = paramsKV.second._id;
+                            auto processor = ctrl->GetSoundobjectProcessor(id);
                             if (processor)
                             {
                                 DBG(String(__FUNCTION__) + String(" beginGuiGesture of multi soundobject") + String(processor->GetSoundobjectId()) + String(" spread/enspacegain parameter"));
@@ -889,6 +891,9 @@ void MultiSoundobjectSlider::updateMultiTouch(const juce::Point<int>& p1, const 
                                 jassert(param);
                                 if (param)
                                     param->BeginGuiGesture();
+                                    
+                                auto paramValRange = ProcessingEngineConfig::GetRemoteObjectRange(isEnSpaceGainChange ? ROI_MatrixInput_ReverbSendGain : ROI_Positioning_SourceSpread);
+                                m_multiTouchModNormalValues[id] = jmap(processor->GetParameterValue(isEnSpaceGainChange ? SPI_ParamIdx_ReverbSendGain : SPI_ParamIdx_ObjectSpread), paramValRange.getStart(), paramValRange.getEnd(), 0.0f, 1.0f);
                             }
                         }
                     }

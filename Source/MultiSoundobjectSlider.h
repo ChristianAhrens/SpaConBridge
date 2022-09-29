@@ -145,7 +145,7 @@ private:
 	bool														m_handleSelectedOnly{ false };		                        /**< Indication if only selected SO shall be visualized. */
     MultiTouchPoints                                            m_multiTouchPoints;                                         /**< The two multitouch points currently tracked. */
     MultiTouchDirectionTarget                                   m_multiTouchTargetOperation{ MTDT_PendingInputDecision };   /**< Enum value defining how current multitouch input is interpreted. */
-    float                                                       m_multiTouchModNormalValue{ 1.0f };
+    std::map<SoundobjectProcessorId, float>                     m_multiTouchModNormalValues;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSoundobjectSlider)
 };

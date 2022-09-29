@@ -629,16 +629,16 @@ void MultiSoundobjectSlider::mouseUp(const MouseEvent& e)
 				}
 			}
 		}
-
-		if (!isntPrimaryMouse)
-		{
-			// De-select knob.
-			m_currentlyDraggedId = INVALID_PROCESSOR_ID;
-
-			// trigger single repaint to get rid of 'currently dragged crosshair'
-			repaint();
-		}
 	}
+    
+    if (!isntPrimaryMouse)
+    {
+        // De-select knob.
+        m_currentlyDraggedId = INVALID_PROCESSOR_ID;
+
+        // trigger single repaint to get rid of 'currently dragged crosshair'
+        repaint();
+    }
 }
 
 /**

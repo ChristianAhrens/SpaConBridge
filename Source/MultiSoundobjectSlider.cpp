@@ -713,8 +713,6 @@ void MultiSoundobjectSlider::dualPointMultitouchUpdated(const juce::Point<int>& 
                                     auto spreadFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_Positioning_SourceSpread);
                                     auto newVal = jlimit(spreadFactorRange.getStart(), spreadFactorRange.getEnd(), m_multiTouchModNormalValues.at(id) - getMultiTouchFactorValue() * spreadFactorRange.getLength());
                                     processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_ObjectSpread, newVal);
-                                    
-                                    DBG(String(__FUNCTION__) + String(" updating abs/rel mod of multi soundobject") + String(processor->GetSoundobjectId()) + String(" spread param to ") + String(newVal));
                                 }
                                 break;
                             case MTDT_HorizontalEnSpaceSendGain:
@@ -722,9 +720,6 @@ void MultiSoundobjectSlider::dualPointMultitouchUpdated(const juce::Point<int>& 
                                     auto enSpacGainRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
                                     auto newVal = jlimit(enSpacGainRange.getStart(), enSpacGainRange.getEnd(), m_multiTouchModNormalValues.at(id) - getMultiTouchFactorValue() * enSpacGainRange.getLength());
                                     processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_ReverbSendGain, newVal);
-                                    
-                                    DBG(String(__FUNCTION__) + String(" updating abs/rel mod of multi soundobject") + String(processor->GetSoundobjectId()) + String(" enspacegain param to ") + String(newVal));
-
                                 }
                                 break;
                             case MTDT_PendingInputDecision:
@@ -792,16 +787,10 @@ void MultiSoundobjectSlider::dualPointMultitouchFinished()
                             case MTDT_VerticalSpread:
                                 param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ObjectSpread]);
                                 jassert(param);
-                                
-                                DBG(String(__FUNCTION__) + String(" endGuiGesture of multi soundobject ") + String(processor->GetSoundobjectId()) + String(" spread parameter"));
-                                
                                 break;
                             case MTDT_HorizontalEnSpaceSendGain:
                                 param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ReverbSendGain]);
                                 jassert(param);
-                                
-                                DBG(String(__FUNCTION__) + String(" endGuiGesture of multi soundobject ") + String(processor->GetSoundobjectId()) + String(" enspacegain parameter"));
-                                
                                 break;
                             case MTDT_PendingInputDecision:
                             default:
@@ -905,8 +894,6 @@ void MultiSoundobjectSlider::updateMultiTouch(const juce::Point<int>& p1, const 
                             {
                                 if (isSpreadFactorChange)
                                 {
-                                    DBG(String(__FUNCTION__) + String(" beginGuiGesture of multi soundobject ") + String(processor->GetSoundobjectId()) + String(" spread parameter"));
-                                    
                                     auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ObjectSpread]);
                                     jassert(param);
                                     if (param)
@@ -919,8 +906,6 @@ void MultiSoundobjectSlider::updateMultiTouch(const juce::Point<int>& p1, const 
                                 }
                                 else if (isEnSpaceGainChange)
                                 {
-                                    DBG(String(__FUNCTION__) + String(" beginGuiGesture of multi soundobject ") + String(processor->GetSoundobjectId()) + String(" enspacegain parameter"));
-                                    
                                     auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ReverbSendGain]);
                                     jassert(param);
                                     if (param)
@@ -939,8 +924,6 @@ void MultiSoundobjectSlider::updateMultiTouch(const juce::Point<int>& p1, const 
                 }
             }
         }
-        else
-            return;
     }
 }
 

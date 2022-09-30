@@ -305,7 +305,7 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 				auto font = Font(static_cast<float>(goodVisibilityDistance), Font::plain);
                 g.setFont(font);
                 g.setOpacity(1.0f);
-				auto textLabel = String("EnSpace Gain ") + String(paramsKV.second._reverbSndGain) + String("dB");
+				auto textLabel = String("EnSpace Gain ") + String(paramsKV.second._reverbSndGain, 2) + String("dB");
 				auto fontDependantWidth = font.getStringWidth(textLabel);
                 auto textLeftOfMouse = (getWidth() - p2.getX() - goodVisibilityDistance) < fontDependantWidth;
                 if (textLeftOfMouse)
@@ -325,7 +325,7 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 				auto font = Font(static_cast<float>(goodVisibilityDistance), Font::plain);
                 g.setFont(font);
                 g.setOpacity(1.0f);
-				auto textLabel = String("Spread Factor ") + String(paramsKV.second._spread);
+				auto textLabel = String("Spread Factor ") + String(paramsKV.second._spread, 2);
 				auto fontDependantWidth = font.getStringWidth(textLabel);
                 auto textBelowMouse = (p2.getY() - goodVisibilityDistance) < goodVisibilityDistance;
                 if (textBelowMouse)
@@ -435,8 +435,8 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
                     g.setFont(font);
                     g.setOpacity(1.0f);
                     auto enSpacGainFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
-                    auto enSpacGainChangeVal = jlimit(enSpacGainFactorRange.getStart(), enSpacGainFactorRange.getEnd(), -1.0f * getMultiTouchFactorValue() * enSpacGainFactorRange.getLength());
-                    auto textLabel = String("EnSpace Gain ") + String(enSpacGainChangeVal) + String("dB");
+                    auto enSpacGainChangeVal = -1.0f * getMultiTouchFactorValue() * enSpacGainFactorRange.getLength();
+                    auto textLabel = String("Adding ") + String(enSpacGainChangeVal, 2) + String("dB to EnSpace Gain");
                     auto fontDependantWidth = font.getStringWidth(textLabel);
                     auto textLeftOfMouse = (getWidth() - p2.getX() - goodVisibilityDistance) < fontDependantWidth;
                     if (textLeftOfMouse)
@@ -457,8 +457,8 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
                     g.setFont(font);
                     g.setOpacity(1.0f);
                     auto spreadFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_Positioning_SourceSpread);
-                    auto spreadFactorChangeVal = jlimit(spreadFactorRange.getStart(), spreadFactorRange.getEnd(), -1.0f * getMultiTouchFactorValue() * spreadFactorRange.getLength());
-                    auto textLabel = String("Spread Factor ") + String(spreadFactorChangeVal);
+                    auto spreadFactorChangeVal = -1.0f * getMultiTouchFactorValue() * spreadFactorRange.getLength();
+                    auto textLabel = String("Adding ") + String(spreadFactorChangeVal, 2) + String(" to Spread Factor");
                     auto fontDependantWidth = font.getStringWidth(textLabel);
                     auto textBelowMouse = (p2.getY() - goodVisibilityDistance) < goodVisibilityDistance;
                     if (textBelowMouse)

@@ -438,8 +438,8 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
                     auto enSpacGainChangeVal = -1.0f * getMultiTouchFactorValue() * enSpacGainFactorRange.getLength();
                     auto textLabel = String("Adding ") + String(enSpacGainChangeVal, 2) + String("dB to EnSpace Gain");
                     auto fontDependantWidth = font.getStringWidth(textLabel);
-                    auto textLeftOfMouse = (getWidth() - p2.getX() - goodVisibilityDistance) < fontDependantWidth;
-                    if (textLeftOfMouse)
+                    auto isTextLeftOfMouse = (getWidth() - p2.getX() - goodVisibilityDistance) < fontDependantWidth;
+                    if (isTextLeftOfMouse)
                         g.drawText(textLabel, goodVisibilityDistance, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
                     else
                         g.drawText(textLabel, getWidth() - goodVisibilityDistance - fontDependantWidth, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centredLeft, true);
@@ -460,8 +460,8 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
                     auto spreadFactorChangeVal = -1.0f * getMultiTouchFactorValue() * spreadFactorRange.getLength();
                     auto textLabel = String("Adding ") + String(spreadFactorChangeVal, 2) + String(" to Spread Factor");
                     auto fontDependantWidth = font.getStringWidth(textLabel);
-                    auto textBelowMouse = (p2.getY() - goodVisibilityDistance) < goodVisibilityDistance;
-                    if (textBelowMouse)
+                    auto isTextBelowMouse = (p2.getY() - goodVisibilityDistance) < goodVisibilityDistance;
+                    if (isTextBelowMouse)
                         g.drawText(textLabel, goodVisibilityDistance, getHeight() - 2 * goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
                     else
                         g.drawText(textLabel, goodVisibilityDistance, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);

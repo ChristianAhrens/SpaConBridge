@@ -420,7 +420,7 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
         auto& p1 = m_multiTouchPoints._p2_init;
         auto& p2 = m_multiTouchPoints._p2;
         auto goodVisibilityDistance = 16;
-        auto multitouchIndicationColour = getLookAndFeel().findColour(TextButton::buttonColourId).brighter(0.15f);
+        auto multitouchIndicationColour = getLookAndFeel().findColour(TextButton::textColourOnId).brighter(0.15f);
         switch (m_multiTouchTargetOperation)
         {
             case MTDT_HorizontalEnSpaceSendGain:

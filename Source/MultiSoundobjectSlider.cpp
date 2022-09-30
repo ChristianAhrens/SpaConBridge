@@ -702,7 +702,7 @@ void MultiSoundobjectSlider::dualPointMultitouchUpdated(const juce::Point<int>& 
                 auto const& selected = paramsKV.second._selected;
                 if (selected)
                 {
-                    auto& id = paramsKV.second._id;
+                    auto& id = paramsKV.first;
                     auto processor = ctrl->GetSoundobjectProcessor(id);
                     if (processor)
                     {
@@ -888,7 +888,7 @@ void MultiSoundobjectSlider::updateMultiTouch(const juce::Point<int>& p1, const 
                         
                         if (selected)
                         {
-                            auto& id = paramsKV.second._id;
+                            auto& id = paramsKV.first;
                             auto processor = ctrl->GetSoundobjectProcessor(id);
                             if (processor)
                             {

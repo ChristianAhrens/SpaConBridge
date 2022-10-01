@@ -86,6 +86,7 @@ public:
 
 	void SetResizeBarRatio(float ratio);
 	float GetResizeBarRatio();
+    bool IsResizeBarRatioUpdatePending();
 
 	void SetSingleSelectionOnly(bool singleSelectionOnly);
 	bool GetSingleSelectionOnly();
@@ -113,14 +114,17 @@ protected:
 	void deactivateStretchableSplitLayout();
 
 private:
+    void UpdateLayoutRatio();
+    
 	std::unique_ptr<SoundobjectTableComponent>		m_soundobjectsTable;				/**< The actual table model / component inside this component. */
 	std::unique_ptr<SoundobjectProcessorEditor>		m_selectedProcessorInstanceEditor;	/**< The processor editor component corresponding to the selected row */
 
-	bool											m_isHorizontalSlider;				/**< Indication if the layout slider currently is shown horizontally (vs. vertically). */
-	int												m_layoutManagerItemCount{ 0 };		/**< Helper to keep track of the pages layouting 'mode'. */
-	std::unique_ptr<StretchableLayoutManager>		m_layoutManager;					/**< The layout manager object instance. */
-	std::unique_ptr<TriplePointResizerBar>	        m_layoutResizeBar;					/**< The layout slider object instance. */
-	float											m_resizeBarRatio{ 0.5f };			/**< The size ratio of table vs. details contents devided by the resizerbar. */
+	bool											m_isHorizontalSlider;				    /**< Indication if the layout slider currently is shown horizontally (vs. vertically). */
+	int												m_layoutManagerItemCount{ 0 };		    /**< Helper to keep track of the pages layouting 'mode'. */
+	std::unique_ptr<StretchableLayoutManager>		m_layoutManager;					    /**< The layout manager object instance. */
+	std::unique_ptr<TriplePointResizerBar>	        m_layoutResizeBar;					    /**< The layout slider object instance. */
+	float											m_resizeBarRatio{ 0.5f };			    /**< The size ratio of table vs. details contents devided by the resizerbar. */
+    bool                                            m_resizeBarRatioUpdatePending{ true };  /**< Indication if the last set resizeBarRatio was already applied. */
 
 	bool	                                                    m_multiSoundobjectsActive;
     std::unique_ptr<BlackFrameMultiSoundobjectComponentHelper>  m_multiSoundobjectComponentContainer;

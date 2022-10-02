@@ -4,6 +4,13 @@ All notable changes to SpaConBridge will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Added
+
+### Changed
+
+### Fixed
+
 ## [0.8.1] - 2022-10-02
 ### Added
 - Two-finger multitouch support on MultiSoundobject UI to modify Spread Factor and EnSpace Send Gain for multiple Soundobjects at a time (when performing gesture without selecting a Soundobject first)

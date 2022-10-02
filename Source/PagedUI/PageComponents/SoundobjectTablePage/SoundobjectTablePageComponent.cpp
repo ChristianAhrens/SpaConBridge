@@ -268,16 +268,31 @@ int SoundobjectTablePageComponent::GetRowHeight()
 void SoundobjectTablePageComponent::SetResizeBarRatio(float ratio)
 {
 	m_resizeBarRatio = ratio;
-	auto size = static_cast<float>(IsPortraitAspectRatio() ? getHeight() : getWidth());
-	auto resultingNewPosition = static_cast<int>(size * ratio);
+    m_resizeBarRatioUpdatePending = true;
 
-	if (m_layoutManager && m_layoutManager->getItemCurrentPosition(1) != resultingNewPosition)
-	{
-		m_layoutManager->setItemPosition(1, resultingNewPosition);
+    UpdateLayoutRatio();
+}
 
-		if (m_layoutResizeBar)
-			m_layoutResizeBar->hasBeenMoved();
-	}
+/**
+ * Helper method to update layout ratio/ resizebar using value of internal resizeBarRatio member
+ */
+void SoundobjectTablePageComponent::UpdateLayoutRatio()
+{
+    auto size = IsPortraitAspectRatio() ? getHeight() : getWidth();
+    if (size == 0 || !IsResizeBarRatioUpdatePending())
+        return;
+    
+    m_resizeBarRatioUpdatePending = false;
+    
+    auto resultingNewPosition = static_cast<float>(size) * m_resizeBarRatio;
+
+    if (m_layoutManager && m_layoutManager->getItemCurrentPosition(1) != resultingNewPosition)
+    {
+        m_layoutManager->setItemPosition(1, resultingNewPosition);
+
+        if (m_layoutResizeBar)
+            m_layoutResizeBar->hasBeenMoved();
+    }
 }
 
 /**
@@ -287,6 +302,15 @@ void SoundobjectTablePageComponent::SetResizeBarRatio(float ratio)
 float SoundobjectTablePageComponent::GetResizeBarRatio()
 {
 	return m_resizeBarRatio;
+}
+
+/**
+ * Getter for the resizer bar ratio pending boolean indicator
+ * @return    The current position ratio update pending flag value.
+ */
+bool SoundobjectTablePageComponent::IsResizeBarRatioUpdatePending()
+{
+    return m_resizeBarRatioUpdatePending;
 }
 
 /**
@@ -365,6 +389,8 @@ void SoundobjectTablePageComponent::resized()
 		Component* comps[] = { m_soundobjectsTable.get() };
 		m_layoutManager->layOutComponents(comps, 1, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, false, true);
 	}
+    
+    UpdateLayoutRatio();
 }
 
 void SoundobjectTablePageComponent::activateStretchableSplitLayout()
@@ -389,10 +415,10 @@ void SoundobjectTablePageComponent::activateStretchableSplitLayout()
 		removeChildComponent(m_layoutResizeBar.get());
 		m_layoutResizeBar = std::make_unique<TriplePointResizerBar>(m_layoutManager.get(), 1, m_isHorizontalSlider);
 		m_layoutResizeBar->onResizeBarMoved = [this]() {
-			auto size = static_cast<float>(IsPortraitAspectRatio() ? getHeight() : getWidth());
-			if (m_layoutManager && size != 0.0f)
+			auto size = IsPortraitAspectRatio() ? getHeight() : getWidth();
+			if (m_layoutManager && size != 0)
 			{
-				m_resizeBarRatio = m_layoutManager->getItemCurrentPosition(1) / size;
+                SetResizeBarRatio(m_layoutManager->getItemCurrentPosition(1) / static_cast<float>(size));
 
 				auto config = SpaConBridge::AppConfiguration::getInstance();
 				if (config)
@@ -400,8 +426,8 @@ void SoundobjectTablePageComponent::activateStretchableSplitLayout()
 			}
 		};
 		addAndMakeVisible(m_layoutResizeBar.get());
-		resized();
-		SetResizeBarRatio(m_resizeBarRatio);
+		
+        UpdateLayoutRatio();
 	}
 }
 
@@ -479,7 +505,7 @@ void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool acti
 
         auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
         if (multiSoundobjectComponent)
-            multiSoundobjectComponent->SetShowSelectedOnly(true);
+            multiSoundobjectComponent->SetHandleSelectedOnly(true);
         m_multiSoundobjectComponentContainer->addInternalComponent();
 	}
 	else
@@ -513,7 +539,7 @@ void SoundobjectTablePageComponent::SetPageIsVisible(bool visible)
     {
         auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
         if (multiSoundobjectComponent)
-            multiSoundobjectComponent->SetShowSelectedOnly(true);
+            multiSoundobjectComponent->SetHandleSelectedOnly(true);
         m_multiSoundobjectComponentContainer->addInternalComponent();
     }
 

@@ -528,10 +528,10 @@ void MultiSoundobjectComponent::RemoveBackgroundImage(MappingAreaId mappingAreaI
  * Getter for the show selected only state
  * @return	The show selected only state.
  */
-bool MultiSoundobjectComponent::IsShowingSelectedOnly() const
+bool MultiSoundobjectComponent::IsHandlingSelectedOnly() const
 {
 	if (m_multiSoundobjectSlider)
-		return m_multiSoundobjectSlider->IsShowingSelectedSoundobjectsOnly();
+		return m_multiSoundobjectSlider->IsHandlingSelectedSoundobjectsOnly();
 	else
 		return false;
 }
@@ -540,10 +540,10 @@ bool MultiSoundobjectComponent::IsShowingSelectedOnly() const
  * Setter for the show selected only state
  * @param selectedOnly	The show selected only state to set.
  */
-void MultiSoundobjectComponent::SetShowSelectedOnly(bool selectedOnly)
+void MultiSoundobjectComponent::SetHandleSelectedOnly(bool selectedOnly)
 {
 	if (m_multiSoundobjectSlider)
-		m_multiSoundobjectSlider->SetShowSelectedSoundobjectsOnly(selectedOnly);
+		m_multiSoundobjectSlider->SetHandleSelectedSoundobjectsOnly(selectedOnly);
 
 	// Trigger an update on the multi-slider
 	UpdateGui(true);

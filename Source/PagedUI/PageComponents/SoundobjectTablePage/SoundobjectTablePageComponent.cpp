@@ -52,7 +52,8 @@ TriplePointResizerBar::TriplePointResizerBar(StretchableLayoutManager* layoutToU
                              bool isBarVertical)
     : StretchableLayoutResizerBar(layoutToUse,
                                   itemIndexInLayout,
-                                  isBarVertical)
+                                  isBarVertical),
+	m_isBarVertical(isBarVertical)
 {
 }
 
@@ -92,15 +93,51 @@ void TriplePointResizerBar::paint(Graphics& g)
         g.fillEllipse(ellipse);
     }
 }
+
+/**
+ * Reimplemented to notify the world about mouse down events and potentially changed resizer bar position.
+ * @param e        Mouse event to react to.
+ */
+void TriplePointResizerBar::mouseDown(const MouseEvent& e)
+{
+	StretchableLayoutResizerBar::mouseDown(e);
+
+	if (onResizeBarMoveStarted)
+		onResizeBarMoveStarted();
+}
+
+/**
+ * Reimplemented to notify the world about mouse drag events and potentially changed resizer bar position.
+ * @param e        Mouse event to react to.
+ */
+void TriplePointResizerBar::mouseDrag(const MouseEvent& e)
+{
+	StretchableLayoutResizerBar::mouseDrag(e);
+
+	if (e.getDistanceFromDragStart() > 0 && onResizeBarMoved)
+	{
+		const int desiredPos = m_isBarVertical ? e.getMouseDownPosition().getX() + e.getDistanceFromDragStartX()
+			: e.getMouseDownPosition().getY() + e.getDistanceFromDragStartY();
+
+		onResizeBarMoved(desiredPos);
+	}
+}
+
 /**
  * Reimplemented to notify the world about mouse up events and potentially changed resizer bar position.
  * @param e        Mouse event to react to.
  */
 void TriplePointResizerBar::mouseUp(const MouseEvent& e)
 {
-	if (e.getDistanceFromDragStart() > 0 && onResizeBarMoved)
-		onResizeBarMoved();
 	StretchableLayoutResizerBar::mouseUp(e);
+
+	if (e.getDistanceFromDragStart() > 0 && onResizeBarMoveFinished)
+	{
+		const int desiredPos = m_isBarVertical ? e.getMouseDownPosition().getX() + e.getDistanceFromDragStartX()
+			: e.getMouseDownPosition().getY() + e.getDistanceFromDragStartY();
+
+		onResizeBarMoveFinished(desiredPos);
+	}
 }
 
 
@@ -264,14 +301,16 @@ int SoundobjectTablePageComponent::GetRowHeight()
 
 /**
  * Setter for the resizer bar ratio in internal layout
- * @param	float  The position ratio to set.
+ * @param	ratio  The position ratio to set.
+ * @param	updateLayoutRatio	Indicator if UpdateLayoutRatio shall be called as well
  */
-void SoundobjectTablePageComponent::SetResizeBarRatio(float ratio)
+void SoundobjectTablePageComponent::SetResizeBarRatio(float ratio, bool updateLayoutRatio)
 {
 	m_resizeBarRatio = ratio;
     m_resizeBarRatioUpdatePending = true;
 
-    UpdateLayoutRatio();
+	if (updateLayoutRatio)
+		UpdateLayoutRatio();
 }
 
 /**
@@ -423,11 +462,20 @@ void SoundobjectTablePageComponent::activateStretchableSplitLayout()
 		m_isHorizontalSlider = !isPortrait;
 		removeChildComponent(m_layoutResizeBar.get());
 		m_layoutResizeBar = std::make_unique<TriplePointResizerBar>(m_layoutManager.get(), 1, m_isHorizontalSlider);
-		m_layoutResizeBar->onResizeBarMoved = [this]() {
+		m_layoutResizeBar->onResizeBarMoved = [this](int itemPosition) {
 			auto size = IsPortraitAspectRatio() ? getHeight() : getWidth();
 			if (m_layoutManager && size != 0)
 			{
-                SetResizeBarRatio(m_layoutManager->getItemCurrentPosition(1) / static_cast<float>(size));
+				auto ratio = static_cast<float>(itemPosition) / static_cast<float>(size);
+                SetResizeBarRatio(ratio);
+			}
+		};
+		m_layoutResizeBar->onResizeBarMoveFinished = [this](int itemPosition) {
+			auto size = IsPortraitAspectRatio() ? getHeight() : getWidth();
+			if (m_layoutManager && size != 0)
+			{
+				auto ratio = static_cast<float>(itemPosition) / static_cast<float>(size);
+				SetResizeBarRatio(ratio);
 
 				auto config = SpaConBridge::AppConfiguration::getInstance();
 				if (config)

@@ -48,9 +48,16 @@ public:
     
     void paint(Graphics& g) override;
 
+	void mouseDown(const MouseEvent& e) override;
+	void mouseDrag(const MouseEvent& e) override;
 	void mouseUp(const MouseEvent& e) override;
 
-	std::function<void()>	onResizeBarMoved;
+	std::function<void()>		onResizeBarMoveStarted;
+	std::function<void(int)>	onResizeBarMoved;
+	std::function<void(int)>	onResizeBarMoveFinished;
+
+private:
+	bool m_isBarVertical;
 };
 
 /**
@@ -84,7 +91,7 @@ public:
 	void SetRowHeight(int height);
 	int GetRowHeight();
 
-	void SetResizeBarRatio(float ratio);
+	void SetResizeBarRatio(float ratio, bool updateLayoutRatio = true);
 	float GetResizeBarRatio();
     bool IsResizeBarRatioUpdatePending();
 

@@ -279,13 +279,21 @@ void SoundobjectTablePageComponent::SetResizeBarRatio(float ratio)
  */
 void SoundobjectTablePageComponent::UpdateLayoutRatio()
 {
-    auto size = IsPortraitAspectRatio() ? getHeight() : getWidth();
-    if (size == 0 || !IsResizeBarRatioUpdatePending())
+    // nothing can be done if the required objects are not existing
+    if (!m_layoutManager || !m_layoutResizeBar)
         return;
     
-    m_resizeBarRatioUpdatePending = false;
+    // if the page's size is not setup yet, nothing can be done here as well
+    auto size = IsPortraitAspectRatio() ? getHeight() : getWidth();
+    if (size == 0)
+        return;
     
-    auto resultingNewPosition = static_cast<float>(size) * m_resizeBarRatio;
+    // in case there is no ratio update pending, we do not need to proceed further with resizing, except if the current position is out of sync with the new position
+    auto resultingNewPosition = static_cast<int>(std::lroundf(static_cast<float>(size) * m_resizeBarRatio));
+    if (!IsResizeBarRatioUpdatePending() && m_layoutManager->getItemCurrentPosition(1) == resultingNewPosition)
+        return;
+    
+    m_resizeBarRatioUpdatePending = false; // this is required BEFORE the layouting below, since that can cause recursive calling ::resized -> ::UpdateLayoutRatio
 
     if (m_layoutManager && m_layoutManager->getItemCurrentPosition(1) != resultingNewPosition)
     {

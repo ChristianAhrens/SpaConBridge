@@ -365,11 +365,11 @@ void SoundobjectTablePageComponent::resized()
 	auto layoutWidth = layoutingBounds.getWidth();
 	auto layoutHeight = layoutingBounds.getHeight();
 
-	if (m_selectedProcessorInstanceEditor || m_multiSoundobjectsActive)
+	if (m_selectedProcessorInstanceEditor || (m_multiSoundobjectsActive && m_multiSoundobjectComponentContainer))
 	{
 		activateStretchableSplitLayout();
 
-		if (m_multiSoundobjectsActive)
+		if (m_multiSoundobjectsActive && m_multiSoundobjectComponentContainer)
 		{
             Component* comps[] = { m_soundobjectsTable.get(), m_layoutResizeBar.get(), m_multiSoundobjectComponentContainer.get()};
             m_layoutManager->layOutComponents(comps, 3, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, IsPortraitAspectRatio(), true);

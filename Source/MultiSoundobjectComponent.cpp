@@ -71,6 +71,13 @@ MultiSoundobjectComponent::MultiSoundobjectComponent()
 	m_removeImage->setTooltip("Remove background image of selected Mapping Area");
 	addAndMakeVisible(m_removeImage.get());
 
+	// select a selection group or add a new one
+	m_selectionGroupSelect = std::make_unique<ComboBox>("groups");
+	m_selectionGroupSelect->addItem("Add current selection", 1);
+	m_selectionGroupSelect->addListener(this);
+	m_selectionGroupSelect->setTooltip("Recall or store a selection");
+	addAndMakeVisible(m_selectionGroupSelect.get());
+
 	// object names enable
 	m_objectNamesEnable = std::make_unique<DrawableButton>("Object Names", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_objectNamesEnable = std::make_unique<DrawableButton>("Reverb", DrawableButton::ButtonStyle::ImageOnButtonBackground);
@@ -131,7 +138,11 @@ void MultiSoundobjectComponent::resized()
 	m_loadImage->setBounds(controlElementsBounds.removeFromLeft(controlElementsBounds.getHeight()));
 	controlElementsBounds.removeFromLeft(margin);
 	m_removeImage->setBounds(controlElementsBounds.removeFromLeft(controlElementsBounds.getHeight()));
-	
+
+	auto selGrComboWidth = (controlElementsBounds.getWidth() + margin) > 140 ? 140 : controlElementsBounds.getWidth() - margin;
+	controlElementsBounds.removeFromLeft(2 * controlElementsBounds.getHeight() + margin);
+	m_selectionGroupSelect->setBounds(controlElementsBounds.removeFromLeft(selGrComboWidth));
+
 	controlElementsBounds.removeFromRight(margin);
 	m_spreadEnable->setBounds(controlElementsBounds.removeFromRight(controlElementsBounds.getHeight()));
 	controlElementsBounds.removeFromRight(margin);
@@ -181,7 +192,7 @@ void MultiSoundobjectComponent::resized()
  */
 void MultiSoundobjectComponent::UpdateGui(bool init)
 {
-	auto ctrl = Controller::GetInstance();
+	auto const &ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return;
 

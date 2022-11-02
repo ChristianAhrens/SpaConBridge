@@ -82,6 +82,8 @@ private:
 	std::unique_ptr<DrawableButton>		m_loadImage;			/**< Button to load background image. */
 	std::unique_ptr<DrawableButton>		m_removeImage;			/**< Button to remove background image. */
 
+	std::unique_ptr<ComboBox>			m_selectionGroupSelect;	/**> ComboBox selector for selection groups. */
+
 	std::unique_ptr<DrawableButton>		m_objectNamesEnable;	/**> Checkbox for enabling showing object names. */
 
 	std::unique_ptr<DrawableButton>		m_reverbEnable;			/**> Checkbox for reverb send gain enable. */

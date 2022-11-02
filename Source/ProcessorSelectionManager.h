@@ -45,11 +45,15 @@ public:
 	void SetSoundobjectProcessorIdSelectState(SoundobjectProcessorId soundobjectProcessorId, bool selected);
 	bool IsSoundobjectProcessorIdSelected(SoundobjectProcessorId soundobjectProcessorId);
 
+	void CreateSoundobjectProcessorSelectionGroup(std::string groupName = std::string());
+
 	//==========================================================================
 	void SetSelectedMatrixInputProcessorIds(const std::vector<MatrixInputProcessorId>& processorIds, bool clearPrevSelection);
 	const std::vector<MatrixInputProcessorId> GetSelectedMatrixInputProcessorIds();
 	void SetMatrixInputProcessorIdSelectState(MatrixInputProcessorId matrixInputProcessorId, bool selected);
 	bool IsMatrixInputProcessorIdSelected(MatrixInputProcessorId matrixInputProcessorId);
+
+	void CreateMatrixInputProcessorSelectionGroup(std::string groupName = std::string());
 
 	//==========================================================================
 	void SetSelectedMatrixOutputProcessorIds(const std::vector<MatrixOutputProcessorId>& processorIds, bool clearPrevSelection);
@@ -57,13 +61,19 @@ public:
 	void SetMatrixOutputProcessorIdSelectState(MatrixOutputProcessorId matrixOutputProcessorId, bool selected);
 	bool IsMatrixOutputProcessorIdSelected(MatrixOutputProcessorId matrixOutputProcessorId);
 
+	void CreateMatrixOutputProcessorSelectionGroup(std::string groupName = std::string());
+
 protected:
 	static std::unique_ptr<ProcessorSelectionManager>	s_singleton;				/**< The one and only instance of ProcessorSelectionManager. */
 
 private:
-	std::map<SoundobjectProcessorId, bool>	m_soundobjectProcessorSelection;		/**< The current select state of sound objects. */
-	std::map<MatrixInputProcessorId, bool>	m_matrixInputProcessorSelection;		/**< The current select state of matrix inputs. */
-	std::map<MatrixOutputProcessorId, bool>	m_matrixOutputProcessorSelection;		/**< The current select state of matrix outputs. */
+	std::map<SoundobjectProcessorId, bool>	m_currentSoundobjectProcessorSelection;		/**< The current select state of sound objects. */
+	std::map<MatrixInputProcessorId, bool>	m_currentMatrixInputProcessorSelection;		/**< The current select state of matrix inputs. */
+	std::map<MatrixOutputProcessorId, bool>	m_currentMatrixOutputProcessorSelection;	/**< The current select state of matrix outputs. */
+
+	std::map<std::string, std::map<SoundobjectProcessorId, bool>> m_soundobjectProcessorSelectionGroups;
+	std::map<std::string, std::map<MatrixInputProcessorId, bool>> m_matrixInputProcessorSelectionGroups;
+	std::map<std::string, std::map<MatrixOutputProcessorId, bool>> m_matrixOutputProcessorSelectionGroups;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ProcessorSelectionManager)
 };

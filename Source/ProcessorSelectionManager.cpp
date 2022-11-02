@@ -95,7 +95,7 @@ void ProcessorSelectionManager::SetSelectedSoundobjectProcessorIds(const std::ve
 	if (clearPrevSelection)
 	{
 		// clear all selected soundobject ids
-		m_soundobjectProcessorSelection.clear();
+		m_currentSoundobjectProcessorSelection.clear();
 
 		// iterate through all processors and set each selected state based on given selection list
 		for (auto const& processorId : ctrl->GetSoundobjectProcessorIds())
@@ -126,12 +126,12 @@ const std::vector<SoundobjectProcessorId> ProcessorSelectionManager::GetSelected
 	if (!ctrl)
 		return processorIds;
 
-	processorIds.reserve(m_soundobjectProcessorSelection.size());
+	processorIds.reserve(m_currentSoundobjectProcessorSelection.size());
 	for (auto const& processorId : ctrl->GetSoundobjectProcessorIds())
 	{
 		auto const& processor = ctrl->GetSoundobjectProcessor(processorId);
 		auto soundobjectProcessorId = processor->GetProcessorId();
-		if ((m_soundobjectProcessorSelection.count(soundobjectProcessorId) > 0) && m_soundobjectProcessorSelection.at(soundobjectProcessorId))
+		if ((m_currentSoundobjectProcessorSelection.count(soundobjectProcessorId) > 0) && m_currentSoundobjectProcessorSelection.at(soundobjectProcessorId))
 			processorIds.push_back(soundobjectProcessorId);
 	}
 
@@ -146,7 +146,7 @@ const std::vector<SoundobjectProcessorId> ProcessorSelectionManager::GetSelected
  */
 void ProcessorSelectionManager::SetSoundobjectProcessorIdSelectState(SoundobjectProcessorId soundobjectProcessorId, bool selected)
 {
-	m_soundobjectProcessorSelection[soundobjectProcessorId] = selected;
+	m_currentSoundobjectProcessorSelection[soundobjectProcessorId] = selected;
 }
 
 /**
@@ -156,10 +156,23 @@ void ProcessorSelectionManager::SetSoundobjectProcessorIdSelectState(Soundobject
  */
 bool ProcessorSelectionManager::IsSoundobjectProcessorIdSelected(SoundobjectProcessorId soundobjectProcessorId)
 {
-	if (m_soundobjectProcessorSelection.count(soundobjectProcessorId) > 0)
-		return m_soundobjectProcessorSelection.at(soundobjectProcessorId);
+	if (m_currentSoundobjectProcessorSelection.count(soundobjectProcessorId) > 0)
+		return m_currentSoundobjectProcessorSelection.at(soundobjectProcessorId);
 	else
 		return false;
+}
+
+/**
+ * Method to create a new SO selection group from the currently selected processors with the given name.
+ * If the given name is empty, a default containing the group number is created.
+ * @param	groupName	The string to use as name for the new group.
+ */
+void ProcessorSelectionManager::CreateSoundobjectProcessorSelectionGroup(std::string groupName)
+{
+	if (groupName.empty())
+		groupName = "SO Selection " + std::to_string(m_soundobjectProcessorSelectionGroups.size() + 1);
+
+	m_soundobjectProcessorSelectionGroups.insert(std::make_pair(groupName, m_currentSoundobjectProcessorSelection));
 }
 
 /**
@@ -178,7 +191,7 @@ void ProcessorSelectionManager::SetSelectedMatrixInputProcessorIds(const std::ve
 	if (clearPrevSelection)
 	{
 		// clear all selected soundobject ids
-		m_matrixInputProcessorSelection.clear();
+		m_currentMatrixInputProcessorSelection.clear();
 
 		// iterate through all processors and set each selected state based on given selection list
 		for (auto const& processorId : ctrl->GetMatrixInputProcessorIds())
@@ -209,12 +222,12 @@ const std::vector<MatrixInputProcessorId> ProcessorSelectionManager::GetSelected
 	if (!ctrl)
 		return processorIds;
 
-	processorIds.reserve(m_matrixInputProcessorSelection.size());
+	processorIds.reserve(m_currentMatrixInputProcessorSelection.size());
 	for (auto const& processorId : ctrl->GetMatrixInputProcessorIds())
 	{
 		auto const& processor = ctrl->GetMatrixInputProcessor(processorId);
 		auto sourceId = processor->GetMatrixInputId();
-		if ((m_matrixInputProcessorSelection.count(sourceId) > 0) && m_matrixInputProcessorSelection.at(sourceId))
+		if ((m_currentMatrixInputProcessorSelection.count(sourceId) > 0) && m_currentMatrixInputProcessorSelection.at(sourceId))
 			processorIds.push_back(processor->GetProcessorId());
 	}
 
@@ -229,7 +242,7 @@ const std::vector<MatrixInputProcessorId> ProcessorSelectionManager::GetSelected
  */
 void ProcessorSelectionManager::SetMatrixInputProcessorIdSelectState(MatrixInputProcessorId matrixInputProcessorId, bool selected)
 {
-	m_matrixInputProcessorSelection[matrixInputProcessorId] = selected;
+	m_currentMatrixInputProcessorSelection[matrixInputProcessorId] = selected;
 }
 
 /**
@@ -239,10 +252,23 @@ void ProcessorSelectionManager::SetMatrixInputProcessorIdSelectState(MatrixInput
  */
 bool ProcessorSelectionManager::IsMatrixInputProcessorIdSelected(MatrixInputProcessorId matrixInputProcessorId)
 {
-	if (m_matrixInputProcessorSelection.count(matrixInputProcessorId) > 0)
-		return m_matrixInputProcessorSelection.at(matrixInputProcessorId);
+	if (m_currentMatrixInputProcessorSelection.count(matrixInputProcessorId) > 0)
+		return m_currentMatrixInputProcessorSelection.at(matrixInputProcessorId);
 	else
 		return false;
+}
+
+/**
+ * Method to create a new MI selection group from the currently selected processors with the given name.
+ * If the given name is empty, a default containing the group number is created.
+ * @param	groupName	The string to use as name for the new group.
+ */
+void ProcessorSelectionManager::CreateMatrixInputProcessorSelectionGroup(std::string groupName)
+{
+	if (groupName.empty())
+		groupName = "MI Selection " + std::to_string(m_matrixInputProcessorSelectionGroups.size() + 1);
+
+	m_matrixInputProcessorSelectionGroups.insert(std::make_pair(groupName, m_currentMatrixInputProcessorSelection));
 }
 
 /**
@@ -261,7 +287,7 @@ void ProcessorSelectionManager::SetSelectedMatrixOutputProcessorIds(const std::v
 	if (clearPrevSelection)
 	{
 		// clear all selected soundobject ids
-		m_matrixOutputProcessorSelection.clear();
+		m_currentMatrixOutputProcessorSelection.clear();
 
 		// iterate through all processors and set each selected state based on given selection list
 		for (auto const& processorId : ctrl->GetMatrixOutputProcessorIds())
@@ -292,12 +318,12 @@ const std::vector<MatrixOutputProcessorId> ProcessorSelectionManager::GetSelecte
 	if (!ctrl)
 		return processorIds;
 
-	processorIds.reserve(m_matrixOutputProcessorSelection.size());
+	processorIds.reserve(m_currentMatrixOutputProcessorSelection.size());
 	for (auto const& processorId : ctrl->GetMatrixOutputProcessorIds())
 	{
 		auto const& processor = ctrl->GetMatrixOutputProcessor(processorId);
 		auto matrixOutputProcessorId = processor->GetProcessorId();
-		if ((m_matrixOutputProcessorSelection.count(matrixOutputProcessorId) > 0) && m_matrixOutputProcessorSelection.at(matrixOutputProcessorId))
+		if ((m_currentMatrixOutputProcessorSelection.count(matrixOutputProcessorId) > 0) && m_currentMatrixOutputProcessorSelection.at(matrixOutputProcessorId))
 			processorIds.push_back(matrixOutputProcessorId);
 	}
 
@@ -312,7 +338,7 @@ const std::vector<MatrixOutputProcessorId> ProcessorSelectionManager::GetSelecte
  */
 void ProcessorSelectionManager::SetMatrixOutputProcessorIdSelectState(MatrixOutputProcessorId matrixOutputProcessorId, bool selected)
 {
-	m_matrixOutputProcessorSelection[matrixOutputProcessorId] = selected;
+	m_currentMatrixOutputProcessorSelection[matrixOutputProcessorId] = selected;
 }
 
 /**
@@ -322,10 +348,23 @@ void ProcessorSelectionManager::SetMatrixOutputProcessorIdSelectState(MatrixOutp
  */
 bool ProcessorSelectionManager::IsMatrixOutputProcessorIdSelected(MatrixOutputProcessorId matrixOutputProcessorId)
 {
-	if (m_matrixOutputProcessorSelection.count(matrixOutputProcessorId) > 0)
-		return m_matrixOutputProcessorSelection.at(matrixOutputProcessorId);
+	if (m_currentMatrixOutputProcessorSelection.count(matrixOutputProcessorId) > 0)
+		return m_currentMatrixOutputProcessorSelection.at(matrixOutputProcessorId);
 	else
 		return false;
+}
+
+/**
+ * Method to create a new MO selection group from the currently selected processors with the given name.
+ * If the given name is empty, a default containing the group number is created.
+ * @param	groupName	The string to use as name for the new group.
+ */
+void ProcessorSelectionManager::CreateMatrixOutputProcessorSelectionGroup(std::string groupName)
+{
+	if (groupName.empty())
+		groupName = "MO Selection " + std::to_string(m_matrixOutputProcessorSelectionGroups.size() + 1);
+
+	m_matrixOutputProcessorSelectionGroups.insert(std::make_pair(groupName, m_currentMatrixOutputProcessorSelection));
 }
 
 } // namespace SpaConBridge

@@ -288,7 +288,7 @@ void SoundobjectTablePageComponent::UpdateLayoutRatio()
 
     if (m_layoutManager && m_layoutManager->getItemCurrentPosition(1) != resultingNewPosition)
     {
-        m_layoutManager->setItemPosition(1, resultingNewPosition);
+        m_layoutManager->setItemPosition(1, static_cast<int>(resultingNewPosition));
 
         if (m_layoutResizeBar)
             m_layoutResizeBar->hasBeenMoved();

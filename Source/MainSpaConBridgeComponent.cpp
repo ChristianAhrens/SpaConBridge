@@ -19,6 +19,7 @@
 #include "MainSpaConBridgeComponent.h"
 
 #include "Controller.h"
+#include "ProcessorSelectionManager.h"
 
 #include "PagedUI/PageContainerComponent.h"
 #include "PagedUI/PageComponentManager.h"
@@ -129,6 +130,12 @@ MainSpaConBridgeComponent::~MainSpaConBridgeComponent()
         }
 
         ctrl->DestroyInstance();
+    }
+
+    auto const& selMgr = ProcessorSelectionManager::GetInstance();
+    if (selMgr)
+    {
+        selMgr->DestroyInstance();
     }
 
     WaitingEntertainerComponent::GetInstance()->DestroyInstance();

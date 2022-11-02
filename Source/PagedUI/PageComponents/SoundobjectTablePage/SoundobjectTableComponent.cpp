@@ -21,6 +21,7 @@
 #include "../BridgingAwareTableHeaderComponent.h"
 
 #include "../../../Controller.h"
+#include "../../../ProcessorSelectionManager.h"
 #include "../../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
 #include "../../../RowHeightSlider.h"
 #include "../../../DelayedRecursiveFunctionCaller.h"
@@ -114,11 +115,15 @@ void SoundobjectTableComponent::RecreateTableRowIds()
  */
 void SoundobjectTableComponent::UpdateTable()
 {
-	Controller* ctrl = Controller::GetInstance();
+	auto const& ctrl = Controller::GetInstance();
 	if (!ctrl)
 		return;
 
-	auto selectedProcessorIds = ctrl->GetSelectedSoundobjectProcessorIds();
+	auto const& selMgr = ProcessorSelectionManager::GetInstance();
+	if (!selMgr)
+		return;
+
+	auto selectedProcessorIds = selMgr->GetSelectedSoundobjectProcessorIds();
 	auto selectedRows = GetRowsForProcessorIds(selectedProcessorIds);
 	if (GetSelectedRows() != selectedRows)
 		SetSelectedRows(selectedRows);
@@ -160,10 +165,12 @@ int SoundobjectTableComponent::getNumRows()
  */
 void SoundobjectTableComponent::selectedRowsChanged(int lastRowSelected)
 {
-	Controller* ctrl = Controller::GetInstance();
-	if (ctrl)
+	auto const& ctrl = Controller::GetInstance();
+	auto const& selMgr = ProcessorSelectionManager::GetInstance();
+
+	if (ctrl && selMgr)
 	{
-		ctrl->SetSelectedSoundobjectProcessorIds(GetProcessorIdsForRows(GetSelectedRows()), true);
+		selMgr->SetSelectedSoundobjectProcessorIds(GetProcessorIdsForRows(GetSelectedRows()), true);
 		ctrl->SetParameterChanged(DCP_SoundobjectTable, DCT_ProcessorSelection);
 	}
 

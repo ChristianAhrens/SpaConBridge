@@ -23,6 +23,7 @@
 
 #include "CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
 #include "Controller.h"
+#include "ProcessorSelectionManager.h"
 #include "MultiSoundobjectSlider.h"
 
 #include <Image_utils.h>
@@ -184,6 +185,10 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 	if (!ctrl)
 		return;
 
+	auto const& selMgr = ProcessorSelectionManager::GetInstance();
+	if (!selMgr)
+		return;
+
 	// Will be set to true if any changes relevant to the multi-slider are found.
 	bool update = init;
 
@@ -262,7 +267,7 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 					auto pos			= Point<float>(processor->GetParameterValue(SPI_ParamIdx_X), processor->GetParameterValue(SPI_ParamIdx_Y));
 					auto spread			= processor->GetParameterValue(SPI_ParamIdx_ObjectSpread);
 					auto reverbSendGain	= processor->GetParameterValue(SPI_ParamIdx_ReverbSendGain);
-					auto selected		= ctrl->IsSoundobjectProcessorIdSelected(processorId);
+					auto selected		= selMgr->IsSoundobjectProcessorIdSelected(processorId);
 					auto colour			= processor->GetSoundobjectColour();
 					auto size			= processor->GetSoundobjectSize();
 					auto objectName		= processor->getProgramName(processor->getCurrentProgram());

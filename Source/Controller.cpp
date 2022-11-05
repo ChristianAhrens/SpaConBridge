@@ -479,10 +479,8 @@ SoundobjectProcessorId Controller::AddSoundobjectProcessor(DataChangeParticipant
 	// Set the new Processor's InputID to the next in sequence.
 	p->SetSoundobjectId(changeSource, newSoundobjectId);
 
-	// Set a color variant based on the input number, so make the nipples easier to tell from each other.
-	auto shade = Colour(juce::uint8(newSoundobjectId * 111), juce::uint8(newSoundobjectId * 222), juce::uint8(newSoundobjectId * 333));
-	auto knobColour = Desktop::getInstance().getDefaultLookAndFeel().findColour(Slider::thumbColourId).interpolatedWith(shade, 0.4f);
-	p->SetSoundobjectColour(changeSource, knobColour);
+	// Set default yellowish colour as an acceptably contrasting startingpoint for both day- and night-lookandfeel ui coloring
+	p->SetSoundobjectColour(changeSource, Colour(0xffffc700));
 
 	// Set a default painting siez for the new soundobject
 	p->SetSoundobjectSize(changeSource, 0.4f);

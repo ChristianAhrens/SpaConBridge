@@ -1,0 +1,86 @@
+@startuml
+left to right direction
+ 
+frame "SpaConBridge" {
+ 
+  frame Controller {
+    frame SoundobjectProcessor {
+        frame SoundobjectProcessorEditor
+    }
+    frame MatrixInputProcessor {
+        frame MatrixInputProcessorEditor
+    }
+    frame MatrixOutputProcessor {
+        frame MatrixOutputProcessorEditor
+    }
+  }
+ 
+  frame PageManager {
+    node "PageContainerComponent" {
+      frame SoundobjectTablePage
+      frame MultiSoundobjectPage
+      frame MatrixIOPage
+      frame ScenesPage
+      frame EnSpacePage
+      frame StatisticsPage
+      frame SettingsPage
+    }
+  }
+ 
+  SoundobjectTablePage ..> SoundobjectProcessorEditor : uses
+  MatrixIOPage ..> MatrixInputProcessorEditor : uses
+  MatrixIOPage ..> MatrixOutputProcessorEditor : uses
+ 
+  SoundobjectTablePage ..> Controller : uses
+  MultiSoundobjectPage ..> Controller : uses
+  MatrixIOPage ..> Controller : uses
+  ScenesPage ..> Controller : uses
+  EnSpacePage ..> Controller : uses
+  StatisticsPage ..> Controller : uses
+  SettingsPage ..> Controller : uses
+ 
+  node "ProtocolBridgingWrapper" {
+    frame "RemoteProtocolBridgeCore" {
+      node "ProtocolBridgingNode" {
+                frame "ObjectDataHandling"
+ 
+        node "RoleA" {
+          frame "1. DS100 : OSCProtocolProcessor"
+          frame "2. DS100 : OSCProtocolProcessor"
+        }
+ 
+        node "RoleB" {
+          frame "d&b Generic OSC : OSCProtocolProcesso"
+          frame "d&b DAW Plugin : OSCProtocolProcessor"
+          frame "BlackTrax : RTTrPMProtocolProcessor"
+          frame "Generic MIDI : MIDIProtocolProcessor"
+          frame "ADM OSC : ADMOSCProtocolProcessor"
+          frame "Yamaha OSC : YMHOSCProtocolProcessor"
+        }
+ 
+        InterProtocolMessageQueue <--> ObjectDataHandling : InterProtocolMessage(RemoteObjectMessageData)
+        InterProtocolMessageQueue <--> RoleA : InterProtocolMessage(RemoteObjectMessageData)
+        InterProtocolMessageQueue <--> RoleB : InterProtocolMessage(RemoteObjectMessageData)
+      }
+    }
+  }
+ 
+  Controller <--> InterProtocolMessageQueue : NodeCallbackMessage(InterProtocolMessage(RemoteObjectMessageData))
+ 
+  cloud "AppConfiguration"
+  cloud "LookAndFeel"
+ 
+  AppConfiguration ..> RemoteProtocolBridgeCore : defines
+  AppConfiguration ..> Controller : defines
+  AppConfiguration ..> PageManager : defines
+ 
+  LookAndFeel ..> SoundobjectTablePage : uses
+  LookAndFeel ..> MultiSoundobjectPage : uses
+  LookAndFeel ..> MatrixIOPage : uses
+  LookAndFeel ..> ScenesPage : uses
+  LookAndFeel ..> EnSpacePage : uses
+  LookAndFeel ..> StatisticsPage : uses
+  LookAndFeel ..> SettingsPage : uses
+}
+ 
+@enduml

@@ -123,75 +123,7 @@ __Note:__ In consequence, devices being plugged in / coming online while app is 
 
 ## App architecture
 
-<div class="mermaid">graph TB
-    subgraph SpaConBridge
-      direction LR
-
-      subgraph PagedUI
-        direction TB
-
-        pageMgr[PageManager]
-
-        sndObjTablePage[SoundobjectTablePage]
-        multiSndObjPage[MultiSoundobjectPage]
-        matrixIOPage[MartixIOPage]
-        scnPage[ScenesPage]
-        enSpacePage[EnSpacePage]
-        statsPage[StatisticsPage]
-        settingsPage[SettingsPage]
-
-        pageMgr <--> sndObjTablePage
-        pageMgr <--> multiSndObjPage
-        pageMgr <--> matrixIOPage
-        pageMgr <--> scnPage
-        pageMgr <--> enSpacePage
-        pageMgr <--> statsPage
-        pageMgr <--> settingsPage
-      end
-
-      ctrl[Controller]
-      pageMgr <--> ctrl
-      ctrl <--> objHndl
-
-      subgraph ProtocolBridge
-        
-        subgraph ProcessingEngine
-          direction TB
-
-          objHndl[ObjectDataHandling]
-          p1(DS100:OSCProtocolProcessor)
-          p2(GenericOSC:OSCProtocolProcessor)
-          p3(d&bSoundscapePlugin:OSCProtocolProcessor)
-          p4(YamahaOSC:OSCProtocolProcessor)
-          p5(ADMOSC:OSCProtocolProcessor)
-          p6(MIDI:MIDIProtocolProcessor)
-          p7(BlackTrax:RTTrPMProtocolProcessor)
-
-          objHndl <--> p1
-          objHndl <--> p2
-          objHndl <--> p3
-          objHndl <--> p4
-          objHndl <--> p5
-          objHndl <--> p6
-          objHndl <--> p7
-        end
-      end
-    end
-
-    classDef green fill:#9f6,stroke:#333,stroke-width:2px;
-    classDef orange fill:#f96,stroke:#333,stroke-width:2px;
-    classDef lightgrey fill:#bbb,stroke:#333,stroke-width:2px;
-    classDef grey fill:#999,stroke:#333,stroke-width:2px;
-    classDef framedWhite fill:#fff,stroke:#333,stroke-width:2px;
-    class pagedUI,ctrl green
-    class objHndl,p1,p2,p3,p4,p5,p6,p7 orange
-    class ProcessingEngine grey
-    class ProtocolBridge lightgrey
-    class SpaConBridge framedWhite
-    class PagedUI lightgrey
-</div>
-
-For details on SpaConBridge app architecture see [app architecture diagram](ARCHITECTURE.md)
+![SpaConBridge architecture](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/ChristianAhrens/SpaConBridge/development/Resources/Documentation/SpaConBridgeArchOvw.txt)
 
 
 <a name="uidetails" />

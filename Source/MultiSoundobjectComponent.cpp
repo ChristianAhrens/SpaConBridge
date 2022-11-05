@@ -25,6 +25,7 @@
 #include "Controller.h"
 #include "ProcessorSelectionManager.h"
 #include "MultiSoundobjectSlider.h"
+#include "SelectGroupSelector.h"
 
 #include <Image_utils.h>
 
@@ -72,7 +73,7 @@ MultiSoundobjectComponent::MultiSoundobjectComponent()
 	addAndMakeVisible(m_removeImage.get());
 
 	// select a selection group or add a new one
-	m_selectionGroupSelect = std::make_unique<ComboBox>("groups");
+	m_selectionGroupSelect = std::make_unique<SelectGroupSelector>("groups");
 	m_selectionGroupSelect->addItem("Add current selection", 1);
 	m_selectionGroupSelect->addListener(this);
 	m_selectionGroupSelect->setTooltip("Recall or store a selection");

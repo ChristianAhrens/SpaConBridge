@@ -353,10 +353,6 @@
       <FILE id="Q7vthe" name="README.md" compile="0" resource="1" file="README.md"/>
     </GROUP>
     <GROUP id="{2B9DD386-1093-ADF5-E47F-5954774132B5}" name="Source">
-      <FILE id="xfJlPa" name="ProcessorSelectionManager.cpp" compile="1"
-            resource="0" file="Source/ProcessorSelectionManager.cpp"/>
-      <FILE id="rOoSAt" name="ProcessorSelectionManager.h" compile="0" resource="0"
-            file="Source/ProcessorSelectionManager.h"/>
       <GROUP id="{A8ED2A1C-3C07-0E79-BDAB-3610B84A5477}" name="CustomAudioProcessors">
         <GROUP id="{4B509C1B-A792-E602-3BD1-999A7C1B208D}" name="MatrixInputProcessor">
           <FILE id="rj7WFi" name="MatrixInputProcessor.cpp" compile="1" resource="0"
@@ -560,6 +556,14 @@
             resource="0" file="Source/DelayedRecursiveFunctionCaller.cpp"/>
       <FILE id="g5106j" name="DelayedRecursiveFunctionCaller.h" compile="0"
             resource="0" file="Source/DelayedRecursiveFunctionCaller.h"/>
+      <FILE id="xfJlPa" name="ProcessorSelectionManager.cpp" compile="1"
+            resource="0" file="Source/ProcessorSelectionManager.cpp"/>
+      <FILE id="rOoSAt" name="ProcessorSelectionManager.h" compile="0" resource="0"
+            file="Source/ProcessorSelectionManager.h"/>
+      <FILE id="yJLYs2" name="SelectGroupSelector.cpp" compile="1" resource="0"
+            file="Source/SelectGroupSelector.cpp"/>
+      <FILE id="ZVImc8" name="SelectGroupSelector.h" compile="0" resource="0"
+            file="Source/SelectGroupSelector.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>

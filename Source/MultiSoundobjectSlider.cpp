@@ -532,7 +532,7 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
 			// Set this source as "selected" and begin a drag gesture.
 			m_currentlyDraggedId = paramsKV.first;
 
-			if (!IsInFakeALTMultiTouch())
+			if (!IsInFakeALTMultiTouch() && m_multiTouchTargetOperation == MTDT_PendingInputDecision)
 			{
 				auto ctrl = Controller::GetInstance();
 				if (ctrl)
@@ -569,7 +569,7 @@ void MultiSoundobjectSlider::mouseDrag(const MouseEvent& e)
     if (GetPrimaryMouseInputSourceIndex() != e.source.getIndex() || IsInFakeALTMultiTouch())
         return;
     
-	if (m_currentlyDraggedId != INVALID_PROCESSOR_ID)
+	if (m_currentlyDraggedId != INVALID_PROCESSOR_ID && m_multiTouchTargetOperation == MTDT_PendingInputDecision)
 	{
 		auto ctrl = Controller::GetInstance();
 		if (ctrl)
@@ -602,31 +602,28 @@ void MultiSoundobjectSlider::mouseUp(const MouseEvent& e)
 
     DualPointMultitouchCatcherComponent::mouseUp(e);
 
-    if (!(wasInFakeALTMultiTouch || isntPrimaryMouse))
+    if (!(wasInFakeALTMultiTouch || isntPrimaryMouse) && validDraggedId)
     {
         auto ctrl = Controller::GetInstance();
         if (ctrl)
         {
-            if (validDraggedId)
-            {
-				auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
-				if (processor)
-				{
-					auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
-					if (param)
-						param->EndGuiGesture();
-					param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_Y]);
-					if (param)
-						param->EndGuiGesture();
+			auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
+			if (processor)
+			{
+				auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
+				if (param)
+					param->EndGuiGesture();
+				param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_Y]);
+				if (param)
+					param->EndGuiGesture();
 
-					// Get mouse pixel-wise position and scale it between 0 and 1.
-					Point<int> pos = e.getPosition();
-					float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / getLocalBounds().getWidth())));
-					float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / getLocalBounds().getHeight())));
+				// Get mouse pixel-wise position and scale it between 0 and 1.
+				Point<int> pos = e.getPosition();
+				float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / getLocalBounds().getWidth())));
+				float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / getLocalBounds().getHeight())));
 
-					processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, x);
-					processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, y);
-				}
+				processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, x);
+				processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, y);
 			}
 		}
 	}

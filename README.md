@@ -123,7 +123,7 @@ __Note:__ In consequence, devices being plugged in / coming online while app is 
 
 ## App architecture
 
-![SpaConBridge architecture](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/ChristianAhrens/SpaConBridge/development/Resources/Documentation/SpaConBridgeArchOvw.txt)
+Some details on SpaConBridge app architecture see [app architecture diagram](ARCHITECTURE.md)
 
 
 <a name="uidetails" />

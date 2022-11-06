@@ -4,12 +4,16 @@ All notable changes to SpaConBridge will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.8.2] - 2022-11-06
 ### Added
+- Soundobject selection group storing and recalling for enhanced usability of MultiSoundobject UI
 
 ### Changed
+- Changed default color for new soundobjects on MultiSoundobject UI to known yellowish color for better contrasting default appearance
+- Tweaked soundobject label font minimum size on MultiSoundobject UI to still be readable
 
 ### Fixed
+- Fixed multisoundobject slider to not change xy position when performing multitouch spread/enspacegain change
 
 ## [0.8.1] - 2022-10-02
 ### Added

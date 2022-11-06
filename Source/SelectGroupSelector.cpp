@@ -178,26 +178,52 @@ void SelectGroupSelector::MatrixOutputSelectionGroupsChanged()
  */
 void SelectGroupSelector::TriggerStoreCurrentSelection()
 {
-	auto selMgr = ProcessorSelectionManager::GetInstance();
-	if (selMgr)
-	{
-		switch (m_mode)
+	auto w = std::make_unique<AlertWindow>("Selection Group", "Choose a name for the current selection", MessageBoxIconType::NoIcon).release();
+	w->addTextEditor("selGroupName", "");
+	w->getTextEditor("selGroupName")->setKeyboardType(TextInputTarget::VirtualKeyboardType::textKeyboard);
+	w->addButton("OK", 1, KeyPress(KeyPress::returnKey, 0, 0));
+	w->addButton("Cancel", 0, KeyPress(KeyPress::escapeKey, 0, 0));
+
+	// lambda to be called with the result of the modal processor count choise dialog
+	auto nameChoiceCallbackFunctionBody = ([w, this](int result)
 		{
-		case SoundobjectSelections:
-			selMgr->CreateSoundobjectProcessorSelectionGroup();
-			break;
-		case MatrixInputSelections:
-			selMgr->CreateMatrixInputProcessorSelectionGroup();
-			break;
-		case MatrixOutputSelections:
-			selMgr->CreateMatrixOutputProcessorSelectionGroup();
-			break;
-		case Invalid:
-		default:
-			jassertfalse;
-			break;
-		}
-	}
+			if (!w)
+				return;
+
+			if (1 == result)
+			{
+				auto newSelectionGroupName = w->getTextEditorContents("selGroupName").toStdString();
+
+				auto selMgr = ProcessorSelectionManager::GetInstance();
+				if (selMgr)
+				{
+					switch (m_mode)
+					{
+					case SoundobjectSelections:
+						selMgr->CreateSoundobjectProcessorSelectionGroup(newSelectionGroupName);
+						break;
+					case MatrixInputSelections:
+						selMgr->CreateMatrixInputProcessorSelectionGroup(newSelectionGroupName);
+						break;
+					case MatrixOutputSelections:
+						selMgr->CreateMatrixOutputProcessorSelectionGroup(newSelectionGroupName);
+						break;
+					case Invalid:
+					default:
+						jassertfalse;
+						break;
+					}
+				}
+			}
+			else if (0 == result)
+			{
+				setSelectedId(0);
+			}
+		});
+	auto modalCallback = juce::ModalCallbackFunction::create(nameChoiceCallbackFunctionBody);
+
+	// Run asynchronously
+	w->enterModalState(true, modalCallback, true);
 }
 
 /**
@@ -206,9 +232,6 @@ void SelectGroupSelector::TriggerStoreCurrentSelection()
  */
 void SelectGroupSelector::TriggerRecallSelectionId(int id)
 {
-	/*dbg*/if (0 == id)
-	/*dbg*/	jassertfalse;
-
 	auto selMgr = ProcessorSelectionManager::GetInstance();
 	if (selMgr)
 	{

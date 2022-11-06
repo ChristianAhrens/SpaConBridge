@@ -36,6 +36,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "Controller.h"
 #include "WaitingEntertainerComponent.h"
+#include "ProcessorSelectionManager.h"
 
 #include "PagedUI/PageComponentManager.h"
 #include "PagedUI/PageContainerComponent.h"
@@ -143,7 +144,7 @@ void StaticObjectsPollingHelper::pollOnce()
 /**
  * The one and only instance of Controller.
  */
-Controller* Controller::m_singleton = nullptr;
+std::unique_ptr<Controller> Controller::s_singleton;
 
 /**
  * Constructs an Controller object.
@@ -152,8 +153,8 @@ Controller* Controller::m_singleton = nullptr;
  */
 Controller::Controller()
 {
-	jassert(!m_singleton);	// only one instnce allowed!!
-	m_singleton = this;
+	jassert(!s_singleton);	// only one instnce allowed!!
+	s_singleton = std::unique_ptr<Controller>(this);
 
 	// Clear all changed flags initially
 	for (int cs = 0; cs < DCP_Max; cs++)
@@ -190,7 +191,7 @@ Controller::~Controller()
 	m_matrixInputProcessors.clearQuick();
 	m_matrixOutputProcessors.clearQuick();
 
-	m_singleton = nullptr;
+	DestroyInstance();
 }
 
 /**
@@ -200,11 +201,12 @@ Controller::~Controller()
  */
 Controller* Controller::GetInstance()
 {
-	if (m_singleton == nullptr)
+	if (!s_singleton)
 	{
-		m_singleton = new Controller();
+		new Controller();
+		jassert(s_singleton);
 	}
-	return m_singleton;
+	return s_singleton.get();
 }
 
 /**
@@ -212,7 +214,7 @@ Controller* Controller::GetInstance()
  */
 void Controller::DestroyInstance()
 {
-	delete m_singleton;
+	s_singleton.reset();
 }
 
 /**
@@ -479,10 +481,8 @@ SoundobjectProcessorId Controller::AddSoundobjectProcessor(DataChangeParticipant
 	// Set the new Processor's InputID to the next in sequence.
 	p->SetSoundobjectId(changeSource, newSoundobjectId);
 
-	// Set a color variant based on the input number, so make the nipples easier to tell from each other.
-	auto shade = Colour(juce::uint8(newSoundobjectId * 111), juce::uint8(newSoundobjectId * 222), juce::uint8(newSoundobjectId * 333));
-	auto knobColour = Desktop::getInstance().getDefaultLookAndFeel().findColour(Slider::thumbColourId).interpolatedWith(shade, 0.4f);
-	p->SetSoundobjectColour(changeSource, knobColour);
+	// Set default yellowish colour as an acceptably contrasting startingpoint for both day- and night-lookandfeel ui coloring
+	p->SetSoundobjectColour(changeSource, Colour(0xffffc700));
 
 	// Set a default painting siez for the new soundobject
 	p->SetSoundobjectSize(changeSource, 0.4f);
@@ -1448,16 +1448,17 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 	// now process what changes were detected to be neccessary to perform
 	if (change == DCT_ProcessorSelection)
 	{
-		if (msgData._valCount == 1 && msgData._valType == RemoteObjectValueType::ROVT_INT)
+		auto const& selMgr = ProcessorSelectionManager::GetInstance();
+		if (selMgr && msgData._valCount == 1 && msgData._valType == RemoteObjectValueType::ROVT_INT)
 		{
 			auto newSelectState = (static_cast<int*>(msgData._payload)[0] == 1);
 
 			for (auto const& processorId : GetSoundobjectProcessorIds())
 			{
 				auto processor = GetSoundobjectProcessor(processorId);
-				if (processor->GetSoundobjectId() == soundobjectId && IsSoundobjectProcessorIdSelected(processorId) != newSelectState)
+				if (processor->GetSoundobjectId() == soundobjectId && selMgr->IsSoundobjectProcessorIdSelected(processorId) != newSelectState)
 				{
-					SetSoundobjectProcessorIdSelectState(processorId, newSelectState);
+					selMgr->SetSoundobjectProcessorIdSelectState(processorId, newSelectState);
 					SetParameterChanged(DCP_Protocol, DCT_ProcessorSelection);
 				}
 			}
@@ -2442,79 +2443,6 @@ void Controller::UpdateActiveSoundobjects()
 }
 
 /**
- * Method to set a list of soundsource ids to be selected, based on given list of processorIds.
- * This affects the internal map of soundsource select states and triggers setting/updating table/multislider pages.
- * The additional bool is used to indicate if the current selection shall be extended or cleared and be replaced by new selection.
- * @param processorIds	The list of processorIds to use to set internal map of soundsourceids selected state
- * @param clearPrevSelection	Use to indicate if previously active selection shall be replaced or extended.
- */
-void Controller::SetSelectedSoundobjectProcessorIds(const std::vector<SoundobjectProcessorId>& processorIds, bool clearPrevSelection)
-{
-	if (clearPrevSelection)
-	{
-		// clear all selected soundobject ids
-		m_soundobjectProcessorSelection.clear();
-
-		// iterate through all processors and set each selected state based on given selection list
-		for (auto const& processorId : GetSoundobjectProcessorIds())
-		{
-			SetSoundobjectProcessorIdSelectState(processorId, std::find(processorIds.begin(), processorIds.end(), processorId) != processorIds.end());
-		}
-	}
-	else
-	{
-		// iterate through selection list and set all contained processor ids to selected
-		for (auto const& processorId : processorIds)
-		{
-			SetSoundobjectProcessorIdSelectState(processorId, true);
-		}
-	}
-}
-
-/**
- * Method to get the list of currently selected processors.
- * This internally accesses the list of processors and selected soundsourceids and combines the info in new list.
- * @return The list of currently selected processors.
- */
-const std::vector<SoundobjectProcessorId> Controller::GetSelectedSoundobjectProcessorIds()
-{
-	std::vector<SoundobjectProcessorId> processorIds;
-	processorIds.reserve(m_soundobjectProcessorSelection.size());
-	for (auto const& processor : m_soundobjectProcessors)
-	{
-		auto soundobjectProcessorId = processor->GetProcessorId();
-		if ((m_soundobjectProcessorSelection.count(soundobjectProcessorId) > 0) && m_soundobjectProcessorSelection.at(soundobjectProcessorId))
-			processorIds.push_back(soundobjectProcessorId);
-	}
-
-	return processorIds;
-}
-
-/**
- * Method to set a soundsource to be selected. This affects the internal map of soundsource select states
- * and triggers setting/updating table/multislider pages.
- * @param soundobjectProcessorId	The soundobjectProcessorId to modify regarding selected state
- * @param selected	The selected state to set.
- */
-void Controller::SetSoundobjectProcessorIdSelectState(SoundobjectProcessorId soundobjectProcessorId, bool selected)
-{
-	m_soundobjectProcessorSelection[soundobjectProcessorId] = selected;
-}
-
-/**
- * Method to get a soundsource id selected state.
- * @param soundobjectProcessorId	The sourceId to modify regarding selected state
- * @param selected	The selected state to set.
- */
-bool Controller::IsSoundobjectProcessorIdSelected(SoundobjectProcessorId soundobjectProcessorId)
-{
-	if (m_soundobjectProcessorSelection.count(soundobjectProcessorId) > 0)
-		return m_soundobjectProcessorSelection.at(soundobjectProcessorId);
-	else
-		return false;
-}
-
-/**
  * Helper method to collect all remote objects that are used by a soundobject processor.
  * @param soundobjectProcessorId		The id of the sound object processor to get the used remote objects for.
  * @return		The list of used remote objects.
@@ -2571,79 +2499,6 @@ void Controller::UpdateActiveMatrixInputs()
 }
 
 /**
- * Method to set a list of soundsource ids to be selected, based on given list of processorIds.
- * This affects the internal map of soundsource select states and triggers setting/updating table/multislider pages.
- * The additional bool is used to indicate if the current selection shall be extended or cleared and be replaced by new selection.
- * @param processorIds	The list of processorIds to use to set internal map of matrixInput selected state
- * @param clearPrevSelection	Use to indicate if previously active selection shall be replaced or extended.
- */
-void Controller::SetSelectedMatrixInputProcessorIds(const std::vector<MatrixInputProcessorId>& processorIds, bool clearPrevSelection)
-{
-	if (clearPrevSelection)
-	{
-		// clear all selected soundobject ids
-		m_matrixInputProcessorSelection.clear();
-
-		// iterate through all processors and set each selected state based on given selection list
-		for (auto const& processorId : GetMatrixInputProcessorIds())
-		{
-			SetMatrixInputProcessorIdSelectState(processorId, std::find(processorIds.begin(), processorIds.end(), processorId) != processorIds.end());
-		}
-	}
-	else
-	{
-		// iterate through selection list and set all contained processor ids to selected
-		for (auto const& processorId : processorIds)
-		{
-			SetMatrixInputProcessorIdSelectState(processorId, true);
-		}
-	}
-}
-
-/**
- * Method to get the list of currently selected processors.
- * This internally accesses the list of processors and selected MatrixChannelids and combines the info in new list.
- * @return The list of currently selected processors.
- */
-const std::vector<MatrixInputProcessorId> Controller::GetSelectedMatrixInputProcessorIds()
-{
-	std::vector<MatrixInputProcessorId> processorIds;
-	processorIds.reserve(m_matrixInputProcessorSelection.size());
-	for (auto const& processor : m_matrixInputProcessors)
-	{
-		auto sourceId = processor->GetMatrixInputId();
-		if ((m_matrixInputProcessorSelection.count(sourceId) > 0) && m_matrixInputProcessorSelection.at(sourceId))
-			processorIds.push_back(processor->GetProcessorId());
-	}
-
-	return processorIds;
-}
-
-/**
- * Method to set a MatrixChannel to be selected. This affects the internal map of MatrixChannel select states
- * and triggers setting/updating MatrixChannel pages.
- * @param sourceId	The sourceId to modify regarding selected state
- * @param selected	The selected state to set.
- */
-void Controller::SetMatrixInputProcessorIdSelectState(MatrixInputProcessorId matrixInputProcessorId, bool selected)
-{
-	m_matrixInputProcessorSelection[matrixInputProcessorId] = selected;
-}
-
-/**
- * Method to get a MatrixInput id selected state.
- * @param matrixInputProcessorId	The id to modify regarding selected state
- * @param selected	The selected state to set.
- */
-bool Controller::IsMatrixInputProcessorIdSelected(MatrixInputProcessorId matrixInputProcessorId)
-{
-	if (m_matrixInputProcessorSelection.count(matrixInputProcessorId) > 0)
-		return m_matrixInputProcessorSelection.at(matrixInputProcessorId);
-	else
-		return false;
-}
-
-/**
  * Helper method to collect all remote objects that are used by a matrix input processor.
  * @param matrixInputProcessorId		The id of the matrix input processor to get the used remote objects for.
  * @return		The list of used remote objects.
@@ -2697,79 +2552,6 @@ const std::vector<RemoteObject> Controller::GetActivatedMatrixOutputRemoteObject
 void Controller::UpdateActiveMatrixOutputs()
 {
 	m_protocolBridge.UpdateActiveDS100RemoteObjectIds();
-}
-
-/**
- * Method to set a list of soundsource ids to be selected, based on given list of processorIds.
- * This affects the internal map of soundsource select states and triggers setting/updating table/multislider pages.
- * The additional bool is used to indicate if the current selection shall be extended or cleared and be replaced by new selection.
- * @param processorIds	The list of processorIds to use to set internal map of soundsourceids selected state
- * @param clearPrevSelection	Use to indicate if previously active selection shall be replaced or extended.
- */
-void Controller::SetSelectedMatrixOutputProcessorIds(const std::vector<MatrixOutputProcessorId>& processorIds, bool clearPrevSelection)
-{
-	if (clearPrevSelection)
-	{
-		// clear all selected soundobject ids
-		m_matrixOutputProcessorSelection.clear();
-
-		// iterate through all processors and set each selected state based on given selection list
-		for (auto const& processorId : GetMatrixOutputProcessorIds())
-		{
-			SetMatrixOutputProcessorIdSelectState(processorId, std::find(processorIds.begin(), processorIds.end(), processorId) != processorIds.end());
-		}
-	}
-	else
-	{
-		// iterate through selection list and set all contained processor ids to selected
-		for (auto const& processorId : processorIds)
-		{
-			SetMatrixOutputProcessorIdSelectState(processorId, true);
-		}
-	}
-}
-
-/**
- * Method to get the list of currently selected processors.
- * This internally accesses the list of processors and selected MatrixChannelids and combines the info in new list.
- * @return The list of currently selected processors.
- */
-const std::vector<MatrixOutputProcessorId> Controller::GetSelectedMatrixOutputProcessorIds()
-{
-	std::vector<MatrixOutputProcessorId> processorIds;
-	processorIds.reserve(m_matrixOutputProcessorSelection.size());
-	for (auto const& processor : m_matrixOutputProcessors)
-	{
-		auto matrixOutputProcessorId = processor->GetProcessorId();
-		if ((m_matrixOutputProcessorSelection.count(matrixOutputProcessorId) > 0) && m_matrixOutputProcessorSelection.at(matrixOutputProcessorId))
-			processorIds.push_back(matrixOutputProcessorId);
-	}
-
-	return processorIds;
-}
-
-/**
- * Method to set a MatrixChannel to be selected. This affects the internal map of MatrixChannel select states
- * and triggers setting/updating MatrixChannel pages.
- * @param matrixOutputProcessorId	The sourceId to modify regarding selected state
- * @param selected	The selected state to set.
- */
-void Controller::SetMatrixOutputProcessorIdSelectState(MatrixOutputProcessorId matrixOutputProcessorId, bool selected)
-{
-	m_matrixOutputProcessorSelection[matrixOutputProcessorId] = selected;
-}
-
-/**
- * Method to get a MatrixChannel id selected state.
- * @param matrixOutputProcessorId	The sourceId to modify regarding selected state
- * @param selected	The selected state to set.
- */
-bool Controller::IsMatrixOutputProcessorIdSelected(MatrixOutputProcessorId matrixOutputProcessorId)
-{
-	if (m_matrixOutputProcessorSelection.count(matrixOutputProcessorId) > 0)
-		return m_matrixOutputProcessorSelection.at(matrixOutputProcessorId);
-	else
-		return false;
 }
 
 /**

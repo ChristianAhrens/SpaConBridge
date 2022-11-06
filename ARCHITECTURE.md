@@ -1,0 +1,1 @@
+![SpaConBridge architecture](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/ChristianAhrens/SpaConBridge/development/Resources/Documentation/SpaConBridgeArchOvw.txt)

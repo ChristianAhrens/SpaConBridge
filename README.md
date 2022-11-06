@@ -74,6 +74,7 @@ __Note:__ In consequence, devices being plugged in / coming online while app is 
 ## Table of contents
 
 * [Quick Start](#quicksetup)
+* [App Architecture](#architectureoverview)
 * [UI details](#uidetails)
   * [Sound Object Table](#soundobjecttable)
     * [Selective Sound Object muting](#soundobjectmuting)
@@ -84,6 +85,7 @@ __Note:__ In consequence, devices being plugged in / coming online while app is 
   * [En-Space](#enspace)
   * [Statistics](#protocolbridgingtrafficloggingandplotting)
   * [Settings](#appsettings)
+    * [Bridging protocols](#appsettingsprotocols)
 * [Supported Sound Object parameters on UI](#soundobjectuiparameters)
 * [Supported Matrix Input parameters on UI](#matrixinputuiparameters)
 * [Supported Matrix Output parameters on UI](#matrixoutputuiparameters)
@@ -115,6 +117,13 @@ __Note:__ In consequence, devices being plugged in / coming online while app is 
 14. You now can set up a bridging protocol in [Settings](#appsettings) tab if you like, following instructions provided for each individual [implemented protocol](#appsettingprotocols)
     * Keep in mind that incoming protocol values are only forwarded to DS100 and not directly shown on UI. The updated values are shown on UI as soon as values are reflected by DS100. Without a working connection to DS100 device or simulation, the UI will not show the changes.
     * [Statistics](#protocolbridgingtrafficloggingandplotting) tab shows bridging traffic and therefor can be used to monitor incoming protocl values without a working connection to DS100 device or simulation.
+
+
+<a name="architectureoverview"/>
+
+## App architecture
+
+Some details on SpaConBridge app architecture see [app architecture diagram](ARCHITECTURE.md)
 
 
 <a name="uidetails" />
@@ -248,11 +257,13 @@ Settings page is structured in sections.
 The first section allows configuration of application related parameters and is always active.
 The pages that are visible as tabs on the UI can be set (exception Settings tab, must always be visible) using toggle buttons for every page and the UI look and feel (dark vs. light) can be selected from a dropdown.
 
+DS100 OSC communication protocol is always active. The IP address can be manually configured or, if the build of SpaConBridge for the host system supports this, zeroconf discovery button can be used to select on of the discovered devices. OSC UDP communication ports are hardcoded to match the ones used by DS100.
+
 <a name="appsettingsprotocols" />
 
-The following sections contain configuration details for the supported remote control protocols.
+#### Implemented bridging protocols
 
-DS100 OSC communication protocol is always active. The IP address can be manually configured or, if the build of SpaConBridge for the host system supports this, zeroconf discovery button can be used to select on of the discovered devices. OSC UDP communication ports are hardcoded to match the ones used by DS100.
+The following sections contain configuration details for the supported remote control protocols.
 
 For details on the settings for the implemented protocols, see the individual documentation
   * [d&b DS100 signal bridge communication](Resources/Documentation/BridgingProtocols/DS100.md)

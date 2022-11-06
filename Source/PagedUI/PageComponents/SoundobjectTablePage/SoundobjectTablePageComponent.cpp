@@ -27,6 +27,7 @@
 #include "../../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessorEditor.h"
 
 #include "../../../Controller.h"
+#include "../../../ProcessorSelectionManager.h"
 #include "../../../LookAndFeel.h"
 #include "../../../MultiSoundobjectComponent.h"
 #include "../../../SoundobjectSlider.h"
@@ -288,7 +289,7 @@ void SoundobjectTablePageComponent::UpdateLayoutRatio()
 
     if (m_layoutManager && m_layoutManager->getItemCurrentPosition(1) != resultingNewPosition)
     {
-        m_layoutManager->setItemPosition(1, resultingNewPosition);
+        m_layoutManager->setItemPosition(1, static_cast<int>(resultingNewPosition));
 
         if (m_layoutResizeBar)
             m_layoutResizeBar->hasBeenMoved();
@@ -365,11 +366,11 @@ void SoundobjectTablePageComponent::resized()
 	auto layoutWidth = layoutingBounds.getWidth();
 	auto layoutHeight = layoutingBounds.getHeight();
 
-	if (m_selectedProcessorInstanceEditor || m_multiSoundobjectsActive)
+	if (m_selectedProcessorInstanceEditor || (m_multiSoundobjectsActive && m_multiSoundobjectComponentContainer))
 	{
 		activateStretchableSplitLayout();
 
-		if (m_multiSoundobjectsActive)
+		if (m_multiSoundobjectsActive && m_multiSoundobjectComponentContainer)
 		{
             Component* comps[] = { m_soundobjectsTable.get(), m_layoutResizeBar.get(), m_multiSoundobjectComponentContainer.get()};
             m_layoutManager->layOutComponents(comps, 3, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, IsPortraitAspectRatio(), true);
@@ -512,9 +513,10 @@ void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool acti
 	{
         m_multiSoundobjectComponentContainer->removeInternalComponent();
 		
-		if (Controller* ctrl = Controller::GetInstance())
+		auto const& selMgr = ProcessorSelectionManager::GetInstance();
+		if (selMgr)
 		{
-			auto selectedProcessorIds = ctrl->GetSelectedSoundobjectProcessorIds();
+			auto selectedProcessorIds = selMgr->GetSelectedSoundobjectProcessorIds();
 			if (selectedProcessorIds.size() == 1)
 				SetSoundsourceProcessorEditorActive(selectedProcessorIds.at(0));
 		}

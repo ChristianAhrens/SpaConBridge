@@ -556,6 +556,14 @@
             resource="0" file="Source/DelayedRecursiveFunctionCaller.cpp"/>
       <FILE id="g5106j" name="DelayedRecursiveFunctionCaller.h" compile="0"
             resource="0" file="Source/DelayedRecursiveFunctionCaller.h"/>
+      <FILE id="xfJlPa" name="ProcessorSelectionManager.cpp" compile="1"
+            resource="0" file="Source/ProcessorSelectionManager.cpp"/>
+      <FILE id="rOoSAt" name="ProcessorSelectionManager.h" compile="0" resource="0"
+            file="Source/ProcessorSelectionManager.h"/>
+      <FILE id="yJLYs2" name="SelectGroupSelector.cpp" compile="1" resource="0"
+            file="Source/SelectGroupSelector.cpp"/>
+      <FILE id="ZVImc8" name="SelectGroupSelector.h" compile="0" resource="0"
+            file="Source/SelectGroupSelector.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>

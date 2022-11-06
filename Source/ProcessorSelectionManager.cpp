@@ -653,6 +653,9 @@ bool ProcessorSelectionManager::setStateXml(XmlElement* stateXml)
 			m_soundobjectProcessorSelectionGroupNames.insert(std::make_pair(selectionId, selectionName));
 			m_soundobjectProcessorSelectionGroups.insert(std::make_pair(selectionId, soundobjectIdSelectStates));
 		}
+
+		for (auto const& listener : m_listeners)
+			listener->SoundobjectSelectionGroupsChanged();
 	}
 	else
 		retVal = false;
@@ -680,6 +683,9 @@ bool ProcessorSelectionManager::setStateXml(XmlElement* stateXml)
 			m_matrixInputProcessorSelectionGroupNames.insert(std::make_pair(selectionId, selectionName));
 			m_matrixInputProcessorSelectionGroups.insert(std::make_pair(selectionId, matrixInputIdSelectStates));
 		}
+
+		for (auto const& listener : m_listeners)
+			listener->MatrixInputSelectionGroupsChanged();
 	}
 	else
 		retVal = false;
@@ -707,6 +713,9 @@ bool ProcessorSelectionManager::setStateXml(XmlElement* stateXml)
 			m_matrixOutputProcessorSelectionGroupNames.insert(std::make_pair(selectionId, selectionName));
 			m_matrixOutputProcessorSelectionGroups.insert(std::make_pair(selectionId, matrixOutputIdSelectStates));
 		}
+
+		for (auto const& listener : m_listeners)
+			listener->MatrixOutputSelectionGroupsChanged();
 	}
 	else
 		retVal = false;

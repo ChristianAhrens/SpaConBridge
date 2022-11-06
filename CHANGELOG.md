@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.8.2] - 2022-11-06
+### Added
+- Soundobject selection group storing and recalling for enhanced usability of MultiSoundobject UI
+
+### Changed
+- Changed default color for new soundobjects on MultiSoundobject UI to known yellowish color for better contrasting default appearance
+- Tweaked soundobject label font minimum size on MultiSoundobject UI to still be readable
+
+### Fixed
+- Fixed multisoundobject slider to not change xy position when performing multitouch spread/enspacegain change
+
 ## [0.8.1] - 2022-10-02
 ### Added
 - Two-finger multitouch support on MultiSoundobject UI to modify Spread Factor and EnSpace Send Gain for multiple Soundobjects at a time (when performing gesture without selecting a Soundobject first)

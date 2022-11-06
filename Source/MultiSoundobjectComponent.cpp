@@ -73,7 +73,7 @@ MultiSoundobjectComponent::MultiSoundobjectComponent()
 	addAndMakeVisible(m_removeImage.get());
 
 	// select a selection group or add a new one
-	m_selectionGroupSelect = std::make_unique<SelectGroupSelector>("groups");
+	m_selectionGroupSelect = std::make_unique<SelectGroupSelector>("selectgroups");
 	m_selectionGroupSelect->SetMode(SelectGroupSelector::SoundobjectSelections);
 	addAndMakeVisible(m_selectionGroupSelect.get());
 
@@ -138,16 +138,28 @@ void MultiSoundobjectComponent::resized()
 	controlElementsBounds.removeFromLeft(margin);
 	m_removeImage->setBounds(controlElementsBounds.removeFromLeft(controlElementsBounds.getHeight()));
 
-	auto selGrComboWidth = (controlElementsBounds.getWidth() + margin) > 140 ? 140 : controlElementsBounds.getWidth() - margin;
-	controlElementsBounds.removeFromLeft(2 * controlElementsBounds.getHeight() + margin);
-	m_selectionGroupSelect->setBounds(controlElementsBounds.removeFromLeft(selGrComboWidth));
-
 	controlElementsBounds.removeFromRight(margin);
 	m_spreadEnable->setBounds(controlElementsBounds.removeFromRight(controlElementsBounds.getHeight()));
 	controlElementsBounds.removeFromRight(margin);
 	m_reverbEnable->setBounds(controlElementsBounds.removeFromRight(controlElementsBounds.getHeight()));
 	controlElementsBounds.removeFromRight(margin);
 	m_objectNamesEnable->setBounds(controlElementsBounds.removeFromRight(controlElementsBounds.getHeight()));
+
+	auto selGrComboWidth = (controlElementsBounds.getWidth()) > (140 + 2 * margin) ? 140 : controlElementsBounds.getWidth() - 2 * margin;
+	controlElementsBounds.removeFromLeft(margin);
+	controlElementsBounds.removeFromRight(margin);
+	if (controlElementsBounds.getWidth() < 1.5f * controlElementsBounds.getHeight())
+	{
+		m_selectionGroupSelect->setVisible(false);
+	}
+	else
+	{
+		m_selectionGroupSelect->setVisible(true);
+
+		auto blankSpace = controlElementsBounds.getWidth() - selGrComboWidth;
+		controlElementsBounds.removeFromLeft(static_cast<int>(0.5f * blankSpace));
+		m_selectionGroupSelect->setBounds(controlElementsBounds.removeFromLeft(selGrComboWidth));
+	}
 	
 	// set the bounds for the 2D slider area.
 	bounds.removeFromBottom(margin);

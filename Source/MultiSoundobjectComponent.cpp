@@ -23,7 +23,9 @@
 
 #include "CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
 #include "Controller.h"
+#include "ProcessorSelectionManager.h"
 #include "MultiSoundobjectSlider.h"
+#include "SelectGroupSelector.h"
 
 #include <Image_utils.h>
 
@@ -69,6 +71,11 @@ MultiSoundobjectComponent::MultiSoundobjectComponent()
 	m_removeImage->addListener(this);
 	m_removeImage->setTooltip("Remove background image of selected Mapping Area");
 	addAndMakeVisible(m_removeImage.get());
+
+	// select a selection group or add a new one
+	m_selectionGroupSelect = std::make_unique<SelectGroupSelector>("selectgroups");
+	m_selectionGroupSelect->SetMode(SelectGroupSelector::SoundobjectSelections);
+	addAndMakeVisible(m_selectionGroupSelect.get());
 
 	// object names enable
 	m_objectNamesEnable = std::make_unique<DrawableButton>("Object Names", DrawableButton::ButtonStyle::ImageOnButtonBackground);
@@ -130,13 +137,29 @@ void MultiSoundobjectComponent::resized()
 	m_loadImage->setBounds(controlElementsBounds.removeFromLeft(controlElementsBounds.getHeight()));
 	controlElementsBounds.removeFromLeft(margin);
 	m_removeImage->setBounds(controlElementsBounds.removeFromLeft(controlElementsBounds.getHeight()));
-	
+
 	controlElementsBounds.removeFromRight(margin);
 	m_spreadEnable->setBounds(controlElementsBounds.removeFromRight(controlElementsBounds.getHeight()));
 	controlElementsBounds.removeFromRight(margin);
 	m_reverbEnable->setBounds(controlElementsBounds.removeFromRight(controlElementsBounds.getHeight()));
 	controlElementsBounds.removeFromRight(margin);
 	m_objectNamesEnable->setBounds(controlElementsBounds.removeFromRight(controlElementsBounds.getHeight()));
+
+	auto selGrComboWidth = (controlElementsBounds.getWidth()) > (140 + 2 * margin) ? 140 : controlElementsBounds.getWidth() - 2 * margin;
+	controlElementsBounds.removeFromLeft(margin);
+	controlElementsBounds.removeFromRight(margin);
+	if (controlElementsBounds.getWidth() < 1.5f * controlElementsBounds.getHeight())
+	{
+		m_selectionGroupSelect->setVisible(false);
+	}
+	else
+	{
+		m_selectionGroupSelect->setVisible(true);
+
+		auto blankSpace = controlElementsBounds.getWidth() - selGrComboWidth;
+		controlElementsBounds.removeFromLeft(static_cast<int>(0.5f * blankSpace));
+		m_selectionGroupSelect->setBounds(controlElementsBounds.removeFromLeft(selGrComboWidth));
+	}
 	
 	// set the bounds for the 2D slider area.
 	bounds.removeFromBottom(margin);
@@ -180,8 +203,12 @@ void MultiSoundobjectComponent::resized()
  */
 void MultiSoundobjectComponent::UpdateGui(bool init)
 {
-	auto ctrl = Controller::GetInstance();
+	auto const &ctrl = Controller::GetInstance();
 	if (!ctrl)
+		return;
+
+	auto const& selMgr = ProcessorSelectionManager::GetInstance();
+	if (!selMgr)
 		return;
 
 	// Will be set to true if any changes relevant to the multi-slider are found.
@@ -262,7 +289,7 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 					auto pos			= Point<float>(processor->GetParameterValue(SPI_ParamIdx_X), processor->GetParameterValue(SPI_ParamIdx_Y));
 					auto spread			= processor->GetParameterValue(SPI_ParamIdx_ObjectSpread);
 					auto reverbSendGain	= processor->GetParameterValue(SPI_ParamIdx_ReverbSendGain);
-					auto selected		= ctrl->IsSoundobjectProcessorIdSelected(processorId);
+					auto selected		= selMgr->IsSoundobjectProcessorIdSelected(processorId);
 					auto colour			= processor->GetSoundobjectColour();
 					auto size			= processor->GetSoundobjectSize();
 					auto objectName		= processor->getProgramName(processor->getCurrentProgram());
@@ -310,18 +337,21 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
  */
 void MultiSoundobjectComponent::comboBoxChanged(ComboBox *comboBox)
 {
-	if (GetSelectedMapping() != comboBox->getSelectedId())
+	if (comboBox == m_mappingAreaSelect.get())
 	{
-		SetSelectedMapping(static_cast<MappingAreaId>(comboBox->getSelectedId()));
+		if (GetSelectedMapping() != comboBox->getSelectedId())
+		{
+			SetSelectedMapping(static_cast<MappingAreaId>(comboBox->getSelectedId()));
 
-		// Trigger an update on the multi-slider, so that only sources with the
-		// selected mapping are visible.
-		UpdateGui(true);
+			// Trigger an update on the multi-slider, so that only sources with the
+			// selected mapping are visible.
+			UpdateGui(true);
 
-		// finally trigger refreshing the config file
-		auto config = SpaConBridge::AppConfiguration::getInstance();
-		if (config)
-			config->triggerConfigurationDump(false);
+			// finally trigger refreshing the config file
+			auto config = SpaConBridge::AppConfiguration::getInstance();
+			if (config)
+				config->triggerConfigurationDump(false);
+		}
 	}
 }
 

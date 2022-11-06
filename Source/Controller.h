@@ -115,11 +115,6 @@ public:
 
 	void UpdateActiveSoundobjects();
 
-	void SetSelectedSoundobjectProcessorIds(const std::vector<SoundobjectProcessorId>& processorIds, bool clearPrevSelection);
-	const std::vector<SoundobjectProcessorId> GetSelectedSoundobjectProcessorIds();
-	void SetSoundobjectProcessorIdSelectState(SoundobjectProcessorId soundobjectProcessorId, bool selected);
-	bool IsSoundobjectProcessorIdSelected(SoundobjectProcessorId soundobjectProcessorId);
-
 	std::vector<RemoteObject> GetSoundobjectProcessorRemoteObjects(SoundobjectProcessorId soundobjectProcessorId);
 
 	//==========================================================================
@@ -133,11 +128,6 @@ public:
 
 	void UpdateActiveMatrixInputs();
 
-	void SetSelectedMatrixInputProcessorIds(const std::vector<MatrixInputProcessorId>& processorIds, bool clearPrevSelection);
-	const std::vector<MatrixInputProcessorId> GetSelectedMatrixInputProcessorIds();
-	void SetMatrixInputProcessorIdSelectState(MatrixInputProcessorId matrixInputProcessorId, bool selected);
-	bool IsMatrixInputProcessorIdSelected(MatrixInputProcessorId matrixInputProcessorId);
-
 	std::vector<RemoteObject> GetMatrixInputProcessorRemoteObjects(MatrixInputProcessorId matrixInputProcessorId);
 
 	//==========================================================================
@@ -150,11 +140,6 @@ public:
 	std::vector<MatrixOutputProcessorId> GetMatrixOutputProcessorIds() const;
 
 	void UpdateActiveMatrixOutputs();
-
-	void SetSelectedMatrixOutputProcessorIds(const std::vector<MatrixOutputProcessorId>& processorIds, bool clearPrevSelection);
-	const std::vector<MatrixOutputProcessorId> GetSelectedMatrixOutputProcessorIds();
-	void SetMatrixOutputProcessorIdSelectState(MatrixOutputProcessorId matrixOutputProcessorId, bool selected);
-	bool IsMatrixOutputProcessorIdSelected(MatrixOutputProcessorId matrixOutputProcessorId);
 
 	std::vector<RemoteObject> GetMatrixOutputProcessorRemoteObjects(MatrixOutputProcessorId matrixOutputProcessorId);
 
@@ -274,7 +259,7 @@ private:
 
 protected:
 	
-	static Controller				*m_singleton;					/**< The one and only instance of CController. */
+	static std::unique_ptr<Controller>	s_singleton;					/**< The one and only instance of CController. */
 
 	int								m_refreshInterval;				/**< Interval at which the controller internal update is triggered, in ms. */
 	bool							m_onlineState{ false };			/**< State of the protocol bridging/communication. This is only the expected state, not the actual connected state. */
@@ -294,10 +279,6 @@ protected:
 																	 * The array has one entry for each application module (see enum DataChangeSource). */
 
 	CriticalSection					m_mutex;						/**< A re-entrant mutex. */
-
-	std::map<SoundobjectProcessorId, bool>	m_soundobjectProcessorSelection;		/**< The current select state of sound objects. */
-	std::map<MatrixInputProcessorId, bool>	m_matrixInputProcessorSelection;		/**< The current select state of matrix inputs. */
-	std::map<MatrixOutputProcessorId, bool>	m_matrixOutputProcessorSelection;		/**< The current select state of matrix outputs. */
 
 private:
 	std::unique_ptr<StaticObjectsPollingHelper> m_pollingHelper;

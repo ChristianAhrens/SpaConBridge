@@ -27,6 +27,7 @@
 #include "../../../CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessorEditor.h"
 
 #include "../../../Controller.h"
+#include "../../../ProcessorSelectionManager.h"
 #include "../../../LookAndFeel.h"
 #include "../../../MultiSoundobjectComponent.h"
 #include "../../../SoundobjectSlider.h"
@@ -512,9 +513,10 @@ void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool acti
 	{
         m_multiSoundobjectComponentContainer->removeInternalComponent();
 		
-		if (Controller* ctrl = Controller::GetInstance())
+		auto const& selMgr = ProcessorSelectionManager::GetInstance();
+		if (selMgr)
 		{
-			auto selectedProcessorIds = ctrl->GetSelectedSoundobjectProcessorIds();
+			auto selectedProcessorIds = selMgr->GetSelectedSoundobjectProcessorIds();
 			if (selectedProcessorIds.size() == 1)
 				SetSoundsourceProcessorEditorActive(selectedProcessorIds.at(0));
 		}

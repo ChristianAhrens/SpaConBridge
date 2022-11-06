@@ -21,6 +21,7 @@
 #include "../BridgingAwareTableHeaderComponent.h"
 
 #include "../../../Controller.h"
+#include "../../../ProcessorSelectionManager.h"
 #include "../../../CustomAudioProcessors/MatrixOutputProcessor/MatrixOutputProcessor.h"
 #include "../../../RowHeightSlider.h"
 #include "../../../DelayedRecursiveFunctionCaller.h"
@@ -104,10 +105,10 @@ void MatrixOutputTableComponent::RecreateTableRowIds()
  */
 void MatrixOutputTableComponent::UpdateTable()
 {
-	Controller* ctrl = Controller::GetInstance();
-	if (ctrl)
+	auto const& selMgr = ProcessorSelectionManager::GetInstance();
+	if (selMgr)
 	{
-		auto selectedProcessorIds = ctrl->GetSelectedMatrixOutputProcessorIds();
+		auto selectedProcessorIds = selMgr->GetSelectedMatrixOutputProcessorIds();
 		auto selectedRows = GetRowsForProcessorIds(selectedProcessorIds);
 		if (GetSelectedRows() != selectedRows)
 			SetSelectedRows(selectedRows);
@@ -147,9 +148,9 @@ int MatrixOutputTableComponent::getNumRows()
  */
 void MatrixOutputTableComponent::selectedRowsChanged(int lastRowSelected)
 {
-	Controller* ctrl = Controller::GetInstance();
-	if (ctrl)
-		ctrl->SetSelectedMatrixOutputProcessorIds(GetProcessorIdsForRows(GetSelectedRows()), true);
+	auto const& selMgr = ProcessorSelectionManager::GetInstance();
+	if (selMgr)
+		selMgr->SetSelectedMatrixOutputProcessorIds(GetProcessorIdsForRows(GetSelectedRows()), true);
 
 	TableModelComponent::selectedRowsChanged(lastRowSelected);
 }

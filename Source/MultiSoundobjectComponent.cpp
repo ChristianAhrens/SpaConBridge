@@ -74,9 +74,7 @@ MultiSoundobjectComponent::MultiSoundobjectComponent()
 
 	// select a selection group or add a new one
 	m_selectionGroupSelect = std::make_unique<SelectGroupSelector>("groups");
-	m_selectionGroupSelect->addItem("Add current selection", 1);
-	m_selectionGroupSelect->addListener(this);
-	m_selectionGroupSelect->setTooltip("Recall or store a selection");
+	m_selectionGroupSelect->SetMode(SelectGroupSelector::SoundobjectSelections);
 	addAndMakeVisible(m_selectionGroupSelect.get());
 
 	// object names enable
@@ -327,18 +325,21 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
  */
 void MultiSoundobjectComponent::comboBoxChanged(ComboBox *comboBox)
 {
-	if (GetSelectedMapping() != comboBox->getSelectedId())
+	if (comboBox == m_mappingAreaSelect.get())
 	{
-		SetSelectedMapping(static_cast<MappingAreaId>(comboBox->getSelectedId()));
+		if (GetSelectedMapping() != comboBox->getSelectedId())
+		{
+			SetSelectedMapping(static_cast<MappingAreaId>(comboBox->getSelectedId()));
 
-		// Trigger an update on the multi-slider, so that only sources with the
-		// selected mapping are visible.
-		UpdateGui(true);
+			// Trigger an update on the multi-slider, so that only sources with the
+			// selected mapping are visible.
+			UpdateGui(true);
 
-		// finally trigger refreshing the config file
-		auto config = SpaConBridge::AppConfiguration::getInstance();
-		if (config)
-			config->triggerConfigurationDump(false);
+			// finally trigger refreshing the config file
+			auto config = SpaConBridge::AppConfiguration::getInstance();
+			if (config)
+				config->triggerConfigurationDump(false);
+		}
 	}
 }
 

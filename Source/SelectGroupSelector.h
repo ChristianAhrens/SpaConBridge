@@ -15,12 +15,11 @@
  * along with this library; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
-
 #pragma once
 
 #include <JuceHeader.h>
 
+#include "ProcessorSelectionManager.h"
 
 namespace SpaConBridge
 {
@@ -30,48 +29,44 @@ namespace SpaConBridge
  * SelectGroupSelector class provides a dropdown ui component that allows
  * selection of object select groups, managed by SelectionManager.
  */
-class SelectGroupSelector  : public ComboBox
+class SelectGroupSelector  : public ComboBox, ProcessorSelectionManager::Listener
 {
 public:
-	class SelectGroupSelectorListener
+	enum Mode
 	{
-	public:
-		//==============================================================================
-		/** Destructor. */
-		virtual ~SelectGroupSelectorListener() = default;
-
-		//==============================================================================
-		/** Called when the selectors selected item is changed.
-		*/
-		virtual void selectionChanged(int selected) = 0;
+		SoundobjectSelections,
+		MatrixInputSelections,
+		MatrixOutputSelections,
+		Invalid
 	};
 
 public:
 	SelectGroupSelector(const String& componentName);
 	~SelectGroupSelector() override;
 
-	void SetListener(SelectGroupSelectorListener* listener);
+	void SetMode(SelectGroupSelector::Mode mode);
 
 	//==============================================================================
-	//void sliderValueChanged(Slider* slider) override;
-
-	//==============================================================================
-	void lookAndFeelChanged() override;
-
-	//==============================================================================
-	void paint(Graphics&) override;
-	void resized() override;
-
-	//==============================================================================
-	//static constexpr int _Min = 33;
-	//static constexpr int _Max = 66;
-	//static constexpr int _Interval = 11;
+	void SoundobjectSelectionChanged(ProcessorSelectionManager::SoundobjectSelectionId selectionId) override;
+	void MatrixInputSelectionChanged(ProcessorSelectionManager::MatrixInputSelectionId selectionId) override;
+	void MatrixOutputSelectionChanged(ProcessorSelectionManager::MatrixOutputSelectionId selectionId) override;
+	void SoundobjectSelectionGroupsChanged() override;
+	void MatrixInputSelectionGroupsChanged() override;
+	void MatrixOutputSelectionGroupsChanged() override;
 
 private:
-	//std::unique_ptr<Drawable>	m_arrowComponent;	// the drawable arrow icon
-	//std::unique_ptr<Slider>		m_slider;			// the slider component
+	void TriggerStoreCurrentSelection();
+	void TriggerRecallSelectionId(int id);
 
-	SelectGroupSelectorListener* m_listener{ nullptr };
+	void RepopulateWithSoundobjectSelectionGroups();
+	void RepopulateWithMatrixInputSelectionGroups();
+	void RepopulateWithMatrixOutputSelectionGroups();
+
+	//==============================================================================
+	static constexpr int s_storeNewGroupId = INT_MAX;
+
+	//==============================================================================
+	SelectGroupSelector::Mode m_mode = SelectGroupSelector::Mode::Invalid;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SelectGroupSelector)
 };

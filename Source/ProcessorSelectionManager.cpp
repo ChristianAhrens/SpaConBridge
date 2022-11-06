@@ -80,6 +80,37 @@ void ProcessorSelectionManager::DestroyInstance()
 }
 
 /**
+ * Adds a listener object to the internal list of objects to be notified of changes.
+ * @param	listener	The object to be added to internal list of listeners.
+ * @return	True on successful adding, false if already present in internal list.
+ */
+bool ProcessorSelectionManager::AddListener(ProcessorSelectionManager::Listener* listener)
+{
+	if (std::find(m_listeners.begin(), m_listeners.end(), listener) == m_listeners.end())
+		m_listeners.push_back(listener);
+	else
+		return false;
+
+	return true;
+}
+
+/**
+ * Removes a listener object from the internal list of objects to be notified of changes.
+ * @param	listener	The object to be removed from internal list of listeners.
+ * @return	True on successful removal, false if not found in internal list.
+ */
+bool ProcessorSelectionManager::RemoveListener(ProcessorSelectionManager::Listener* listener)
+{
+	auto listenerIter = std::find(m_listeners.begin(), m_listeners.end(), listener);
+	if (listenerIter == m_listeners.end())
+		return false;
+	else
+		m_listeners.erase(listenerIter);
+
+	return true;
+}
+
+/**
  * Method to set a list of soundsource ids to be selected, based on given list of processorIds.
  * This affects the internal map of soundsource select states and triggers setting/updating table/multislider pages.
  * The additional bool is used to indicate if the current selection shall be extended or cleared and be replaced by new selection.
@@ -166,13 +197,67 @@ bool ProcessorSelectionManager::IsSoundobjectProcessorIdSelected(SoundobjectProc
  * Method to create a new SO selection group from the currently selected processors with the given name.
  * If the given name is empty, a default containing the group number is created.
  * @param	groupName	The string to use as name for the new group.
+ * @return	The id of the newly created selection group.
  */
-void ProcessorSelectionManager::CreateSoundobjectProcessorSelectionGroup(std::string groupName)
+const ProcessorSelectionManager::SoundobjectSelectionId ProcessorSelectionManager::CreateSoundobjectProcessorSelectionGroup(std::string groupName)
 {
 	if (groupName.empty())
 		groupName = "SO Selection " + std::to_string(m_soundobjectProcessorSelectionGroups.size() + 1);
 
-	m_soundobjectProcessorSelectionGroups.insert(std::make_pair(groupName, m_currentSoundobjectProcessorSelection));
+	auto newId = SoundobjectSelectionId(1);
+	for (auto const& soSelGrp : m_soundobjectProcessorSelectionGroups)
+		if (soSelGrp.first >= newId)
+			newId = soSelGrp.first + 1;
+
+	m_soundobjectProcessorSelectionGroups.insert(std::make_pair(newId, m_currentSoundobjectProcessorSelection));
+	m_soundobjectProcessorSelectionGroupNames.insert(std::make_pair(newId, groupName));
+
+	for (auto const& listener : m_listeners)
+		listener->SoundobjectSelectionGroupsChanged();
+
+	return newId;
+}
+
+/**
+ * Method to recall a given soundobject selection group.
+ * @param	selectionId		The id of the selection group to recall.
+ * @return	True on success, false if given id is invalid.
+ */
+bool ProcessorSelectionManager::RecallSoundobjectProcessorSelectionGroup(ProcessorSelectionManager::SoundobjectSelectionId selectionId)
+{
+	if (m_soundobjectProcessorSelectionGroups.count(selectionId) == 0)
+		return false;
+
+	for (auto const& procSelState : m_soundobjectProcessorSelectionGroups.at(selectionId))
+		SetSoundobjectProcessorIdSelectState(procSelState.first, procSelState.second);
+
+	return true;
+}
+
+/**
+ * Method to get the name of a given soundobject selection group.
+ * @param	selectionId		The id of the selection group to get the name for.
+ * @return	The name of the group or empty string if not found.
+ */
+const std::string ProcessorSelectionManager::GetSoundobjectProcessorSelectionGroupName(ProcessorSelectionManager::SoundobjectSelectionId selectionId)
+{
+	if (m_soundobjectProcessorSelectionGroupNames.count(selectionId) == 0)
+		return std::string();
+	else
+		return m_soundobjectProcessorSelectionGroupNames.at(selectionId);
+}
+
+/**
+ * Method to get a list of currently used soundobject selection group ids.
+ * @return	The list of currently used selection group ids.
+ */
+const std::vector<ProcessorSelectionManager::SoundobjectSelectionId> ProcessorSelectionManager::GetSoundobjectProcessorSelectionGroupIds()
+{
+	auto selGrpIds = std::vector<SoundobjectSelectionId>();
+	for (auto const& selectionGroups : m_soundobjectProcessorSelectionGroups)
+		selGrpIds.push_back(selectionGroups.first);
+
+	return selGrpIds;
 }
 
 /**
@@ -262,13 +347,67 @@ bool ProcessorSelectionManager::IsMatrixInputProcessorIdSelected(MatrixInputProc
  * Method to create a new MI selection group from the currently selected processors with the given name.
  * If the given name is empty, a default containing the group number is created.
  * @param	groupName	The string to use as name for the new group.
+ * @return	The id of the newly created selection group.
  */
-void ProcessorSelectionManager::CreateMatrixInputProcessorSelectionGroup(std::string groupName)
+const ProcessorSelectionManager::MatrixInputSelectionId ProcessorSelectionManager::CreateMatrixInputProcessorSelectionGroup(std::string groupName)
 {
 	if (groupName.empty())
 		groupName = "MI Selection " + std::to_string(m_matrixInputProcessorSelectionGroups.size() + 1);
 
-	m_matrixInputProcessorSelectionGroups.insert(std::make_pair(groupName, m_currentMatrixInputProcessorSelection));
+	auto newId = MatrixInputSelectionId(1);
+	for (auto const& miSelGrp : m_matrixInputProcessorSelectionGroups)
+		if (miSelGrp.first >= newId)
+			newId = miSelGrp.first + 1;
+
+	m_matrixInputProcessorSelectionGroups.insert(std::make_pair(newId, m_currentMatrixInputProcessorSelection));
+	m_matrixInputProcessorSelectionGroupNames.insert(std::make_pair(newId, groupName));
+
+	for (auto const& listener : m_listeners)
+		listener->MatrixInputSelectionGroupsChanged();
+
+	return newId;
+}
+
+/**
+ * Method to recall a given matrix input selection group.
+ * @param	selectionId		The id of the selection group to recall.
+ * @return	True on success, false if given id is invalid.
+ */
+bool ProcessorSelectionManager::RecallMatrixInputProcessorSelectionGroup(ProcessorSelectionManager::MatrixInputSelectionId selectionId)
+{
+	if (m_matrixInputProcessorSelectionGroups.count(selectionId) == 0)
+		return false;
+
+	for (auto const& procSelState : m_matrixInputProcessorSelectionGroups.at(selectionId))
+		SetMatrixInputProcessorIdSelectState(procSelState.first, procSelState.second);
+
+	return true;
+}
+
+/**
+ * Method to get the name of a given matrix input selection group.
+ * @param	selectionId		The id of the selection group to get the name for.
+ * @return	The name of the group or empty string if not found.
+ */
+const std::string ProcessorSelectionManager::GetMatrixInputProcessorSelectionGroupName(ProcessorSelectionManager::MatrixInputSelectionId selectionId)
+{
+	if (m_matrixInputProcessorSelectionGroupNames.count(selectionId) == 0)
+		return std::string();
+	else
+		return m_matrixInputProcessorSelectionGroupNames.at(selectionId);
+}
+
+/**
+ * Method to get a list of currently used matrix input selection group ids.
+ * @return	The list of currently used selection group ids.
+ */
+const std::vector<ProcessorSelectionManager::MatrixInputSelectionId> ProcessorSelectionManager::GetMatrixInputProcessorSelectionGroupIds()
+{
+	auto selGrpIds = std::vector<MatrixInputSelectionId>();
+	for (auto const& selectionGroups : m_matrixInputProcessorSelectionGroupNames)
+		selGrpIds.push_back(selectionGroups.first);
+
+	return selGrpIds;
 }
 
 /**
@@ -358,13 +497,68 @@ bool ProcessorSelectionManager::IsMatrixOutputProcessorIdSelected(MatrixOutputPr
  * Method to create a new MO selection group from the currently selected processors with the given name.
  * If the given name is empty, a default containing the group number is created.
  * @param	groupName	The string to use as name for the new group.
+ * @return	The id of the newly created selection group.
  */
-void ProcessorSelectionManager::CreateMatrixOutputProcessorSelectionGroup(std::string groupName)
+const ProcessorSelectionManager::MatrixOutputSelectionId ProcessorSelectionManager::CreateMatrixOutputProcessorSelectionGroup(std::string groupName)
 {
 	if (groupName.empty())
 		groupName = "MO Selection " + std::to_string(m_matrixOutputProcessorSelectionGroups.size() + 1);
 
-	m_matrixOutputProcessorSelectionGroups.insert(std::make_pair(groupName, m_currentMatrixOutputProcessorSelection));
+	auto newId = MatrixOutputSelectionId(1);
+	for (auto const& moSelGrp : m_matrixOutputProcessorSelectionGroups)
+		if (moSelGrp.first >= newId)
+			newId = moSelGrp.first + 1;
+
+	m_matrixOutputProcessorSelectionGroups.insert(std::make_pair(newId, m_currentMatrixOutputProcessorSelection));
+	m_matrixOutputProcessorSelectionGroupNames.insert(std::make_pair(newId, groupName));
+
+	for (auto const& listener : m_listeners)
+		listener->MatrixOutputSelectionGroupsChanged();
+
+	return newId;
 }
+
+/**
+ * Method to recall a given matrix output selection group.
+ * @param	selectionId		The id of the selection group to recall.
+ * @return	True on success, false if given id is invalid.
+ */
+bool ProcessorSelectionManager::RecallMatrixOutputProcessorSelectionGroup(ProcessorSelectionManager::MatrixOutputSelectionId selectionId)
+{
+	if (m_matrixOutputProcessorSelectionGroups.count(selectionId) == 0)
+		return false;
+
+	for (auto const& procSelState : m_matrixOutputProcessorSelectionGroups.at(selectionId))
+		SetMatrixOutputProcessorIdSelectState(procSelState.first, procSelState.second);
+
+	return true;
+}
+
+/**
+ * Method to get the name of a given matrix output selection group.
+ * @param	selectionId		The id of the selection group to get the name for.
+ * @return	The name of the group or empty string if not found.
+ */
+const std::string ProcessorSelectionManager::GetMatrixOutputProcessorSelectionGroupName(ProcessorSelectionManager::MatrixOutputSelectionId selectionId)
+{
+	if (m_matrixOutputProcessorSelectionGroupNames.count(selectionId) == 0)
+		return std::string();
+	else
+		return m_matrixOutputProcessorSelectionGroupNames.at(selectionId);
+}
+
+/**
+ * Method to get a list of currently used matrix output selection group ids.
+ * @return	The list of currently used selection group ids.
+ */
+const std::vector<ProcessorSelectionManager::MatrixOutputSelectionId> ProcessorSelectionManager::GetMatrixOutputProcessorSelectionGroupIds()
+{
+	auto selGrpIds = std::vector<MatrixOutputSelectionId>();
+	for (auto const& selectionGroups : m_matrixOutputProcessorSelectionGroupNames)
+		selGrpIds.push_back(selectionGroups.first);
+
+	return selGrpIds;
+}
+
 
 } // namespace SpaConBridge

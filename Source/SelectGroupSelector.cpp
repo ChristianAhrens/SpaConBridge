@@ -38,13 +38,25 @@ namespace SpaConBridge
 SelectGroupSelector::SelectGroupSelector(const String& componentName)
 	: ComboBox(componentName)
 {
-	//m_slider = std::make_unique<Slider>(Slider::LinearHorizontal, Slider::NoTextBox);
-	//m_slider->addListener(this);
-	//addAndMakeVisible(m_slider.get());
+	addSeparator();
+	addItem("Store current selection", s_storeNewGroupId);
 
-	//SetSliderRange(_Min, _Max, _Interval);
+	setTooltip("Recall or store a selection");
+	setTextWhenNothingSelected("Recall selection");
 
 	lookAndFeelChanged();
+
+	onChange = [this]() {
+		auto selId = getSelectedId();
+		if (selId == s_storeNewGroupId)
+			TriggerStoreCurrentSelection();
+		else if (selId != 0)
+			TriggerRecallSelectionId(selId);
+	};
+
+	auto selMgr = ProcessorSelectionManager::GetInstance();
+	if (selMgr)
+		selMgr->AddListener(this);
 }
 
 /**
@@ -52,102 +64,263 @@ SelectGroupSelector::SelectGroupSelector(const String& componentName)
  */
 SelectGroupSelector::~SelectGroupSelector()
 {
+	auto selMgr = ProcessorSelectionManager::GetInstance();
+	if (selMgr)
+		selMgr->RemoveListener(this);
 }
 
 /**
- * Setter method for the internal listener object member.
- * @param	listener	The new listner object to set as internal listener memeber object pointer.
+ * Setter for the operation mode (SO, MI, MO)
+ * @param	mode The mode to set active.
  */
-void SelectGroupSelector::SetListener(SelectGroupSelectorListener* listener)
+void SelectGroupSelector::SetMode(SelectGroupSelector::Mode mode)
 {
-	m_listener = listener;
-}
-
-/**
- * Reimplemented to correctly handle drawable icon colouring
- */
-void SelectGroupSelector::lookAndFeelChanged()
-{
-	Component::lookAndFeelChanged();
-
-	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
-	if (dblookAndFeel)
+	if (m_mode != mode)
 	{
+		m_mode = mode;
 
-		//auto svg_xml = XmlDocument::parse(BinaryData::height24px_svg);
-		//m_arrowComponent = Drawable::createFromSVG(*(svg_xml.get()));
-		//m_arrowComponent->replaceColour(Colours::black, dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-		//addAndMakeVisible(m_arrowComponent.get());
-//
-		//if (m_slider)
-		//	m_slider->setColour(Slider::backgroundColourId, dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::MidColor));
+		switch (m_mode)
+		{
+		case SoundobjectSelections:
+			RepopulateWithSoundobjectSelectionGroups();
+			break;
+		case MatrixInputSelections:
+			RepopulateWithMatrixInputSelectionGroups();
+			break;
+		case MatrixOutputSelections:
+			RepopulateWithMatrixOutputSelectionGroups();
+			break;
+		case Invalid:
+		default:
+			jassertfalse;
+			break;
+		}
 	}
 }
 
 /**
- * Reimplemented to paint background and logo.
- * @param g		Graphics context that must be used to do the drawing operations.
+ * Reimplemented from ProcessorSelectionManager::Listener to process
+ * changed soundobject selections.
+ * @param	selectionId	The id of the newly selected selection group.
  */
-void SelectGroupSelector::paint(Graphics& g)
+void SelectGroupSelector::SoundobjectSelectionChanged(ProcessorSelectionManager::SoundobjectSelectionId selectionId)
 {
-	auto cornerSize = 2.0f;
-	auto boxBounds = getLocalBounds();
+	ignoreUnused(selectionId);
 
-	g.setColour(getLookAndFeel().findColour(ComboBox::backgroundColourId));
-	g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);
-
-	g.setColour(getLookAndFeel().findColour(ComboBox::outlineColourId));
-	g.drawRoundedRectangle(boxBounds.toFloat().reduced(0.5f, 0.5f), cornerSize, 1.0f);
+	if (m_mode != SelectGroupSelector::Mode::SoundobjectSelections)
+		return;
 }
 
 /**
- * Reimplemented to resize and re-postion controls on the overview window.
+ * Reimplemented from ProcessorSelectionManager::Listener to process
+ * changed matrix input selections.
+ * @param	selectionId	The id of the newly selected selection group.
  */
-void SelectGroupSelector::resized()
+void SelectGroupSelector::MatrixInputSelectionChanged(ProcessorSelectionManager::MatrixInputSelectionId selectionId)
 {
-	auto bounds = getLocalBounds();
+	ignoreUnused(selectionId);
 
-	auto isPortrait = bounds.getHeight() > bounds.getWidth();
-	if (isPortrait)
+	if (m_mode != SelectGroupSelector::Mode::MatrixInputSelections)
+		return;
+}
+
+/**
+ * Reimplemented from ProcessorSelectionManager::Listener to process
+ * changed matrix output selections.
+ * @param	selectionId	The id of the newly selected selection group.
+ */
+void SelectGroupSelector::MatrixOutputSelectionChanged(ProcessorSelectionManager::MatrixOutputSelectionId selectionId)
+{
+	ignoreUnused(selectionId);
+
+	if (m_mode != SelectGroupSelector::Mode::MatrixOutputSelections)
+		return;
+}
+
+/**
+ * Reimplemented from ProcessorSelectionManager::Listener to process
+ * changed soundobject selection groups.
+ */
+void SelectGroupSelector::SoundobjectSelectionGroupsChanged()
+{
+	if (m_mode != SelectGroupSelector::Mode::SoundobjectSelections)
+		return;
+
+	RepopulateWithSoundobjectSelectionGroups();
+}
+
+/**
+ * Reimplemented from ProcessorSelectionManager::Listener to process
+ * changed matrix input selection groups.
+ */
+void SelectGroupSelector::MatrixInputSelectionGroupsChanged()
+{
+	if (m_mode != SelectGroupSelector::Mode::MatrixInputSelections)
+		return;
+
+	RepopulateWithMatrixInputSelectionGroups();
+}
+
+/**
+ * Reimplemented from ProcessorSelectionManager::Listener to process
+ * changed matrix output selection groups.
+ */
+void SelectGroupSelector::MatrixOutputSelectionGroupsChanged()
+{
+	if (m_mode != SelectGroupSelector::Mode::MatrixOutputSelections)
+		return;
+
+	RepopulateWithMatrixOutputSelectionGroups();
+}
+
+/**
+ * Helper method that is called when the 'store' dropdown menu item is selected.
+ */
+void SelectGroupSelector::TriggerStoreCurrentSelection()
+{
+	auto selMgr = ProcessorSelectionManager::GetInstance();
+	if (selMgr)
 	{
-		//auto drawableHeight = static_cast<int>(0.8f * getLocalBounds().getWidth());
-//
-		//if (m_arrowComponent)
-		//{
-		//	auto drawableBounds = getLocalBounds().removeFromTop(drawableHeight).reduced(1);
-		//	drawableBounds.reduce(2, 0);
-		//	m_arrowComponent->setTransformToFit(drawableBounds.toFloat(), RectanglePlacement::fillDestination);
-		//}
-//
-		//if (m_slider)
-		//{
-		//	if (m_slider->getSliderStyle() != Slider::LinearVertical)
-		//		m_slider->setSliderStyle(Slider::LinearVertical);
-//
-		//	auto sliderBounds = getLocalBounds().removeFromBottom(getLocalBounds().getHeight() - (drawableHeight - 2));
-		//	m_slider->setBounds(sliderBounds);
-		//}
+		switch (m_mode)
+		{
+		case SoundobjectSelections:
+			selMgr->CreateSoundobjectProcessorSelectionGroup();
+			break;
+		case MatrixInputSelections:
+			selMgr->CreateMatrixInputProcessorSelectionGroup();
+			break;
+		case MatrixOutputSelections:
+			selMgr->CreateMatrixOutputProcessorSelectionGroup();
+			break;
+		case Invalid:
+		default:
+			jassertfalse;
+			break;
+		}
 	}
-	else
+}
+
+/**
+ * Helper method that is called when a dropdown menu item
+ * corresponding to a selection group is selected.
+ */
+void SelectGroupSelector::TriggerRecallSelectionId(int id)
+{
+	/*dbg*/if (0 == id)
+	/*dbg*/	jassertfalse;
+
+	auto selMgr = ProcessorSelectionManager::GetInstance();
+	if (selMgr)
 	{
-		//auto drawableWidth = static_cast<int>(0.8f * getLocalBounds().getHeight());
-//
-		//if (m_arrowComponent)
-		//{
-		//	auto drawableBounds = getLocalBounds().removeFromLeft(drawableWidth).reduced(1);
-		//	drawableBounds.reduce(0, 2);
-		//	m_arrowComponent->setTransformToFit(drawableBounds.toFloat(), RectanglePlacement::fillDestination);
-		//}
-//
-		//if (m_slider)
-		//{
-		//	if (m_slider->getSliderStyle() != Slider::LinearHorizontal)
-		//		m_slider->setSliderStyle(Slider::LinearHorizontal);
-//
-		//	auto sliderBounds = getLocalBounds().removeFromRight(getLocalBounds().getWidth() - (drawableWidth - 2));
-		//	m_slider->setBounds(sliderBounds);
-		//}
+		switch (m_mode)
+		{
+		case SoundobjectSelections:
+			selMgr->RecallSoundobjectProcessorSelectionGroup(ProcessorSelectionManager::SoundobjectSelectionId(id));
+			break;
+		case MatrixInputSelections:
+			selMgr->RecallMatrixInputProcessorSelectionGroup(ProcessorSelectionManager::MatrixInputSelectionId(id));
+			break;
+		case MatrixOutputSelections:
+			selMgr->RecallMatrixOutputProcessorSelectionGroup(ProcessorSelectionManager::MatrixOutputSelectionId(id));
+			break;
+		case Invalid:
+		default:
+			jassertfalse;
+			break;
+		}
 	}
+
+	setSelectedId(0);
+}
+
+/**
+ * Helper method to reset contents and refill with current soundobject select group contents.
+ */
+void SelectGroupSelector::RepopulateWithSoundobjectSelectionGroups()
+{
+	jassert(m_mode == SelectGroupSelector::Mode::SoundobjectSelections);
+
+	auto selMgr = ProcessorSelectionManager::GetInstance();
+	if (!selMgr)
+		return;
+
+	clear();
+
+	auto ids = selMgr->GetSoundobjectProcessorSelectionGroupIds();
+	for (auto const& id : ids)
+	{
+		jassert(0 != id); // zero is not allowed
+		jassert(s_storeNewGroupId != id); // new group id is reserved
+
+		auto grpName = selMgr->GetSoundobjectProcessorSelectionGroupName(id);
+		if (grpName.empty())
+			grpName = "SO Selection Id" + std::to_string(id);
+
+		addItem(grpName, id);
+	}
+
+	addSeparator();
+	addItem("Store current selection", s_storeNewGroupId);
+}
+
+/**
+ * Helper method to reset contents and refill with current matrixinput select group contents.
+ */
+void SelectGroupSelector::RepopulateWithMatrixInputSelectionGroups()
+{
+	jassert(m_mode == SelectGroupSelector::Mode::MatrixInputSelections);
+
+	auto selMgr = ProcessorSelectionManager::GetInstance();
+	if (!selMgr)
+		return;
+
+	clear();
+
+	auto ids = selMgr->GetMatrixInputProcessorSelectionGroupIds();
+	for (auto const& id : ids)
+	{
+		jassert(0 != id); // zero is not allowed
+		jassert(s_storeNewGroupId != id); // new group id is reserved
+
+		auto grpName = selMgr->GetMatrixInputProcessorSelectionGroupName(id);
+		if (grpName.empty())
+			grpName = "MI Selection Id" + std::to_string(id);
+
+		addItem(grpName, id);
+	}
+
+	addSeparator();
+	addItem("Store current selection", s_storeNewGroupId);
+}
+
+/**
+ * Helper method to reset contents and refill with current matrixoutput select group contents.
+ */
+void SelectGroupSelector::RepopulateWithMatrixOutputSelectionGroups()
+{
+	jassert(m_mode == SelectGroupSelector::Mode::MatrixOutputSelections);
+
+	auto selMgr = ProcessorSelectionManager::GetInstance();
+	if (!selMgr)
+		return;
+
+	clear();
+
+	auto ids = selMgr->GetMatrixOutputProcessorSelectionGroupIds();
+	for (auto const& id : ids)
+	{
+		jassert(0 != id); // zero is not allowed
+		jassert(s_storeNewGroupId != id); // new group id is reserved
+
+		auto grpName = selMgr->GetMatrixOutputProcessorSelectionGroupName(id);
+		if (grpName.empty())
+			grpName = "MO Selection Id" + std::to_string(id);
+
+		addItem(grpName, id);
+	}
+
+	addSeparator();
+	addItem("Store current selection", s_storeNewGroupId);
 }
 
 

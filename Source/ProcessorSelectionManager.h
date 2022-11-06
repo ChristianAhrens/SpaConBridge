@@ -15,11 +15,11 @@
  * along with this library; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
-
 #pragma once
 
 #include "SpaConBridgeCommon.h"
+
+#include "AppConfiguration.h"
 
 
 namespace SpaConBridge
@@ -31,7 +31,8 @@ namespace SpaConBridge
  * This is a singleton class, so only one instance can exist at a time and can be accessed
  * from throughout the app by calling GetInstance().
  */
-class ProcessorSelectionManager
+class ProcessorSelectionManager :
+	public AppConfiguration::XmlConfigurableElement
 {
 public:
 	typedef int SoundobjectSelectionId;
@@ -75,6 +76,7 @@ public:
 	bool RecallSoundobjectProcessorSelectionGroup(SoundobjectSelectionId selectionId);
 	const std::string GetSoundobjectProcessorSelectionGroupName(SoundobjectSelectionId selectionId);
 	const std::vector<SoundobjectSelectionId> GetSoundobjectProcessorSelectionGroupIds();
+	void ClearSoundobjectProcessorSelectionGroups();
 
 	//==========================================================================
 	void SetSelectedMatrixInputProcessorIds(const std::vector<MatrixInputProcessorId>& processorIds, bool clearPrevSelection);
@@ -86,6 +88,7 @@ public:
 	bool RecallMatrixInputProcessorSelectionGroup(MatrixInputSelectionId selectionId);
 	const std::string GetMatrixInputProcessorSelectionGroupName(MatrixInputSelectionId selectionId);
 	const std::vector<MatrixInputSelectionId> GetMatrixInputProcessorSelectionGroupIds();
+	void ClearMatrixInputProcessorSelectionGroups();
 
 	//==========================================================================
 	void SetSelectedMatrixOutputProcessorIds(const std::vector<MatrixOutputProcessorId>& processorIds, bool clearPrevSelection);
@@ -97,6 +100,11 @@ public:
 	bool RecallMatrixOutputProcessorSelectionGroup(MatrixOutputSelectionId selectionId);
 	const std::string GetMatrixOutputProcessorSelectionGroupName(MatrixOutputSelectionId selectionId);
 	const std::vector<MatrixOutputSelectionId> GetMatrixOutputProcessorSelectionGroupIds();
+	void ClearMatrixOutputProcessorSelectionGroups();
+
+	//==========================================================================
+	std::unique_ptr<XmlElement> createStateXml() override;
+	bool setStateXml(XmlElement* stateXml) override;
 
 protected:
 	static std::unique_ptr<ProcessorSelectionManager>	s_singleton;	/**< The one and only instance of ProcessorSelectionManager. */

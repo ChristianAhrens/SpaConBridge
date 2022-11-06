@@ -60,6 +60,11 @@ public:
         FULLSCREENWINDOWMODE,
         RESIZERBARRATIO,
         SINGLESELECTIONONLY,
+        PROCESSORSELECTIONMANAGER,
+        SOUNDOBJECTPROCESSORSELECTIONS,
+        MATRIXINPUTPROCESSORSELECTIONS,
+        MATRIXOUTPUTPROCESSORSELECTIONS,
+        PROCESSORSELECTIONGROUP,
     };
     static String getTagName(TagID ID)
     {
@@ -123,6 +128,16 @@ public:
             return "ResizeBarRatio";
         case SINGLESELECTIONONLY:
             return "SingleSelectionOnly";
+        case PROCESSORSELECTIONMANAGER:
+            return "ProcessorSelectionManager";
+        case SOUNDOBJECTPROCESSORSELECTIONS:
+            return "SoundobjectProcessorSelections";
+        case MATRIXINPUTPROCESSORSELECTIONS:
+            return "MatrixInputProcessorSelections";
+        case MATRIXOUTPUTPROCESSORSELECTIONS:
+            return "MatrixOutputProcessorSelections";
+        case PROCESSORSELECTIONGROUP:
+            return "ProcessorSelectionGroup";
 		default:
 			return "INVALID";
         }
@@ -137,6 +152,7 @@ public:
         PROCESSORSIZE,
         INDEXMAJOR,
         INDEXMINOR,
+        PROCESSORSELECTIONGROUPNAME,
 	};
 	static String getAttributeName(AttributeID Id)
 	{
@@ -156,6 +172,8 @@ public:
             return "IndexMajor";
         case INDEXMINOR:
             return "IndexMinor";
+        case PROCESSORSELECTIONGROUPNAME:
+            return "ProcessorSelectionGroupName";
 		default:
 			return "INVALID";
 		}

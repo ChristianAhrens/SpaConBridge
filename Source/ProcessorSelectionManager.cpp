@@ -214,6 +214,10 @@ const ProcessorSelectionManager::SoundobjectSelectionId ProcessorSelectionManage
 
 	for (auto const& listener : m_listeners)
 		listener->SoundobjectSelectionGroupsChanged();
+	
+	auto config = SpaConBridge::AppConfiguration::getInstance();
+	if (config)
+		config->triggerConfigurationDump(false);
 
 	return newId;
 }
@@ -262,6 +266,15 @@ const std::vector<ProcessorSelectionManager::SoundobjectSelectionId> ProcessorSe
 		selGrpIds.push_back(selectionGroups.first);
 
 	return selGrpIds;
+}
+
+/**
+ * Helper method to clear the internal selection groups
+ */
+void ProcessorSelectionManager::ClearSoundobjectProcessorSelectionGroups()
+{
+	m_soundobjectProcessorSelectionGroupNames.clear();
+	m_soundobjectProcessorSelectionGroups.clear();
 }
 
 /**
@@ -368,6 +381,10 @@ const ProcessorSelectionManager::MatrixInputSelectionId ProcessorSelectionManage
 
 	for (auto const& listener : m_listeners)
 		listener->MatrixInputSelectionGroupsChanged();
+	
+	auto config = SpaConBridge::AppConfiguration::getInstance();
+	if (config)
+		config->triggerConfigurationDump(false);
 
 	return newId;
 }
@@ -416,6 +433,15 @@ const std::vector<ProcessorSelectionManager::MatrixInputSelectionId> ProcessorSe
 		selGrpIds.push_back(selectionGroups.first);
 
 	return selGrpIds;
+}
+
+/**
+ * Helper method to clear the internal selection groups
+ */
+void ProcessorSelectionManager::ClearMatrixInputProcessorSelectionGroups()
+{
+	m_matrixInputProcessorSelectionGroupNames.clear();
+	m_matrixInputProcessorSelectionGroups.clear();
 }
 
 /**
@@ -522,6 +548,10 @@ const ProcessorSelectionManager::MatrixOutputSelectionId ProcessorSelectionManag
 
 	for (auto const& listener : m_listeners)
 		listener->MatrixOutputSelectionGroupsChanged();
+	
+	auto config = SpaConBridge::AppConfiguration::getInstance();
+	if (config)
+		config->triggerConfigurationDump(false);
 
 	return newId;
 }
@@ -570,6 +600,194 @@ const std::vector<ProcessorSelectionManager::MatrixOutputSelectionId> ProcessorS
 		selGrpIds.push_back(selectionGroups.first);
 
 	return selGrpIds;
+}
+
+/**
+ * Helper method to clear the internal selection groups
+ */
+void ProcessorSelectionManager::ClearMatrixOutputProcessorSelectionGroups()
+{
+	m_matrixOutputProcessorSelectionGroupNames.clear();
+	m_matrixOutputProcessorSelectionGroups.clear();
+}
+
+/**
+ * Overriden from AppConfiguration::XmlConfigurableElement to set this objects' settings
+ * from a XML element structure that passed as argument.
+ * @param stateXml	The XML element containing this objects' configuration data
+ * @return	True if the data was read and handled successfuly, false if not.
+ */
+bool ProcessorSelectionManager::setStateXml(XmlElement* stateXml)
+{
+	// sanity check, if the incoming xml does make sense for this method
+	if (!stateXml || (stateXml->getTagName() != AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORSELECTIONMANAGER)))
+		return false;
+
+	// To prevent that we end up in a recursive ::setStateXml situation, verify that this setStateXml method is not called by itself
+	const ScopedXmlChangeLock lock(IsXmlChangeLocked());
+	if (!lock.isLocked())
+		return false;
+
+	bool retVal = true;
+
+	// create soundobject processors selection groups from xml
+	auto soundobjectProcessorSelectionsXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTPROCESSORSELECTIONS));
+	if (soundobjectProcessorSelectionsXmlElement)
+	{
+		ClearSoundobjectProcessorSelectionGroups();
+
+		for (auto soSelGrpXmlElement : soundobjectProcessorSelectionsXmlElement->getChildIterator())
+		{
+			jassert(soSelGrpXmlElement->getTagName().contains(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTPROCESSORSELECTIONS)));
+			auto selectionId = static_cast<SoundobjectSelectionId>(soSelGrpXmlElement->getTagName().getTrailingIntValue());
+			auto selectionName = soSelGrpXmlElement->getStringAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORSELECTIONGROUPNAME)).toStdString();
+
+			auto soundobjectIdSelectStates = std::map<SoundobjectId, bool>();
+			auto idStringList = soSelGrpXmlElement->getAllSubText();
+			auto ids = StringArray();
+			ids.addTokens(idStringList, ", ", "");
+			for (auto const& id : ids)
+				if (id.isNotEmpty())
+					soundobjectIdSelectStates.insert(std::make_pair(static_cast<SoundobjectId>(std::stoi(id.toStdString())), true));
+
+			m_soundobjectProcessorSelectionGroupNames.insert(std::make_pair(selectionId, selectionName));
+			m_soundobjectProcessorSelectionGroups.insert(std::make_pair(selectionId, soundobjectIdSelectStates));
+		}
+	}
+	else
+		retVal = false;
+
+	// create matrixinput processors selection groups from xml
+	auto matrixInputProcessorSelectionsXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXINPUTPROCESSORSELECTIONS));
+	if (matrixInputProcessorSelectionsXmlElement)
+	{
+		ClearMatrixInputProcessorSelectionGroups();
+
+		for (auto miSelGrpXmlElement : matrixInputProcessorSelectionsXmlElement->getChildIterator())
+		{
+			jassert(miSelGrpXmlElement->getTagName().contains(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXINPUTPROCESSORSELECTIONS)));
+			auto selectionId = static_cast<MatrixInputSelectionId>(miSelGrpXmlElement->getTagName().getTrailingIntValue());
+			auto selectionName = miSelGrpXmlElement->getStringAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORSELECTIONGROUPNAME)).toStdString();
+
+			auto matrixInputIdSelectStates = std::map<MatrixInputId, bool>();
+			auto idStringList = miSelGrpXmlElement->getAllSubText();
+			auto ids = StringArray();
+			ids.addTokens(idStringList, ", ", "");
+			for (auto const& id : ids)
+				if (id.isNotEmpty())
+					matrixInputIdSelectStates.insert(std::make_pair(static_cast<MatrixInputId>(std::stoi(id.toStdString())), true));
+
+			m_matrixInputProcessorSelectionGroupNames.insert(std::make_pair(selectionId, selectionName));
+			m_matrixInputProcessorSelectionGroups.insert(std::make_pair(selectionId, matrixInputIdSelectStates));
+		}
+	}
+	else
+		retVal = false;
+
+	// create matrixoutput processors selection groups from xml
+	auto matrixOutputProcessorSelectionsXmlElement = stateXml->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXOUTPUTPROCESSORSELECTIONS));
+	if (matrixOutputProcessorSelectionsXmlElement)
+	{
+		ClearMatrixOutputProcessorSelectionGroups();
+
+		for (auto moSelGrpXmlElement : matrixOutputProcessorSelectionsXmlElement->getChildIterator())
+		{
+			jassert(moSelGrpXmlElement->getTagName().contains(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXOUTPUTPROCESSORSELECTIONS)));
+			auto selectionId = static_cast<MatrixInputSelectionId>(moSelGrpXmlElement->getTagName().getTrailingIntValue());
+			auto selectionName = moSelGrpXmlElement->getStringAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORSELECTIONGROUPNAME)).toStdString();
+
+			auto matrixOutputIdSelectStates = std::map<MatrixOutputId, bool>();
+			auto idStringList = moSelGrpXmlElement->getAllSubText();
+			auto ids = StringArray();
+			ids.addTokens(idStringList, ", ", "");
+			for (auto const& id : ids)
+				if (id.isNotEmpty())
+					matrixOutputIdSelectStates.insert(std::make_pair(static_cast<MatrixOutputId>(std::stoi(id.toStdString())), true));
+
+			m_matrixOutputProcessorSelectionGroupNames.insert(std::make_pair(selectionId, selectionName));
+			m_matrixOutputProcessorSelectionGroups.insert(std::make_pair(selectionId, matrixOutputIdSelectStates));
+		}
+	}
+	else
+		retVal = false;
+
+	return retVal;
+}
+
+/**
+ * Overriden from AppConfiguration::XmlConfigurableElement to dump this objects' settings
+ * to a XML element structure that is returned and written to config file by the
+ * singleton AppConfiguration class implementation.
+ * @return	The XML element data that was created.
+ */
+std::unique_ptr<XmlElement> ProcessorSelectionManager::createStateXml()
+{
+	auto processorSelectionManagerXmlElement = std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORSELECTIONMANAGER));
+
+	// soundobject processors selection groups
+	auto soundobjectProcessorSelectionsXmlElement = processorSelectionManagerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTPROCESSORSELECTIONS));
+	if (soundobjectProcessorSelectionsXmlElement)
+	{
+		for (auto soSelGrp : m_soundobjectProcessorSelectionGroups)
+		{
+			auto soSelGrpXmlElement = soundobjectProcessorSelectionsXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTPROCESSORSELECTIONS) + String(soSelGrp.first));
+			if (soSelGrpXmlElement)
+			{
+				soSelGrpXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORSELECTIONGROUPNAME), m_soundobjectProcessorSelectionGroupNames.at(soSelGrp.first));
+				
+				auto ids = String();
+				for (auto soundobjectProcessorSelectionStates : soSelGrp.second)
+					if (soundobjectProcessorSelectionStates.second)
+						ids += (String(soundobjectProcessorSelectionStates.first) + String(","));
+
+				soSelGrpXmlElement->addTextElement(ids);
+			}
+		}
+	}
+
+	// matrix input processors selection groups
+	auto matrixInputProcessorSelectionssXmlElement = processorSelectionManagerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXINPUTPROCESSORSELECTIONS));
+	if (matrixInputProcessorSelectionssXmlElement)
+	{
+		for (auto miSelGrp : m_matrixInputProcessorSelectionGroups)
+		{
+			auto miSelGrpXmlElement = soundobjectProcessorSelectionsXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTPROCESSORSELECTIONS) + String(miSelGrp.first));
+			if (miSelGrpXmlElement)
+			{
+				miSelGrpXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORSELECTIONGROUPNAME), m_matrixInputProcessorSelectionGroupNames.at(miSelGrp.first));
+
+				auto ids = String();
+				for (auto matrixInputProcessorSelectionStates : miSelGrp.second)
+					if (matrixInputProcessorSelectionStates.second)
+						ids += (String(matrixInputProcessorSelectionStates.first) + String(","));
+
+				miSelGrpXmlElement->addTextElement(ids);
+			}
+		}
+	}
+
+	// matrix output processors selection groups
+	auto matrixOutputProcessorSelectionssXmlElement = processorSelectionManagerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXOUTPUTPROCESSORSELECTIONS));
+	if (matrixOutputProcessorSelectionssXmlElement)
+	{
+		for (auto moSelGrp : m_matrixOutputProcessorSelectionGroups)
+		{
+			auto moSelGrpXmlElement = soundobjectProcessorSelectionsXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTPROCESSORSELECTIONS) + String(moSelGrp.first));
+			if (moSelGrpXmlElement)
+			{
+				moSelGrpXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORSELECTIONGROUPNAME), m_matrixOutputProcessorSelectionGroupNames.at(moSelGrp.first));
+
+				auto ids = String();
+				for (auto matrixOutputProcessorSelectionStates : moSelGrp.second)
+					if (matrixOutputProcessorSelectionStates.second)
+						ids += (String(matrixOutputProcessorSelectionStates.first) + String(","));
+
+				moSelGrpXmlElement->addTextElement(ids);
+			}
+		}
+	}
+
+	return processorSelectionManagerXmlElement;
 }
 
 

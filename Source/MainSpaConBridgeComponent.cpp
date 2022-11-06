@@ -179,6 +179,10 @@ void MainSpaConBridgeComponent::performConfigurationDump()
     auto pageMgr = SpaConBridge::PageComponentManager::GetInstance();
     if (pageMgr)
         m_config->setConfigState(pageMgr->createStateXml());
+
+    auto selMgr = SpaConBridge::ProcessorSelectionManager::GetInstance();
+    if (selMgr)
+        m_config->setConfigState(selMgr->createStateXml());
 }
 
 void MainSpaConBridgeComponent::onConfigUpdated()
@@ -186,6 +190,7 @@ void MainSpaConBridgeComponent::onConfigUpdated()
     // get all the modules' configs first, because the initialization process might already trigger dumping, that would override data
     auto ctrlConfigState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::CONTROLLER));
     auto uiCfgState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::UICONFIG));
+    auto selMgrCfgState = m_config->getConfigState(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORSELECTIONMANAGER));
 
     // set the controller modules' config
     auto ctrl = SpaConBridge::Controller::GetInstance();
@@ -196,6 +201,11 @@ void MainSpaConBridgeComponent::onConfigUpdated()
     auto pageMgr = SpaConBridge::PageComponentManager::GetInstance();
     if (pageMgr)
         pageMgr->setStateXml(uiCfgState.get());
+
+    // set the processor selection manager modules' config
+    auto selMgr = SpaConBridge::ProcessorSelectionManager::GetInstance();
+    if (selMgr)
+        selMgr->setStateXml(selMgrCfgState.get());
 
     // set the lookandfeel config (forwards to MainWindow where the magic happens)
     if (uiCfgState)

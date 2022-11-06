@@ -232,8 +232,11 @@ bool ProcessorSelectionManager::RecallSoundobjectProcessorSelectionGroup(Process
 	if (m_soundobjectProcessorSelectionGroups.count(selectionId) == 0)
 		return false;
 
+	auto selSOPrcIds = std::vector<SoundobjectProcessorId>();
 	for (auto const& procSelState : m_soundobjectProcessorSelectionGroups.at(selectionId))
-		SetSoundobjectProcessorIdSelectState(procSelState.first, procSelState.second);
+		if (procSelState.second)
+			selSOPrcIds.push_back(procSelState.first);
+	SetSelectedSoundobjectProcessorIds(selSOPrcIds, true);
 
 	auto ctrl = Controller::GetInstance();
 	if (ctrl)
@@ -402,8 +405,11 @@ bool ProcessorSelectionManager::RecallMatrixInputProcessorSelectionGroup(Process
 	if (m_matrixInputProcessorSelectionGroups.count(selectionId) == 0)
 		return false;
 
+	auto selMIPrcIds = std::vector<MatrixInputProcessorId>();
 	for (auto const& procSelState : m_matrixInputProcessorSelectionGroups.at(selectionId))
-		SetMatrixInputProcessorIdSelectState(procSelState.first, procSelState.second);
+		if (procSelState.second)
+			selMIPrcIds.push_back(procSelState.first);
+	SetSelectedMatrixInputProcessorIds(selMIPrcIds, true);
 
 	auto ctrl = Controller::GetInstance();
 	if (ctrl)
@@ -572,8 +578,11 @@ bool ProcessorSelectionManager::RecallMatrixOutputProcessorSelectionGroup(Proces
 	if (m_matrixOutputProcessorSelectionGroups.count(selectionId) == 0)
 		return false;
 
+	auto selMOPrcIds = std::vector<MatrixOutputProcessorId>();
 	for (auto const& procSelState : m_matrixOutputProcessorSelectionGroups.at(selectionId))
-		SetMatrixOutputProcessorIdSelectState(procSelState.first, procSelState.second);
+		if (procSelState.second)
+			selMOPrcIds.push_back(procSelState.first);
+	SetSelectedMatrixOutputProcessorIds(selMOPrcIds, true);
 
 	auto ctrl = Controller::GetInstance();
 	if (ctrl)

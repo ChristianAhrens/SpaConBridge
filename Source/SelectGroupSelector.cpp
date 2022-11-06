@@ -38,10 +38,6 @@ namespace SpaConBridge
 SelectGroupSelector::SelectGroupSelector(const String& componentName)
 	: ComboBox(componentName)
 {
-	addSeparator();
-	addItem("Store current selection", s_storeNewGroupId);
-	addItem("Clear all selections", s_clearAllGroupsId);
-
 	setTooltip("Recall or store a selection");
 	setTextWhenNothingSelected("Recall selection");
 
@@ -315,7 +311,7 @@ void SelectGroupSelector::RepopulateWithSoundobjectSelectionGroups()
 
 	addSeparator();
 	addItem("Store current selection", s_storeNewGroupId);
-	addItem("Clear all selections", s_clearAllGroupsId);
+	addItem("Delete all stored selections", s_clearAllGroupsId);
 }
 
 /**

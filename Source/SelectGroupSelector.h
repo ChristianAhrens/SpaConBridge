@@ -56,6 +56,7 @@ public:
 
 private:
 	void TriggerStoreCurrentSelection();
+	void TriggerClearAllSelections();
 	void TriggerRecallSelectionId(int id);
 
 	void RepopulateWithSoundobjectSelectionGroups();
@@ -63,7 +64,8 @@ private:
 	void RepopulateWithMatrixOutputSelectionGroups();
 
 	//==============================================================================
-	static constexpr int s_storeNewGroupId = INT_MAX;
+	static constexpr int s_storeNewGroupId = INT_MAX - 1;
+	static constexpr int s_clearAllGroupsId = INT_MAX;
 
 	//==============================================================================
 	SelectGroupSelector::Mode m_mode = SelectGroupSelector::Mode::Invalid;

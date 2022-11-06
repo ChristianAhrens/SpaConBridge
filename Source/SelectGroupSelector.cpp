@@ -40,6 +40,7 @@ SelectGroupSelector::SelectGroupSelector(const String& componentName)
 {
 	addSeparator();
 	addItem("Store current selection", s_storeNewGroupId);
+	addItem("Clear all selections", s_clearAllGroupsId);
 
 	setTooltip("Recall or store a selection");
 	setTextWhenNothingSelected("Recall selection");
@@ -50,6 +51,8 @@ SelectGroupSelector::SelectGroupSelector(const String& componentName)
 		auto selId = getSelectedId();
 		if (selId == s_storeNewGroupId)
 			TriggerStoreCurrentSelection();
+		else if (selId == s_clearAllGroupsId)
+			TriggerClearAllSelections();
 		else if (selId != 0)
 			TriggerRecallSelectionId(selId);
 	};
@@ -227,6 +230,33 @@ void SelectGroupSelector::TriggerStoreCurrentSelection()
 }
 
 /**
+ * Helper method that is called when the 'clear' dropdown menu item is selected.
+ */
+void SelectGroupSelector::TriggerClearAllSelections()
+{
+	auto selMgr = ProcessorSelectionManager::GetInstance();
+	if (selMgr)
+	{
+		switch (m_mode)
+		{
+		case SoundobjectSelections:
+			selMgr->ClearSoundobjectProcessorSelectionGroups();
+			break;
+		case MatrixInputSelections:
+			selMgr->ClearMatrixInputProcessorSelectionGroups();
+			break;
+		case MatrixOutputSelections:
+			selMgr->ClearMatrixOutputProcessorSelectionGroups();
+			break;
+		case Invalid:
+		default:
+			jassertfalse;
+			break;
+		}
+	}
+}
+
+/**
  * Helper method that is called when a dropdown menu item
  * corresponding to a selection group is selected.
  */
@@ -274,6 +304,7 @@ void SelectGroupSelector::RepopulateWithSoundobjectSelectionGroups()
 	{
 		jassert(0 != id); // zero is not allowed
 		jassert(s_storeNewGroupId != id); // new group id is reserved
+		jassert(s_clearAllGroupsId != id); // clear all id is reserved
 
 		auto grpName = selMgr->GetSoundobjectProcessorSelectionGroupName(id);
 		if (grpName.empty())
@@ -284,6 +315,7 @@ void SelectGroupSelector::RepopulateWithSoundobjectSelectionGroups()
 
 	addSeparator();
 	addItem("Store current selection", s_storeNewGroupId);
+	addItem("Clear all selections", s_clearAllGroupsId);
 }
 
 /**

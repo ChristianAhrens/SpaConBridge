@@ -275,6 +275,9 @@ void ProcessorSelectionManager::ClearSoundobjectProcessorSelectionGroups()
 {
 	m_soundobjectProcessorSelectionGroupNames.clear();
 	m_soundobjectProcessorSelectionGroups.clear();
+
+	for (auto const& listener : m_listeners)
+		listener->SoundobjectSelectionGroupsChanged();
 }
 
 /**
@@ -442,6 +445,9 @@ void ProcessorSelectionManager::ClearMatrixInputProcessorSelectionGroups()
 {
 	m_matrixInputProcessorSelectionGroupNames.clear();
 	m_matrixInputProcessorSelectionGroups.clear();
+
+	for (auto const& listener : m_listeners)
+		listener->MatrixInputSelectionGroupsChanged();
 }
 
 /**
@@ -609,6 +615,9 @@ void ProcessorSelectionManager::ClearMatrixOutputProcessorSelectionGroups()
 {
 	m_matrixOutputProcessorSelectionGroupNames.clear();
 	m_matrixOutputProcessorSelectionGroups.clear();
+
+	for (auto const& listener : m_listeners)
+		listener->MatrixOutputSelectionGroupsChanged();
 }
 
 /**

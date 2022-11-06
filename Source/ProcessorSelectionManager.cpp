@@ -231,6 +231,10 @@ bool ProcessorSelectionManager::RecallSoundobjectProcessorSelectionGroup(Process
 	for (auto const& procSelState : m_soundobjectProcessorSelectionGroups.at(selectionId))
 		SetSoundobjectProcessorIdSelectState(procSelState.first, procSelState.second);
 
+	auto ctrl = Controller::GetInstance();
+	if (ctrl)
+		ctrl->SetParameterChanged(DCP_SoundobjectProcessor, DCT_ProcessorSelection);
+
 	return true;
 }
 
@@ -381,6 +385,10 @@ bool ProcessorSelectionManager::RecallMatrixInputProcessorSelectionGroup(Process
 	for (auto const& procSelState : m_matrixInputProcessorSelectionGroups.at(selectionId))
 		SetMatrixInputProcessorIdSelectState(procSelState.first, procSelState.second);
 
+	auto ctrl = Controller::GetInstance();
+	if (ctrl)
+		ctrl->SetParameterChanged(DCP_MatrixInputProcessor, DCT_ProcessorSelection);
+
 	return true;
 }
 
@@ -530,6 +538,10 @@ bool ProcessorSelectionManager::RecallMatrixOutputProcessorSelectionGroup(Proces
 
 	for (auto const& procSelState : m_matrixOutputProcessorSelectionGroups.at(selectionId))
 		SetMatrixOutputProcessorIdSelectState(procSelState.first, procSelState.second);
+
+	auto ctrl = Controller::GetInstance();
+	if (ctrl)
+		ctrl->SetParameterChanged(DCP_MatrixOutputProcessor, DCT_ProcessorSelection);
 
 	return true;
 }

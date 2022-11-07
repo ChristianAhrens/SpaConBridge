@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
-## [0.8.2] - 2022-11-06
+## [0.8.3] - 2022-11-07
 ### Added
 - Soundobject selection group storing and recalling for enhanced usability of MultiSoundobject UI
 

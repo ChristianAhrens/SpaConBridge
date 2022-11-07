@@ -18,6 +18,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include <climits>
 
 #include "ProcessorSelectionManager.h"
 

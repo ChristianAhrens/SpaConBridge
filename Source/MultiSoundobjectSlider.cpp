@@ -541,6 +541,7 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
 					jassert(processor);
 					if (processor)
 					{
+                        DBG(String(__FUNCTION__) + String(" BeginGuiGesture for id ") + String(m_currentlyDraggedId));
 						auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
 						if (param)
 							param->BeginGuiGesture();
@@ -556,6 +557,34 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
 			break;
 		}
 	}
+
+    // if no multitouch operation is in progress and no SO was selected in loop above, we have to deal with xy pos changes for multi SOs
+    if (MTDT_PendingInputDecision == m_multiTouchTargetOperation && INVALID_PROCESSOR_ID == m_currentlyDraggedId)
+    {
+        auto ctrl = Controller::GetInstance();
+        if (ctrl)
+        {
+            for (auto const& paramsKV : m_cachedParameters)
+            {
+                if (!paramsKV.second._selected)
+                    continue;
+
+                auto processor = ctrl->GetSoundobjectProcessor(paramsKV.first);
+                if (processor)
+                {
+                    DBG(String(__FUNCTION__) + String(" BeginGuiGesture for id ") + String(paramsKV.first));
+                    auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
+                    if (param)
+                        param->BeginGuiGesture();
+                    param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_Y]);
+                    if (param)
+                        param->BeginGuiGesture();
+
+                    m_objectPosMultiEditStartValues[paramsKV.first] = paramsKV.second._pos;
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -569,24 +598,51 @@ void MultiSoundobjectSlider::mouseDrag(const MouseEvent& e)
     if (GetPrimaryMouseInputSourceIndex() != e.source.getIndex() || IsInFakeALTMultiTouch())
         return;
     
-	if (m_currentlyDraggedId != INVALID_PROCESSOR_ID && m_multiTouchTargetOperation == MTDT_PendingInputDecision)
-	{
-		auto ctrl = Controller::GetInstance();
-		if (ctrl)
-		{
-			auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
-			if (processor)
-			{
-				// Get mouse pixel-wise position and scale it between 0 and 1.
-				Point<int> pos = e.getPosition();
-				float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / getLocalBounds().getWidth())));
-				float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / getLocalBounds().getHeight())));
+    if (m_multiTouchTargetOperation == MTDT_PendingInputDecision)
+    {
+        auto ctrl = Controller::GetInstance();
+        if (ctrl)
+        {
+            // if no multitouch operation is in progress, we have to deal with xy pos changes
+            if (m_currentlyDraggedId != INVALID_PROCESSOR_ID)
+            {
+                auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
+                if (processor)
+                {
+                    // Get mouse pixel-wise position and scale it between 0 and 1.
+                    auto const& pos = e.getPosition();
+                    auto x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / getLocalBounds().getWidth())));
+                    auto y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / getLocalBounds().getHeight())));
 
-				processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, x);
-				processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, y);
-			}
-		}
-	}
+                    processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, x);
+                    processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, y);
+                }
+            }
+            else
+            {
+                for (auto const& paramsKV : m_cachedParameters)
+                {
+                    if (!paramsKV.second._selected)
+                        continue;
+
+                    auto processor = ctrl->GetSoundobjectProcessor(paramsKV.first);
+                    if (processor)
+                    {
+                        auto const& posDelta = Point<int>(e.getDistanceFromDragStartX(), e.getDistanceFromDragStartY());
+                        auto xDelta = static_cast<float>(posDelta.getX()) / getLocalBounds().getWidth();
+                        auto yDelta = static_cast<float>(posDelta.getY()) / getLocalBounds().getHeight();
+
+                        auto const& cachedPos = m_objectPosMultiEditStartValues.at(paramsKV.first);
+                        auto newPosX = jmin<float>(1.0, jmax<float>(0.0, (cachedPos.getX() + xDelta)));
+                        auto newPosY = jmin<float>(1.0, jmax<float>(0.0, (cachedPos.getY() - yDelta)));
+
+                        processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, newPosX);
+                        processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, newPosY);
+                    }
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -602,31 +658,70 @@ void MultiSoundobjectSlider::mouseUp(const MouseEvent& e)
 
     DualPointMultitouchCatcherComponent::mouseUp(e);
 
-    if (!(wasInFakeALTMultiTouch || isntPrimaryMouse) && validDraggedId)
+    if (!(wasInFakeALTMultiTouch || isntPrimaryMouse))
     {
         auto ctrl = Controller::GetInstance();
         if (ctrl)
         {
-			auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
-			if (processor)
-			{
-				auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
-				if (param)
-					param->EndGuiGesture();
-				param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_Y]);
-				if (param)
-					param->EndGuiGesture();
+            if (validDraggedId)
+            {
+                auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
+                if (processor)
+                {
+                    DBG(String(__FUNCTION__) + String(" EndGuiGesture for id ") + String(m_currentlyDraggedId));
+                    auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
+                    if (param)
+                        param->EndGuiGesture();
+                    param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_Y]);
+                    if (param)
+                        param->EndGuiGesture();
 
-				// Get mouse pixel-wise position and scale it between 0 and 1.
-				Point<int> pos = e.getPosition();
-				float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / getLocalBounds().getWidth())));
-				float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / getLocalBounds().getHeight())));
+                    // Get mouse pixel-wise position and scale it between 0 and 1.
+                    auto pos = e.getPosition();
+                    auto x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / getLocalBounds().getWidth())));
+                    auto y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / getLocalBounds().getHeight())));
 
-				processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, x);
-				processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, y);
-			}
-		}
-	}
+                    processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, x);
+                    processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, y);
+                }
+            }
+            else
+            {
+                for (auto const& paramsKV : m_cachedParameters)
+                {
+                    if (!paramsKV.second._selected)
+                        continue;
+
+                    auto processor = ctrl->GetSoundobjectProcessor(paramsKV.first);
+                    if (processor)
+                    {
+                        DBG(String(__FUNCTION__) + String(" EndGuiGesture for id ") + String(paramsKV.first));
+                        auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
+                        if (param)
+                            param->EndGuiGesture();
+                        param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_Y]);
+                        if (param)
+                            param->EndGuiGesture();
+
+                        // Get mouse pixel-wise position and scale it between 0 and 1.
+                        auto const& posDelta = Point<int>(e.getDistanceFromDragStartX(), e.getDistanceFromDragStartY());
+                        auto xDelta = static_cast<float>(posDelta.getX()) / getLocalBounds().getWidth();
+                        auto yDelta = static_cast<float>(posDelta.getY()) / getLocalBounds().getHeight();
+
+                        auto const& cachedPos = m_objectPosMultiEditStartValues.at(paramsKV.first);
+                        auto newPosX = jmin<float>(1.0, jmax<float>(0.0, (cachedPos.getX() + xDelta)));
+                        auto newPosY = jmin<float>(1.0, jmax<float>(0.0, (cachedPos.getY() - yDelta)));
+
+                        processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, newPosX);
+                        processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, newPosY);
+                    }
+                }
+
+
+                m_objectPosMultiEditStartValues.clear();
+            }
+        }
+    }
     
     if (!isntPrimaryMouse)
     {

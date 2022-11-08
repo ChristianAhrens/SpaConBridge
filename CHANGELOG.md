@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.8.4] - 2022-11-08
+### Added
+- Soundobject xy Position modification for all selected objects when dragging in empty area of MultiSoundobject UI
+
 ## [0.8.3] - 2022-11-07
 ### Added
 - Soundobject selection group storing and recalling for enhanced usability of MultiSoundobject UI

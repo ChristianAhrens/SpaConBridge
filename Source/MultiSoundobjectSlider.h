@@ -145,7 +145,8 @@ private:
 	bool														m_handleSelectedOnly{ false };		                        /**< Indication if only selected SO shall be visualized. */
     MultiTouchPoints                                            m_multiTouchPoints;                                         /**< The two multitouch points currently tracked. */
     MultiTouchDirectionTarget                                   m_multiTouchTargetOperation{ MTDT_PendingInputDecision };   /**< Enum value defining how current multitouch input is interpreted. */
-    std::map<SoundobjectProcessorId, float>                     m_multiTouchModNormalValues;
+    std::map<SoundobjectProcessorId, float>                     m_multiTouchModNormalValues;								/**< Startvalues for multitouch multi-object modification, to be used as base for adding gesture deltas to create actual object values. */
+	std::map<SoundobjectProcessorId, juce::Point<float>>		m_objectPosMultiEditStartValues;							/**< Startvalues for editing multiple SO positions. */
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSoundobjectSlider)
 };

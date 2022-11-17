@@ -452,6 +452,16 @@ void SettingsSectionsComponent::createGenericMIDISettingsSection()
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMatrixInputSelectLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMatrixInputSelectLearner.get(), true, false);
 
+	m_GenericMIDISelectionSelectLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
+		static_cast<std::int16_t>(ROI_RemoteProtocolBridge_SoundObjectGroupSelect),
+		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_Trigger | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
+	m_GenericMIDISelectionSelectLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+	m_GenericMIDISelectionSelectLabel = std::make_unique<Label>("GenericMIDISelectSelectLearner", "Selection Select");
+	m_GenericMIDISelectionSelectLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDISelectionSelectLabel->attachToComponent(m_GenericMIDISelectionSelectLearner.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDISelectionSelectLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDISelectionSelectLearner.get(), true, false);
+
 	m_GenericMIDIXValueLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
 		static_cast<std::int16_t>(ROI_CoordinateMapping_SourcePosition_X),
 		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_ValueRange | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
@@ -1442,6 +1452,11 @@ void SettingsSectionsComponent::processUpdatedGenericMIDIConfig()
 	{
 		m_GenericMIDIMatrixInputSelectLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
 		m_GenericMIDIMatrixInputSelectLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIMatrixInputSelectLearner->getReferredId())));
+	}
+	if (m_GenericMIDISelectionSelectLearner)
+	{
+		m_GenericMIDISelectionSelectLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
+		m_GenericMIDISelectionSelectLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDISelectionSelectLearner->getReferredId())));
 	}
     if (m_GenericMIDIXValueLearner)
 	{

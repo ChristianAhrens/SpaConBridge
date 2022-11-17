@@ -32,6 +32,68 @@ namespace SpaConBridge
 
 /*
 ===============================================================================
+	Class SettingsSectionsComponent
+===============================================================================
+*/
+
+/**
+ * Class constructor.
+ */
+IPAddressDisplay::IPAddressDisplay()
+	: TextEditor()
+{
+	setText(juce::IPAddress::getLocalAddress().toString());
+	if (juce::IPAddress::getAllAddresses().size() > 1)
+		setPopupMenuEnabled(true);
+	setEnabled(false);
+}
+
+/**
+ * Reimplemented to create custom popup menu contents: THe ip addresses used by this host instead of copy/cut/paste default actions.
+ * @param	menuToAddTo			The menu to populate
+ * @param	mouseClickEvent		Initiating mouse event that is ignored
+ */
+void IPAddressDisplay::addPopupMenuItems(PopupMenu& menuToAddTo, const MouseEvent* mouseClickEvent)
+{
+	menuToAddTo.clear();
+	ignoreUnused(mouseClickEvent);
+
+	// ip address edit tooltip with all other ips than primary if multiple present in system
+	auto localIpAddresses = juce::IPAddress::getAllAddresses();
+	for (auto const& ip : localIpAddresses)
+	{
+		auto bca = juce::IPAddress::getInterfaceBroadcastAddress(juce::IPAddress::getLocalAddress());
+		if (ip != juce::IPAddress::getLocalAddress() && !IsMultiCast(ip) && !IsUPnPDiscoverAddress(ip))
+		{
+			menuToAddTo.addItem(ip.toString(), false, false, std::function<void()>());
+		}
+	}
+	setEnabled(false);
+}
+
+/**
+ * Helper method to test if a given IP is in multicast range
+ * @param	address		The address to test
+ * @return	True if the ip is in multicast range, false if not
+ */
+bool IPAddressDisplay::IsMultiCast(const juce::IPAddress& address)
+{
+	return address.toString().contains("224.0.0.");
+}
+
+/**
+ * Helper method to test if a given IP is UPnP SSDP discovery ip
+ * @param	address		The address to test
+ * @return	True if the ip is the UPnP address, false if not
+ */
+bool IPAddressDisplay::IsUPnPDiscoverAddress(const juce::IPAddress& address)
+{
+	return address.toString().contains("239.255.255.250");
+}
+
+
+/*
+===============================================================================
  Class SettingsSectionsComponent
 ===============================================================================
 */
@@ -133,14 +195,12 @@ void SettingsSectionsComponent::createGeneralSettingsSection()
 	m_GeneralSettings->addComponent(m_ToggleFullscreenButton.get(), true, false);
 #endif
 
-	m_SystemIpInfoEdit = std::make_unique<TextEditor>();
-	m_SystemIpInfoEdit->setText(juce::IPAddress::getLocalAddress().toString());
+	m_SystemIpInfoEdit = std::make_unique<IPAddressDisplay>();
 	m_SystemIpInfoLabel = std::make_unique<Label>("SystemIpInfoLabel", JUCEApplication::getInstance()->getApplicationName() + " IP");
 	m_SystemIpInfoLabel->setJustificationType(Justification::centred);
 	m_SystemIpInfoLabel->attachToComponent(m_SystemIpInfoEdit.get(), true);
 	m_GeneralSettings->addComponent(m_SystemIpInfoLabel.get(), false, false);
 	m_GeneralSettings->addComponent(m_SystemIpInfoEdit.get(), true, false);
-	m_SystemIpInfoEdit->setEnabled(false);
 
 	m_GeneralSettings->resized();
 

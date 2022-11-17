@@ -1298,6 +1298,10 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 	
 	MappingId mappingId = INVALID_ADDRESS_VALUE;
 
+	ProcessorSelectionManager::SoundobjectSelectionId soundobjectSelectionId = INVALID_ADDRESS_VALUE;
+	ProcessorSelectionManager::MatrixInputSelectionId matrixInputSelectionId = INVALID_ADDRESS_VALUE;
+	ProcessorSelectionManager::MatrixOutputSelectionId matrixOutputSelectionId = INVALID_ADDRESS_VALUE;
+
 	DataChangeType change = DCT_None;
 
 	// Determine which parameter was changed depending on the incoming message's address pattern.
@@ -1433,6 +1437,39 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 			change = DCT_MatrixOutputName;
 		}
 		break;
+	case RemoteObjectIdentifier::ROI_RemoteProtocolBridge_SoundObjectGroupSelect:
+		{
+			// The group No
+			soundobjectSelectionId = msgData._addrVal._first;
+			jassert(soundobjectSelectionId > 0);
+
+			jassert(msgData._valCount == 1 && msgData._valType == RemoteObjectValueType::ROVT_INT);
+
+			change = DCT_ProcessorSelection;
+		}
+		break;
+	case RemoteObjectIdentifier::ROI_RemoteProtocolBridge_MatrixInputGroupSelect:
+		{
+			// The group No
+			matrixInputSelectionId = msgData._addrVal._first;
+			jassert(matrixInputSelectionId > 0);
+
+			jassert(msgData._valCount == 1 && msgData._valType == RemoteObjectValueType::ROVT_INT);
+
+			change = DCT_ProcessorSelection;
+		}
+		break;
+	case RemoteObjectIdentifier::ROI_RemoteProtocolBridge_MatrixOutputGroupSelect:
+		{
+			// The group No
+			matrixOutputSelectionId = msgData._addrVal._first;
+			jassert(matrixOutputSelectionId > 0);
+
+			jassert(msgData._valCount == 1 && msgData._valType == RemoteObjectValueType::ROVT_INT);
+
+			change = DCT_ProcessorSelection;
+		}
+		break;
 	default:
 		break;
 	}
@@ -1453,14 +1490,35 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 		{
 			auto newSelectState = (static_cast<int*>(msgData._payload)[0] == 1);
 
-			for (auto const& processorId : GetSoundobjectProcessorIds())
+			if (soundobjectId > 0)
 			{
-				auto processor = GetSoundobjectProcessor(processorId);
-				if (processor->GetSoundobjectId() == soundobjectId && selMgr->IsSoundobjectProcessorIdSelected(processorId) != newSelectState)
+				for (auto const& processorId : GetSoundobjectProcessorIds())
 				{
-					selMgr->SetSoundobjectProcessorIdSelectState(processorId, newSelectState);
-					SetParameterChanged(DCP_Protocol, DCT_ProcessorSelection);
+					auto processor = GetSoundobjectProcessor(processorId);
+					if (processor->GetSoundobjectId() == soundobjectId && selMgr->IsSoundobjectProcessorIdSelected(processorId) != newSelectState)
+					{
+						selMgr->SetSoundobjectProcessorIdSelectState(processorId, newSelectState);
+						SetParameterChanged(DCP_Protocol, DCT_ProcessorSelection);
+					}
 				}
+			}
+			else if (soundobjectSelectionId > 0)
+			{
+				auto const& existingIds = selMgr->GetSoundobjectProcessorSelectionGroupIds();
+				if (std::find(existingIds.begin(), existingIds.end(), soundobjectSelectionId) != existingIds.end())
+					selMgr->RecallSoundobjectProcessorSelectionGroup(soundobjectSelectionId);
+			}
+			else if (matrixInputSelectionId > 0)
+			{
+				auto const& existingIds = selMgr->GetMatrixInputProcessorSelectionGroupIds();
+				if (std::find(existingIds.begin(), existingIds.end(), matrixInputSelectionId) != existingIds.end())
+					selMgr->RecallMatrixInputProcessorSelectionGroup(matrixInputSelectionId);
+			}
+			else if (matrixOutputSelectionId > 0)
+			{
+				auto const& existingIds = selMgr->GetMatrixOutputProcessorSelectionGroupIds();
+				if (std::find(existingIds.begin(), existingIds.end(), matrixOutputSelectionId) != existingIds.end())
+					selMgr->RecallMatrixOutputProcessorSelectionGroup(matrixOutputSelectionId);
 			}
 		}
 	}

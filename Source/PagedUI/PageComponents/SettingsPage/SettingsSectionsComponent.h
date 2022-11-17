@@ -211,6 +211,8 @@ private:
 	std::unique_ptr<Label>										m_GenericMIDIMappingAreaLabel;
 	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDIMatrixInputSelectLearner;
 	std::unique_ptr<Label>										m_GenericMIDIMatrixInputSelectLabel;
+	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDISelectionSelectLearner;
+	std::unique_ptr<Label>										m_GenericMIDISelectionSelectLabel;	
 	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDIXValueLearner;
 	std::unique_ptr<Label>										m_GenericMIDIXValueLabel;
 	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDIYValueLearner;

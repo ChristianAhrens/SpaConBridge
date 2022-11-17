@@ -163,6 +163,9 @@ bool ProtocolBridgingWrapper::IsBridgingObjectOnly(RemoteObjectIdentifier id)
 	case ROI_RemoteProtocolBridge_SoundObjectSelect:
 	case ROI_RemoteProtocolBridge_UIElementIndexSelect:
 	case ROI_RemoteProtocolBridge_GetAllKnownValues:
+	case ROI_RemoteProtocolBridge_SoundObjectGroupSelect:
+	case ROI_RemoteProtocolBridge_MatrixInputGroupSelect:
+	case ROI_RemoteProtocolBridge_MatrixOutputGroupSelect:
 		return false;
 	default:
 		return true;

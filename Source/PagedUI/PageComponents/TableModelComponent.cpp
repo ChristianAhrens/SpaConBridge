@@ -1129,7 +1129,8 @@ void TableModelComponent::selectedRowsChanged(int lastRowSelected)
 		else
 			jassertfalse;
         
-        m_table->grabKeyboardFocus();
+		if(isShowing() || isOnDesktop())
+			m_table->grabKeyboardFocus();
 	}
 }
 

@@ -241,10 +241,13 @@ void SettingsPageComponent::onApplyClicked()
 }
 
 /**
- *
+ * Method to be called when user clicks on reset to default config button
  */
 void SettingsPageComponent::onResetToDefaultClicked()
 {
+	m_useRawConfigButton->setToggleState(false, juce::dontSendNotification);
+	onToggleRawConfigVisible();
+
 	auto config = dynamic_cast<AppConfiguration*>(SpaConBridge::AppConfiguration::getInstance());
 	if (config != nullptr)
 	{
@@ -313,7 +316,7 @@ void SettingsPageComponent::onSaveConfigClicked()
 }
 
 /**
- *
+ * Method to be called when user clicks on button to toggle raw config visu
  */
 void SettingsPageComponent::onToggleRawConfigVisible()
 {

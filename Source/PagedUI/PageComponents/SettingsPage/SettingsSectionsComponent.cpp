@@ -503,7 +503,7 @@ void SettingsSectionsComponent::createGenericMIDISettingsSection()
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMappingAreaSelect.get(), true, false);
 
 	m_GenericMIDIMatrixInputSelectLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
-		static_cast<std::int16_t>(ROI_MatrixInput_Select), 
+		static_cast<std::int16_t>(ROI_RemoteProtocolBridge_SoundObjectSelect),
 		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_Trigger | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
 	m_GenericMIDIMatrixInputSelectLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
 	m_GenericMIDIMatrixInputSelectLabel = std::make_unique<Label>("GenericMIDIMatrixInputSelectLearner", "Object Select");

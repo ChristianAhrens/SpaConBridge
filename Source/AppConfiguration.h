@@ -64,7 +64,7 @@ public:
         SOUNDOBJECTPROCESSORSELECTIONS,
         MATRIXINPUTPROCESSORSELECTIONS,
         MATRIXOUTPUTPROCESSORSELECTIONS,
-        PROCESSORSELECTIONGROUP,
+        SELECTIONGROUP,
     };
     static String getTagName(TagID ID)
     {
@@ -131,13 +131,13 @@ public:
         case PROCESSORSELECTIONMANAGER:
             return "ProcessorSelectionManager";
         case SOUNDOBJECTPROCESSORSELECTIONS:
-            return "SoundobjectProcessorSelections";
+            return "SOProcSelections";
         case MATRIXINPUTPROCESSORSELECTIONS:
-            return "MatrixInputProcessorSelections";
+            return "MIProcSelections";
         case MATRIXOUTPUTPROCESSORSELECTIONS:
-            return "MatrixOutputProcessorSelections";
-        case PROCESSORSELECTIONGROUP:
-            return "ProcessorSelectionGroup";
+            return "MOProcSelections";
+        case SELECTIONGROUP:
+            return "SelctGrp";
 		default:
 			return "INVALID";
         }
@@ -152,7 +152,7 @@ public:
         PROCESSORSIZE,
         INDEXMAJOR,
         INDEXMINOR,
-        PROCESSORSELECTIONGROUPNAME,
+        NAME,
 	};
 	static String getAttributeName(AttributeID Id)
 	{
@@ -172,8 +172,8 @@ public:
             return "IndexMajor";
         case INDEXMINOR:
             return "IndexMinor";
-        case PROCESSORSELECTIONGROUPNAME:
-            return "ProcessorSelectionGroupName";
+        case NAME:
+            return "Name";
 		default:
 			return "INVALID";
 		}

@@ -30,7 +30,8 @@ _Minimal video tutorial for example setup with AKAI MPKmini2 as MIDI input:_
 
 | Internal remote object | Supported MIDI mapping type | |
 | -- | -- | -- |
-| SoundscapeBridgeApp Sound Object Select | _Single Trigger / Command+Value Range_ | Usable to externally (de-)select a sound object |
+| SpaConBridge Sound Object Select | _Single Trigger / Command+Value Range_ | Usable to externally (de-)select a sound object |
+| SpaConBridge Sound Object Selection Select | _Single Trigger / Command+Value Range_ | Usable to externally select a selection of sound objects |
 | Mapped Sound Object Position X | _Value Range / Command+Value Range_ | Object value range is 0...1, the learned range is mapped to this |
 | Mapped Sound Object Position Y | _Value Range / Command+Value Range_ | Object value range is 0...1, the learned range is mapped to this |
 | Matrix Input ReverbSendGain | _Value Range / Command+Value Range_ | Object value range is 0...1, the learned range is mapped to this |

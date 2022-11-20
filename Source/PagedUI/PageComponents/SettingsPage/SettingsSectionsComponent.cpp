@@ -32,6 +32,68 @@ namespace SpaConBridge
 
 /*
 ===============================================================================
+	Class SettingsSectionsComponent
+===============================================================================
+*/
+
+/**
+ * Class constructor.
+ */
+IPAddressDisplay::IPAddressDisplay()
+	: TextEditor()
+{
+	setText(juce::IPAddress::getLocalAddress().toString());
+	if (juce::IPAddress::getAllAddresses().size() > 1)
+		setPopupMenuEnabled(true);
+	setEnabled(false);
+}
+
+/**
+ * Reimplemented to create custom popup menu contents: THe ip addresses used by this host instead of copy/cut/paste default actions.
+ * @param	menuToAddTo			The menu to populate
+ * @param	mouseClickEvent		Initiating mouse event that is ignored
+ */
+void IPAddressDisplay::addPopupMenuItems(PopupMenu& menuToAddTo, const MouseEvent* mouseClickEvent)
+{
+	menuToAddTo.clear();
+	ignoreUnused(mouseClickEvent);
+
+	// ip address edit tooltip with all other ips than primary if multiple present in system
+	auto localIpAddresses = juce::IPAddress::getAllAddresses();
+	for (auto const& ip : localIpAddresses)
+	{
+		auto bca = juce::IPAddress::getInterfaceBroadcastAddress(juce::IPAddress::getLocalAddress());
+		if (ip != juce::IPAddress::getLocalAddress() && !IsMultiCast(ip) && !IsUPnPDiscoverAddress(ip))
+		{
+			menuToAddTo.addItem(ip.toString(), false, false, std::function<void()>());
+		}
+	}
+	setEnabled(false);
+}
+
+/**
+ * Helper method to test if a given IP is in multicast range
+ * @param	address		The address to test
+ * @return	True if the ip is in multicast range, false if not
+ */
+bool IPAddressDisplay::IsMultiCast(const juce::IPAddress& address)
+{
+	return address.toString().contains("224.0.0.");
+}
+
+/**
+ * Helper method to test if a given IP is UPnP SSDP discovery ip
+ * @param	address		The address to test
+ * @return	True if the ip is the UPnP address, false if not
+ */
+bool IPAddressDisplay::IsUPnPDiscoverAddress(const juce::IPAddress& address)
+{
+	return address.toString().contains("239.255.255.250");
+}
+
+
+/*
+===============================================================================
  Class SettingsSectionsComponent
 ===============================================================================
 */
@@ -133,14 +195,12 @@ void SettingsSectionsComponent::createGeneralSettingsSection()
 	m_GeneralSettings->addComponent(m_ToggleFullscreenButton.get(), true, false);
 #endif
 
-	m_SystemIpInfoEdit = std::make_unique<TextEditor>();
-	m_SystemIpInfoEdit->setText(juce::IPAddress::getLocalAddress().toString());
+	m_SystemIpInfoEdit = std::make_unique<IPAddressDisplay>();
 	m_SystemIpInfoLabel = std::make_unique<Label>("SystemIpInfoLabel", JUCEApplication::getInstance()->getApplicationName() + " IP");
 	m_SystemIpInfoLabel->setJustificationType(Justification::centred);
 	m_SystemIpInfoLabel->attachToComponent(m_SystemIpInfoEdit.get(), true);
 	m_GeneralSettings->addComponent(m_SystemIpInfoLabel.get(), false, false);
 	m_GeneralSettings->addComponent(m_SystemIpInfoEdit.get(), true, false);
-	m_SystemIpInfoEdit->setEnabled(false);
 
 	m_GeneralSettings->resized();
 
@@ -443,7 +503,7 @@ void SettingsSectionsComponent::createGenericMIDISettingsSection()
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMappingAreaSelect.get(), true, false);
 
 	m_GenericMIDIMatrixInputSelectLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
-		static_cast<std::int16_t>(ROI_MatrixInput_Select), 
+		static_cast<std::int16_t>(ROI_RemoteProtocolBridge_SoundObjectSelect),
 		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_Trigger | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
 	m_GenericMIDIMatrixInputSelectLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
 	m_GenericMIDIMatrixInputSelectLabel = std::make_unique<Label>("GenericMIDIMatrixInputSelectLearner", "Object Select");
@@ -451,6 +511,16 @@ void SettingsSectionsComponent::createGenericMIDISettingsSection()
 	m_GenericMIDIMatrixInputSelectLabel->attachToComponent(m_GenericMIDIMatrixInputSelectLearner.get(), true);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMatrixInputSelectLabel.get(), false, false);
 	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDIMatrixInputSelectLearner.get(), true, false);
+
+	m_GenericMIDISelectionSelectLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
+		static_cast<std::int16_t>(ROI_RemoteProtocolBridge_SoundObjectGroupSelect),
+		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_Trigger | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
+	m_GenericMIDISelectionSelectLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
+	m_GenericMIDISelectionSelectLabel = std::make_unique<Label>("GenericMIDISelectSelectLearner", "Selection Select");
+	m_GenericMIDISelectionSelectLabel->setJustificationType(Justification::centredLeft);
+	m_GenericMIDISelectionSelectLabel->attachToComponent(m_GenericMIDISelectionSelectLearner.get(), true);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDISelectionSelectLabel.get(), false, false);
+	m_GenericMIDIBridgingSettings->addComponent(m_GenericMIDISelectionSelectLearner.get(), true, false);
 
 	m_GenericMIDIXValueLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
 		static_cast<std::int16_t>(ROI_CoordinateMapping_SourcePosition_X),
@@ -514,7 +584,7 @@ void SettingsSectionsComponent::createGenericMIDISettingsSection()
 
 	m_GenericMIDIMatrixInputMuteLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
 		static_cast<std::int16_t>(ROI_MatrixInput_Mute),
-		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
+		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_Trigger | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
 	m_GenericMIDIMatrixInputMuteLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
 	m_GenericMIDIMatrixInputMuteLabel = std::make_unique<Label>("GenericMIDIMatrixInputMuteLearner", "MatrixInput Mute");
 	m_GenericMIDIMatrixInputMuteLabel->setJustificationType(Justification::centredLeft);
@@ -534,7 +604,7 @@ void SettingsSectionsComponent::createGenericMIDISettingsSection()
 
 	m_GenericMIDIMatrixOutputMuteLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
 		static_cast<std::int16_t>(ROI_MatrixOutput_Mute),
-		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
+		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_Trigger | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
 	m_GenericMIDIMatrixOutputMuteLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
 	m_GenericMIDIMatrixOutputMuteLabel = std::make_unique<Label>("GenericMIDIMatrixOutputMuteLearner", "MatrixOutput Mute");
 	m_GenericMIDIMatrixOutputMuteLabel->setJustificationType(Justification::centredLeft);
@@ -544,7 +614,7 @@ void SettingsSectionsComponent::createGenericMIDISettingsSection()
 
 	m_GenericMIDINextSceneLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
 		static_cast<std::int16_t>(ROI_Scene_Next),
-		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
+		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_Trigger));
 	m_GenericMIDINextSceneLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
 	m_GenericMIDINextSceneLabel = std::make_unique<Label>("GenericMIDINextSceneLearner", "Next Scene");
 	m_GenericMIDINextSceneLabel->setJustificationType(Justification::centredLeft);
@@ -554,7 +624,7 @@ void SettingsSectionsComponent::createGenericMIDISettingsSection()
 
 	m_GenericMIDIPrevSceneLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
 		static_cast<std::int16_t>(ROI_Scene_Previous),
-		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
+		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_Trigger));
 	m_GenericMIDIPrevSceneLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
 	m_GenericMIDIPrevSceneLabel = std::make_unique<Label>("GenericMIDIPrevSceneLearner", "Previous Scene");
 	m_GenericMIDIPrevSceneLabel->setJustificationType(Justification::centredLeft);
@@ -1442,6 +1512,11 @@ void SettingsSectionsComponent::processUpdatedGenericMIDIConfig()
 	{
 		m_GenericMIDIMatrixInputSelectLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
 		m_GenericMIDIMatrixInputSelectLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIMatrixInputSelectLearner->getReferredId())));
+	}
+	if (m_GenericMIDISelectionSelectLearner)
+	{
+		m_GenericMIDISelectionSelectLearner->setSelectedDeviceIdentifier(ctrl->GetBridgingInputDeviceIdentifier(PBT_GenericMIDI));
+		m_GenericMIDISelectionSelectLearner->setCurrentMidiAssi(ctrl->GetBridgingMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDISelectionSelectLearner->getReferredId())));
 	}
     if (m_GenericMIDIXValueLearner)
 	{

@@ -17,7 +17,18 @@ _Minimal video tutorial for example setup with OSC input from OSControl software
 | _/dbaudio1/matrixinput/reverbsendgain_ | Matrix Input ReverbSendGain          |  |
 | _/dbaudio1/positioning/source_spread_ | Sound Object Spread                  |  |
 | _/dbaudio1/positioning/source_delaymode_ | Sound Object Delay Mode              |  |
+| _/dbaudio1/matrixoutput/mute_ | Matrix Output Mute                   |  |
+| _/dbaudio1/matrixoutput/gain_ | Matrix Output Gain                   |  |
+| _/dbaudio1/matrixinput/mute_ | Matrix Input Mute                    |  |
+| _/dbaudio1/matrixinput/gain_ | Matrix Input Gain                    |  |
+| _/dbaudio1/scene/previous_ | Scene Previous                       |  |
+| _/dbaudio1/scene/next_ | Scene Next                           |  |
+| _/dbaudio1/scene/recall_ | Scene Recall                         |  |
+| _/dbaudio1/scene/sceneindex_ | Scene SceneIndex                     |  |
+| _/dbaudio1/scene/scenename_ | Scene SceneName                      |  |
+| _/dbaudio1/scene/scenecomment_ | Scene SceneComment                   |  |
 | _/RemoteProtocolBridge/SoundObjectSelect_ | SpaConBridge Sound Object Select | _Used to externally (de-)select a sound object_ |
+| _/RemoteProtocolBridge/SoundObjectSelectionSelect_ | SpaConBridge Sound Object Selection Select | _Used to externally select a selection of sound objects_ |
 | _/RemoteProtocolBridge/UIElementIndexSelect_ | SpaConBridge UI Element Index Select | _Used to externally switch between tabs_ |
 | _/RemoteProtocolBridge/cachedValues_ | SpaConBridge value cache sending trigger | _Used to externally query all internally known cached object values_ |
 

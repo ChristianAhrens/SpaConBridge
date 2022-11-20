@@ -35,6 +35,24 @@ namespace SpaConBridge
 {
 
 
+/** 
+ *	Custom reimplementation of a Texteditor that simply shows
+ *	the systems current IP and if this is not unique,
+ *	a popup with all alternative IPs the host system uses. 
+ */
+class IPAddressDisplay : public TextEditor
+{
+public:
+	IPAddressDisplay();
+
+	void addPopupMenuItems(PopupMenu& menuToAddTo, const MouseEvent* mouseClickEvent) override;
+
+private:
+	bool IsMultiCast(const juce::IPAddress& address);
+	bool IsUPnPDiscoverAddress(const juce::IPAddress& address);
+};
+
+
 /**
  * SettingsSectionsComponent is the component to hold multiple components 
  * that are dedicated to app configuration and itself resides within 
@@ -211,6 +229,8 @@ private:
 	std::unique_ptr<Label>										m_GenericMIDIMappingAreaLabel;
 	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDIMatrixInputSelectLearner;
 	std::unique_ptr<Label>										m_GenericMIDIMatrixInputSelectLabel;
+	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDISelectionSelectLearner;
+	std::unique_ptr<Label>										m_GenericMIDISelectionSelectLabel;	
 	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDIXValueLearner;
 	std::unique_ptr<Label>										m_GenericMIDIXValueLabel;
 	std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>		m_GenericMIDIYValueLearner;

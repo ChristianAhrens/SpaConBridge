@@ -584,7 +584,7 @@ void SettingsSectionsComponent::createGenericMIDISettingsSection()
 
 	m_GenericMIDIMatrixInputMuteLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
 		static_cast<std::int16_t>(ROI_MatrixInput_Mute),
-		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
+		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_Trigger | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
 	m_GenericMIDIMatrixInputMuteLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
 	m_GenericMIDIMatrixInputMuteLabel = std::make_unique<Label>("GenericMIDIMatrixInputMuteLearner", "MatrixInput Mute");
 	m_GenericMIDIMatrixInputMuteLabel->setJustificationType(Justification::centredLeft);
@@ -604,7 +604,7 @@ void SettingsSectionsComponent::createGenericMIDISettingsSection()
 
 	m_GenericMIDIMatrixOutputMuteLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
 		static_cast<std::int16_t>(ROI_MatrixOutput_Mute),
-		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
+		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_Trigger | JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
 	m_GenericMIDIMatrixOutputMuteLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
 	m_GenericMIDIMatrixOutputMuteLabel = std::make_unique<Label>("GenericMIDIMatrixOutputMuteLearner", "MatrixOutput Mute");
 	m_GenericMIDIMatrixOutputMuteLabel->setJustificationType(Justification::centredLeft);

@@ -201,6 +201,7 @@ void SettingsSectionsComponent::createGeneralSettingsSection()
 	m_SystemIpInfoLabel->attachToComponent(m_SystemIpInfoEdit.get(), true);
 	m_GeneralSettings->addComponent(m_SystemIpInfoLabel.get(), false, false);
 	m_GeneralSettings->addComponent(m_SystemIpInfoEdit.get(), true, false);
+    m_SystemIpInfoEdit->setEnabled(false);
 
 	m_GeneralSettings->resized();
 

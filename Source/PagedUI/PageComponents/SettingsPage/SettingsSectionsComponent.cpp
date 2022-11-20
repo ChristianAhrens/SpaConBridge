@@ -614,7 +614,7 @@ void SettingsSectionsComponent::createGenericMIDISettingsSection()
 
 	m_GenericMIDINextSceneLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
 		static_cast<std::int16_t>(ROI_Scene_Next),
-		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
+		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_Trigger));
 	m_GenericMIDINextSceneLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
 	m_GenericMIDINextSceneLabel = std::make_unique<Label>("GenericMIDINextSceneLearner", "Next Scene");
 	m_GenericMIDINextSceneLabel->setJustificationType(Justification::centredLeft);
@@ -624,7 +624,7 @@ void SettingsSectionsComponent::createGenericMIDISettingsSection()
 
 	m_GenericMIDIPrevSceneLearner = std::make_unique<JUCEAppBasics::MidiLearnerComponent>(
 		static_cast<std::int16_t>(ROI_Scene_Previous),
-		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_CommandRange));
+		static_cast<JUCEAppBasics::MidiLearnerComponent::AssignmentType>(JUCEAppBasics::MidiLearnerComponent::AT_Trigger));
 	m_GenericMIDIPrevSceneLearner->onMidiAssiSet = [=](Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi) { handleMidiAssiSet(sender, midiAssi); };
 	m_GenericMIDIPrevSceneLabel = std::make_unique<Label>("GenericMIDIPrevSceneLearner", "Previous Scene");
 	m_GenericMIDIPrevSceneLabel->setJustificationType(Justification::centredLeft);

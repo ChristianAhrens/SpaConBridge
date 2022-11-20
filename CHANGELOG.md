@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.8.5] - 2022-11-20
+### Added
+- Support for selection of Soundobject selection groups via MIDI or OSC protocol command
+- Displaying of all relevant SpaConBridge host IPs when not only a single one can be determined as relevant in TextEditor contextmenu
+
+### Changed
+
+### Fixed
+- Fixed MIDI command assignment for MatrixInput_Mute, Scene_Next, Scene_Previous single triggering
+- Fixed various issues with MIDI command handling and assignment mapping
+
 ## [0.8.4] - 2022-11-08
 ### Added
 - Soundobject xy Position modification for all selected objects when dragging in empty area of MultiSoundobject UI

@@ -46,10 +46,17 @@ public:
 	IPAddressDisplay();
 
 	void addPopupMenuItems(PopupMenu& menuToAddTo, const MouseEvent* mouseClickEvent) override;
+    
+    const std::vector<juce::IPAddress> getRelevantIPs();
+    
+protected:
+    void mouseDown(const MouseEvent& e) override;
 
 private:
 	bool IsMultiCast(const juce::IPAddress& address);
 	bool IsUPnPDiscoverAddress(const juce::IPAddress& address);
+    bool IsLoopbackAddress(const juce::IPAddress& address);
+    bool IsBroadcastAddress(const juce::IPAddress& address);
 };
 
 

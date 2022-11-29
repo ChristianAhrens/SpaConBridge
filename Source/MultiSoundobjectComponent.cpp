@@ -277,6 +277,10 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 		// Iterate through all procssor instances and see if anything changed there.
 		// At the same time collect all sources positions for updating.
 		MultiSoundobjectSlider::ParameterCache cachedParameters;
+		auto& soundobjectParameterMap = std::get<0>(cachedParameters);
+		auto& parameterFlags = std::get<1>(cachedParameters);
+
+		auto selectedSOs = 0;
 		for (auto const& processorId : ctrl->GetSoundobjectProcessorIds())
 		{
 			auto processor = ctrl->GetSoundobjectProcessor(processorId);
@@ -294,7 +298,10 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 					auto size			= processor->GetSoundobjectSize();
 					auto objectName		= processor->getProgramName(processor->getCurrentProgram());
 
-					cachedParameters.insert(std::make_pair(processorId, MultiSoundobjectSlider::SoundobjectParameters(soundobjectId, pos, spread, reverbSendGain, selected, colour, size, objectName)));
+					soundobjectParameterMap.insert(std::make_pair(processorId, MultiSoundobjectSlider::SoundobjectParameters(soundobjectId, pos, spread, reverbSendGain, selected, colour, size, objectName)));
+
+					if (selected)
+						selectedSOs++;
 				}
 
 #ifdef UNDEF//DEBUG
@@ -321,6 +328,10 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 #endif
 			}
 		}
+
+		// flag a multiselelction if present
+		if (selectedSOs > 1)
+			parameterFlags |= MultiSoundobjectSlider::CacheFlag::MultiSelection;
 
 		if (update && m_multiSoundobjectSlider)
 		{

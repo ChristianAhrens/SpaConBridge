@@ -257,13 +257,24 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 	g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
 	g.drawRect(Rectangle<float>(0.0f, 0.0f, w, h), 1.5f);
 
+
+    // painting for all cached soundobjects, based on cached parameter values
 	float refKnobSize = 10.0f;
 
-	for (auto const& paramsKV : m_cachedParameters)
-	{
-		auto const& selected = paramsKV.second._selected;
+    auto& soundobjectParameterMap = std::get<0>(m_cachedParameters);
+    auto& parameterFlags = std::get<1>(m_cachedParameters);
 
-		if (m_handleSelectedOnly && !selected)
+    auto multiselectionActive = false;
+    if ((parameterFlags & CacheFlag::MultiSelection) == CacheFlag::MultiSelection)
+        multiselectionActive = true;
+
+    auto selectedCoords = std::vector<juce::Point<float>>();
+
+	for (auto const& paramsKV : soundobjectParameterMap)
+	{
+		auto const& isSelected = paramsKV.second._selected;
+
+		if (m_handleSelectedOnly && !isSelected)
 			continue;
 
 		auto knobColour = paramsKV.second._colour;
@@ -274,8 +285,11 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 
 		// Map the x/y coordinates to the pixel-wise dimensions of the surface area.
 		auto const& pt = paramsKV.second._pos;
-		float x = pt.x * w;
-		float y = h - (pt.y * h);
+
+        auto currentCoords = juce::Point<float>(pt.x * w, h - (pt.y * h));
+        selectedCoords.push_back(currentCoords);
+        auto const& x = currentCoords.getX();
+        auto const& y = currentCoords.getY();
 
 		auto metaInfoSize = 6 * refKnobSize;
 		auto innerRadius = 0.5f * knobSize;
@@ -387,8 +401,9 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 		// Paint knob
 		g.setColour(knobColour);
 		g.setOpacity(1.0f);
-		if (selected)
+        if (isSelected && !multiselectionActive)
 		{
+            // if the current SO is the only selected one, paint it with a circle indicator and solid fill
 			auto fillSize = knobSize + knobThickness;
 			auto outlineSize = 8 * refKnobSize;
 			g.fillEllipse(Rectangle<float>(x - (fillSize / 2.0f), y - (fillSize / 2.0f), fillSize, fillSize));
@@ -411,6 +426,26 @@ void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 		g.setFont(font);
 		g.drawText(textLabel, Rectangle<float>(x - (0.5f * fontDependantWidth), y + 3, fontDependantWidth, knobSize * 2.0f), Justification::centred, true);
 	}
+
+    // Paint the multiselection indication elements
+    if (multiselectionActive && !selectedCoords.empty())
+    {
+        auto multitselectionIndicationColour = getLookAndFeel().findColour(TextButton::textColourOnId).brighter(0.15f);
+        g.setColour(multitselectionIndicationColour);
+
+        auto prevCoord = selectedCoords.back();
+        auto sum = juce::Point<float>(0.0f, 0.0f);
+        for (auto const& coord : selectedCoords)
+        {
+            g.drawLine(prevCoord.getX(), prevCoord.getY(), coord.getX(), coord.getY(), 1.0f);
+            prevCoord = coord;
+            sum += coord;
+        }
+
+        auto cog = sum / selectedCoords.size();
+        auto knobSize = 2.0f * refKnobSize;
+        g.drawEllipse(Rectangle<float>(cog.getX() - (knobSize / 2.0f), cog.getY() - (knobSize / 2.0f), knobSize, knobSize), 0.5f * knobSize);
+    }
     
     auto singleSoundobjectCurrentlyEdited = INVALID_PROCESSOR_ID != m_currentlyDraggedId;
     auto multitouchInputActive = MTDT_PendingInputDecision != m_multiTouchTargetOperation;
@@ -506,7 +541,7 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
 
 	float refKnobSize = 10.0f;
 
-	for (auto const& paramsKV : m_cachedParameters)
+	for (auto const& paramsKV : std::get<0>(m_cachedParameters))
 	{
         auto const& selected = paramsKV.second._selected;
 
@@ -564,7 +599,7 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
         auto ctrl = Controller::GetInstance();
         if (ctrl)
         {
-            for (auto const& paramsKV : m_cachedParameters)
+            for (auto const& paramsKV : std::get<0>(m_cachedParameters))
             {
                 if (!paramsKV.second._selected)
                     continue;
@@ -620,7 +655,7 @@ void MultiSoundobjectSlider::mouseDrag(const MouseEvent& e)
             }
             else
             {
-                for (auto const& paramsKV : m_cachedParameters)
+                for (auto const& paramsKV : std::get<0>(m_cachedParameters))
                 {
                     if (!paramsKV.second._selected)
                         continue;
@@ -687,7 +722,7 @@ void MultiSoundobjectSlider::mouseUp(const MouseEvent& e)
             }
             else
             {
-                for (auto const& paramsKV : m_cachedParameters)
+                for (auto const& paramsKV : std::get<0>(m_cachedParameters))
                 {
                     if (!paramsKV.second._selected)
                         continue;
@@ -789,7 +824,7 @@ void MultiSoundobjectSlider::dualPointMultitouchUpdated(const juce::Point<int>& 
         }
         else
         {
-            for (auto const& paramsKV : m_cachedParameters)
+            for (auto const& paramsKV : std::get<0>(m_cachedParameters))
             {
                 auto const& selected = paramsKV.second._selected;
                 if (selected)
@@ -864,7 +899,7 @@ void MultiSoundobjectSlider::dualPointMultitouchFinished()
         }
         else
         {
-            for (auto const& paramsKV : m_cachedParameters)
+            for (auto const& paramsKV : std::get<0>(m_cachedParameters))
             {
                 auto const& selected = paramsKV.second._selected;
                 if (selected)
@@ -974,7 +1009,7 @@ void MultiSoundobjectSlider::updateMultiTouch(const juce::Point<int>& p1, const 
                 }
                 else
                 {
-                    for (auto const& paramsKV : m_cachedParameters)
+                    for (auto const& paramsKV : std::get<0>(m_cachedParameters))
                     {
                         auto const& selected = paramsKV.second._selected;
                         

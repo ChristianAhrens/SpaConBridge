@@ -74,7 +74,13 @@ public:
 		double			_size;
 		String			_objectName;
 	};
-	typedef std::map<SoundobjectProcessorId, SoundobjectParameters> ParameterCache;
+	enum CacheFlag : std::uint16_t
+	{
+		None = 0x0000,
+		MultiSelection = 0x0001,
+	};
+	using CacheFlags = std::uint16_t;
+	typedef std::tuple<std::map<SoundobjectProcessorId, SoundobjectParameters>, CacheFlags> ParameterCache;
     
     struct MultiTouchPoints
     {

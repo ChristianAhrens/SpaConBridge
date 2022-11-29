@@ -31,6 +31,109 @@ namespace SpaConBridge
 
 /*
 ===============================================================================
+    Class MultiSOSelectionVisualizerComponent
+===============================================================================
+*/
+
+/**
+ * Default constructor
+ */
+MultiSOSelectionVisualizerComponent::MultiSOSelectionVisualizerComponent()
+{
+
+}
+
+/**
+ * Default destructor
+ */
+MultiSOSelectionVisualizerComponent::~MultiSOSelectionVisualizerComponent()
+{
+
+}
+
+/**
+ * Setter for the active state used to decide if painting if required or not.
+ * @param   active  The boolean active state
+ */
+void MultiSOSelectionVisualizerComponent::SetSelectionVisuActive(bool active)
+{
+    m_selectionVisuActive = active;
+}
+
+/**
+ * Setter for the list of points that are selected and shall be used as base for multiselection visu.
+ * @param   points     The list of points to copy into internal member list.
+ */
+void MultiSOSelectionVisualizerComponent::SetSelectionPoints(const std::vector<juce::Point<float>>& points)
+{
+    m_selectionPoints = points;
+}
+
+/**
+ * Reimplemented paint method to perform the actual visualization drawing
+ * @param   g   The graphics object to use for painting.
+ */
+void MultiSOSelectionVisualizerComponent::paint(Graphics& g)
+{
+    Component::paint(g);
+
+    // Paint the multiselection indication elements
+    if (m_selectionVisuActive && !m_selectionPoints.empty())
+    {
+        auto multitselectionIndicationColour = getLookAndFeel().findColour(TextButton::textColourOnId).brighter(0.15f);
+        g.setColour(multitselectionIndicationColour);
+
+        auto prevCoord = m_selectionPoints.back();
+        auto sum = juce::Point<float>(0.0f, 0.0f);
+        for (auto const& coord : m_selectionPoints)
+        {
+            g.drawLine(prevCoord.getX(), prevCoord.getY(), coord.getX(), coord.getY(), 1.0f);
+            prevCoord = coord;
+            sum += coord;
+        }
+
+        auto cog = sum / m_selectionPoints.size();
+
+        auto refKnobSize = 10.0f;
+        auto knobSize = 2.0f * refKnobSize;
+        g.drawEllipse(juce::Rectangle<float>(cog.getX() - (knobSize / 2.0f), cog.getY() - (knobSize / 2.0f), knobSize, knobSize), 0.5f * knobSize);
+    }
+
+}
+
+/**
+ * Reimplemented mouse event handling to forward the event to parent component
+ * in order to not block any user interaction from handling in parent component.
+ * @param   e   The event that occurd and is forwarded to parent component.
+ */
+void MultiSOSelectionVisualizerComponent::mouseDown(const MouseEvent& e)
+{
+    getParentComponent()->mouseDown(e);
+}
+
+/**
+ * Reimplemented mouse event handling to forward the event to parent component
+ * in order to not block any user interaction from handling in parent component.
+ * @param   e   The event that occurd and is forwarded to parent component.
+ */
+void MultiSOSelectionVisualizerComponent::mouseDrag(const MouseEvent& e)
+{
+    getParentComponent()->mouseDrag(e);
+}
+
+/**
+ * Reimplemented mouse event handling to forward the event to parent component
+ * in order to not block any user interaction from handling in parent component.
+ * @param   e   The event that occurd and is forwarded to parent component.
+ */
+void MultiSOSelectionVisualizerComponent::mouseUp(const MouseEvent& e)
+{
+    getParentComponent()->mouseUp(e);
+}
+
+
+/*
+===============================================================================
  Class MultiSoundobjectSlider
 ===============================================================================
 */
@@ -39,11 +142,7 @@ namespace SpaConBridge
  * Object constructor.
  */
 MultiSoundobjectSlider::MultiSoundobjectSlider() :
-	m_currentlyDraggedId(INVALID_PROCESSOR_ID),
-	m_spreadEnabled(false),
-	m_reverbSndGainEnabled(false),
-	m_soundObjectNamesEnabled(false),
-	m_selectedMapping(MappingAreaId::MAI_First)
+    MultiSoundobjectSlider(false, false)
 {
 }
 
@@ -57,6 +156,8 @@ MultiSoundobjectSlider::MultiSoundobjectSlider(bool spreadEnabled, bool reverbSn
     m_soundObjectNamesEnabled(false),
     m_selectedMapping(MappingAreaId::MAI_First)
 {
+    m_multiselectionVisualizer = std::make_unique<MultiSOSelectionVisualizerComponent>();
+    addAndMakeVisible(m_multiselectionVisualizer.get());
 }
 
 /**
@@ -426,26 +527,6 @@ void MultiSoundobjectSlider::paint(Graphics& g)
 		g.setFont(font);
 		g.drawText(textLabel, Rectangle<float>(x - (0.5f * fontDependantWidth), y + 3, fontDependantWidth, knobSize * 2.0f), Justification::centred, true);
 	}
-
-    // Paint the multiselection indication elements
-    if (multiselectionActive && !selectedCoords.empty())
-    {
-        auto multitselectionIndicationColour = getLookAndFeel().findColour(TextButton::textColourOnId).brighter(0.15f);
-        g.setColour(multitselectionIndicationColour);
-
-        auto prevCoord = selectedCoords.back();
-        auto sum = juce::Point<float>(0.0f, 0.0f);
-        for (auto const& coord : selectedCoords)
-        {
-            g.drawLine(prevCoord.getX(), prevCoord.getY(), coord.getX(), coord.getY(), 1.0f);
-            prevCoord = coord;
-            sum += coord;
-        }
-
-        auto cog = sum / selectedCoords.size();
-        auto knobSize = 2.0f * refKnobSize;
-        g.drawEllipse(Rectangle<float>(cog.getX() - (knobSize / 2.0f), cog.getY() - (knobSize / 2.0f), knobSize, knobSize), 0.5f * knobSize);
-    }
     
     auto singleSoundobjectCurrentlyEdited = INVALID_PROCESSOR_ID != m_currentlyDraggedId;
     auto multitouchInputActive = MTDT_PendingInputDecision != m_multiTouchTargetOperation;
@@ -520,6 +601,9 @@ void MultiSoundobjectSlider::resized()
 
 	if (m_backgroundImages.count(GetSelectedMapping()) != 0 && m_backgroundImages.at(GetSelectedMapping()))
 		m_backgroundImages.at(GetSelectedMapping())->setBounds(getLocalBounds().reduced(2));
+
+    if (m_multiselectionVisualizer)
+        m_multiselectionVisualizer->setBounds(getLocalBounds());
 }
 
 /**
@@ -1105,6 +1189,36 @@ float MultiSoundobjectSlider::getMultiTouchFactorValue()
 void MultiSoundobjectSlider::UpdateParameters(const ParameterCache& parameters)
 {
 	m_cachedParameters = parameters;
+
+    if (m_multiselectionVisualizer)
+    {
+        auto& soundobjectParameterMap = std::get<0>(m_cachedParameters);
+        auto& parameterFlags = std::get<1>(m_cachedParameters);
+        if ((parameterFlags & CacheFlag::MultiSelection) == CacheFlag::MultiSelection)
+        {
+            auto selectedCoords = std::vector<juce::Point<float>>();
+
+            auto w = getLocalBounds().toFloat().getWidth();
+            auto h = getLocalBounds().toFloat().getHeight();
+
+            for (auto const& paramsKV : soundobjectParameterMap)
+            {
+                auto const& isSelected = paramsKV.second._selected;
+                auto const& pt = paramsKV.second._pos;
+
+                if (isSelected)
+                    selectedCoords.push_back(juce::Point<float>(pt.x * w, h - (pt.y * h)));
+            }
+
+            m_multiselectionVisualizer->SetSelectionPoints(selectedCoords);
+            m_multiselectionVisualizer->SetSelectionVisuActive(true);
+        }
+        else
+        {
+            m_multiselectionVisualizer->SetSelectionPoints(std::vector<juce::Point<float>>());
+            m_multiselectionVisualizer->SetSelectionVisuActive(false);
+        }
+    }
 }
 
 

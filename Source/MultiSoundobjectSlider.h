@@ -30,6 +30,35 @@ namespace SpaConBridge
 
 
 /**
+ * MultiSOSelectionVisualizerComponent is a helper to encapsulate painting of
+ * custom multiselection visualization and touch/click interaction
+ */
+class MultiSOSelectionVisualizerComponent : public juce::Component
+{
+
+public:
+	MultiSOSelectionVisualizerComponent();
+	virtual ~MultiSOSelectionVisualizerComponent() override;
+
+	//==========================================================================
+	void SetSelectionVisuActive(bool active = true);
+	void SetSelectionPoints(const std::vector<juce::Point<float>>& points);
+
+	//==========================================================================
+	void paint(Graphics& g) override;
+
+	void mouseDown(const MouseEvent& e) override;
+	void mouseDrag(const MouseEvent& e) override;
+	void mouseUp(const MouseEvent& e) override;
+
+private:
+	bool							m_selectionVisuActive{ false };
+	std::vector<juce::Point<float>>	m_selectionPoints;
+
+};
+
+
+/**
  * SoundobjectSlider for displaying and controlling multiple sources.
  */
 class MultiSoundobjectSlider  : public JUCEAppBasics::DualPointMultitouchCatcherComponent
@@ -153,6 +182,8 @@ private:
     MultiTouchDirectionTarget                                   m_multiTouchTargetOperation{ MTDT_PendingInputDecision };   /**< Enum value defining how current multitouch input is interpreted. */
     std::map<SoundobjectProcessorId, float>                     m_multiTouchModNormalValues;								/**< Startvalues for multitouch multi-object modification, to be used as base for adding gesture deltas to create actual object values. */
 	std::map<SoundobjectProcessorId, juce::Point<float>>		m_objectPosMultiEditStartValues;							/**< Startvalues for editing multiple SO positions. */
+
+	std::unique_ptr<MultiSOSelectionVisualizerComponent>		m_multiselectionVisualizer;									/**< Helper component to do the painting and user interaction tracking for multiselection interaction. */
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSoundobjectSlider)
 };

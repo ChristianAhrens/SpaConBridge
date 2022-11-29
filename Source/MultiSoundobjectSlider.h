@@ -123,7 +123,7 @@ public:
 
 	void UpdateParameters(const ParameterCache& positions);
 
-	void paintOverChildren (Graphics& g) override;
+	void paint(Graphics& g) override;
 
 	void resized() override;
 

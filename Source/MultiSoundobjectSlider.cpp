@@ -94,9 +94,14 @@ void MultiSOSelectionVisualizerComponent::paint(Graphics& g)
 
         auto cog = sum / m_selectionPoints.size();
 
+        auto knobSizeScaleFactor = 2.0f;
         auto refKnobSize = 10.0f;
-        auto knobSize = 2.0f * refKnobSize;
-        g.drawEllipse(juce::Rectangle<float>(cog.getX() - (knobSize / 2.0f), cog.getY() - (knobSize / 2.0f), knobSize, knobSize), 0.5f * knobSize);
+        auto knobSize = refKnobSize * knobSizeScaleFactor;
+        auto knobThickness = 3.0f * knobSizeScaleFactor;
+        auto fillSize = knobSize + knobThickness;
+        auto outlineSize = 8 * refKnobSize;
+        g.fillEllipse(Rectangle<float>(cog.getX() - (fillSize / 2.0f), cog.getY() - (fillSize / 2.0f), fillSize, fillSize));
+        g.drawEllipse(Rectangle<float>(cog.getX() - (outlineSize / 2.0f), cog.getY() - (outlineSize / 2.0f), outlineSize, outlineSize), 1.0f);
     }
 
 }

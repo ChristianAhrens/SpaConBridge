@@ -40,7 +40,12 @@ namespace SpaConBridge
  */
 MultiSOSelectionVisualizerComponent::MultiSOSelectionVisualizerComponent()
 {
-
+    auto knobSizeScaleFactor = 2.0f;
+    auto refKnobSize = 10.0f;
+    auto knobSize = refKnobSize * knobSizeScaleFactor;
+    auto knobThickness = 3.0f * knobSizeScaleFactor;
+    m_fillSize = knobSize + knobThickness;
+    m_outlineSize = 8 * refKnobSize;
 }
 
 /**
@@ -70,6 +75,24 @@ void MultiSOSelectionVisualizerComponent::SetSelectionPoints(const std::vector<j
 }
 
 /**
+ * Getter for the 'currently interacted with' internal boolean state.
+ * @return  True if currently interacted with, false if not
+ */
+bool MultiSOSelectionVisualizerComponent::IsPrimaryInteractionActive()
+{
+    return m_currentlyPrimaryInteractedWith;
+}
+
+/**
+ * Getter for the 'currently interacted with' internal boolean state.
+ * @return  True if currently interacted with, false if not
+ */
+bool MultiSOSelectionVisualizerComponent::IsSecondaryInteractionActive()
+{
+    return m_currentlySecondaryInteractedWith;
+}
+
+/**
  * Reimplemented paint method to perform the actual visualization drawing
  * @param   g   The graphics object to use for painting.
  */
@@ -92,16 +115,18 @@ void MultiSOSelectionVisualizerComponent::paint(Graphics& g)
             sum += coord;
         }
 
-        auto cog = sum / m_selectionPoints.size();
+        m_currentCOG = sum / m_selectionPoints.size();
 
-        auto knobSizeScaleFactor = 2.0f;
-        auto refKnobSize = 10.0f;
-        auto knobSize = refKnobSize * knobSizeScaleFactor;
-        auto knobThickness = 3.0f * knobSizeScaleFactor;
-        auto fillSize = knobSize + knobThickness;
-        auto outlineSize = 8 * refKnobSize;
-        g.fillEllipse(Rectangle<float>(cog.getX() - (fillSize / 2.0f), cog.getY() - (fillSize / 2.0f), fillSize, fillSize));
-        g.drawEllipse(Rectangle<float>(cog.getX() - (outlineSize / 2.0f), cog.getY() - (outlineSize / 2.0f), outlineSize, outlineSize), 1.0f);
+        g.fillEllipse(Rectangle<float>(m_currentCOG.getX() - (m_fillSize / 2.0f), m_currentCOG.getY() - (m_fillSize / 2.0f), m_fillSize, m_fillSize));
+        g.drawEllipse(Rectangle<float>(m_currentCOG.getX() - (m_outlineSize / 2.0f), m_currentCOG.getY() - (m_outlineSize / 2.0f), m_outlineSize, m_outlineSize), 1.0f);
+
+        if (IsPrimaryInteractionActive())
+        {
+            auto w = static_cast<float>(getLocalBounds().getWidth());
+            auto h = static_cast<float>(getLocalBounds().getHeight());
+            g.drawLine(0, m_currentCOG.getY(), w, m_currentCOG.getY(), 1);
+            g.drawLine(m_currentCOG.getX(), 0, m_currentCOG.getX(), h, 1);
+        }
     }
 
 }
@@ -113,6 +138,21 @@ void MultiSOSelectionVisualizerComponent::paint(Graphics& g)
  */
 void MultiSOSelectionVisualizerComponent::mouseDown(const MouseEvent& e)
 {
+    // no multitouch support, so only primary mouse clicks are handled
+    if (0 == e.source.getIndex())
+    {
+        auto mousePosF = e.getMouseDownPosition().toFloat();
+
+        Path knobPath;
+        knobPath.addEllipse(Rectangle<float>(m_currentCOG.x - (m_fillSize / 2.0f), m_currentCOG.y - (m_fillSize / 2.0f), m_fillSize, m_fillSize));
+
+        // Check if the mouse click landed inside any of the knobs.
+        if (knobPath.contains(mousePosF))
+            m_currentlyPrimaryInteractedWith = true;
+
+        repaint();
+    }
+
     getParentComponent()->mouseDown(e);
 }
 
@@ -133,6 +173,12 @@ void MultiSOSelectionVisualizerComponent::mouseDrag(const MouseEvent& e)
  */
 void MultiSOSelectionVisualizerComponent::mouseUp(const MouseEvent& e)
 {
+    // no multitouch support, so only primary mouse clicks are handled
+    if (0 == e.source.getIndex())
+    {
+        m_currentlyPrimaryInteractedWith = false;
+    }
+
     getParentComponent()->mouseUp(e);
 }
 
@@ -685,29 +731,16 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
     // if no multitouch operation is in progress and no SO was selected in loop above, we have to deal with xy pos changes for multi SOs
     if (MTDT_PendingInputDecision == m_multiTouchTargetOperation && INVALID_PROCESSOR_ID == m_currentlyDraggedId)
     {
-        auto ctrl = Controller::GetInstance();
-        if (ctrl)
+        auto objectIdsToCache = std::vector<SoundobjectProcessorId>();
+        for (auto const& paramsKV : std::get<0>(m_cachedParameters))
         {
-            for (auto const& paramsKV : std::get<0>(m_cachedParameters))
-            {
-                if (!paramsKV.second._selected)
-                    continue;
+            if (!paramsKV.second._selected)
+                continue;
 
-                auto processor = ctrl->GetSoundobjectProcessor(paramsKV.first);
-                if (processor)
-                {
-                    DBG(String(__FUNCTION__) + String(" BeginGuiGesture for id ") + String(paramsKV.first));
-                    auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
-                    if (param)
-                        param->BeginGuiGesture();
-                    param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_Y]);
-                    if (param)
-                        param->BeginGuiGesture();
-
-                    m_objectPosMultiEditStartValues[paramsKV.first] = paramsKV.second._pos;
-                }
-            }
+            objectIdsToCache.push_back(paramsKV.first);
         }
+
+        cacheObjectXYPos(objectIdsToCache);
     }
 }
 
@@ -744,26 +777,17 @@ void MultiSoundobjectSlider::mouseDrag(const MouseEvent& e)
             }
             else
             {
+                auto objectIdsToModify = std::vector<SoundobjectProcessorId>();
                 for (auto const& paramsKV : std::get<0>(m_cachedParameters))
                 {
                     if (!paramsKV.second._selected)
                         continue;
 
-                    auto processor = ctrl->GetSoundobjectProcessor(paramsKV.first);
-                    if (processor)
-                    {
-                        auto const& posDelta = Point<int>(e.getDistanceFromDragStartX(), e.getDistanceFromDragStartY());
-                        auto xDelta = static_cast<float>(posDelta.getX()) / getLocalBounds().getWidth();
-                        auto yDelta = static_cast<float>(posDelta.getY()) / getLocalBounds().getHeight();
-
-                        auto const& cachedPos = m_objectPosMultiEditStartValues.at(paramsKV.first);
-                        auto newPosX = jmin<float>(1.0, jmax<float>(0.0, (cachedPos.getX() + xDelta)));
-                        auto newPosY = jmin<float>(1.0, jmax<float>(0.0, (cachedPos.getY() - yDelta)));
-
-                        processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, newPosX);
-                        processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, newPosY);
-                    }
+                    objectIdsToModify.push_back(paramsKV.first);
                 }
+
+                auto const& posDelta = Point<int>(e.getDistanceFromDragStartX(), e.getDistanceFromDragStartY());
+                moveObjectXYPos(objectIdsToModify, posDelta);
             }
         }
     }
@@ -811,38 +835,17 @@ void MultiSoundobjectSlider::mouseUp(const MouseEvent& e)
             }
             else
             {
+                auto objectIdsToModify = std::vector<SoundobjectProcessorId>();
                 for (auto const& paramsKV : std::get<0>(m_cachedParameters))
                 {
                     if (!paramsKV.second._selected)
                         continue;
 
-                    auto processor = ctrl->GetSoundobjectProcessor(paramsKV.first);
-                    if (processor)
-                    {
-                        DBG(String(__FUNCTION__) + String(" EndGuiGesture for id ") + String(paramsKV.first));
-                        auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
-                        if (param)
-                            param->EndGuiGesture();
-                        param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_Y]);
-                        if (param)
-                            param->EndGuiGesture();
-
-                        // Get mouse pixel-wise position and scale it between 0 and 1.
-                        auto const& posDelta = Point<int>(e.getDistanceFromDragStartX(), e.getDistanceFromDragStartY());
-                        auto xDelta = static_cast<float>(posDelta.getX()) / getLocalBounds().getWidth();
-                        auto yDelta = static_cast<float>(posDelta.getY()) / getLocalBounds().getHeight();
-
-                        auto const& cachedPos = m_objectPosMultiEditStartValues.at(paramsKV.first);
-                        auto newPosX = jmin<float>(1.0, jmax<float>(0.0, (cachedPos.getX() + xDelta)));
-                        auto newPosY = jmin<float>(1.0, jmax<float>(0.0, (cachedPos.getY() - yDelta)));
-
-                        processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, newPosX);
-                        processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, newPosY);
-                    }
+                    objectIdsToModify.push_back(paramsKV.first);
                 }
 
-
-                m_objectPosMultiEditStartValues.clear();
+                auto const& posDelta = Point<int>(e.getDistanceFromDragStartX(), e.getDistanceFromDragStartY());
+                finalizeObjectXYPos(objectIdsToModify, posDelta);
             }
         }
     }
@@ -1184,6 +1187,105 @@ float MultiSoundobjectSlider::getMultiTouchFactorValue()
     }
     
     return 1.0f;
+}
+
+/**
+ * Helper to cache xy object positions as starting point for multi-obj-modification
+ * @param   objectIds           The ids of the soundobjects that shall be cached
+ */
+void MultiSoundobjectSlider::cacheObjectXYPos(const std::vector<SoundobjectProcessorId>& objectIds)
+{
+    auto ctrl = Controller::GetInstance();
+    if (!ctrl)
+        return;
+
+    for (auto const& objectId : objectIds)
+    {
+        auto processor = ctrl->GetSoundobjectProcessor(objectId);
+        if (processor)
+        {
+            DBG(String(__FUNCTION__) + String(" BeginGuiGesture for id ") + String(objectId));
+            auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
+            if (param)
+                param->BeginGuiGesture();
+            param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_Y]);
+            if (param)
+                param->BeginGuiGesture();
+
+            auto& soundobjectParameterMap = std::get<0>(m_cachedParameters);
+            jassert(soundobjectParameterMap.count(objectId) > 0);
+            m_objectPosMultiEditStartValues[objectId] = soundobjectParameterMap.at(objectId)._pos;
+        }
+    }
+}
+
+/**
+ * Helper to batch modifiy xy object positions with a given position delta
+ * @param   objectIds           The ids of the soundobjects that shall be modified
+ * @param   positionMoveDelta   The xy delta to add to the existing positions
+ */
+void MultiSoundobjectSlider::moveObjectXYPos(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<int>& positionMoveDelta)
+{
+    auto ctrl = Controller::GetInstance();
+    if (!ctrl)
+        return;
+
+    for (auto const& objectId : objectIds)
+    {
+        auto processor = ctrl->GetSoundobjectProcessor(objectId);
+        if (processor)
+        {
+            auto xDelta = static_cast<float>(positionMoveDelta.getX()) / getLocalBounds().getWidth();
+            auto yDelta = static_cast<float>(positionMoveDelta.getY()) / getLocalBounds().getHeight();
+
+            auto const& cachedPos = m_objectPosMultiEditStartValues.at(objectId);
+            auto newPosX = jmin<float>(1.0, jmax<float>(0.0, (cachedPos.getX() + xDelta)));
+            auto newPosY = jmin<float>(1.0, jmax<float>(0.0, (cachedPos.getY() - yDelta)));
+
+            processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, newPosX);
+            processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, newPosY);
+        }
+    }
+}
+
+/**
+ * Helper to finalize modification of xy object positions
+ * @param   objectIds           The ids of the soundobjects that shall be finalized
+ * @param   positionMoveDelta   The xy delta to finally add to the existing positions
+ */
+void MultiSoundobjectSlider::finalizeObjectXYPos(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<int>& positionMoveDelta)
+{
+    auto ctrl = Controller::GetInstance();
+    if (!ctrl)
+        return;
+
+    for (auto const& objectId : objectIds)
+    {
+        auto processor = ctrl->GetSoundobjectProcessor(objectId);
+        if (processor)
+        {
+            DBG(String(__FUNCTION__) + String(" EndGuiGesture for id ") + String(objectId));
+            auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
+            if (param)
+                param->EndGuiGesture();
+            param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_Y]);
+            if (param)
+                param->EndGuiGesture();
+
+            // Get mouse pixel-wise position and scale it between 0 and 1.
+            auto xDelta = static_cast<float>(positionMoveDelta.getX()) / getLocalBounds().getWidth();
+            auto yDelta = static_cast<float>(positionMoveDelta.getY()) / getLocalBounds().getHeight();
+
+            auto const& cachedPos = m_objectPosMultiEditStartValues.at(objectId);
+            auto newPosX = jmin<float>(1.0, jmax<float>(0.0, (cachedPos.getX() + xDelta)));
+            auto newPosY = jmin<float>(1.0, jmax<float>(0.0, (cachedPos.getY() - yDelta)));
+
+            processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, newPosX);
+            processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, newPosY);
+        }
+    }
+
+    m_objectPosMultiEditStartValues.clear();
 }
 
 /**

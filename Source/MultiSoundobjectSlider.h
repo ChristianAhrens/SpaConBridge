@@ -45,6 +45,10 @@ public:
 	void SetSelectionPoints(const std::vector<juce::Point<float>>& points);
 
 	//==========================================================================
+	bool IsPrimaryInteractionActive();
+	bool IsSecondaryInteractionActive();
+
+	//==========================================================================
 	void paint(Graphics& g) override;
 
 	void mouseDown(const MouseEvent& e) override;
@@ -54,7 +58,12 @@ public:
 private:
 	bool							m_selectionVisuActive{ false };
 	std::vector<juce::Point<float>>	m_selectionPoints;
+	bool							m_currentlyPrimaryInteractedWith{ false };
+	bool							m_currentlySecondaryInteractedWith{ false };
+	juce::Point<float>				m_currentCOG;
 
+	float m_fillSize{ 0.0f };
+	float m_outlineSize{ 0.0f };
 };
 
 
@@ -167,6 +176,10 @@ public:
 private:
     void updateMultiTouch(const juce::Point<int>& p1, const juce::Point<int>& p2);
     float getMultiTouchFactorValue();
+
+	void cacheObjectXYPos(const std::vector<SoundobjectProcessorId>& objectIds);
+	void moveObjectXYPos(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<int>& positionMoveDelta);
+	void finalizeObjectXYPos(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<int>& positionMoveDelta);
 
 	SoundobjectProcessorId										m_currentlyDraggedId;				                        /**< ProcessorId of the currently selected knob, if any. */
 	std::vector<SoundobjectId>									m_highlightedIds;					                        /**< SourceIds of the currently highlighted knobs, if any. */

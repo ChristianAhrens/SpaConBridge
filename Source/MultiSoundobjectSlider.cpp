@@ -77,6 +77,14 @@ void MultiSOSelectionVisualizerComponent::SetSelectionVisuActive(bool active)
 void MultiSOSelectionVisualizerComponent::SetSelectionPoints(const std::vector<juce::Point<float>>& points)
 {
     m_selectionPoints = points;
+    if (m_selectionPoints.size() > 1)
+    {
+        auto sum = juce::Point<float>(0.0f, 0.0f);
+        for (auto const& coord : m_selectionPoints)
+            sum += coord;
+
+        m_currentCOG = sum / m_selectionPoints.size(); // zerodivision is prevented in condition above
+    }
 }
 
 /**
@@ -120,15 +128,11 @@ void MultiSOSelectionVisualizerComponent::paint(Graphics& g)
         g.setColour(m_multitselectionIndicationColour);
 
         auto prevCoord = m_selectionPoints.back();
-        auto sum = juce::Point<float>(0.0f, 0.0f);
         for (auto const& coord : m_selectionPoints)
         {
             g.drawLine(prevCoord.getX(), prevCoord.getY(), coord.getX(), coord.getY(), 2.0f);
             prevCoord = coord;
-            sum += coord;
         }
-
-        m_currentCOG = sum / m_selectionPoints.size(); // zerodivision is prevented in condition above
 
         auto& p1 = m_selectionPoints.at(0);
         auto& p2 = m_selectionPoints.at(1);
@@ -220,11 +224,20 @@ void MultiSOSelectionVisualizerComponent::mouseDrag(const MouseEvent& e)
         }
         else if (IsSecondaryInteractionActive())
         {
-            auto cog = juce::Point<float>();
             auto rotDelta = 0.0f;
             auto scaleDelta = 0.0f;
+
+            auto dist1 = m_currentSecondaryHandle.getDistanceFrom(m_currentCOG);
+            auto dist2 = e.getPosition().toFloat().getDistanceFrom(m_currentCOG);
+            if (dist1 != 0.0f)
+                scaleDelta = dist2 / dist1;
+
+            auto angl1 = m_currentCOG.getAngleToPoint(m_currentSecondaryHandle);
+            auto angl2 = m_currentCOG.getAngleToPoint(e.getPosition().toFloat());
+            rotDelta = angl2 - angl1;
+
             if (onMouseRotAndScaleChanged)
-                onMouseRotAndScaleChanged(cog, rotDelta, scaleDelta);
+                onMouseRotAndScaleChanged(m_currentCOG, rotDelta, scaleDelta);
         }
 
         // trigger repaint to show the crosshair visu
@@ -260,11 +273,20 @@ void MultiSOSelectionVisualizerComponent::mouseUp(const MouseEvent& e)
         {
             m_currentlySecondaryInteractedWith = false;
             
-            auto cog = juce::Point<float>();
             auto rotDelta = 0.0f;
             auto scaleDelta = 0.0f;
+
+            auto dist1 = m_currentSecondaryHandle.getDistanceFrom(m_currentCOG);
+            auto dist2 = e.getPosition().toFloat().getDistanceFrom(m_currentCOG);
+            if (dist1 != 0.0f)
+                scaleDelta = dist2 / dist1;
+
+            auto angl1 = m_currentCOG.getAngleToPoint(m_currentSecondaryHandle);
+            auto angl2 = m_currentCOG.getAngleToPoint(e.getPosition().toFloat());
+            rotDelta = angl2 - angl1;
+
             if (onMouseRotAndScaleFinished)
-                onMouseRotAndScaleFinished(cog, rotDelta, scaleDelta);
+                onMouseRotAndScaleFinished(m_currentCOG, rotDelta, scaleDelta);
         }
 
         // trigger repaint to show the crosshair visu
@@ -1311,7 +1333,6 @@ void MultiSoundobjectSlider::cacheObjectXYPos(const std::vector<SoundobjectProce
     if (!ctrl)
         return;
 
-    DBG(__FUNCTION__);
     for (auto const& objectId : objectIds)
     {
         auto processor = ctrl->GetSoundobjectProcessor(objectId);
@@ -1408,7 +1429,7 @@ void MultiSoundobjectSlider::finalizeObjectXYPos(const std::vector<SoundobjectPr
  * @param   rotation            The rotation angle to apply
  * @param   scaling             The relative scaling to apply
  */
-void MultiSoundobjectSlider::applyObjectRotAndScale(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<float>& cog, const float roation, const float scaling)
+void MultiSoundobjectSlider::applyObjectRotAndScale(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<float>& cog, const float rotation, const float scaling)
 {
     auto ctrl = Controller::GetInstance();
     if (!ctrl)
@@ -1440,7 +1461,7 @@ void MultiSoundobjectSlider::applyObjectRotAndScale(const std::vector<Soundobjec
  * @param   rotation            The rotation angle to apply
  * @param   scaling             The relative scaling to apply
  */
-void MultiSoundobjectSlider::finalizeObjectRotAndScale(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<float>& cog, const float roation, const float scaling)
+void MultiSoundobjectSlider::finalizeObjectRotAndScale(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<float>& cog, const float rotation, const float scaling)
 {
     auto ctrl = Controller::GetInstance();
     if (!ctrl)

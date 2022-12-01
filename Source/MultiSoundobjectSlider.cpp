@@ -234,7 +234,7 @@ void MultiSOSelectionVisualizerComponent::mouseDrag(const MouseEvent& e)
 
             auto angl1 = m_currentCOG.getAngleToPoint(m_currentSecondaryHandle);
             auto angl2 = m_currentCOG.getAngleToPoint(e.getPosition().toFloat());
-            rotDelta = angl2 - angl1;
+            rotDelta = -(angl2 - angl1);
 
             if (onMouseRotAndScaleChanged)
                 onMouseRotAndScaleChanged(m_currentCOG, rotDelta, scaleDelta);
@@ -283,7 +283,7 @@ void MultiSOSelectionVisualizerComponent::mouseUp(const MouseEvent& e)
 
             auto angl1 = m_currentCOG.getAngleToPoint(m_currentSecondaryHandle);
             auto angl2 = m_currentCOG.getAngleToPoint(e.getPosition().toFloat());
-            rotDelta = angl2 - angl1;
+            rotDelta = -(angl2 - angl1);
 
             if (onMouseRotAndScaleFinished)
                 onMouseRotAndScaleFinished(m_currentCOG, rotDelta, scaleDelta);
@@ -1434,20 +1434,24 @@ void MultiSoundobjectSlider::applyObjectRotAndScale(const std::vector<Soundobjec
     auto ctrl = Controller::GetInstance();
     if (!ctrl)
         return;
+    if (getLocalBounds().getWidth() == 0 || getLocalBounds().getHeight() == 0)
+        return;
 
-    DBG(String(__FUNCTION__) + String(" ") + cog.toString() + String(" ") + String(rotation) + String(" ") + String(scaling));
+    auto relCOG = juce::Point<float>(cog.getX() / getLocalBounds().getWidth(), cog.getY() / getLocalBounds().getHeight());
+
     for (auto const& objectId : objectIds)
     {
         auto processor = ctrl->GetSoundobjectProcessor(objectId);
         if (processor)
         {
             auto const& cachedPos = m_objectPosMultiEditStartValues.at(objectId);
-            
-            auto relCOG = cog / juce::Point<float>(getLocalBounds().getWidth(), getLocalBounds().getHeight());
 
             auto v1 = cachedPos - relCOG;
             auto sv1 = v1 * scaling;
             auto newPos = relCOG + sv1;
+
+            newPos -= relCOG;
+            newPos = newPos.rotatedAboutOrigin(rotation) + relCOG;
             
             processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, newPos.getX());
             processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, newPos.getY());
@@ -1467,8 +1471,11 @@ void MultiSoundobjectSlider::finalizeObjectRotAndScale(const std::vector<Soundob
     auto ctrl = Controller::GetInstance();
     if (!ctrl)
         return;
+    if (getLocalBounds().getWidth() == 0 || getLocalBounds().getHeight() == 0)
+        return;
 
-    DBG(String(__FUNCTION__) + String(" ") + cog.toString() + String(" ") + String(rotation) + String(" ") + String(scaling));
+    auto relCOG = juce::Point<float>(cog.getX() / getLocalBounds().getWidth(), cog.getY() / getLocalBounds().getHeight());
+
     for (auto const& objectId : objectIds)
     {
         auto processor = ctrl->GetSoundobjectProcessor(objectId);
@@ -1484,11 +1491,12 @@ void MultiSoundobjectSlider::finalizeObjectRotAndScale(const std::vector<Soundob
 
             auto const& cachedPos = m_objectPosMultiEditStartValues.at(objectId);
 
-            auto relCOG = cog / juce::Point<float>(getLocalBounds().getWidth(), getLocalBounds().getHeight());
-
             auto v1 = cachedPos - relCOG;
             auto sv1 = v1 * scaling;
             auto newPos = relCOG + sv1;
+
+            newPos -= relCOG;
+            newPos = newPos.rotatedAboutOrigin(rotation) + relCOG;
 
             processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, newPos.getX());
             processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, newPos.getY());

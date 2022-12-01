@@ -40,12 +40,17 @@ namespace SpaConBridge
  */
 MultiSOSelectionVisualizerComponent::MultiSOSelectionVisualizerComponent()
 {
-    auto knobSizeScaleFactor = 2.0f;
-    auto refKnobSize = 10.0f;
-    auto knobSize = refKnobSize * knobSizeScaleFactor;
-    auto knobThickness = 3.0f * knobSizeScaleFactor;
-    m_fillSize = knobSize + knobThickness;
-    m_outlineSize = 8 * refKnobSize;
+    m_handleSize = 35.0f;
+
+    m_multitselectionIndicationColour = getLookAndFeel().findColour(TextButton::textColourOnId).brighter(0.15f);
+
+    std::unique_ptr<XmlElement> cog_svg_xml = XmlDocument::parse(BinaryData::translate24dp_svg);
+    m_cog_drawable = Drawable::createFromSVG(*(cog_svg_xml.get()));
+    m_cog_drawable->replaceColour(Colours::black, m_multitselectionIndicationColour);
+    
+    std::unique_ptr<XmlElement> secHndl_svg_xml = XmlDocument::parse(BinaryData::croprotate24dp_svg);
+    m_secHndl_drawable = Drawable::createFromSVG(*(secHndl_svg_xml.get()));
+    m_secHndl_drawable->replaceColour(Colours::black, m_multitselectionIndicationColour);
 }
 
 /**
@@ -75,6 +80,15 @@ void MultiSOSelectionVisualizerComponent::SetSelectionPoints(const std::vector<j
 }
 
 /**
+ * Getter for the visu/musel active flag
+ * @return  The active flag value (True if active, false if not)
+ */
+bool MultiSOSelectionVisualizerComponent::IsSelectionVisuActive()
+{
+    return m_selectionVisuActive;
+}
+
+/**
  * Getter for the 'currently interacted with' internal boolean state.
  * @return  True if currently interacted with, false if not
  */
@@ -101,24 +115,32 @@ void MultiSOSelectionVisualizerComponent::paint(Graphics& g)
     Component::paint(g);
 
     // Paint the multiselection indication elements
-    if (m_selectionVisuActive && !m_selectionPoints.empty())
+    if (m_selectionVisuActive && m_selectionPoints.size() > 1)
     {
-        auto multitselectionIndicationColour = getLookAndFeel().findColour(TextButton::textColourOnId).brighter(0.15f);
-        g.setColour(multitselectionIndicationColour);
+        g.setColour(m_multitselectionIndicationColour);
 
         auto prevCoord = m_selectionPoints.back();
         auto sum = juce::Point<float>(0.0f, 0.0f);
         for (auto const& coord : m_selectionPoints)
         {
-            g.drawLine(prevCoord.getX(), prevCoord.getY(), coord.getX(), coord.getY(), 1.0f);
+            g.drawLine(prevCoord.getX(), prevCoord.getY(), coord.getX(), coord.getY(), 2.0f);
             prevCoord = coord;
             sum += coord;
         }
 
-        m_currentCOG = sum / m_selectionPoints.size();
+        m_currentCOG = sum / m_selectionPoints.size(); // zerodivision is prevented in condition above
 
-        g.fillEllipse(Rectangle<float>(m_currentCOG.getX() - (m_fillSize / 2.0f), m_currentCOG.getY() - (m_fillSize / 2.0f), m_fillSize, m_fillSize));
-        g.drawEllipse(Rectangle<float>(m_currentCOG.getX() - (m_outlineSize / 2.0f), m_currentCOG.getY() - (m_outlineSize / 2.0f), m_outlineSize, m_outlineSize), 1.0f);
+        auto& p1 = m_selectionPoints.at(0);
+        auto& p2 = m_selectionPoints.at(1);
+        auto& cog = m_currentCOG;
+        auto vectorP1P2 = p2 - p1;
+        auto p1p2half = p1 + 0.5f * vectorP1P2;
+        auto vectorCogPy = 2.0f * (p1p2half - cog);
+        m_currentSecondaryHandle = cog + vectorCogPy;
+
+        g.drawLine(m_currentCOG.getX(), m_currentCOG.getY(), m_currentSecondaryHandle.getX(), m_currentSecondaryHandle.getY(), 2.0f);
+        m_cog_drawable->drawWithin(g, juce::Rectangle<float>(m_currentCOG.getX() - (m_handleSize / 2.0f), m_currentCOG.getY() - (m_handleSize / 2.0f), m_handleSize, m_handleSize), juce::RectanglePlacement::fillDestination, 1.0f);
+        m_secHndl_drawable->drawWithin(g, juce::Rectangle<float>(m_currentSecondaryHandle.getX() - (m_handleSize / 2.0f), m_currentSecondaryHandle.getY() - (m_handleSize / 2.0f), m_handleSize, m_handleSize), juce::RectanglePlacement::fillDestination, 1.0f);
 
         if (IsPrimaryInteractionActive())
         {
@@ -139,18 +161,41 @@ void MultiSOSelectionVisualizerComponent::paint(Graphics& g)
 void MultiSOSelectionVisualizerComponent::mouseDown(const MouseEvent& e)
 {
     // no multitouch support, so only primary mouse clicks are handled
-    if (0 == e.source.getIndex())
+    if (0 == e.source.getIndex() && IsSelectionVisuActive())
     {
         auto mousePosF = e.getMouseDownPosition().toFloat();
 
-        Path knobPath;
-        knobPath.addEllipse(Rectangle<float>(m_currentCOG.x - (m_fillSize / 2.0f), m_currentCOG.y - (m_fillSize / 2.0f), m_fillSize, m_fillSize));
+        Path cogPath;
+        cogPath.addEllipse(Rectangle<float>(m_currentCOG.x - (m_handleSize / 2.0f), m_currentCOG.y - (m_handleSize / 2.0f), m_handleSize, m_handleSize));
+        auto startPrimInteraction = cogPath.contains(mousePosF);
+
+        Path secHndlPath;
+        secHndlPath.addEllipse(Rectangle<float>(m_currentSecondaryHandle.getX() - (m_handleSize / 2.0f), m_currentSecondaryHandle.getY() - (m_handleSize / 2.0f), m_handleSize, m_handleSize));
+        auto startSecInteraction = secHndlPath.contains(mousePosF);
 
         // Check if the mouse click landed inside any of the knobs.
-        if (knobPath.contains(mousePosF))
-            m_currentlyPrimaryInteractedWith = true;
+        if (startPrimInteraction || startSecInteraction)
+        {
+            if (startPrimInteraction)
+            {
+                jassert(!IsSecondaryInteractionActive());
+                m_currentlyPrimaryInteractedWith = true;
+            }
+            else if (startSecInteraction)
+            {
+                jassert(!IsPrimaryInteractionActive());
+                m_currentlySecondaryInteractedWith = true;
+            }
 
-        repaint();
+            if (onMouseInteractionStarted)
+                onMouseInteractionStarted();
+
+            // trigger repaint to show the crosshair visu
+            repaint();
+
+            // do not continue to foward mouseDown to parent
+            return;
+        }
     }
 
     getParentComponent()->mouseDown(e);
@@ -163,6 +208,32 @@ void MultiSOSelectionVisualizerComponent::mouseDown(const MouseEvent& e)
  */
 void MultiSOSelectionVisualizerComponent::mouseDrag(const MouseEvent& e)
 {
+    // no multitouch support, so only primary mouse clicks are handled
+    if (0 == e.source.getIndex() && (IsPrimaryInteractionActive() || IsSecondaryInteractionActive()))
+    {
+        auto dragDelta = juce::Point<int>(e.getDistanceFromDragStartX(), e.getDistanceFromDragStartY());
+
+        if (IsPrimaryInteractionActive())
+        {
+            if (onMouseXYPosChanged)
+                onMouseXYPosChanged(dragDelta);
+        }
+        else if (IsSecondaryInteractionActive())
+        {
+            auto cog = juce::Point<float>();
+            auto rotDelta = 0.0f;
+            auto scaleDelta = 0.0f;
+            if (onMouseRotAndScaleChanged)
+                onMouseRotAndScaleChanged(cog, rotDelta, scaleDelta);
+        }
+
+        // trigger repaint to show the crosshair visu
+        repaint();
+
+        // do not continue to foward mouseDown to parent
+        return;
+    }
+
     getParentComponent()->mouseDrag(e);
 }
 
@@ -174,9 +245,33 @@ void MultiSOSelectionVisualizerComponent::mouseDrag(const MouseEvent& e)
 void MultiSOSelectionVisualizerComponent::mouseUp(const MouseEvent& e)
 {
     // no multitouch support, so only primary mouse clicks are handled
-    if (0 == e.source.getIndex())
+    if (0 == e.source.getIndex() && (IsPrimaryInteractionActive() || IsSecondaryInteractionActive()))
     {
-        m_currentlyPrimaryInteractedWith = false;
+        auto dragDelta = juce::Point<int>(e.getDistanceFromDragStartX(), e.getDistanceFromDragStartY());
+
+        if (IsPrimaryInteractionActive())
+        {
+            m_currentlyPrimaryInteractedWith = false;
+
+            if (onMouseXYPosFinished)
+                onMouseXYPosFinished(dragDelta);
+        }
+        else if (IsSecondaryInteractionActive())
+        {
+            m_currentlySecondaryInteractedWith = false;
+            
+            auto cog = juce::Point<float>();
+            auto rotDelta = 0.0f;
+            auto scaleDelta = 0.0f;
+            if (onMouseRotAndScaleFinished)
+                onMouseRotAndScaleFinished(cog, rotDelta, scaleDelta);
+        }
+
+        // trigger repaint to show the crosshair visu
+        repaint();
+
+        // do not continue to foward mouseDown to parent
+        return;
     }
 
     getParentComponent()->mouseUp(e);
@@ -208,6 +303,66 @@ MultiSoundobjectSlider::MultiSoundobjectSlider(bool spreadEnabled, bool reverbSn
     m_selectedMapping(MappingAreaId::MAI_First)
 {
     m_multiselectionVisualizer = std::make_unique<MultiSOSelectionVisualizerComponent>();
+    m_multiselectionVisualizer->onMouseInteractionStarted = [this](void) {
+        auto objectIdsToCache = std::vector<SoundobjectProcessorId>();
+        for (auto const& paramsKV : std::get<0>(m_cachedParameters))
+        {
+            if (!paramsKV.second._selected)
+                continue;
+        
+            objectIdsToCache.push_back(paramsKV.first);
+        }
+        
+        cacheObjectXYPos(objectIdsToCache);
+    };
+    m_multiselectionVisualizer->onMouseXYPosChanged = [this](const juce::Point<int>& posDelta) {
+        auto objectIdsToModify = std::vector<SoundobjectProcessorId>();
+        for (auto const& paramsKV : std::get<0>(m_cachedParameters))
+        {
+            if (!paramsKV.second._selected)
+                continue;
+        
+            objectIdsToModify.push_back(paramsKV.first);
+        }
+        
+        moveObjectXYPos(objectIdsToModify, posDelta);
+    };
+    m_multiselectionVisualizer->onMouseXYPosFinished = [this](const juce::Point<int>& posDelta) {
+        auto objectIdsToModify = std::vector<SoundobjectProcessorId>();
+        for (auto const& paramsKV : std::get<0>(m_cachedParameters))
+        {
+            if (!paramsKV.second._selected)
+                continue;
+        
+            objectIdsToModify.push_back(paramsKV.first);
+        }
+        
+        finalizeObjectXYPos(objectIdsToModify, posDelta);
+    };
+    m_multiselectionVisualizer->onMouseRotAndScaleChanged = [this](const juce::Point<float>& cog, const float roation, const float scaling) {
+        auto objectIdsToModify = std::vector<SoundobjectProcessorId>();
+        for (auto const& paramsKV : std::get<0>(m_cachedParameters))
+        {
+            if (!paramsKV.second._selected)
+                continue;
+
+            objectIdsToModify.push_back(paramsKV.first);
+        }
+
+        applyObjectRotAndScale(objectIdsToModify, cog, roation, scaling);
+    };
+    m_multiselectionVisualizer->onMouseRotAndScaleFinished = [this](const juce::Point<float>& cog, const float roation, const float scaling) {
+        auto objectIdsToModify = std::vector<SoundobjectProcessorId>();
+        for (auto const& paramsKV : std::get<0>(m_cachedParameters))
+        {
+            if (!paramsKV.second._selected)
+                continue;
+
+            objectIdsToModify.push_back(paramsKV.first);
+        }
+
+        finalizeObjectRotAndScale(objectIdsToModify, cog, roation, scaling);
+    };
     addAndMakeVisible(m_multiselectionVisualizer.get());
 }
 
@@ -727,21 +882,6 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
 			break;
 		}
 	}
-
-    // if no multitouch operation is in progress and no SO was selected in loop above, we have to deal with xy pos changes for multi SOs
-    if (MTDT_PendingInputDecision == m_multiTouchTargetOperation && INVALID_PROCESSOR_ID == m_currentlyDraggedId)
-    {
-        auto objectIdsToCache = std::vector<SoundobjectProcessorId>();
-        for (auto const& paramsKV : std::get<0>(m_cachedParameters))
-        {
-            if (!paramsKV.second._selected)
-                continue;
-
-            objectIdsToCache.push_back(paramsKV.first);
-        }
-
-        cacheObjectXYPos(objectIdsToCache);
-    }
 }
 
 /**
@@ -774,20 +914,6 @@ void MultiSoundobjectSlider::mouseDrag(const MouseEvent& e)
                     processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, x);
                     processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, y);
                 }
-            }
-            else
-            {
-                auto objectIdsToModify = std::vector<SoundobjectProcessorId>();
-                for (auto const& paramsKV : std::get<0>(m_cachedParameters))
-                {
-                    if (!paramsKV.second._selected)
-                        continue;
-
-                    objectIdsToModify.push_back(paramsKV.first);
-                }
-
-                auto const& posDelta = Point<int>(e.getDistanceFromDragStartX(), e.getDistanceFromDragStartY());
-                moveObjectXYPos(objectIdsToModify, posDelta);
             }
         }
     }
@@ -832,20 +958,6 @@ void MultiSoundobjectSlider::mouseUp(const MouseEvent& e)
                     processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, x);
                     processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, y);
                 }
-            }
-            else
-            {
-                auto objectIdsToModify = std::vector<SoundobjectProcessorId>();
-                for (auto const& paramsKV : std::get<0>(m_cachedParameters))
-                {
-                    if (!paramsKV.second._selected)
-                        continue;
-
-                    objectIdsToModify.push_back(paramsKV.first);
-                }
-
-                auto const& posDelta = Point<int>(e.getDistanceFromDragStartX(), e.getDistanceFromDragStartY());
-                finalizeObjectXYPos(objectIdsToModify, posDelta);
             }
         }
     }
@@ -1199,6 +1311,7 @@ void MultiSoundobjectSlider::cacheObjectXYPos(const std::vector<SoundobjectProce
     if (!ctrl)
         return;
 
+    DBG(__FUNCTION__);
     for (auto const& objectId : objectIds)
     {
         auto processor = ctrl->GetSoundobjectProcessor(objectId);
@@ -1282,6 +1395,81 @@ void MultiSoundobjectSlider::finalizeObjectXYPos(const std::vector<SoundobjectPr
 
             processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, newPosX);
             processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, newPosY);
+        }
+    }
+
+    m_objectPosMultiEditStartValues.clear();
+}
+
+/**
+ * Helper to batch modifiy object rotation and scaling relative to their common center of gravity
+ * @param   objectIds           The ids of the soundobjects that shall be modified
+ * @param   cog                 The center of gravity the rot/scale values refer to
+ * @param   rotation            The rotation angle to apply
+ * @param   scaling             The relative scaling to apply
+ */
+void MultiSoundobjectSlider::applyObjectRotAndScale(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<float>& cog, const float roation, const float scaling)
+{
+    auto ctrl = Controller::GetInstance();
+    if (!ctrl)
+        return;
+
+    DBG(__FUNCTION__);
+    for (auto const& objectId : objectIds)
+    {
+        auto processor = ctrl->GetSoundobjectProcessor(objectId);
+        if (processor)
+        {
+            //auto xDelta = static_cast<float>(positionMoveDelta.getX()) / getLocalBounds().getWidth();
+            //auto yDelta = static_cast<float>(positionMoveDelta.getY()) / getLocalBounds().getHeight();
+            //
+            //auto const& cachedPos = m_objectPosMultiEditStartValues.at(objectId);
+            //auto newPosX = jmin<float>(1.0, jmax<float>(0.0, (cachedPos.getX() + xDelta)));
+            //auto newPosY = jmin<float>(1.0, jmax<float>(0.0, (cachedPos.getY() - yDelta)));
+            //
+            //processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, newPosX);
+            //processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, newPosY);
+        }
+    }
+}
+
+/**
+ * Helper to finalize modification of object rotation and scaling relative to their common center of gravity
+ * @param   objectIds           The ids of the soundobjects that shall be finalized
+ * * @param   cog                 The center of gravity the rot/scale values refer to
+ * @param   rotation            The rotation angle to apply
+ * @param   scaling             The relative scaling to apply
+ */
+void MultiSoundobjectSlider::finalizeObjectRotAndScale(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<float>& cog, const float roation, const float scaling)
+{
+    auto ctrl = Controller::GetInstance();
+    if (!ctrl)
+        return;
+
+    DBG(__FUNCTION__);
+    for (auto const& objectId : objectIds)
+    {
+        auto processor = ctrl->GetSoundobjectProcessor(objectId);
+        if (processor)
+        {
+            DBG(String(__FUNCTION__) + String(" EndGuiGesture for id ") + String(objectId));
+            auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
+            if (param)
+                param->EndGuiGesture();
+            param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_Y]);
+            if (param)
+                param->EndGuiGesture();
+
+            //// Get mouse pixel-wise position and scale it between 0 and 1.
+            //auto xDelta = static_cast<float>(positionMoveDelta.getX()) / getLocalBounds().getWidth();
+            //auto yDelta = static_cast<float>(positionMoveDelta.getY()) / getLocalBounds().getHeight();
+            //
+            //auto const& cachedPos = m_objectPosMultiEditStartValues.at(objectId);
+            //auto newPosX = jmin<float>(1.0, jmax<float>(0.0, (cachedPos.getX() + xDelta)));
+            //auto newPosY = jmin<float>(1.0, jmax<float>(0.0, (cachedPos.getY() - yDelta)));
+            //
+            //processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, newPosX);
+            //processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, newPosY);
         }
     }
 

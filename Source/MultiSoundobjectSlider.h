@@ -44,6 +44,8 @@ public:
 	void SetSelectionVisuActive(bool active = true);
 	void SetSelectionPoints(const std::vector<juce::Point<float>>& points);
 
+	bool IsSelectionVisuActive();
+
 	//==========================================================================
 	bool IsPrimaryInteractionActive();
 	bool IsSecondaryInteractionActive();
@@ -55,15 +57,28 @@ public:
 	void mouseDrag(const MouseEvent& e) override;
 	void mouseUp(const MouseEvent& e) override;
 
+	//==========================================================================
+	std::function<void()> onMouseInteractionStarted = nullptr;
+	std::function<void(const juce::Point<int>&)> onMouseXYPosChanged = nullptr;
+	std::function<void(const juce::Point<int>&)> onMouseXYPosFinished = nullptr;
+	std::function<void(const juce::Point<float>&, const float, const float)> onMouseRotAndScaleChanged = nullptr;
+	std::function<void(const juce::Point<float>&, const float, const float)> onMouseRotAndScaleFinished = nullptr;
+
 private:
 	bool							m_selectionVisuActive{ false };
 	std::vector<juce::Point<float>>	m_selectionPoints;
 	bool							m_currentlyPrimaryInteractedWith{ false };
 	bool							m_currentlySecondaryInteractedWith{ false };
 	juce::Point<float>				m_currentCOG;
+	juce::Point<float>				m_currentSecondaryHandle;
 
-	float m_fillSize{ 0.0f };
-	float m_outlineSize{ 0.0f };
+	juce::Colour					m_multitselectionIndicationColour;
+
+	std::unique_ptr<juce::Drawable>	m_cog_drawable;
+	std::unique_ptr<juce::Drawable>	m_secHndl_drawable;
+
+	float m_handleSize{ 0.0f };
+	
 };
 
 
@@ -180,6 +195,8 @@ private:
 	void cacheObjectXYPos(const std::vector<SoundobjectProcessorId>& objectIds);
 	void moveObjectXYPos(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<int>& positionMoveDelta);
 	void finalizeObjectXYPos(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<int>& positionMoveDelta);
+	void applyObjectRotAndScale(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<float>& cog, const float roation, const float scaling);
+	void finalizeObjectRotAndScale(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<float>& cog, const float roation, const float scaling);
 
 	SoundobjectProcessorId										m_currentlyDraggedId;				                        /**< ProcessorId of the currently selected knob, if any. */
 	std::vector<SoundobjectId>									m_highlightedIds;					                        /**< SourceIds of the currently highlighted knobs, if any. */

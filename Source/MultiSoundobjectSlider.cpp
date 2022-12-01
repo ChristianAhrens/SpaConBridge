@@ -1435,21 +1435,22 @@ void MultiSoundobjectSlider::applyObjectRotAndScale(const std::vector<Soundobjec
     if (!ctrl)
         return;
 
-    DBG(__FUNCTION__);
+    DBG(String(__FUNCTION__) + String(" ") + cog.toString() + String(" ") + String(rotation) + String(" ") + String(scaling));
     for (auto const& objectId : objectIds)
     {
         auto processor = ctrl->GetSoundobjectProcessor(objectId);
         if (processor)
         {
-            //auto xDelta = static_cast<float>(positionMoveDelta.getX()) / getLocalBounds().getWidth();
-            //auto yDelta = static_cast<float>(positionMoveDelta.getY()) / getLocalBounds().getHeight();
-            //
-            //auto const& cachedPos = m_objectPosMultiEditStartValues.at(objectId);
-            //auto newPosX = jmin<float>(1.0, jmax<float>(0.0, (cachedPos.getX() + xDelta)));
-            //auto newPosY = jmin<float>(1.0, jmax<float>(0.0, (cachedPos.getY() - yDelta)));
-            //
-            //processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, newPosX);
-            //processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, newPosY);
+            auto const& cachedPos = m_objectPosMultiEditStartValues.at(objectId);
+            
+            auto relCOG = cog / juce::Point<float>(getLocalBounds().getWidth(), getLocalBounds().getHeight());
+
+            auto v1 = cachedPos - relCOG;
+            auto sv1 = v1 * scaling;
+            auto newPos = relCOG + sv1;
+            
+            processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, newPos.getX());
+            processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, newPos.getY());
         }
     }
 }
@@ -1467,7 +1468,7 @@ void MultiSoundobjectSlider::finalizeObjectRotAndScale(const std::vector<Soundob
     if (!ctrl)
         return;
 
-    DBG(__FUNCTION__);
+    DBG(String(__FUNCTION__) + String(" ") + cog.toString() + String(" ") + String(rotation) + String(" ") + String(scaling));
     for (auto const& objectId : objectIds)
     {
         auto processor = ctrl->GetSoundobjectProcessor(objectId);
@@ -1481,16 +1482,16 @@ void MultiSoundobjectSlider::finalizeObjectRotAndScale(const std::vector<Soundob
             if (param)
                 param->EndGuiGesture();
 
-            //// Get mouse pixel-wise position and scale it between 0 and 1.
-            //auto xDelta = static_cast<float>(positionMoveDelta.getX()) / getLocalBounds().getWidth();
-            //auto yDelta = static_cast<float>(positionMoveDelta.getY()) / getLocalBounds().getHeight();
-            //
-            //auto const& cachedPos = m_objectPosMultiEditStartValues.at(objectId);
-            //auto newPosX = jmin<float>(1.0, jmax<float>(0.0, (cachedPos.getX() + xDelta)));
-            //auto newPosY = jmin<float>(1.0, jmax<float>(0.0, (cachedPos.getY() - yDelta)));
-            //
-            //processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, newPosX);
-            //processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, newPosY);
+            auto const& cachedPos = m_objectPosMultiEditStartValues.at(objectId);
+
+            auto relCOG = cog / juce::Point<float>(getLocalBounds().getWidth(), getLocalBounds().getHeight());
+
+            auto v1 = cachedPos - relCOG;
+            auto sv1 = v1 * scaling;
+            auto newPos = relCOG + sv1;
+
+            processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, newPos.getX());
+            processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, newPos.getY());
         }
     }
 

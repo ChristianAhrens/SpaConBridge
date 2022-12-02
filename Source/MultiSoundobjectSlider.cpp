@@ -262,14 +262,14 @@ void MultiSOSelectionVisualizerComponent::mouseDrag(const MouseEvent& e)
 
             m_currentVirtSecondaryHandle = e.getPosition().toFloat();
             // implicitly changed cog need recalc
-            //if (m_selectionPoints.size() > 1)
-            //{
-            //    auto sum = juce::Point<float>(0.0f, 0.0f);
-            //    for (auto const& coord : m_selectionPoints)
-            //        sum += coord;
-            //
-            //    m_currentVirtCOG = sum / m_selectionPoints.size(); // zerodivision is prevented in condition above
-            //}
+            if (m_selectionPoints.size() > 1)
+            {
+                auto sum = juce::Point<float>(0.0f, 0.0f);
+                for (auto const& coord : m_selectionPoints)
+                    sum += coord;
+            
+                m_currentVirtCOG = sum / m_selectionPoints.size(); // zerodivision is prevented in condition above
+            }
         }
 
         // trigger repaint to show the crosshair visu
@@ -334,6 +334,16 @@ void MultiSOSelectionVisualizerComponent::mouseUp(const MouseEvent& e)
 
             m_currentVirtSecondaryHandle = e.getPosition().toFloat();
             m_startSecondaryHandle = m_currentVirtSecondaryHandle;
+            // implicitly changed cog need recalc
+            if (m_selectionPoints.size() > 1)
+            {
+                auto sum = juce::Point<float>(0.0f, 0.0f);
+                for (auto const& coord : m_selectionPoints)
+                    sum += coord;
+
+                m_currentVirtCOG = sum / m_selectionPoints.size(); // zerodivision is prevented in condition above
+                m_startCOG = m_currentVirtCOG;
+            }
         }
 
         // trigger repaint to show the crosshair visu

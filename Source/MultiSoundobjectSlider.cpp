@@ -111,7 +111,6 @@ void MultiSOSelectionVisualizerComponent::SetSelectionPoints(const std::vector<j
  */
 void MultiSOSelectionVisualizerComponent::UpdateSelectionPoints(const std::vector<juce::Point<float>>& points)
 {
-    DBG(String(__FUNCTION__) + String(" ") + String(points.size()));
     m_selectionPoints = points;
 }
 

@@ -624,7 +624,7 @@ void MultiSoundobjectSlider::SetHandleSelectedSoundobjectsOnly(bool selectedOnly
  * been called, or because something has happened on the screen that means a section of a window needs to be redrawn.
  * @param g		The graphics context that must be used to do the drawing operations. 
  */
-void MultiSoundobjectSlider::paint(Graphics& g)
+void MultiSoundobjectSlider::paintOverChildren(Graphics& g)
 {
 	// Solid surface background area if no image is set
 	auto backgroundRect = getLocalBounds().toFloat().reduced(2);

@@ -43,6 +43,7 @@ public:
 	//==========================================================================
 	void SetSelectionVisuActive(bool active = true);
 	void SetSelectionPoints(const std::vector<juce::Point<float>>& points);
+	void UpdateSelectionPoints(const std::vector<juce::Point<float>>& points);
 
 	bool IsSelectionVisuActive();
 
@@ -69,8 +70,12 @@ private:
 	std::vector<juce::Point<float>>	m_selectionPoints;
 	bool							m_currentlyPrimaryInteractedWith{ false };
 	bool							m_currentlySecondaryInteractedWith{ false };
-	juce::Point<float>				m_currentCOG;
-	juce::Point<float>				m_currentSecondaryHandle;
+
+	juce::Point<float>				m_startCOG;
+	juce::Point<float>				m_startSecondaryHandle;
+
+	juce::Point<float>				m_currentVirtCOG;
+	juce::Point<float>				m_currentVirtSecondaryHandle;
 
 	juce::Colour					m_multitselectionIndicationColour;
 

@@ -72,6 +72,7 @@ void MultiSOSelectionVisualizerComponent::SetSelectionVisuActive(bool active)
 
 /**
  * Setter for the list of points that are selected and shall be used as base for multiselection visu.
+ * This DOES process the COG and secHndl from the input points.
  * @param   points     The list of points to copy into internal member list.
  */
 void MultiSOSelectionVisualizerComponent::SetSelectionPoints(const std::vector<juce::Point<float>>& points)
@@ -83,8 +84,26 @@ void MultiSOSelectionVisualizerComponent::SetSelectionPoints(const std::vector<j
         for (auto const& coord : m_selectionPoints)
             sum += coord;
 
-        m_currentCOG = sum / m_selectionPoints.size(); // zerodivision is prevented in condition above
+        m_startCOG = sum / m_selectionPoints.size(); // zerodivision is prevented in condition above
+        m_currentVirtCOG = m_startCOG;
+
+        auto vectorP1P2 = m_selectionPoints.at(1) - m_selectionPoints.at(0);
+        auto p1p2half = m_selectionPoints.at(0) + 0.5f * vectorP1P2;
+        auto vectorCogPy = 2.0f * (p1p2half - m_startCOG);
+        m_startSecondaryHandle = m_startCOG + vectorCogPy;
+        m_currentVirtSecondaryHandle = m_startSecondaryHandle;
     }
+}
+
+/**
+ * Updater for the list of points that are selected and shall be used as base for multiselection visu.
+ * This does NOT process the COG and secHndl from the input points.
+ * @param   points     The list of points to copy into internal member list.
+ */
+void MultiSOSelectionVisualizerComponent::UpdateSelectionPoints(const std::vector<juce::Point<float>>& points)
+{
+    DBG(String(__FUNCTION__) + String(" ") + String(points.size()));
+    m_selectionPoints = points;
 }
 
 /**
@@ -134,24 +153,16 @@ void MultiSOSelectionVisualizerComponent::paint(Graphics& g)
             prevCoord = coord;
         }
 
-        auto& p1 = m_selectionPoints.at(0);
-        auto& p2 = m_selectionPoints.at(1);
-        auto& cog = m_currentCOG;
-        auto vectorP1P2 = p2 - p1;
-        auto p1p2half = p1 + 0.5f * vectorP1P2;
-        auto vectorCogPy = 2.0f * (p1p2half - cog);
-        m_currentSecondaryHandle = cog + vectorCogPy;
-
-        g.drawLine(m_currentCOG.getX(), m_currentCOG.getY(), m_currentSecondaryHandle.getX(), m_currentSecondaryHandle.getY(), 2.0f);
-        m_cog_drawable->drawWithin(g, juce::Rectangle<float>(m_currentCOG.getX() - (m_handleSize / 2.0f), m_currentCOG.getY() - (m_handleSize / 2.0f), m_handleSize, m_handleSize), juce::RectanglePlacement::fillDestination, 1.0f);
-        m_secHndl_drawable->drawWithin(g, juce::Rectangle<float>(m_currentSecondaryHandle.getX() - (m_handleSize / 2.0f), m_currentSecondaryHandle.getY() - (m_handleSize / 2.0f), m_handleSize, m_handleSize), juce::RectanglePlacement::fillDestination, 1.0f);
+        g.drawLine(m_currentVirtCOG.getX(), m_currentVirtCOG.getY(), m_currentVirtSecondaryHandle.getX(), m_currentVirtSecondaryHandle.getY(), 2.0f);
+        m_cog_drawable->drawWithin(g, juce::Rectangle<float>(m_currentVirtCOG.getX() - (m_handleSize / 2.0f), m_currentVirtCOG.getY() - (m_handleSize / 2.0f), m_handleSize, m_handleSize), juce::RectanglePlacement::fillDestination, 1.0f);
+        m_secHndl_drawable->drawWithin(g, juce::Rectangle<float>(m_currentVirtSecondaryHandle.getX() - (m_handleSize / 2.0f), m_currentVirtSecondaryHandle.getY() - (m_handleSize / 2.0f), m_handleSize, m_handleSize), juce::RectanglePlacement::fillDestination, 1.0f);
 
         if (IsPrimaryInteractionActive())
         {
             auto w = static_cast<float>(getLocalBounds().getWidth());
             auto h = static_cast<float>(getLocalBounds().getHeight());
-            g.drawLine(0, m_currentCOG.getY(), w, m_currentCOG.getY(), 1);
-            g.drawLine(m_currentCOG.getX(), 0, m_currentCOG.getX(), h, 1);
+            g.drawLine(0, m_currentVirtCOG.getY(), w, m_currentVirtCOG.getY(), 1);
+            g.drawLine(m_currentVirtCOG.getX(), 0, m_currentVirtCOG.getX(), h, 1);
         }
     }
 
@@ -170,11 +181,11 @@ void MultiSOSelectionVisualizerComponent::mouseDown(const MouseEvent& e)
         auto mousePosF = e.getMouseDownPosition().toFloat();
 
         Path cogPath;
-        cogPath.addEllipse(Rectangle<float>(m_currentCOG.x - (m_handleSize / 2.0f), m_currentCOG.y - (m_handleSize / 2.0f), m_handleSize, m_handleSize));
+        cogPath.addEllipse(Rectangle<float>(m_startCOG.x - (m_handleSize / 2.0f), m_startCOG.y - (m_handleSize / 2.0f), m_handleSize, m_handleSize));
         auto startPrimInteraction = cogPath.contains(mousePosF);
 
         Path secHndlPath;
-        secHndlPath.addEllipse(Rectangle<float>(m_currentSecondaryHandle.getX() - (m_handleSize / 2.0f), m_currentSecondaryHandle.getY() - (m_handleSize / 2.0f), m_handleSize, m_handleSize));
+        secHndlPath.addEllipse(Rectangle<float>(m_startSecondaryHandle.getX() - (m_handleSize / 2.0f), m_startSecondaryHandle.getY() - (m_handleSize / 2.0f), m_handleSize, m_handleSize));
         auto startSecInteraction = secHndlPath.contains(mousePosF);
 
         // Check if the mouse click landed inside any of the knobs.
@@ -221,23 +232,44 @@ void MultiSOSelectionVisualizerComponent::mouseDrag(const MouseEvent& e)
         {
             if (onMouseXYPosChanged)
                 onMouseXYPosChanged(dragDelta);
+
+            m_currentVirtCOG = e.getPosition().toFloat();
+            // inplicitly changed second handle needs recalc
+            if (m_selectionPoints.size() > 1)
+            {
+                auto vectorP1P2 = m_selectionPoints.at(1) - m_selectionPoints.at(0);
+                auto p1p2half = m_selectionPoints.at(0) + 0.5f * vectorP1P2;
+                auto vectorCogPy = 2.0f * (p1p2half - m_currentVirtCOG);
+                m_currentVirtSecondaryHandle = m_currentVirtCOG + vectorCogPy;
+            }
         }
         else if (IsSecondaryInteractionActive())
         {
             auto rotDelta = 0.0f;
             auto scaleDelta = 0.0f;
 
-            auto dist1 = m_currentSecondaryHandle.getDistanceFrom(m_currentCOG);
-            auto dist2 = e.getPosition().toFloat().getDistanceFrom(m_currentCOG);
+            auto dist1 = m_startSecondaryHandle.getDistanceFrom(m_startCOG);
+            auto dist2 = e.getPosition().toFloat().getDistanceFrom(m_startCOG);
             if (dist1 != 0.0f)
                 scaleDelta = dist2 / dist1;
 
-            auto angl1 = m_currentCOG.getAngleToPoint(m_currentSecondaryHandle);
-            auto angl2 = m_currentCOG.getAngleToPoint(e.getPosition().toFloat());
+            auto angl1 = m_startCOG.getAngleToPoint(m_startSecondaryHandle);
+            auto angl2 = m_startCOG.getAngleToPoint(e.getPosition().toFloat());
             rotDelta = -(angl2 - angl1);
 
             if (onMouseRotAndScaleChanged)
-                onMouseRotAndScaleChanged(m_currentCOG, rotDelta, scaleDelta);
+                onMouseRotAndScaleChanged(m_startCOG, rotDelta, scaleDelta);
+
+            m_currentVirtSecondaryHandle = e.getPosition().toFloat();
+            // implicitly changed cog need recalc
+            //if (m_selectionPoints.size() > 1)
+            //{
+            //    auto sum = juce::Point<float>(0.0f, 0.0f);
+            //    for (auto const& coord : m_selectionPoints)
+            //        sum += coord;
+            //
+            //    m_currentVirtCOG = sum / m_selectionPoints.size(); // zerodivision is prevented in condition above
+            //}
         }
 
         // trigger repaint to show the crosshair visu
@@ -268,6 +300,18 @@ void MultiSOSelectionVisualizerComponent::mouseUp(const MouseEvent& e)
 
             if (onMouseXYPosFinished)
                 onMouseXYPosFinished(dragDelta);
+
+            m_currentVirtCOG = e.getPosition().toFloat();
+            m_startCOG = m_currentVirtCOG;
+            // inplicitly changed second handle needs recalc
+            if (m_selectionPoints.size() > 1)
+            {
+                auto vectorP1P2 = m_selectionPoints.at(1) - m_selectionPoints.at(0);
+                auto p1p2half = m_selectionPoints.at(0) + 0.5f * vectorP1P2;
+                auto vectorCogPy = 2.0f * (p1p2half - m_currentVirtCOG);
+                m_currentVirtSecondaryHandle = m_currentVirtCOG + vectorCogPy;
+                m_startSecondaryHandle = m_currentVirtSecondaryHandle;
+            }
         }
         else if (IsSecondaryInteractionActive())
         {
@@ -276,17 +320,20 @@ void MultiSOSelectionVisualizerComponent::mouseUp(const MouseEvent& e)
             auto rotDelta = 0.0f;
             auto scaleDelta = 0.0f;
 
-            auto dist1 = m_currentSecondaryHandle.getDistanceFrom(m_currentCOG);
-            auto dist2 = e.getPosition().toFloat().getDistanceFrom(m_currentCOG);
+            auto dist1 = m_startSecondaryHandle.getDistanceFrom(m_startCOG);
+            auto dist2 = e.getPosition().toFloat().getDistanceFrom(m_startCOG);
             if (dist1 != 0.0f)
                 scaleDelta = dist2 / dist1;
 
-            auto angl1 = m_currentCOG.getAngleToPoint(m_currentSecondaryHandle);
-            auto angl2 = m_currentCOG.getAngleToPoint(e.getPosition().toFloat());
+            auto angl1 = m_startCOG.getAngleToPoint(m_startSecondaryHandle);
+            auto angl2 = m_startCOG.getAngleToPoint(e.getPosition().toFloat());
             rotDelta = -(angl2 - angl1);
 
             if (onMouseRotAndScaleFinished)
-                onMouseRotAndScaleFinished(m_currentCOG, rotDelta, scaleDelta);
+                onMouseRotAndScaleFinished(m_startCOG, rotDelta, scaleDelta);
+
+            m_currentVirtSecondaryHandle = e.getPosition().toFloat();
+            m_startSecondaryHandle = m_currentVirtSecondaryHandle;
         }
 
         // trigger repaint to show the crosshair visu
@@ -1364,6 +1411,10 @@ void MultiSoundobjectSlider::moveObjectXYPos(const std::vector<SoundobjectProces
     if (!ctrl)
         return;
 
+    auto updatedScreenCoords = std::vector<juce::Point<float>>();
+    auto w = getLocalBounds().toFloat().getWidth();
+    auto h = getLocalBounds().toFloat().getHeight();
+
     for (auto const& objectId : objectIds)
     {
         auto processor = ctrl->GetSoundobjectProcessor(objectId);
@@ -1378,8 +1429,12 @@ void MultiSoundobjectSlider::moveObjectXYPos(const std::vector<SoundobjectProces
 
             processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, newPosX);
             processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, newPosY);
+
+            updatedScreenCoords.push_back(juce::Point<float>(newPosX * w, h - (newPosY * h)));
         }
     }
+
+    m_multiselectionVisualizer->UpdateSelectionPoints(updatedScreenCoords);
 }
 
 /**
@@ -1392,6 +1447,10 @@ void MultiSoundobjectSlider::finalizeObjectXYPos(const std::vector<SoundobjectPr
     auto ctrl = Controller::GetInstance();
     if (!ctrl)
         return;
+
+    auto updatedScreenCoords = std::vector<juce::Point<float>>();
+    auto w = getLocalBounds().toFloat().getWidth();
+    auto h = getLocalBounds().toFloat().getHeight();
 
     for (auto const& objectId : objectIds)
     {
@@ -1416,8 +1475,12 @@ void MultiSoundobjectSlider::finalizeObjectXYPos(const std::vector<SoundobjectPr
 
             processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, newPosX);
             processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, newPosY);
+
+            updatedScreenCoords.push_back(juce::Point<float>(newPosX * w, h - (newPosY * h)));
         }
     }
+
+    m_multiselectionVisualizer->UpdateSelectionPoints(updatedScreenCoords);
 
     m_objectPosMultiEditStartValues.clear();
 }
@@ -1439,6 +1502,10 @@ void MultiSoundobjectSlider::applyObjectRotAndScale(const std::vector<Soundobjec
 
     auto relCOG = juce::Point<float>(cog.getX() / getLocalBounds().getWidth(), cog.getY() / getLocalBounds().getHeight());
 
+    auto updatedScreenCoords = std::vector<juce::Point<float>>();
+    auto w = getLocalBounds().toFloat().getWidth();
+    auto h = getLocalBounds().toFloat().getHeight();
+
     for (auto const& objectId : objectIds)
     {
         auto processor = ctrl->GetSoundobjectProcessor(objectId);
@@ -1455,8 +1522,12 @@ void MultiSoundobjectSlider::applyObjectRotAndScale(const std::vector<Soundobjec
             
             processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, newPos.getX());
             processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, newPos.getY());
+
+            updatedScreenCoords.push_back(juce::Point<float>(newPos.getX() * w, h - (newPos.getY() * h)));
         }
     }
+
+    m_multiselectionVisualizer->UpdateSelectionPoints(updatedScreenCoords);
 }
 
 /**
@@ -1475,6 +1546,10 @@ void MultiSoundobjectSlider::finalizeObjectRotAndScale(const std::vector<Soundob
         return;
 
     auto relCOG = juce::Point<float>(cog.getX() / getLocalBounds().getWidth(), cog.getY() / getLocalBounds().getHeight());
+
+    auto updatedScreenCoords = std::vector<juce::Point<float>>();
+    auto w = getLocalBounds().toFloat().getWidth();
+    auto h = getLocalBounds().toFloat().getHeight();
 
     for (auto const& objectId : objectIds)
     {
@@ -1500,8 +1575,12 @@ void MultiSoundobjectSlider::finalizeObjectRotAndScale(const std::vector<Soundob
 
             processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, newPos.getX());
             processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, newPos.getY());
+
+            updatedScreenCoords.push_back(juce::Point<float>(newPos.getX() * w, h - (newPos.getY() * h)));
         }
     }
+
+    m_multiselectionVisualizer->UpdateSelectionPoints(updatedScreenCoords);
 
     m_objectPosMultiEditStartValues.clear();
 }
@@ -1535,13 +1614,19 @@ void MultiSoundobjectSlider::UpdateParameters(const ParameterCache& parameters)
                     selectedCoords.push_back(juce::Point<float>(pt.x * w, h - (pt.y * h)));
             }
 
-            m_multiselectionVisualizer->SetSelectionPoints(selectedCoords);
-            m_multiselectionVisualizer->SetSelectionVisuActive(true);
+            if (!m_multiselectionVisualizer->IsSelectionVisuActive())
+            {
+                m_multiselectionVisualizer->SetSelectionPoints(selectedCoords);
+                m_multiselectionVisualizer->SetSelectionVisuActive(true);
+            }
         }
         else
         {
-            m_multiselectionVisualizer->SetSelectionPoints(std::vector<juce::Point<float>>());
-            m_multiselectionVisualizer->SetSelectionVisuActive(false);
+            if (m_multiselectionVisualizer->IsSelectionVisuActive())
+            {
+                m_multiselectionVisualizer->SetSelectionPoints(std::vector<juce::Point<float>>());
+                m_multiselectionVisualizer->SetSelectionVisuActive(false);
+            }
         }
     }
 }

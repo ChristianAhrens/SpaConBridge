@@ -71,6 +71,15 @@ void MultiSOSelectionVisualizerComponent::SetSelectionVisuActive(bool active)
 }
 
 /**
+ * Getter for the list of points currently known in the muselvisu.
+ * @return  The list of known points.
+ */
+const std::vector<juce::Point<float>>& MultiSOSelectionVisualizerComponent::GetSelectionPoints()
+{
+    return m_selectionPoints;
+}
+
+/**
  * Setter for the list of points that are selected and shall be used as base for multiselection visu.
  * This DOES process the COG and secHndl from the input points.
  * @param   points     The list of points to copy into internal member list.
@@ -1624,7 +1633,10 @@ void MultiSoundobjectSlider::UpdateParameters(const ParameterCache& parameters)
                     selectedCoords.push_back(juce::Point<float>(pt.x * w, h - (pt.y * h)));
             }
 
-            if (!m_multiselectionVisualizer->IsSelectionVisuActive())
+            auto selectionCountChanged = selectedCoords.size() != m_multiselectionVisualizer->GetSelectionPoints().size();
+            auto intermediateSingleSOChange = m_currentlyDraggedId != INVALID_PROCESSOR_ID;
+
+            if (!m_multiselectionVisualizer->IsSelectionVisuActive() || selectionCountChanged || intermediateSingleSOChange)
             {
                 m_multiselectionVisualizer->SetSelectionPoints(selectedCoords);
                 m_multiselectionVisualizer->SetSelectionVisuActive(true);

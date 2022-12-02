@@ -42,6 +42,7 @@ public:
 
 	//==========================================================================
 	void SetSelectionVisuActive(bool active = true);
+	const std::vector<juce::Point<float>>& GetSelectionPoints();
 	void SetSelectionPoints(const std::vector<juce::Point<float>>& points);
 	void UpdateSelectionPoints(const std::vector<juce::Point<float>>& points);
 

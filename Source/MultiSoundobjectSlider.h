@@ -126,6 +126,9 @@ public:
 	bool IsHandlingSelectedSoundobjectsOnly();
 	void SetHandleSelectedSoundobjectsOnly(bool selectedOnly);
 
+	void SetUseMuselVisuActive(bool active);
+	bool IsUseMuselVisuActive();
+
 	void UpdateParameters(const ParameterCache& positions);
 
 protected:
@@ -169,6 +172,7 @@ private:
 	std::map<SoundobjectProcessorId, juce::Point<float>>		m_objectPosMultiEditStartValues;							/**< Startvalues for editing multiple SO positions. */
 
 	std::unique_ptr<MultiSOSelectionVisualizerComponent>		m_multiselectionVisualizer;									/**< Helper component to do the painting and user interaction tracking for multiselection interaction. */
+	bool														m_useMuselVisu{ false };									/** Boolean indication if extended nultiselection visu component shall be active and visible. */
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSoundobjectSlider)
 };

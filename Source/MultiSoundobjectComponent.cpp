@@ -72,6 +72,13 @@ MultiSoundobjectComponent::MultiSoundobjectComponent()
 	m_removeImage->setTooltip("Remove background image of selected Mapping Area");
 	addAndMakeVisible(m_removeImage.get());
 
+	// extended multiselection interaction enable
+	m_muselvisuEnable = std::make_unique<DrawableButton>("MuselVisuInteraction", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	m_muselvisuEnable->addListener(this);
+	m_muselvisuEnable->setTooltip("Enable extended multiselection interaction");
+	m_muselvisuEnable->setClickingTogglesState(true);
+	addAndMakeVisible(m_muselvisuEnable.get());
+
 	// select a selection group or add a new one
 	m_selectionGroupSelect = std::make_unique<SelectGroupSelector>("selectgroups");
 	m_selectionGroupSelect->SetMode(SelectGroupSelector::SoundobjectSelections);
@@ -79,7 +86,6 @@ MultiSoundobjectComponent::MultiSoundobjectComponent()
 
 	// object names enable
 	m_objectNamesEnable = std::make_unique<DrawableButton>("Object Names", DrawableButton::ButtonStyle::ImageOnButtonBackground);
-	m_objectNamesEnable = std::make_unique<DrawableButton>("Reverb", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_objectNamesEnable->addListener(this);
 	m_objectNamesEnable->setTooltip("Show Soundobject names");
 	m_objectNamesEnable->setClickingTogglesState(true);
@@ -137,6 +143,8 @@ void MultiSoundobjectComponent::resized()
 	m_loadImage->setBounds(controlElementsBounds.removeFromLeft(controlElementsBounds.getHeight()));
 	controlElementsBounds.removeFromLeft(margin);
 	m_removeImage->setBounds(controlElementsBounds.removeFromLeft(controlElementsBounds.getHeight()));
+	controlElementsBounds.removeFromLeft(margin);
+	m_muselvisuEnable->setBounds(controlElementsBounds.removeFromLeft(controlElementsBounds.getHeight()));
 
 	controlElementsBounds.removeFromRight(margin);
 	m_spreadEnable->setBounds(controlElementsBounds.removeFromRight(controlElementsBounds.getHeight()));
@@ -392,6 +400,10 @@ void MultiSoundobjectComponent::buttonClicked(Button* button)
 	{
 		PageComponentManager::GetInstance()->RemoveImageForMapping(GetSelectedMapping());
 	}
+	else if (m_muselvisuEnable.get() == button)
+	{
+		m_multiSoundobjectSlider->SetUseMuselVisuActive(button->getToggleState());
+	}
 	else if (m_reverbEnable.get() == button)
 	{
 		if (IsReverbEnabled() != button->getToggleState())
@@ -600,6 +612,7 @@ void MultiSoundobjectComponent::lookAndFeelChanged()
 	// Update drawable button images with updated lookAndFeel colours
 	UpdateDrawableButtonImages(m_loadImage, BinaryData::image_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_removeImage, BinaryData::hide_image_black_24dp_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_muselvisuEnable, BinaryData::hide_image_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_reverbEnable, BinaryData::sensors_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_spreadEnable, BinaryData::adjust_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_objectNamesEnable, BinaryData::text_fields_black_24dp_svg, &getLookAndFeel());

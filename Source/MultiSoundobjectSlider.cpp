@@ -116,7 +116,6 @@ MultiSoundobjectSlider::MultiSoundobjectSlider(bool spreadEnabled, bool reverbSn
 
         finalizeObjectsRotAndScale(objectIdsToModify, cog, roation, scaling);
     };
-    addAndMakeVisible(m_multiselectionVisualizer.get());
 }
 
 /**
@@ -257,6 +256,30 @@ bool MultiSoundobjectSlider::IsHandlingSelectedSoundobjectsOnly()
 void MultiSoundobjectSlider::SetHandleSelectedSoundobjectsOnly(bool selectedOnly)
 {
 	m_handleSelectedOnly = selectedOnly;
+}
+
+/**
+ * Helper to activate or deactivate the extended multiselection mode provided by MultiSOSelectionVisualizerComponent
+ * @param    active     Boolean value to either activate or deactivate the extended muselvisu mode
+ */
+void MultiSoundobjectSlider::SetUseMuselVisuActive(bool active)
+{
+    m_useMuselVisu = active;
+    if (active)
+        addAndMakeVisible(m_multiselectionVisualizer.get());
+    else
+        removeChildComponent(m_multiselectionVisualizer.get());
+
+    resized();
+}
+
+/**
+ * Getter for the active state of the extended multiselection mode provided by MultiSOSelectionVisualizerComponent
+ * @return  True when active, false when not
+ */
+bool MultiSoundobjectSlider::IsUseMuselVisuActive()
+{
+    return m_useMuselVisu;
 }
 
 /**
@@ -439,7 +462,7 @@ void MultiSoundobjectSlider::paint(Graphics& g)
 		// Paint knob
 		g.setColour(knobColour);
 		g.setOpacity(1.0f);
-        if (isSelected && !multiselectionActive)
+        if (isSelected && !IsUseMuselVisuActive())
 		{
             // if the current SO is the only selected one, paint it with a circle indicator and solid fill
 			auto fillSize = knobSize + knobThickness;
@@ -1119,7 +1142,8 @@ void MultiSoundobjectSlider::moveObjectsXYPos(const std::vector<SoundobjectProce
         }
     }
 
-    m_multiselectionVisualizer->UpdateSelectionPoints(updatedScreenCoords);
+    if (m_multiselectionVisualizer)
+        m_multiselectionVisualizer->UpdateSelectionPoints(updatedScreenCoords);
 }
 
 /**
@@ -1165,7 +1189,8 @@ void MultiSoundobjectSlider::finalizeObjectsXYPos(const std::vector<SoundobjectP
         }
     }
 
-    m_multiselectionVisualizer->UpdateSelectionPoints(updatedScreenCoords);
+    if (m_multiselectionVisualizer)
+        m_multiselectionVisualizer->UpdateSelectionPoints(updatedScreenCoords);
 
     m_objectPosMultiEditStartValues.clear();
 }
@@ -1212,7 +1237,8 @@ void MultiSoundobjectSlider::applyObjectsRotAndScale(const std::vector<Soundobje
         }
     }
 
-    m_multiselectionVisualizer->UpdateSelectionPoints(updatedScreenCoords);
+    if (m_multiselectionVisualizer)
+        m_multiselectionVisualizer->UpdateSelectionPoints(updatedScreenCoords);
 }
 
 /**
@@ -1265,7 +1291,8 @@ void MultiSoundobjectSlider::finalizeObjectsRotAndScale(const std::vector<Soundo
         }
     }
 
-    m_multiselectionVisualizer->UpdateSelectionPoints(updatedScreenCoords);
+    if (m_multiselectionVisualizer)
+        m_multiselectionVisualizer->UpdateSelectionPoints(updatedScreenCoords);
 
     m_objectPosMultiEditStartValues.clear();
 }

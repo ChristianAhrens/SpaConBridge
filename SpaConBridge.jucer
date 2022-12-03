@@ -511,6 +511,10 @@
         <FILE id="H1EAfS" name="PageContainerComponent.h" compile="0" resource="0"
               file="Source/PagedUI/PageContainerComponent.h"/>
       </GROUP>
+      <FILE id="ZulqRS" name="MultiSOSelectionVisualizerComponent.cpp" compile="1"
+            resource="0" file="Source/MultiSOSelectionVisualizerComponent.cpp"/>
+      <FILE id="S1X2va" name="MultiSOSelectionVisualizerComponent.h" compile="0"
+            resource="0" file="Source/MultiSOSelectionVisualizerComponent.h"/>
       <FILE id="cjzzIw" name="MultiSoundobjectComponent.cpp" compile="1"
             resource="0" file="Source/MultiSoundobjectComponent.cpp"/>
       <FILE id="QSCEhO" name="MultiSoundobjectComponent.h" compile="0" resource="0"

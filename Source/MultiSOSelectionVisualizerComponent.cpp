@@ -113,10 +113,31 @@ void MultiSOSelectionVisualizerComponent::UpdateSelectionPoints(const std::vecto
  */
 const juce::Point<float>& MultiSOSelectionVisualizerComponent::DeriveSecondaryHandleFromCOG(const juce::Point<float>& cog)
 {
-    auto vectorP1P2 = m_selectionPoints.at(1) - m_selectionPoints.at(0);
-    auto p1p2half = m_selectionPoints.at(0) + 0.5f * vectorP1P2;
-    auto vectorCogPy = 2.0f * (p1p2half - cog);
-    return cog + vectorCogPy;
+    auto secHndlToCogHOffset = 0.0f;
+
+    auto w = getLocalBounds().getWidth();
+    auto cogIsOffsetRight = (cog.getX() > (0.5f * w));
+
+    if (m_selectionPoints.size() > 1)
+    {
+        auto avgRadius = 0.0f;
+        for (auto const& p : m_selectionPoints)
+            avgRadius += cog.getDistanceFrom(p);
+        avgRadius = avgRadius / m_selectionPoints.size();
+
+        secHndlToCogHOffset = cogIsOffsetRight ? -2.0f * avgRadius : 2.0f * avgRadius;
+    }
+    else
+    {
+        // why would we only have one selection point in this muselvisu instance and have to default to this calculation?!
+        jassertfalse;
+
+        // if no sufficient amount of points is available, use
+        // area width to derive a feasible position from
+        secHndlToCogHOffset = cogIsOffsetRight ? -(0.5f * cog.getX()) : (0.5f * (w - cog.getX()));
+    }
+
+    return cog.translated(secHndlToCogHOffset, 0.0f);
 }
 
 /**

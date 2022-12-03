@@ -173,7 +173,7 @@ public:
 	void SetSoundobjectNamesEnabled(bool enabled);
 
 	bool HasBackgroundImage(MappingAreaId mappingAreaId);
-	const juce::Image* GetBackgroundImage(MappingAreaId mappingAreaId);
+	const juce::Image& GetBackgroundImage(MappingAreaId mappingAreaId);
 	void SetBackgroundImage(MappingAreaId mappingAreaId, const juce::Image& backgroundImage);
 	void RemoveBackgroundImage(MappingAreaId mappingAreaId);
 
@@ -182,7 +182,7 @@ public:
 
 	void UpdateParameters(const ParameterCache& positions);
 
-	void paintOverChildren(Graphics& g) override;
+	void paint(Graphics& g) override;
 
 	void resized() override;
 
@@ -212,7 +212,9 @@ private:
 	bool														m_reverbSndGainEnabled{ false };	                        /**< Flag indication, if SO reverb send gaind visu shall be painted for individual SOs. */
 	bool														m_soundObjectNamesEnabled{ false };	                        /**< Flag indication, if SO name strings shall be painted for individual SOs. */
 	MappingAreaId												m_selectedMapping;					                        /**< Remember the last selected coordinate mapping for the multi-slider. */
-	std::map<MappingAreaId, std::unique_ptr<ImageComponent>>	m_backgroundImages;					                        /**< Map of background images for the four Mapping Areas that can be displayed. */
+
+	std::map<MappingAreaId, juce::Image>						m_backgroundImages;					                        /**< Map of background images for the four Mapping Areas that can be displayed. */
+
 	bool														m_handleSelectedOnly{ false };		                        /**< Indication if only selected SO shall be visualized. */
     MultiTouchPoints                                            m_multiTouchPoints;                                         /**< The two multitouch points currently tracked. */
     MultiTouchDirectionTarget                                   m_multiTouchTargetOperation{ MTDT_PendingInputDecision };   /**< Enum value defining how current multitouch input is interpreted. */

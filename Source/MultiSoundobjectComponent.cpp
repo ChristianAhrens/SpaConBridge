@@ -170,10 +170,9 @@ void MultiSoundobjectComponent::resized()
 		auto multiSliderBounds = bounds;
 		auto multiSliderAspect = multiSliderBounds.toFloat().getAspectRatio();
 
-		auto backgroundImage = m_multiSoundobjectSlider->GetBackgroundImage(GetSelectedMapping());
-		if (backgroundImage)
+		if (m_multiSoundobjectSlider->HasBackgroundImage(GetSelectedMapping()))
 		{
-			auto imageBounds = backgroundImage->getBounds().toFloat();
+			auto imageBounds = m_multiSoundobjectSlider->GetBackgroundImage(GetSelectedMapping()).getBounds().toFloat();
 			auto imageAspect = imageBounds.getAspectRatio();
 			
 			if (imageAspect > multiSliderAspect) // larger aspectratio is wider
@@ -525,7 +524,7 @@ void MultiSoundobjectComponent::SetSpreadEnabled(bool enabled)
 const juce::Image* MultiSoundobjectComponent::GetBackgroundImage(MappingAreaId mappingAreaId)
 {
 	if (m_multiSoundobjectSlider)
-		return m_multiSoundobjectSlider->GetBackgroundImage(mappingAreaId);
+		return &m_multiSoundobjectSlider->GetBackgroundImage(mappingAreaId);
 	else
 		return nullptr;
 }

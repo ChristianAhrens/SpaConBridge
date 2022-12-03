@@ -211,7 +211,7 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 		return;
 
 	// Will be set to true if any changes relevant to the multi-slider are found.
-	bool update = init;
+	auto update = init;
 
 	// Update the selected mapping area.
 	if (GetSelectedMapping() != m_mappingAreaSelect->getSelectedId())
@@ -277,7 +277,6 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 		// At the same time collect all sources positions for updating.
 		MultiSoundobjectSlider::ParameterCache cachedParameters;
 		auto& soundobjectParameterMap = std::get<0>(cachedParameters);
-		auto& parameterFlags = std::get<1>(cachedParameters);
 
 		auto selectedSOs = 0;
 		for (auto const& processorId : ctrl->GetSoundobjectProcessorIds())
@@ -330,7 +329,7 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 
 		// flag a multiselelction if present
 		if (selectedSOs > 1)
-			parameterFlags |= MultiSoundobjectSlider::CacheFlag::MultiSelection;
+			std::get<1>(cachedParameters) |= MultiSoundobjectSlider::CacheFlag::MultiSelection;
 
 		if (update && m_multiSoundobjectSlider)
 		{

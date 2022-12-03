@@ -199,6 +199,15 @@ void SoundobjectProcessor::SetParameterChanged(DataChangeParticipant changeSourc
 }
 
 /**
+ * Getter for the member defining the origin of the last occured data change.
+ * @return The DCP identification of the last change origin.
+ */
+const DataChangeParticipant& SoundobjectProcessor::GetCurrentChangeSource()
+{
+	return m_currentChangeSource;
+}
+
+/**
  * Get the current value of a specific automation parameter.
  * @param paramIdx	The index of the desired parameter.
  * @param normalized If true, the returned value will be normalized to a 0.0f to 1.0f range. False per default.
@@ -288,11 +297,6 @@ void SoundobjectProcessor::SetParameterValue(DataChangeParticipant changeSource,
 		jassertfalse; // Unknown parameter index!
 		break;
 	}
-
-	// After the SetParameterChanged() call has been triggered, set the change source to the default.
-	// The host is the only one which can call parameterValueChanged directly. All other modules of the
-	// application do it over this method.
-	m_currentChangeSource = DCP_Host;
 }
 
 /**

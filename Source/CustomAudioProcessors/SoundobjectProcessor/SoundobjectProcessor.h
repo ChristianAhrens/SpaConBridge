@@ -95,6 +95,8 @@ public:
 	bool PopParameterChanged(DataChangeParticipant changeTarget, DataChangeType change);
 	void SetParameterChanged(DataChangeParticipant changeSource, DataChangeType changeTypes);
 
+	const DataChangeParticipant& GetCurrentChangeSource();
+
 	void Tick();
 	void SetParamInTransit(DataChangeType paramsChanged);
 	bool IsParamInTransit(DataChangeType paramsChanged) const;

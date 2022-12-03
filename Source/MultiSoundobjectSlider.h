@@ -128,6 +128,7 @@ public:
 
 	void UpdateParameters(const ParameterCache& positions);
 
+protected:
 	void paint(Graphics& g) override;
 
 	void resized() override;

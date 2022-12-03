@@ -537,7 +537,33 @@ void MultiSoundobjectSlider::resized()
 	Component::resized();
 
     if (m_multiselectionVisualizer)
+    {
         m_multiselectionVisualizer->setBounds(getLocalBounds());
+
+        if (m_multiselectionVisualizer->IsSelectionVisuActive())
+        {
+            auto& soundobjectParameterMap = std::get<0>(m_cachedParameters);
+            auto& parameterFlags = std::get<1>(m_cachedParameters);
+            if ((parameterFlags & CacheFlag::MultiSelection) == CacheFlag::MultiSelection)
+            {
+                auto selectedCoords = std::vector<juce::Point<float>>();
+
+                auto w = getLocalBounds().toFloat().getWidth();
+                auto h = getLocalBounds().toFloat().getHeight();
+
+                for (auto const& paramsKV : soundobjectParameterMap)
+                {
+                    auto const& isSelected = paramsKV.second._selected;
+                    auto const& pt = paramsKV.second._pos;
+
+                    if (isSelected)
+                        selectedCoords.push_back(juce::Point<float>(pt.x * w, h - (pt.y * h)));
+                }
+
+                m_multiselectionVisualizer->SetSelectionPoints(selectedCoords);
+            }
+        }
+    }
 }
 
 /**

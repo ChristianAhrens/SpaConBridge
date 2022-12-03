@@ -66,7 +66,7 @@ protected:
 
 private:
 	//==========================================================================
-	const juce::Point<float>& DeriveSecondaryHandleFromCOG(const juce::Point<float>& cog);
+	const juce::Point<float> DeriveSecondaryHandleFromCOG(const juce::Point<float>& cog);
 
 	//==========================================================================
 	bool							m_selectionVisuActive{ false };

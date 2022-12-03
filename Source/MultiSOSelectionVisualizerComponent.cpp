@@ -111,7 +111,7 @@ void MultiSOSelectionVisualizerComponent::UpdateSelectionPoints(const std::vecto
  * @param   cog     The center of gravity position to use for calculation
  * @return  The calculated secondary handle position.
  */
-const juce::Point<float>& MultiSOSelectionVisualizerComponent::DeriveSecondaryHandleFromCOG(const juce::Point<float>& cog)
+const juce::Point<float> MultiSOSelectionVisualizerComponent::DeriveSecondaryHandleFromCOG(const juce::Point<float>& cog)
 {
     auto secHndlToCogHOffset = 0.0f;
 

@@ -612,7 +612,7 @@ void MultiSoundobjectComponent::lookAndFeelChanged()
 	// Update drawable button images with updated lookAndFeel colours
 	UpdateDrawableButtonImages(m_loadImage, BinaryData::image_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_removeImage, BinaryData::hide_image_black_24dp_svg, &getLookAndFeel());
-	UpdateDrawableButtonImages(m_muselvisuEnable, BinaryData::hide_image_black_24dp_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_muselvisuEnable, BinaryData::dual_handle24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_reverbEnable, BinaryData::sensors_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_spreadEnable, BinaryData::adjust_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_objectNamesEnable, BinaryData::text_fields_black_24dp_svg, &getLookAndFeel());

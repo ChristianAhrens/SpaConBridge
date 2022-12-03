@@ -275,6 +275,8 @@
                   file="submodules/JUCE-AppBasics/Resources/Images/compare_black_24dp.svg"/>
             <FILE id="oBbSy5" name="crop-rotate-24dp.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/crop-rotate-24dp.svg"/>
+            <FILE id="oYWj9a" name="dual_handle-24dp.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/dual_handle-24dp.svg"/>
             <FILE id="oihE0b" name="find_replace-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/find_replace-24px.svg"/>
             <FILE id="klDhr6" name="flip_black_24dp.svg" compile="0" resource="1"

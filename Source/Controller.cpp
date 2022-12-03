@@ -3536,10 +3536,6 @@ bool Controller::LoadConfigurationFile(const File& fileToLoadFrom)
 {
     if (!fileToLoadFrom.existsAsFile() || !fileToLoadFrom.hasReadAccess())
     {
-        FileInputStream testStream(fileToLoadFrom);
-        if (!testStream.openedOk())
-            DBG(String(__FUNCTION__) + String(": ") + testStream.getStatus().getErrorMessage());
-        
 		ShowUserErrorNotification(SEC_LoadConfig_CannotAccess);
         return false;
     }

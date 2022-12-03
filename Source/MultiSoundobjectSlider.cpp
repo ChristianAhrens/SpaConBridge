@@ -66,7 +66,7 @@ MultiSoundobjectSlider::MultiSoundobjectSlider(bool spreadEnabled, bool reverbSn
             objectIdsToCache.push_back(paramsKV.first);
         }
         
-        cacheObjectXYPos(objectIdsToCache);
+        cacheObjectsXYPos(objectIdsToCache);
     };
     m_multiselectionVisualizer->onMouseXYPosChanged = [this](const juce::Point<int>& posDelta) {
         auto objectIdsToModify = std::vector<SoundobjectProcessorId>();
@@ -78,7 +78,7 @@ MultiSoundobjectSlider::MultiSoundobjectSlider(bool spreadEnabled, bool reverbSn
             objectIdsToModify.push_back(paramsKV.first);
         }
         
-        moveObjectXYPos(objectIdsToModify, posDelta);
+        moveObjectsXYPos(objectIdsToModify, posDelta);
     };
     m_multiselectionVisualizer->onMouseXYPosFinished = [this](const juce::Point<int>& posDelta) {
         auto objectIdsToModify = std::vector<SoundobjectProcessorId>();
@@ -90,7 +90,7 @@ MultiSoundobjectSlider::MultiSoundobjectSlider(bool spreadEnabled, bool reverbSn
             objectIdsToModify.push_back(paramsKV.first);
         }
         
-        finalizeObjectXYPos(objectIdsToModify, posDelta);
+        finalizeObjectsXYPos(objectIdsToModify, posDelta);
     };
     m_multiselectionVisualizer->onMouseRotAndScaleChanged = [this](const juce::Point<float>& cog, const float roation, const float scaling) {
         auto objectIdsToModify = std::vector<SoundobjectProcessorId>();
@@ -102,7 +102,7 @@ MultiSoundobjectSlider::MultiSoundobjectSlider(bool spreadEnabled, bool reverbSn
             objectIdsToModify.push_back(paramsKV.first);
         }
 
-        applyObjectRotAndScale(objectIdsToModify, cog, roation, scaling);
+        applyObjectsRotAndScale(objectIdsToModify, cog, roation, scaling);
     };
     m_multiselectionVisualizer->onMouseRotAndScaleFinished = [this](const juce::Point<float>& cog, const float roation, const float scaling) {
         auto objectIdsToModify = std::vector<SoundobjectProcessorId>();
@@ -114,7 +114,7 @@ MultiSoundobjectSlider::MultiSoundobjectSlider(bool spreadEnabled, bool reverbSn
             objectIdsToModify.push_back(paramsKV.first);
         }
 
-        finalizeObjectRotAndScale(objectIdsToModify, cog, roation, scaling);
+        finalizeObjectsRotAndScale(objectIdsToModify, cog, roation, scaling);
     };
     addAndMakeVisible(m_multiselectionVisualizer.get());
 }
@@ -1059,7 +1059,7 @@ float MultiSoundobjectSlider::getMultiTouchFactorValue()
  * Helper to cache xy object positions as starting point for multi-obj-modification
  * @param   objectIds           The ids of the soundobjects that shall be cached
  */
-void MultiSoundobjectSlider::cacheObjectXYPos(const std::vector<SoundobjectProcessorId>& objectIds)
+void MultiSoundobjectSlider::cacheObjectsXYPos(const std::vector<SoundobjectProcessorId>& objectIds)
 {
     auto ctrl = Controller::GetInstance();
     if (!ctrl)
@@ -1090,7 +1090,7 @@ void MultiSoundobjectSlider::cacheObjectXYPos(const std::vector<SoundobjectProce
  * @param   objectIds           The ids of the soundobjects that shall be modified
  * @param   positionMoveDelta   The xy delta to add to the existing positions
  */
-void MultiSoundobjectSlider::moveObjectXYPos(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<int>& positionMoveDelta)
+void MultiSoundobjectSlider::moveObjectsXYPos(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<int>& positionMoveDelta)
 {
     auto ctrl = Controller::GetInstance();
     if (!ctrl)
@@ -1127,7 +1127,7 @@ void MultiSoundobjectSlider::moveObjectXYPos(const std::vector<SoundobjectProces
  * @param   objectIds           The ids of the soundobjects that shall be finalized
  * @param   positionMoveDelta   The xy delta to finally add to the existing positions
  */
-void MultiSoundobjectSlider::finalizeObjectXYPos(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<int>& positionMoveDelta)
+void MultiSoundobjectSlider::finalizeObjectsXYPos(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<int>& positionMoveDelta)
 {
     auto ctrl = Controller::GetInstance();
     if (!ctrl)
@@ -1177,7 +1177,7 @@ void MultiSoundobjectSlider::finalizeObjectXYPos(const std::vector<SoundobjectPr
  * @param   rotation            The rotation angle to apply
  * @param   scaling             The relative scaling to apply
  */
-void MultiSoundobjectSlider::applyObjectRotAndScale(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<float>& cog, const float rotation, const float scaling)
+void MultiSoundobjectSlider::applyObjectsRotAndScale(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<float>& cog, const float rotation, const float scaling)
 {
     auto ctrl = Controller::GetInstance();
     if (!ctrl)
@@ -1222,7 +1222,7 @@ void MultiSoundobjectSlider::applyObjectRotAndScale(const std::vector<Soundobjec
  * @param   rotation            The rotation angle to apply
  * @param   scaling             The relative scaling to apply
  */
-void MultiSoundobjectSlider::finalizeObjectRotAndScale(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<float>& cog, const float rotation, const float scaling)
+void MultiSoundobjectSlider::finalizeObjectsRotAndScale(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<float>& cog, const float rotation, const float scaling)
 {
     auto ctrl = Controller::GetInstance();
     if (!ctrl)

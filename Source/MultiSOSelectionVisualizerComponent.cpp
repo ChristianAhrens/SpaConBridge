@@ -91,10 +91,7 @@ void MultiSOSelectionVisualizerComponent::SetSelectionPoints(const std::vector<j
         m_startCOG = sum / m_selectionPoints.size(); // zerodivision is prevented in condition above
         m_currentVirtCOG = m_startCOG;
 
-        auto vectorP1P2 = m_selectionPoints.at(1) - m_selectionPoints.at(0);
-        auto p1p2half = m_selectionPoints.at(0) + 0.5f * vectorP1P2;
-        auto vectorCogPy = 2.0f * (p1p2half - m_startCOG);
-        m_startSecondaryHandle = m_startCOG + vectorCogPy;
+        m_startSecondaryHandle = DeriveSecondaryHandleFromCOG(m_startCOG);
         m_currentVirtSecondaryHandle = m_startSecondaryHandle;
     }
 }
@@ -107,6 +104,19 @@ void MultiSOSelectionVisualizerComponent::SetSelectionPoints(const std::vector<j
 void MultiSOSelectionVisualizerComponent::UpdateSelectionPoints(const std::vector<juce::Point<float>>& points)
 {
     m_selectionPoints = points;
+}
+
+/**
+ * Helper to calculate the secondary handle position from internal known selectionpoints and given cog
+ * @param   cog     The center of gravity position to use for calculation
+ * @return  The calculated secondary handle position.
+ */
+const juce::Point<float>& MultiSOSelectionVisualizerComponent::DeriveSecondaryHandleFromCOG(const juce::Point<float>& cog)
+{
+    auto vectorP1P2 = m_selectionPoints.at(1) - m_selectionPoints.at(0);
+    auto p1p2half = m_selectionPoints.at(0) + 0.5f * vectorP1P2;
+    auto vectorCogPy = 2.0f * (p1p2half - cog);
+    return cog + vectorCogPy;
 }
 
 /**
@@ -240,10 +250,7 @@ void MultiSOSelectionVisualizerComponent::mouseDrag(const MouseEvent& e)
             // inplicitly changed second handle needs recalc
             if (m_selectionPoints.size() > 1)
             {
-                auto vectorP1P2 = m_selectionPoints.at(1) - m_selectionPoints.at(0);
-                auto p1p2half = m_selectionPoints.at(0) + 0.5f * vectorP1P2;
-                auto vectorCogPy = 2.0f * (p1p2half - m_currentVirtCOG);
-                m_currentVirtSecondaryHandle = m_currentVirtCOG + vectorCogPy;
+                m_currentVirtSecondaryHandle = DeriveSecondaryHandleFromCOG(m_currentVirtCOG);
             }
         }
         else if (IsSecondaryInteractionActive())
@@ -309,10 +316,7 @@ void MultiSOSelectionVisualizerComponent::mouseUp(const MouseEvent& e)
             // inplicitly changed second handle needs recalc
             if (m_selectionPoints.size() > 1)
             {
-                auto vectorP1P2 = m_selectionPoints.at(1) - m_selectionPoints.at(0);
-                auto p1p2half = m_selectionPoints.at(0) + 0.5f * vectorP1P2;
-                auto vectorCogPy = 2.0f * (p1p2half - m_currentVirtCOG);
-                m_currentVirtSecondaryHandle = m_currentVirtCOG + vectorCogPy;
+                m_startSecondaryHandle = DeriveSecondaryHandleFromCOG(m_currentVirtCOG);
                 m_startSecondaryHandle = m_currentVirtSecondaryHandle;
             }
         }

@@ -50,20 +50,25 @@ public:
 	bool IsSecondaryInteractionActive();
 
 	//==========================================================================
-	void paint(Graphics& g) override;
-
-	void mouseDown(const MouseEvent& e) override;
-	void mouseDrag(const MouseEvent& e) override;
-	void mouseUp(const MouseEvent& e) override;
-
-	//==========================================================================
 	std::function<void()> onMouseInteractionStarted = nullptr;
 	std::function<void(const juce::Point<int>&)> onMouseXYPosChanged = nullptr;
 	std::function<void(const juce::Point<int>&)> onMouseXYPosFinished = nullptr;
 	std::function<void(const juce::Point<float>&, const float, const float)> onMouseRotAndScaleChanged = nullptr;
 	std::function<void(const juce::Point<float>&, const float, const float)> onMouseRotAndScaleFinished = nullptr;
 
+protected:
+	//==========================================================================
+	void paint(Graphics& g) override;
+
+	void mouseDown(const MouseEvent& e) override;
+	void mouseDrag(const MouseEvent& e) override;
+	void mouseUp(const MouseEvent& e) override;
+
 private:
+	//==========================================================================
+	const juce::Point<float>& DeriveSecondaryHandleFromCOG(const juce::Point<float>& cog);
+
+	//==========================================================================
 	bool							m_selectionVisuActive{ false };
 	std::vector<juce::Point<float>>	m_selectionPoints;
 	bool							m_currentlyPrimaryInteractedWith{ false };

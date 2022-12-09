@@ -1299,10 +1299,11 @@ void MultiSoundobjectSlider::finalizeObjectsRotAndScale(const std::vector<Soundo
 
 /**
  * Update the local hash of processorIds and their current parameters.
- * @param parameters	Map where the keys are the processorIds of each soundobject, while values are pairs of the corresponding 
- *						soundobject number and position coordinates (0.0 to 1.0), spread, reverbSendGain and select state. 
+ * @param   parameters	    Map where the keys are the processorIds of each soundobject, while values are pairs of the corresponding 
+ *						    soundobject number and position coordinates (0.0 to 1.0), spread, reverbSendGain and select state. 
+ * @param   externalTrigger Indicator if the change was triggered outside of the application itself    
  */
-void MultiSoundobjectSlider::UpdateParameters(const ParameterCache& parameters)
+void MultiSoundobjectSlider::UpdateParameters(const ParameterCache& parameters, bool externalTrigger)
 {
 	m_cachedParameters = parameters;
 
@@ -1329,7 +1330,7 @@ void MultiSoundobjectSlider::UpdateParameters(const ParameterCache& parameters)
             auto selectionCountChanged = selectedCoords.size() != m_multiselectionVisualizer->GetSelectionPoints().size();
             auto intermediateSingleSOChange = m_currentlyDraggedId != INVALID_PROCESSOR_ID;
 
-            if (!m_multiselectionVisualizer->IsSelectionVisuActive() || selectionCountChanged || intermediateSingleSOChange)
+            if (!m_multiselectionVisualizer->IsSelectionVisuActive() || selectionCountChanged || intermediateSingleSOChange || externalTrigger)
             {
                 m_multiselectionVisualizer->SetSelectionPoints(selectedCoords);
                 m_multiselectionVisualizer->SetSelectionVisuActive(true);

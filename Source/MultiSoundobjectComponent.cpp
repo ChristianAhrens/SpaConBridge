@@ -286,6 +286,9 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 		MultiSoundobjectSlider::ParameterCache cachedParameters;
 		auto& soundobjectParameterMap = std::get<0>(cachedParameters);
 
+		// special helper flag to indicate if a change was received from external source
+		auto externalChangeOrigin = false;
+
 		auto selectedSOs = 0;
 		for (auto const& processorId : ctrl->GetSoundobjectProcessorIds())
 		{
@@ -326,10 +329,14 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 					DBG(String(__FUNCTION__) + String(" processor update DCT_ProcessorSelection"));
 					update = true;
 				}
+
+				externalChangeOrigin = DataChangeParticipant::DCP_Protocol == processor->GetParameterChangeSource(DCT_SoundobjectParameters);
 #else
 				if (processor->PopParameterChanged(DCP_MultiSlider, (DCT_SoundobjectProcessorConfig | DCT_SoundobjectParameters | DCT_ProcessorSelection)))
 				{
 					update = true;
+
+					externalChangeOrigin = DataChangeParticipant::DCP_Protocol == processor->GetParameterChangeSource(DCT_SoundobjectParameters);
 				}
 #endif
 			}
@@ -342,7 +349,7 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 		if (update && m_multiSoundobjectSlider)
 		{
 			// Update all nipple positions on the 2D-Slider.
-			m_multiSoundobjectSlider->UpdateParameters(cachedParameters);
+			m_multiSoundobjectSlider->UpdateParameters(cachedParameters, externalChangeOrigin);
 			m_multiSoundobjectSlider->repaint();
 		}
 	}

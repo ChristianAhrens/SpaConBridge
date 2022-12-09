@@ -129,7 +129,7 @@ public:
 	void SetUseMuselVisuActive(bool active);
 	bool IsUseMuselVisuActive();
 
-	void UpdateParameters(const ParameterCache& positions);
+	void UpdateParameters(const ParameterCache& positions, bool externalTrigger = false);
 
 protected:
 	void paint(Graphics& g) override;

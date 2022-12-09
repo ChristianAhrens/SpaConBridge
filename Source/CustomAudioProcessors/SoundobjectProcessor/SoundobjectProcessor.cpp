@@ -192,7 +192,7 @@ void SoundobjectProcessor::SetParameterChanged(const DataChangeParticipant& chan
 	// Set the specified change flag for all DataChangeTargets.
 	for (auto changeTarget = 0; changeTarget < DCP_Max; changeTarget++)
 	{
-		if ((changeSource != DCP_Protocol) || (changeTarget != DCP_Protocol))
+		//if ((changeSource != DCP_Protocol) || (changeTarget != DCP_Protocol))
 			m_dataChangesByTarget[static_cast<DataChangeParticipant>(changeTarget)] |= changeTypes;
 	}
 }
@@ -287,78 +287,81 @@ const DataChangeParticipant SoundobjectProcessor::GetParameterChangeSource(const
 {
 	auto changeSource = DataChangeParticipant(DCP_Max);
 
-	if (((changeType & DCT_NumProcessors) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_NumProcessors))
+	// unique DCTs
+	if (((changeType & DCT_NumProcessors) == DCT_NumProcessors) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_NumProcessors))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_NumProcessors);
-	else if (((changeType & DCT_IPAddress) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_IPAddress))
+	else if (((changeType & DCT_IPAddress) == DCT_IPAddress) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_IPAddress))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_IPAddress);
-	else if (((changeType & DCT_RefreshInterval) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_RefreshInterval))
+	else if (((changeType & DCT_RefreshInterval) == DCT_RefreshInterval) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_RefreshInterval))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_RefreshInterval);
-	else if (((changeType & DCT_Connected) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_Connected))
+	else if (((changeType & DCT_Connected) == DCT_Connected) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_Connected))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_Connected);
-	else if (((changeType & DCT_CommunicationConfig) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_CommunicationConfig))
-		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_CommunicationConfig);
-	else if (((changeType & DCT_SoundobjectID) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_SoundobjectID))
+	else if (((changeType & DCT_SoundobjectID) == DCT_SoundobjectID) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_SoundobjectID))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_SoundobjectID);
-	else if (((changeType & DCT_MappingID) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MappingID))
+	else if (((changeType & DCT_MappingID) == DCT_MappingID) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MappingID))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_MappingID);
-	else if (((changeType & DCT_ComsMode) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_ComsMode))
+	else if (((changeType & DCT_ComsMode) == DCT_ComsMode) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_ComsMode))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_ComsMode);
-	else if (((changeType & DCT_SoundobjectColourAndSize) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_SoundobjectColourAndSize))
+	else if (((changeType & DCT_SoundobjectColourAndSize) == DCT_SoundobjectColourAndSize) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_SoundobjectColourAndSize))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_SoundobjectColourAndSize);
-	else if (((changeType & DCT_MatrixInputID) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixInputID))
+	else if (((changeType & DCT_MatrixInputID) == DCT_MatrixInputID) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixInputID))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_MatrixInputID);
-	else if (((changeType & DCT_MatrixOutputID) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixOutputID))
+	else if (((changeType & DCT_MatrixOutputID) == DCT_MatrixOutputID) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixOutputID))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_MatrixOutputID);
-	else if (((changeType & DCT_SoundobjectProcessorConfig) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_SoundobjectProcessorConfig))
-		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_SoundobjectProcessorConfig);
-	else if (((changeType & DCT_MatrixInputProcessorConfig) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixInputProcessorConfig))
-		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_MatrixInputProcessorConfig);
-	else if (((changeType & DCT_MatrixOutputProcessorConfig) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixOutputProcessorConfig))
-		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_MatrixOutputProcessorConfig);
-	else if (((changeType & DCT_SoundobjectPosition) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_SoundobjectPosition))
+	else if (((changeType & DCT_SoundobjectPosition) == DCT_SoundobjectPosition) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_SoundobjectPosition))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_SoundobjectPosition);
-	else if (((changeType & DCT_ReverbSendGain) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_ReverbSendGain))
+	else if (((changeType & DCT_ReverbSendGain) == DCT_ReverbSendGain) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_ReverbSendGain))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_ReverbSendGain);
-	else if (((changeType & DCT_SoundobjectSpread) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_SoundobjectSpread))
+	else if (((changeType & DCT_SoundobjectSpread) == DCT_SoundobjectSpread) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_SoundobjectSpread))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_SoundobjectSpread);
-	else if (((changeType & DCT_DelayMode) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_DelayMode))
+	else if (((changeType & DCT_DelayMode) == DCT_DelayMode) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_DelayMode))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_DelayMode);
-	else if (((changeType & DCT_SoundobjectParameters) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_SoundobjectParameters))
-		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_SoundobjectParameters);
-	else if (((changeType & DCT_MatrixInputLevelMeter) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixInputLevelMeter))
+	else if (((changeType & DCT_MatrixInputLevelMeter) == DCT_MatrixInputLevelMeter) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixInputLevelMeter))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_MatrixInputLevelMeter);
-	else if (((changeType & DCT_MatrixInputGain) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixInputGain))
+	else if (((changeType & DCT_MatrixInputGain) == DCT_MatrixInputGain) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixInputGain))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_MatrixInputGain);
-	else if (((changeType & DCT_MatrixInputMute) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixInputMute))
+	else if (((changeType & DCT_MatrixInputMute) == DCT_MatrixInputMute) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixInputMute))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_MatrixInputMute);
-	else if (((changeType & DCT_MatrixInputParameters) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixInputParameters))
-		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_MatrixInputParameters);
-	else if (((changeType & DCT_MatrixOutputLevelMeter) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixOutputLevelMeter))
+	else if (((changeType & DCT_MatrixOutputLevelMeter) == DCT_MatrixOutputLevelMeter) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixOutputLevelMeter))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_MatrixOutputLevelMeter);
-	else if (((changeType & DCT_MatrixOutputGain) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixOutputGain))
+	else if (((changeType & DCT_MatrixOutputGain) == DCT_MatrixOutputGain) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixOutputGain))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_MatrixOutputGain);
-	else if (((changeType & DCT_MatrixOutputMute) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixOutputMute))
+	else if (((changeType & DCT_MatrixOutputMute) == DCT_MatrixOutputMute) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixOutputMute))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_MatrixOutputMute);
-	else if (((changeType & DCT_MatrixOutputParameters) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixOutputParameters))
-		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_MatrixOutputParameters);
-	else if (((changeType & DCT_MuteState) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MuteState))
+	else if (((changeType & DCT_MuteState) == DCT_MuteState) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MuteState))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_MuteState);
-	else if (((changeType & DCT_NumBridgingModules) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_NumBridgingModules))
+	else if (((changeType & DCT_NumBridgingModules) == DCT_NumBridgingModules) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_NumBridgingModules))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_NumBridgingModules);
-	else if (((changeType & DCT_BridgingConfig) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_BridgingConfig))
-		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_BridgingConfig);
-	else if (((changeType & DCT_DebugMessage) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_DebugMessage))
+	else if (((changeType & DCT_DebugMessage) == DCT_DebugMessage) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_DebugMessage))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_DebugMessage);
-	else if (((changeType & DCT_ProcessorSelection) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_ProcessorSelection))
+	else if (((changeType & DCT_ProcessorSelection) == DCT_ProcessorSelection) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_ProcessorSelection))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_ProcessorSelection);
-	else if (((changeType & DCT_TabPageSelection) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_TabPageSelection))
+	else if (((changeType & DCT_TabPageSelection) == DCT_TabPageSelection) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_TabPageSelection))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_TabPageSelection);
-	else if (((changeType & DCT_AllConfigParameters) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_AllConfigParameters))
-		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_AllConfigParameters);
-	else if (((changeType & DCT_MatrixInputName) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixInputName))
+	else if (((changeType & DCT_MatrixInputName) == DCT_MatrixInputName) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixInputName))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_MatrixInputName);
-	else if (((changeType & DCT_MatrixOutputName) == changeType) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixOutputName))
+	else if (((changeType & DCT_MatrixOutputName) == DCT_MatrixOutputName) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixOutputName))
 		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_MatrixOutputName);
+	// accumulated DCTs - Config
+	else if (((changeType & DCT_CommunicationConfig) == DCT_CommunicationConfig) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_CommunicationConfig))
+		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_CommunicationConfig);
+	else if (((changeType & DCT_SoundobjectProcessorConfig) == DCT_SoundobjectProcessorConfig) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_SoundobjectProcessorConfig))
+		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_SoundobjectProcessorConfig);
+	else if (((changeType & DCT_MatrixInputProcessorConfig) == DCT_MatrixInputProcessorConfig) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixInputProcessorConfig))
+		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_MatrixInputProcessorConfig);
+	else if (((changeType & DCT_MatrixOutputProcessorConfig) == DCT_MatrixOutputProcessorConfig) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixOutputProcessorConfig))
+		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_MatrixOutputProcessorConfig);
+	else if (((changeType & DCT_BridgingConfig) == DCT_BridgingConfig) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_BridgingConfig))
+		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_BridgingConfig);
+	// accumulated DCTs - Parameters
+	else if (((changeType & DCT_SoundobjectParameters) == DCT_SoundobjectParameters) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_SoundobjectParameters))
+		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_SoundobjectParameters);
+	else if (((changeType & DCT_MatrixInputParameters) == DCT_MatrixInputParameters) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixInputParameters))
+		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_MatrixInputParameters);
+	else if (((changeType & DCT_MatrixOutputParameters) == DCT_MatrixOutputParameters) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_MatrixOutputParameters))
+		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_MatrixOutputParameters);
+	else if (((changeType & DCT_AllConfigParameters) == DCT_AllConfigParameters) && 0 < m_dataChangeTypesByLastChangeSource.count(DCT_AllConfigParameters))
+		changeSource = m_dataChangeTypesByLastChangeSource.at(DCT_AllConfigParameters);
 
 	return changeSource;
 }

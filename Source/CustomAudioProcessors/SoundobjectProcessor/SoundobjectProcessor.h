@@ -91,11 +91,11 @@ public:
 	float GetParameterValue(SoundobjectParameterIndex paramIdx, bool normalized = false) const;
 	void SetParameterValue(DataChangeParticipant changeSource, SoundobjectParameterIndex paramIdx, float newValue);
 
-	bool GetParameterChanged(DataChangeParticipant changeTarget, DataChangeType change);
-	bool PopParameterChanged(DataChangeParticipant changeTarget, DataChangeType change);
-	void SetParameterChanged(DataChangeParticipant changeSource, DataChangeType changeTypes);
+	bool GetParameterChanged(const DataChangeParticipant& changeTarget, const DataChangeType& changeTypes);
+	bool PopParameterChanged(const DataChangeParticipant& changeTarget, const DataChangeType& changeTypes);
+	void SetParameterChanged(const DataChangeParticipant& changeSource, const DataChangeType& changeTypes);
 
-	const DataChangeParticipant& GetCurrentChangeSource();
+	const DataChangeParticipant GetParameterChangeSource(const DataChangeType& changeType);
 
 	void Tick();
 	void SetParamInTransit(DataChangeType paramsChanged);
@@ -129,26 +129,29 @@ public:
 	void releaseResources() override;
 	void setCurrentProgram(int index) override;
 
-protected:
-	GestureManagedAudioParameterFloat*		m_xPos;						/**< X coordinate in meters. NOTE: not using std::unique_ptr here, see addParameter(). */
-	GestureManagedAudioParameterFloat*		m_yPos;						/**< Y coordinate in meters. */
-	GestureManagedAudioParameterFloat*		m_reverbSendGain;			/**< Matrix input En-Space gain. */
-	GestureManagedAudioParameterFloat*		m_sourceSpread;				/**< Sound object spread. */
-	GestureManagedAudioParameterChoice*		m_delayMode;				/**< Sound object delay mode (Off, Tight, Full). */
-	ComsMode					m_comsMode;								/**< Current OSC communication mode, sending and/or receiving. */
-	MappingId					m_mappingId;							/**< Coordinate mapping index (1 to 4). */
-	SoundobjectId				m_soundobjectId;						/**< SoundobjectID, or matrix input number. */
-	juce::Colour				m_soundobjectColour;					/**< The colour to be used to paint this soundobject on ui. */
-	double						m_soundobjectSize;						/**< The size to be used to paint this soundobject on ui. */
-	SoundobjectProcessorId		m_processorId;							/**< Unique ID of this Processor instance. This is also this Processor's index within the Controller::m_processors array. */
-	DataChangeType				m_parametersChanged[DCP_Max];			/**< Keep track of which automation parameters have changed recently. The array has one entry for each application module (see enum DataChangeSource). */
-	DataChangeType				m_paramSetCommandsInTransit = DCT_None;	/**< Flags used to indicate when a SET command for a parameter is currently out on the network.
-																		 * Until such a flag is cleared (in the Tick() method), calls to IsParamInTransit will return true.
-																		 * This mechanism is used to ensure that parameters aren't overwritten right after having been
-																		 * changed via the Gui or the host.
-																		 */
-	String						m_processorDisplayName;					/**< User friendly name for this processor instance. */
-	DataChangeParticipant		m_currentChangeSource = DCP_Host;		/**< Member used to ensure that property changes are registered to the correct source. See MainProcessor::SetParameterValue(). */
+private:
+	void SetLastSourceForChangeType(const DataChangeParticipant& changeSource, const DataChangeType& changeTypes);
+
+	GestureManagedAudioParameterFloat*				m_xPos;									/**< X coordinate in meters. NOTE: not using std::unique_ptr here, see addParameter(). */
+	GestureManagedAudioParameterFloat*				m_yPos;									/**< Y coordinate in meters. */
+	GestureManagedAudioParameterFloat*				m_reverbSendGain;						/**< Matrix input En-Space gain. */
+	GestureManagedAudioParameterFloat*				m_sourceSpread;							/**< Sound object spread. */
+	GestureManagedAudioParameterChoice*				m_delayMode;							/**< Sound object delay mode (Off, Tight, Full). */
+	ComsMode										m_comsMode;								/**< Current OSC communication mode, sending and/or receiving. */
+	MappingId										m_mappingId;							/**< Coordinate mapping index (1 to 4). */
+	SoundobjectId									m_soundobjectId;						/**< SoundobjectID, or matrix input number. */
+	juce::Colour									m_soundobjectColour;					/**< The colour to be used to paint this soundobject on ui. */
+	double											m_soundobjectSize;						/**< The size to be used to paint this soundobject on ui. */
+	SoundobjectProcessorId							m_processorId;							/**< Unique ID of this Processor instance. This is also this Processor's index within the Controller::m_processors array. */
+	std::map<DataChangeParticipant, DataChangeType>	m_dataChangesByTarget;					/**< Keep track of which automation parameters have changed recently. */
+	std::map<DataChangeType, DataChangeParticipant>	m_dataChangeTypesByLastChangeSource;	/**< Keep track of who has last changed which automation parameters. */
+	DataChangeType									m_paramSetCommandsInTransit = DCT_None;	/**< Flags used to indicate when a SET command for a parameter is currently out on the network.
+																							 * Until such a flag is cleared (in the Tick() method), calls to IsParamInTransit will return true.
+																							 * This mechanism is used to ensure that parameters aren't overwritten right after having been
+																							 * changed via the Gui or the host.
+																							 */
+	String											m_processorDisplayName;					/**< User friendly name for this processor instance. */
+	DataChangeParticipant							m_currentChangeSource = DCP_Host;		/**< Member used to ensure that property changes are registered to the correct source. See MainProcessor::SetParameterValue(). */
 
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SoundobjectProcessor)

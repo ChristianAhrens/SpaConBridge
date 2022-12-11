@@ -3912,6 +3912,24 @@ bool ProtocolBridgingWrapper::SetADMOSCDataSendingDisabled(int disabled, bool do
 }
 
 /**
+ * 
+ */
+bool ProtocolBridgingWrapper::GetADMOSCBridgingXYMessageCombined()
+{
+	jassertfalse;
+	return false;
+}
+
+/**
+ *
+ */
+bool ProtocolBridgingWrapper::SetADMOSCBridgingXYMessageCombined(int mappingAreaId, bool dontSendNotification)
+{
+	jassertfalse;
+	return false;
+}
+
+/**
  * Gets the mute state of the given soundobject processor
  * @param soundobjectProcessorId The id of the source for which the mute state shall be returned
  * @return The mute state

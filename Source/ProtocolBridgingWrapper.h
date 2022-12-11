@@ -269,6 +269,8 @@ public:
 	bool SetADMOSCRemotePort(int remotePort, bool dontSendNotification = false);
 	int GetADMOSCMappingArea();
 	bool SetADMOSCMappingArea(int mappingAreaId, bool dontSendNotification = false);
+	bool GetADMOSCBridgingXYMessageCombined();
+	bool SetADMOSCBridgingXYMessageCombined(int mappingAreaId, bool dontSendNotification = false);
 
 	int GetADMOSCXAxisInverted();
 	bool SetADMOSCXAxisInverted(int inverted, bool dontSendNotification = false);

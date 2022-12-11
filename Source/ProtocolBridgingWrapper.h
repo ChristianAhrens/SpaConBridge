@@ -270,7 +270,7 @@ public:
 	int GetADMOSCMappingArea();
 	bool SetADMOSCMappingArea(int mappingAreaId, bool dontSendNotification = false);
 	bool GetADMOSCBridgingXYMessageCombined();
-	bool SetADMOSCBridgingXYMessageCombined(int mappingAreaId, bool dontSendNotification = false);
+	bool SetADMOSCBridgingXYMessageCombined(bool combined, bool dontSendNotification = false);
 
 	int GetADMOSCXAxisInverted();
 	bool SetADMOSCXAxisInverted(int inverted, bool dontSendNotification = false);
@@ -354,6 +354,8 @@ private:
 	bool SetProtocolXYAxisSwapped(ProtocolId protocolId, int swapped, bool dontSendNotification = false);
 	int GetProtocolDataSendingDisabled(ProtocolId protocolId);
 	bool SetProtocolDataSendingDisabled(ProtocolId protocolId, int disabled, bool dontSendNotification = false);
+	bool GetProtocolBridgingXYMessageCombined(ProtocolId protocolId);
+	bool SetProtocolBridgingXYMessageCombined(ProtocolId protocolId, bool combined, bool dontSendNotification);
 
 	ObjectHandlingState GetProtocolState(ProtocolId protocolId) const;
 	void SetProtocolState(ProtocolId protocolId, ObjectHandlingState state);

@@ -416,6 +416,7 @@ void SettingsSectionsComponent::createDAWPluginSettingsSection()
 {
 	// DAWPlugin settings section
 	m_DAWPluginBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
+	m_DAWPluginBridgingSettings->setBackgroundDecorationText("Alpha");
 	m_DAWPluginBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_DAWPlugin) + " Bridging");
 	m_DAWPluginBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_DAWPlugin) + " Bridging Settings");
 	m_DAWPluginBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/DAWPlugin.md"));

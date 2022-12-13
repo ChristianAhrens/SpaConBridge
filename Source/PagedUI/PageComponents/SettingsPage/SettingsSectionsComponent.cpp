@@ -781,7 +781,7 @@ void SettingsSectionsComponent::createADMOSCSettingsSection()
 {
 	// ADM-OSC settings section
 	m_ADMOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
-	m_ADMOSCBridgingSettings->setBackgroundDecorationText("Alpha");
+	m_ADMOSCBridgingSettings->setBackgroundDecorationText("Beta");
 	m_ADMOSCBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_ADMOSC) + " Bridging");
 	m_ADMOSCBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_ADMOSC) + " Bridging Settings");
 	m_ADMOSCBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/ADMOSC.md"));

@@ -1742,6 +1742,17 @@ void SettingsSectionsComponent::processUpdatedADMOSCConfig()
 		m_ADMOSCSwapXYButton->setToggleState(1 == ctrl->GetBridgingXYAxisSwapped(PBT_ADMOSC), dontSendNotification);
 	if (m_ADMOSCDisableSendingButton)
 		m_ADMOSCDisableSendingButton->setToggleState(1 == ctrl->GetBridgingDataSendingDisabled(PBT_ADMOSC), dontSendNotification);
+
+	if (m_ADMOSCxyMsgSndModeButton)
+	{
+		auto xyMessageCombined = ctrl->GetBridgingXYMessageCombined(PBT_ADMOSC);
+
+		auto newActiveButtonId = m_ADMOSCxyMsgSndModeButtonIds[m_ADMOSCxyMsgSndModes[0]];
+		if (xyMessageCombined)
+			newActiveButtonId = m_ADMOSCxyMsgSndModeButtonIds[m_ADMOSCxyMsgSndModes[1]];
+
+		m_ADMOSCxyMsgSndModeButton->setButtonDown(newActiveButtonId);
+	}
 }
 
 /**

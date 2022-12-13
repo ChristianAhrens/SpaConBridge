@@ -675,6 +675,10 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupADMOSCBridgingProtocol
 		if (dataSendingDisabledXmlElement)
 			dataSendingDisabledXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
 
+		auto xyMessageCombinedXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::XYMESSAGECOMBINED));
+		if (xyMessageCombinedXmlElement)
+			xyMessageCombinedXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
+
 		auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
 		auto mutedObjects = std::vector<RemoteObject>();
 		if (mutedObjsXmlElement)
@@ -1829,12 +1833,7 @@ bool ProtocolBridgingWrapper::SetProtocolDataSendingDisabled(ProtocolId protocol
 				dataSendingDisabledXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), disabled);
 			}
 			else
-			{
-				dataSendingDisabledXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATASENDINGDISABLED));
-				dataSendingDisabledXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), disabled);
-
-				return true;
-			}
+				return false;
 		}
 		else
 			return false;
@@ -1884,12 +1883,7 @@ bool ProtocolBridgingWrapper::SetProtocolBridgingXYMessageCombined(ProtocolId pr
 				xyMessageCombinedXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), combined);
 			}
 			else
-			{
-				xyMessageCombinedXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::XYMESSAGECOMBINED));
-				xyMessageCombinedXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), combined);
-			
-				return true;
-			}
+				return false;
 		}
 		else
 			return false;

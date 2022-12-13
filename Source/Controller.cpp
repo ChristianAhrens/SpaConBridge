@@ -3193,6 +3193,48 @@ bool Controller::SetBridgingMappingArea(ProtocolBridgingType bridgingType, int m
 	}
 }
 
+bool Controller::GetBridgingXYMessageCombined(ProtocolBridgingType bridgingType)
+{
+	switch (bridgingType)
+	{
+	case PBT_ADMOSC:
+		return m_protocolBridge.GetADMOSCBridgingXYMessageCombined();
+	case PBT_BlacktraxRTTrPM:
+	case PBT_YamahaOSC:
+	case PBT_GenericMIDI:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	case PBT_DS100:
+	case PBT_DAWPlugin:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
+bool Controller::SetBridgingXYMessageCombined(ProtocolBridgingType bridgingType, bool combined, bool dontSendNotification)
+{
+	switch (bridgingType)
+	{
+	case PBT_ADMOSC:
+		return m_protocolBridge.SetADMOSCBridgingXYMessageCombined(combined, dontSendNotification);
+	case PBT_BlacktraxRTTrPM:
+	case PBT_YamahaOSC:
+	case PBT_GenericMIDI:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	case PBT_DS100:
+	case PBT_DAWPlugin:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
 String Controller::GetBridgingInputDeviceIdentifier(ProtocolBridgingType bridgingType)
 {
 	switch (bridgingType)

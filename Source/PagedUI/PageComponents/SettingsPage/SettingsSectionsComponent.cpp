@@ -858,6 +858,17 @@ void SettingsSectionsComponent::createADMOSCSettingsSection()
 	m_ADMOSCDisableSendingButton->addListener(this);
 	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCDisableSendingButton.get(), true, false);
 
+	m_ADMOSCxyMsgSndModeButton = std::make_unique<JUCEAppBasics::SplitButtonComponent>();
+	m_ADMOSCxyMsgSndModeButton->addListener(this);
+	m_ADMOSCxyMsgSndModeButtonIds[m_ADMOSCxyMsgSndModes[0]] = m_ADMOSCxyMsgSndModeButton->addButton(m_ADMOSCxyMsgSndModes[0]);
+	m_ADMOSCxyMsgSndModeButtonIds[m_ADMOSCxyMsgSndModes[1]] = m_ADMOSCxyMsgSndModeButton->addButton(m_ADMOSCxyMsgSndModes[1]);
+	m_ADMOSCxyMsgSndModeButton->setButtonDown(m_ADMOSCxyMsgSndModeButtonIds[m_ADMOSCxyMsgSndModes[0]]);
+	m_ADMOSCxyMsgSndLabel = std::make_unique<Label>("ADMxyMessageModeButton", "XY msg. mode");
+	m_ADMOSCxyMsgSndLabel->setJustificationType(Justification::centred);
+	m_ADMOSCxyMsgSndLabel->attachToComponent(m_ADMOSCxyMsgSndModeButton.get(), true);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCxyMsgSndLabel.get(), false, false);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCxyMsgSndModeButton.get(), true, false);
+
 	m_ADMOSCBridgingSettings->resized();
 }
 
@@ -1096,6 +1107,19 @@ void SettingsSectionsComponent::buttonClicked(JUCEAppBasics::SplitButtonComponen
 		else if(m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[1]] == buttonId) // Relative
 		{
 			ctrl->SetBridgingMappingArea(PBT_BlacktraxRTTrPM, m_previousRTTrPMMappingAreaId);
+		}
+	}
+
+	// ADM OSC settings section
+	else if (m_ADMOSCxyMsgSndModeButton && m_ADMOSCxyMsgSndModeButton.get() == button)
+	{
+		if (m_ADMOSCxyMsgSndModeButtonIds[m_ADMOSCxyMsgSndModes[0]] == buttonId) // separate x and y messages
+		{
+			ctrl->SetBridgingXYMessageCombined(PBT_ADMOSC, false);
+		}
+		else if (m_ADMOSCxyMsgSndModeButtonIds[m_ADMOSCxyMsgSndModes[1]] == buttonId) // combined xy message
+		{
+			ctrl->SetBridgingXYMessageCombined(PBT_ADMOSC, true);
 		}
 	}
 
@@ -1718,6 +1742,17 @@ void SettingsSectionsComponent::processUpdatedADMOSCConfig()
 		m_ADMOSCSwapXYButton->setToggleState(1 == ctrl->GetBridgingXYAxisSwapped(PBT_ADMOSC), dontSendNotification);
 	if (m_ADMOSCDisableSendingButton)
 		m_ADMOSCDisableSendingButton->setToggleState(1 == ctrl->GetBridgingDataSendingDisabled(PBT_ADMOSC), dontSendNotification);
+
+	if (m_ADMOSCxyMsgSndModeButton)
+	{
+		auto xyMessageCombined = ctrl->GetBridgingXYMessageCombined(PBT_ADMOSC);
+
+		auto newActiveButtonId = m_ADMOSCxyMsgSndModeButtonIds[m_ADMOSCxyMsgSndModes[0]];
+		if (xyMessageCombined)
+			newActiveButtonId = m_ADMOSCxyMsgSndModeButtonIds[m_ADMOSCxyMsgSndModes[1]];
+
+		m_ADMOSCxyMsgSndModeButton->setButtonDown(newActiveButtonId);
+	}
 }
 
 /**

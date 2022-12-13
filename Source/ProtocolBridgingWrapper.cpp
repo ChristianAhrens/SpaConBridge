@@ -675,6 +675,10 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupADMOSCBridgingProtocol
 		if (dataSendingDisabledXmlElement)
 			dataSendingDisabledXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
 
+		auto xyMessageCombinedXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::XYMESSAGECOMBINED));
+		if (xyMessageCombinedXmlElement)
+			xyMessageCombinedXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
+
 		auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
 		auto mutedObjects = std::vector<RemoteObject>();
 		if (mutedObjsXmlElement)
@@ -1829,12 +1833,57 @@ bool ProtocolBridgingWrapper::SetProtocolDataSendingDisabled(ProtocolId protocol
 				dataSendingDisabledXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), disabled);
 			}
 			else
-			{
-				dataSendingDisabledXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATASENDINGDISABLED));
-				dataSendingDisabledXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), disabled);
+				return false;
+		}
+		else
+			return false;
 
-				return true;
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
+}
+
+/**
+ *
+ */
+bool ProtocolBridgingWrapper::GetProtocolBridgingXYMessageCombined(ProtocolId protocolId)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto xyMessageCombinedXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::XYMESSAGECOMBINED));
+			if (xyMessageCombinedXmlElement)
+			{
+				return xyMessageCombinedXmlElement->getIntAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE));
 			}
+		}
+	}
+
+	return 0;
+}
+
+/**
+ *
+ */
+bool ProtocolBridgingWrapper::SetProtocolBridgingXYMessageCombined(ProtocolId protocolId, bool combined, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto xyMessageCombinedXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::XYMESSAGECOMBINED));
+			if (xyMessageCombinedXmlElement)
+			{
+				xyMessageCombinedXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), combined);
+			}
+			else
+				return false;
 		}
 		else
 			return false;
@@ -3848,67 +3897,83 @@ bool ProtocolBridgingWrapper::SetADMOSCMappingArea(int mappingAreaId, bool dontS
 }
 
 /**
-*
-*/
+ *
+ */
 int ProtocolBridgingWrapper::GetADMOSCXAxisInverted()
 {
 	return GetProtocolXAxisInverted(ADMOSC_PROCESSINGPROTOCOL_ID);
 }
 
 /**
-*
-*/
+ *
+ */
 bool ProtocolBridgingWrapper::SetADMOSCXAxisInverted(int inverted, bool dontSendNotification)
 {
 	return SetProtocolXAxisInverted(ADMOSC_PROCESSINGPROTOCOL_ID, inverted, dontSendNotification);
 }
 
 /**
-*
-*/
+ *
+ */
 int ProtocolBridgingWrapper::GetADMOSCYAxisInverted()
 {
 	return GetProtocolYAxisInverted(ADMOSC_PROCESSINGPROTOCOL_ID);
 }
 
 /**
-*
-*/
+ *
+ */
 bool ProtocolBridgingWrapper::SetADMOSCYAxisInverted(int inverted, bool dontSendNotification)
 {
 	return SetProtocolYAxisInverted(ADMOSC_PROCESSINGPROTOCOL_ID, inverted, dontSendNotification);
 }
 
 /**
-*
-*/
+ *
+ */
 int ProtocolBridgingWrapper::GetADMOSCXYAxisSwapped()
 {
 	return GetProtocolXYAxisSwapped(ADMOSC_PROCESSINGPROTOCOL_ID);
 }
 
 /**
-*
-*/
+ *
+ */
 bool ProtocolBridgingWrapper::SetADMOSCXYAxisSwapped(int swapped, bool dontSendNotification)
 {
 	return SetProtocolXYAxisSwapped(ADMOSC_PROCESSINGPROTOCOL_ID, swapped, dontSendNotification);
 }
 
 /**
-*
-*/
+ *
+ */
 int ProtocolBridgingWrapper::GetADMOSCDataSendingDisabled()
 {
 	return GetProtocolDataSendingDisabled(ADMOSC_PROCESSINGPROTOCOL_ID);
 }
 
 /**
-*
-*/
+ *
+ */
 bool ProtocolBridgingWrapper::SetADMOSCDataSendingDisabled(int disabled, bool dontSendNotification)
 {
 	return SetProtocolDataSendingDisabled(ADMOSC_PROCESSINGPROTOCOL_ID, disabled, dontSendNotification);
+}
+
+/**
+ * 
+ */
+bool ProtocolBridgingWrapper::GetADMOSCBridgingXYMessageCombined()
+{
+	return GetProtocolBridgingXYMessageCombined(ADMOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ *
+ */
+bool ProtocolBridgingWrapper::SetADMOSCBridgingXYMessageCombined(bool combined, bool dontSendNotification)
+{
+	return SetProtocolBridgingXYMessageCombined(ADMOSC_PROCESSINGPROTOCOL_ID, combined, dontSendNotification);
 }
 
 /**

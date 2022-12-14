@@ -204,7 +204,7 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::createStateXml()
  */
 bool ProtocolBridgingWrapper::setStateXml(XmlElement* stateXml)
 {
-	if (stateXml || (stateXml->getTagName() == AppConfiguration::getTagName(AppConfiguration::TagID::BRIDGING)))
+	if (stateXml && (stateXml->getTagName() == AppConfiguration::getTagName(AppConfiguration::TagID::BRIDGING)))
 	{
 		m_bridgingXml = *stateXml;
 		auto nodeXmlElement = stateXml->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::NODE));

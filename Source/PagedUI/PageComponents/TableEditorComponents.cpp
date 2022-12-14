@@ -61,7 +61,7 @@ namespace SpaConBridge
  * Class constructor.
  */
 TableEditorComponent::TableEditorComponent(TableModelComponent& td)
-	: m_owner(td)
+	: m_owner(td), m_row(0)
 {
 }
 

@@ -201,6 +201,7 @@ void SceneIndexToMidiAssignerComponent::AssignmentEditComponent::handleMidiAssiS
 SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::AssignmentsListingComponent(const String& deviceIdentifier, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& initialAssignments) 
 {
     m_deviceIdentifier = deviceIdentifier;
+    m_minHeight = 0;
 
     auto refId = std::int16_t(1);
     for (auto const& assignment : initialAssignments)

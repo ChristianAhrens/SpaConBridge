@@ -138,7 +138,8 @@ public:
                 m_customLookAndFeel = std::unique_ptr<LookAndFeel>(new DarkDbLookAndFeel);
                 break;
             }
-            m_customLookAndFeel->setUsingNativeAlertWindows(true);
+            if (m_customLookAndFeel)
+                m_customLookAndFeel->setUsingNativeAlertWindows(true);
 
             Desktop::getInstance().setDefaultLookAndFeel(m_customLookAndFeel.get());
         }

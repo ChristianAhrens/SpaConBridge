@@ -1485,7 +1485,7 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 	// now process what changes were detected to be neccessary to perform
 	if (change == DCT_ProcessorSelection)
 	{
-		auto const& selMgr = ProcessorSelectionManager::GetInstance();
+		auto const selMgr = ProcessorSelectionManager::GetInstance();
 		if (selMgr && msgData._valCount == 1 && msgData._valType == RemoteObjectValueType::ROVT_INT)
 		{
 			auto newSelectState = (static_cast<int*>(msgData._payload)[0] == 1);

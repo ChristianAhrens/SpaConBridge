@@ -203,12 +203,9 @@ void MultiSoundobjectComponent::resized()
  */
 void MultiSoundobjectComponent::UpdateGui(bool init)
 {
-	auto const &ctrl = Controller::GetInstance();
-	if (!ctrl)
-		return;
-
-	auto const& selMgr = ProcessorSelectionManager::GetInstance();
-	if (!selMgr)
+	auto const ctrl = Controller::GetInstance();
+	auto const selMgr = ProcessorSelectionManager::GetInstance();
+	if (!ctrl || !selMgr)
 		return;
 
 	// Will be set to true if any changes relevant to the multi-slider are found.

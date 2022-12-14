@@ -115,12 +115,9 @@ void SoundobjectTableComponent::RecreateTableRowIds()
  */
 void SoundobjectTableComponent::UpdateTable()
 {
-	auto const& ctrl = Controller::GetInstance();
-	if (!ctrl)
-		return;
-
-	auto const& selMgr = ProcessorSelectionManager::GetInstance();
-	if (!selMgr)
+	auto const ctrl = Controller::GetInstance();
+	auto const selMgr = ProcessorSelectionManager::GetInstance();
+	if (!ctrl || !selMgr)
 		return;
 
 	auto selectedProcessorIds = selMgr->GetSelectedSoundobjectProcessorIds();
@@ -165,8 +162,8 @@ int SoundobjectTableComponent::getNumRows()
  */
 void SoundobjectTableComponent::selectedRowsChanged(int lastRowSelected)
 {
-	auto const& ctrl = Controller::GetInstance();
-	auto const& selMgr = ProcessorSelectionManager::GetInstance();
+	auto const ctrl = Controller::GetInstance();
+	auto const selMgr = ProcessorSelectionManager::GetInstance();
 
 	if (ctrl && selMgr)
 	{

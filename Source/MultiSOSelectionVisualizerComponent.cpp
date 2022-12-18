@@ -81,16 +81,30 @@ const std::vector<juce::Point<float>>& MultiSOSelectionVisualizerComponent::GetS
  */
 void MultiSOSelectionVisualizerComponent::SetSelectionPoints(const std::vector<juce::Point<float>>& points)
 {
-    m_selectionPoints = points;
-    if (m_selectionPoints.size() > 1)
+    if (points.size() > 1)
     {
+        // Iterate over new points to calculate COG
         auto sum = juce::Point<float>(0.0f, 0.0f);
-        for (auto const& coord : m_selectionPoints)
+        for (auto const& coord : points)
             sum += coord;
 
-        m_startCOG = sum / m_selectionPoints.size(); // zerodivision is prevented in condition above
+        // calculate COG
+        m_startCOG = sum / points.size(); // zerodivision is prevented in condition above
         m_currentVirtCOG = m_startCOG;
 
+        // Iterate over new points to collect angles that can be used for sorting counterclockwise
+        std::vector<std::pair<juce::Point<float>, float>> pointsToAngles;
+        for (auto const& coord : points)
+            pointsToAngles.push_back(std::make_pair(coord, m_startCOG.getAngleToPoint(coord)));
+
+        // sort points based on their angles around COG
+        std::sort(pointsToAngles.begin(), pointsToAngles.end(), [](const std::pair<juce::Point<float>, float>& a, const std::pair<juce::Point<float>, float>& b) { return a.second < b.second; });
+        m_selectionPoints.clear();
+        m_selectionPoints.reserve(pointsToAngles.size());
+        for (auto const& pointToAngle : pointsToAngles)
+            m_selectionPoints.push_back(pointToAngle.first);
+
+        // calculate secondary handle position
         m_startSecondaryHandle = DeriveSecondaryHandleFromCOG(m_startCOG);
         m_currentVirtSecondaryHandle = m_startSecondaryHandle;
     }
@@ -103,7 +117,20 @@ void MultiSOSelectionVisualizerComponent::SetSelectionPoints(const std::vector<j
  */
 void MultiSOSelectionVisualizerComponent::UpdateSelectionPoints(const std::vector<juce::Point<float>>& points)
 {
-    m_selectionPoints = points;
+    if (points.size() > 1)
+    {
+        // Iterate over new points to collect angles that can be used for sorting counterclockwise
+        std::vector<std::pair<juce::Point<float>, float>> pointsToAngles;
+        for (auto const& coord : points)
+            pointsToAngles.push_back(std::make_pair(coord, m_startCOG.getAngleToPoint(coord)));
+
+        // sort points based on their angles around COG
+        std::sort(pointsToAngles.begin(), pointsToAngles.end(), [](const std::pair<juce::Point<float>, float>& a, const std::pair<juce::Point<float>, float>& b) { return a.second < b.second; });
+        m_selectionPoints.clear();
+        m_selectionPoints.reserve(pointsToAngles.size());
+        for (auto const& pointToAngle : pointsToAngles)
+            m_selectionPoints.push_back(pointToAngle.first);
+    }
 }
 
 /**
@@ -215,11 +242,11 @@ void MultiSOSelectionVisualizerComponent::mouseDown(const MouseEvent& e)
         auto mousePosF = e.getMouseDownPosition().toFloat();
 
         Path cogPath;
-        cogPath.addEllipse(Rectangle<float>(m_startCOG.x - (m_handleSize / 2.0f), m_startCOG.y - (m_handleSize / 2.0f), m_handleSize, m_handleSize));
+        cogPath.addEllipse(juce::Rectangle<float>(m_startCOG.x - (m_handleSize / 2.0f), m_startCOG.y - (m_handleSize / 2.0f), m_handleSize, m_handleSize));
         auto startPrimInteraction = cogPath.contains(mousePosF);
 
         Path secHndlPath;
-        secHndlPath.addEllipse(Rectangle<float>(m_startSecondaryHandle.getX() - (m_handleSize / 2.0f), m_startSecondaryHandle.getY() - (m_handleSize / 2.0f), m_handleSize, m_handleSize));
+        secHndlPath.addEllipse(juce::Rectangle<float>(m_startSecondaryHandle.getX() - (m_handleSize / 2.0f), m_startSecondaryHandle.getY() - (m_handleSize / 2.0f), m_handleSize, m_handleSize));
         auto startSecInteraction = secHndlPath.contains(mousePosF);
 
         // Check if the mouse click landed inside any of the knobs.

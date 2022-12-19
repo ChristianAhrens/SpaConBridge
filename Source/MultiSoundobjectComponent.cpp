@@ -144,7 +144,16 @@ void MultiSoundobjectComponent::resized()
 	controlElementsBounds.removeFromLeft(margin);
 	m_removeImage->setBounds(controlElementsBounds.removeFromLeft(controlElementsBounds.getHeight()));
 	controlElementsBounds.removeFromLeft(margin);
-	m_muselvisuEnable->setBounds(controlElementsBounds.removeFromLeft(controlElementsBounds.getHeight()));
+    
+    if (controlElementsBounds.getWidth() < 4.8f * controlElementsBounds.getHeight())
+    {
+        m_muselvisuEnable->setVisible(false);
+    }
+    else
+    {
+        m_muselvisuEnable->setVisible(true);
+        m_muselvisuEnable->setBounds(controlElementsBounds.removeFromLeft(controlElementsBounds.getHeight()));
+    }
 
 	controlElementsBounds.removeFromRight(margin);
 	m_spreadEnable->setBounds(controlElementsBounds.removeFromRight(controlElementsBounds.getHeight()));
@@ -156,7 +165,7 @@ void MultiSoundobjectComponent::resized()
 	auto selGrComboWidth = (controlElementsBounds.getWidth()) > (140 + 2 * margin) ? 140 : controlElementsBounds.getWidth() - 2 * margin;
 	controlElementsBounds.removeFromLeft(margin);
 	controlElementsBounds.removeFromRight(margin);
-	if (controlElementsBounds.getWidth() < 1.5f * controlElementsBounds.getHeight())
+	if (controlElementsBounds.getWidth() < 2.0f * controlElementsBounds.getHeight())
 	{
 		m_selectionGroupSelect->setVisible(false);
 	}

@@ -102,6 +102,9 @@ public:
 	//==========================================================================
 	void setSettingsSectionActiveState(HeaderWithElmListComponent* settingsSection, bool activeState);
 
+	//==============================================================================
+	std::function<void()>	onContentSizesChangedCallback;
+
 private:
 	void updateAvailableMidiInputDevices();
 	void updateAvailableMidiOutputDevices();

@@ -81,6 +81,8 @@ public:
 	void addComponent(Component* compo, bool includeInLayout = true, bool takeOwnership = true, int verticalSpan = 1);
 	void removeComponent(Component* compo);
 	void setToggleActiveState(bool toggleState);
+
+	bool IsActive();
 	
 	void onToggleActive();
 

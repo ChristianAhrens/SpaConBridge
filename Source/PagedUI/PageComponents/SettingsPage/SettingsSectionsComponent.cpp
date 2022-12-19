@@ -1316,6 +1316,11 @@ void SettingsSectionsComponent::setSettingsSectionActiveState(HeaderWithElmListC
 		ctrl->SetActiveProtocolBridging(ctrl->GetActiveProtocolBridging() | sectionType);
 	else
 		ctrl->SetActiveProtocolBridging(ctrl->GetActiveProtocolBridging() & ~sectionType);
+
+	resized();
+
+	if (onContentSizesChangedCallback)
+		onContentSizesChangedCallback();
 }
 
 /**

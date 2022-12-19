@@ -146,10 +146,9 @@ std::int16_t SceneIndexToMidiAssignerComponent::getReferredId() const
 }
 
 SceneIndexToMidiAssignerComponent::AssignmentEditComponent::AssignmentEditComponent(std::int16_t refId, const String& deviceIdentifier, const String& sceneIndex, const JUCEAppBasics::MidiCommandRangeAssignment& currentAssi)
-    : Component("AssignmentEditComponent")
+    : Component("AssignmentEditComponent"),
+      m_sceneIndex(sceneIndex)
 {
-    m_sceneIndex = sceneIndex;
-
     m_sceneIndexEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(6, "1234567890."); // 6 digits: "99.999"
 
     m_sceneIndexEdit = std::make_unique<TextEditor>("SceneIndexEditor");
@@ -198,11 +197,10 @@ void SceneIndexToMidiAssignerComponent::AssignmentEditComponent::handleMidiAssiS
     }
 }
 
-SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::AssignmentsListingComponent(const String& deviceIdentifier, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& initialAssignments) 
+SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::AssignmentsListingComponent(const String& deviceIdentifier, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& initialAssignments)
+    : m_deviceIdentifier(deviceIdentifier),
+      m_minHeight(0)
 {
-    m_deviceIdentifier = deviceIdentifier;
-    m_minHeight = 0;
-
     auto refId = std::int16_t(1);
     for (auto const& assignment : initialAssignments)
     {
@@ -393,9 +391,8 @@ String SceneIndexToMidiAssignerComponent::AssignmentsListingComponent::GetNextSc
 }
 
 SceneIndexToMidiAssignerComponent::AssignmentsViewingComponent::AssignmentsViewingComponent(const String& deviceIdentifier, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& initialAssignments)
+    : m_deviceIdentifier(deviceIdentifier)
 {
-    m_deviceIdentifier = deviceIdentifier;
-
     m_contentComponent = std::make_unique<AssignmentsListingComponent>(deviceIdentifier, initialAssignments);
     m_contentViewport = std::make_unique<Viewport>();
     m_contentViewport->setViewedComponent(m_contentComponent.get(), false);

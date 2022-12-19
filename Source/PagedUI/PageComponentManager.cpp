@@ -1081,6 +1081,10 @@ std::unique_ptr<XmlElement> PageComponentManager::createStateXml()
 		if (spreadEnabledXmlElement)
 			spreadEnabledXmlElement->addTextElement(String(IsMultiSoundobjectSpreadEnabled() ? 1 : 0));
 
+		auto muselvisuEnabledXmlElement = MultiSoundobjectPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MUSELVISUENABLED));
+		if (muselvisuEnabledXmlElement)
+			muselvisuEnabledXmlElement->addTextElement(String(IsMultiSoundobjectMuSelVisuEnabled() ? 1 : 0));
+
 		auto backgroundImagesXmlElement = MultiSoundobjectPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::BACKGROUNDIMAGES));
 		if (backgroundImagesXmlElement)
 		{

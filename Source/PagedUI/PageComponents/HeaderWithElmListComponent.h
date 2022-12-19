@@ -58,7 +58,7 @@ class HeaderWithElmListComponent : public Component
 public:
 	struct LayoutingMetadata
 	{
-		LayoutingMetadata(bool includeInLayout, bool takeOwnership, int verticalSpan)
+		explicit LayoutingMetadata(bool includeInLayout, bool takeOwnership, int verticalSpan)
 		{
 			_includeInLayout = includeInLayout;
 			_takeOwnership = takeOwnership;
@@ -71,7 +71,7 @@ public:
 	};
 
 public:
-	HeaderWithElmListComponent(const String& componentName = String());
+	explicit HeaderWithElmListComponent(const String& componentName = String());
 	~HeaderWithElmListComponent() override;
 
 	//==============================================================================

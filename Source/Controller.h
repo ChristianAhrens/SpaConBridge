@@ -60,7 +60,7 @@ class StaticObjectsPollingHelper : private Timer
 {
 public:
 	StaticObjectsPollingHelper();
-	StaticObjectsPollingHelper(int interval);
+	explicit StaticObjectsPollingHelper(int interval);
 	~StaticObjectsPollingHelper() override;
 
 	int GetInterval();

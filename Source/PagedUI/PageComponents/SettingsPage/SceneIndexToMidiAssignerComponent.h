@@ -31,7 +31,7 @@ class SceneIndexToMidiAssignerComponent :
     public Button::Listener
 {
 public:
-    SceneIndexToMidiAssignerComponent(std::int16_t refId = -1);
+    explicit SceneIndexToMidiAssignerComponent(std::int16_t refId = -1);
     ~SceneIndexToMidiAssignerComponent();
 	
     //==============================================================================
@@ -54,7 +54,7 @@ private:
     class AssignmentEditComponent : public Component
     {
     public:
-        AssignmentEditComponent(std::int16_t refId, const String& deviceIdentifier, const String& sceneIndex, const JUCEAppBasics::MidiCommandRangeAssignment& currentAssi);
+        explicit AssignmentEditComponent(std::int16_t refId, const String& deviceIdentifier, const String& sceneIndex, const JUCEAppBasics::MidiCommandRangeAssignment& currentAssi);
         ~AssignmentEditComponent();
 
         const String GetSceneIndex();
@@ -80,7 +80,7 @@ private:
     class AssignmentsListingComponent : public Component
     {
     public:
-        AssignmentsListingComponent(const String& deviceIdentifier, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& initialAssignments);
+        explicit AssignmentsListingComponent(const String& deviceIdentifier, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& initialAssignments);
         ~AssignmentsListingComponent();
 
         void setWidth(int width);
@@ -122,7 +122,7 @@ private:
     class AssignmentsViewingComponent : public Component
     {
     public:
-        AssignmentsViewingComponent(const String& deviceIdentifier, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& initialAssignments);
+        explicit AssignmentsViewingComponent(const String& deviceIdentifier, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& initialAssignments);
         ~AssignmentsViewingComponent();
 
         std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> GetCurrentAssignments();

@@ -77,7 +77,7 @@ public:
 	};
 
 public:
-	BridgingAwareTableHeaderComponent(const std::map<TableColumn, ColumnProperties>& tableColumns, TableColumn sortColumn = TC_None);
+	explicit BridgingAwareTableHeaderComponent(const std::map<TableColumn, ColumnProperties>& tableColumns, TableColumn sortColumn = TC_None);
 	~BridgingAwareTableHeaderComponent() override;
 
 	void paint(Graphics& g) override;

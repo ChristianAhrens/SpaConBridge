@@ -41,7 +41,7 @@ public:
 		LD_Vertical
 	};
 public:
-	TableControlBarComponent(bool canCollapse = false, bool canToggleSingleSelectionOnly = false, const String& componentName = String());
+	explicit TableControlBarComponent(bool canCollapse = false, bool canToggleSingleSelectionOnly = false, const String& componentName = String());
 	~TableControlBarComponent() override;
 
 	void SetLayoutDirection(LayoutDirection direction);

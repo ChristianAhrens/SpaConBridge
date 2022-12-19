@@ -180,7 +180,7 @@ public:
 	};
 
 public:
-	AppConfiguration(const File &file);
+	explicit AppConfiguration(const File &file);
 	~AppConfiguration() override;
 
 	bool isValid() override;

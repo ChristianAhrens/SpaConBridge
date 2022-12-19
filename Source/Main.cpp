@@ -70,7 +70,7 @@ public:
     class MainWindow : public DocumentWindow
     {
     public:
-        MainWindow(String name) : DocumentWindow(name,
+        explicit MainWindow(String name) : DocumentWindow(name,
             Desktop::getInstance().getDefaultLookAndFeel()
             .findColour(ResizableWindow::backgroundColourId),
             DocumentWindow::allButtons)

@@ -38,7 +38,7 @@ class MatrixInputProcessorEditor :
 	private Timer
 {
 public:
-	MatrixInputProcessorEditor(MatrixInputProcessor&);
+	explicit MatrixInputProcessorEditor(MatrixInputProcessor&);
 	~MatrixInputProcessorEditor() override;
 
 	MatrixInputId	GetMatrixInputId();

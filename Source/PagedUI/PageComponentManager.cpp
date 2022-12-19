@@ -463,7 +463,7 @@ void PageComponentManager::SetMultiSoundobjectMappingArea(MappingAreaId mappingA
 bool PageComponentManager::IsMultiSoundobjectReverbEnabled()
 {
 	if (m_multiSoundobjectComponent)
-		return m_multiSoundobjectComponent->IsReverbEnabled();
+		return m_multiSoundobjectComponent->IsReverbVisuEnabled();
 	else
 	{
 		jassertfalse;
@@ -480,7 +480,7 @@ bool PageComponentManager::IsMultiSoundobjectReverbEnabled()
 void PageComponentManager::SetMultiSoundobjectReverbEnabled(bool enabled, bool dontSendNotification)
 {
 	if (m_multiSoundobjectComponent)
-		m_multiSoundobjectComponent->SetReverbEnabled(enabled);
+		m_multiSoundobjectComponent->SetReverbVisuEnabled(enabled);
 
 	if (!dontSendNotification)
 	{
@@ -496,7 +496,7 @@ void PageComponentManager::SetMultiSoundobjectReverbEnabled(bool enabled, bool d
 bool PageComponentManager::IsMultiSoundobjectSpreadEnabled()
 {
 	if (m_multiSoundobjectComponent)
-		return m_multiSoundobjectComponent->IsSpreadEnabled();
+		return m_multiSoundobjectComponent->IsSpreadVisuEnabled();
 	else
 	{
 		jassertfalse;
@@ -513,7 +513,40 @@ bool PageComponentManager::IsMultiSoundobjectSpreadEnabled()
 void PageComponentManager::SetMultiSoundobjectSpreadEnabled(bool enabled, bool dontSendNotification)
 {
 	if (m_multiSoundobjectComponent)
-		m_multiSoundobjectComponent->SetSpreadEnabled(enabled);
+		m_multiSoundobjectComponent->SetSpreadVisuEnabled(enabled);
+
+	if (!dontSendNotification)
+	{
+		triggerConfigurationUpdate(false);
+	}
+}
+
+/**
+ * Proxy Getter for the multisclection visu enabled state in MultiSoundobject Page.
+ * Forwards the call to PageContainerComponent.
+ * @return	The multisclection visu enabled state in MultiSoundobject Page.
+ */
+bool PageComponentManager::IsMultiSoundobjectMuSelVisuEnabled()
+{
+	if (m_multiSoundobjectComponent)
+		return m_multiSoundobjectComponent->IsMuSelVisuEnabled();
+	else
+	{
+		jassertfalse;
+		return false;
+	}
+}
+
+/**
+ * Proxy Setter for the multisclection visu enabled state in MultiSoundobject Page.
+ * Forwards the call to PageContainerComponent.
+ * @param enabled	The multisclection visu enabled state in MultiSoundobject Page.
+ * @param dontSendNotification	Indication if the configuration update shall be triggerd as well
+ */
+void PageComponentManager::SetMultiSoundobjectMuSelVisuEnabled(bool enabled, bool dontSendNotification)
+{
+	if (m_multiSoundobjectComponent)
+		m_multiSoundobjectComponent->SetMuSelVisuEnabled(enabled);
 
 	if (!dontSendNotification)
 	{
@@ -890,6 +923,17 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
 				SetMultiSoundobjectSpreadEnabled(spreadEnabled, true);
 			}
 		}
+		auto muselvisuEnabledXmlElement = MultiSoundobjectPageXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::MUSELVISUENABLED));
+		if (muselvisuEnabledXmlElement)
+		{
+			auto muselvisuEnabledTextXmlElement = muselvisuEnabledXmlElement->getFirstChildElement();
+			if (muselvisuEnabledTextXmlElement && muselvisuEnabledTextXmlElement->isTextElement())
+			{
+				auto muselvisuEnabled = (muselvisuEnabledTextXmlElement->getText().getIntValue() == 1);
+
+				SetMultiSoundobjectMuSelVisuEnabled(muselvisuEnabled, true);
+			}
+		}
 		auto backgroundImagesXmlElement = MultiSoundobjectPageXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::BACKGROUNDIMAGES));
 		if (backgroundImagesXmlElement)
 		{
@@ -1036,6 +1080,10 @@ std::unique_ptr<XmlElement> PageComponentManager::createStateXml()
 		auto spreadEnabledXmlElement = MultiSoundobjectPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SPREADENABLED));
 		if (spreadEnabledXmlElement)
 			spreadEnabledXmlElement->addTextElement(String(IsMultiSoundobjectSpreadEnabled() ? 1 : 0));
+
+		auto muselvisuEnabledXmlElement = MultiSoundobjectPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MUSELVISUENABLED));
+		if (muselvisuEnabledXmlElement)
+			muselvisuEnabledXmlElement->addTextElement(String(IsMultiSoundobjectMuSelVisuEnabled() ? 1 : 0));
 
 		auto backgroundImagesXmlElement = MultiSoundobjectPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::BACKGROUNDIMAGES));
 		if (backgroundImagesXmlElement)

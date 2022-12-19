@@ -1603,9 +1603,14 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 							jassert(msgData._valCount == 2 && msgData._valType == RemoteObjectValueType::ROVT_FLOAT);
 							if (msgData._valCount == 2 && msgData._valType == RemoteObjectValueType::ROVT_FLOAT)
 							{
+								auto newXValue = static_cast<float*>(msgData._payload)[0];
+								auto newYValue = static_cast<float*>(msgData._payload)[1];
 								// Set the processor's new position.
-								processor->SetParameterValue(DCP_Protocol, SPI_ParamIdx_X, static_cast<float*>(msgData._payload)[0]);
-								processor->SetParameterValue(DCP_Protocol, SPI_ParamIdx_Y, static_cast<float*>(msgData._payload)[1]);
+								if (processor->GetParameterValue(SPI_ParamIdx_X) != newXValue || processor->GetParameterValue(SPI_ParamIdx_Y))
+								{
+									processor->SetParameterValue(DCP_Protocol, SPI_ParamIdx_X, newXValue);
+									processor->SetParameterValue(DCP_Protocol, SPI_ParamIdx_Y, newYValue);
+								}
 							}
 						}
 					}
@@ -1613,22 +1618,22 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 					// All other automation parameters.
 					else
 					{
-						float newValue;
+						auto newValue = 0.0f;
 						switch (msgData._valType)
 						{
 						case RemoteObjectValueType::ROVT_INT:
-							newValue = static_cast<float>(static_cast<int*>(msgData._payload)[0]);
+							newValue = static_cast<float>(*(static_cast<int*>(msgData._payload)));
 							break;
 						case RemoteObjectValueType::ROVT_FLOAT:
-							newValue = static_cast<float*>(msgData._payload)[0];
+							newValue = *(static_cast<float*>(msgData._payload));
 							break;
 						case RemoteObjectValueType::ROVT_NONE:
 						default:
-							newValue = 0.0f;
 							break;
 						}
 
-						processor->SetParameterValue(DCP_Protocol, sopIdx, newValue);
+						if (processor->GetParameterValue(sopIdx) != newValue)
+							processor->SetParameterValue(DCP_Protocol, sopIdx, newValue);
 					}
 				}
 			}
@@ -1650,22 +1655,22 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 				// Also, ignore all incoming messages for properties which this processor wants to send a set command.
 				if (!ignoreResponse && isReceiveMode && processorIsAttentive)
 				{
-					float newValue;
+					auto newValue = 0.0f;
 					switch (msgData._valType)
 					{
 					case RemoteObjectValueType::ROVT_INT:
-						newValue = static_cast<float>(static_cast<int*>(msgData._payload)[0]);
+						newValue = static_cast<float>(*(static_cast<int*>(msgData._payload)));
 						break;
 					case RemoteObjectValueType::ROVT_FLOAT:
-						newValue = static_cast<float*>(msgData._payload)[0];
+						newValue = *(static_cast<float*>(msgData._payload));
 						break;
 					case RemoteObjectValueType::ROVT_NONE:
 					default:
-						newValue = 0.0f;
 						break;
 					}
-
-					processor->SetParameterValue(DCP_Protocol, mipIdx, newValue);
+					
+					if (processor->GetParameterValue(mipIdx) != newValue)
+						processor->SetParameterValue(DCP_Protocol, mipIdx, newValue);
 				}
 			}
 		}
@@ -1686,22 +1691,22 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 				// Also, ignore all incoming messages for properties which this processor wants to send a set command.
 				if (!ignoreResponse && isReceiveMode && processorIsAttentive)
 				{
-					float newValue;
+					auto newValue = 0.0f;
 					switch (msgData._valType)
 					{
 					case RemoteObjectValueType::ROVT_INT:
-						newValue = static_cast<float>(static_cast<int*>(msgData._payload)[0]);
+						newValue = static_cast<float>(*(static_cast<int*>(msgData._payload)));
 						break;
 					case RemoteObjectValueType::ROVT_FLOAT:
-						newValue = static_cast<float*>(msgData._payload)[0];
+						newValue = *(static_cast<float*>(msgData._payload));
 						break;
 					case RemoteObjectValueType::ROVT_NONE:
 					default:
-						newValue = 0.0f;
 						break;
 					}
 
-					processor->SetParameterValue(DCP_Protocol, mopIdx, newValue);
+					if (processor->GetParameterValue(mopIdx) != newValue)
+						processor->SetParameterValue(DCP_Protocol, mopIdx, newValue);
 				}
 			}
 		}

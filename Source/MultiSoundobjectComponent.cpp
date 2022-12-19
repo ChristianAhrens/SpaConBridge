@@ -72,6 +72,13 @@ MultiSoundobjectComponent::MultiSoundobjectComponent()
 	m_removeImage->setTooltip("Remove background image of selected Mapping Area");
 	addAndMakeVisible(m_removeImage.get());
 
+	// extended multiselection interaction enable
+	m_muselvisuEnable = std::make_unique<DrawableButton>("MuselVisuInteraction", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+	m_muselvisuEnable->addListener(this);
+	m_muselvisuEnable->setTooltip("Enable extended multiselection interaction");
+	m_muselvisuEnable->setClickingTogglesState(true);
+	addAndMakeVisible(m_muselvisuEnable.get());
+
 	// select a selection group or add a new one
 	m_selectionGroupSelect = std::make_unique<SelectGroupSelector>("selectgroups");
 	m_selectionGroupSelect->SetMode(SelectGroupSelector::SoundobjectSelections);
@@ -79,7 +86,6 @@ MultiSoundobjectComponent::MultiSoundobjectComponent()
 
 	// object names enable
 	m_objectNamesEnable = std::make_unique<DrawableButton>("Object Names", DrawableButton::ButtonStyle::ImageOnButtonBackground);
-	m_objectNamesEnable = std::make_unique<DrawableButton>("Reverb", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_objectNamesEnable->addListener(this);
 	m_objectNamesEnable->setTooltip("Show Soundobject names");
 	m_objectNamesEnable->setClickingTogglesState(true);
@@ -137,6 +143,8 @@ void MultiSoundobjectComponent::resized()
 	m_loadImage->setBounds(controlElementsBounds.removeFromLeft(controlElementsBounds.getHeight()));
 	controlElementsBounds.removeFromLeft(margin);
 	m_removeImage->setBounds(controlElementsBounds.removeFromLeft(controlElementsBounds.getHeight()));
+	controlElementsBounds.removeFromLeft(margin);
+	m_muselvisuEnable->setBounds(controlElementsBounds.removeFromLeft(controlElementsBounds.getHeight()));
 
 	controlElementsBounds.removeFromRight(margin);
 	m_spreadEnable->setBounds(controlElementsBounds.removeFromRight(controlElementsBounds.getHeight()));
@@ -170,10 +178,9 @@ void MultiSoundobjectComponent::resized()
 		auto multiSliderBounds = bounds;
 		auto multiSliderAspect = multiSliderBounds.toFloat().getAspectRatio();
 
-		auto backgroundImage = m_multiSoundobjectSlider->GetBackgroundImage(GetSelectedMapping());
-		if (backgroundImage)
+		if (m_multiSoundobjectSlider->HasBackgroundImage(GetSelectedMapping()))
 		{
-			auto imageBounds = backgroundImage->getBounds().toFloat();
+			auto imageBounds = m_multiSoundobjectSlider->GetBackgroundImage(GetSelectedMapping()).getBounds().toFloat();
 			auto imageAspect = imageBounds.getAspectRatio();
 			
 			if (imageAspect > multiSliderAspect) // larger aspectratio is wider
@@ -209,7 +216,7 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 		return;
 
 	// Will be set to true if any changes relevant to the multi-slider are found.
-	bool update = init;
+	auto update = init;
 
 	// Update the selected mapping area.
 	if (GetSelectedMapping() != m_mappingAreaSelect->getSelectedId())
@@ -219,16 +226,23 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 	}
 
 	// Update the reverb enabled state
-	if (IsReverbEnabled() != m_reverbEnable->getToggleState())
+	if (IsReverbVisuEnabled() != m_reverbEnable->getToggleState())
 	{
-		m_reverbEnable->setToggleState(IsReverbEnabled(), dontSendNotification);
+		m_reverbEnable->setToggleState(IsReverbVisuEnabled(), dontSendNotification);
 		update = true;
 	}
 
 	// Update the spread enabled state
-	if (IsSpreadEnabled() != m_spreadEnable->getToggleState())
+	if (IsSpreadVisuEnabled() != m_spreadEnable->getToggleState())
 	{
-		m_spreadEnable->setToggleState(IsSpreadEnabled(), dontSendNotification);
+		m_spreadEnable->setToggleState(IsSpreadVisuEnabled(), dontSendNotification);
+		update = true;
+	}
+
+	// Update the muselvisu enabled state
+	if (IsMuSelVisuEnabled() != m_muselvisuEnable->getToggleState())
+	{
+		m_muselvisuEnable->setToggleState(IsMuSelVisuEnabled(), dontSendNotification);
 		update = true;
 	}
 
@@ -274,6 +288,12 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 		// Iterate through all procssor instances and see if anything changed there.
 		// At the same time collect all sources positions for updating.
 		MultiSoundobjectSlider::ParameterCache cachedParameters;
+		auto& soundobjectParameterMap = std::get<0>(cachedParameters);
+
+		// special helper flag to indicate if a change was received from external source
+		auto externalChangeOrigin = false;
+
+		auto selectedSOs = 0;
 		for (auto const& processorId : ctrl->GetSoundobjectProcessorIds())
 		{
 			auto processor = ctrl->GetSoundobjectProcessor(processorId);
@@ -291,7 +311,10 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 					auto size			= processor->GetSoundobjectSize();
 					auto objectName		= processor->getProgramName(processor->getCurrentProgram());
 
-					cachedParameters.insert(std::make_pair(processorId, MultiSoundobjectSlider::SoundobjectParameters(soundobjectId, pos, spread, reverbSendGain, selected, colour, size, objectName)));
+					soundobjectParameterMap.insert(std::make_pair(processorId, MultiSoundobjectSlider::SoundobjectParameters(soundobjectId, pos, spread, reverbSendGain, selected, colour, size, objectName)));
+
+					if (selected)
+						selectedSOs++;
 				}
 
 #ifdef UNDEF//DEBUG
@@ -310,19 +333,27 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 					DBG(String(__FUNCTION__) + String(" processor update DCT_ProcessorSelection"));
 					update = true;
 				}
+
+				externalChangeOrigin = DataChangeParticipant::DCP_Protocol == processor->GetParameterChangeSource(DCT_SoundobjectParameters);
 #else
 				if (processor->PopParameterChanged(DCP_MultiSlider, (DCT_SoundobjectProcessorConfig | DCT_SoundobjectParameters | DCT_ProcessorSelection)))
 				{
 					update = true;
+
+					externalChangeOrigin = DataChangeParticipant::DCP_Protocol == processor->GetParameterChangeSource(DCT_SoundobjectParameters);
 				}
 #endif
 			}
 		}
 
+		// flag a multiselelction if present
+		if (selectedSOs > 1)
+			std::get<1>(cachedParameters) |= MultiSoundobjectSlider::CacheFlag::MultiSelection;
+
 		if (update)
 		{
 			// Update all nipple positions on the 2D-Slider.
-			m_multiSoundobjectSlider->UpdateParameters(cachedParameters);
+			m_multiSoundobjectSlider->UpdateParameters(cachedParameters, externalChangeOrigin);
 			m_multiSoundobjectSlider->repaint();
 		}
 	}
@@ -380,11 +411,23 @@ void MultiSoundobjectComponent::buttonClicked(Button* button)
 	{
 		PageComponentManager::GetInstance()->RemoveImageForMapping(GetSelectedMapping());
 	}
+	else if (m_muselvisuEnable.get() == button)
+	{
+		if (IsMuSelVisuEnabled() != button->getToggleState())
+		{
+			SetMuSelVisuEnabled(button->getToggleState());
+
+			// finally trigger refreshing the config file
+			auto config = SpaConBridge::AppConfiguration::getInstance();
+			if (config)
+				config->triggerConfigurationDump(false);
+		}
+	}
 	else if (m_reverbEnable.get() == button)
 	{
-		if (IsReverbEnabled() != button->getToggleState())
+		if (IsReverbVisuEnabled() != button->getToggleState())
 		{
-			SetReverbEnabled(button->getToggleState());
+			SetReverbVisuEnabled(button->getToggleState());
 
 			// finally trigger refreshing the config file
 			auto config = SpaConBridge::AppConfiguration::getInstance();
@@ -394,9 +437,9 @@ void MultiSoundobjectComponent::buttonClicked(Button* button)
 	}
 	else if (m_spreadEnable.get() == button)
 	{
-		if (IsSpreadEnabled() != button->getToggleState())
+		if (IsSpreadVisuEnabled() != button->getToggleState())
 		{
-			SetSpreadEnabled(button->getToggleState());
+			SetSpreadVisuEnabled(button->getToggleState());
 
 			// finally trigger refreshing the config file
 			auto config = SpaConBridge::AppConfiguration::getInstance();
@@ -457,7 +500,7 @@ bool MultiSoundobjectComponent::SetSelectedMapping(MappingAreaId mapping)
  * Getter for the reverb enabled state
  * @return	The enabled state.
  */
-bool MultiSoundobjectComponent::IsReverbEnabled() const
+bool MultiSoundobjectComponent::IsReverbVisuEnabled() const
 {
 	if (m_multiSoundobjectSlider)
 		return m_multiSoundobjectSlider->IsReverbSndGainEnabled();
@@ -469,10 +512,36 @@ bool MultiSoundobjectComponent::IsReverbEnabled() const
  * Setter for the reverb enabled state
  * @param enabled	The enabled state to set.
  */
-void MultiSoundobjectComponent::SetReverbEnabled(bool enabled)
+void MultiSoundobjectComponent::SetReverbVisuEnabled(bool enabled)
 {
 	if (m_multiSoundobjectSlider)
 		m_multiSoundobjectSlider->SetReverbSndGainEnabled(enabled);
+
+	// Trigger an update on the multi-slider
+	UpdateGui(true);
+}
+
+
+/**
+ * Getter for the multiselection visu enabled state
+ * @return	The enabled state.
+ */
+bool MultiSoundobjectComponent::IsMuSelVisuEnabled() const
+{
+	if (m_multiSoundobjectSlider)
+		return m_multiSoundobjectSlider->IsMuSelVisuEnabled();
+	else
+		return false;
+}
+
+/**
+ * Setter for the multiselection visu enabled state
+ * @param enabled	The enabled state to set.
+ */
+void MultiSoundobjectComponent::SetMuSelVisuEnabled(bool enabled)
+{
+	if (m_multiSoundobjectSlider)
+		m_multiSoundobjectSlider->SetMuSelVisuEnabled(enabled);
 
 	// Trigger an update on the multi-slider
 	UpdateGui(true);
@@ -482,7 +551,7 @@ void MultiSoundobjectComponent::SetReverbEnabled(bool enabled)
  * Getter for the spread enabled state
  * @return	The enabled state.
  */
-bool MultiSoundobjectComponent::IsSpreadEnabled() const
+bool MultiSoundobjectComponent::IsSpreadVisuEnabled() const
 {
 	if (m_multiSoundobjectSlider)
 		return m_multiSoundobjectSlider->IsSpreadEnabled();
@@ -494,7 +563,7 @@ bool MultiSoundobjectComponent::IsSpreadEnabled() const
  * Setter for the spread enabled state
  * @param enabled	The enabled state to set.
  */
-void MultiSoundobjectComponent::SetSpreadEnabled(bool enabled)
+void MultiSoundobjectComponent::SetSpreadVisuEnabled(bool enabled)
 {
 	if (m_multiSoundobjectSlider)
 		m_multiSoundobjectSlider->SetSpreadEnabled(enabled);
@@ -511,7 +580,7 @@ void MultiSoundobjectComponent::SetSpreadEnabled(bool enabled)
 const juce::Image* MultiSoundobjectComponent::GetBackgroundImage(MappingAreaId mappingAreaId)
 {
 	if (m_multiSoundobjectSlider)
-		return m_multiSoundobjectSlider->GetBackgroundImage(mappingAreaId);
+		return &m_multiSoundobjectSlider->GetBackgroundImage(mappingAreaId);
 	else
 		return nullptr;
 }
@@ -588,6 +657,7 @@ void MultiSoundobjectComponent::lookAndFeelChanged()
 	// Update drawable button images with updated lookAndFeel colours
 	UpdateDrawableButtonImages(m_loadImage, BinaryData::image_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_removeImage, BinaryData::hide_image_black_24dp_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_muselvisuEnable, BinaryData::dual_handle24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_reverbEnable, BinaryData::sensors_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_spreadEnable, BinaryData::adjust_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_objectNamesEnable, BinaryData::text_fields_black_24dp_svg, &getLookAndFeel());

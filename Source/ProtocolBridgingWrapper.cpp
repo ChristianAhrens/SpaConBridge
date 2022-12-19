@@ -137,7 +137,7 @@ void ProtocolBridgingWrapper::Disconnect()
 bool ProtocolBridgingWrapper::Reconnect()
 {
 	auto ctrl = Controller::GetInstance();
-	if (!ctrl || (ctrl && !ctrl->IsOnline())) // dont execute the reconnection if controller state suggests that the application shall be offline
+	if (!ctrl || !ctrl->IsOnline()) // dont execute the reconnection if controller state suggests that the application shall be offline
 		return false;
 
 	Disconnect();

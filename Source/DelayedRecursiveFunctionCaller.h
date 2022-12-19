@@ -38,7 +38,7 @@ class DelayedRecursiveFunctionCaller
 {
 public:
 	DelayedRecursiveFunctionCaller(std::function<void()> voidFunction, int recursionCount, bool selfDestroy = true, int callbackDelayMs = 200);
-	DelayedRecursiveFunctionCaller(std::function<void(int)> intFunction, std::vector<int> intRecursionContainer, bool selfDestroy = true, int callbackDelayMs = 200);
+	DelayedRecursiveFunctionCaller(std::function<void(int)> intFunction, const std::vector<int>& intRecursionContainer, bool selfDestroy = true, int callbackDelayMs = 200);
 	~DelayedRecursiveFunctionCaller();
 
 	void Run();

@@ -557,7 +557,6 @@ void RadioButtonContainer::buttonClicked(Button *button)
 				}
 			}
 			break;
-			break;
 		case TT_Soundobjects:
 		default:
 			{

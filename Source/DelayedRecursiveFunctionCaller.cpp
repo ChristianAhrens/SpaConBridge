@@ -54,7 +54,7 @@ DelayedRecursiveFunctionCaller::DelayedRecursiveFunctionCaller(std::function<voi
  * @param	selfDestroy				Flag that defines if the object instance shall destroy itself once the timer driven recursion is completed.
  * @param	callbackDelayMs			Delay inbetween recursive calls (via message queue timer)
  */
-DelayedRecursiveFunctionCaller::DelayedRecursiveFunctionCaller(std::function<void(int)> intFunction, std::vector<int> intRecursionContainer, bool selfDestroy, int callbackDelayMs)
+DelayedRecursiveFunctionCaller::DelayedRecursiveFunctionCaller(std::function<void(int)> intFunction, const std::vector<int>& intRecursionContainer, bool selfDestroy, int callbackDelayMs)
 	: m_intFunction(intFunction),
 	  m_intRecursionContainer(intRecursionContainer),
 	  m_recursionCount(static_cast<int>(m_intRecursionContainer.size())),

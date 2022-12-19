@@ -115,23 +115,15 @@ void StaticObjectsPollingHelper::timerCallback()
 void StaticObjectsPollingHelper::pollOnce()
 {
 	auto ctrl = Controller::GetInstance();
-	if (!ctrl)
-		return;
-	if (!ctrl->IsOnline())
+	if (!ctrl || !ctrl->IsOnline())
 		return;
 
-	bool success = true;
 	auto remoteObjectsToPoll = ctrl->GetStaticRemoteObjects();
 	for (auto const& remoteObject : remoteObjectsToPoll)
 	{
 		auto romd = RemoteObjectMessageData(remoteObject._Addr, ROVT_NONE, 0, nullptr, 0);
-		success &= ctrl->SendMessageDataDirect(remoteObject._Id, romd);
+		ctrl->SendMessageDataDirect(remoteObject._Id, romd);
 	}
-
-#ifdef DEBUG
-	if (!success)
-		DBG(String(__FUNCTION__) + " sending static objects poll request failed");
-#endif
 };
 
 
@@ -1800,7 +1792,6 @@ void Controller::timerCallback()
 		// Signal every timer tick to each processor instance.
 		soProcessor->Tick();
 
-		bool msgSent;
 		DataChangeType paramSetsInTransit = DCT_None;
 
 		newMsgData._addrVal._first = static_cast<juce::uint16>(soProcessor->GetSoundobjectId());
@@ -1809,8 +1800,6 @@ void Controller::timerCallback()
 		// Iterate through all automation parameters.
 		for (int pIdx = SPI_ParamIdx_X; pIdx < SPI_ParamIdx_MaxIndex; ++pIdx)
 		{
-			msgSent = false;
-
 			switch (pIdx)
 			{
 				case SPI_ParamIdx_X:
@@ -1829,7 +1818,7 @@ void Controller::timerCallback()
 						newMsgData._payload = &newDualFloatValue;
 						newMsgData._payloadSize = 2 * sizeof(float);
 
-						msgSent = m_protocolBridge.SendMessage(ROI_CoordinateMapping_SourcePosition_XY, newMsgData);
+						m_protocolBridge.SendMessage(ROI_CoordinateMapping_SourcePosition_XY, newMsgData);
 						paramSetsInTransit |= DCT_SoundobjectPosition;
 					}
 				}
@@ -1853,7 +1842,7 @@ void Controller::timerCallback()
 						newMsgData._payload = &newDualFloatValue;
 						newMsgData._payloadSize = sizeof(float);
 
-						msgSent = m_protocolBridge.SendMessage(ROI_MatrixInput_ReverbSendGain, newMsgData);
+						m_protocolBridge.SendMessage(ROI_MatrixInput_ReverbSendGain, newMsgData);
 						paramSetsInTransit |= DCT_ReverbSendGain;
 					}
 				}
@@ -1872,7 +1861,7 @@ void Controller::timerCallback()
 						newMsgData._payload = &newDualFloatValue;
 						newMsgData._payloadSize = sizeof(float);
 
-						msgSent = m_protocolBridge.SendMessage(ROI_Positioning_SourceSpread, newMsgData);
+						m_protocolBridge.SendMessage(ROI_Positioning_SourceSpread, newMsgData);
 						paramSetsInTransit |= DCT_SoundobjectSpread;
 					}
 				}
@@ -1891,7 +1880,7 @@ void Controller::timerCallback()
 						newMsgData._payload = &newIntValue;
 						newMsgData._payloadSize = sizeof(int);
 
-						msgSent = m_protocolBridge.SendMessage(ROI_Positioning_SourceDelayMode, newMsgData);
+						m_protocolBridge.SendMessage(ROI_Positioning_SourceDelayMode, newMsgData);
 						paramSetsInTransit |= DCT_DelayMode;
 					}
 				}
@@ -1954,7 +1943,6 @@ void Controller::timerCallback()
 		// Signal every timer tick to each processor instance.
 		miProcessor->Tick();
 		
-		bool msgSent;
 		DataChangeType paramSetsInTransit = DCT_None;
 
 		newMsgData._addrVal._first = static_cast<juce::uint16>(miProcessor->GetMatrixInputId());
@@ -1963,8 +1951,6 @@ void Controller::timerCallback()
 		// Iterate through all automation parameters.
 		for (int pIdx = MII_ParamIdx_LevelMeterPreMute; pIdx < MII_ParamIdx_MaxIndex; ++pIdx)
 		{
-			msgSent = false;
-
 			switch (pIdx)
 			{
 			case MII_ParamIdx_LevelMeterPreMute:
@@ -1980,7 +1966,7 @@ void Controller::timerCallback()
 					newMsgData._payload = &newDualFloatValue;
 					newMsgData._payloadSize = sizeof(float);
 
-					msgSent = m_protocolBridge.SendMessage(ROI_MatrixInput_LevelMeterPreMute, newMsgData);
+					m_protocolBridge.SendMessage(ROI_MatrixInput_LevelMeterPreMute, newMsgData);
 					paramSetsInTransit |= DCT_MatrixInputLevelMeter;
 				}
 			}
@@ -1999,7 +1985,7 @@ void Controller::timerCallback()
 					newMsgData._payload = &newDualFloatValue;
 					newMsgData._payloadSize = sizeof(float);
 
-					msgSent = m_protocolBridge.SendMessage(ROI_MatrixInput_Gain, newMsgData);
+					m_protocolBridge.SendMessage(ROI_MatrixInput_Gain, newMsgData);
 					paramSetsInTransit |= DCT_MatrixInputGain;
 				}
 			}
@@ -2018,7 +2004,7 @@ void Controller::timerCallback()
 					newMsgData._payload = &newIntValue;
 					newMsgData._payloadSize = sizeof(int);
 
-					msgSent = m_protocolBridge.SendMessage(ROI_MatrixInput_Mute, newMsgData);
+					m_protocolBridge.SendMessage(ROI_MatrixInput_Mute, newMsgData);
 					paramSetsInTransit |= DCT_MatrixInputMute;
 				}
 			}
@@ -2081,7 +2067,6 @@ void Controller::timerCallback()
 		// Signal every timer tick to each processor instance.
 		moProcessor->Tick();
 
-		bool msgSent;
 		DataChangeType paramSetsInTransit = DCT_None;
 
 		newMsgData._addrVal._first = static_cast<juce::uint16>(moProcessor->GetMatrixOutputId());
@@ -2090,8 +2075,6 @@ void Controller::timerCallback()
 		// Iterate through all automation parameters.
 		for (int pIdx = MOI_ParamIdx_LevelMeterPostMute; pIdx < MOI_ParamIdx_MaxIndex; ++pIdx)
 		{
-			msgSent = false;
-
 			switch (pIdx)
 			{
 			case MOI_ParamIdx_LevelMeterPostMute:
@@ -2107,7 +2090,7 @@ void Controller::timerCallback()
 					newMsgData._payload = &newDualFloatValue;
 					newMsgData._payloadSize = sizeof(float);
 
-					msgSent = m_protocolBridge.SendMessage(ROI_MatrixOutput_LevelMeterPostMute, newMsgData);
+					m_protocolBridge.SendMessage(ROI_MatrixOutput_LevelMeterPostMute, newMsgData);
 					paramSetsInTransit |= DCT_MatrixOutputLevelMeter;
 				}
 			}
@@ -2126,7 +2109,7 @@ void Controller::timerCallback()
 					newMsgData._payload = &newDualFloatValue;
 					newMsgData._payloadSize = sizeof(float);
 
-					msgSent = m_protocolBridge.SendMessage(ROI_MatrixOutput_Gain, newMsgData);
+					m_protocolBridge.SendMessage(ROI_MatrixOutput_Gain, newMsgData);
 					paramSetsInTransit |= DCT_MatrixOutputGain;
 				}
 			}
@@ -2145,7 +2128,7 @@ void Controller::timerCallback()
 					newMsgData._payload = &newIntValue;
 					newMsgData._payloadSize = sizeof(int);
 
-					msgSent = m_protocolBridge.SendMessage(ROI_MatrixOutput_Mute, newMsgData);
+					m_protocolBridge.SendMessage(ROI_MatrixOutput_Mute, newMsgData);
 					paramSetsInTransit |= DCT_MatrixOutputMute;
 				}
 			}

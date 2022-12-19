@@ -85,19 +85,18 @@ void StandalonePollingPageComponentBase::resized()
 {
 	auto bounds = getLocalBounds().reduced(5);
 
-	if (m_elementsContainerViewport)
-		m_elementsContainerViewport->setBounds(bounds);
-
-	auto minWidth = HeaderWithElmListComponent::m_attachedItemWidth + HeaderWithElmListComponent::m_layoutItemWidth + 2 * m_borderedElementsContainer->GetBorder();
-	auto minHeight = m_borderedElementsContainer->GetBorderedHeight();
-
-	if (bounds.getWidth() < minWidth)
-		bounds.setWidth(minWidth);
-	if (bounds.getHeight() < minHeight)
-		bounds.setHeight(minHeight);
-
 	if (m_borderedElementsContainer && m_elementsContainerViewport)
 	{
+		m_elementsContainerViewport->setBounds(bounds);
+
+		auto minWidth = HeaderWithElmListComponent::m_attachedItemWidth + HeaderWithElmListComponent::m_layoutItemWidth + 2 * m_borderedElementsContainer->GetBorder();
+		auto minHeight = m_borderedElementsContainer->GetBorderedHeight();
+
+		if (bounds.getWidth() < minWidth)
+			bounds.setWidth(minWidth);
+		if (bounds.getHeight() < minHeight)
+			bounds.setHeight(minHeight);
+
 		if (m_elementsContainerViewport->canScrollVertically() || m_elementsContainerViewport->canScrollHorizontally())
 		{
 			auto boundsWithoutScrollbars = bounds;

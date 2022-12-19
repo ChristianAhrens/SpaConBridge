@@ -48,7 +48,7 @@ public:
 	};
 
 public:
-	RowHeightSlider(const String& componentName);
+	explicit RowHeightSlider(const String& componentName);
 	~RowHeightSlider() override;
 
 	void SetListener(RowHeightListener* listener);

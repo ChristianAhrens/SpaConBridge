@@ -56,7 +56,7 @@ class SoundobjectProcessorEditor :
 	private Timer
 {
 public:
-	SoundobjectProcessorEditor(SoundobjectProcessor&);
+	explicit SoundobjectProcessorEditor(SoundobjectProcessor&);
 	~SoundobjectProcessorEditor() override;
 
 	void paint(Graphics&) override;

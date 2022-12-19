@@ -132,7 +132,7 @@ MainSpaConBridgeComponent::~MainSpaConBridgeComponent()
         ctrl->DestroyInstance();
     }
 
-    auto const& selMgr = ProcessorSelectionManager::GetInstance();
+    auto const selMgr = ProcessorSelectionManager::GetInstance();
     if (selMgr)
     {
         selMgr->DestroyInstance();

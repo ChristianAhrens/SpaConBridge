@@ -62,7 +62,7 @@ class SoundobjectProcessor :
 	public AppConfiguration::XmlConfigurableElement
 {
 public:
-	SoundobjectProcessor(bool insertToConfig = true);
+	explicit SoundobjectProcessor(bool insertToConfig = true);
 	~SoundobjectProcessor() override;
 
 	int GetProcessorId() const;

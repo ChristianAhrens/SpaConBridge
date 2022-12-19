@@ -95,8 +95,6 @@ void StatisticsPlot::paint(Graphics& g)
 	// Plot graph parameters
 	auto plotDataCount = (m_plotData.empty() ? 0 : m_plotData.begin()->second.size());
 	auto plotStepWidthPx = float(plotBounds.getWidth() - 1) / float((plotDataCount > 0 ? plotDataCount : 1) - 1);
-	auto newPointX = 0.0f;
-	auto newPointY = 0.0f;
 	auto vFactor = float(plotBounds.getHeight() - 1) / float(m_vertValueRange > 0 ? m_vertValueRange : 1);
 	auto plotOrigX = plotBounds.getBottomLeft().getX();
 	auto plotOrigY = plotBounds.getBottomLeft().getY() - 1;
@@ -132,8 +130,8 @@ void StatisticsPlot::paint(Graphics& g)
 			path.startNewSubPath(Point<float>(plotOrigX, plotOrigY - (m_plotData[dataEntryKV.first].front()) * vFactor));
 			for (int i = 1; i < m_plotData[dataEntryKV.first].size(); ++i)
 			{
-				newPointX = plotOrigX + float(i) * plotStepWidthPx;
-				newPointY = plotOrigY - (m_plotData[dataEntryKV.first].at(i) * vFactor);
+				auto newPointX = plotOrigX + float(i) * plotStepWidthPx;
+				auto newPointY = plotOrigY - (m_plotData[dataEntryKV.first].at(i) * vFactor);
 
 				path.lineTo(Point<float>(newPointX, newPointY));
 			}

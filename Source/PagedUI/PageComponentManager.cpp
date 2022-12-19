@@ -982,128 +982,122 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
 std::unique_ptr<XmlElement> PageComponentManager::createStateXml()
 {
 	auto uiCfgXmlElement = std::make_unique<XmlElement>(AppConfiguration::getTagName(AppConfiguration::TagID::UICONFIG));
-	if (uiCfgXmlElement)
+
+	auto activeTabXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::ACTIVETAB));
+	if (activeTabXmlElement)
+		activeTabXmlElement->addTextElement(GetPageNameFromId(GetActivePage()));
+
+	auto enabledPagesXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::ENABLEDPAGES));
+	if (enabledPagesXmlElement)
 	{
-		auto activeTabXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::ACTIVETAB));
-		if (activeTabXmlElement)
-			activeTabXmlElement->addTextElement(GetPageNameFromId(GetActivePage()));
+		auto enabledPagesIdStrings = StringArray();
+		for (auto const& pageId : GetEnabledPages())
+			enabledPagesIdStrings.add(String(pageId));
+		enabledPagesXmlElement->addTextElement(enabledPagesIdStrings.joinIntoString(", "));
+	}
 
-		auto enabledPagesXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::ENABLEDPAGES));
-		if (enabledPagesXmlElement)
-		{
-			auto enabledPagesIdStrings = StringArray();
-			for (auto const& pageId : GetEnabledPages())
-				enabledPagesIdStrings.add(String(pageId));
-			enabledPagesXmlElement->addTextElement(enabledPagesIdStrings.joinIntoString(", "));
-		}
-
-		auto lookAndFeelXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::LOOKANDFEELTYPE));
-		if (lookAndFeelXmlElement)
-			lookAndFeelXmlElement->addTextElement(String((GetLookAndFeelType() == DbLookAndFeelBase::LAFT_InvalidFirst) ? DbLookAndFeelBase::LAFT_Dark : GetLookAndFeelType()));
+	auto lookAndFeelXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::LOOKANDFEELTYPE));
+	if (lookAndFeelXmlElement)
+		lookAndFeelXmlElement->addTextElement(String((GetLookAndFeelType() == DbLookAndFeelBase::LAFT_InvalidFirst) ? DbLookAndFeelBase::LAFT_Dark : GetLookAndFeelType()));
 
 #if USE_FULLSCREEN_WINDOWMODE_TOGGLE
-		auto fullscreenWindowModeXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::FULLSCREENWINDOWMODE));
-		if (fullscreenWindowModeXmlElement)
-			fullscreenWindowModeXmlElement->addTextElement(String(IsFullscreenWindowMode() ? 1 : 0));
+	auto fullscreenWindowModeXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::FULLSCREENWINDOWMODE));
+	if (fullscreenWindowModeXmlElement)
+		fullscreenWindowModeXmlElement->addTextElement(String(IsFullscreenWindowMode() ? 1 : 0));
 #endif
 
-		auto soundobjectTableXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTTABLE));
-		if (soundobjectTableXmlElement)
+	auto soundobjectTableXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTTABLE));
+	if (soundobjectTableXmlElement)
+	{
+		auto rowHeightXmlElement = soundobjectTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::ROWHEIGHT));
+		if (rowHeightXmlElement)
+			rowHeightXmlElement->addTextElement(String(GetSoundobjectTableRowHeight()));
+
+		auto resizeBarRatioXmlElement = soundobjectTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::RESIZERBARRATIO));
+		if (resizeBarRatioXmlElement)
+			resizeBarRatioXmlElement->addTextElement(String(GetSoundobjectTableResizeBarRatio()));
+
+		auto singleSelectionOnlyXmlElement = soundobjectTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SINGLESELECTIONONLY));
+		if (singleSelectionOnlyXmlElement)
+			singleSelectionOnlyXmlElement->addTextElement(String(GetSoundobjectTableSingleSelectionOnly() ? 1 : 0));
+	}
+
+	auto matrixInputTableXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXINPUTTABLE));
+	if (matrixInputTableXmlElement)
+	{
+		auto rowHeightXmlElement = matrixInputTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::ROWHEIGHT));
+		if (rowHeightXmlElement)
+			rowHeightXmlElement->addTextElement(String(GetMatrixInputTableRowHeight()));
+
+		auto collapsedXmlElement = matrixInputTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::COLLAPSED));
+		if (collapsedXmlElement)
+			collapsedXmlElement->addTextElement(String(IsMatrixInputTableCollapsed() ? 1 : 0));
+	}
+
+	auto matrixOutputTableXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXOUTPUTTABLE));
+	if (matrixOutputTableXmlElement)
+	{
+		auto rowHeightXmlElement = matrixOutputTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::ROWHEIGHT));
+		if (rowHeightXmlElement)
+			rowHeightXmlElement->addTextElement(String(GetMatrixOutputTableRowHeight()));
+
+		auto collapsedXmlElement = matrixOutputTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::COLLAPSED));
+		if (collapsedXmlElement)
+			collapsedXmlElement->addTextElement(String(IsMatrixOutputTableCollapsed() ? 1 : 0));
+	}
+
+	auto scenesPageXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SCENESPAGE));
+	if (scenesPageXmlElement)
+	{
+		auto pinnedScenesXmlElement = scenesPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::PINNEDSCENES));
+		if (pinnedScenesXmlElement)
 		{
-			auto rowHeightXmlElement = soundobjectTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::ROWHEIGHT));
-			if (rowHeightXmlElement)
-				rowHeightXmlElement->addTextElement(String(GetSoundobjectTableRowHeight()));
-
-			auto resizeBarRatioXmlElement = soundobjectTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::RESIZERBARRATIO));
-			if (resizeBarRatioXmlElement)
-				resizeBarRatioXmlElement->addTextElement(String(GetSoundobjectTableResizeBarRatio()));
-
-			auto singleSelectionOnlyXmlElement = soundobjectTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SINGLESELECTIONONLY));
-			if (singleSelectionOnlyXmlElement)
-				singleSelectionOnlyXmlElement->addTextElement(String(GetSoundobjectTableSingleSelectionOnly() ? 1 : 0));
-		}
-
-		auto matrixInputTableXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXINPUTTABLE));
-		if (matrixInputTableXmlElement)
-		{
-			auto rowHeightXmlElement = matrixInputTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::ROWHEIGHT));
-			if (rowHeightXmlElement)
-				rowHeightXmlElement->addTextElement(String(GetMatrixInputTableRowHeight()));
-
-			auto collapsedXmlElement = matrixInputTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::COLLAPSED));
-			if (collapsedXmlElement)
-				collapsedXmlElement->addTextElement(String(IsMatrixInputTableCollapsed() ? 1 : 0));
-		}
-
-		auto matrixOutputTableXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXOUTPUTTABLE));
-		if (matrixOutputTableXmlElement)
-		{
-			auto rowHeightXmlElement = matrixOutputTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::ROWHEIGHT));
-			if (rowHeightXmlElement)
-				rowHeightXmlElement->addTextElement(String(GetMatrixOutputTableRowHeight()));
-
-			auto collapsedXmlElement = matrixOutputTableXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::COLLAPSED));
-			if (collapsedXmlElement)
-				collapsedXmlElement->addTextElement(String(IsMatrixOutputTableCollapsed() ? 1 : 0));
-		}
-
-		auto scenesPageXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SCENESPAGE));
-		if (scenesPageXmlElement)
-		{
-			auto pinnedScenesXmlElement = scenesPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::PINNEDSCENES));
-			if (pinnedScenesXmlElement)
+			auto pinnedScenes = GetScenesPagePinnedScenes();
+			for (auto const& pinnedScene : pinnedScenes)
 			{
-				auto pinnedScenes = GetScenesPagePinnedScenes();
-				for (auto const& pinnedScene : pinnedScenes)
+				auto pinnedSceneXmlElement = pinnedScenesXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SCENE));
+				if (pinnedSceneXmlElement)
 				{
-					auto pinnedSceneXmlElement = pinnedScenesXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SCENE));
-					if (pinnedSceneXmlElement)
-					{
-						pinnedSceneXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::INDEXMAJOR), pinnedScene.first.first);
-						pinnedSceneXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::INDEXMINOR), pinnedScene.first.second);
-						pinnedSceneXmlElement->addTextElement(pinnedScene.second);
-					}
+					pinnedSceneXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::INDEXMAJOR), pinnedScene.first.first);
+					pinnedSceneXmlElement->setAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::INDEXMINOR), pinnedScene.first.second);
+					pinnedSceneXmlElement->addTextElement(pinnedScene.second);
 				}
 			}
 		}
+	}
 
-		auto MultiSoundobjectPageXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MULTISLIDER));
-		if (MultiSoundobjectPageXmlElement)
+	auto MultiSoundobjectPageXmlElement = uiCfgXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MULTISLIDER));
+	if (MultiSoundobjectPageXmlElement)
+	{
+		auto mappingAreaXmlElement = MultiSoundobjectPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MAPPINGAREA));
+		if (mappingAreaXmlElement)
+			mappingAreaXmlElement->addTextElement(String(GetMultiSoundobjectMappingArea()));
+
+		auto reverbEnabledXmlElement = MultiSoundobjectPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::REVERBENABLED));
+		if (reverbEnabledXmlElement)
+			reverbEnabledXmlElement->addTextElement(String(IsMultiSoundobjectReverbEnabled() ? 1 : 0));
+
+		auto spreadEnabledXmlElement = MultiSoundobjectPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SPREADENABLED));
+		if (spreadEnabledXmlElement)
+			spreadEnabledXmlElement->addTextElement(String(IsMultiSoundobjectSpreadEnabled() ? 1 : 0));
+
+		auto backgroundImagesXmlElement = MultiSoundobjectPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::BACKGROUNDIMAGES));
+		if (backgroundImagesXmlElement)
 		{
-			auto mappingAreaXmlElement = MultiSoundobjectPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MAPPINGAREA));
-			if (mappingAreaXmlElement)
-				mappingAreaXmlElement->addTextElement(String(GetMultiSoundobjectMappingArea()));
-
-			auto reverbEnabledXmlElement = MultiSoundobjectPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::REVERBENABLED));
-			if (reverbEnabledXmlElement)
-				reverbEnabledXmlElement->addTextElement(String(IsMultiSoundobjectReverbEnabled() ? 1 : 0));
-
-			auto spreadEnabledXmlElement = MultiSoundobjectPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SPREADENABLED));
-			if (spreadEnabledXmlElement)
-				spreadEnabledXmlElement->addTextElement(String(IsMultiSoundobjectSpreadEnabled() ? 1 : 0));
-
-			auto muselvisuEnabledXmlElement = MultiSoundobjectPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MUSELVISUENABLED));
-			if (muselvisuEnabledXmlElement)
-				muselvisuEnabledXmlElement->addTextElement(String(IsMultiSoundobjectMuSelVisuEnabled() ? 1 : 0));
-
-			auto backgroundImagesXmlElement = MultiSoundobjectPageXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::BACKGROUNDIMAGES));
-			if (backgroundImagesXmlElement)
+			for (int i = MAI_First; i <= MAI_Fourth; i++)
 			{
-				for (int i = MAI_First; i <= MAI_Fourth; i++)
+				auto mapping = static_cast<MappingAreaId>(i);
+				if (m_multiSoundobjectBackgrounds.count(mapping) > 0 && m_multiSoundobjectBackgrounds.at(mapping).isValid())
 				{
-					auto mapping = static_cast<MappingAreaId>(i);
-					if (m_multiSoundobjectBackgrounds.count(mapping) > 0 && m_multiSoundobjectBackgrounds.at(mapping).isValid())
+					auto bkgXmlElement = backgroundImagesXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::BACKGROUND) + String(mapping));
+					if (bkgXmlElement)
 					{
-						auto bkgXmlElement = backgroundImagesXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::BACKGROUND) + String(mapping));
-						if (bkgXmlElement)
-						{
-							MemoryOutputStream outputStream;
-							PNGImageFormat formattedImage;
-							formattedImage.writeImageToStream(m_multiSoundobjectBackgrounds.at(mapping), outputStream);
-							MemoryBlock pngData(outputStream.getData(), outputStream.getDataSize());
+						MemoryOutputStream outputStream;
+						PNGImageFormat formattedImage;
+						formattedImage.writeImageToStream(m_multiSoundobjectBackgrounds.at(mapping), outputStream);
+						MemoryBlock pngData(outputStream.getData(), outputStream.getDataSize());
 
-							bkgXmlElement->setAttribute("pngData", pngData.toBase64Encoding());
-						}
+						bkgXmlElement->setAttribute("pngData", pngData.toBase64Encoding());
 					}
 				}
 			}

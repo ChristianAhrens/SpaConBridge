@@ -210,12 +210,9 @@ void MultiSoundobjectComponent::resized()
  */
 void MultiSoundobjectComponent::UpdateGui(bool init)
 {
-	auto const &ctrl = Controller::GetInstance();
-	if (!ctrl)
-		return;
-
-	auto const& selMgr = ProcessorSelectionManager::GetInstance();
-	if (!selMgr)
+	auto const ctrl = Controller::GetInstance();
+	auto const selMgr = ProcessorSelectionManager::GetInstance();
+	if (!ctrl || !selMgr)
 		return;
 
 	// Will be set to true if any changes relevant to the multi-slider are found.
@@ -353,7 +350,7 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 		if (selectedSOs > 1)
 			std::get<1>(cachedParameters) |= MultiSoundobjectSlider::CacheFlag::MultiSelection;
 
-		if (update && m_multiSoundobjectSlider)
+		if (update)
 		{
 			// Update all nipple positions on the 2D-Slider.
 			m_multiSoundobjectSlider->UpdateParameters(cachedParameters, externalChangeOrigin);

@@ -513,7 +513,7 @@ void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool acti
 	{
         m_multiSoundobjectComponentContainer->removeInternalComponent();
 		
-		auto const& selMgr = ProcessorSelectionManager::GetInstance();
+		auto const selMgr = ProcessorSelectionManager::GetInstance();
 		if (selMgr)
 		{
 			auto selectedProcessorIds = selMgr->GetSelectedSoundobjectProcessorIds();
@@ -537,7 +537,7 @@ void SoundobjectTablePageComponent::SetPageIsVisible(bool visible)
     {
         m_multiSoundobjectComponentContainer->removeInternalComponent();
     }
-    else if (m_multiSoundobjectsActive && visible)
+    else if (m_multiSoundobjectsActive)
     {
         auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
         if (multiSoundobjectComponent)

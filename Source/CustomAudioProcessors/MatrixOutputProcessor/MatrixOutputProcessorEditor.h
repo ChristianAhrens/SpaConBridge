@@ -38,7 +38,7 @@ class MatrixOutputProcessorEditor :
 	private Timer
 {
 public:
-	MatrixOutputProcessorEditor(MatrixOutputProcessor&);
+	explicit MatrixOutputProcessorEditor(MatrixOutputProcessor&);
 	~MatrixOutputProcessorEditor() override;
 
 	MatrixOutputId	GetMatrixOutputId();

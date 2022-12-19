@@ -42,7 +42,7 @@ public:
 	};
 
 public:
-	SelectGroupSelector(const String& componentName);
+	explicit SelectGroupSelector(const String& componentName);
 	~SelectGroupSelector() override;
 
 	void SetMode(SelectGroupSelector::Mode mode);

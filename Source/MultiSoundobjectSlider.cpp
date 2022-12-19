@@ -477,7 +477,7 @@ void MultiSoundobjectSlider::paint(Graphics& g)
 		}
 
 		// Soundobject text labeling
-		auto textLabel = String();
+        String textLabel;
 		if (m_soundObjectNamesEnabled)
 			textLabel = paramsKV.second._objectName;
 		else
@@ -778,7 +778,7 @@ void MultiSoundobjectSlider::dualPointMultitouchUpdated(const juce::Point<int>& 
     {
         if (validDraggedId)
         {
-            auto& id = m_currentlyDraggedId;
+            auto const& id = m_currentlyDraggedId;
             auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
             if (processor)
             {
@@ -811,7 +811,7 @@ void MultiSoundobjectSlider::dualPointMultitouchUpdated(const juce::Point<int>& 
                 auto const& selected = paramsKV.second._selected;
                 if (selected)
                 {
-                    auto& id = paramsKV.first;
+                    auto const& id = paramsKV.first;
                     auto processor = ctrl->GetSoundobjectProcessor(id);
                     if (processor)
                     {

@@ -58,20 +58,14 @@ public:
 	struct ColumnProperties
 	{
 		ColumnProperties() {};
-		ColumnProperties(
-			String	columnName,
-			int		width,
-			int		minimumWidth,
-			int		maximumWidth,
-			int		propertyFlags,
-			int		insertIndex = -1)
+		ColumnProperties(String	columnName, int width, int minimumWidth, int maximumWidth, int propertyFlags, int insertIndex = -1)
+			: _columnName(columnName),
+			  _width(width),
+			  _minimumWidth(minimumWidth),
+			  _maximumWidth(maximumWidth),
+			  _propertyFlags(propertyFlags),
+			  _insertIndex(insertIndex)
 		{
-			_columnName = columnName;
-			_width = width;
-			_minimumWidth = minimumWidth;
-			_maximumWidth = maximumWidth;
-			_propertyFlags = propertyFlags;
-			_insertIndex = insertIndex;
 		};
 
 		String	_columnName;
@@ -83,7 +77,7 @@ public:
 	};
 
 public:
-	BridgingAwareTableHeaderComponent(const std::map<TableColumn, ColumnProperties>& tableColumns, TableColumn sortColumn = TC_None);
+	explicit BridgingAwareTableHeaderComponent(const std::map<TableColumn, ColumnProperties>& tableColumns, TableColumn sortColumn = TC_None);
 	~BridgingAwareTableHeaderComponent() override;
 
 	void paint(Graphics& g) override;

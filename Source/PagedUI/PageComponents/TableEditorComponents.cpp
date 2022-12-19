@@ -61,7 +61,7 @@ namespace SpaConBridge
  * Class constructor.
  */
 TableEditorComponent::TableEditorComponent(TableModelComponent& td)
-	: m_owner(td)
+	: m_owner(td), m_row(0)
 {
 }
 
@@ -556,7 +556,6 @@ void RadioButtonContainer::buttonClicked(Button *button)
 					processor->SetComsMode(DCP_MatrixOutputTable, oldMode);
 				}
 			}
-			break;
 			break;
 		case TT_Soundobjects:
 		default:

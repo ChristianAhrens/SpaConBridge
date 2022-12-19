@@ -199,6 +199,31 @@ void MultiSoundobjectSlider::SetSoundobjectNamesEnabled(bool enabled)
 }
 
 /**
+ * Getter for the bool flag that indicates if multiselection visualization shall be used.
+ * @return	True if the flag if the multiselection visualization shall be used is set, false if not.
+ */
+bool MultiSoundobjectSlider::IsMuSelVisuEnabled()
+{
+    return m_muselvisuEnabled;
+}
+
+/**
+ * Setter for the bool flag that indicates if multiselection visualization shall be usedd.
+ * @param	enabled		True if the flag for if the multiselection visualization shall be used is set, false if not.
+ */
+void MultiSoundobjectSlider::SetMuSelVisuEnabled(bool enabled)
+{
+    m_muselvisuEnabled = enabled;
+
+    if (enabled)
+        addAndMakeVisible(m_multiselectionVisualizer.get());
+    else
+        removeChildComponent(m_multiselectionVisualizer.get());
+
+    resized();
+}
+
+/**
  * Helper method to check if a background image is set for the given mapping area id 
  * @param	mappingAreaId	The id of the mapping are to verify for if an image has been set as background
  */
@@ -256,30 +281,6 @@ bool MultiSoundobjectSlider::IsHandlingSelectedSoundobjectsOnly()
 void MultiSoundobjectSlider::SetHandleSelectedSoundobjectsOnly(bool selectedOnly)
 {
 	m_handleSelectedOnly = selectedOnly;
-}
-
-/**
- * Helper to activate or deactivate the extended multiselection mode provided by MultiSOSelectionVisualizerComponent
- * @param    active     Boolean value to either activate or deactivate the extended muselvisu mode
- */
-void MultiSoundobjectSlider::SetUseMuselVisuActive(bool active)
-{
-    m_useMuselVisu = active;
-    if (active)
-        addAndMakeVisible(m_multiselectionVisualizer.get());
-    else
-        removeChildComponent(m_multiselectionVisualizer.get());
-
-    resized();
-}
-
-/**
- * Getter for the active state of the extended multiselection mode provided by MultiSOSelectionVisualizerComponent
- * @return  True when active, false when not
- */
-bool MultiSoundobjectSlider::IsUseMuselVisuActive()
-{
-    return m_useMuselVisu;
 }
 
 /**
@@ -462,7 +463,7 @@ void MultiSoundobjectSlider::paint(Graphics& g)
 		// Paint knob
 		g.setColour(knobColour);
 		g.setOpacity(1.0f);
-        if (isSelected && !IsUseMuselVisuActive())
+        if (isSelected && !IsMuSelVisuEnabled())
 		{
             // if the current SO is the only selected one, paint it with a circle indicator and solid fill
 			auto fillSize = knobSize + knobThickness;

@@ -50,10 +50,12 @@ public:
 	MappingAreaId GetSelectedMapping() const;
 	bool SetSelectedMapping(MappingAreaId mapping);
 
-	bool IsReverbEnabled() const;
-	void SetReverbEnabled(bool enabled);
-	bool IsSpreadEnabled() const;
-	void SetSpreadEnabled(bool enabled);
+	bool IsReverbVisuEnabled() const;
+	void SetReverbVisuEnabled(bool enabled);
+	bool IsSpreadVisuEnabled() const;
+	void SetSpreadVisuEnabled(bool enabled);
+	bool IsMuSelVisuEnabled() const;
+	void SetMuSelVisuEnabled(bool enabled);
 
 	const juce::Image* GetBackgroundImage(MappingAreaId mappingAreaId);
 	void SetBackgroundImage(MappingAreaId mappingAreaId, const juce::Image& backgroundImage);

@@ -229,16 +229,23 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 	}
 
 	// Update the reverb enabled state
-	if (IsReverbEnabled() != m_reverbEnable->getToggleState())
+	if (IsReverbVisuEnabled() != m_reverbEnable->getToggleState())
 	{
-		m_reverbEnable->setToggleState(IsReverbEnabled(), dontSendNotification);
+		m_reverbEnable->setToggleState(IsReverbVisuEnabled(), dontSendNotification);
 		update = true;
 	}
 
 	// Update the spread enabled state
-	if (IsSpreadEnabled() != m_spreadEnable->getToggleState())
+	if (IsSpreadVisuEnabled() != m_spreadEnable->getToggleState())
 	{
-		m_spreadEnable->setToggleState(IsSpreadEnabled(), dontSendNotification);
+		m_spreadEnable->setToggleState(IsSpreadVisuEnabled(), dontSendNotification);
+		update = true;
+	}
+
+	// Update the muselvisu enabled state
+	if (IsMuSelVisuEnabled() != m_muselvisuEnable->getToggleState())
+	{
+		m_muselvisuEnable->setToggleState(IsMuSelVisuEnabled(), dontSendNotification);
 		update = true;
 	}
 
@@ -409,13 +416,21 @@ void MultiSoundobjectComponent::buttonClicked(Button* button)
 	}
 	else if (m_muselvisuEnable.get() == button)
 	{
-		m_multiSoundobjectSlider->SetUseMuselVisuActive(button->getToggleState());
+		if (IsMuSelVisuEnabled() != button->getToggleState())
+		{
+			SetMuSelVisuEnabled(button->getToggleState());
+
+			// finally trigger refreshing the config file
+			auto config = SpaConBridge::AppConfiguration::getInstance();
+			if (config)
+				config->triggerConfigurationDump(false);
+		}
 	}
 	else if (m_reverbEnable.get() == button)
 	{
-		if (IsReverbEnabled() != button->getToggleState())
+		if (IsReverbVisuEnabled() != button->getToggleState())
 		{
-			SetReverbEnabled(button->getToggleState());
+			SetReverbVisuEnabled(button->getToggleState());
 
 			// finally trigger refreshing the config file
 			auto config = SpaConBridge::AppConfiguration::getInstance();
@@ -425,9 +440,9 @@ void MultiSoundobjectComponent::buttonClicked(Button* button)
 	}
 	else if (m_spreadEnable.get() == button)
 	{
-		if (IsSpreadEnabled() != button->getToggleState())
+		if (IsSpreadVisuEnabled() != button->getToggleState())
 		{
-			SetSpreadEnabled(button->getToggleState());
+			SetSpreadVisuEnabled(button->getToggleState());
 
 			// finally trigger refreshing the config file
 			auto config = SpaConBridge::AppConfiguration::getInstance();
@@ -488,7 +503,7 @@ bool MultiSoundobjectComponent::SetSelectedMapping(MappingAreaId mapping)
  * Getter for the reverb enabled state
  * @return	The enabled state.
  */
-bool MultiSoundobjectComponent::IsReverbEnabled() const
+bool MultiSoundobjectComponent::IsReverbVisuEnabled() const
 {
 	if (m_multiSoundobjectSlider)
 		return m_multiSoundobjectSlider->IsReverbSndGainEnabled();
@@ -500,10 +515,36 @@ bool MultiSoundobjectComponent::IsReverbEnabled() const
  * Setter for the reverb enabled state
  * @param enabled	The enabled state to set.
  */
-void MultiSoundobjectComponent::SetReverbEnabled(bool enabled)
+void MultiSoundobjectComponent::SetReverbVisuEnabled(bool enabled)
 {
 	if (m_multiSoundobjectSlider)
 		m_multiSoundobjectSlider->SetReverbSndGainEnabled(enabled);
+
+	// Trigger an update on the multi-slider
+	UpdateGui(true);
+}
+
+
+/**
+ * Getter for the multiselection visu enabled state
+ * @return	The enabled state.
+ */
+bool MultiSoundobjectComponent::IsMuSelVisuEnabled() const
+{
+	if (m_multiSoundobjectSlider)
+		return m_multiSoundobjectSlider->IsMuSelVisuEnabled();
+	else
+		return false;
+}
+
+/**
+ * Setter for the multiselection visu enabled state
+ * @param enabled	The enabled state to set.
+ */
+void MultiSoundobjectComponent::SetMuSelVisuEnabled(bool enabled)
+{
+	if (m_multiSoundobjectSlider)
+		m_multiSoundobjectSlider->SetMuSelVisuEnabled(enabled);
 
 	// Trigger an update on the multi-slider
 	UpdateGui(true);
@@ -513,7 +554,7 @@ void MultiSoundobjectComponent::SetReverbEnabled(bool enabled)
  * Getter for the spread enabled state
  * @return	The enabled state.
  */
-bool MultiSoundobjectComponent::IsSpreadEnabled() const
+bool MultiSoundobjectComponent::IsSpreadVisuEnabled() const
 {
 	if (m_multiSoundobjectSlider)
 		return m_multiSoundobjectSlider->IsSpreadEnabled();
@@ -525,7 +566,7 @@ bool MultiSoundobjectComponent::IsSpreadEnabled() const
  * Setter for the spread enabled state
  * @param enabled	The enabled state to set.
  */
-void MultiSoundobjectComponent::SetSpreadEnabled(bool enabled)
+void MultiSoundobjectComponent::SetSpreadVisuEnabled(bool enabled)
 {
 	if (m_multiSoundobjectSlider)
 		m_multiSoundobjectSlider->SetSpreadEnabled(enabled);

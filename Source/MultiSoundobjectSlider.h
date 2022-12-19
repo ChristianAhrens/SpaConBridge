@@ -117,6 +117,8 @@ public:
 	void SetReverbSndGainEnabled(bool enabled);
 	bool IsSoundobjectNamesEnabled();
 	void SetSoundobjectNamesEnabled(bool enabled);
+	bool IsMuSelVisuEnabled();
+	void SetMuSelVisuEnabled(bool enabled);
 
 	bool HasBackgroundImage(MappingAreaId mappingAreaId);
 	const juce::Image& GetBackgroundImage(MappingAreaId mappingAreaId);
@@ -125,9 +127,6 @@ public:
 
 	bool IsHandlingSelectedSoundobjectsOnly();
 	void SetHandleSelectedSoundobjectsOnly(bool selectedOnly);
-
-	void SetUseMuselVisuActive(bool active);
-	bool IsUseMuselVisuActive();
 
 	void UpdateParameters(const ParameterCache& positions, bool externalTrigger = false);
 
@@ -161,6 +160,7 @@ private:
 	bool														m_spreadEnabled{ false };			                        /**< Flag indication, if SO spread factor visu shall be painted for individual SOs. */
 	bool														m_reverbSndGainEnabled{ false };	                        /**< Flag indication, if SO reverb send gaind visu shall be painted for individual SOs. */
 	bool														m_soundObjectNamesEnabled{ false };	                        /**< Flag indication, if SO name strings shall be painted for individual SOs. */
+	bool														m_muselvisuEnabled{ false };								/**< Flag indication, if multiselection visualization shall be used. */
 	MappingAreaId												m_selectedMapping;					                        /**< Remember the last selected coordinate mapping for the multi-slider. */
 
 	std::map<MappingAreaId, juce::Image>						m_backgroundImages;					                        /**< Map of background images for the four Mapping Areas that can be displayed. */
@@ -172,7 +172,6 @@ private:
 	std::map<SoundobjectProcessorId, juce::Point<float>>		m_objectPosMultiEditStartValues;							/**< Startvalues for editing multiple SO positions. */
 
 	std::unique_ptr<MultiSOSelectionVisualizerComponent>		m_multiselectionVisualizer;									/**< Helper component to do the painting and user interaction tracking for multiselection interaction. */
-	bool														m_useMuselVisu{ false };									/** Boolean indication if extended nultiselection visu component shall be active and visible. */
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSoundobjectSlider)
 };

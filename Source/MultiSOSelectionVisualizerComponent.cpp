@@ -37,15 +37,10 @@ MultiSOSelectionVisualizerComponent::MultiSOSelectionVisualizerComponent()
 {
     m_handleSize = 35.0f;
 
-    m_multitselectionIndicationColour = getLookAndFeel().findColour(TextButton::textColourOnId).brighter(0.15f);
+    m_cog_svg_xml = XmlDocument::parse(BinaryData::translate24dp_svg);
+    m_secHndl_svg_xml = XmlDocument::parse(BinaryData::croprotate24dp_svg);
 
-    std::unique_ptr<XmlElement> cog_svg_xml = XmlDocument::parse(BinaryData::translate24dp_svg);
-    m_cog_drawable = Drawable::createFromSVG(*(cog_svg_xml.get()));
-    m_cog_drawable->replaceColour(Colours::black, m_multitselectionIndicationColour);
-    
-    std::unique_ptr<XmlElement> secHndl_svg_xml = XmlDocument::parse(BinaryData::croprotate24dp_svg);
-    m_secHndl_drawable = Drawable::createFromSVG(*(secHndl_svg_xml.get()));
-    m_secHndl_drawable->replaceColour(Colours::black, m_multitselectionIndicationColour);
+    lookAndFeelChanged();
 }
 
 /**
@@ -131,6 +126,22 @@ void MultiSOSelectionVisualizerComponent::UpdateSelectionPoints(const std::vecto
         for (auto const& pointToAngle : pointsToAngles)
             m_selectionPoints.push_back(pointToAngle.first);
     }
+}
+
+/**
+ * Reimplemented from component to update button drawables correctly
+ */
+void MultiSOSelectionVisualizerComponent::lookAndFeelChanged()
+{
+    Component::lookAndFeelChanged();
+
+    m_multitselectionIndicationColour = getLookAndFeel().findColour(TextButton::textColourOnId);
+
+    m_cog_drawable = Drawable::createFromSVG(*(m_cog_svg_xml.get()));
+    m_cog_drawable->replaceColour(Colours::black, m_multitselectionIndicationColour);
+
+    m_secHndl_drawable = Drawable::createFromSVG(*(m_secHndl_svg_xml.get()));
+    m_secHndl_drawable->replaceColour(Colours::black, m_multitselectionIndicationColour);
 }
 
 /**

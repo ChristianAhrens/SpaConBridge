@@ -66,6 +66,9 @@ protected:
 
 private:
 	//==========================================================================
+	void lookAndFeelChanged() override;
+
+	//==========================================================================
 	const juce::Point<float> DeriveSecondaryHandleFromCOG(const juce::Point<float>& cog);
 
 	//==========================================================================
@@ -82,6 +85,8 @@ private:
 
 	juce::Colour					m_multitselectionIndicationColour;
 
+	std::unique_ptr<XmlElement>		m_cog_svg_xml;
+	std::unique_ptr<XmlElement>		m_secHndl_svg_xml;
 	std::unique_ptr<juce::Drawable>	m_cog_drawable;
 	std::unique_ptr<juce::Drawable>	m_secHndl_drawable;
 

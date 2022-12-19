@@ -537,7 +537,7 @@ void SoundobjectTablePageComponent::SetPageIsVisible(bool visible)
     {
         m_multiSoundobjectComponentContainer->removeInternalComponent();
     }
-    else if (m_multiSoundobjectsActive && visible)
+    else if (m_multiSoundobjectsActive)
     {
         auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
         if (multiSoundobjectComponent)

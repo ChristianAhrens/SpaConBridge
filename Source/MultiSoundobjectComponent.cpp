@@ -319,7 +319,7 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 			}
 		}
 
-		if (update && m_multiSoundobjectSlider)
+		if (update)
 		{
 			// Update all nipple positions on the 2D-Slider.
 			m_multiSoundobjectSlider->UpdateParameters(cachedParameters);

@@ -97,7 +97,7 @@ void MultiSoundobjectPageComponent::SetPageIsVisible(bool visible)
 	auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
 	if (multiSoundobjectComponent)
 	{
-		if (!visible && multiSoundobjectComponent)
+		if (!visible)
 		{
 			removeChildComponent(multiSoundobjectComponent.get());
 		}

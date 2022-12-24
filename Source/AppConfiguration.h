@@ -65,6 +65,7 @@ public:
         MATRIXINPUTPROCESSORSELECTIONS,
         MATRIXOUTPUTPROCESSORSELECTIONS,
         SELECTIONGROUP,
+        MUSELVISUENABLED,
     };
     static String getTagName(TagID ID)
     {
@@ -138,6 +139,8 @@ public:
             return "MOProcSelections";
         case SELECTIONGROUP:
             return "SelctGrp";
+        case MUSELVISUENABLED:
+            return "MuSelVisuEnabled";
 		default:
 			return "INVALID";
         }
@@ -180,7 +183,7 @@ public:
 	};
 
 public:
-	AppConfiguration(const File &file);
+	explicit AppConfiguration(const File &file);
 	~AppConfiguration() override;
 
 	bool isValid() override;

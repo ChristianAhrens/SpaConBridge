@@ -38,7 +38,7 @@ class MainSpaConBridgeComponent :    public juce::Component,
 {
 public:
     MainSpaConBridgeComponent();
-    MainSpaConBridgeComponent(std::function<void(DbLookAndFeelBase::LookAndFeelType)> lafUpdateCallback);
+    explicit MainSpaConBridgeComponent(std::function<void(DbLookAndFeelBase::LookAndFeelType)> lafUpdateCallback);
     ~MainSpaConBridgeComponent() override;
 
     //==========================================================================

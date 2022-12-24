@@ -115,23 +115,15 @@ void StaticObjectsPollingHelper::timerCallback()
 void StaticObjectsPollingHelper::pollOnce()
 {
 	auto ctrl = Controller::GetInstance();
-	if (!ctrl)
-		return;
-	if (!ctrl->IsOnline())
+	if (!ctrl || !ctrl->IsOnline())
 		return;
 
-	bool success = true;
 	auto remoteObjectsToPoll = ctrl->GetStaticRemoteObjects();
 	for (auto const& remoteObject : remoteObjectsToPoll)
 	{
 		auto romd = RemoteObjectMessageData(remoteObject._Addr, ROVT_NONE, 0, nullptr, 0);
-		success &= ctrl->SendMessageDataDirect(remoteObject._Id, romd);
+		ctrl->SendMessageDataDirect(remoteObject._Id, romd);
 	}
-
-#ifdef DEBUG
-	if (!success)
-		DBG(String(__FUNCTION__) + " sending static objects poll request failed");
-#endif
 };
 
 
@@ -1485,7 +1477,7 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 	// now process what changes were detected to be neccessary to perform
 	if (change == DCT_ProcessorSelection)
 	{
-		auto const& selMgr = ProcessorSelectionManager::GetInstance();
+		auto const selMgr = ProcessorSelectionManager::GetInstance();
 		if (selMgr && msgData._valCount == 1 && msgData._valType == RemoteObjectValueType::ROVT_INT)
 		{
 			auto newSelectState = (static_cast<int*>(msgData._payload)[0] == 1);
@@ -1611,9 +1603,14 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 							jassert(msgData._valCount == 2 && msgData._valType == RemoteObjectValueType::ROVT_FLOAT);
 							if (msgData._valCount == 2 && msgData._valType == RemoteObjectValueType::ROVT_FLOAT)
 							{
+								auto newXValue = static_cast<float*>(msgData._payload)[0];
+								auto newYValue = static_cast<float*>(msgData._payload)[1];
 								// Set the processor's new position.
-								processor->SetParameterValue(DCP_Protocol, SPI_ParamIdx_X, static_cast<float*>(msgData._payload)[0]);
-								processor->SetParameterValue(DCP_Protocol, SPI_ParamIdx_Y, static_cast<float*>(msgData._payload)[1]);
+								if (processor->GetParameterValue(SPI_ParamIdx_X) != newXValue || processor->GetParameterValue(SPI_ParamIdx_Y))
+								{
+									processor->SetParameterValue(DCP_Protocol, SPI_ParamIdx_X, newXValue);
+									processor->SetParameterValue(DCP_Protocol, SPI_ParamIdx_Y, newYValue);
+								}
 							}
 						}
 					}
@@ -1621,22 +1618,22 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 					// All other automation parameters.
 					else
 					{
-						float newValue;
+						auto newValue = 0.0f;
 						switch (msgData._valType)
 						{
 						case RemoteObjectValueType::ROVT_INT:
-							newValue = static_cast<float>(static_cast<int*>(msgData._payload)[0]);
+							newValue = static_cast<float>(*(static_cast<int*>(msgData._payload)));
 							break;
 						case RemoteObjectValueType::ROVT_FLOAT:
-							newValue = static_cast<float*>(msgData._payload)[0];
+							newValue = *(static_cast<float*>(msgData._payload));
 							break;
 						case RemoteObjectValueType::ROVT_NONE:
 						default:
-							newValue = 0.0f;
 							break;
 						}
 
-						processor->SetParameterValue(DCP_Protocol, sopIdx, newValue);
+						if (processor->GetParameterValue(sopIdx) != newValue)
+							processor->SetParameterValue(DCP_Protocol, sopIdx, newValue);
 					}
 				}
 			}
@@ -1658,22 +1655,22 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 				// Also, ignore all incoming messages for properties which this processor wants to send a set command.
 				if (!ignoreResponse && isReceiveMode && processorIsAttentive)
 				{
-					float newValue;
+					auto newValue = 0.0f;
 					switch (msgData._valType)
 					{
 					case RemoteObjectValueType::ROVT_INT:
-						newValue = static_cast<float>(static_cast<int*>(msgData._payload)[0]);
+						newValue = static_cast<float>(*(static_cast<int*>(msgData._payload)));
 						break;
 					case RemoteObjectValueType::ROVT_FLOAT:
-						newValue = static_cast<float*>(msgData._payload)[0];
+						newValue = *(static_cast<float*>(msgData._payload));
 						break;
 					case RemoteObjectValueType::ROVT_NONE:
 					default:
-						newValue = 0.0f;
 						break;
 					}
-
-					processor->SetParameterValue(DCP_Protocol, mipIdx, newValue);
+					
+					if (processor->GetParameterValue(mipIdx) != newValue)
+						processor->SetParameterValue(DCP_Protocol, mipIdx, newValue);
 				}
 			}
 		}
@@ -1694,22 +1691,22 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 				// Also, ignore all incoming messages for properties which this processor wants to send a set command.
 				if (!ignoreResponse && isReceiveMode && processorIsAttentive)
 				{
-					float newValue;
+					auto newValue = 0.0f;
 					switch (msgData._valType)
 					{
 					case RemoteObjectValueType::ROVT_INT:
-						newValue = static_cast<float>(static_cast<int*>(msgData._payload)[0]);
+						newValue = static_cast<float>(*(static_cast<int*>(msgData._payload)));
 						break;
 					case RemoteObjectValueType::ROVT_FLOAT:
-						newValue = static_cast<float*>(msgData._payload)[0];
+						newValue = *(static_cast<float*>(msgData._payload));
 						break;
 					case RemoteObjectValueType::ROVT_NONE:
 					default:
-						newValue = 0.0f;
 						break;
 					}
 
-					processor->SetParameterValue(DCP_Protocol, mopIdx, newValue);
+					if (processor->GetParameterValue(mopIdx) != newValue)
+						processor->SetParameterValue(DCP_Protocol, mopIdx, newValue);
 				}
 			}
 		}
@@ -1800,7 +1797,6 @@ void Controller::timerCallback()
 		// Signal every timer tick to each processor instance.
 		soProcessor->Tick();
 
-		bool msgSent;
 		DataChangeType paramSetsInTransit = DCT_None;
 
 		newMsgData._addrVal._first = static_cast<juce::uint16>(soProcessor->GetSoundobjectId());
@@ -1809,8 +1805,6 @@ void Controller::timerCallback()
 		// Iterate through all automation parameters.
 		for (int pIdx = SPI_ParamIdx_X; pIdx < SPI_ParamIdx_MaxIndex; ++pIdx)
 		{
-			msgSent = false;
-
 			switch (pIdx)
 			{
 				case SPI_ParamIdx_X:
@@ -1829,7 +1823,7 @@ void Controller::timerCallback()
 						newMsgData._payload = &newDualFloatValue;
 						newMsgData._payloadSize = 2 * sizeof(float);
 
-						msgSent = m_protocolBridge.SendMessage(ROI_CoordinateMapping_SourcePosition_XY, newMsgData);
+						m_protocolBridge.SendMessage(ROI_CoordinateMapping_SourcePosition_XY, newMsgData);
 						paramSetsInTransit |= DCT_SoundobjectPosition;
 					}
 				}
@@ -1853,7 +1847,7 @@ void Controller::timerCallback()
 						newMsgData._payload = &newDualFloatValue;
 						newMsgData._payloadSize = sizeof(float);
 
-						msgSent = m_protocolBridge.SendMessage(ROI_MatrixInput_ReverbSendGain, newMsgData);
+						m_protocolBridge.SendMessage(ROI_MatrixInput_ReverbSendGain, newMsgData);
 						paramSetsInTransit |= DCT_ReverbSendGain;
 					}
 				}
@@ -1872,7 +1866,7 @@ void Controller::timerCallback()
 						newMsgData._payload = &newDualFloatValue;
 						newMsgData._payloadSize = sizeof(float);
 
-						msgSent = m_protocolBridge.SendMessage(ROI_Positioning_SourceSpread, newMsgData);
+						m_protocolBridge.SendMessage(ROI_Positioning_SourceSpread, newMsgData);
 						paramSetsInTransit |= DCT_SoundobjectSpread;
 					}
 				}
@@ -1891,7 +1885,7 @@ void Controller::timerCallback()
 						newMsgData._payload = &newIntValue;
 						newMsgData._payloadSize = sizeof(int);
 
-						msgSent = m_protocolBridge.SendMessage(ROI_Positioning_SourceDelayMode, newMsgData);
+						m_protocolBridge.SendMessage(ROI_Positioning_SourceDelayMode, newMsgData);
 						paramSetsInTransit |= DCT_DelayMode;
 					}
 				}
@@ -1954,7 +1948,6 @@ void Controller::timerCallback()
 		// Signal every timer tick to each processor instance.
 		miProcessor->Tick();
 		
-		bool msgSent;
 		DataChangeType paramSetsInTransit = DCT_None;
 
 		newMsgData._addrVal._first = static_cast<juce::uint16>(miProcessor->GetMatrixInputId());
@@ -1963,8 +1956,6 @@ void Controller::timerCallback()
 		// Iterate through all automation parameters.
 		for (int pIdx = MII_ParamIdx_LevelMeterPreMute; pIdx < MII_ParamIdx_MaxIndex; ++pIdx)
 		{
-			msgSent = false;
-
 			switch (pIdx)
 			{
 			case MII_ParamIdx_LevelMeterPreMute:
@@ -1980,7 +1971,7 @@ void Controller::timerCallback()
 					newMsgData._payload = &newDualFloatValue;
 					newMsgData._payloadSize = sizeof(float);
 
-					msgSent = m_protocolBridge.SendMessage(ROI_MatrixInput_LevelMeterPreMute, newMsgData);
+					m_protocolBridge.SendMessage(ROI_MatrixInput_LevelMeterPreMute, newMsgData);
 					paramSetsInTransit |= DCT_MatrixInputLevelMeter;
 				}
 			}
@@ -1999,7 +1990,7 @@ void Controller::timerCallback()
 					newMsgData._payload = &newDualFloatValue;
 					newMsgData._payloadSize = sizeof(float);
 
-					msgSent = m_protocolBridge.SendMessage(ROI_MatrixInput_Gain, newMsgData);
+					m_protocolBridge.SendMessage(ROI_MatrixInput_Gain, newMsgData);
 					paramSetsInTransit |= DCT_MatrixInputGain;
 				}
 			}
@@ -2018,7 +2009,7 @@ void Controller::timerCallback()
 					newMsgData._payload = &newIntValue;
 					newMsgData._payloadSize = sizeof(int);
 
-					msgSent = m_protocolBridge.SendMessage(ROI_MatrixInput_Mute, newMsgData);
+					m_protocolBridge.SendMessage(ROI_MatrixInput_Mute, newMsgData);
 					paramSetsInTransit |= DCT_MatrixInputMute;
 				}
 			}
@@ -2081,7 +2072,6 @@ void Controller::timerCallback()
 		// Signal every timer tick to each processor instance.
 		moProcessor->Tick();
 
-		bool msgSent;
 		DataChangeType paramSetsInTransit = DCT_None;
 
 		newMsgData._addrVal._first = static_cast<juce::uint16>(moProcessor->GetMatrixOutputId());
@@ -2090,8 +2080,6 @@ void Controller::timerCallback()
 		// Iterate through all automation parameters.
 		for (int pIdx = MOI_ParamIdx_LevelMeterPostMute; pIdx < MOI_ParamIdx_MaxIndex; ++pIdx)
 		{
-			msgSent = false;
-
 			switch (pIdx)
 			{
 			case MOI_ParamIdx_LevelMeterPostMute:
@@ -2107,7 +2095,7 @@ void Controller::timerCallback()
 					newMsgData._payload = &newDualFloatValue;
 					newMsgData._payloadSize = sizeof(float);
 
-					msgSent = m_protocolBridge.SendMessage(ROI_MatrixOutput_LevelMeterPostMute, newMsgData);
+					m_protocolBridge.SendMessage(ROI_MatrixOutput_LevelMeterPostMute, newMsgData);
 					paramSetsInTransit |= DCT_MatrixOutputLevelMeter;
 				}
 			}
@@ -2126,7 +2114,7 @@ void Controller::timerCallback()
 					newMsgData._payload = &newDualFloatValue;
 					newMsgData._payloadSize = sizeof(float);
 
-					msgSent = m_protocolBridge.SendMessage(ROI_MatrixOutput_Gain, newMsgData);
+					m_protocolBridge.SendMessage(ROI_MatrixOutput_Gain, newMsgData);
 					paramSetsInTransit |= DCT_MatrixOutputGain;
 				}
 			}
@@ -2145,7 +2133,7 @@ void Controller::timerCallback()
 					newMsgData._payload = &newIntValue;
 					newMsgData._payloadSize = sizeof(int);
 
-					msgSent = m_protocolBridge.SendMessage(ROI_MatrixOutput_Mute, newMsgData);
+					m_protocolBridge.SendMessage(ROI_MatrixOutput_Mute, newMsgData);
 					paramSetsInTransit |= DCT_MatrixOutputMute;
 				}
 			}
@@ -3188,6 +3176,48 @@ bool Controller::SetBridgingMappingArea(ProtocolBridgingType bridgingType, int m
 	}
 }
 
+bool Controller::GetBridgingXYMessageCombined(ProtocolBridgingType bridgingType)
+{
+	switch (bridgingType)
+	{
+	case PBT_ADMOSC:
+		return m_protocolBridge.GetADMOSCBridgingXYMessageCombined();
+	case PBT_BlacktraxRTTrPM:
+	case PBT_YamahaOSC:
+	case PBT_GenericMIDI:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	case PBT_DS100:
+	case PBT_DAWPlugin:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
+bool Controller::SetBridgingXYMessageCombined(ProtocolBridgingType bridgingType, bool combined, bool dontSendNotification)
+{
+	switch (bridgingType)
+	{
+	case PBT_ADMOSC:
+		return m_protocolBridge.SetADMOSCBridgingXYMessageCombined(combined, dontSendNotification);
+	case PBT_BlacktraxRTTrPM:
+	case PBT_YamahaOSC:
+	case PBT_GenericMIDI:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	case PBT_DS100:
+	case PBT_DAWPlugin:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
 String Controller::GetBridgingInputDeviceIdentifier(ProtocolBridgingType bridgingType)
 {
 	switch (bridgingType)
@@ -3534,7 +3564,7 @@ bool Controller::SetBridgingDataSendingDisabled(ProtocolBridgingType bridgingTyp
  */
 bool Controller::LoadConfigurationFile(const File& fileToLoadFrom)
 {
-    if (!fileToLoadFrom.existsAsFile())
+    if (!fileToLoadFrom.existsAsFile() || !fileToLoadFrom.hasReadAccess())
     {
 		ShowUserErrorNotification(SEC_LoadConfig_CannotAccess);
         return false;

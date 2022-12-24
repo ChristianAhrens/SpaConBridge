@@ -30,6 +30,11 @@ namespace SpaConBridge
 
 
 /**
+ * Fwd. declarations
+ */
+class MultiSOSelectionVisualizerComponent;
+
+/**
  * SoundobjectSlider for displaying and controlling multiple sources.
  */
 class MultiSoundobjectSlider  : public JUCEAppBasics::DualPointMultitouchCatcherComponent
@@ -74,7 +79,13 @@ public:
 		double			_size;
 		String			_objectName;
 	};
-	typedef std::map<SoundobjectProcessorId, SoundobjectParameters> ParameterCache;
+	enum CacheFlag : std::uint16_t
+	{
+		None = 0x0000,
+		MultiSelection = 0x0001,
+	};
+	using CacheFlags = std::uint16_t;
+	typedef std::tuple<std::map<SoundobjectProcessorId, SoundobjectParameters>, CacheFlags> ParameterCache;
     
     struct MultiTouchPoints
     {
@@ -106,18 +117,21 @@ public:
 	void SetReverbSndGainEnabled(bool enabled);
 	bool IsSoundobjectNamesEnabled();
 	void SetSoundobjectNamesEnabled(bool enabled);
+	bool IsMuSelVisuEnabled();
+	void SetMuSelVisuEnabled(bool enabled);
 
 	bool HasBackgroundImage(MappingAreaId mappingAreaId);
-	const juce::Image* GetBackgroundImage(MappingAreaId mappingAreaId);
+	const juce::Image& GetBackgroundImage(MappingAreaId mappingAreaId);
 	void SetBackgroundImage(MappingAreaId mappingAreaId, const juce::Image& backgroundImage);
 	void RemoveBackgroundImage(MappingAreaId mappingAreaId);
 
 	bool IsHandlingSelectedSoundobjectsOnly();
 	void SetHandleSelectedSoundobjectsOnly(bool selectedOnly);
 
-	void UpdateParameters(const ParameterCache& positions);
+	void UpdateParameters(const ParameterCache& positions, bool externalTrigger = false);
 
-	void paintOverChildren (Graphics& g) override;
+protected:
+	void paint(Graphics& g) override;
 
 	void resized() override;
 
@@ -133,6 +147,12 @@ private:
     void updateMultiTouch(const juce::Point<int>& p1, const juce::Point<int>& p2);
     float getMultiTouchFactorValue();
 
+	void cacheObjectsXYPos(const std::vector<SoundobjectProcessorId>& objectIds);
+	void moveObjectsXYPos(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<int>& positionMoveDelta);
+	void finalizeObjectsXYPos(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<int>& positionMoveDelta);
+	void applyObjectsRotAndScale(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<float>& cog, const float rotation, const float scaling);
+	void finalizeObjectsRotAndScale(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<float>& cog, const float rotation, const float scaling);
+
 	SoundobjectProcessorId										m_currentlyDraggedId;				                        /**< ProcessorId of the currently selected knob, if any. */
 	std::vector<SoundobjectId>									m_highlightedIds;					                        /**< SourceIds of the currently highlighted knobs, if any. */
 	ParameterCache												m_cachedParameters;					                        /**< To save us from iterating over all Soundobject Processors at every click, cache their current parametervalues.
@@ -140,13 +160,18 @@ private:
 	bool														m_spreadEnabled{ false };			                        /**< Flag indication, if SO spread factor visu shall be painted for individual SOs. */
 	bool														m_reverbSndGainEnabled{ false };	                        /**< Flag indication, if SO reverb send gaind visu shall be painted for individual SOs. */
 	bool														m_soundObjectNamesEnabled{ false };	                        /**< Flag indication, if SO name strings shall be painted for individual SOs. */
+	bool														m_muselvisuEnabled{ false };								/**< Flag indication, if multiselection visualization shall be used. */
 	MappingAreaId												m_selectedMapping;					                        /**< Remember the last selected coordinate mapping for the multi-slider. */
-	std::map<MappingAreaId, std::unique_ptr<ImageComponent>>	m_backgroundImages;					                        /**< Map of background images for the four Mapping Areas that can be displayed. */
+
+	std::map<MappingAreaId, juce::Image>						m_backgroundImages;					                        /**< Map of background images for the four Mapping Areas that can be displayed. */
+
 	bool														m_handleSelectedOnly{ false };		                        /**< Indication if only selected SO shall be visualized. */
     MultiTouchPoints                                            m_multiTouchPoints;                                         /**< The two multitouch points currently tracked. */
     MultiTouchDirectionTarget                                   m_multiTouchTargetOperation{ MTDT_PendingInputDecision };   /**< Enum value defining how current multitouch input is interpreted. */
     std::map<SoundobjectProcessorId, float>                     m_multiTouchModNormalValues;								/**< Startvalues for multitouch multi-object modification, to be used as base for adding gesture deltas to create actual object values. */
 	std::map<SoundobjectProcessorId, juce::Point<float>>		m_objectPosMultiEditStartValues;							/**< Startvalues for editing multiple SO positions. */
+
+	std::unique_ptr<MultiSOSelectionVisualizerComponent>		m_multiselectionVisualizer;									/**< Helper component to do the painting and user interaction tracking for multiselection interaction. */
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSoundobjectSlider)
 };

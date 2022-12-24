@@ -60,7 +60,7 @@ class StaticObjectsPollingHelper : private Timer
 {
 public:
 	StaticObjectsPollingHelper();
-	StaticObjectsPollingHelper(int interval);
+	explicit StaticObjectsPollingHelper(int interval);
 	~StaticObjectsPollingHelper() override;
 
 	int GetInterval();
@@ -196,6 +196,9 @@ public:
 
 	int GetBridgingMappingArea(ProtocolBridgingType bridgingType);
 	bool SetBridgingMappingArea(ProtocolBridgingType bridgingType, int mappingAreaId, bool dontSendNotification = false);
+
+	bool GetBridgingXYMessageCombined(ProtocolBridgingType bridgingType);
+	bool SetBridgingXYMessageCombined(ProtocolBridgingType bridgingType, bool combined, bool dontSendNotification = false);
 
 	String GetBridgingInputDeviceIdentifier(ProtocolBridgingType bridgingType);
 	bool SetBridgingInputDeviceIdentifier(ProtocolBridgingType bridgingType, const String& inputDeviceIdentifier, bool dontSendNotification = false);

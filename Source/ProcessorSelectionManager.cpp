@@ -160,7 +160,7 @@ const std::vector<SoundobjectProcessorId> ProcessorSelectionManager::GetSelected
 	processorIds.reserve(m_currentSoundobjectProcessorSelection.size());
 	for (auto const& processorId : ctrl->GetSoundobjectProcessorIds())
 	{
-		auto const& processor = ctrl->GetSoundobjectProcessor(processorId);
+		auto const processor = ctrl->GetSoundobjectProcessor(processorId);
 		auto soundobjectProcessorId = processor->GetProcessorId();
 		if ((m_currentSoundobjectProcessorSelection.count(soundobjectProcessorId) > 0) && m_currentSoundobjectProcessorSelection.at(soundobjectProcessorId))
 			processorIds.push_back(soundobjectProcessorId);
@@ -333,7 +333,7 @@ const std::vector<MatrixInputProcessorId> ProcessorSelectionManager::GetSelected
 	processorIds.reserve(m_currentMatrixInputProcessorSelection.size());
 	for (auto const& processorId : ctrl->GetMatrixInputProcessorIds())
 	{
-		auto const& processor = ctrl->GetMatrixInputProcessor(processorId);
+		auto const processor = ctrl->GetMatrixInputProcessor(processorId);
 		auto sourceId = processor->GetMatrixInputId();
 		if ((m_currentMatrixInputProcessorSelection.count(sourceId) > 0) && m_currentMatrixInputProcessorSelection.at(sourceId))
 			processorIds.push_back(processor->GetProcessorId());
@@ -506,7 +506,7 @@ const std::vector<MatrixOutputProcessorId> ProcessorSelectionManager::GetSelecte
 	processorIds.reserve(m_currentMatrixOutputProcessorSelection.size());
 	for (auto const& processorId : ctrl->GetMatrixOutputProcessorIds())
 	{
-		auto const& processor = ctrl->GetMatrixOutputProcessor(processorId);
+		auto const processor = ctrl->GetMatrixOutputProcessor(processorId);
 		auto matrixOutputProcessorId = processor->GetProcessorId();
 		if ((m_currentMatrixOutputProcessorSelection.count(matrixOutputProcessorId) > 0) && m_currentMatrixOutputProcessorSelection.at(matrixOutputProcessorId))
 			processorIds.push_back(matrixOutputProcessorId);

@@ -45,7 +45,7 @@ class MatrixInputProcessor :
 	public AppConfiguration::XmlConfigurableElement
 {
 public:
-	MatrixInputProcessor(bool insertToConfig = true);
+	explicit MatrixInputProcessor(bool insertToConfig = true);
 	~MatrixInputProcessor() override;
 
 	int GetProcessorId() const;

@@ -75,6 +75,7 @@ SettingsPageComponent::SettingsPageComponent()
 
 	// The component containing configuration sections, etc. to be shown in a viewport for scrolling capabilities
 	m_settingsComponent = std::make_unique<SettingsSectionsComponent>();
+	m_settingsComponent->onContentSizesChangedCallback = [this] { resized(); };
 	m_settingsViewport = std::make_unique<Viewport>();
 	m_settingsViewport->setViewedComponent(m_settingsComponent.get(), false);
 	addAndMakeVisible(m_settingsViewport.get());

@@ -105,7 +105,7 @@ void MatrixInputTableComponent::RecreateTableRowIds()
  */
 void MatrixInputTableComponent::UpdateTable()
 {
-	auto const& selMgr = ProcessorSelectionManager::GetInstance();
+	auto const selMgr = ProcessorSelectionManager::GetInstance();
 	if (selMgr)
 	{
 		auto selectedProcessorIds = selMgr->GetSelectedMatrixInputProcessorIds();
@@ -148,7 +148,7 @@ int MatrixInputTableComponent::getNumRows()
  */
 void MatrixInputTableComponent::selectedRowsChanged(int lastRowSelected)
 {
-	auto const& selMgr = ProcessorSelectionManager::GetInstance();
+	auto const selMgr = ProcessorSelectionManager::GetInstance();
 	if (selMgr)
 		selMgr->SetSelectedMatrixInputProcessorIds(GetProcessorIdsForRows(GetSelectedRows()), true);
 

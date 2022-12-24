@@ -192,6 +192,17 @@ void HeaderWithElmListComponent::setElementsActiveState(bool toggleState)
 }
 
 /**
+ * Helper to get the accumulated state if this instance doesn't use 
+ * active toggling or is actually currently toggled active.
+ * Both lead to all elements being displayed and the component being active.
+ * @return The accumulated state as described.
+ */
+bool HeaderWithElmListComponent::IsActive()
+{
+	return m_toggleState || !m_hasActiveToggle;
+}
+
+/**
  * Callback method for when active/deactive toggle was triggered
  */
 void HeaderWithElmListComponent::onToggleActive()
@@ -237,6 +248,7 @@ void HeaderWithElmListComponent::setHelpUrl(const URL& helpUrl)
  */
 void HeaderWithElmListComponent::setBackgroundDecorationText(const std::string& text)
 {
+	m_backgroundDecorationText.clear();
 	for (auto i = 0; i < 200; i++)
 		m_backgroundDecorationText.append(text + "	");
 }
@@ -402,33 +414,46 @@ void HeaderWithElmListComponent::resized()
 		.withAlignSelf(FlexItem::AlignSelf::flexStart)
 		.withWidth(headerHeight)
 		.withHeight(headerHeight));
-	fb.items.add(
+
+	if (IsActive())
+	{
+		fb.items.add(
 		FlexItem(headerFb)
 			.withHeight(headerHeight)
 			.withMargin(FlexItem::Margin(headerMargin, headerMargin, headerMargin, headerMargin)));
-	// Add all the componentes that are flagged to be included in layouting
-	for (auto const& component : m_components)
-	{
-		auto includeInLayout = component.second._includeInLayout;
-		auto itemVerticalSpan = component.second._verticalSpan;
-		auto flexItemHeight = (itemHeight * itemVerticalSpan) + (2 * itemMargin * (itemVerticalSpan - 1));
-		if (includeInLayout)
+
+		// Add all the componentes that are flagged to be included in layouting
+		for (auto const& component : m_components)
 		{
-			fb.items.add(FlexItem(*component.first.get())
-				.withHeight(flexItemHeight)
-				.withMaxWidth(m_layoutItemWidth)
-				.withMargin(FlexItem::Margin(itemMargin, itemMargin, itemMargin, 130 + itemMargin)));
-			itemCount += itemVerticalSpan;
+			auto includeInLayout = component.second._includeInLayout;
+			auto itemVerticalSpan = component.second._verticalSpan;
+			auto flexItemHeight = (itemHeight * itemVerticalSpan) + (2 * itemMargin * (itemVerticalSpan - 1));
+			if (includeInLayout)
+			{
+				fb.items.add(FlexItem(*component.first.get())
+					.withHeight(flexItemHeight)
+					.withMaxWidth(m_layoutItemWidth)
+					.withMargin(FlexItem::Margin(itemMargin, itemMargin, itemMargin, 130 + itemMargin)));
+				itemCount += itemVerticalSpan;
+			}
 		}
 	}
 
 	// Set the accumulated required size of the contents as new component size
-	auto bounds = getLocalBounds();
+
 	auto totalActiveToggleHeight = static_cast<int>(m_hasActiveToggle ? (activeToggleHeight + (2 * activeToggleMargin)) : 0);
 	auto totalHeaderHeight = static_cast<int>(headerHeight + (2 * headerMargin));
 	auto totalItemsHeight = static_cast<int>((itemHeight + (2 * itemMargin)) * itemCount);
-	bounds.setHeight(totalActiveToggleHeight + totalHeaderHeight + totalItemsHeight + static_cast<int>(itemMargin));
-	setSize(bounds.getWidth(), bounds.getHeight());
+
+	auto totalHeight = static_cast<int>(itemMargin);
+	if (IsActive())
+		totalHeight += totalHeaderHeight;
+	totalHeight += totalActiveToggleHeight;
+	totalHeight += totalItemsHeight;
+
+	auto bounds = getLocalBounds();
+	bounds.setHeight(totalHeight);
+	setSize(getLocalBounds().getWidth(), bounds.getHeight());
 
 	// Trigger the actual layouting based on the calculated bounds
 	fb.performLayout(bounds);

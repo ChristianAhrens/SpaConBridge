@@ -46,10 +46,17 @@ public:
 	IPAddressDisplay();
 
 	void addPopupMenuItems(PopupMenu& menuToAddTo, const MouseEvent* mouseClickEvent) override;
+    
+    const std::vector<juce::IPAddress> getRelevantIPs();
+    
+protected:
+    void mouseDown(const MouseEvent& e) override;
 
 private:
 	bool IsMultiCast(const juce::IPAddress& address);
 	bool IsUPnPDiscoverAddress(const juce::IPAddress& address);
+    bool IsLoopbackAddress(const juce::IPAddress& address);
+    bool IsBroadcastAddress(const juce::IPAddress& address);
 };
 
 
@@ -94,6 +101,9 @@ public:
 
 	//==========================================================================
 	void setSettingsSectionActiveState(HeaderWithElmListComponent* settingsSection, bool activeState);
+
+	//==============================================================================
+	std::function<void()>	onContentSizesChangedCallback;
 
 private:
 	void updateAvailableMidiInputDevices();
@@ -272,6 +282,10 @@ private:
 	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_ADMOSCInvertYButton;
 	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_ADMOSCSwapXYButton;
 	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_ADMOSCDisableSendingButton;
+	std::unique_ptr<JUCEAppBasics::SplitButtonComponent>		m_ADMOSCxyMsgSndModeButton;
+	std::unique_ptr<Label>										m_ADMOSCxyMsgSndLabel;
+	const std::vector<std::string>								m_ADMOSCxyMsgSndModes{ "Separate x, y messages", "Combined xy message" };
+	std::map<std::string, uint64>								m_ADMOSCxyMsgSndModeButtonIds;
 
 	// Yamaha OSC settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_YamahaOSCBridgingSettings;

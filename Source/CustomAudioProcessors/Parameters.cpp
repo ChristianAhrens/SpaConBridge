@@ -72,6 +72,9 @@ GestureManagedAudioParameterFloat::GestureManagedAudioParameterFloat(String para
 
 	m_inGuiGesture = false;
 	m_ticksSinceLastChange = GESTURE_LENGTH_IN_TICKS + 1;
+
+	m_lastValue[0] = 0.0f;
+	m_lastValue[1] = 0.0f;
 }
 
 /**
@@ -208,6 +211,9 @@ GestureManagedAudioParameterInt::GestureManagedAudioParameterInt(String paramete
 {
 	m_inGuiGesture = false;
 	m_ticksSinceLastChange = GESTURE_LENGTH_IN_TICKS + 1;
+
+	m_lastValue[0] = 0;
+	m_lastValue[1] = 0;
 }
 
 /**
@@ -351,6 +357,9 @@ GestureManagedAudioParameterChoice::GestureManagedAudioParameterChoice(	const St
 	: AudioParameterChoice(parameterID, name, choices, defaultItemIndex, attributes)
 {
 	m_ticksSinceLastChange = GESTURE_LENGTH_IN_TICKS + 1;
+
+	m_lastIndex[0] = 0;
+	m_lastIndex[1] = 0;
 }
 
 /**

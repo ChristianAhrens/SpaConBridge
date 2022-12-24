@@ -93,6 +93,8 @@ public:
 	void SetMultiSoundobjectReverbEnabled(bool enabled, bool dontSendNotification);
 	bool IsMultiSoundobjectSpreadEnabled();
 	void SetMultiSoundobjectSpreadEnabled(bool enabled, bool dontSendNotification);
+	bool IsMultiSoundobjectMuSelVisuEnabled();
+	void SetMultiSoundobjectMuSelVisuEnabled(bool enabled, bool dontSendNotification);
 
 	void LoadImageForMappingFromFile(MappingAreaId mappingArea, const File& file);
 	void RemoveImageForMapping(MappingAreaId mappingArea);

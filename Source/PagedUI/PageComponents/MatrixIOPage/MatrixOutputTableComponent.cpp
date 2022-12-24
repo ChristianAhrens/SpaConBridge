@@ -105,7 +105,7 @@ void MatrixOutputTableComponent::RecreateTableRowIds()
  */
 void MatrixOutputTableComponent::UpdateTable()
 {
-	auto const& selMgr = ProcessorSelectionManager::GetInstance();
+	auto const selMgr = ProcessorSelectionManager::GetInstance();
 	if (selMgr)
 	{
 		auto selectedProcessorIds = selMgr->GetSelectedMatrixOutputProcessorIds();
@@ -148,7 +148,7 @@ int MatrixOutputTableComponent::getNumRows()
  */
 void MatrixOutputTableComponent::selectedRowsChanged(int lastRowSelected)
 {
-	auto const& selMgr = ProcessorSelectionManager::GetInstance();
+	auto const selMgr = ProcessorSelectionManager::GetInstance();
 	if (selMgr)
 		selMgr->SetSelectedMatrixOutputProcessorIds(GetProcessorIdsForRows(GetSelectedRows()), true);
 

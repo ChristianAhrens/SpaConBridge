@@ -42,7 +42,16 @@ namespace SpaConBridge
 IPAddressDisplay::IPAddressDisplay()
 	: TextEditor()
 {
-	setText(juce::IPAddress::getLocalAddress().toString());
+    auto ip = juce::IPAddress::getLocalAddress();
+    if (!IsMultiCast(ip) && !IsUPnPDiscoverAddress(ip) && !IsLoopbackAddress(ip) && !IsBroadcastAddress(ip))
+        setText(juce::IPAddress::getLocalAddress().toString());
+    else
+    {
+        auto IPs = getRelevantIPs();
+        if (!IPs.empty())
+            setText(IPs.begin()->toString());
+    }
+    
 	if (juce::IPAddress::getAllAddresses().size() > 1)
 		setPopupMenuEnabled(true);
 	setEnabled(false);
@@ -59,16 +68,33 @@ void IPAddressDisplay::addPopupMenuItems(PopupMenu& menuToAddTo, const MouseEven
 	ignoreUnused(mouseClickEvent);
 
 	// ip address edit tooltip with all other ips than primary if multiple present in system
-	auto localIpAddresses = juce::IPAddress::getAllAddresses();
-	for (auto const& ip : localIpAddresses)
+	auto relevantIpAddresses = getRelevantIPs();
+	for (auto const& ip : relevantIpAddresses)
 	{
-		auto bca = juce::IPAddress::getInterfaceBroadcastAddress(juce::IPAddress::getLocalAddress());
-		if (ip != juce::IPAddress::getLocalAddress() && !IsMultiCast(ip) && !IsUPnPDiscoverAddress(ip))
+		if (ip.toString() != getText())
 		{
 			menuToAddTo.addItem(ip.toString(), false, false, std::function<void()>());
 		}
 	}
 	setEnabled(false);
+}
+
+/**
+ * Helper method that filters results of juce::IPAddress::getAllAddresses to only return the IPs that are in fact of interest to the user on UI.
+ * @return  The list of relevant IPs
+ */
+const std::vector<juce::IPAddress> IPAddressDisplay::getRelevantIPs()
+{
+    auto relevantIPs = std::vector<juce::IPAddress>();
+    
+    auto localIpAddresses = juce::IPAddress::getAllAddresses();
+    for (auto const& ip : localIpAddresses)
+    {
+        if (!IsMultiCast(ip) && !IsUPnPDiscoverAddress(ip) && !IsLoopbackAddress(ip) && !IsBroadcastAddress(ip))
+            relevantIPs.push_back(ip);
+    }
+    
+    return relevantIPs;
 }
 
 /**
@@ -89,6 +115,54 @@ bool IPAddressDisplay::IsMultiCast(const juce::IPAddress& address)
 bool IPAddressDisplay::IsUPnPDiscoverAddress(const juce::IPAddress& address)
 {
 	return address.toString().contains("239.255.255.250");
+}
+
+/**
+ * Helper method to test if a given IP is loopback ip
+ * @param    address        The address to test
+ * @return    True if the ip is the loopback address, false if not
+ */
+bool IPAddressDisplay::IsLoopbackAddress(const juce::IPAddress& address)
+{
+    return address.toString().contains("127.0.0.1");
+}
+
+/**
+ * Helper method to test if a given IP is broadcast ip
+ * @param    address        The address to test
+ * @return    True if the ip is the broadcast address, false if not
+ */
+bool IPAddressDisplay::IsBroadcastAddress(const juce::IPAddress& address)
+{
+    return juce::IPAddress::getInterfaceBroadcastAddress(juce::IPAddress::getLocalAddress()) == address;
+}
+
+/**
+ * Reimplemented mouse click handling to trigger popup even when clicked with primary or touch.
+ * @param   e   The mouse event that occured.
+ */
+void IPAddressDisplay::mouseDown(const MouseEvent& e)
+{
+    if (e.originalComponent != this)
+        return;
+    
+    auto eventCopy = MouseEvent(e.source,
+                                e.position,
+                                e.mods.withFlags(juce::ModifierKeys::popupMenuClickModifier), // fake a popup menu click, to trigger the popup even on primary click (or touch)
+                                e.pressure,
+                                e.orientation,
+                                e.rotation,
+                                e.tiltX,
+                                e.tiltY,
+                                e.eventComponent,
+                                e.originalComponent,
+                                e.eventTime,
+                                e.mouseDownPosition,
+                                e.mouseDownTime,
+                                e.getNumberOfClicks(),
+                                e.mouseWasDraggedSinceMouseDown());
+                    
+    TextEditor::mouseDown(eventCopy);
 }
 
 
@@ -342,6 +416,7 @@ void SettingsSectionsComponent::createDAWPluginSettingsSection()
 {
 	// DAWPlugin settings section
 	m_DAWPluginBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
+	m_DAWPluginBridgingSettings->setBackgroundDecorationText("Alpha");
 	m_DAWPluginBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_DAWPlugin) + " Bridging");
 	m_DAWPluginBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_DAWPlugin) + " Bridging Settings");
 	m_DAWPluginBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/DAWPlugin.md"));
@@ -707,7 +782,7 @@ void SettingsSectionsComponent::createADMOSCSettingsSection()
 {
 	// ADM-OSC settings section
 	m_ADMOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
-	m_ADMOSCBridgingSettings->setBackgroundDecorationText("Alpha");
+	m_ADMOSCBridgingSettings->setBackgroundDecorationText("Beta");
 	m_ADMOSCBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_ADMOSC) + " Bridging");
 	m_ADMOSCBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_ADMOSC) + " Bridging Settings");
 	m_ADMOSCBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/ADMOSC.md"));
@@ -783,6 +858,17 @@ void SettingsSectionsComponent::createADMOSCSettingsSection()
 	m_ADMOSCDisableSendingButton->setClickingTogglesState(true);
 	m_ADMOSCDisableSendingButton->addListener(this);
 	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCDisableSendingButton.get(), true, false);
+
+	m_ADMOSCxyMsgSndModeButton = std::make_unique<JUCEAppBasics::SplitButtonComponent>();
+	m_ADMOSCxyMsgSndModeButton->addListener(this);
+	m_ADMOSCxyMsgSndModeButtonIds[m_ADMOSCxyMsgSndModes[0]] = m_ADMOSCxyMsgSndModeButton->addButton(m_ADMOSCxyMsgSndModes[0]);
+	m_ADMOSCxyMsgSndModeButtonIds[m_ADMOSCxyMsgSndModes[1]] = m_ADMOSCxyMsgSndModeButton->addButton(m_ADMOSCxyMsgSndModes[1]);
+	m_ADMOSCxyMsgSndModeButton->setButtonDown(m_ADMOSCxyMsgSndModeButtonIds[m_ADMOSCxyMsgSndModes[0]]);
+	m_ADMOSCxyMsgSndLabel = std::make_unique<Label>("ADMxyMessageModeButton", "XY msg. mode");
+	m_ADMOSCxyMsgSndLabel->setJustificationType(Justification::centred);
+	m_ADMOSCxyMsgSndLabel->attachToComponent(m_ADMOSCxyMsgSndModeButton.get(), true);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCxyMsgSndLabel.get(), false, false);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCxyMsgSndModeButton.get(), true, false);
 
 	m_ADMOSCBridgingSettings->resized();
 }
@@ -1025,6 +1111,19 @@ void SettingsSectionsComponent::buttonClicked(JUCEAppBasics::SplitButtonComponen
 		}
 	}
 
+	// ADM OSC settings section
+	else if (m_ADMOSCxyMsgSndModeButton && m_ADMOSCxyMsgSndModeButton.get() == button)
+	{
+		if (m_ADMOSCxyMsgSndModeButtonIds[m_ADMOSCxyMsgSndModes[0]] == buttonId) // separate x and y messages
+		{
+			ctrl->SetBridgingXYMessageCombined(PBT_ADMOSC, false);
+		}
+		else if (m_ADMOSCxyMsgSndModeButtonIds[m_ADMOSCxyMsgSndModes[1]] == buttonId) // combined xy message
+		{
+			ctrl->SetBridgingXYMessageCombined(PBT_ADMOSC, true);
+		}
+	}
+
 	// return without config update trigger if the button was unknown
 	else
 		return;
@@ -1217,6 +1316,11 @@ void SettingsSectionsComponent::setSettingsSectionActiveState(HeaderWithElmListC
 		ctrl->SetActiveProtocolBridging(ctrl->GetActiveProtocolBridging() | sectionType);
 	else
 		ctrl->SetActiveProtocolBridging(ctrl->GetActiveProtocolBridging() & ~sectionType);
+
+	resized();
+
+	if (onContentSizesChangedCallback)
+		onContentSizesChangedCallback();
 }
 
 /**
@@ -1644,6 +1748,17 @@ void SettingsSectionsComponent::processUpdatedADMOSCConfig()
 		m_ADMOSCSwapXYButton->setToggleState(1 == ctrl->GetBridgingXYAxisSwapped(PBT_ADMOSC), dontSendNotification);
 	if (m_ADMOSCDisableSendingButton)
 		m_ADMOSCDisableSendingButton->setToggleState(1 == ctrl->GetBridgingDataSendingDisabled(PBT_ADMOSC), dontSendNotification);
+
+	if (m_ADMOSCxyMsgSndModeButton)
+	{
+		auto xyMessageCombined = ctrl->GetBridgingXYMessageCombined(PBT_ADMOSC);
+
+		auto newActiveButtonId = m_ADMOSCxyMsgSndModeButtonIds[m_ADMOSCxyMsgSndModes[0]];
+		if (xyMessageCombined)
+			newActiveButtonId = m_ADMOSCxyMsgSndModeButtonIds[m_ADMOSCxyMsgSndModes[1]];
+
+		m_ADMOSCxyMsgSndModeButton->setButtonDown(newActiveButtonId);
+	}
 }
 
 /**

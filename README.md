@@ -162,6 +162,8 @@ The selection in Sound Object table and the currently active tab can be external
 
 The table control bar contains a toggle button that allows switching between single- and multiselection mode of the table. Depending on the mode, either the single sound object editor is shown on the right (horizontal layout) or below (vertical layout) or the multi sound object visualization area is shown. In case the latter is shown, only those sound objects that are selected in the table are visible.
 
+A dropdown menu below the multiselection visualization area can be used to store the current multiselection with a given name for later recalling. All stored multiselections are listed in the dropdown menu for recalling and can also be cleared here.
+
 
 <a name="twodimensionalpositionslider" />
 
@@ -193,17 +195,21 @@ Visualization of the Spread factor per SoundObject can be activated with a toggl
 
 ![Showreel.011.png](Resources/Documentation/Showreel/Showreel.011.png "Multislider Spread Multitouch")
 
-
 On devices that support multitouch input, a vertical pinch gesture can be used to modify the Spread Factor value. The gesture should be performed by first touching the sound object that shall be modified with a finger and then use a second finger to drag up or down. Dragging up increases the value, down decreases it.
 
 Alternatively the mode can be used with a keyboard+mouse setup as well by clicking on the sound object to be modified, then pressing the ALT key on the keyboard and dragging the mouse while still pressing the primary mousekey.
+
+![Showreel.012.png](Resources/Documentation/Showreel/Showreel.012.png "Multislider extended multiselection interaction")
+
+Extended Sound Object multiselection visualization and interaction can be activated with a toggle button in the lower button bar.
+When enabled, the currently active multiselection of Sound Objects can be moved, rotated and scaled using the two interaction-handles. The Sound Objects part of the currently active multiselection are visualized with connecting lines.
 
 
 <a name="matrixiotable" />
 
 ### Matrix Inputs/Outputs Table
 
-![Showreel.012.png](Resources/Documentation/Showreel/Showreel.012.png "Matrix IO Table Overview")
+![Showreel.013.png](Resources/Documentation/Showreel/Showreel.013.png "Matrix IO Table Overview")
 
 On the left side (landscape) or top (portrait) of the page, a table for visualization and control of DS100 matrix input channels is shown and on the right side or bottom of the page, a table for matrix outputs.
 Every row in both of the tables corresponds to an active Matrix Input or Output, meaning that it is shown on UI and its values can be received from DS100. This does not affect the pure protocol bridging in underlying module. E.g. in case an external OSC input sends new gain values for a channel that is not present in the table, the values will still be bridged to DS100. This needs to be kept in mind if muting the input data from a protocol for a Matrix Input/Output is desired!
@@ -213,7 +219,7 @@ Every row in both of the tables corresponds to an active Matrix Input or Output,
 
 ### Scenes
 
-![Showreel.013.png](Resources/Documentation/Showreel/Showreel.013.png "Scenes")
+![Showreel.014.png](Resources/Documentation/Showreel/Showreel.014.png "Scenes")
 
 Scenes page constantly reads the currently active Scene Index, Name and Comment from DS100 (low refresh rate) and displays the values in text editors.
 
@@ -228,7 +234,7 @@ Direct recall entries must be unique, therefor a direct recall entry for a Scene
 
 ### En-Space
 
-![Showreel.014.png](Resources/Documentation/Showreel/Showreel.014.png "En-Space")
+![Showreel.015.png](Resources/Documentation/Showreel/Showreel.015.png "En-Space")
 
 En-Space page constantly reads the currently active room id, predelay factor and rear level values and displays them on UI.
 The values can be modified by the user through given UI elements.
@@ -238,7 +244,7 @@ The values can be modified by the user through given UI elements.
 
 ### Statistics
 
-![Showreel.015.png](Resources/Documentation/Showreel/Showreel.015.png "Protocol Bridging Statistics")
+![Showreel.016.png](Resources/Documentation/Showreel/Showreel.016.png "Protocol Bridging Statistics")
 
 Statistics page shows a graphical representation for current bridging protocol load (messages per second) for every active protocol and a tabular log view of the last 200 received messages. The graphical representation shown describes the raw incoming data rate only and contains no information on actual bridging.
 Both plot and log are refreshed at a small rate to keep the performance impact on the host system resources low.
@@ -248,9 +254,9 @@ Both plot and log are refreshed at a small rate to keep the performance impact o
 
 ### Settings
 
-![Showreel.0016.png](Resources/Documentation/Showreel/Showreel.016.png "General Settings")
+![Showreel.0017.png](Resources/Documentation/Showreel/Showreel.017.png "General Settings")
 
-![Showreel.0017.png](Resources/Documentation/Showreel/Showreel.017.png "General Settings - Windows kiosk mode")
+![Showreel.0018.png](Resources/Documentation/Showreel/Showreel.018.png "General Settings - Windows kiosk mode")
 
 Settings page is structured in sections.
 

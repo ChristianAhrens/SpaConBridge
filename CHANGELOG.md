@@ -4,12 +4,18 @@ All notable changes to SpaConBridge will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.8.7] - 2022-12-24
 ### Added
+- Added optional extended soundobject multiselection interaction on MultiSoundobject UI
+- Added option to ADM OSC bridging settings to select if xy coords shall be sent as combined or individual messages
 
 ### Changed
+- Changed unused settings page sections to be in a minimized collapsed state when unused
+- Promoted ADM OSC bridging to Beta instead of Alpha feature
+- Degraded DAW plugin protocol bridging to Alpha feature, since several issues have been revealed and require further investigation
 
 ### Fixed
+- Fixed sending ADM coordinate system announcement message only once when connection is established
 
 ## [0.8.6] - 2022-11-20
 ### Added

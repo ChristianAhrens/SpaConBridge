@@ -56,12 +56,12 @@ DelayedRecursiveFunctionCaller::DelayedRecursiveFunctionCaller(std::function<voi
  */
 DelayedRecursiveFunctionCaller::DelayedRecursiveFunctionCaller(std::function<void(int)> intFunction, const std::vector<int>& intRecursionContainer, bool selfDestroy, int callbackDelayMs)
 	: m_intFunction(intFunction),
+      m_recursionCounter(0),
 	  m_intRecursionContainer(intRecursionContainer),
-	  m_recursionCount(static_cast<int>(m_intRecursionContainer.size())),
-	  m_recursionCounter(0),
 	  m_callbackDelayMs(callbackDelayMs),
 	  m_selfDestroy(selfDestroy)
 {
+    m_recursionCount = static_cast<int>(m_intRecursionContainer.size());
 }
 
 /**

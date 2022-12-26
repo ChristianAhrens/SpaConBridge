@@ -1,6 +1,6 @@
 ## Generic MIDI bridging settings
 
-![Showreel.023.png](../Showreel/Showreel.023.png "Generic MIDI bridging settings")
+![Showreel.024.png](../Showreel/Showreel.024.png "Generic MIDI bridging settings")
 
 Assignment of mapping between MIDI input commmands and internal Soundscape parameters is done using the provided 'MIDI learner' training functionality.
 This can be activated clicking on the learner trigger buttons and brings up a popup menu that lists the incoming MIDI data preprocessed into usable mapping types. Clearing the current assignment is possible with the dedicated Clear button per assignment.
@@ -12,7 +12,7 @@ This can be activated clicking on the learner trigger buttons and brings up a po
 
 As soon as the desired MIDI mapping is learned, it can be selected from the listing and in consequence is assigned to the remote object. MIDI mappings currently cannot be cleared but only new ones selected as replacement. Deactivating the Generic MIDI bridging protocol and reactivating can be used as workaround, since this clears all learned assignments.
 
-![Showreel.024.png](../Showreel/Showreel.024.png "Generic MIDI overlay for Scene Index to MIDI assignment mapping")
+![Showreel.025.png](../Showreel/Showreel.025.png "Generic MIDI overlay for Scene Index to MIDI assignment mapping")
 
 For internal Soundscape parameter 'Scene Recall' that refers to a dedicated Scene Index value (1.00 ... 99.999), a mapping between Scene Index values and MIDI input commands can be setup in an overlay UI accessible by clicking the 'Edit assignments' button for 'Recall Scene' Soundscape parameter.
 

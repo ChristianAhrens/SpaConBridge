@@ -1,8 +1,8 @@
 ## ADM OSC bridging settings
 
-**ADM OSC bridging support is purely experimental - if you are interested in this functionality and have the means to try it out, feedback is welcome!**
+**ADM OSC bridging support is in a development testing state - if you are interested in this functionality and have the means to try it out, feedback is welcome!**
 
-![Showreel.026.png](../Showreel/Showreel.026.png "ADM OSC bridging settings")
+![Showreel.027.png](../Showreel/Showreel.027.png "ADM OSC bridging settings")
 
 
 ### Implemented OSC messages

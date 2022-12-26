@@ -2,7 +2,7 @@
 
 **Yamaha OSC bridging support is purely experimental - if the commands as described below can actually be used in PM series consoles has yet to be verified/tested. If you are interested in this functionality and have the means to try it out, feedback is welcome!**
 
-![Showreel.025.png](../Showreel/Showreel.025.png "Yamaha OSC bridging settings")
+![Showreel.026.png](../Showreel/Showreel.026.png "Yamaha OSC bridging settings")
 
 
 ### Implemented OSC messages

@@ -416,7 +416,6 @@ void SettingsSectionsComponent::createDAWPluginSettingsSection()
 {
 	// DAWPlugin settings section
 	m_DAWPluginBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
-	m_DAWPluginBridgingSettings->setBackgroundDecorationText("Alpha");
 	m_DAWPluginBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_DAWPlugin) + " Bridging");
 	m_DAWPluginBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_DAWPlugin) + " Bridging Settings");
 	m_DAWPluginBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/DAWPlugin.md"));
@@ -432,6 +431,9 @@ void SettingsSectionsComponent::createDAWPluginSettingsSection()
 	m_DAWPluginIpAddressLabel->attachToComponent(m_DAWPluginIpAddressEdit.get(), true);
 	m_DAWPluginBridgingSettings->addComponent(m_DAWPluginIpAddressLabel.get(), false, false);
 	m_DAWPluginBridgingSettings->addComponent(m_DAWPluginIpAddressEdit.get(), true, false);
+
+	m_DAWPluginDifferentHostInfoLabel = std::make_unique<Label>("DAWPluginDifferentHostInfo1Label", "Note: " + GetProtocolBridgingNiceName(PBT_DAWPlugin) + " cannot run on same host as " + JUCEApplicationBase::getInstance()->getApplicationName());
+	m_DAWPluginBridgingSettings->addComponent(m_DAWPluginDifferentHostInfoLabel.get(), true, false, 2);
 
 	m_DAWPluginBridgingSettings->resized();
 }

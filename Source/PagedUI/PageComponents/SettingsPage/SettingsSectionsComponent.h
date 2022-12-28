@@ -204,6 +204,7 @@ private:
 	std::unique_ptr<HeaderWithElmListComponent>					m_DAWPluginBridgingSettings;
 	std::unique_ptr<TextEditor>									m_DAWPluginIpAddressEdit;
 	std::unique_ptr<Label>										m_DAWPluginIpAddressLabel;
+	std::unique_ptr<Label>										m_DAWPluginDifferentHostInfoLabel;
 
 	// RTTrPM settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_RTTrPMBridgingSettings;

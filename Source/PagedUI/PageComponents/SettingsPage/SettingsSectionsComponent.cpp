@@ -192,6 +192,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	createGenericMIDISettingsSection();
 	createADMOSCSettingsSection();
 	createYamahaOSCSettingsSection();
+	createRemapOSCSettingsSection();
 }
 
 /**
@@ -876,6 +877,51 @@ void SettingsSectionsComponent::createADMOSCSettingsSection()
 }
 
 /**
+ * Helper method to create and setup objects for Remap OSC settings section
+ */
+void SettingsSectionsComponent::createRemapOSCSettingsSection()
+{
+	// RemapOSC settings section
+	m_RemapOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
+	m_RemapOSCBridgingSettings->setBackgroundDecorationText("Alpha");
+	m_RemapOSCBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_RemapOSC) + " Bridging");
+	m_RemapOSCBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_RemapOSC) + " Bridging Settings");
+	m_RemapOSCBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/RemapOSC.md"));
+	m_RemapOSCBridgingSettings->setHasActiveToggle(true);
+	m_RemapOSCBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
+	addAndMakeVisible(m_RemapOSCBridgingSettings.get());
+
+	m_RemapOSCIpAddressEdit = std::make_unique<TextEditor>();
+	m_RemapOSCIpAddressEdit->addListener(this);
+	m_RemapOSCIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
+	m_RemapOSCIpAddressLabel = std::make_unique<Label>("RemapOSCIpAddressEdit", "IP Address");
+	m_RemapOSCIpAddressLabel->setJustificationType(Justification::centred);
+	m_RemapOSCIpAddressLabel->attachToComponent(m_RemapOSCIpAddressEdit.get(), true);
+	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCIpAddressLabel.get(), false, false);
+	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCIpAddressEdit.get(), true, false);
+
+	m_RemapOSCListeningPortEdit = std::make_unique<TextEditor>();
+	m_RemapOSCListeningPortEdit->addListener(this);
+	m_RemapOSCListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
+	m_RemapOSCListeningPortLabel = std::make_unique<Label>("RemapOSCListeningPortEdit", "Listening Port");
+	m_RemapOSCListeningPortLabel->setJustificationType(Justification::centred);
+	m_RemapOSCListeningPortLabel->attachToComponent(m_RemapOSCListeningPortEdit.get(), true);
+	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCListeningPortLabel.get(), false, false);
+	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCListeningPortEdit.get(), true, false);
+
+	m_RemapOSCRemotePortEdit = std::make_unique<TextEditor>();
+	m_RemapOSCRemotePortEdit->addListener(this);
+	m_RemapOSCRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
+	m_RemapOSCRemotePortLabel = std::make_unique<Label>("RemapOSCRemotePortEdit", "Remote Port");
+	m_RemapOSCRemotePortLabel->setJustificationType(Justification::centred);
+	m_RemapOSCRemotePortLabel->attachToComponent(m_RemapOSCRemotePortEdit.get(), true);
+	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCRemotePortLabel.get(), false, false);
+	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCRemotePortEdit.get(), true, false);
+
+	m_RemapOSCBridgingSettings->resized();
+}
+
+/**
  * Class destructor.
  */
 SettingsSectionsComponent::~SettingsSectionsComponent()
@@ -910,7 +956,8 @@ void SettingsSectionsComponent::resized()
 		+ (m_RTTrPMBridgingSettings->getHeight() + (2 * margin))
 		+ (m_GenericMIDIBridgingSettings->getHeight() + (2 * margin))
 		+ (m_ADMOSCBridgingSettings->getHeight() + (2 * margin))
-		+ (m_YamahaOSCBridgingSettings->getHeight() + (2 * margin));
+		+ (m_YamahaOSCBridgingSettings->getHeight() + (2 * margin))
+		+ (m_RemapOSCBridgingSettings->getHeight() + (2 * margin));
 
 	auto bounds = getLocalBounds();
 	if (bounds.getWidth() < minWidth || bounds.getHeight() < minHeight)
@@ -953,6 +1000,9 @@ void SettingsSectionsComponent::resized()
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
 		FlexItem(*m_YamahaOSCBridgingSettings.get())
 			.withHeight(static_cast<float>(m_YamahaOSCBridgingSettings->getHeight()))
+			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
+		FlexItem(*m_RemapOSCBridgingSettings.get())
+			.withHeight(static_cast<float>(m_RemapOSCBridgingSettings->getHeight()))
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)) });
 	fb.performLayout(bounds);
 }
@@ -1215,6 +1265,16 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 	else if (m_YamahaOSCListeningPortEdit && m_YamahaOSCListeningPortEdit.get() == &editor)
 		ctrl->SetBridgingListeningPort(PBT_YamahaOSC, m_YamahaOSCListeningPortEdit->getText().getIntValue());
 
+	// Remap OSC settings section
+	else if (m_RemapOSCIpAddressEdit && m_RemapOSCIpAddressEdit.get() == &editor)
+		ctrl->SetBridgingIpAddress(PBT_RemapOSC, m_RemapOSCIpAddressEdit->getText());
+	else if (m_RemapOSCListeningPortEdit && m_RemapOSCListeningPortEdit.get() == &editor)
+		ctrl->SetBridgingListeningPort(PBT_RemapOSC, m_RemapOSCListeningPortEdit->getText().getIntValue());
+	else if (m_RemapOSCRemotePortEdit && m_RemapOSCRemotePortEdit.get() == &editor)
+		ctrl->SetBridgingRemotePort(PBT_RemapOSC, m_RemapOSCRemotePortEdit->getText().getIntValue());
+	else if (m_RemapOSCListeningPortEdit && m_RemapOSCListeningPortEdit.get() == &editor)
+		ctrl->SetBridgingListeningPort(PBT_RemapOSC, m_RemapOSCListeningPortEdit->getText().getIntValue());
+
 	// return without config update trigger if the editor was unknown
 	else
 		return;
@@ -1313,6 +1373,8 @@ void SettingsSectionsComponent::setSettingsSectionActiveState(HeaderWithElmListC
 		sectionType = PBT_ADMOSC;
 	else if (settingsSection == m_YamahaOSCBridgingSettings.get())
 		sectionType = PBT_YamahaOSC;
+	else if (settingsSection == m_RemapOSCBridgingSettings.get())
+		sectionType = PBT_RemapOSC;
 
 	if (activeState)
 		ctrl->SetActiveProtocolBridging(ctrl->GetActiveProtocolBridging() | sectionType);
@@ -1393,6 +1455,7 @@ void SettingsSectionsComponent::processUpdatedConfig()
 	processUpdatedGenericMIDIConfig();
 	processUpdatedADMOSCConfig();
 	processUpdatedYamahaOSCConfig();
+	processUpdatedRemapOSCConfig();
 }
 
 /**
@@ -1761,6 +1824,28 @@ void SettingsSectionsComponent::processUpdatedADMOSCConfig()
 
 		m_ADMOSCxyMsgSndModeButton->setButtonDown(newActiveButtonId);
 	}
+}
+
+/**
+ * Helper method to update objects for Remap OSC settings section with updated config
+ */
+void SettingsSectionsComponent::processUpdatedRemapOSCConfig()
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
+	// Remap OSC settings section
+	auto RemapOSCBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_RemapOSC) == PBT_RemapOSC;
+	if (m_RemapOSCBridgingSettings)
+		m_RemapOSCBridgingSettings->setToggleActiveState(RemapOSCBridgingActive);
+	if (m_RemapOSCIpAddressEdit)
+		m_RemapOSCIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_RemapOSC));
+	if (m_RemapOSCListeningPortEdit)
+		m_RemapOSCListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_RemapOSC)), false);
+	if (m_RemapOSCRemotePortEdit)
+		m_RemapOSCRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_RemapOSC)), false);
+
 }
 
 /**

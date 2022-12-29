@@ -54,8 +54,11 @@ static constexpr int RX_PORT_RTTRPM_HOST = 24100;		//< UDP port to which the Bla
 static constexpr int RX_PORT_YAMAHAOSC_DEVICE = 50016;	//< UDP port which the Yamaha Rivage console is listening to for OSC
 static constexpr int RX_PORT_YAMAHAOSC_HOST = 50017;	//< UDP port to which the Yamaha Rivage console will send OSC replies
 
-static constexpr int RX_PORT_ADMOSC_DEVICE = 50018;	//< UDP port which the Yamaha Rivage console is listening to for OSC
-static constexpr int RX_PORT_ADMOSC_HOST = 50019;	//< UDP port to which the Yamaha Rivage console will send OSC replies
+static constexpr int RX_PORT_ADMOSC_DEVICE = 50018;		//< Default UDP port to use for ADM OSC device side
+static constexpr int RX_PORT_ADMOSC_HOST = 50019;		//< Default UDP port to use for ADM OSC host (spaconbridge) side
+
+static constexpr int RX_PORT_REMAPOSC_DEVICE = 50020;	//< Default UDP port to use for Remap OSC device side
+static constexpr int RX_PORT_REMAPOSC_HOST = 50021;		//< Default UDP port to use for Remap OSC host (spaconbridge) side
 
 /**
  * Pre-define processing bridge config values

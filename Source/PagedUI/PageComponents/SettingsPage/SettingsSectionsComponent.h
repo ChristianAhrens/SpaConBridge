@@ -130,6 +130,7 @@ private:
 	void processUpdatedGenericMIDIConfig();
 	void processUpdatedADMOSCConfig();
 	void processUpdatedYamahaOSCConfig();
+	void processUpdatedRemapOSCConfig();
 
 	//==============================================================================
 	void createGeneralSettingsSection();
@@ -141,6 +142,7 @@ private:
 	void createGenericMIDISettingsSection();
 	void createADMOSCSettingsSection();
 	void createYamahaOSCSettingsSection();
+	void createRemapOSCSettingsSection();
 
 	// input filters for texteditors
 	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_intervalEditFilter;
@@ -298,6 +300,17 @@ private:
 	std::unique_ptr<Label>										m_YamahaOSCRemotePortLabel;
 	std::unique_ptr<ComboBox>									m_YamahaOSCMappingAreaSelect;
 	std::unique_ptr<Label>										m_YamahaOSCMappingAreaLabel;
+
+	// Remap OSC settings section
+	std::unique_ptr<HeaderWithElmListComponent>					m_RemapOSCBridgingSettings;
+	std::unique_ptr<TextEditor>									m_RemapOSCIpAddressEdit;
+	std::unique_ptr<Label>										m_RemapOSCIpAddressLabel;
+	std::unique_ptr<TextEditor>									m_RemapOSCListeningPortEdit;
+	std::unique_ptr<Label>										m_RemapOSCListeningPortLabel;
+	std::unique_ptr<TextEditor>									m_RemapOSCRemotePortEdit;
+	std::unique_ptr<Label>										m_RemapOSCRemotePortLabel;
+	//std::unique_ptr<RemoteObjectToOscAssignerComponent>			m_RemapOSCAssignmentsEditor;
+	//std::unique_ptr<Label>										m_RemapOSCAssignmentsLabel;
 };
 
 

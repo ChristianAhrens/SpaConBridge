@@ -442,6 +442,18 @@ bool ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridg
 		}
 	}
 
+	// Remap OSC protocol - RoleB
+	{
+		auto remapOSCBridgingXmlElement = SetupRemapOSCBridgingProtocol();
+		if (remapOSCBridgingXmlElement)
+		{
+			m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_RemapOSC, *remapOSCBridgingXmlElement));
+
+			if ((bridgingProtocolsToActivate & PBT_RemapOSC) == PBT_RemapOSC)
+				nodeXmlElement->addChildElement(remapOSCBridgingXmlElement.release());
+		}
+	}
+
 	if (SetBridgingNodeStateXml(nodeXmlElement.get(), true))
 	{
 		m_bridgingXml.addChildElement(nodeXmlElement.release());
@@ -733,11 +745,11 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupRemapOSCBridgingProtoc
 
 	auto clientPortXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
 	if (clientPortXmlElement)
-		clientPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_YAMAHAOSC_DEVICE);
+		clientPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_REMAPOSC_DEVICE);
 
 	auto hostPortXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
 	if (hostPortXmlElement)
-		hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_YAMAHAOSC_HOST);
+		hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_REMAPOSC_HOST);
 
 	auto ipAdressXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
 	if (ipAdressXmlElement)

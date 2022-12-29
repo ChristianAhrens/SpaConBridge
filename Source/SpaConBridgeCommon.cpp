@@ -116,6 +116,8 @@ String GetProtocolBridgingShortName(ProtocolBridgingType type)
 			return "Yamaha";
 		case PBT_ADMOSC:
 			return "ADM";
+		case PBT_RemapOSC:
+			return "Custom";
 		case PBT_DS100:
 			return "DS100";
 		case PBT_None:
@@ -151,6 +153,8 @@ String GetProtocolBridgingNiceName(ProtocolBridgingType type)
 		return "Yamaha OSC";
 	case PBT_ADMOSC:
 		return "ADM OSC";
+	case PBT_RemapOSC:
+		return "Custom OSC";
 	case PBT_DS100:
 		return "DS100";
 	case PBT_None:
@@ -186,6 +190,8 @@ String GetProtocolBridgingSystemName(ProtocolBridgingType type)
 		return "YamahaOSC";
 	case PBT_ADMOSC:
 		return "ADMOSC";
+	case PBT_RemapOSC:
+		return "RemapOSC";
 	case PBT_DS100:
 		return "DS100OSCPolling";
 	case PBT_None:
@@ -217,6 +223,8 @@ const Colour GetProtocolBridgingColour(ProtocolBridgingType type)
 		return Colour(72, 33, 122);
 	case PBT_ADMOSC:
 		return Colour(217, 0, 122);
+	case PBT_RemapOSC:
+		return Colour(124, 255, 0);
 	case PBT_YamahaSQ:
 	case PBT_DS100:
 	case PBT_HUI:

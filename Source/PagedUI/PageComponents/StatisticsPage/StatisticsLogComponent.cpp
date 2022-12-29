@@ -291,6 +291,8 @@ String StatisticsLog::GetLogSourceName(StatisticsLogSource logSourceType)
 		return GetProtocolBridgingShortName(PBT_DS100);
 	case SLS_DS100_2:
 		return GetProtocolBridgingShortName(PBT_DS100) + "(2nd)";
+	case SLS_RemapOSC:
+		return GetProtocolBridgingShortName(PBT_RemapOSC);
 	default:
 		return GetProtocolBridgingShortName(PBT_None);
 	}
@@ -327,6 +329,8 @@ const Colour StatisticsLog::GetLogSourceColour(StatisticsLogSource logSourceType
 	case SLS_DS100:
 	case SLS_DS100_2:
 		return GetProtocolBridgingColour(PBT_DS100);
+	case SLS_RemapOSC:
+		return GetProtocolBridgingColour(PBT_RemapOSC);
 	default:
 		return GetProtocolBridgingColour(PBT_None);
 	}

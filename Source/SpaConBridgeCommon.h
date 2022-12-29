@@ -191,6 +191,7 @@ static constexpr ProtocolBridgingType PBT_HUI				= 0x00000020;
 static constexpr ProtocolBridgingType PBT_YamahaOSC			= 0x00000040;
 static constexpr ProtocolBridgingType PBT_ADMOSC			= 0x00000080;
 static constexpr ProtocolBridgingType PBT_DAWPlugin			= 0x00000100;
+static constexpr ProtocolBridgingType PBT_RemapOSC			= 0x00000200;
 static constexpr ProtocolBridgingType PBT_DS100				= 0x10000000;
 
 static const std::vector<ProtocolBridgingType> ProtocolBridgingTypes{ PBT_DiGiCo, PBT_DAWPlugin, PBT_BlacktraxRTTrPM, PBT_GenericOSC, PBT_GenericMIDI, PBT_YamahaSQ, PBT_HUI, PBT_YamahaOSC, PBT_ADMOSC, PBT_DS100 };

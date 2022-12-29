@@ -70,6 +70,7 @@ static constexpr int GENERICMIDI_PROCESSINGPROTOCOL_ID = 7;
 static constexpr int YAMAHAOSC_PROCESSINGPROTOCOL_ID = 8;
 static constexpr int ADMOSC_PROCESSINGPROTOCOL_ID = 9;
 static constexpr int DAWPLUGIN_PROCESSINGPROTOCOL_ID = 10;
+static constexpr int REMAPOSC_PROCESSINGPROTOCOL_ID = 11;
 
 class ProtocolBridgingWrapper :
 	public ProcessingEngineNode::NodeListener,
@@ -371,6 +372,7 @@ private:
 	std::unique_ptr<XmlElement> SetupGenericMIDIBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupADMOSCBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupYamahaOSCBridgingProtocol();
+	std::unique_ptr<XmlElement> SetupRemapOSCBridgingProtocol();
 
 	/**
 	 * A processing engine node can send data to and receive data from multiple protocols that is encapsulates.

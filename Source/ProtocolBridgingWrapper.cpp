@@ -231,6 +231,9 @@ bool ProtocolBridgingWrapper::setStateXml(XmlElement* stateXml)
 			auto yamahaOSCProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(YAMAHAOSC_PROCESSINGPROTOCOL_ID));
 			if (yamahaOSCProtocolXmlElement)
 				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_YamahaOSC, *yamahaOSCProtocolXmlElement));
+			auto remapOSCProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(REMAPOSC_PROCESSINGPROTOCOL_ID));
+			if (remapOSCProtocolXmlElement)
+				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_RemapOSC, *remapOSCProtocolXmlElement));
 
 			return SetBridgingNodeStateXml(nodeXmlElement, true);
 		}
@@ -705,6 +708,40 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupYamahaOSCBridgingProto
 	auto mappingAreaIdXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MAPPINGAREA));
 	if (mappingAreaIdXmlElement)
 		mappingAreaIdXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), PROTOCOL_DEFAULT_MAPPINGAREA);
+
+	auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
+	auto mutedObjects = std::vector<RemoteObject>();
+	if (mutedObjsXmlElement)
+		ProcessingEngineConfig::WriteMutedObjects(mutedObjsXmlElement, mutedObjects);
+
+	return protocolBXmlElement;
+}
+
+/**
+ * Method to create the default Remap OSC bridging protocol xml element.
+ * @return	The protocol xml element that was created
+ */
+std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupRemapOSCBridgingProtocol()
+{
+	// Remap OSC protocol - RoleB
+	auto protocolBXmlElement = std::make_unique<XmlElement>(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLB));
+
+	protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), REMAPOSC_PROCESSINGPROTOCOL_ID);
+
+	protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), ProcessingEngineConfig::ProtocolTypeToString(PT_RemapOSCProtocol));
+	protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::USESACTIVEOBJ), 0);
+
+	auto clientPortXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+	if (clientPortXmlElement)
+		clientPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_YAMAHAOSC_DEVICE);
+
+	auto hostPortXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
+	if (hostPortXmlElement)
+		hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_YAMAHAOSC_HOST);
+
+	auto ipAdressXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
+	if (ipAdressXmlElement)
+		ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
 
 	auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
 	auto mutedObjects = std::vector<RemoteObject>();
@@ -1957,6 +1994,10 @@ ProtocolBridgingType ProtocolBridgingWrapper::GetActiveBridgingProtocols()
 		protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(YAMAHAOSC_PROCESSINGPROTOCOL_ID));
 		if (protocolXmlElement)
 			activeBridgingTypes |= PBT_YamahaOSC;
+
+		protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(REMAPOSC_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+			activeBridgingTypes |= PBT_RemapOSC;
 	}
 
 	return activeBridgingTypes;
@@ -1987,6 +2028,8 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 		auto removeADMOSCBridging = (!(desiredActiveBridgingTypes & PBT_ADMOSC) && (currentlyActiveBridgingTypes & PBT_ADMOSC));
 		auto addYamahaOSCBridging = ((desiredActiveBridgingTypes & PBT_YamahaOSC) && !(currentlyActiveBridgingTypes & PBT_YamahaOSC));
 		auto removeYamahaOSCBridging = (!(desiredActiveBridgingTypes & PBT_YamahaOSC) && (currentlyActiveBridgingTypes & PBT_YamahaOSC));
+		auto addRemapOSCBridging = ((desiredActiveBridgingTypes & PBT_RemapOSC) && !(currentlyActiveBridgingTypes & PBT_RemapOSC));
+		auto removeRemapOSCBridging = (!(desiredActiveBridgingTypes & PBT_RemapOSC) && (currentlyActiveBridgingTypes & PBT_RemapOSC));
 
 		auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 		if (nodeXmlElement)
@@ -2085,6 +2128,20 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 				if (protocolXmlElement)
 				{
 					m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_YamahaOSC, *protocolXmlElement));
+					nodeXmlElement->removeChildElement(protocolXmlElement, true);
+				}
+			}
+
+			if (addRemapOSCBridging)
+			{
+				nodeXmlElement->addChildElement(std::make_unique<XmlElement>(m_bridgingProtocolCacheMap.at(PBT_RemapOSC)).release());
+			}
+			else if (removeRemapOSCBridging)
+			{
+				auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(REMAPOSC_PROCESSINGPROTOCOL_ID));
+				if (protocolXmlElement)
+				{
+					m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_RemapOSC, *protocolXmlElement));
 					nodeXmlElement->removeChildElement(protocolXmlElement, true);
 				}
 			}

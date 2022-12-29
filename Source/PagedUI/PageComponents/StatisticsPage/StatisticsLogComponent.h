@@ -57,6 +57,7 @@ public:
 		SLS_HUI,
 		SLS_DS100,
 		SLS_DS100_2,
+		SLS_RemapOSC,
 	};
 
 	enum StatisticsLogColumn

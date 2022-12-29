@@ -197,9 +197,6 @@ public:
 	int GetBridgingMappingArea(ProtocolBridgingType bridgingType);
 	bool SetBridgingMappingArea(ProtocolBridgingType bridgingType, int mappingAreaId, bool dontSendNotification = false);
 
-	bool GetBridgingXYMessageCombined(ProtocolBridgingType bridgingType);
-	bool SetBridgingXYMessageCombined(ProtocolBridgingType bridgingType, bool combined, bool dontSendNotification = false);
-
 	String GetBridgingInputDeviceIdentifier(ProtocolBridgingType bridgingType);
 	bool SetBridgingInputDeviceIdentifier(ProtocolBridgingType bridgingType, const String& inputDeviceIdentifier, bool dontSendNotification = false);
 
@@ -221,8 +218,14 @@ public:
 	int GetBridgingXYAxisSwapped(ProtocolBridgingType bridgingType);
 	bool SetBridgingXYAxisSwapped(ProtocolBridgingType bridgingType, int swapped, bool dontSendNotification = false);
 
+	bool GetBridgingXYMessageCombined(ProtocolBridgingType bridgingType);
+	bool SetBridgingXYMessageCombined(ProtocolBridgingType bridgingType, bool combined, bool dontSendNotification = false);
+
 	int GetBridgingDataSendingDisabled(ProtocolBridgingType bridgingType);
 	bool SetBridgingDataSendingDisabled(ProtocolBridgingType bridgingType, int disabled, bool dontSendNotification = false);
+
+	std::map<RemoteObjectIdentifier, juce::String> GetBridgingOscRemapAssignments(ProtocolBridgingType bridgingType);
+	bool SetBridgingOscRemapAssignments(ProtocolBridgingType bridgingType, const std::map<RemoteObjectIdentifier, juce::String>& oscRemapAssignments, bool dontSendNotification = false);
 
 	//==========================================================================
 	void InitGlobalSettings(DataChangeParticipant changeSource, String ipAddress, int rate);

@@ -306,6 +306,28 @@ public:
 	bool SetYamahaOSCMappingArea(int mappingAreaId, bool dontSendNotification = false);
 
 	//==========================================================================
+	bool GetMuteRemapOSCSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId);
+	bool SetMuteRemapOSCSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId, bool mute = true);
+	bool SetMuteRemapOSCSoundobjectProcessorIds(const std::vector<SoundobjectProcessorId>& soundobjectProcessorIds, bool mute = true);
+
+	bool GetMuteRemapOSCMatrixInputProcessorId(MatrixInputProcessorId matrixInputProcessorId);
+	bool SetMuteRemapOSCMatrixInputProcessorId(MatrixInputProcessorId matrixInputProcessorId, bool mute = true);
+	bool SetMuteRemapOSCMatrixInputProcessorIds(const std::vector<MatrixInputProcessorId>& matrixInputProcessorIds, bool mute = true);
+
+	bool GetMuteRemapOSCMatrixOutputProcessorId(MatrixInputProcessorId matrixOutputProcessorId);
+	bool SetMuteRemapOSCMatrixOutputProcessorId(MatrixInputProcessorId matrixOutputProcessorId, bool mute = true);
+	bool SetMuteRemapOSCMatrixOutputProcessorIds(const std::vector<MatrixOutputProcessorId>& matrixOutputProcessorIds, bool mute = true);
+
+	String GetRemapOSCIpAddress();
+	bool SetRemapOSCIpAddress(String ipAddress, bool dontSendNotification = false);
+	int GetRemapOSCListeningPort();
+	bool SetRemapOSCListeningPort(int listeningPort, bool dontSendNotification = false);
+	int GetRemapOSCRemotePort();
+	bool SetRemapOSCRemotePort(int remotePort, bool dontSendNotification = false);
+	std::map<RemoteObjectIdentifier, juce::String> GetRemapOSCOscRemapAssignments();
+	bool SetRemapOSCOscRemapAssignments(const std::map<RemoteObjectIdentifier, juce::String>& oscRemapAssignments, bool dontSendNotification = false);
+
+	//==========================================================================
 	static bool IsBridgingObjectOnly(RemoteObjectIdentifier id);
 
 private:
@@ -357,7 +379,9 @@ private:
 	int GetProtocolDataSendingDisabled(ProtocolId protocolId);
 	bool SetProtocolDataSendingDisabled(ProtocolId protocolId, int disabled, bool dontSendNotification = false);
 	bool GetProtocolBridgingXYMessageCombined(ProtocolId protocolId);
-	bool SetProtocolBridgingXYMessageCombined(ProtocolId protocolId, bool combined, bool dontSendNotification);
+	bool SetProtocolBridgingXYMessageCombined(ProtocolId protocolId, bool combined, bool dontSendNotification = false);
+	std::map<RemoteObjectIdentifier, juce::String> GetOscRemapAssignments(ProtocolId protocolId);
+	bool SetOscRemapAssignments(ProtocolId protocolId, const std::map<RemoteObjectIdentifier, juce::String>& oscRemapAssignments, bool dontSendNotification = false);
 
 	ObjectHandlingState GetProtocolState(ProtocolId protocolId) const;
 	void SetProtocolState(ProtocolId protocolId, ObjectHandlingState state);

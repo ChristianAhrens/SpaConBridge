@@ -2004,6 +2004,25 @@ bool ProtocolBridgingWrapper::SetOscRemapAssignments(ProtocolId protocolId, cons
 			auto oscRemappingsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REMAPPINGS));
 			if (oscRemappingsXmlElement)
 			{
+				// collect the xml elements that are no longer used according to new incoming assignments
+				std::vector<XmlElement*> noLongerUsedElements;
+				auto remappingXmlElement = oscRemappingsXmlElement->getFirstChildElement();
+				while (nullptr != remappingXmlElement)
+				{
+					bool stillInUse = false;
+					for (auto const& assi : oscRemapAssignments)
+						if (ProcessingEngineConfig::GetObjectDescription(assi.first).removeCharacters(" ") == remappingXmlElement->getTagName())
+							stillInUse = true;
+					if (!stillInUse)
+						noLongerUsedElements.push_back(remappingXmlElement);
+
+					remappingXmlElement = remappingXmlElement->getNextElement();
+				}
+				// and remove them
+				for (auto const& childToRemove : noLongerUsedElements)
+					oscRemappingsXmlElement->removeChildElement(childToRemove, true);
+
+				// create or update the xml elements according to new incoming assignments
 				for (auto const& assi : oscRemapAssignments)
 				{
 					auto oscRemappingXmlElement = oscRemappingsXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(assi.first).removeCharacters(" "));

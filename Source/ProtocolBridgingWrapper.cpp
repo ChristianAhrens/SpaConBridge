@@ -1543,17 +1543,31 @@ std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> ProtocolBridgingWrap
  * @param dontSendNotification	Flag if change notification shall be broadcasted.
  * @return	True on succes, false if failure
  */
-bool ProtocolBridgingWrapper::SetMidiScenesAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& assignmentMapping, bool dontSendNotification)
+bool ProtocolBridgingWrapper::SetMidiScenesAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const std::map<juce::String, JUCEAppBasics::MidiCommandRangeAssignment>& assignmentMapping, bool dontSendNotification)
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
 	{
-		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), juce::String(protocolId));
 		if (protocolXmlElement)
 		{
 			auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
 			if (assiMapXmlElement)
 			{
+				// collect the xml elements that are no longer used according to new incoming mappings
+				std::vector<XmlElement*> noLongerUsedElements;
+				auto assiXmlElement = assiMapXmlElement->getFirstChildElement();
+				while (nullptr != assiXmlElement)
+				{
+					if (assignmentMapping.count(assiXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::VALUE))) < 1)
+						noLongerUsedElements.push_back(assiXmlElement);
+					assiXmlElement = assiXmlElement->getNextElement();
+				}
+				// and remove them
+				for (auto const& childToRemove : noLongerUsedElements)
+					assiMapXmlElement->removeChildElement(childToRemove, true);
+
+				// create or update the xml elements according to new incoming mappings
 				assiMapXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MULTIVALUE), 1);
 				for (auto const& assi : assignmentMapping)
 				{

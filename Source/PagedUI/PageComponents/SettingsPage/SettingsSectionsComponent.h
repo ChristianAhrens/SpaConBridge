@@ -16,24 +16,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #pragma once
 
-#include "../HeaderWithElmListComponent.h"
-
 #include "../../../SpaConBridgeCommon.h"
-#include "SceneIndexToMidiAssignerComponent.h"
 
-#include <ZeroconfDiscoverComponent.h>
+#include <MidiLearnerComponent.h>
 #include <SplitButtonComponent.h>
 #include <TextWithImageButton.h>
-#include <MidiLearnerComponent.h>
+#include <ZeroconfDiscoverComponent.h>
 
 #define ZEROCONF_SUPPORTED
 
 namespace SpaConBridge
 {
 
+/**
+ * Fwd decls.
+ */
+class HeaderWithElmListComponent;
+class HorizontalLayouterComponent;
+class SceneIndexToMidiAssignerComponent;
+class RemoteObjectToOscAssignerComponent;
 
 /** 
  *	Custom reimplementation of a Texteditor that simply shows
@@ -119,6 +122,9 @@ private:
 	//==============================================================================
 	void handleMidiAssiSet(Component* sender, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssi);
 	void handleScenesToMidiAssiSet(Component* sender, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& scenesToMidiAssi);
+
+	//==============================================================================
+	void handleRemapOscAssisSet(Component* sender, const std::map<RemoteObjectIdentifier, juce::String>& roiToCustomOscAssis);
 
 	//==============================================================================
 	void processUpdatedGeneralConfig();
@@ -309,8 +315,8 @@ private:
 	std::unique_ptr<Label>										m_RemapOSCListeningPortLabel;
 	std::unique_ptr<TextEditor>									m_RemapOSCRemotePortEdit;
 	std::unique_ptr<Label>										m_RemapOSCRemotePortLabel;
-	//std::unique_ptr<RemoteObjectToOscAssignerComponent>			m_RemapOSCAssignmentsEditor;
-	//std::unique_ptr<Label>										m_RemapOSCAssignmentsLabel;
+	std::unique_ptr<RemoteObjectToOscAssignerComponent>			m_RemapOSCAssignmentsEditor;
+	std::unique_ptr<Label>										m_RemapOSCAssignmentsLabel;
 };
 
 

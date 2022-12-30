@@ -19,9 +19,13 @@
 
 #include "SettingsSectionsComponent.h"
 
+#include "../HeaderWithElmListComponent.h"
 #include "../../../Controller.h"
 #include "../../../LookAndFeel.h"
 #include "../../PageComponentManager.h"
+
+#include "SceneIndexToMidiAssignerComponent.h"
+#include "RemoteObjectToOscAssignerComponent.h"
 
 #include <Image_utils.h>
 
@@ -917,6 +921,14 @@ void SettingsSectionsComponent::createRemapOSCSettingsSection()
 	m_RemapOSCRemotePortLabel->attachToComponent(m_RemapOSCRemotePortEdit.get(), true);
 	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCRemotePortLabel.get(), false, false);
 	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCRemotePortEdit.get(), true, false);
+
+	m_RemapOSCAssignmentsEditor = std::make_unique<RemoteObjectToOscAssignerComponent>();
+	m_RemapOSCAssignmentsEditor->onAssignmentsSet = [=](Component* sender, const std::map<RemoteObjectIdentifier, juce::String>& roiToCustomOscAssis) { handleRemapOscAssisSet(sender, roiToCustomOscAssis); };
+	m_RemapOSCAssignmentsLabel = std::make_unique<Label>("RemapOSCAssignmentsEditor", GetProtocolBridgingNiceName(PBT_RemapOSC));
+	m_RemapOSCAssignmentsLabel->setJustificationType(Justification::centredLeft);
+	m_RemapOSCAssignmentsLabel->attachToComponent(m_RemapOSCAssignmentsEditor.get(), true);
+	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCAssignmentsLabel.get(), false, false);
+	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCAssignmentsEditor.get(), true, false);
 
 	m_RemapOSCBridgingSettings->resized();
 }
@@ -1908,7 +1920,7 @@ void SettingsSectionsComponent::handleMidiAssiSet(Component* sender, const JUCEA
 
 /**
  * Callback method to be registered with SceneIndexToMidiAssignerComponent to handle scene index to midi assignment selection.
- * @param sender	The SceneIndexToMidiAssignerComponent that sent the assignment.
+ * @param sender			The SceneIndexToMidiAssignerComponent that sent the assignment.
  * @param scenesToMidiAssi	The sent assignment that was chosen by user
  */
 void SettingsSectionsComponent::handleScenesToMidiAssiSet(Component* sender, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& scenesToMidiAssi)
@@ -1918,6 +1930,21 @@ void SettingsSectionsComponent::handleScenesToMidiAssiSet(Component* sender, con
 		auto ctrl = Controller::GetInstance();
 		if (ctrl)
 			ctrl->SetBridgingScenesToMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIRecallSceneAssigner->getReferredId()), scenesToMidiAssi);
+	}
+}
+
+/**
+ * Callback method to be registered with RemoteObjectToOscAssignerComponent to handle custom osc remap assignment selection.
+ * @param sender				The RemoteObjectToOscAssignerComponent that sent the assignment.
+ * @param roiToCustomOscAssis	The sent assignment that was chosen by user
+ */
+void SettingsSectionsComponent::handleRemapOscAssisSet(Component* sender, const std::map<RemoteObjectIdentifier, juce::String>& roiToCustomOscAssis)
+{
+	if (m_RemapOSCAssignmentsEditor && sender == m_RemapOSCAssignmentsEditor.get())
+	{
+		auto ctrl = Controller::GetInstance();
+		if (ctrl)
+			ctrl->SetBridgingOscRemapAssignments(PBT_RemapOSC, roiToCustomOscAssis);
 	}
 }
 

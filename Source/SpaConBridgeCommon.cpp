@@ -154,7 +154,7 @@ String GetProtocolBridgingNiceName(ProtocolBridgingType type)
 	case PBT_ADMOSC:
 		return "ADM OSC";
 	case PBT_RemapOSC:
-		return "Custom OSC";
+		return "Customized OSC";
 	case PBT_DS100:
 		return "DS100";
 	case PBT_None:

@@ -436,6 +436,10 @@
                   file="Source/PagedUI/PageComponents/StatisticsPage/StatisticsPlotComponent.h"/>
           </GROUP>
           <GROUP id="{811EF1A2-3AD2-5387-1DC2-32ED14213B13}" name="SettingsPage">
+            <FILE id="g1WMKX" name="AssignmentEditOverlayBaseComponents.cpp" compile="1"
+                  resource="0" file="Source/PagedUI/PageComponents/SettingsPage/AssignmentEditOverlayBaseComponents.cpp"/>
+            <FILE id="a68j4E" name="AssignmentEditOverlayBaseComponents.h" compile="0"
+                  resource="0" file="Source/PagedUI/PageComponents/SettingsPage/AssignmentEditOverlayBaseComponents.h"/>
             <FILE id="v39RUd" name="RemoteObjectToOscAssignerComponent.cpp" compile="1"
                   resource="0" file="Source/PagedUI/PageComponents/SettingsPage/RemoteObjectToOscAssignerComponent.cpp"/>
             <FILE id="D2KuDn" name="RemoteObjectToOscAssignerComponent.h" compile="0"

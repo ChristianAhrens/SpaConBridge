@@ -23,6 +23,8 @@
 #include <MidiLearnerComponent.h>
 #include <TextWithImageButton.h>
 
+#include "AssignmentEditOverlayBaseComponents.h"
+
 namespace SpaConBridge
 {
 
@@ -51,11 +53,11 @@ public:
     std::int16_t getReferredId() const;
     
 private:
-    class AssignmentEditComponent : public Component
+    class SceneIndexAssignmentEditComponent : public AssignmentEditOverlayBaseComponents::AssignmentEditComponent
     {
     public:
-        explicit AssignmentEditComponent(std::int16_t refId, const String& deviceIdentifier, const String& sceneIndex, const JUCEAppBasics::MidiCommandRangeAssignment& currentAssi);
-        ~AssignmentEditComponent();
+        explicit SceneIndexAssignmentEditComponent(std::int16_t refId, const String& deviceIdentifier, const String& sceneIndex, const JUCEAppBasics::MidiCommandRangeAssignment& currentAssi);
+        ~SceneIndexAssignmentEditComponent();
 
         const String GetSceneIndex();
         const JUCEAppBasics::MidiCommandRangeAssignment& GetCurrentAssignment();
@@ -77,85 +79,52 @@ private:
         std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>        m_learnerComponent;
     };
 
-    class AssignmentsListingComponent : public Component
+    class SceneIndexAssignmentsListingComponent : public AssignmentEditOverlayBaseComponents::AssignmentsListingComponent
     {
     public:
-        explicit AssignmentsListingComponent(const String& deviceIdentifier, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& initialAssignments);
-        ~AssignmentsListingComponent();
-
-        void setWidth(int width);
-        void setMinHeight(int height);
+        explicit SceneIndexAssignmentsListingComponent(const String& deviceIdentifier, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& initialAssignments);
+        ~SceneIndexAssignmentsListingComponent();
 
         //==============================================================================
         std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> GetCurrentAssignments();
-        bool AddAssignment();
-        void ClearAssignments();
+        bool AddAssignment() override;
 
         //==============================================================================
-        const String DumpCurrentAssignmentsToCsvString();
-        bool ReadAssignmentsFromCsvString(const String& csvAssignmentsString);
-
-        //==============================================================================
-        void paint(Graphics&) override;
-        void resized() override;
+        const String DumpCurrentAssignmentsToCsvString() override;
+        bool ReadAssignmentsFromCsvString(const String& csvAssignmentsString) override;
 
         //==============================================================================
         std::function<void(Component*, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>&)> onAssigningFinished;
 
     private:
         //==============================================================================
-        bool IsAvailableUiAreaExceeded();
         String GetNextSceneIndex();
 
         //==============================================================================
-        std::vector<std::unique_ptr<AssignmentEditComponent>>   m_editComponents;
-        String                                                  m_deviceIdentifier;
-        int                                                     m_minHeight;
-
-        //==============================================================================
-        const float m_editorWidth = 225.0f;
-        const float m_editorHeight = 25.0f;
-        const float m_editorMargin = 2.0f;
+        String  m_deviceIdentifier;
 
     };
 
-    class AssignmentsViewingComponent : public Component
+    class SceneIndexAssignmentsViewingComponent : public AssignmentEditOverlayBaseComponents::AssignmentsViewingComponent
     {
     public:
-        explicit AssignmentsViewingComponent(const String& deviceIdentifier, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& initialAssignments);
-        ~AssignmentsViewingComponent();
-
-        std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> GetCurrentAssignments();
+        explicit SceneIndexAssignmentsViewingComponent(const String& deviceIdentifier, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& initialAssignments);
+        ~SceneIndexAssignmentsViewingComponent();
 
         //==============================================================================
-        void onAddClicked();
-        void onClearClicked();
-        void onExportClicked();
-        void onImportClicked();
-        void onCloseClicked();
+        std::map<juce::String, JUCEAppBasics::MidiCommandRangeAssignment> GetCurrentAssignments();
 
         //==============================================================================
-        void paint(Graphics&) override;
-        void resized() override;
-
-        //==========================================================================
-        void lookAndFeelChanged() override;
+        void onExportClicked() override;
+        void onImportClicked() override;
+        void onCloseClicked() override;
 
         //==============================================================================
         std::function<void(Component*, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>&)> onAssigningFinished;
 
     private:
         //==============================================================================
-        std::unique_ptr<AssignmentsListingComponent>    m_contentComponent;
-        std::unique_ptr<Viewport>					    m_contentViewport;
-        std::unique_ptr<TextButton>                     m_addButton;
-        std::unique_ptr<TextButton>                     m_clearButton;
-        std::unique_ptr<DrawableButton>                 m_exportButton;
-        std::unique_ptr<DrawableButton>                 m_importButton;
-        std::unique_ptr<TextButton>                     m_closeButton;
-
         String m_deviceIdentifier;
-
     };
 
     void triggerEditAssignments();
@@ -166,7 +135,7 @@ private:
     std::unique_ptr<TextEditor>                                 m_currentMidiAssisLabel;
     std::unique_ptr<TextButton>                                 m_editAssignmentsButton;
 
-    std::unique_ptr<AssignmentsViewingComponent>                m_assignmentsEditionOverlay;
+    std::unique_ptr<SceneIndexAssignmentsViewingComponent>      m_assignmentsEditionOverlay;
 
     String                                                      m_deviceIdentifier;
     String                                                      m_deviceName;

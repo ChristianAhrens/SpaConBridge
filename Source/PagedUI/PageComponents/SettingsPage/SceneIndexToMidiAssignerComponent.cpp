@@ -198,8 +198,13 @@ void SceneIndexToMidiAssignerComponent::SceneIndexAssignmentEditComponent::handl
 }
 
 SceneIndexToMidiAssignerComponent::SceneIndexAssignmentsListingComponent::SceneIndexAssignmentsListingComponent(const String& deviceIdentifier, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& initialAssignments)
-    : m_deviceIdentifier(deviceIdentifier)
+    : AssignmentEditOverlayBaseComponents::AssignmentsListingComponent(),
+      m_deviceIdentifier(deviceIdentifier)
 {
+    m_editorWidth = 225.0f;
+    m_editorHeight = 25.0f;
+    m_editorMargin = 2.0f;
+
     auto refId = std::int16_t(1);
     for (auto const& assignment : initialAssignments)
     {

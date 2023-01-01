@@ -22,6 +22,8 @@
 #include "../../PageContainerComponent.h"
 #include "../../PageComponentManager.h"
 
+#include <ProcessingEngine/ProcessingEngineConfig.h>
+
 namespace SpaConBridge
 {
 
@@ -97,7 +99,8 @@ void RemoteObjectToOscAssignerComponent::processAssignmentResult(Component* send
 {
     ignoreUnused(sender);
 
-    m_currentRoiToOscAssignments[remoteObjectId] = roiToOscAssignment;
+    if (RemoteObjectIdentifier::ROI_Invalid != remoteObjectId)
+        m_currentRoiToOscAssignments[remoteObjectId] = roiToOscAssignment;
 
     if (onAssignmentsSet)
         onAssignmentsSet(this, m_currentRoiToOscAssignments);
@@ -110,7 +113,10 @@ void RemoteObjectToOscAssignerComponent::processAssignmentResults(Component* sen
 {
     ignoreUnused(sender);
 
-    m_currentRoiToOscAssignments = roiToOscAssignment;
+    m_currentRoiToOscAssignments.clear();
+    for (auto const& assi : roiToOscAssignment)
+        if (RemoteObjectIdentifier::ROI_Invalid != assi.first)
+            m_currentRoiToOscAssignments[assi.first] = assi.second;
 
     if (onAssignmentsSet)
         onAssignmentsSet(this, m_currentRoiToOscAssignments);
@@ -134,14 +140,25 @@ void RemoteObjectToOscAssignerComponent::setSelectedDeviceIdentifier(const Strin
 
 RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::RemoteObjectToOscAssignmentEditComponent(const RemoteObjectIdentifier& remoteObjectId, const juce::String& currentAssi)
     : AssignmentEditOverlayBaseComponents::AssignmentEditComponent(),
-      m_currentRemoteObjectId(remoteObjectId),
-      m_currentOscAssignment(currentAssi)
+    m_currentRemoteObjectId(remoteObjectId),
+    m_currentOscAssignment(currentAssi)
 {
+    // create and setup remote object dropdown
     m_remoteObjectSelect = std::make_unique<juce::ComboBox>("OscRemapObjectId");
+    for (int i = ROI_Invalid + 1; i < ROI_BridgingMAX; ++i)
+    {
+        auto roid = static_cast<RemoteObjectIdentifier>(i);
+        m_remoteObjectSelect->setTextWhenNothingSelected("Select target");
+        m_remoteObjectSelect->addItem(ProcessingEngineConfig::GetObjectDescription(roid), roid);
+    }
+    m_remoteObjectSelect->onChange = [=] {
+        m_currentRemoteObjectId = static_cast<RemoteObjectIdentifier>(m_remoteObjectSelect->getSelectedId());
+        m_remoteObjectSelect->setTooltip(ProcessingEngineConfig::GetObjectDescription(m_currentRemoteObjectId));
+    };
     addAndMakeVisible(m_remoteObjectSelect.get());
 
+    // create and setup osc string textedit
     m_oscAssignmentEditComponent = std::make_unique<juce::TextEditor>("OscRemapAssignment");
-    m_oscAssignmentEditComponent->setTextToShowWhenEmpty("/some/osc/%1/path/%2", getLookAndFeel().findColour(TextEditor::ColourIds::textColourId).darker(0.6f));
     m_oscAssignmentEditComponent->onEscapeKey = [=]() {
         handleRemoteObjectToOscAssiReset(); 
     };
@@ -160,11 +177,25 @@ RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::Re
         }
     };
     addAndMakeVisible(m_oscAssignmentEditComponent.get());
+
+    // set incoming start values
+    if (RemoteObjectIdentifier::ROI_Invalid != remoteObjectId)
+    {
+        m_remoteObjectSelect->setSelectedId(remoteObjectId);
+        m_remoteObjectSelect->setTooltip(ProcessingEngineConfig::GetObjectDescription(remoteObjectId));
+    }
+    m_oscAssignmentEditComponent->setText(currentAssi);
+
+    lookAndFeelChanged();
 }
 
 RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::~RemoteObjectToOscAssignmentEditComponent()
 {
+}
 
+void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::lookAndFeelChanged()
+{
+    m_oscAssignmentEditComponent->setTextToShowWhenEmpty("/some/osc/%1/path/%2", getLookAndFeel().findColour(TextEditor::ColourIds::textColourId).darker(0.6f));
 }
 
 const RemoteObjectIdentifier RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::GetRemoteObjectId()
@@ -181,18 +212,17 @@ void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponen
 {
     auto bounds = getLocalBounds();
 
-    m_oscAssignmentEditComponent->setBounds(bounds.removeFromRight(static_cast<int>(0.75f * bounds.getWidth()) - 2));
+    m_oscAssignmentEditComponent->setBounds(bounds.removeFromRight(static_cast<int>(0.6f * bounds.getWidth()) - 2));
     bounds.removeFromRight(4);
-    m_oscAssignmentEditComponent->setBounds(bounds);
+    m_remoteObjectSelect->setBounds(bounds);
 }
 
 void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::handleRemoteObjectToOscAssiSet(const juce::String& oscAssi)
 {
+    m_currentOscAssignment = oscAssi;
+
     if (onAssignmentSet)
-    {
-        m_currentOscAssignment = oscAssi;
         onAssignmentSet(this, m_currentRemoteObjectId, oscAssi);
-    }
 }
 
 void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::handleRemoteObjectToOscAssiReset()
@@ -204,18 +234,15 @@ void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponen
 RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComponent::RemoteObjectToOscAssignmentsListingComponent(const std::map<RemoteObjectIdentifier, juce::String>& initialAssignments)
     : AssignmentEditOverlayBaseComponents::AssignmentsListingComponent()
 {
-    //auto refId = std::int16_t(1);
-    //for (auto const& assignment : initialAssignments)
-    //{
-    //    auto floatRemoteObjectToOsc = assignment.first.getFloatValue();
-    //    auto isValidRemoteObjectToOsc = (1.0f <= floatRemoteObjectToOsc && 99.999 >= floatRemoteObjectToOsc);
-    //    if (isValidRemoteObjectToOsc)
-    //    {
-    //        auto stringRemoteObjectToOsc = String(floatRemoteObjectToOsc, 2);
-    //        m_editComponents.push_back(std::make_unique<RemoteObjectToOscAssignmentEditComponent>(refId++, m_deviceIdentifier, stringRemoteObjectToOsc, assignment.second));
-    //        addAndMakeVisible(m_editComponents.back().get());
-    //    }
-    //}
+    m_editorWidth = 295.0f;
+    m_editorHeight = 25.0f;
+    m_editorMargin = 2.0f;
+
+    for (auto const& assignment : initialAssignments)
+    {
+        m_editComponents.push_back(std::make_unique<RemoteObjectToOscAssignmentEditComponent>(assignment.first, assignment.second));
+        addAndMakeVisible(m_editComponents.back().get());
+    }
 }
 
 RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComponent::~RemoteObjectToOscAssignmentsListingComponent()
@@ -225,20 +252,20 @@ RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComponent
 std::map<RemoteObjectIdentifier, juce::String> RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComponent::GetCurrentAssignments()
 {
     std::map<RemoteObjectIdentifier, juce::String> currentAssignments;
-    //for (auto const& editComponent : m_editComponents)
-    //{
-    //    auto RemoteObjectToOscEditComponent = reinterpret_cast<RemoteObjectToOscAssignmentEditComponent*>(editComponent.get());
-    //    if (RemoteObjectToOscEditComponent)
-    //        currentAssignments.insert(std::make_pair(RemoteObjectToOscEditComponent->GetRemoteObjectToOsc(), RemoteObjectToOscEditComponent->GetCurrentAssignment()));
-    //}
+    for (auto const& editComponent : m_editComponents)
+    {
+        auto remoteObjectToOscEditComponent = reinterpret_cast<RemoteObjectToOscAssignmentEditComponent*>(editComponent.get());
+        if (remoteObjectToOscEditComponent)
+            currentAssignments.insert(std::make_pair(remoteObjectToOscEditComponent->GetRemoteObjectId(), remoteObjectToOscEditComponent->GetCurrentAssignment()));
+    }
 
     return currentAssignments;
 }
 
 bool RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComponent::AddAssignment()
 {
-    //m_editComponents.push_back(std::make_unique<RemoteObjectToOscAssignmentEditComponent>(static_cast<int16_t>(m_editComponents.size()), m_deviceIdentifier, GetNextRemoteObjectToOsc(), JUCEAppBasics::MidiCommandRangeAssignment()));
-    //addAndMakeVisible(m_editComponents.back().get());
+    m_editComponents.push_back(std::make_unique<RemoteObjectToOscAssignmentEditComponent>(RemoteObjectIdentifier::ROI_Invalid, juce::String()));
+    addAndMakeVisible(m_editComponents.back().get());
 
     resized();
 

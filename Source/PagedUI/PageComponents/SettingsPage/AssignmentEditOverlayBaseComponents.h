@@ -62,15 +62,15 @@ protected:
 
     //==============================================================================
     bool IsAvailableUiAreaExceeded();
+    
+    //==============================================================================
+    float m_editorWidth;
+    float m_editorHeight;
+    float m_editorMargin;
 
 private:
     //==============================================================================
     int m_minHeight;
-
-    //==============================================================================
-    const float m_editorWidth = 225.0f;
-    const float m_editorHeight = 25.0f;
-    const float m_editorMargin = 2.0f;
 
 };
 

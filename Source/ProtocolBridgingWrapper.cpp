@@ -2014,47 +2014,45 @@ bool ProtocolBridgingWrapper::SetOscRemapAssignments(ProtocolId protocolId, cons
 		if (protocolXmlElement)
 		{
 			auto oscRemappingsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REMAPPINGS));
-			if (oscRemappingsXmlElement)
+			if (!oscRemappingsXmlElement)
+				oscRemappingsXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REMAPPINGS));
+
+			// collect the xml elements that are no longer used according to new incoming assignments
+			std::vector<XmlElement*> noLongerUsedElements;
+			auto remappingXmlElement = oscRemappingsXmlElement->getFirstChildElement();
+			while (nullptr != remappingXmlElement)
 			{
-				// collect the xml elements that are no longer used according to new incoming assignments
-				std::vector<XmlElement*> noLongerUsedElements;
-				auto remappingXmlElement = oscRemappingsXmlElement->getFirstChildElement();
-				while (nullptr != remappingXmlElement)
-				{
-					bool stillInUse = false;
-					for (auto const& assi : oscRemapAssignments)
-						if (ProcessingEngineConfig::GetObjectDescription(assi.first).removeCharacters(" ") == remappingXmlElement->getTagName())
-							stillInUse = true;
-					if (!stillInUse)
-						noLongerUsedElements.push_back(remappingXmlElement);
-
-					remappingXmlElement = remappingXmlElement->getNextElement();
-				}
-				// and remove them
-				for (auto const& childToRemove : noLongerUsedElements)
-					oscRemappingsXmlElement->removeChildElement(childToRemove, true);
-
-				// create or update the xml elements according to new incoming assignments
+				bool stillInUse = false;
 				for (auto const& assi : oscRemapAssignments)
+					if (ProcessingEngineConfig::GetObjectDescription(assi.first).removeCharacters(" ") == remappingXmlElement->getTagName())
+						stillInUse = true;
+				if (!stillInUse)
+					noLongerUsedElements.push_back(remappingXmlElement);
+
+				remappingXmlElement = remappingXmlElement->getNextElement();
+			}
+			// and remove them
+			for (auto const& childToRemove : noLongerUsedElements)
+				oscRemappingsXmlElement->removeChildElement(childToRemove, true);
+
+			// create or update the xml elements according to new incoming assignments
+			for (auto const& assi : oscRemapAssignments)
+			{
+				auto oscRemappingXmlElement = oscRemappingsXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(assi.first).removeCharacters(" "));
+				if (oscRemappingXmlElement)
 				{
-					auto oscRemappingXmlElement = oscRemappingsXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(assi.first).removeCharacters(" "));
-					if (oscRemappingXmlElement)
-					{
-						auto oscRemappingTextXmlElement = oscRemappingXmlElement->getFirstChildElement();
-						if (oscRemappingTextXmlElement && oscRemappingTextXmlElement->isTextElement())
-							oscRemappingTextXmlElement->setText(assi.second);
-						else
-							oscRemappingTextXmlElement->addTextElement(assi.second);
-					}
+					auto oscRemappingTextXmlElement = oscRemappingXmlElement->getFirstChildElement();
+					if (oscRemappingTextXmlElement && oscRemappingTextXmlElement->isTextElement())
+						oscRemappingTextXmlElement->setText(assi.second);
 					else
-					{
-						oscRemappingXmlElement = oscRemappingsXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectDescription(assi.first).removeCharacters(" "));
-						oscRemappingXmlElement->addTextElement(assi.second);
-					}
+						oscRemappingTextXmlElement->addTextElement(assi.second);
+				}
+				else
+				{
+					oscRemappingXmlElement = oscRemappingsXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectDescription(assi.first).removeCharacters(" "));
+					oscRemappingXmlElement->addTextElement(assi.second);
 				}
 			}
-			else
-				return false;
 		}
 		else
 			return false;

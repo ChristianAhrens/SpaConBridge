@@ -1848,15 +1848,21 @@ void SettingsSectionsComponent::processUpdatedRemapOSCConfig()
 		return;
 
 	// Remap OSC settings section
-	auto RemapOSCBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_RemapOSC) == PBT_RemapOSC;
+	auto remapOSCBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_RemapOSC) == PBT_RemapOSC;
 	if (m_RemapOSCBridgingSettings)
-		m_RemapOSCBridgingSettings->setToggleActiveState(RemapOSCBridgingActive);
+		m_RemapOSCBridgingSettings->setToggleActiveState(remapOSCBridgingActive);
 	if (m_RemapOSCIpAddressEdit)
 		m_RemapOSCIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_RemapOSC));
 	if (m_RemapOSCListeningPortEdit)
 		m_RemapOSCListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_RemapOSC)), false);
 	if (m_RemapOSCRemotePortEdit)
 		m_RemapOSCRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_RemapOSC)), false);
+
+	if (m_RemapOSCAssignmentsEditor)
+	{
+		auto assignments = ctrl->GetBridgingOscRemapAssignments(PBT_RemapOSC);
+		m_RemapOSCAssignmentsEditor->setCurrentRemoteObjecToOscAssignments(assignments);
+	}
 
 }
 

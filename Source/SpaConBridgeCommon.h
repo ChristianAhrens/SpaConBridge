@@ -305,6 +305,11 @@ enum SpaConBridgeErrorCode
 	SEC_LoadScnIdxToMIDI_InvalidFile,
 	SEC_SaveScnIdxToMIDI_CannotAccess,
 	SEC_SaveScnIdxToMIDI_CannotWrite,
+	SEC_LoadCustomOSC_CannotAccess,
+	SEC_LoadCustomOSC_InvalidFile,
+	SEC_SaveCustomOSC_CannotAccess,
+	SEC_SaveCustomOSC_CannotWrite,
+	
 };
 
 /**

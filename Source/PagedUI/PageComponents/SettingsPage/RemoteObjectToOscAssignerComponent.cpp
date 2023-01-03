@@ -234,7 +234,7 @@ void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponen
 RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComponent::RemoteObjectToOscAssignmentsListingComponent(const std::map<RemoteObjectIdentifier, juce::String>& initialAssignments)
     : AssignmentEditOverlayBaseComponents::AssignmentsListingComponent()
 {
-    m_editorWidth = 295.0f;
+    m_editorWidth = 355.0f;
     m_editorHeight = 25.0f;
     m_editorMargin = 2.0f;
 
@@ -276,13 +276,13 @@ const String RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsLis
 {
     auto csvString = String();
 
-    //csvString += "RemoteObjectToOsc;MidiAssignment;\n";
-    //for (auto const& editComponent : m_editComponents)
-    //{
-    //    auto RemoteObjectToOscEditComponent = reinterpret_cast<RemoteObjectToOscAssignmentEditComponent*>(editComponent.get());
-    //    if (RemoteObjectToOscEditComponent)
-    //        csvString += RemoteObjectToOscEditComponent->GetRemoteObjectToOsc() + ";" + RemoteObjectToOscEditComponent->GetCurrentAssignment().serializeToHexString() + ";\n";
-    //}
+    csvString += "RemoteObjectIdentifier;OscStringAssignment;\n";
+    for (auto const& editComponent : m_editComponents)
+    {
+        auto remoteObjectToOscEditComponent = reinterpret_cast<RemoteObjectToOscAssignmentEditComponent*>(editComponent.get());
+        if (remoteObjectToOscEditComponent)
+            csvString += ProcessingEngineConfig::GetObjectDescription(remoteObjectToOscEditComponent->GetRemoteObjectId()).removeCharacters(" ") + ";" + remoteObjectToOscEditComponent->GetCurrentAssignment() + ";\n";
+    }
 
     return csvString;
 }
@@ -291,44 +291,42 @@ bool RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComp
 {
     std::map<String, String> assignments;
 
-    //auto separatedCsvAssignmentStrings = StringArray();
-    //separatedCsvAssignmentStrings.addTokens(csvAssignmentsString, "\n", "");
-    //
-    //if (separatedCsvAssignmentStrings.size() > 1 && separatedCsvAssignmentStrings[0] == "RemoteObjectToOsc;MidiAssignment;")
-    //    separatedCsvAssignmentStrings.remove(0);
-    //else
-    //    return false;
-    //
-    //for (auto const& csvAssignmentString : separatedCsvAssignmentStrings)
-    //{
-    //    auto csvAssignmentStringElements = StringArray();
-    //    csvAssignmentStringElements.addTokens(csvAssignmentString, ";", "");
-    //
-    //    if (csvAssignmentStringElements.size() != 3)
-    //        continue;
-    //
-    //    assignments.insert(std::make_pair(csvAssignmentStringElements[0], csvAssignmentStringElements[1]));
-    //}
-    //
-    //if (assignments.empty())
-    //    return false;
-    //
-    //m_editComponents.clear();
-    //auto refId = std::int16_t(1);
-    //for (auto const& assignment : assignments)
-    //{
-    //    JUCEAppBasics::MidiCommandRangeAssignment assi;
-    //    if (assignment.second.isNotEmpty())
-    //        assi.deserializeFromHexString(assignment.second);
-    //    auto floatRemoteObjectToOsc = assignment.first.getFloatValue();
-    //    auto isValidRemoteObjectToOsc = (1.0f <= floatRemoteObjectToOsc && 99.999 >= floatRemoteObjectToOsc);
-    //    if (isValidRemoteObjectToOsc)
-    //    {
-    //        auto stringRemoteObjectToOsc = String(floatRemoteObjectToOsc, 2);
-    //        m_editComponents.push_back(std::make_unique<RemoteObjectToOscAssignmentEditComponent>(refId++, m_deviceIdentifier, stringRemoteObjectToOsc, assi));
-    //        addAndMakeVisible(m_editComponents.back().get());
-    //    }
-    //}
+    auto separatedCsvAssignmentStrings = StringArray();
+    separatedCsvAssignmentStrings.addTokens(csvAssignmentsString, "\n", "");
+    
+    if (separatedCsvAssignmentStrings.size() > 1 && separatedCsvAssignmentStrings[0] == "RemoteObjectIdentifier;OscStringAssignment;")
+        separatedCsvAssignmentStrings.remove(0);
+    else
+        return false;
+    
+    for (auto const& csvAssignmentString : separatedCsvAssignmentStrings)
+    {
+        auto csvAssignmentStringElements = StringArray();
+        csvAssignmentStringElements.addTokens(csvAssignmentString, ";", "");
+    
+        if (csvAssignmentStringElements.size() != 3)
+            continue;
+    
+        assignments.insert(std::make_pair(csvAssignmentStringElements[0], csvAssignmentStringElements[1]));
+    }
+    
+    if (assignments.empty())
+        return false;
+    
+    m_editComponents.clear();
+    for (auto const& assignment : assignments)
+    {
+        for (int i = ROI_Invalid + 1; i < ROI_BridgingMAX; ++i)
+        {
+            auto roid = static_cast<RemoteObjectIdentifier>(i);
+            if (ProcessingEngineConfig::GetObjectDescription(roid).removeCharacters(" ") == assignment.first)
+            {   
+                m_editComponents.push_back(std::make_unique<RemoteObjectToOscAssignmentEditComponent>(roid, assignment.second));
+                addAndMakeVisible(m_editComponents.back().get());
+                break;
+            }
+        }
+    }
 
     resized();
 
@@ -358,80 +356,80 @@ std::map<RemoteObjectIdentifier, juce::String> RemoteObjectToOscAssignerComponen
 
 void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsViewingComponent::onExportClicked()
 {
-    //// prepare a default filename suggestion based on current date and app name
-    //auto initialFolderPathName = File::getSpecialLocation(File::userDocumentsDirectory).getFullPathName();
-    //auto initialFileNameSuggestion = Time::getCurrentTime().formatted("%Y-%m-%d_") + JUCEApplication::getInstance()->getApplicationName() + "_scnIdxToMidiMapping";
-    //auto initialFilePathSuggestion = initialFolderPathName + File::getSeparatorString() + initialFileNameSuggestion;
-    //auto initialFileSuggestion = File(initialFilePathSuggestion);
-    //
-    //// create the file chooser dialog
-    //auto chooser = std::make_unique<FileChooser>("Save current Scene Index to MIDI mapping file as...",
-    //    initialFileSuggestion, "*.csv", true, false, this);
-    //// and trigger opening it
-    //chooser->launchAsync(FileBrowserComponent::saveMode, [this](const FileChooser& chooser)
-    //    {
-    //        auto file = chooser.getResult();
-    //
-    //// verify that the result is valid (ok clicked)
-    //if (!file.getFullPathName().isEmpty())
-    //{
-    //    // enforce the .config extension
-    //    if (file.getFileExtension() != ".csv")
-    //        file = file.withFileExtension(".csv");
-    //
-    //    if (file.hasWriteAccess())
-    //    {
-    //        FileOutputStream outputStream(file);
-    //        if (outputStream.openedOk())
-    //        {
-    //            outputStream.setPosition(0);
-    //            outputStream.truncate();
-    //
-    //            if (m_contentComponent)
-    //            {
-    //                outputStream.writeText(m_contentComponent->DumpCurrentAssignmentsToCsvString(), false, false, nullptr);
-    //                outputStream.flush();
-    //            }
-    //        }
-    //        else
-    //            ShowUserErrorNotification(SEC_SaveScnIdxToMIDI_CannotWrite);
-    //    }
-    //    else
-    //        ShowUserErrorNotification(SEC_SaveScnIdxToMIDI_CannotAccess);
-    //
-    //}
-    //delete static_cast<const FileChooser*>(&chooser);
-    //    });
-    //chooser.release();
+    // prepare a default filename suggestion based on current date and app name
+    auto initialFolderPathName = File::getSpecialLocation(File::userDocumentsDirectory).getFullPathName();
+    auto initialFileNameSuggestion = Time::getCurrentTime().formatted("%Y-%m-%d_") + JUCEApplication::getInstance()->getApplicationName() + "_CustomOscMapping";
+    auto initialFilePathSuggestion = initialFolderPathName + File::getSeparatorString() + initialFileNameSuggestion;
+    auto initialFileSuggestion = File(initialFilePathSuggestion);
+    
+    // create the file chooser dialog
+    auto chooser = std::make_unique<FileChooser>("Save current custom OSC mapping file as...",
+        initialFileSuggestion, "*.csv", true, false, this);
+    // and trigger opening it
+    chooser->launchAsync(FileBrowserComponent::saveMode, [this](const FileChooser& chooser)
+        {
+            auto file = chooser.getResult();
+    
+    // verify that the result is valid (ok clicked)
+    if (!file.getFullPathName().isEmpty())
+    {
+        // enforce the .config extension
+        if (file.getFileExtension() != ".csv")
+            file = file.withFileExtension(".csv");
+    
+        if (file.hasWriteAccess())
+        {
+            FileOutputStream outputStream(file);
+            if (outputStream.openedOk())
+            {
+                outputStream.setPosition(0);
+                outputStream.truncate();
+    
+                if (m_contentComponent)
+                {
+                    outputStream.writeText(m_contentComponent->DumpCurrentAssignmentsToCsvString(), false, false, nullptr);
+                    outputStream.flush();
+                }
+            }
+            else
+                ShowUserErrorNotification(SEC_SaveCustomOSC_CannotWrite);
+        }
+        else
+            ShowUserErrorNotification(SEC_SaveCustomOSC_CannotAccess);
+    
+    }
+    delete static_cast<const FileChooser*>(&chooser);
+        });
+    chooser.release();
 }
 
 void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsViewingComponent::onImportClicked()
 {
-    //// create the file chooser dialog
-    //auto chooser = std::make_unique<FileChooser>("Select a Scene Index to MIDI mapping file to import...",
-    //    File::getSpecialLocation(File::userDocumentsDirectory), String(), true, false, this); // all filepatterns are allowed for loading (currently seems to not work on iOS and not be regarded on macOS at all)
-    //// and trigger opening it
-    //chooser->launchAsync(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, [this](const FileChooser& chooser)
-    //    {
-    //        auto file = chooser.getResult();
-    //
-    //// verify that the result is valid (ok clicked)
-    //if (!file.getFullPathName().isEmpty())
-    //{
-    //    FileInputStream inputStream(file);
-    //    if (inputStream.openedOk())
-    //    {
-    //        auto csvFileContents = inputStream.readEntireStreamAsString();
-    //        if (m_contentComponent)
-    //            if (!m_contentComponent->ReadAssignmentsFromCsvString(csvFileContents))
-    //                ShowUserErrorNotification(SEC_LoadScnIdxToMIDI_InvalidFile);
-    //    }
-    //    else
-    //        ShowUserErrorNotification(SEC_LoadScnIdxToMIDI_CannotAccess);
-    //}
-    //delete static_cast<const FileChooser*>(&chooser);
-    //    });
-    //chooser.release();
+    // create the file chooser dialog
+    auto chooser = std::make_unique<FileChooser>("Select a custom OSC mapping file to import...",
+        File::getSpecialLocation(File::userDocumentsDirectory), String(), true, false, this); // all filepatterns are allowed for loading (currently seems to not work on iOS and not be regarded on macOS at all)
+    // and trigger opening it
+    chooser->launchAsync(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, [this](const FileChooser& chooser)
+        {
+            auto file = chooser.getResult();
+    
+    // verify that the result is valid (ok clicked)
+    if (!file.getFullPathName().isEmpty())
+    {
+        FileInputStream inputStream(file);
+        if (inputStream.openedOk())
+        {
+            auto csvFileContents = inputStream.readEntireStreamAsString();
+            if (m_contentComponent)
+                if (!m_contentComponent->ReadAssignmentsFromCsvString(csvFileContents))
+                    ShowUserErrorNotification(SEC_LoadCustomOSC_InvalidFile);
+        }
+        else
+            ShowUserErrorNotification(SEC_LoadCustomOSC_CannotAccess);
+    }
+    delete static_cast<const FileChooser*>(&chooser);
+        });
+    chooser.release();
 }
 
 void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsViewingComponent::onCloseClicked()

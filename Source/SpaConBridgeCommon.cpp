@@ -301,6 +301,8 @@ const String GetErrorTitle(const SpaConBridgeErrorCode errorCode)
 	case SEC_LoadConfig_ConfigInit:
 	case SEC_LoadScnIdxToMIDI_CannotAccess:
 	case SEC_LoadScnIdxToMIDI_InvalidFile:
+	case SEC_LoadCustomOSC_CannotAccess:
+	case SEC_LoadCustomOSC_InvalidFile:
 		return "Loading Failed";
 	case SEC_SaveConfig_CannotAccess:
 	case SEC_SaveConfig_InternalError:
@@ -308,6 +310,8 @@ const String GetErrorTitle(const SpaConBridgeErrorCode errorCode)
 	case SEC_SaveConfig_CannotWrite:
 	case SEC_SaveScnIdxToMIDI_CannotAccess:
 	case SEC_SaveScnIdxToMIDI_CannotWrite:
+	case SEC_SaveCustomOSC_CannotAccess:
+	case SEC_SaveCustomOSC_CannotWrite:
 		return "Saving Failed";
 	case SEC_LoadImage_CannotAccess:
 	case SEC_LoadImage_CannotRead:
@@ -353,11 +357,16 @@ const String GetErrorInfo(const SpaConBridgeErrorCode errorCode)
 	case SEC_LoadImage_InvalidImage:
 		return "The chosen image is invalid for usage in " + JUCEApplication::getInstance()->getApplicationName();
 	case SEC_LoadScnIdxToMIDI_InvalidFile:
-		return "The chosen file does not contain valid Scene Index to MIDI mapping data"; 
+		return "The chosen file does not contain valid Scene Index to MIDI mapping data";
+	case SEC_LoadCustomOSC_InvalidFile:
+		return "The chosen file does not contain valid custom OSC mapping data"; 
 	case SEC_LoadScnIdxToMIDI_CannotAccess:
 	case SEC_SaveScnIdxToMIDI_CannotAccess:
+	case SEC_LoadCustomOSC_CannotAccess:
+	case SEC_SaveCustomOSC_CannotAccess:
 		return JUCEApplication::getInstance()->getApplicationName() + " is not allowed to access the chosen file location.";
 	case SEC_SaveScnIdxToMIDI_CannotWrite:
+	case SEC_SaveCustomOSC_CannotWrite:
 		return JUCEApplication::getInstance()->getApplicationName() + " is not allowed to write to the chosen file location.";
 	case SEC_None:
 	default:

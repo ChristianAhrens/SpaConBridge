@@ -14,15 +14,11 @@ AppBundlePath=Builds/MacOSX/build/Release
 CreateDmgPath=submodules/create-dmg/create-dmg
 DmgTargetPath=SpaConBridge.dmg
 
-# build the project
+# build the project and create dmg
 cd Resources/Deployment/macOS
 ./build_project.sh
+./create_diskimage.sh
 cd ../../../
-
-# create project disk image
-test -f "$DmgTargetPath" && rm "$DmgTargetPath"
-ln -s /Applications "$AppBundlePath"/Applications
-"$CreateDmgPath" --window-size 410 240 "$DmgTargetPath" "$AppBundlePath"
 
 # codesign the disk image
 codesign --force --sign "$CodesignCertName" "$DmgTargetPath"

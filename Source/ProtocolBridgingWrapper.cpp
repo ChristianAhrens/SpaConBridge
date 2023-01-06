@@ -231,6 +231,9 @@ bool ProtocolBridgingWrapper::setStateXml(XmlElement* stateXml)
 			auto yamahaOSCProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(YAMAHAOSC_PROCESSINGPROTOCOL_ID));
 			if (yamahaOSCProtocolXmlElement)
 				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_YamahaOSC, *yamahaOSCProtocolXmlElement));
+			auto remapOSCProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(REMAPOSC_PROCESSINGPROTOCOL_ID));
+			if (remapOSCProtocolXmlElement)
+				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_RemapOSC, *remapOSCProtocolXmlElement));
 
 			return SetBridgingNodeStateXml(nodeXmlElement, true);
 		}
@@ -436,6 +439,18 @@ bool ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridg
 
 			if ((bridgingProtocolsToActivate & PBT_YamahaOSC) == PBT_YamahaOSC)
 				nodeXmlElement->addChildElement(yamahaOSCBridgingXmlElement.release());
+		}
+	}
+
+	// Remap OSC protocol - RoleB
+	{
+		auto remapOSCBridgingXmlElement = SetupRemapOSCBridgingProtocol();
+		if (remapOSCBridgingXmlElement)
+		{
+			m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_RemapOSC, *remapOSCBridgingXmlElement));
+
+			if ((bridgingProtocolsToActivate & PBT_RemapOSC) == PBT_RemapOSC)
+				nodeXmlElement->addChildElement(remapOSCBridgingXmlElement.release());
 		}
 	}
 
@@ -705,6 +720,44 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupYamahaOSCBridgingProto
 	auto mappingAreaIdXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MAPPINGAREA));
 	if (mappingAreaIdXmlElement)
 		mappingAreaIdXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), PROTOCOL_DEFAULT_MAPPINGAREA);
+
+	auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
+	auto mutedObjects = std::vector<RemoteObject>();
+	if (mutedObjsXmlElement)
+		ProcessingEngineConfig::WriteMutedObjects(mutedObjsXmlElement, mutedObjects);
+
+	return protocolBXmlElement;
+}
+
+/**
+ * Method to create the default Remap OSC bridging protocol xml element.
+ * @return	The protocol xml element that was created
+ */
+std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupRemapOSCBridgingProtocol()
+{
+	// Remap OSC protocol - RoleB
+	auto protocolBXmlElement = std::make_unique<XmlElement>(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLB));
+
+	protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), REMAPOSC_PROCESSINGPROTOCOL_ID);
+
+	protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), ProcessingEngineConfig::ProtocolTypeToString(PT_RemapOSCProtocol));
+	protocolBXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::USESACTIVEOBJ), 0);
+
+	auto clientPortXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+	if (clientPortXmlElement)
+		clientPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_REMAPOSC_DEVICE);
+
+	auto hostPortXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
+	if (hostPortXmlElement)
+		hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), RX_PORT_REMAPOSC_HOST);
+
+	auto ipAdressXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
+	if (ipAdressXmlElement)
+		ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
+
+	auto dataSendingDisabledXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATASENDINGDISABLED));
+	if (dataSendingDisabledXmlElement)
+		dataSendingDisabledXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
 
 	auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
 	auto mutedObjects = std::vector<RemoteObject>();
@@ -1845,7 +1898,9 @@ bool ProtocolBridgingWrapper::SetProtocolDataSendingDisabled(ProtocolId protocol
 }
 
 /**
- *
+ * Gets the currently set xy combine flag for the given protocol.
+ * @param protocolId	The id of the protocol to get the flag.
+ * @return	The requested flag value.
  */
 bool ProtocolBridgingWrapper::GetProtocolBridgingXYMessageCombined(ProtocolId protocolId)
 {
@@ -1867,7 +1922,13 @@ bool ProtocolBridgingWrapper::GetProtocolBridgingXYMessageCombined(ProtocolId pr
 }
 
 /**
- *
+ * Sets the desired xy combine flag for the given protocol.
+ * This method inserts the value into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param protocolId	The id of the protocol to set the flag value for.
+ * @param combined		The xy combined flag value.
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
+ * @return	True on succes, false on failure
  */
 bool ProtocolBridgingWrapper::SetProtocolBridgingXYMessageCombined(ProtocolId protocolId, bool combined, bool dontSendNotification)
 {
@@ -1884,6 +1945,124 @@ bool ProtocolBridgingWrapper::SetProtocolBridgingXYMessageCombined(ProtocolId pr
 			}
 			else
 				return false;
+		}
+		else
+			return false;
+
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
+}
+
+/**
+ * Gets the currently set osc remappings for the given protocol.
+ * @param protocolId	The id of the protocol to get the assignments for.
+ * @return	The requested osc remapping assignments.
+ */
+std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> ProtocolBridgingWrapper::GetOscRemapAssignments(ProtocolId protocolId)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto oscRemappingsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REMAPPINGS));
+			if (oscRemappingsXmlElement)
+			{
+				std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> oscRemappings;
+				auto oscRemappingXmlElement = oscRemappingsXmlElement->getFirstChildElement();
+				while (nullptr != oscRemappingXmlElement)
+				{
+					for (int i = ROI_Invalid + 1; i < ROI_BridgingMAX; ++i)
+					{
+						auto ROId = static_cast<RemoteObjectIdentifier>(i);
+						if (oscRemappingXmlElement->getTagName() == ProcessingEngineConfig::GetObjectDescription(ROId).removeCharacters(" "))
+						{
+							auto oscRemappingTextElement = oscRemappingXmlElement->getFirstChildElement();
+							if (oscRemappingTextElement && oscRemappingTextElement->isTextElement())
+							{
+								auto remapPattern = oscRemappingTextElement->getText();
+								auto minVal = static_cast<float>(oscRemappingXmlElement->getDoubleAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MINVALUE)));
+								auto maxVal = static_cast<float>(oscRemappingXmlElement->getDoubleAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MAXVALUE)));
+								oscRemappings.insert(std::make_pair(ROId, std::make_pair(remapPattern, juce::Range<float>(minVal, maxVal))));
+							}
+						}
+					}
+
+					oscRemappingXmlElement = oscRemappingXmlElement->getNextElement();
+				}
+
+				return oscRemappings;
+			}
+		}
+	}
+
+	return std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>();
+}
+
+/**
+ * Sets the given osc remappings for the given protocol.
+ * This method inserts the value into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param protocolId			The id of the protocol to set the flag value for.
+ * @param oscRemapAssignments	The new osc remapping assignments value.
+ * @param dontSendNotification	Flag if change notification shall be broadcasted.
+ * @return	True on succes, false on failure
+ */
+bool ProtocolBridgingWrapper::SetOscRemapAssignments(ProtocolId protocolId, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& oscRemapAssignments, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto oscRemappingsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REMAPPINGS));
+			if (!oscRemappingsXmlElement)
+				oscRemappingsXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REMAPPINGS));
+
+			// collect the xml elements that are no longer used according to new incoming assignments
+			std::vector<XmlElement*> noLongerUsedElements;
+			auto remappingXmlElement = oscRemappingsXmlElement->getFirstChildElement();
+			while (nullptr != remappingXmlElement)
+			{
+				bool stillInUse = false;
+				for (auto const& assi : oscRemapAssignments)
+					if (ProcessingEngineConfig::GetObjectDescription(assi.first).removeCharacters(" ") == remappingXmlElement->getTagName())
+						stillInUse = true;
+				if (!stillInUse)
+					noLongerUsedElements.push_back(remappingXmlElement);
+
+				remappingXmlElement = remappingXmlElement->getNextElement();
+			}
+			// and remove them
+			for (auto const& childToRemove : noLongerUsedElements)
+				oscRemappingsXmlElement->removeChildElement(childToRemove, true);
+
+			// create or update the xml elements according to new incoming assignments
+			for (auto const& assi : oscRemapAssignments)
+			{
+				auto oscRemappingXmlElement = oscRemappingsXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(assi.first).removeCharacters(" "));
+				if (oscRemappingXmlElement)
+				{
+					auto oscRemappingTextXmlElement = oscRemappingXmlElement->getFirstChildElement();
+					if (oscRemappingTextXmlElement && oscRemappingTextXmlElement->isTextElement())
+						oscRemappingTextXmlElement->setText(assi.second.first);
+					else
+						oscRemappingTextXmlElement->addTextElement(assi.second.first);
+					oscRemappingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MINVALUE), static_cast<double>(assi.second.second.getStart()));
+					oscRemappingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MAXVALUE), static_cast<double>(assi.second.second.getEnd()));
+				}
+				else
+				{
+					oscRemappingXmlElement = oscRemappingsXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectDescription(assi.first).removeCharacters(" "));
+					oscRemappingXmlElement->addTextElement(assi.second.first);
+					oscRemappingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MINVALUE), static_cast<double>(assi.second.second.getStart()));
+					oscRemappingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MAXVALUE), static_cast<double>(assi.second.second.getEnd()));
+				}
+			}
 		}
 		else
 			return false;
@@ -1971,6 +2150,10 @@ ProtocolBridgingType ProtocolBridgingWrapper::GetActiveBridgingProtocols()
 		protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(YAMAHAOSC_PROCESSINGPROTOCOL_ID));
 		if (protocolXmlElement)
 			activeBridgingTypes |= PBT_YamahaOSC;
+
+		protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(REMAPOSC_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+			activeBridgingTypes |= PBT_RemapOSC;
 	}
 
 	return activeBridgingTypes;
@@ -2001,6 +2184,8 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 		auto removeADMOSCBridging = (!(desiredActiveBridgingTypes & PBT_ADMOSC) && (currentlyActiveBridgingTypes & PBT_ADMOSC));
 		auto addYamahaOSCBridging = ((desiredActiveBridgingTypes & PBT_YamahaOSC) && !(currentlyActiveBridgingTypes & PBT_YamahaOSC));
 		auto removeYamahaOSCBridging = (!(desiredActiveBridgingTypes & PBT_YamahaOSC) && (currentlyActiveBridgingTypes & PBT_YamahaOSC));
+		auto addRemapOSCBridging = ((desiredActiveBridgingTypes & PBT_RemapOSC) && !(currentlyActiveBridgingTypes & PBT_RemapOSC));
+		auto removeRemapOSCBridging = (!(desiredActiveBridgingTypes & PBT_RemapOSC) && (currentlyActiveBridgingTypes & PBT_RemapOSC));
 
 		auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 		if (nodeXmlElement)
@@ -2099,6 +2284,20 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 				if (protocolXmlElement)
 				{
 					m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_YamahaOSC, *protocolXmlElement));
+					nodeXmlElement->removeChildElement(protocolXmlElement, true);
+				}
+			}
+
+			if (addRemapOSCBridging)
+			{
+				nodeXmlElement->addChildElement(std::make_unique<XmlElement>(m_bridgingProtocolCacheMap.at(PBT_RemapOSC)).release());
+			}
+			else if (removeRemapOSCBridging)
+			{
+				auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(REMAPOSC_PROCESSINGPROTOCOL_ID));
+				if (protocolXmlElement)
+				{
+					m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_RemapOSC, *protocolXmlElement));
 					nodeXmlElement->removeChildElement(protocolXmlElement, true);
 				}
 			}
@@ -4173,6 +4372,221 @@ int ProtocolBridgingWrapper::GetYamahaOSCMappingArea()
 bool ProtocolBridgingWrapper::SetYamahaOSCMappingArea(int mappingAreaId, bool dontSendNotification)
 {
 	return SetProtocolMappingArea(YAMAHAOSC_PROCESSINGPROTOCOL_ID, mappingAreaId, dontSendNotification);
+}
+
+/**
+ * Gets the mute state of the given soundobject processor
+ * @param soundobjectProcessorId The id of the source for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteRemapOSCSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId)
+{
+	return GetMuteProtocolSoundobjectProcessorId(REMAPOSC_PROCESSINGPROTOCOL_ID, soundobjectProcessorId);
+}
+
+/**
+ * Sets the given soundobjectProcessor to be (un-)muted
+ * @param soundobjectProcessorId The id of the source that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteRemapOSCSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolSoundobjectProcessorId(REMAPOSC_PROCESSINGPROTOCOL_ID, soundobjectProcessorId);
+	else
+		return SetUnmuteProtocolSoundobjectProcessorId(REMAPOSC_PROCESSINGPROTOCOL_ID, soundobjectProcessorId);
+}
+
+/**
+ * Sets the given soundobject processors to be (un-)muted
+ * @param soundobjectProcessorIds The ids of the sources that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteRemapOSCSoundobjectProcessorIds(const std::vector<SoundobjectProcessorId>& soundobjectProcessorIds, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolSoundobjectProcessorIds(REMAPOSC_PROCESSINGPROTOCOL_ID, soundobjectProcessorIds);
+	else
+		return SetUnmuteProtocolSoundobjectProcessorIds(REMAPOSC_PROCESSINGPROTOCOL_ID, soundobjectProcessorIds);
+}
+
+/**
+ * Gets the mute state of the given MatrixInputProcessor
+ * @param matrixInputProcessorId The id of the matrixInputProcessor for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteRemapOSCMatrixInputProcessorId(MatrixInputProcessorId matrixInputProcessorId)
+{
+	return GetMuteProtocolMatrixInputProcessorId(REMAPOSC_PROCESSINGPROTOCOL_ID, matrixInputProcessorId);
+}
+
+/**
+ * Sets the given MatrixInputProcessor to be (un-)muted
+ * @param matrixInputProcessorId The id of the matrixInputProcessor that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteRemapOSCMatrixInputProcessorId(MatrixInputProcessorId matrixInputProcessorId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixInputProcessorId(REMAPOSC_PROCESSINGPROTOCOL_ID, matrixInputProcessorId);
+	else
+		return SetUnmuteProtocolMatrixInputProcessorId(REMAPOSC_PROCESSINGPROTOCOL_ID, matrixInputProcessorId);
+}
+
+/**
+ * Sets the given MatrixInputProcessors to be (un-)muted
+ * @param matrixInputProcessorIds The ids of the matrixInputProcessors that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteRemapOSCMatrixInputProcessorIds(const std::vector<MatrixInputProcessorId>& matrixInputProcessorIds, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixInputProcessorIds(REMAPOSC_PROCESSINGPROTOCOL_ID, matrixInputProcessorIds);
+	else
+		return SetUnmuteProtocolMatrixInputProcessorIds(REMAPOSC_PROCESSINGPROTOCOL_ID, matrixInputProcessorIds);
+}
+
+/**
+ * Gets the mute state of the given matrixOutputProcessor
+ * @param matrixOutputProcessorId The id of the matrixOutputProcessor for which the mute state shall be returned
+ * @return The mute state
+ */
+bool ProtocolBridgingWrapper::GetMuteRemapOSCMatrixOutputProcessorId(MatrixOutputProcessorId matrixOutputProcessorId)
+{
+	return GetMuteProtocolMatrixOutputProcessorId(REMAPOSC_PROCESSINGPROTOCOL_ID, matrixOutputProcessorId);
+}
+
+/**
+ * Sets the given MatrixOutputProcessor to be (un-)muted
+ * @param matrixOutputProcessorId The id of the matrixOutputProcessor that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteRemapOSCMatrixOutputProcessorId(MatrixOutputProcessorId matrixOutputProcessorId, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixOutputProcessorId(REMAPOSC_PROCESSINGPROTOCOL_ID, matrixOutputProcessorId);
+	else
+		return SetUnmuteProtocolMatrixOutputProcessorId(REMAPOSC_PROCESSINGPROTOCOL_ID, matrixOutputProcessorId);
+}
+
+/**
+ * Sets the given MatrixOutputProcessors to be (un-)muted
+ * @param matrixOutputProcessorIds The ids of the matrixOutputProcessor that shall be muted
+ * @param mute Set to true for mute and false for unmute
+ * @return True on success, false on failure
+ */
+bool ProtocolBridgingWrapper::SetMuteRemapOSCMatrixOutputProcessorIds(const std::vector<MatrixOutputProcessorId>& matrixOutputProcessorIds, bool mute)
+{
+	if (mute)
+		return SetMuteProtocolMatrixOutputProcessorIds(REMAPOSC_PROCESSINGPROTOCOL_ID, matrixOutputProcessorIds);
+	else
+		return SetUnmuteProtocolMatrixOutputProcessorIds(REMAPOSC_PROCESSINGPROTOCOL_ID, matrixOutputProcessorIds);
+}
+
+/**
+ * Gets the currently set ADM client ip address.
+ * This method forwards the call to the generic implementation.
+ * @return	The ip address string
+ */
+String ProtocolBridgingWrapper::GetRemapOSCIpAddress()
+{
+	return GetProtocolIpAddress(REMAPOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol client ip address.
+ * This method forwards the call to the generic implementation.
+ * @param ipAddress	The new ip address string
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetRemapOSCIpAddress(String ipAddress, bool dontSendNotification)
+{
+	return SetProtocolIpAddress(REMAPOSC_PROCESSINGPROTOCOL_ID, ipAddress, dontSendNotification);
+}
+
+/**
+ * Gets the desired protocol listening port.
+ * This method forwards the call to the generic implementation.
+ * @return	The requested listening port
+ */
+int ProtocolBridgingWrapper::GetRemapOSCListeningPort()
+{
+	return GetProtocolListeningPort(REMAPOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol listening port.
+ * This method forwards the call to the generic implementation.
+ * @param	listeningPort	The protocol port to set as listening port
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetRemapOSCListeningPort(int listeningPort, bool dontSendNotification)
+{
+	return SetProtocolListeningPort(REMAPOSC_PROCESSINGPROTOCOL_ID, listeningPort, dontSendNotification);
+}
+
+/**
+ * Gets the desired protocol remote (target client) port.
+ * This method forwards the call to the generic implementation.
+ * @return	The requested remote port
+ */
+int ProtocolBridgingWrapper::GetRemapOSCRemotePort()
+{
+	return GetProtocolRemotePort(REMAPOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol remote port.
+ * This method forwards the call to the generic implementation.
+ * @param	remotePort	The protocol port to set as remote port
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetRemapOSCRemotePort(int remotePort, bool dontSendNotification)
+{
+	return SetProtocolRemotePort(REMAPOSC_PROCESSINGPROTOCOL_ID, remotePort, dontSendNotification);
+}
+
+/**
+ * Gets the desired protocol OSC string to roi remappings.
+ * This method forwards the call to the generic implementation.
+ * @return	The requested OSC string to roi remappings
+ */
+std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> ProtocolBridgingWrapper::GetRemapOSCOscRemapAssignments()
+{
+	return GetOscRemapAssignments(REMAPOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol OSC string to roi remappings.
+ * This method forwards the call to the generic implementation.
+ * @param	oscRemapAssignments	The protocol OSC string to roi remappings to set
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetRemapOSCOscRemapAssignments(const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& oscRemapAssignments, bool dontSendNotification)
+{
+	return SetOscRemapAssignments(REMAPOSC_PROCESSINGPROTOCOL_ID, oscRemapAssignments, dontSendNotification);
+}
+
+/**
+ *
+ */
+int ProtocolBridgingWrapper::GetRemapOSCDataSendingDisabled()
+{
+	return GetProtocolDataSendingDisabled(REMAPOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ *
+ */
+bool ProtocolBridgingWrapper::SetRemapOSCDataSendingDisabled(int disabled, bool dontSendNotification)
+{
+	return SetProtocolDataSendingDisabled(REMAPOSC_PROCESSINGPROTOCOL_ID, disabled, dontSendNotification);
 }
 
 }

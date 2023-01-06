@@ -174,6 +174,10 @@ void StatisticsPageComponent::HandleMessageData(NodeId nodeId, ProtocolId sender
 		bridgingProtocol = PBT_YamahaOSC;
 		logSource = StatisticsLog::StatisticsLogSource::SLS_YamahaOSC;
 		break;
+	case REMAPOSC_PROCESSINGPROTOCOL_ID:
+		bridgingProtocol = PBT_RemapOSC;
+		logSource = StatisticsLog::StatisticsLogSource::SLS_RemapOSC;
+		break;
 	default:
 		return;
 	}

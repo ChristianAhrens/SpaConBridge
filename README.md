@@ -280,6 +280,7 @@ For details on the settings for the implemented protocols, see the individual do
   * [Generic MIDI communication](Resources/Documentation/BridgingProtocols/GenericMIDI.md)
   * [Yamaha OSC communication *](Resources/Documentation/BridgingProtocols/YamahaOSC.md)
   * [ADM OSC communication *](Resources/Documentation/BridgingProtocols/ADMOSC.md)
+  * [Customized OSC communication *](Resources/Documentation/BridgingProtocols/RemapOSC.md)
   
   &ast; Implemented using simulation only -> feature level 'Alpha'/'Beta'.
 

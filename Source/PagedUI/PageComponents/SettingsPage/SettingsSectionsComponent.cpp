@@ -19,9 +19,13 @@
 
 #include "SettingsSectionsComponent.h"
 
+#include "../HeaderWithElmListComponent.h"
 #include "../../../Controller.h"
 #include "../../../LookAndFeel.h"
 #include "../../PageComponentManager.h"
+
+#include "SceneIndexToMidiAssignerComponent.h"
+#include "RemoteObjectToOscAssignerComponent.h"
 
 #include <Image_utils.h>
 
@@ -192,6 +196,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 	createGenericMIDISettingsSection();
 	createADMOSCSettingsSection();
 	createYamahaOSCSettingsSection();
+	createRemapOSCSettingsSection();
 }
 
 /**
@@ -854,13 +859,6 @@ void SettingsSectionsComponent::createADMOSCSettingsSection()
 	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCCoordSysModLabel.get(), false, false);
 	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCCoordSysModContainer.get(), true, false);
 
-	m_ADMOSCDisableSendingButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Disable adm return channel");
-	m_ADMOSCDisableSendingButton->setTooltip("Disable sending of value changes to ADM OSC input devices.");
-	m_ADMOSCDisableSendingButton->setImagePosition(Justification::centredLeft);
-	m_ADMOSCDisableSendingButton->setClickingTogglesState(true);
-	m_ADMOSCDisableSendingButton->addListener(this);
-	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCDisableSendingButton.get(), true, false);
-
 	m_ADMOSCxyMsgSndModeButton = std::make_unique<JUCEAppBasics::SplitButtonComponent>();
 	m_ADMOSCxyMsgSndModeButton->addListener(this);
 	m_ADMOSCxyMsgSndModeButtonIds[m_ADMOSCxyMsgSndModes[0]] = m_ADMOSCxyMsgSndModeButton->addButton(m_ADMOSCxyMsgSndModes[0]);
@@ -872,7 +870,74 @@ void SettingsSectionsComponent::createADMOSCSettingsSection()
 	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCxyMsgSndLabel.get(), false, false);
 	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCxyMsgSndModeButton.get(), true, false);
 
+	m_ADMOSCDisableSendingButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Disable return channel");
+	m_ADMOSCDisableSendingButton->setTooltip("Disable sending of value changes to " + GetProtocolBridgingNiceName(PBT_ADMOSC) + " input devices.");
+	m_ADMOSCDisableSendingButton->setImagePosition(Justification::centredLeft);
+	m_ADMOSCDisableSendingButton->setClickingTogglesState(true);
+	m_ADMOSCDisableSendingButton->addListener(this);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCDisableSendingButton.get(), true, false);
+
 	m_ADMOSCBridgingSettings->resized();
+}
+
+/**
+ * Helper method to create and setup objects for Remap OSC settings section
+ */
+void SettingsSectionsComponent::createRemapOSCSettingsSection()
+{
+	// RemapOSC settings section
+	m_RemapOSCBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
+	m_RemapOSCBridgingSettings->setBackgroundDecorationText("Alpha");
+	m_RemapOSCBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_RemapOSC) + " Bridging");
+	m_RemapOSCBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_RemapOSC) + " Bridging Settings");
+	m_RemapOSCBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/RemapOSC.md"));
+	m_RemapOSCBridgingSettings->setHasActiveToggle(true);
+	m_RemapOSCBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
+	addAndMakeVisible(m_RemapOSCBridgingSettings.get());
+
+	m_RemapOSCIpAddressEdit = std::make_unique<TextEditor>();
+	m_RemapOSCIpAddressEdit->addListener(this);
+	m_RemapOSCIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
+	m_RemapOSCIpAddressLabel = std::make_unique<Label>("RemapOSCIpAddressEdit", "IP Address");
+	m_RemapOSCIpAddressLabel->setJustificationType(Justification::centred);
+	m_RemapOSCIpAddressLabel->attachToComponent(m_RemapOSCIpAddressEdit.get(), true);
+	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCIpAddressLabel.get(), false, false);
+	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCIpAddressEdit.get(), true, false);
+
+	m_RemapOSCListeningPortEdit = std::make_unique<TextEditor>();
+	m_RemapOSCListeningPortEdit->addListener(this);
+	m_RemapOSCListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
+	m_RemapOSCListeningPortLabel = std::make_unique<Label>("RemapOSCListeningPortEdit", "Listening Port");
+	m_RemapOSCListeningPortLabel->setJustificationType(Justification::centred);
+	m_RemapOSCListeningPortLabel->attachToComponent(m_RemapOSCListeningPortEdit.get(), true);
+	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCListeningPortLabel.get(), false, false);
+	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCListeningPortEdit.get(), true, false);
+
+	m_RemapOSCRemotePortEdit = std::make_unique<TextEditor>();
+	m_RemapOSCRemotePortEdit->addListener(this);
+	m_RemapOSCRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
+	m_RemapOSCRemotePortLabel = std::make_unique<Label>("RemapOSCRemotePortEdit", "Remote Port");
+	m_RemapOSCRemotePortLabel->setJustificationType(Justification::centred);
+	m_RemapOSCRemotePortLabel->attachToComponent(m_RemapOSCRemotePortEdit.get(), true);
+	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCRemotePortLabel.get(), false, false);
+	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCRemotePortEdit.get(), true, false);
+
+	m_RemapOSCAssignmentsEditor = std::make_unique<RemoteObjectToOscAssignerComponent>();
+	m_RemapOSCAssignmentsEditor->onAssignmentsSet = [=](Component* sender, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& roiToCustomOscAssis) { handleRemapOscAssisSet(sender, roiToCustomOscAssis); };
+	m_RemapOSCAssignmentsLabel = std::make_unique<Label>("RemapOSCAssignmentsEditor", GetProtocolBridgingNiceName(PBT_RemapOSC));
+	m_RemapOSCAssignmentsLabel->setJustificationType(Justification::centredLeft);
+	m_RemapOSCAssignmentsLabel->attachToComponent(m_RemapOSCAssignmentsEditor.get(), true);
+	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCAssignmentsLabel.get(), false, false);
+	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCAssignmentsEditor.get(), true, false);
+
+	m_RemapOSCDisableSendingButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Disable return channel");
+	m_RemapOSCDisableSendingButton->setTooltip("Disable sending of value changes to " + GetProtocolBridgingNiceName(PBT_RemapOSC) + " input devices.");
+	m_RemapOSCDisableSendingButton->setImagePosition(Justification::centredLeft);
+	m_RemapOSCDisableSendingButton->setClickingTogglesState(true);
+	m_RemapOSCDisableSendingButton->addListener(this);
+	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCDisableSendingButton.get(), true, false);
+
+	m_RemapOSCBridgingSettings->resized();
 }
 
 /**
@@ -910,7 +975,8 @@ void SettingsSectionsComponent::resized()
 		+ (m_RTTrPMBridgingSettings->getHeight() + (2 * margin))
 		+ (m_GenericMIDIBridgingSettings->getHeight() + (2 * margin))
 		+ (m_ADMOSCBridgingSettings->getHeight() + (2 * margin))
-		+ (m_YamahaOSCBridgingSettings->getHeight() + (2 * margin));
+		+ (m_YamahaOSCBridgingSettings->getHeight() + (2 * margin))
+		+ (m_RemapOSCBridgingSettings->getHeight() + (2 * margin));
 
 	auto bounds = getLocalBounds();
 	if (bounds.getWidth() < minWidth || bounds.getHeight() < minHeight)
@@ -953,6 +1019,9 @@ void SettingsSectionsComponent::resized()
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
 		FlexItem(*m_YamahaOSCBridgingSettings.get())
 			.withHeight(static_cast<float>(m_YamahaOSCBridgingSettings->getHeight()))
+			.withMargin(FlexItem::Margin(margin, margin, margin, margin)),
+		FlexItem(*m_RemapOSCBridgingSettings.get())
+			.withHeight(static_cast<float>(m_RemapOSCBridgingSettings->getHeight()))
 			.withMargin(FlexItem::Margin(margin, margin, margin, margin)) });
 	fb.performLayout(bounds);
 }
@@ -980,6 +1049,7 @@ void SettingsSectionsComponent::lookAndFeelChanged()
 #if USE_FULLSCREEN_WINDOWMODE_TOGGLE
 	UpdateDrawableButtonImages(m_ToggleFullscreenButton, BinaryData::open_in_full24px_svg, &getLookAndFeel());
 #endif
+	UpdateDrawableButtonImages(m_RemapOSCDisableSendingButton, BinaryData::mobiledata_off24px_svg, &getLookAndFeel());
 }
 
 /**
@@ -1047,6 +1117,12 @@ void SettingsSectionsComponent::buttonClicked(Button* button)
 	else if (m_GenericOSCDisableSendingButton.get() == button)
 	{
 		ctrl->SetBridgingDataSendingDisabled(PBT_GenericOSC, m_GenericOSCDisableSendingButton->getToggleState() ? 1 : 0);
+	}
+
+	// Remapped OSC Settings section
+	else if (m_RemapOSCDisableSendingButton.get() == button)
+	{
+		ctrl->SetBridgingDataSendingDisabled(PBT_RemapOSC, m_RemapOSCDisableSendingButton->getToggleState() ? 1 : 0);
 	}
 }
 
@@ -1215,6 +1291,16 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 	else if (m_YamahaOSCListeningPortEdit && m_YamahaOSCListeningPortEdit.get() == &editor)
 		ctrl->SetBridgingListeningPort(PBT_YamahaOSC, m_YamahaOSCListeningPortEdit->getText().getIntValue());
 
+	// Remap OSC settings section
+	else if (m_RemapOSCIpAddressEdit && m_RemapOSCIpAddressEdit.get() == &editor)
+		ctrl->SetBridgingIpAddress(PBT_RemapOSC, m_RemapOSCIpAddressEdit->getText());
+	else if (m_RemapOSCListeningPortEdit && m_RemapOSCListeningPortEdit.get() == &editor)
+		ctrl->SetBridgingListeningPort(PBT_RemapOSC, m_RemapOSCListeningPortEdit->getText().getIntValue());
+	else if (m_RemapOSCRemotePortEdit && m_RemapOSCRemotePortEdit.get() == &editor)
+		ctrl->SetBridgingRemotePort(PBT_RemapOSC, m_RemapOSCRemotePortEdit->getText().getIntValue());
+	else if (m_RemapOSCListeningPortEdit && m_RemapOSCListeningPortEdit.get() == &editor)
+		ctrl->SetBridgingListeningPort(PBT_RemapOSC, m_RemapOSCListeningPortEdit->getText().getIntValue());
+
 	// return without config update trigger if the editor was unknown
 	else
 		return;
@@ -1313,6 +1399,8 @@ void SettingsSectionsComponent::setSettingsSectionActiveState(HeaderWithElmListC
 		sectionType = PBT_ADMOSC;
 	else if (settingsSection == m_YamahaOSCBridgingSettings.get())
 		sectionType = PBT_YamahaOSC;
+	else if (settingsSection == m_RemapOSCBridgingSettings.get())
+		sectionType = PBT_RemapOSC;
 
 	if (activeState)
 		ctrl->SetActiveProtocolBridging(ctrl->GetActiveProtocolBridging() | sectionType);
@@ -1393,6 +1481,7 @@ void SettingsSectionsComponent::processUpdatedConfig()
 	processUpdatedGenericMIDIConfig();
 	processUpdatedADMOSCConfig();
 	processUpdatedYamahaOSCConfig();
+	processUpdatedRemapOSCConfig();
 }
 
 /**
@@ -1764,6 +1853,37 @@ void SettingsSectionsComponent::processUpdatedADMOSCConfig()
 }
 
 /**
+ * Helper method to update objects for Remap OSC settings section with updated config
+ */
+void SettingsSectionsComponent::processUpdatedRemapOSCConfig()
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
+	// Remap OSC settings section
+	auto remapOSCBridgingActive = (ctrl->GetActiveProtocolBridging() & PBT_RemapOSC) == PBT_RemapOSC;
+	if (m_RemapOSCBridgingSettings)
+		m_RemapOSCBridgingSettings->setToggleActiveState(remapOSCBridgingActive);
+	if (m_RemapOSCIpAddressEdit)
+		m_RemapOSCIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_RemapOSC));
+	if (m_RemapOSCListeningPortEdit)
+		m_RemapOSCListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_RemapOSC)), false);
+	if (m_RemapOSCRemotePortEdit)
+		m_RemapOSCRemotePortEdit->setText(String(ctrl->GetBridgingRemotePort(PBT_RemapOSC)), false);
+
+	if (m_RemapOSCAssignmentsEditor)
+	{
+		auto assignments = ctrl->GetBridgingOscRemapAssignments(PBT_RemapOSC);
+		m_RemapOSCAssignmentsEditor->setCurrentRemoteObjecToOscAssignments(assignments);
+	}
+
+	if (m_RemapOSCDisableSendingButton)
+		m_RemapOSCDisableSendingButton->setToggleState(1 == ctrl->GetBridgingDataSendingDisabled(PBT_RemapOSC), dontSendNotification);
+
+}
+
+/**
  * Callback method to be registered with ZeroconfDiscoveryComponent to handle user input regarding service selection.
  * @param type	The service type that was selected
  * @param info	The detailed info on the service that was selected
@@ -1823,7 +1943,7 @@ void SettingsSectionsComponent::handleMidiAssiSet(Component* sender, const JUCEA
 
 /**
  * Callback method to be registered with SceneIndexToMidiAssignerComponent to handle scene index to midi assignment selection.
- * @param sender	The SceneIndexToMidiAssignerComponent that sent the assignment.
+ * @param sender			The SceneIndexToMidiAssignerComponent that sent the assignment.
  * @param scenesToMidiAssi	The sent assignment that was chosen by user
  */
 void SettingsSectionsComponent::handleScenesToMidiAssiSet(Component* sender, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& scenesToMidiAssi)
@@ -1833,6 +1953,21 @@ void SettingsSectionsComponent::handleScenesToMidiAssiSet(Component* sender, con
 		auto ctrl = Controller::GetInstance();
 		if (ctrl)
 			ctrl->SetBridgingScenesToMidiAssignmentMapping(PBT_GenericMIDI, static_cast<RemoteObjectIdentifier>(m_GenericMIDIRecallSceneAssigner->getReferredId()), scenesToMidiAssi);
+	}
+}
+
+/**
+ * Callback method to be registered with RemoteObjectToOscAssignerComponent to handle custom osc remap assignment selection.
+ * @param sender				The RemoteObjectToOscAssignerComponent that sent the assignment.
+ * @param roiToCustomOscAssis	The sent assignment that was chosen by user
+ */
+void SettingsSectionsComponent::handleRemapOscAssisSet(Component* sender, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& roiToCustomOscAssis)
+{
+	if (m_RemapOSCAssignmentsEditor && sender == m_RemapOSCAssignmentsEditor.get())
+	{
+		auto ctrl = Controller::GetInstance();
+		if (ctrl)
+			ctrl->SetBridgingOscRemapAssignments(PBT_RemapOSC, roiToCustomOscAssis);
 	}
 }
 

@@ -54,8 +54,11 @@ static constexpr int RX_PORT_RTTRPM_HOST = 24100;		//< UDP port to which the Bla
 static constexpr int RX_PORT_YAMAHAOSC_DEVICE = 50016;	//< UDP port which the Yamaha Rivage console is listening to for OSC
 static constexpr int RX_PORT_YAMAHAOSC_HOST = 50017;	//< UDP port to which the Yamaha Rivage console will send OSC replies
 
-static constexpr int RX_PORT_ADMOSC_DEVICE = 50018;	//< UDP port which the Yamaha Rivage console is listening to for OSC
-static constexpr int RX_PORT_ADMOSC_HOST = 50019;	//< UDP port to which the Yamaha Rivage console will send OSC replies
+static constexpr int RX_PORT_ADMOSC_DEVICE = 50018;		//< Default UDP port to use for ADM OSC device side
+static constexpr int RX_PORT_ADMOSC_HOST = 50019;		//< Default UDP port to use for ADM OSC host (spaconbridge) side
+
+static constexpr int RX_PORT_REMAPOSC_DEVICE = 50020;	//< Default UDP port to use for Remap OSC device side
+static constexpr int RX_PORT_REMAPOSC_HOST = 50021;		//< Default UDP port to use for Remap OSC host (spaconbridge) side
 
 /**
  * Pre-define processing bridge config values
@@ -70,6 +73,7 @@ static constexpr int GENERICMIDI_PROCESSINGPROTOCOL_ID = 7;
 static constexpr int YAMAHAOSC_PROCESSINGPROTOCOL_ID = 8;
 static constexpr int ADMOSC_PROCESSINGPROTOCOL_ID = 9;
 static constexpr int DAWPLUGIN_PROCESSINGPROTOCOL_ID = 10;
+static constexpr int REMAPOSC_PROCESSINGPROTOCOL_ID = 11;
 
 class ProtocolBridgingWrapper :
 	public ProcessingEngineNode::NodeListener,
@@ -305,6 +309,30 @@ public:
 	bool SetYamahaOSCMappingArea(int mappingAreaId, bool dontSendNotification = false);
 
 	//==========================================================================
+	bool GetMuteRemapOSCSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId);
+	bool SetMuteRemapOSCSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId, bool mute = true);
+	bool SetMuteRemapOSCSoundobjectProcessorIds(const std::vector<SoundobjectProcessorId>& soundobjectProcessorIds, bool mute = true);
+
+	bool GetMuteRemapOSCMatrixInputProcessorId(MatrixInputProcessorId matrixInputProcessorId);
+	bool SetMuteRemapOSCMatrixInputProcessorId(MatrixInputProcessorId matrixInputProcessorId, bool mute = true);
+	bool SetMuteRemapOSCMatrixInputProcessorIds(const std::vector<MatrixInputProcessorId>& matrixInputProcessorIds, bool mute = true);
+
+	bool GetMuteRemapOSCMatrixOutputProcessorId(MatrixInputProcessorId matrixOutputProcessorId);
+	bool SetMuteRemapOSCMatrixOutputProcessorId(MatrixInputProcessorId matrixOutputProcessorId, bool mute = true);
+	bool SetMuteRemapOSCMatrixOutputProcessorIds(const std::vector<MatrixOutputProcessorId>& matrixOutputProcessorIds, bool mute = true);
+
+	String GetRemapOSCIpAddress();
+	bool SetRemapOSCIpAddress(String ipAddress, bool dontSendNotification = false);
+	int GetRemapOSCListeningPort();
+	bool SetRemapOSCListeningPort(int listeningPort, bool dontSendNotification = false);
+	int GetRemapOSCRemotePort();
+	bool SetRemapOSCRemotePort(int remotePort, bool dontSendNotification = false);
+	std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> GetRemapOSCOscRemapAssignments();
+	bool SetRemapOSCOscRemapAssignments(const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& oscRemapAssignments, bool dontSendNotification = false);
+	int GetRemapOSCDataSendingDisabled();
+	bool SetRemapOSCDataSendingDisabled(int disabled, bool dontSendNotification = false);
+
+	//==========================================================================
 	static bool IsBridgingObjectOnly(RemoteObjectIdentifier id);
 
 private:
@@ -356,7 +384,9 @@ private:
 	int GetProtocolDataSendingDisabled(ProtocolId protocolId);
 	bool SetProtocolDataSendingDisabled(ProtocolId protocolId, int disabled, bool dontSendNotification = false);
 	bool GetProtocolBridgingXYMessageCombined(ProtocolId protocolId);
-	bool SetProtocolBridgingXYMessageCombined(ProtocolId protocolId, bool combined, bool dontSendNotification);
+	bool SetProtocolBridgingXYMessageCombined(ProtocolId protocolId, bool combined, bool dontSendNotification = false);
+	std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> GetOscRemapAssignments(ProtocolId protocolId);
+	bool SetOscRemapAssignments(ProtocolId protocolId, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& oscRemapAssignments, bool dontSendNotification = false);
 
 	ObjectHandlingState GetProtocolState(ProtocolId protocolId) const;
 	void SetProtocolState(ProtocolId protocolId, ObjectHandlingState state);
@@ -371,6 +401,7 @@ private:
 	std::unique_ptr<XmlElement> SetupGenericMIDIBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupADMOSCBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupYamahaOSCBridgingProtocol();
+	std::unique_ptr<XmlElement> SetupRemapOSCBridgingProtocol();
 
 	/**
 	 * A processing engine node can send data to and receive data from multiple protocols that is encapsulates.

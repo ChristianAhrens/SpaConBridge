@@ -16,24 +16,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #pragma once
 
-#include "../HeaderWithElmListComponent.h"
-
 #include "../../../SpaConBridgeCommon.h"
-#include "SceneIndexToMidiAssignerComponent.h"
 
-#include <ZeroconfDiscoverComponent.h>
+#include <MidiLearnerComponent.h>
 #include <SplitButtonComponent.h>
 #include <TextWithImageButton.h>
-#include <MidiLearnerComponent.h>
+#include <ZeroconfDiscoverComponent.h>
 
 #define ZEROCONF_SUPPORTED
 
 namespace SpaConBridge
 {
 
+/**
+ * Fwd decls.
+ */
+class HeaderWithElmListComponent;
+class HorizontalLayouterComponent;
+class SceneIndexToMidiAssignerComponent;
+class RemoteObjectToOscAssignerComponent;
 
 /** 
  *	Custom reimplementation of a Texteditor that simply shows
@@ -121,6 +124,9 @@ private:
 	void handleScenesToMidiAssiSet(Component* sender, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& scenesToMidiAssi);
 
 	//==============================================================================
+	void handleRemapOscAssisSet(Component* sender, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& roiToCustomOscAssis);
+
+	//==============================================================================
 	void processUpdatedGeneralConfig();
 	void processUpdatedDS100Config();
 	void processUpdatedDiGiCoConfig();
@@ -130,6 +136,7 @@ private:
 	void processUpdatedGenericMIDIConfig();
 	void processUpdatedADMOSCConfig();
 	void processUpdatedYamahaOSCConfig();
+	void processUpdatedRemapOSCConfig();
 
 	//==============================================================================
 	void createGeneralSettingsSection();
@@ -141,6 +148,7 @@ private:
 	void createGenericMIDISettingsSection();
 	void createADMOSCSettingsSection();
 	void createYamahaOSCSettingsSection();
+	void createRemapOSCSettingsSection();
 
 	// input filters for texteditors
 	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_intervalEditFilter;
@@ -298,6 +306,18 @@ private:
 	std::unique_ptr<Label>										m_YamahaOSCRemotePortLabel;
 	std::unique_ptr<ComboBox>									m_YamahaOSCMappingAreaSelect;
 	std::unique_ptr<Label>										m_YamahaOSCMappingAreaLabel;
+
+	// Remap OSC settings section
+	std::unique_ptr<HeaderWithElmListComponent>					m_RemapOSCBridgingSettings;
+	std::unique_ptr<TextEditor>									m_RemapOSCIpAddressEdit;
+	std::unique_ptr<Label>										m_RemapOSCIpAddressLabel;
+	std::unique_ptr<TextEditor>									m_RemapOSCListeningPortEdit;
+	std::unique_ptr<Label>										m_RemapOSCListeningPortLabel;
+	std::unique_ptr<TextEditor>									m_RemapOSCRemotePortEdit;
+	std::unique_ptr<Label>										m_RemapOSCRemotePortLabel;
+	std::unique_ptr<RemoteObjectToOscAssignerComponent>			m_RemapOSCAssignmentsEditor;
+	std::unique_ptr<Label>										m_RemapOSCAssignmentsLabel;
+	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_RemapOSCDisableSendingButton;
 };
 
 

@@ -202,9 +202,13 @@ RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::Re
         m_remoteObjectSelect->setSelectedId(remoteObjectId);
         m_remoteObjectSelect->setTooltip(ProcessingEngineConfig::GetObjectDescription(remoteObjectId));
     }
-    m_oscAssignmentEditComponent->setText(currentAssi.first);
-    m_oscAssignmentMinRangeValEditComponent->setText(juce::String(currentAssi.second.getStart()));
-    m_oscAssignmentMaxRangeValEditComponent->setText(juce::String(currentAssi.second.getEnd()));
+    if (currentAssi.first.isNotEmpty())
+        m_oscAssignmentEditComponent->setText(currentAssi.first);
+    if (!currentAssi.second.isEmpty())
+    {
+        m_oscAssignmentMinRangeValEditComponent->setText(juce::String(currentAssi.second.getStart()));
+        m_oscAssignmentMaxRangeValEditComponent->setText(juce::String(currentAssi.second.getEnd()));
+    }
 
     lookAndFeelChanged();
 }

@@ -203,6 +203,8 @@ RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::Re
         m_remoteObjectSelect->setTooltip(ProcessingEngineConfig::GetObjectDescription(remoteObjectId));
     }
     m_oscAssignmentEditComponent->setText(currentAssi.first);
+    m_oscAssignmentMinRangeValEditComponent->setText(juce::String(currentAssi.second.getStart()));
+    m_oscAssignmentMaxRangeValEditComponent->setText(juce::String(currentAssi.second.getEnd()));
 
     lookAndFeelChanged();
 }
@@ -253,7 +255,8 @@ void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponen
 
     rangeEditBounds.removeFromLeft(2).removeFromRight(2);
 
-    m_oscAssignmentMinRangeValEditComponent->setBounds(rangeEditBounds.removeFromLeft(static_cast<int>(0.5f * rangeEditBounds.getWidth())));
+    m_oscAssignmentMinRangeValEditComponent->setBounds(rangeEditBounds.removeFromLeft(static_cast<int>(0.5f * rangeEditBounds.getWidth()) - 2));
+    rangeEditBounds.removeFromLeft(2);
     m_oscAssignmentMaxRangeValEditComponent->setBounds(rangeEditBounds);
 }
 

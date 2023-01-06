@@ -3404,7 +3404,7 @@ int Controller::GetBridgingXAxisInverted(ProtocolBridgingType bridgingType)
 	case PBT_RemapOSC:
 	default:
 		jassertfalse;
-		return false;
+		return 0;
 	}
 }
 
@@ -3448,7 +3448,7 @@ int Controller::GetBridgingYAxisInverted(ProtocolBridgingType bridgingType)
 	case PBT_RemapOSC:
 	default:
 		jassertfalse;
-		return false;
+		return 0;
 	}
 }
 
@@ -3492,7 +3492,7 @@ int Controller::GetBridgingXYAxisSwapped(ProtocolBridgingType bridgingType)
 	case PBT_RemapOSC:
 	default:
 		jassertfalse;
-		return false;
+		return 0;
 	}
 }
 
@@ -3578,10 +3578,9 @@ int Controller::GetBridgingDataSendingDisabled(ProtocolBridgingType bridgingType
 	case PBT_HUI:
 	case PBT_DS100:
 	case PBT_DAWPlugin:
-	case PBT_RemapOSC:
 	default:
 		jassertfalse;
-		return false;
+		return 0;
 	}
 }
 
@@ -3601,7 +3600,6 @@ bool Controller::SetBridgingDataSendingDisabled(ProtocolBridgingType bridgingTyp
 	case PBT_HUI:
 	case PBT_DS100:
 	case PBT_DAWPlugin:
-	case PBT_RemapOSC:
 	default:
 		jassertfalse;
 		return false;

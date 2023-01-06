@@ -124,7 +124,7 @@ private:
 	void handleScenesToMidiAssiSet(Component* sender, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& scenesToMidiAssi);
 
 	//==============================================================================
-	void handleRemapOscAssisSet(Component* sender, const std::map<RemoteObjectIdentifier, juce::String>& roiToCustomOscAssis);
+	void handleRemapOscAssisSet(Component* sender, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& roiToCustomOscAssis);
 
 	//==============================================================================
 	void processUpdatedGeneralConfig();

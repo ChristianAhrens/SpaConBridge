@@ -44,27 +44,28 @@ public:
     void buttonClicked(Button*) override;
 
     //==============================================================================
-    std::function<void(Component*, std::map<RemoteObjectIdentifier, juce::String>)> onAssignmentsSet;
+    std::function<void(Component*, std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>)> onAssignmentsSet;
     
     //==============================================================================
     void setSelectedDeviceIdentifier(const String& deviceIdentifier);
-    void setCurrentRemoteObjecToOscAssignments(const std::map<RemoteObjectIdentifier, juce::String>& currentAssignments);
+    void setCurrentRemoteObjecToOscAssignments(const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& currentAssignments);
     
 private:
     class RemoteObjectToOscAssignmentEditComponent : public AssignmentEditOverlayBaseComponents::AssignmentEditComponent
     {
     public:
-        explicit RemoteObjectToOscAssignmentEditComponent(const RemoteObjectIdentifier& remoteObjectId, const juce::String& currentAssi);
+        explicit RemoteObjectToOscAssignmentEditComponent(const RemoteObjectIdentifier& remoteObjectId, const std::pair<juce::String, juce::Range<float>>& currentAssi);
         ~RemoteObjectToOscAssignmentEditComponent();
     
         const RemoteObjectIdentifier GetRemoteObjectId();
-        const juce::String& GetCurrentAssignment();
+        const std::pair<juce::String, juce::Range<float>>& GetCurrentAssignment();
     
-        void handleRemoteObjectToOscAssiSet(const juce::String& oscAssi);
+        void handleEditorInput();
+        void handleRemoteObjectToOscAssiSet(const std::pair<juce::String, juce::Range<float>>& oscAssi);
         void handleRemoteObjectToOscAssiReset();
     
         //==============================================================================
-        std::function<void(Component*, const RemoteObjectIdentifier&, const juce::String&)> onAssignmentSet;
+        std::function<void(Component*, const RemoteObjectIdentifier&, const std::pair<juce::String, juce::Range<float>>&)> onAssignmentSet;
     
         //==============================================================================
         void resized() override;
@@ -74,21 +75,23 @@ private:
     
     private:
         //==============================================================================
-        RemoteObjectIdentifier  m_currentRemoteObjectId;
-        juce::String            m_currentOscAssignment;
+        RemoteObjectIdentifier                      m_currentRemoteObjectId;
+        std::pair<juce::String, juce::Range<float>> m_currentOscAssignment;
     
         std::unique_ptr<ComboBox>   m_remoteObjectSelect;
         std::unique_ptr<TextEditor> m_oscAssignmentEditComponent;
+        std::unique_ptr<TextEditor> m_oscAssignmentMinRangeValEditComponent;
+        std::unique_ptr<TextEditor> m_oscAssignmentMaxRangeValEditComponent;
     };
 
     class RemoteObjectToOscAssignmentsListingComponent : public AssignmentEditOverlayBaseComponents::AssignmentsListingComponent
     {
     public:
-        explicit RemoteObjectToOscAssignmentsListingComponent(const std::map<RemoteObjectIdentifier, juce::String>& initialAssignments);
+        explicit RemoteObjectToOscAssignmentsListingComponent(const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& initialAssignments);
         ~RemoteObjectToOscAssignmentsListingComponent();
 
         //==============================================================================
-        std::map<RemoteObjectIdentifier, juce::String> GetCurrentAssignments();
+        std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> GetCurrentAssignments();
         bool AddAssignment() override;
 
         //==============================================================================
@@ -96,7 +99,7 @@ private:
         bool ReadAssignmentsFromCsvString(const String& csvAssignmentsString) override;
 
         //==============================================================================
-        std::function<void(Component*, const std::map<RemoteObjectIdentifier, juce::String>&)> onAssigningFinished;
+        std::function<void(Component*, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>&)> onAssigningFinished;
 
     private:
         //==============================================================================
@@ -106,11 +109,11 @@ private:
     class RemoteObjectToOscAssignmentsViewingComponent : public AssignmentEditOverlayBaseComponents::AssignmentsViewingComponent
     {
     public:
-        explicit RemoteObjectToOscAssignmentsViewingComponent(const std::map<RemoteObjectIdentifier, juce::String>& initialAssignments);
+        explicit RemoteObjectToOscAssignmentsViewingComponent(const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& initialAssignments);
         ~RemoteObjectToOscAssignmentsViewingComponent();
 
         //==============================================================================
-        std::map<RemoteObjectIdentifier, juce::String> GetCurrentAssignments();
+        std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> GetCurrentAssignments();
 
         //==============================================================================
         void onExportClicked() override;
@@ -118,7 +121,7 @@ private:
         void onCloseClicked() override;
 
         //==============================================================================
-        std::function<void(Component*, const std::map<RemoteObjectIdentifier, juce::String>&)> onAssigningFinished;
+        std::function<void(Component*, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>&)> onAssigningFinished;
 
     private:
         //==============================================================================
@@ -126,19 +129,19 @@ private:
 
     void triggerEditAssignments();
     void finishEditAssignments();
-    void processAssignmentResult(Component* sender, const RemoteObjectIdentifier& remoteObjectId, const juce::String& roiToOscAssignment);
-    void processAssignmentResults(Component* sender, const std::map<RemoteObjectIdentifier, juce::String>& roiToOscAssignments);
+    void processAssignmentResult(Component* sender, const RemoteObjectIdentifier& remoteObjectId, const std::pair<juce::String, juce::Range<float>>& roiToOscAssignment);
+    void processAssignmentResults(Component* sender, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& roiToOscAssignments);
 
-    std::unique_ptr<TextEditor>                                     m_currentRoiToOscAssisLabel;
-    std::unique_ptr<TextButton>                                     m_editAssignmentsButton;
+    std::unique_ptr<TextEditor>                                                     m_currentRoiToOscAssisLabel;
+    std::unique_ptr<TextButton>                                                     m_editAssignmentsButton;
 
-    std::unique_ptr<RemoteObjectToOscAssignmentsViewingComponent>   m_assignmentsEditionOverlay;
+    std::unique_ptr<RemoteObjectToOscAssignmentsViewingComponent>                   m_assignmentsEditionOverlay;
 
-    String                                                          m_deviceIdentifier;
-    String                                                          m_deviceName;
+    String                                                                          m_deviceIdentifier;
+    String                                                                          m_deviceName;
 
-    std::map<RemoteObjectIdentifier, juce::String>                  m_currentRoiToOscAssignments;
-    std::int16_t                                                    m_referredId{ -1 };
+    std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>   m_currentRoiToOscAssignments;
+    std::int16_t                                                                    m_referredId{ -1 };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RemoteObjectToOscAssignerComponent)
 };

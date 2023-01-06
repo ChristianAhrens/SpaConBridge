@@ -3608,7 +3608,7 @@ bool Controller::SetBridgingDataSendingDisabled(ProtocolBridgingType bridgingTyp
 	}
 }
 
-std::map<RemoteObjectIdentifier, juce::String> Controller::GetBridgingOscRemapAssignments(ProtocolBridgingType bridgingType)
+std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> Controller::GetBridgingOscRemapAssignments(ProtocolBridgingType bridgingType)
 {
 	switch (bridgingType)
 	{
@@ -3626,11 +3626,11 @@ std::map<RemoteObjectIdentifier, juce::String> Controller::GetBridgingOscRemapAs
 	case PBT_DAWPlugin:
 	default:
 		jassertfalse;
-		return std::map<RemoteObjectIdentifier, juce::String>();
+		return std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>();
 	}
 }
 
-bool Controller::SetBridgingOscRemapAssignments(ProtocolBridgingType bridgingType, const std::map<RemoteObjectIdentifier, juce::String>& oscRemapAssignments, bool dontSendNotification)
+bool Controller::SetBridgingOscRemapAssignments(ProtocolBridgingType bridgingType, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& oscRemapAssignments, bool dontSendNotification)
 {
 	switch (bridgingType)
 	{

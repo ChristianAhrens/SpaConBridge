@@ -923,7 +923,7 @@ void SettingsSectionsComponent::createRemapOSCSettingsSection()
 	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCRemotePortEdit.get(), true, false);
 
 	m_RemapOSCAssignmentsEditor = std::make_unique<RemoteObjectToOscAssignerComponent>();
-	m_RemapOSCAssignmentsEditor->onAssignmentsSet = [=](Component* sender, const std::map<RemoteObjectIdentifier, juce::String>& roiToCustomOscAssis) { handleRemapOscAssisSet(sender, roiToCustomOscAssis); };
+	m_RemapOSCAssignmentsEditor->onAssignmentsSet = [=](Component* sender, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& roiToCustomOscAssis) { handleRemapOscAssisSet(sender, roiToCustomOscAssis); };
 	m_RemapOSCAssignmentsLabel = std::make_unique<Label>("RemapOSCAssignmentsEditor", GetProtocolBridgingNiceName(PBT_RemapOSC));
 	m_RemapOSCAssignmentsLabel->setJustificationType(Justification::centredLeft);
 	m_RemapOSCAssignmentsLabel->attachToComponent(m_RemapOSCAssignmentsEditor.get(), true);
@@ -1944,7 +1944,7 @@ void SettingsSectionsComponent::handleScenesToMidiAssiSet(Component* sender, con
  * @param sender				The RemoteObjectToOscAssignerComponent that sent the assignment.
  * @param roiToCustomOscAssis	The sent assignment that was chosen by user
  */
-void SettingsSectionsComponent::handleRemapOscAssisSet(Component* sender, const std::map<RemoteObjectIdentifier, juce::String>& roiToCustomOscAssis)
+void SettingsSectionsComponent::handleRemapOscAssisSet(Component* sender, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& roiToCustomOscAssis)
 {
 	if (m_RemapOSCAssignmentsEditor && sender == m_RemapOSCAssignmentsEditor.get())
 	{

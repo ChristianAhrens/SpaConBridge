@@ -1956,7 +1956,7 @@ bool ProtocolBridgingWrapper::SetProtocolBridgingXYMessageCombined(ProtocolId pr
  * @param protocolId	The id of the protocol to get the assignments for.
  * @return	The requested osc remapping assignments.
  */
-std::map<RemoteObjectIdentifier, juce::String> ProtocolBridgingWrapper::GetOscRemapAssignments(ProtocolId protocolId)
+std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> ProtocolBridgingWrapper::GetOscRemapAssignments(ProtocolId protocolId)
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
@@ -1967,7 +1967,7 @@ std::map<RemoteObjectIdentifier, juce::String> ProtocolBridgingWrapper::GetOscRe
 			auto oscRemappingsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REMAPPINGS));
 			if (oscRemappingsXmlElement)
 			{
-				std::map<RemoteObjectIdentifier, juce::String> oscRemappings;
+				std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> oscRemappings;
 				auto oscRemappingXmlElement = oscRemappingsXmlElement->getFirstChildElement();
 				while (nullptr != oscRemappingXmlElement)
 				{
@@ -1979,8 +1979,10 @@ std::map<RemoteObjectIdentifier, juce::String> ProtocolBridgingWrapper::GetOscRe
 							auto oscRemappingTextElement = oscRemappingXmlElement->getFirstChildElement();
 							if (oscRemappingTextElement && oscRemappingTextElement->isTextElement())
 							{
-								juce::String remapPattern = oscRemappingTextElement->getText();
-								oscRemappings.insert(std::make_pair(ROId, remapPattern));
+								auto remapPattern = oscRemappingTextElement->getText();
+								auto minVal = static_cast<float>(oscRemappingXmlElement->getDoubleAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MINVALUE)));
+								auto maxVal = static_cast<float>(oscRemappingXmlElement->getDoubleAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MAXVALUE)));
+								oscRemappings.insert(std::make_pair(ROId, std::make_pair(remapPattern, juce::Range<float>(minVal, maxVal))));
 							}
 						}
 					}
@@ -1993,7 +1995,7 @@ std::map<RemoteObjectIdentifier, juce::String> ProtocolBridgingWrapper::GetOscRe
 		}
 	}
 
-	return std::map<RemoteObjectIdentifier, juce::String>();
+	return std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>();
 }
 
 /**
@@ -2005,7 +2007,7 @@ std::map<RemoteObjectIdentifier, juce::String> ProtocolBridgingWrapper::GetOscRe
  * @param dontSendNotification	Flag if change notification shall be broadcasted.
  * @return	True on succes, false on failure
  */
-bool ProtocolBridgingWrapper::SetOscRemapAssignments(ProtocolId protocolId, const std::map<RemoteObjectIdentifier, juce::String>& oscRemapAssignments, bool dontSendNotification)
+bool ProtocolBridgingWrapper::SetOscRemapAssignments(ProtocolId protocolId, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& oscRemapAssignments, bool dontSendNotification)
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
@@ -2043,14 +2045,18 @@ bool ProtocolBridgingWrapper::SetOscRemapAssignments(ProtocolId protocolId, cons
 				{
 					auto oscRemappingTextXmlElement = oscRemappingXmlElement->getFirstChildElement();
 					if (oscRemappingTextXmlElement && oscRemappingTextXmlElement->isTextElement())
-						oscRemappingTextXmlElement->setText(assi.second);
+						oscRemappingTextXmlElement->setText(assi.second.first);
 					else
-						oscRemappingTextXmlElement->addTextElement(assi.second);
+						oscRemappingTextXmlElement->addTextElement(assi.second.first);
+					oscRemappingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MINVALUE), static_cast<double>(assi.second.second.getStart()));
+					oscRemappingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MAXVALUE), static_cast<double>(assi.second.second.getEnd()));
 				}
 				else
 				{
 					oscRemappingXmlElement = oscRemappingsXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectDescription(assi.first).removeCharacters(" "));
-					oscRemappingXmlElement->addTextElement(assi.second);
+					oscRemappingXmlElement->addTextElement(assi.second.first);
+					oscRemappingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MINVALUE), static_cast<double>(assi.second.second.getStart()));
+					oscRemappingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MAXVALUE), static_cast<double>(assi.second.second.getEnd()));
 				}
 			}
 		}
@@ -4547,7 +4553,7 @@ bool ProtocolBridgingWrapper::SetRemapOSCRemotePort(int remotePort, bool dontSen
  * This method forwards the call to the generic implementation.
  * @return	The requested OSC string to roi remappings
  */
-std::map<RemoteObjectIdentifier, juce::String> ProtocolBridgingWrapper::GetRemapOSCOscRemapAssignments()
+std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> ProtocolBridgingWrapper::GetRemapOSCOscRemapAssignments()
 {
 	return GetOscRemapAssignments(REMAPOSC_PROCESSINGPROTOCOL_ID);
 }
@@ -4558,7 +4564,7 @@ std::map<RemoteObjectIdentifier, juce::String> ProtocolBridgingWrapper::GetRemap
  * @param	oscRemapAssignments	The protocol OSC string to roi remappings to set
  * @return	True on succes, false if failure
  */
-bool ProtocolBridgingWrapper::SetRemapOSCOscRemapAssignments(const std::map<RemoteObjectIdentifier, juce::String>& oscRemapAssignments, bool dontSendNotification)
+bool ProtocolBridgingWrapper::SetRemapOSCOscRemapAssignments(const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& oscRemapAssignments, bool dontSendNotification)
 {
 	return SetOscRemapAssignments(REMAPOSC_PROCESSINGPROTOCOL_ID, oscRemapAssignments, dontSendNotification);
 }

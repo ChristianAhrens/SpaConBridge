@@ -68,7 +68,7 @@ void RemoteObjectToOscAssignerComponent::buttonClicked(Button* button)
 void RemoteObjectToOscAssignerComponent::triggerEditAssignments()
 {
     m_assignmentsEditionOverlay = std::make_unique<RemoteObjectToOscAssignmentsViewingComponent>(m_currentRoiToOscAssignments);
-    m_assignmentsEditionOverlay->onAssigningFinished = [&](Component* sender, const std::map<RemoteObjectIdentifier, juce::String>& roiToOscAssignments) {
+    m_assignmentsEditionOverlay->onAssigningFinished = [&](Component* sender, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& roiToOscAssignments) {
         processAssignmentResults(sender, roiToOscAssignments);
         finishEditAssignments();
     };
@@ -95,7 +95,7 @@ void RemoteObjectToOscAssignerComponent::finishEditAssignments()
     m_assignmentsEditionOverlay.reset();
 }
 
-void RemoteObjectToOscAssignerComponent::processAssignmentResult(Component* sender, const RemoteObjectIdentifier& remoteObjectId, const juce::String& roiToOscAssignment)
+void RemoteObjectToOscAssignerComponent::processAssignmentResult(Component* sender, const RemoteObjectIdentifier& remoteObjectId, const std::pair<juce::String, juce::Range<float>>& roiToOscAssignment)
 {
     ignoreUnused(sender);
 
@@ -109,7 +109,7 @@ void RemoteObjectToOscAssignerComponent::processAssignmentResult(Component* send
         m_currentRoiToOscAssisLabel->setText(String(m_currentRoiToOscAssignments.size()) + " assignments");
 }
 
-void RemoteObjectToOscAssignerComponent::processAssignmentResults(Component* sender, const std::map<RemoteObjectIdentifier, juce::String>& roiToOscAssignment)
+void RemoteObjectToOscAssignerComponent::processAssignmentResults(Component* sender, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& roiToOscAssignment)
 {
     ignoreUnused(sender);
 
@@ -125,7 +125,7 @@ void RemoteObjectToOscAssignerComponent::processAssignmentResults(Component* sen
         m_currentRoiToOscAssisLabel->setText(String(m_currentRoiToOscAssignments.size()) + " assignments");
 }
 
-void RemoteObjectToOscAssignerComponent::setCurrentRemoteObjecToOscAssignments(const std::map<RemoteObjectIdentifier, juce::String>& currentAssignments)
+void RemoteObjectToOscAssignerComponent::setCurrentRemoteObjecToOscAssignments(const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& currentAssignments)
 {
     m_currentRoiToOscAssignments = currentAssignments;
 
@@ -138,10 +138,10 @@ void RemoteObjectToOscAssignerComponent::setSelectedDeviceIdentifier(const Strin
     m_deviceIdentifier = deviceIdentifier;
 }
 
-RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::RemoteObjectToOscAssignmentEditComponent(const RemoteObjectIdentifier& remoteObjectId, const juce::String& currentAssi)
-    : AssignmentEditOverlayBaseComponents::AssignmentEditComponent(),
-    m_currentRemoteObjectId(remoteObjectId),
-    m_currentOscAssignment(currentAssi)
+RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::RemoteObjectToOscAssignmentEditComponent(const RemoteObjectIdentifier& remoteObjectId, const std::pair<juce::String, juce::Range<float>>& currentAssi)
+    :   AssignmentEditOverlayBaseComponents::AssignmentEditComponent(),
+        m_currentRemoteObjectId(remoteObjectId),
+        m_currentOscAssignment(currentAssi)
 {
     // create and setup remote object dropdown
     m_remoteObjectSelect = std::make_unique<juce::ComboBox>("OscRemapObjectId");
@@ -163,20 +163,38 @@ RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::Re
         handleRemoteObjectToOscAssiReset(); 
     };
     m_oscAssignmentEditComponent->onFocusLost = [=]() {
-        if (m_oscAssignmentEditComponent)
-        {
-            auto oscAssi = m_oscAssignmentEditComponent->getText();
-            handleRemoteObjectToOscAssiSet(oscAssi);
-        }
+        handleEditorInput();
     };
     m_oscAssignmentEditComponent->onReturnKey = [=]() {
-        if (m_oscAssignmentEditComponent)
-        {
-            auto oscAssi = m_oscAssignmentEditComponent->getText();
-            handleRemoteObjectToOscAssiSet(oscAssi);
-        }
+        handleEditorInput();
     };
     addAndMakeVisible(m_oscAssignmentEditComponent.get());
+
+    // create and setup range min textedit
+    m_oscAssignmentMinRangeValEditComponent = std::make_unique<TextEditor>("OscMinAssignment");
+    m_oscAssignmentMinRangeValEditComponent->onEscapeKey = [=]() {
+        handleRemoteObjectToOscAssiReset();
+    };
+    m_oscAssignmentMinRangeValEditComponent->onFocusLost = [=]() {
+        handleEditorInput();
+    };
+    m_oscAssignmentMinRangeValEditComponent->onReturnKey = [=]() {
+        handleEditorInput();
+    };
+    addAndMakeVisible(m_oscAssignmentMinRangeValEditComponent.get());
+
+    // create and setup range max textedit
+    m_oscAssignmentMaxRangeValEditComponent = std::make_unique<TextEditor>("OscMaxAssignment");
+    m_oscAssignmentMaxRangeValEditComponent->onEscapeKey = [=]() {
+        handleRemoteObjectToOscAssiReset();
+    };
+    m_oscAssignmentMaxRangeValEditComponent->onFocusLost = [=]() {
+        handleEditorInput();
+    };
+    m_oscAssignmentMaxRangeValEditComponent->onReturnKey = [=]() {
+        handleEditorInput();
+    };
+    addAndMakeVisible(m_oscAssignmentMaxRangeValEditComponent.get());
 
     // set incoming start values
     if (RemoteObjectIdentifier::ROI_Invalid != remoteObjectId)
@@ -184,7 +202,7 @@ RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::Re
         m_remoteObjectSelect->setSelectedId(remoteObjectId);
         m_remoteObjectSelect->setTooltip(ProcessingEngineConfig::GetObjectDescription(remoteObjectId));
     }
-    m_oscAssignmentEditComponent->setText(currentAssi);
+    m_oscAssignmentEditComponent->setText(currentAssi.first);
 
     lookAndFeelChanged();
 }
@@ -195,7 +213,23 @@ RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::~R
 
 void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::lookAndFeelChanged()
 {
-    m_oscAssignmentEditComponent->setTextToShowWhenEmpty("/some/osc/%1/path/%2", getLookAndFeel().findColour(TextEditor::ColourIds::textColourId).darker(0.6f));
+    if (m_oscAssignmentEditComponent && m_oscAssignmentMinRangeValEditComponent && m_oscAssignmentMaxRangeValEditComponent)
+    {
+        m_oscAssignmentEditComponent->setTextToShowWhenEmpty("/some/osc/%1/path/%2", getLookAndFeel().findColour(TextEditor::ColourIds::textColourId).darker(0.6f));
+        m_oscAssignmentMinRangeValEditComponent->setTextToShowWhenEmpty("min val", getLookAndFeel().findColour(TextEditor::ColourIds::textColourId).darker(0.6f));
+        m_oscAssignmentMaxRangeValEditComponent->setTextToShowWhenEmpty("max val", getLookAndFeel().findColour(TextEditor::ColourIds::textColourId).darker(0.6f));
+    }
+}
+
+void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::handleEditorInput()
+{
+    if (m_oscAssignmentEditComponent && m_oscAssignmentMinRangeValEditComponent && m_oscAssignmentMaxRangeValEditComponent)
+    {
+        auto oscAssi = m_oscAssignmentEditComponent->getText();
+        auto minVal = m_oscAssignmentMinRangeValEditComponent->getText().getFloatValue();
+        auto maxVal = m_oscAssignmentMaxRangeValEditComponent->getText().getFloatValue();
+        handleRemoteObjectToOscAssiSet(std::make_pair(oscAssi, juce::Range<float>(minVal, maxVal)));
+    }
 }
 
 const RemoteObjectIdentifier RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::GetRemoteObjectId()
@@ -203,7 +237,7 @@ const RemoteObjectIdentifier RemoteObjectToOscAssignerComponent::RemoteObjectToO
     return m_currentRemoteObjectId;
 }
 
-const juce::String& RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::GetCurrentAssignment()
+const std::pair<juce::String, juce::Range<float>>& RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::GetCurrentAssignment()
 {
     return m_currentOscAssignment;
 }
@@ -211,13 +245,19 @@ const juce::String& RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignm
 void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::resized()
 {
     auto bounds = getLocalBounds();
+    auto rangeEditBounds = bounds.removeFromRight(static_cast<int>(0.25f * bounds.getWidth()));
 
     m_oscAssignmentEditComponent->setBounds(bounds.removeFromRight(static_cast<int>(0.6f * bounds.getWidth()) - 2));
     bounds.removeFromRight(4);
     m_remoteObjectSelect->setBounds(bounds);
+
+    rangeEditBounds.removeFromLeft(2).removeFromRight(2);
+
+    m_oscAssignmentMinRangeValEditComponent->setBounds(rangeEditBounds.removeFromLeft(static_cast<int>(0.5f * rangeEditBounds.getWidth())));
+    m_oscAssignmentMaxRangeValEditComponent->setBounds(rangeEditBounds);
 }
 
-void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::handleRemoteObjectToOscAssiSet(const juce::String& oscAssi)
+void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::handleRemoteObjectToOscAssiSet(const std::pair<juce::String, juce::Range<float>>& oscAssi)
 {
     m_currentOscAssignment = oscAssi;
 
@@ -228,13 +268,17 @@ void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponen
 void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::handleRemoteObjectToOscAssiReset()
 {
     if (m_oscAssignmentEditComponent)
-        m_oscAssignmentEditComponent->setText(m_currentOscAssignment);
+        m_oscAssignmentEditComponent->setText(m_currentOscAssignment.first);
+    if (m_oscAssignmentMinRangeValEditComponent)
+        m_oscAssignmentMinRangeValEditComponent->setText(String(m_currentOscAssignment.second.getStart()));
+    if (m_oscAssignmentMaxRangeValEditComponent)
+        m_oscAssignmentMaxRangeValEditComponent->setText(String(m_currentOscAssignment.second.getEnd()));
 }
 
-RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComponent::RemoteObjectToOscAssignmentsListingComponent(const std::map<RemoteObjectIdentifier, juce::String>& initialAssignments)
+RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComponent::RemoteObjectToOscAssignmentsListingComponent(const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& initialAssignments)
     : AssignmentEditOverlayBaseComponents::AssignmentsListingComponent()
 {
-    m_editorWidth = 355.0f;
+    m_editorWidth = 425.0f;
     m_editorHeight = 25.0f;
     m_editorMargin = 2.0f;
 
@@ -249,9 +293,9 @@ RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComponent
 {
 }
 
-std::map<RemoteObjectIdentifier, juce::String> RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComponent::GetCurrentAssignments()
+std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComponent::GetCurrentAssignments()
 {
-    std::map<RemoteObjectIdentifier, juce::String> currentAssignments;
+    std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> currentAssignments;
     for (auto const& editComponent : m_editComponents)
     {
         auto remoteObjectToOscEditComponent = reinterpret_cast<RemoteObjectToOscAssignmentEditComponent*>(editComponent.get());
@@ -264,7 +308,7 @@ std::map<RemoteObjectIdentifier, juce::String> RemoteObjectToOscAssignerComponen
 
 bool RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComponent::AddAssignment()
 {
-    m_editComponents.push_back(std::make_unique<RemoteObjectToOscAssignmentEditComponent>(RemoteObjectIdentifier::ROI_Invalid, juce::String()));
+    m_editComponents.push_back(std::make_unique<RemoteObjectToOscAssignmentEditComponent>(RemoteObjectIdentifier::ROI_Invalid, std::pair<juce::String, juce::Range<float>>()));
     addAndMakeVisible(m_editComponents.back().get());
 
     resized();
@@ -276,38 +320,47 @@ const String RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsLis
 {
     auto csvString = String();
 
-    csvString += "RemoteObjectIdentifier;OscStringAssignment;\n";
+    csvString += "RemoteObjectIdentifier;OscAssignmentString;OscAssignmentMinVal;OscAssignmentMaxVal;\n";
     for (auto const& editComponent : m_editComponents)
     {
         auto remoteObjectToOscEditComponent = reinterpret_cast<RemoteObjectToOscAssignmentEditComponent*>(editComponent.get());
         if (remoteObjectToOscEditComponent)
-            csvString += ProcessingEngineConfig::GetObjectDescription(remoteObjectToOscEditComponent->GetRemoteObjectId()).removeCharacters(" ") + ";" + remoteObjectToOscEditComponent->GetCurrentAssignment() + ";\n";
+            csvString += ProcessingEngineConfig::GetObjectDescription(remoteObjectToOscEditComponent->GetRemoteObjectId()).removeCharacters(" ") 
+            + ";" + remoteObjectToOscEditComponent->GetCurrentAssignment().first 
+            + ";" + juce::String(remoteObjectToOscEditComponent->GetCurrentAssignment().second.getStart())
+            + ";" + juce::String(remoteObjectToOscEditComponent->GetCurrentAssignment().second.getEnd())
+            + ";\n";
     }
 
     return csvString;
 }
 
-bool RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComponent::ReadAssignmentsFromCsvString(const String& csvAssignmentsString)
+bool RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComponent::ReadAssignmentsFromCsvString(const juce::String& csvAssignmentsString)
 {
-    std::map<String, String> assignments;
+    std::vector<std::vector<juce::String>> assignments;
 
-    auto separatedCsvAssignmentStrings = StringArray();
+    auto separatedCsvAssignmentStrings = juce::StringArray();
     separatedCsvAssignmentStrings.addTokens(csvAssignmentsString, "\n", "");
     
-    if (separatedCsvAssignmentStrings.size() > 1 && separatedCsvAssignmentStrings[0] == "RemoteObjectIdentifier;OscStringAssignment;")
+    if (separatedCsvAssignmentStrings.size() > 1 && separatedCsvAssignmentStrings[0] == "RemoteObjectIdentifier;OscAssignmentString;OscAssignmentMinVal;OscAssignmentMaxVal;")
         separatedCsvAssignmentStrings.remove(0);
     else
         return false;
     
     for (auto const& csvAssignmentString : separatedCsvAssignmentStrings)
     {
-        auto csvAssignmentStringElements = StringArray();
+        auto csvAssignmentStringElements = juce::StringArray();
         csvAssignmentStringElements.addTokens(csvAssignmentString, ";", "");
     
-        if (csvAssignmentStringElements.size() != 3)
+        if (csvAssignmentStringElements.size() != 5)
             continue;
     
-        assignments.insert(std::make_pair(csvAssignmentStringElements[0], csvAssignmentStringElements[1]));
+        auto assiElements = std::vector<juce::String>();
+        assiElements.push_back(csvAssignmentStringElements[0]);
+        assiElements.push_back(csvAssignmentStringElements[1]);
+        assiElements.push_back(csvAssignmentStringElements[2]);
+        assiElements.push_back(csvAssignmentStringElements[3]);
+        assignments.push_back(assiElements);
     }
     
     if (assignments.empty())
@@ -316,12 +369,17 @@ bool RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComp
     m_editComponents.clear();
     for (auto const& assignment : assignments)
     {
+        jassert(assignment.size() == 4);
+        if (assignment.size() != 4)
+            continue;
+
         for (int i = ROI_Invalid + 1; i < ROI_BridgingMAX; ++i)
         {
             auto roid = static_cast<RemoteObjectIdentifier>(i);
-            if (ProcessingEngineConfig::GetObjectDescription(roid).removeCharacters(" ") == assignment.first)
+            if (ProcessingEngineConfig::GetObjectDescription(roid).removeCharacters(" ") == assignment.at(0))
             {   
-                m_editComponents.push_back(std::make_unique<RemoteObjectToOscAssignmentEditComponent>(roid, assignment.second));
+                auto oscAssiWithRange = std::make_pair(assignment.at(1), juce::Range<float>(assignment.at(2).getFloatValue(), assignment.at(3).getFloatValue()));
+                m_editComponents.push_back(std::make_unique<RemoteObjectToOscAssignmentEditComponent>(roid, oscAssiWithRange));
                 addAndMakeVisible(m_editComponents.back().get());
                 break;
             }
@@ -333,7 +391,7 @@ bool RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComp
     return !m_editComponents.empty();
 }
 
-RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsViewingComponent::RemoteObjectToOscAssignmentsViewingComponent(const std::map<RemoteObjectIdentifier, juce::String>& initialAssignments)
+RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsViewingComponent::RemoteObjectToOscAssignmentsViewingComponent(const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& initialAssignments)
     : AssignmentEditOverlayBaseComponents::AssignmentsViewingComponent()
 {
     m_contentComponent = std::unique_ptr<AssignmentEditOverlayBaseComponents::AssignmentsListingComponent>(reinterpret_cast<AssignmentEditOverlayBaseComponents::AssignmentsListingComponent*>(new RemoteObjectToOscAssignmentsListingComponent(initialAssignments)));
@@ -347,11 +405,11 @@ RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsViewingComponent
 {
 }
 
-std::map<RemoteObjectIdentifier, juce::String> RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsViewingComponent::GetCurrentAssignments()
+std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsViewingComponent::GetCurrentAssignments()
 {
     auto contentComponent = reinterpret_cast<RemoteObjectToOscAssignmentsListingComponent*>(m_contentComponent.get());
 
-    return contentComponent ? contentComponent->GetCurrentAssignments() : std::map<RemoteObjectIdentifier, juce::String>();
+    return contentComponent ? contentComponent->GetCurrentAssignments() : std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>();
 }
 
 void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsViewingComponent::onExportClicked()
@@ -407,7 +465,7 @@ void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsViewingComp
 {
     // create the file chooser dialog
     auto chooser = std::make_unique<FileChooser>("Select a custom OSC mapping file to import...",
-        File::getSpecialLocation(File::userDocumentsDirectory), String(), true, false, this); // all filepatterns are allowed for loading (currently seems to not work on iOS and not be regarded on macOS at all)
+        File::getSpecialLocation(File::userDocumentsDirectory), juce::String(), true, false, this); // all filepatterns are allowed for loading (currently seems to not work on iOS and not be regarded on macOS at all)
     // and trigger opening it
     chooser->launchAsync(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, [this](const FileChooser& chooser)
         {

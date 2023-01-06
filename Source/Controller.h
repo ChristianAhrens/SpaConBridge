@@ -224,8 +224,8 @@ public:
 	int GetBridgingDataSendingDisabled(ProtocolBridgingType bridgingType);
 	bool SetBridgingDataSendingDisabled(ProtocolBridgingType bridgingType, int disabled, bool dontSendNotification = false);
 
-	std::map<RemoteObjectIdentifier, juce::String> GetBridgingOscRemapAssignments(ProtocolBridgingType bridgingType);
-	bool SetBridgingOscRemapAssignments(ProtocolBridgingType bridgingType, const std::map<RemoteObjectIdentifier, juce::String>& oscRemapAssignments, bool dontSendNotification = false);
+	std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> GetBridgingOscRemapAssignments(ProtocolBridgingType bridgingType);
+	bool SetBridgingOscRemapAssignments(ProtocolBridgingType bridgingType, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& oscRemapAssignments, bool dontSendNotification = false);
 
 	//==========================================================================
 	void InitGlobalSettings(DataChangeParticipant changeSource, String ipAddress, int rate);

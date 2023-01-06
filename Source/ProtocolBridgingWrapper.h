@@ -329,6 +329,8 @@ public:
 	bool SetRemapOSCRemotePort(int remotePort, bool dontSendNotification = false);
 	std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> GetRemapOSCOscRemapAssignments();
 	bool SetRemapOSCOscRemapAssignments(const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& oscRemapAssignments, bool dontSendNotification = false);
+	int GetRemapOSCDataSendingDisabled();
+	bool SetRemapOSCDataSendingDisabled(int disabled, bool dontSendNotification = false);
 
 	//==========================================================================
 	static bool IsBridgingObjectOnly(RemoteObjectIdentifier id);

@@ -755,6 +755,10 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupRemapOSCBridgingProtoc
 	if (ipAdressXmlElement)
 		ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
 
+	auto dataSendingDisabledXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATASENDINGDISABLED));
+	if (dataSendingDisabledXmlElement)
+		dataSendingDisabledXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
+
 	auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
 	auto mutedObjects = std::vector<RemoteObject>();
 	if (mutedObjsXmlElement)
@@ -4567,6 +4571,22 @@ std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> Pr
 bool ProtocolBridgingWrapper::SetRemapOSCOscRemapAssignments(const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& oscRemapAssignments, bool dontSendNotification)
 {
 	return SetOscRemapAssignments(REMAPOSC_PROCESSINGPROTOCOL_ID, oscRemapAssignments, dontSendNotification);
+}
+
+/**
+ *
+ */
+int ProtocolBridgingWrapper::GetRemapOSCDataSendingDisabled()
+{
+	return GetProtocolDataSendingDisabled(REMAPOSC_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ *
+ */
+bool ProtocolBridgingWrapper::SetRemapOSCDataSendingDisabled(int disabled, bool dontSendNotification)
+{
+	return SetProtocolDataSendingDisabled(REMAPOSC_PROCESSINGPROTOCOL_ID, disabled, dontSendNotification);
 }
 
 }

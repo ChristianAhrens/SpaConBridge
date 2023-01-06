@@ -317,6 +317,7 @@ private:
 	std::unique_ptr<Label>										m_RemapOSCRemotePortLabel;
 	std::unique_ptr<RemoteObjectToOscAssignerComponent>			m_RemapOSCAssignmentsEditor;
 	std::unique_ptr<Label>										m_RemapOSCAssignmentsLabel;
+	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_RemapOSCDisableSendingButton;
 };
 
 

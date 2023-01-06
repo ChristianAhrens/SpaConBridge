@@ -859,13 +859,6 @@ void SettingsSectionsComponent::createADMOSCSettingsSection()
 	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCCoordSysModLabel.get(), false, false);
 	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCCoordSysModContainer.get(), true, false);
 
-	m_ADMOSCDisableSendingButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Disable adm return channel");
-	m_ADMOSCDisableSendingButton->setTooltip("Disable sending of value changes to ADM OSC input devices.");
-	m_ADMOSCDisableSendingButton->setImagePosition(Justification::centredLeft);
-	m_ADMOSCDisableSendingButton->setClickingTogglesState(true);
-	m_ADMOSCDisableSendingButton->addListener(this);
-	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCDisableSendingButton.get(), true, false);
-
 	m_ADMOSCxyMsgSndModeButton = std::make_unique<JUCEAppBasics::SplitButtonComponent>();
 	m_ADMOSCxyMsgSndModeButton->addListener(this);
 	m_ADMOSCxyMsgSndModeButtonIds[m_ADMOSCxyMsgSndModes[0]] = m_ADMOSCxyMsgSndModeButton->addButton(m_ADMOSCxyMsgSndModes[0]);
@@ -876,6 +869,13 @@ void SettingsSectionsComponent::createADMOSCSettingsSection()
 	m_ADMOSCxyMsgSndLabel->attachToComponent(m_ADMOSCxyMsgSndModeButton.get(), true);
 	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCxyMsgSndLabel.get(), false, false);
 	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCxyMsgSndModeButton.get(), true, false);
+
+	m_ADMOSCDisableSendingButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Disable return channel");
+	m_ADMOSCDisableSendingButton->setTooltip("Disable sending of value changes to " + GetProtocolBridgingNiceName(PBT_ADMOSC) + " input devices.");
+	m_ADMOSCDisableSendingButton->setImagePosition(Justification::centredLeft);
+	m_ADMOSCDisableSendingButton->setClickingTogglesState(true);
+	m_ADMOSCDisableSendingButton->addListener(this);
+	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCDisableSendingButton.get(), true, false);
 
 	m_ADMOSCBridgingSettings->resized();
 }
@@ -929,6 +929,13 @@ void SettingsSectionsComponent::createRemapOSCSettingsSection()
 	m_RemapOSCAssignmentsLabel->attachToComponent(m_RemapOSCAssignmentsEditor.get(), true);
 	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCAssignmentsLabel.get(), false, false);
 	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCAssignmentsEditor.get(), true, false);
+
+	m_RemapOSCDisableSendingButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Disable return channel");
+	m_RemapOSCDisableSendingButton->setTooltip("Disable sending of value changes to " + GetProtocolBridgingNiceName(PBT_RemapOSC) + " input devices.");
+	m_RemapOSCDisableSendingButton->setImagePosition(Justification::centredLeft);
+	m_RemapOSCDisableSendingButton->setClickingTogglesState(true);
+	m_RemapOSCDisableSendingButton->addListener(this);
+	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCDisableSendingButton.get(), true, false);
 
 	m_RemapOSCBridgingSettings->resized();
 }
@@ -1042,6 +1049,7 @@ void SettingsSectionsComponent::lookAndFeelChanged()
 #if USE_FULLSCREEN_WINDOWMODE_TOGGLE
 	UpdateDrawableButtonImages(m_ToggleFullscreenButton, BinaryData::open_in_full24px_svg, &getLookAndFeel());
 #endif
+	UpdateDrawableButtonImages(m_RemapOSCDisableSendingButton, BinaryData::mobiledata_off24px_svg, &getLookAndFeel());
 }
 
 /**
@@ -1109,6 +1117,12 @@ void SettingsSectionsComponent::buttonClicked(Button* button)
 	else if (m_GenericOSCDisableSendingButton.get() == button)
 	{
 		ctrl->SetBridgingDataSendingDisabled(PBT_GenericOSC, m_GenericOSCDisableSendingButton->getToggleState() ? 1 : 0);
+	}
+
+	// Remapped OSC Settings section
+	else if (m_RemapOSCDisableSendingButton.get() == button)
+	{
+		ctrl->SetBridgingDataSendingDisabled(PBT_RemapOSC, m_RemapOSCDisableSendingButton->getToggleState() ? 1 : 0);
 	}
 }
 
@@ -1863,6 +1877,9 @@ void SettingsSectionsComponent::processUpdatedRemapOSCConfig()
 		auto assignments = ctrl->GetBridgingOscRemapAssignments(PBT_RemapOSC);
 		m_RemapOSCAssignmentsEditor->setCurrentRemoteObjecToOscAssignments(assignments);
 	}
+
+	if (m_RemapOSCDisableSendingButton)
+		m_RemapOSCDisableSendingButton->setToggleState(1 == ctrl->GetBridgingDataSendingDisabled(PBT_RemapOSC), dontSendNotification);
 
 }
 

@@ -59,3 +59,9 @@
 | Scene SceneIndex                     |  |
 | Scene SceneName                      |  |
 | Scene SceneComment                   |  |
+| RPB Sound Object Select              |  |
+| RPB UI Element Select                |  |
+| RPB get all known values             |  |
+| RPB SO Selection Select              |  |
+| RPB MI Selection Select              |  |
+| RPB MO Selection Select              |  |

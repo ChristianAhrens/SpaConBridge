@@ -145,11 +145,18 @@ RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::Re
 {
     // create and setup remote object dropdown
     m_remoteObjectSelect = std::make_unique<juce::ComboBox>("OscRemapObjectId");
-    for (int i = ROI_Invalid + 1; i < ROI_BridgingMAX; ++i)
+    for (int i = ROI_Invalid; i < ROI_InvalidMAX; ++i)
     {
         auto roid = static_cast<RemoteObjectIdentifier>(i);
-        m_remoteObjectSelect->setTextWhenNothingSelected("Select target");
-        m_remoteObjectSelect->addItem(ProcessingEngineConfig::GetObjectDescription(roid), roid);
+        if (ROI_Invalid == roid)
+            m_remoteObjectSelect->addSectionHeading("Targets for bridging");
+        else if (ROI_BridgingMAX == roid)
+            m_remoteObjectSelect->addSectionHeading("Targets for triggering only");
+        else
+        {
+            m_remoteObjectSelect->setTextWhenNothingSelected("Select target");
+            m_remoteObjectSelect->addItem(ProcessingEngineConfig::GetObjectDescription(roid), roid);
+        }
     }
     m_remoteObjectSelect->onChange = [=] {
         m_currentRemoteObjectId = static_cast<RemoteObjectIdentifier>(m_remoteObjectSelect->getSelectedId());

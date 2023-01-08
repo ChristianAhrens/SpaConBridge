@@ -1,4 +1,4 @@
-/* Copyright(c) 2022, Christian Ahrens
+/* Copyright(c) 2023, Christian Ahrens
  *
  * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
  *

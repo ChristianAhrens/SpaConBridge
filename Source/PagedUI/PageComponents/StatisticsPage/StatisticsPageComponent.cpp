@@ -1,4 +1,4 @@
-/* Copyright (c) 2020-2022, Christian Ahrens
+/* Copyright (c) 2020-2023, Christian Ahrens
  *
  * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
  *
@@ -173,6 +173,10 @@ void StatisticsPageComponent::HandleMessageData(NodeId nodeId, ProtocolId sender
 	case YAMAHAOSC_PROCESSINGPROTOCOL_ID:
 		bridgingProtocol = PBT_YamahaOSC;
 		logSource = StatisticsLog::StatisticsLogSource::SLS_YamahaOSC;
+		break;
+	case REMAPOSC_PROCESSINGPROTOCOL_ID:
+		bridgingProtocol = PBT_RemapOSC;
+		logSource = StatisticsLog::StatisticsLogSource::SLS_RemapOSC;
 		break;
 	default:
 		return;

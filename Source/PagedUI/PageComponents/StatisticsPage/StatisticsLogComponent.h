@@ -1,4 +1,4 @@
-/* Copyright (c) 2020-2022, Christian Ahrens
+/* Copyright (c) 2020-2023, Christian Ahrens
  *
  * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
  *
@@ -57,6 +57,7 @@ public:
 		SLS_HUI,
 		SLS_DS100,
 		SLS_DS100_2,
+		SLS_RemapOSC,
 	};
 
 	enum StatisticsLogColumn

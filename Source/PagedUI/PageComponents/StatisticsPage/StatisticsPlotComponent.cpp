@@ -1,4 +1,4 @@
-/* Copyright (c) 2020-2022, Christian Ahrens
+/* Copyright (c) 2020-2023, Christian Ahrens
  *
  * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
  *
@@ -200,6 +200,8 @@ void StatisticsPlot::ResetStatisticsPlot()
 		m_plottedBridgingTypes.add(PBT_YamahaOSC);
 	if ((bridgingTypes & PBT_ADMOSC) == PBT_ADMOSC)
 		m_plottedBridgingTypes.add(PBT_ADMOSC);
+	if ((bridgingTypes & PBT_RemapOSC) == PBT_RemapOSC)
+		m_plottedBridgingTypes.add(PBT_RemapOSC);
 
 	for (auto bridgingProtocol : m_plottedBridgingTypes)
 	{

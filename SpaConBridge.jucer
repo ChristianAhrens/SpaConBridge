@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="MFvkL5" name="SpaConBridge" projectType="guiapp" version="0.8.8"
+<JUCERPROJECT id="MFvkL5" name="SpaConBridge" projectType="guiapp" version="0.9.0"
               bundleIdentifier="com.ChristianAhrens.SpaConBridge" companyName="Christian Ahrens"
               companyEmail="christianahrens@me.com" displaySplashScreen="0"
               reportAppUsage="0" companyCopyright="2022" jucerFormatVersion="1"
@@ -33,6 +33,10 @@
                       file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/OSCProtocolProcessor/OSCProtocolProcessor.cpp"/>
                 <FILE id="DrDaok" name="OSCProtocolProcessor.h" compile="0" resource="0"
                       file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/OSCProtocolProcessor/OSCProtocolProcessor.h"/>
+                <FILE id="U98xdt" name="RemapOSCProtocolProcessor.cpp" compile="1"
+                      resource="0" file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/OSCProtocolProcessor/RemapOSCProtocolProcessor.cpp"/>
+                <FILE id="nLQtFo" name="RemapOSCProtocolProcessor.h" compile="0" resource="0"
+                      file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/OSCProtocolProcessor/RemapOSCProtocolProcessor.h"/>
                 <FILE id="GjgxnM" name="SenderAwareOSCReceiver.cpp" compile="1" resource="0"
                       file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/OSCProtocolProcessor/SenderAwareOSCReceiver.cpp"/>
                 <FILE id="qvCEil" name="SenderAwareOSCReceiver.h" compile="0" resource="0"
@@ -432,6 +436,14 @@
                   file="Source/PagedUI/PageComponents/StatisticsPage/StatisticsPlotComponent.h"/>
           </GROUP>
           <GROUP id="{811EF1A2-3AD2-5387-1DC2-32ED14213B13}" name="SettingsPage">
+            <FILE id="g1WMKX" name="AssignmentEditOverlayBaseComponents.cpp" compile="1"
+                  resource="0" file="Source/PagedUI/PageComponents/SettingsPage/AssignmentEditOverlayBaseComponents.cpp"/>
+            <FILE id="a68j4E" name="AssignmentEditOverlayBaseComponents.h" compile="0"
+                  resource="0" file="Source/PagedUI/PageComponents/SettingsPage/AssignmentEditOverlayBaseComponents.h"/>
+            <FILE id="v39RUd" name="RemoteObjectToOscAssignerComponent.cpp" compile="1"
+                  resource="0" file="Source/PagedUI/PageComponents/SettingsPage/RemoteObjectToOscAssignerComponent.cpp"/>
+            <FILE id="D2KuDn" name="RemoteObjectToOscAssignerComponent.h" compile="0"
+                  resource="0" file="Source/PagedUI/PageComponents/SettingsPage/RemoteObjectToOscAssignerComponent.h"/>
             <FILE id="Q4N7VJ" name="SceneIndexToMidiAssignerComponent.cpp" compile="1"
                   resource="0" file="Source/PagedUI/PageComponents/SettingsPage/SceneIndexToMidiAssignerComponent.cpp"/>
             <FILE id="RWilcj" name="SceneIndexToMidiAssignerComponent.h" compile="0"

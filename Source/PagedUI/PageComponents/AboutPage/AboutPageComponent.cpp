@@ -1,4 +1,4 @@
-/* Copyright (c) 2020-2022, Christian Ahrens
+/* Copyright (c) 2020-2023, Christian Ahrens
  *
  * This file is part of SpaConBridge <https://github.com/ChristianAhrens/SpaConBridge>
  *
@@ -42,7 +42,7 @@ AboutPageContentComponent::AboutPageContentComponent()
 	addAndMakeVisible(m_appIconDrawable.get());
 	// App info label
 	String infoString = JUCEApplication::getInstance()->getApplicationName() + String(" V") + String(JUCE_STRINGIFY(JUCE_APP_VERSION)) + String("\n")
-                    + String("Copyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2022 - Christian Ahrens,\n")
+                    + String("Copyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2023 - Christian Ahrens,\n")
                     + JUCEApplication::getInstance()->getApplicationName() + String(" uses GPLv3");
 	m_appInfoLabel = std::make_unique<Label>("Version", infoString);
 	m_appInfoLabel->setJustificationType(Justification::topLeft);

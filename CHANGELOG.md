@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.9.0] - 2023-01-08
+### Added
+- Added 'Customized OSC' protocol bridging, enabling the user to configure custom OSC strings to use with d&b Soundscape
+
+### Changed
+- Modified ADM OSC width parameter '/w' to use range 0...1 instead of '0°...180°' according to latest spec 0.5
+- Updated JUCE submodule version to v7.0.4
+
+### Fixed 
+- Fixed macOS Zeroconf discovery in DS100 settings
+- Fixed MIDI bridging command assignment mixup (Scene Index assignment cmd mixup)
+
 ## [0.8.7] - 2022-12-24
 ### Added
 - Added optional extended soundobject multiselection interaction on MultiSoundobject UI

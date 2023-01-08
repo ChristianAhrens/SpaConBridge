@@ -4,6 +4,13 @@ All notable changes to SpaConBridge will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Added
+
+### Changed
+
+### Fixed
+
 ## [0.9.0] - 2023-01-08
 ### Added
 - Added 'Customized OSC' protocol bridging, enabling the user to configure custom OSC strings to use with d&b Soundscape

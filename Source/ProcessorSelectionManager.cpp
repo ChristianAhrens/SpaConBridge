@@ -129,9 +129,9 @@ void ProcessorSelectionManager::SetSelectedSoundobjectProcessorIds(const std::ve
 		m_currentSoundobjectProcessorSelection.clear();
 
 		// iterate through all processors and set each selected state based on given selection list
-		for (auto const& processorId : ctrl->GetSoundobjectProcessorIds())
+		for (auto const& soundobjectProcessorId : ctrl->GetSoundobjectProcessorIds())
 		{
-			SetSoundobjectProcessorIdSelectState(processorId, std::find(processorIds.begin(), processorIds.end(), processorId) != processorIds.end());
+			SetSoundobjectProcessorIdSelectState(soundobjectProcessorId, std::find(processorIds.begin(), processorIds.end(), soundobjectProcessorId) != processorIds.end());
 		}
 	}
 	else
@@ -158,10 +158,8 @@ const std::vector<SoundobjectProcessorId> ProcessorSelectionManager::GetSelected
 		return processorIds;
 
 	processorIds.reserve(m_currentSoundobjectProcessorSelection.size());
-	for (auto const& processorId : ctrl->GetSoundobjectProcessorIds())
+	for (auto const& soundobjectProcessorId : ctrl->GetSoundobjectProcessorIds())
 	{
-		auto const processor = ctrl->GetSoundobjectProcessor(processorId);
-		auto soundobjectProcessorId = processor->GetProcessorId();
 		if ((m_currentSoundobjectProcessorSelection.count(soundobjectProcessorId) > 0) && m_currentSoundobjectProcessorSelection.at(soundobjectProcessorId))
 			processorIds.push_back(soundobjectProcessorId);
 	}
@@ -302,9 +300,9 @@ void ProcessorSelectionManager::SetSelectedMatrixInputProcessorIds(const std::ve
 		m_currentMatrixInputProcessorSelection.clear();
 
 		// iterate through all processors and set each selected state based on given selection list
-		for (auto const& processorId : ctrl->GetMatrixInputProcessorIds())
+		for (auto const& matrixInputProcessorId : ctrl->GetMatrixInputProcessorIds())
 		{
-			SetMatrixInputProcessorIdSelectState(processorId, std::find(processorIds.begin(), processorIds.end(), processorId) != processorIds.end());
+			SetMatrixInputProcessorIdSelectState(matrixInputProcessorId, std::find(processorIds.begin(), processorIds.end(), matrixInputProcessorId) != processorIds.end());
 		}
 	}
 	else
@@ -331,12 +329,10 @@ const std::vector<MatrixInputProcessorId> ProcessorSelectionManager::GetSelected
 		return processorIds;
 
 	processorIds.reserve(m_currentMatrixInputProcessorSelection.size());
-	for (auto const& processorId : ctrl->GetMatrixInputProcessorIds())
+	for (auto const& matrixInputProcessorId : ctrl->GetMatrixInputProcessorIds())
 	{
-		auto const processor = ctrl->GetMatrixInputProcessor(processorId);
-		auto sourceId = processor->GetMatrixInputId();
-		if ((m_currentMatrixInputProcessorSelection.count(sourceId) > 0) && m_currentMatrixInputProcessorSelection.at(sourceId))
-			processorIds.push_back(processor->GetProcessorId());
+		if ((m_currentMatrixInputProcessorSelection.count(matrixInputProcessorId) > 0) && m_currentMatrixInputProcessorSelection.at(matrixInputProcessorId))
+			processorIds.push_back(matrixInputProcessorId);
 	}
 
 	return processorIds;
@@ -475,9 +471,9 @@ void ProcessorSelectionManager::SetSelectedMatrixOutputProcessorIds(const std::v
 		m_currentMatrixOutputProcessorSelection.clear();
 
 		// iterate through all processors and set each selected state based on given selection list
-		for (auto const& processorId : ctrl->GetMatrixOutputProcessorIds())
+		for (auto const& matrixOutputProcessorId : ctrl->GetMatrixOutputProcessorIds())
 		{
-			SetMatrixOutputProcessorIdSelectState(processorId, std::find(processorIds.begin(), processorIds.end(), processorId) != processorIds.end());
+			SetMatrixOutputProcessorIdSelectState(matrixOutputProcessorId, std::find(processorIds.begin(), processorIds.end(), matrixOutputProcessorId) != processorIds.end());
 		}
 	}
 	else
@@ -504,10 +500,8 @@ const std::vector<MatrixOutputProcessorId> ProcessorSelectionManager::GetSelecte
 		return processorIds;
 
 	processorIds.reserve(m_currentMatrixOutputProcessorSelection.size());
-	for (auto const& processorId : ctrl->GetMatrixOutputProcessorIds())
+	for (auto const& matrixOutputProcessorId : ctrl->GetMatrixOutputProcessorIds())
 	{
-		auto const processor = ctrl->GetMatrixOutputProcessor(processorId);
-		auto matrixOutputProcessorId = processor->GetProcessorId();
 		if ((m_currentMatrixOutputProcessorSelection.count(matrixOutputProcessorId) > 0) && m_currentMatrixOutputProcessorSelection.at(matrixOutputProcessorId))
 			processorIds.push_back(matrixOutputProcessorId);
 	}

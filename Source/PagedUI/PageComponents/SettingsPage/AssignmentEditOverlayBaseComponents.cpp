@@ -36,7 +36,11 @@ AssignmentEditComponent::~AssignmentEditComponent()
 {
 }
 
-AssignmentsListingComponent::AssignmentsListingComponent()
+AssignmentsListingComponent::AssignmentsListingComponent() :
+    m_editorWidth(0.0f),
+    m_editorHeight(0.0f),
+    m_editorMargin(0.0f),
+    m_minHeight(0)
 {
 }
 
@@ -117,8 +121,8 @@ bool AssignmentsListingComponent::IsAvailableUiAreaExceeded()
 }
 
 AssignmentsViewingComponent::AssignmentsViewingComponent()
+    : m_contentViewport(std::make_unique<Viewport>())
 {
-    m_contentViewport = std::make_unique<Viewport>();
     addAndMakeVisible(m_contentViewport.get());
 
     m_addButton = std::make_unique<TextButton>("Add");

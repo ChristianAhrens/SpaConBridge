@@ -4,12 +4,20 @@ All notable changes to SpaConBridge will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.9.1] - 2023-01-28
 ### Added
 
 ### Changed
+- Improved button image handling performance
+- Improved 'Customized OSC' protocol bridging to use default channel/record id info if none is provided in custom osc config
+- Improved 'Customized OSC' protocol bridging config UI layouting
+- Updated JUCE submodule version to v7.0.5
 
 ### Fixed
+- Fixed MIDI assignments to be cleared from runtime config when deleted on UI (was previously only done on application restart)
+- Fixed Soundobject selection handling mixup
+- Fixed rotation/scaling in optional extended soundobject multiselection interaction on MultiSoundobject UI
+- Fixed 'Customized OSC' protocol bridging to be available for muting per Soundobject/MatrixInput/MatrixOutput
 
 ## [0.9.0] - 2023-01-08
 ### Added

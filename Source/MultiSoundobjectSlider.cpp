@@ -1211,7 +1211,7 @@ void MultiSoundobjectSlider::applyObjectsRotAndScale(const std::vector<Soundobje
     if (getLocalBounds().getWidth() == 0 || getLocalBounds().getHeight() == 0)
         return;
 
-    auto relCOG = juce::Point<float>(cog.getX() / getLocalBounds().getWidth(), cog.getY() / getLocalBounds().getHeight());
+    auto relCOG = juce::Point<float>(cog.getX() / getLocalBounds().getWidth(), 1 - (cog.getY() / getLocalBounds().getHeight()));
 
     auto updatedScreenCoords = std::vector<juce::Point<float>>();
     auto w = getLocalBounds().toFloat().getWidth();
@@ -1257,7 +1257,7 @@ void MultiSoundobjectSlider::finalizeObjectsRotAndScale(const std::vector<Soundo
     if (getLocalBounds().getWidth() == 0 || getLocalBounds().getHeight() == 0)
         return;
 
-    auto relCOG = juce::Point<float>(cog.getX() / getLocalBounds().getWidth(), cog.getY() / getLocalBounds().getHeight());
+    auto relCOG = juce::Point<float>(cog.getX() / getLocalBounds().getWidth(), 1 - (cog.getY() / getLocalBounds().getHeight()));
 
     auto updatedScreenCoords = std::vector<juce::Point<float>>();
     auto w = getLocalBounds().toFloat().getWidth();

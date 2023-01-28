@@ -36,25 +36,16 @@ AssignmentEditComponent::~AssignmentEditComponent()
 {
 }
 
-AssignmentsListingComponent::AssignmentsListingComponent()
+AssignmentsListingComponent::AssignmentsListingComponent() :
+    m_editorWidth(0.0f),
+    m_editorHeight(0.0f),
+    m_editorMargin(0.0f),
+    m_minHeight(0)
 {
 }
 
 AssignmentsListingComponent::~AssignmentsListingComponent() 
 {
-}
-
-void AssignmentsListingComponent::setWidth(int width)
-{
-    auto editsCount = m_editComponents.size();
-    auto fittingColumnCount = static_cast<int>(width / (m_editorWidth + 2.0f * m_editorMargin));
-    auto totalEditsHeight = (editsCount + 1) * (m_editorHeight + 2.0f * m_editorMargin);
-    auto minRequiredHeight = static_cast<int>(totalEditsHeight / fittingColumnCount);
-
-    if (minRequiredHeight < m_minHeight)
-        setSize(width, m_minHeight);
-    else
-        setSize(width, minRequiredHeight);
 }
 
 void AssignmentsListingComponent::setMinHeight(int height)
@@ -75,19 +66,6 @@ void AssignmentsListingComponent::paint(Graphics& g)
     // Background
     g.setColour(getLookAndFeel().findColour(AlertWindow::backgroundColourId).darker());
     g.fillRect(bounds.toFloat());
-}
-
-void AssignmentsListingComponent::resized() 
-{
-    auto bounds = getLocalBounds();
-
-    juce::FlexBox editsBox;
-    editsBox.flexWrap = juce::FlexBox::Wrap::wrap;
-    editsBox.flexDirection = juce::FlexBox::Direction::column;
-    editsBox.justifyContent = juce::FlexBox::JustifyContent::flexStart;
-    for (auto const& editComponent : m_editComponents)
-        editsBox.items.add(juce::FlexItem(*editComponent).withHeight(m_editorHeight).withWidth(m_editorWidth).withMargin(m_editorMargin));
-    editsBox.performLayout(bounds.reduced(static_cast<int>(2.0f * m_editorMargin)));
 }
 
 bool AssignmentsListingComponent::IsAvailableUiAreaExceeded()
@@ -117,8 +95,8 @@ bool AssignmentsListingComponent::IsAvailableUiAreaExceeded()
 }
 
 AssignmentsViewingComponent::AssignmentsViewingComponent()
+    : m_contentViewport(std::make_unique<Viewport>())
 {
-    m_contentViewport = std::make_unique<Viewport>();
     addAndMakeVisible(m_contentViewport.get());
 
     m_addButton = std::make_unique<TextButton>("Add");

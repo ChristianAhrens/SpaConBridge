@@ -696,6 +696,7 @@ void RadioButtonContainer::lookAndFeelChanged()
 MuteButtonContainer::MuteButtonContainer(TableModelComponent& td)
 	: TableEditorComponent(td)
 {
+	lookAndFeelChanged();
 }
 
 /**
@@ -716,37 +717,17 @@ void MuteButtonContainer::updateBridgingMuteButtons()
 	if (!ctrl)
 		return;
 
-	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
-	if (!dblookAndFeel)
-		return;
-
-	// create the required button drawable images based on lookandfeel colours
-	String imageName = BinaryData::mobiledata_off24px_svg;
-	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
-	JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
-		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
-
 	// collect what bridging modules are active
 	auto activeBridging = ctrl->GetActiveProtocolBridging();
-
-	// determine the right red colour from lookandfeel
-	auto redColour = dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonRedColor);
 
 	for (auto type : ProtocolBridgingTypes)
 	{
 		if (((activeBridging & type) == type) && (m_bridgingMutes.count(type) == 0))
 		{
 			m_bridgingMutes.insert(std::make_pair(type, std::make_unique<DrawableButton>("Mute", DrawableButton::ButtonStyle::ImageOnButtonBackground)));
-			m_bridgingMutes[type]->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+			m_bridgingMutes[type]->setImages(m_NormalImage.get(), m_OverImage.get(), m_DownImage.get(), m_DisabledImage.get(), m_NormalOnImage.get(), m_OverOnImage.get(), m_DownOnImage.get(), m_DisabledOnImage.get());
 			m_bridgingMutes[type]->setClickingTogglesState(true);
-			m_bridgingMutes[type]->setColour(TextButton::ColourIds::buttonOnColourId, redColour.brighter(0.05f));
+			m_bridgingMutes[type]->setColour(TextButton::ColourIds::buttonOnColourId, m_redColour.brighter(0.05f));
 			m_bridgingMutes[type]->setEnabled(true);
 			m_bridgingMutes[type]->addListener(this);
 			addAndMakeVisible(m_bridgingMutes.at(type).get());
@@ -761,22 +742,23 @@ void MuteButtonContainer::updateBridgingMuteButtons()
 }
 
 /**
- * Helper method to update the drawables used for buttons to match the text colour
+ * Reimplemented method to process updated lookandfeel settings.
+ * In particular the 'mute' red colour and the button image data is updated.
  */
-void MuteButtonContainer::updateDrawableButtonImageColours()
+void MuteButtonContainer::lookAndFeelChanged()
 {
-	Controller* ctrl = Controller::GetInstance();
-	if (!ctrl)
-		return;
+	Component::lookAndFeelChanged();
 
 	auto dblookAndFeel = dynamic_cast<DbLookAndFeelBase*>(&getLookAndFeel());
 	if (!dblookAndFeel)
 		return;
 
+	// determine the right red colour from lookandfeel
+	m_redColour = dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonRedColor);
+
 	// create the required button drawable images based on lookandfeel colours
 	String imageName = BinaryData::mobiledata_off24px_svg;
-	std::unique_ptr<juce::Drawable> NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage;
-	JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, NormalImage, OverImage, DownImage, DisabledImage, NormalOnImage, OverOnImage, DownOnImage, DisabledOnImage,
+	JUCEAppBasics::Image_utils::getDrawableButtonImages(imageName, m_NormalImage, m_OverImage, m_DownImage, m_DisabledImage, m_NormalOnImage, m_OverOnImage, m_DownOnImage, m_DisabledOnImage,
 		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
 		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkTextColor),
 		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::DarkLineColor),
@@ -786,27 +768,15 @@ void MuteButtonContainer::updateDrawableButtonImageColours()
 		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor),
 		dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::TextColor));
 
-	// determine the right red colour from lookandfeel
-	auto redColour = dblookAndFeel->GetDbColor(DbLookAndFeelBase::DbColor::ButtonRedColor);
-
 	// set the images to button
 	for (auto type : ProtocolBridgingTypes)
 	{
 		if (m_bridgingMutes.count(type) != 0)
 		{
-			m_bridgingMutes[type]->setColour(TextButton::ColourIds::buttonOnColourId, redColour.brighter(0.05f));
-			m_bridgingMutes[type]->setImages(NormalImage.get(), OverImage.get(), DownImage.get(), DisabledImage.get(), NormalOnImage.get(), OverOnImage.get(), DownOnImage.get(), DisabledOnImage.get());
+			m_bridgingMutes[type]->setColour(TextButton::ColourIds::buttonOnColourId, m_redColour.brighter(0.05f));
+			m_bridgingMutes[type]->setImages(m_NormalImage.get(), m_OverImage.get(), m_DownImage.get(), m_DisabledImage.get(), m_NormalOnImage.get(), m_OverOnImage.get(), m_DownOnImage.get(), m_DisabledOnImage.get());
 		}
 	}
-}
-
-/**
- * 
- */
-void MuteButtonContainer::lookAndFeelChanged()
-{
-	Component::lookAndFeelChanged();
-	updateDrawableButtonImageColours();
 }
 
 /**

@@ -171,7 +171,6 @@ public:
 	~MuteButtonContainer() override;
 
 	void updateBridgingMuteButtons();
-	void updateDrawableButtonImageColours();
 
 	void SetRow(int newRow) override;
 
@@ -183,6 +182,16 @@ public:
 
 private:
 	std::map<ProtocolBridgingType, std::unique_ptr<DrawableButton>>	m_bridgingMutes;	/**< The mute buttons currently in use. */
+
+	std::unique_ptr<juce::Drawable> m_NormalImage;
+	std::unique_ptr<juce::Drawable> m_OverImage;
+	std::unique_ptr<juce::Drawable> m_DownImage;
+	std::unique_ptr<juce::Drawable> m_DisabledImage;
+	std::unique_ptr<juce::Drawable> m_NormalOnImage;
+	std::unique_ptr<juce::Drawable> m_OverOnImage;
+	std::unique_ptr<juce::Drawable> m_DownOnImage;
+	std::unique_ptr<juce::Drawable> m_DisabledOnImage;
+	juce::Colour m_redColour;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MuteButtonContainer)
 };

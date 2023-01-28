@@ -144,7 +144,6 @@ public:
 	std::vector<RemoteObject> GetMatrixOutputProcessorRemoteObjects(MatrixOutputProcessorId matrixOutputProcessorId);
 
 	//==========================================================================
-	static String GetDefaultDS100IpAddress();
 	String GetDS100IpAddress() const;
 	void SetDS100IpAddress(DataChangeParticipant changeSource, String ipAddress, bool dontSendNotification = false);
 	String GetSecondDS100IpAddress() const;
@@ -265,7 +264,7 @@ private:
 
 protected:
 	
-	static std::unique_ptr<Controller>	s_singleton;					/**< The one and only instance of CController. */
+	static std::unique_ptr<Controller>	s_singleton;				/**< The one and only instance of CController. */
 
 	int								m_refreshInterval;				/**< Interval at which the controller internal update is triggered, in ms. */
 	bool							m_onlineState{ false };			/**< State of the protocol bridging/communication. This is only the expected state, not the actual connected state. */

@@ -1211,12 +1211,15 @@ void MultiSoundobjectSlider::applyObjectsRotAndScale(const std::vector<Soundobje
     if (getLocalBounds().getWidth() == 0 || getLocalBounds().getHeight() == 0)
         return;
 
-    auto relCOG = juce::Point<float>(cog.getX() / getLocalBounds().getWidth(), cog.getY() / getLocalBounds().getHeight());
+    auto relCOG = juce::Point<float>(cog.getX() / getLocalBounds().getWidth(), 1 - (cog.getY() / getLocalBounds().getHeight()));
 
-    auto updatedScreenCoords = std::vector<juce::Point<float>>();
     auto w = getLocalBounds().toFloat().getWidth();
     auto h = getLocalBounds().toFloat().getHeight();
 
+    auto scalingMatrix = AffineTransform::scale(scaling, scaling, relCOG.getX(), relCOG.getY());
+    auto rotationMatrix = AffineTransform::rotation(rotation, relCOG.getX(), relCOG.getY());
+
+    auto updatedScreenCoords = std::vector<juce::Point<float>>();
     for (auto const& objectId : objectIds)
     {
         auto processor = ctrl->GetSoundobjectProcessor(objectId);
@@ -1224,12 +1227,7 @@ void MultiSoundobjectSlider::applyObjectsRotAndScale(const std::vector<Soundobje
         {
             auto const& cachedPos = m_objectPosMultiEditStartValues.at(objectId);
 
-            auto v1 = cachedPos - relCOG;
-            auto sv1 = v1 * scaling;
-            auto newPos = relCOG + sv1;
-
-            newPos -= relCOG;
-            newPos = newPos.rotatedAboutOrigin(rotation) + relCOG;
+            auto newPos = cachedPos.transformedBy(scalingMatrix).transformedBy(rotationMatrix);
             
             processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, newPos.getX());
             processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, newPos.getY());
@@ -1257,12 +1255,15 @@ void MultiSoundobjectSlider::finalizeObjectsRotAndScale(const std::vector<Soundo
     if (getLocalBounds().getWidth() == 0 || getLocalBounds().getHeight() == 0)
         return;
 
-    auto relCOG = juce::Point<float>(cog.getX() / getLocalBounds().getWidth(), cog.getY() / getLocalBounds().getHeight());
+    auto relCOG = juce::Point<float>(cog.getX() / getLocalBounds().getWidth(), 1 - (cog.getY() / getLocalBounds().getHeight()));
 
-    auto updatedScreenCoords = std::vector<juce::Point<float>>();
     auto w = getLocalBounds().toFloat().getWidth();
     auto h = getLocalBounds().toFloat().getHeight();
 
+    auto scalingMatrix = AffineTransform::scale(scaling, scaling, relCOG.getX(), relCOG.getY());
+    auto rotationMatrix = AffineTransform::rotation(rotation, relCOG.getX(), relCOG.getY());
+
+    auto updatedScreenCoords = std::vector<juce::Point<float>>();
     for (auto const& objectId : objectIds)
     {
         auto processor = ctrl->GetSoundobjectProcessor(objectId);
@@ -1278,12 +1279,7 @@ void MultiSoundobjectSlider::finalizeObjectsRotAndScale(const std::vector<Soundo
 
             auto const& cachedPos = m_objectPosMultiEditStartValues.at(objectId);
 
-            auto v1 = cachedPos - relCOG;
-            auto sv1 = v1 * scaling;
-            auto newPos = relCOG + sv1;
-
-            newPos -= relCOG;
-            newPos = newPos.rotatedAboutOrigin(rotation) + relCOG;
+            auto newPos = cachedPos.transformedBy(scalingMatrix).transformedBy(rotationMatrix);
 
             processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, newPos.getX());
             processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, newPos.getY());

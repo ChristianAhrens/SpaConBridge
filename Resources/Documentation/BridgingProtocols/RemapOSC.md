@@ -40,10 +40,10 @@
 | Absolute Sound Object Position XY    |  |
 | Absolute Sound Object Position X     |  |
 | Absolute Sound Object Position Y     |  |
-| Mapped Sound Object Position XYZ     | _both %1 (soundobject number) and %2 (mapping area id) are required!_ |
-| Mapped Sound Object Position XY      | _both %1 (soundobject number) and %2 (mapping area id) are required!_ |
-| Mapped Sound Object Position X       | _both %1 (soundobject number) and %2 (mapping area id) are required!_ |
-| Mapped Sound Object Position Y       | _both %1 (soundobject number) and %2 (mapping area id) are required!_ |
+| Mapped Sound Object Position XYZ     | _both %1 (soundobject number) and %2 (mapping area id) are required! If missing, a valid default will be used ('1')_ |
+| Mapped Sound Object Position XY      | _both %1 (soundobject number) and %2 (mapping area id) are required! If missing, a valid default will be used ('1')_ |
+| Mapped Sound Object Position X       | _both %1 (soundobject number) and %2 (mapping area id) are required! If missing, a valid default will be used ('1')_ |
+| Mapped Sound Object Position Y       | _both %1 (soundobject number) and %2 (mapping area id) are required! If missing, a valid default will be used ('1')_ |
 | Matrix Settings ReverbRoomId         |  |
 | Matrix Settings ReverbPredelayFactor |  |
 | Matrix Settings ReverbRearLevel      |  |

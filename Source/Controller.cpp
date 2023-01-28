@@ -99,7 +99,7 @@ void StaticObjectsPollingHelper::SetRunning(bool running)
 	if (m_running != running)
 	{
 		if (running)
-			startTimer(m_interval);
+			startTimer(GetInterval());
 		else
 			stopTimer();
 
@@ -956,15 +956,6 @@ std::vector<MatrixOutputProcessorId> Controller::GetMatrixOutputProcessorIds() c
 String Controller::GetDS100IpAddress() const
 {
 	return m_DS100IpAddress;
-}
-
-/**
- * Static methiod which returns the default IP address.
- * @return	IP address to use as default.
- */
-String Controller::GetDefaultDS100IpAddress()
-{
-	return PROTOCOL_DEFAULT_IP;
 }
 
 /**

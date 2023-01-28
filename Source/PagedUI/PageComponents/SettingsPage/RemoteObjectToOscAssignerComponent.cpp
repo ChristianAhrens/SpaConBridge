@@ -292,7 +292,6 @@ void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponen
 RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComponent::RemoteObjectToOscAssignmentsListingComponent(const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& initialAssignments)
     : AssignmentEditOverlayBaseComponents::AssignmentsListingComponent()
 {
-    m_editorWidth = 425.0f;
     m_editorHeight = 25.0f;
     m_editorMargin = 2.0f;
 
@@ -305,6 +304,17 @@ RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComponent
 
 RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComponent::~RemoteObjectToOscAssignmentsListingComponent()
 {
+}
+
+void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComponent::setWidth(int width)
+{
+    auto editsCount = m_editComponents.size();
+    auto totalEditsHeight = static_cast<int>((editsCount + 1) * (m_editorHeight + 2.0f * m_editorMargin));
+
+    if (totalEditsHeight < m_minHeight)
+        setSize(width, m_minHeight);
+    else
+        setSize(width, totalEditsHeight);
 }
 
 std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComponent::GetCurrentAssignments()
@@ -328,6 +338,19 @@ bool RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComp
     resized();
 
     return !IsAvailableUiAreaExceeded();
+}
+
+void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComponent::resized()
+{
+    auto bounds = getLocalBounds();
+
+    juce::FlexBox editsBox;
+    editsBox.flexWrap = juce::FlexBox::Wrap::wrap;
+    editsBox.flexDirection = juce::FlexBox::Direction::column;
+    editsBox.justifyContent = juce::FlexBox::JustifyContent::flexStart;
+    for (auto const& editComponent : m_editComponents)
+        editsBox.items.add(juce::FlexItem(*editComponent).withHeight(m_editorHeight).withWidth(bounds.getWidth() - 6.0f * m_editorMargin).withMargin(m_editorMargin));
+    editsBox.performLayout(bounds.reduced(static_cast<int>(2.0f * m_editorMargin)));
 }
 
 const String RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComponent::DumpCurrentAssignmentsToCsvString()

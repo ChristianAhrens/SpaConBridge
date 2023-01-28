@@ -86,12 +86,18 @@ private:
         ~SceneIndexAssignmentsListingComponent();
 
         //==============================================================================
+        void setWidth(int width) override;
+
+        //==============================================================================
         std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> GetCurrentAssignments();
         bool AddAssignment() override;
 
         //==============================================================================
         const String DumpCurrentAssignmentsToCsvString() override;
         bool ReadAssignmentsFromCsvString(const String& csvAssignmentsString) override;
+        
+        //==============================================================================
+        void resized() override;
 
         //==============================================================================
         std::function<void(Component*, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>&)> onAssigningFinished;

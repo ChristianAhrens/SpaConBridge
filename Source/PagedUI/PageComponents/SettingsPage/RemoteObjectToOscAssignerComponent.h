@@ -91,6 +91,9 @@ private:
         ~RemoteObjectToOscAssignmentsListingComponent();
 
         //==============================================================================
+        void setWidth(int width) override;
+
+        //==============================================================================
         std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> GetCurrentAssignments();
         bool AddAssignment() override;
 
@@ -99,10 +102,10 @@ private:
         bool ReadAssignmentsFromCsvString(const String& csvAssignmentsString) override;
 
         //==============================================================================
-        std::function<void(Component*, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>&)> onAssigningFinished;
+        void resized() override;
 
-    private:
         //==============================================================================
+        std::function<void(Component*, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>&)> onAssigningFinished;
 
     };
 

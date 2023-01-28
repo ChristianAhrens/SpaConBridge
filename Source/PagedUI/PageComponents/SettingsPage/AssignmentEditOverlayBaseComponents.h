@@ -41,7 +41,7 @@ public:
     explicit AssignmentsListingComponent();
     ~AssignmentsListingComponent();
 
-    void setWidth(int width);
+    virtual void setWidth(int width) = 0;
     void setMinHeight(int height);
 
     //==============================================================================
@@ -54,7 +54,7 @@ public:
 
     //==============================================================================
     void paint(Graphics&) override;
-    void resized() override;
+    virtual void resized() override = 0;
 
 protected:
     //==============================================================================
@@ -67,9 +67,6 @@ protected:
     float m_editorWidth;
     float m_editorHeight;
     float m_editorMargin;
-
-private:
-    //==============================================================================
     int m_minHeight;
 
 };

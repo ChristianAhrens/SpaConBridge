@@ -223,6 +223,19 @@ SceneIndexToMidiAssignerComponent::SceneIndexAssignmentsListingComponent::~Scene
 {
 }
 
+void SceneIndexToMidiAssignerComponent::SceneIndexAssignmentsListingComponent::setWidth(int width)
+{
+    auto editsCount = m_editComponents.size();
+    auto fittingColumnCount = static_cast<int>(width / (m_editorWidth + 2.0f * m_editorMargin));
+    auto totalEditsHeight = (editsCount + 1) * (m_editorHeight + 2.0f * m_editorMargin);
+    auto minRequiredHeight = static_cast<int>(totalEditsHeight / fittingColumnCount);
+
+    if (minRequiredHeight < m_minHeight)
+        setSize(width, m_minHeight);
+    else
+        setSize(width, minRequiredHeight);
+}
+
 std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> SceneIndexToMidiAssignerComponent::SceneIndexAssignmentsListingComponent::GetCurrentAssignments()
 {
     std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> currentAssignments;
@@ -244,6 +257,19 @@ bool SceneIndexToMidiAssignerComponent::SceneIndexAssignmentsListingComponent::A
     resized();
 
     return !IsAvailableUiAreaExceeded();
+}
+
+void SceneIndexToMidiAssignerComponent::SceneIndexAssignmentsListingComponent::resized()
+{
+    auto bounds = getLocalBounds();
+
+    juce::FlexBox editsBox;
+    editsBox.flexWrap = juce::FlexBox::Wrap::wrap;
+    editsBox.flexDirection = juce::FlexBox::Direction::column;
+    editsBox.justifyContent = juce::FlexBox::JustifyContent::flexStart;
+    for (auto const& editComponent : m_editComponents)
+        editsBox.items.add(juce::FlexItem(*editComponent).withHeight(m_editorHeight).withWidth(m_editorWidth).withMargin(m_editorMargin));
+    editsBox.performLayout(bounds.reduced(static_cast<int>(2.0f * m_editorMargin)));
 }
 
 const String SceneIndexToMidiAssignerComponent::SceneIndexAssignmentsListingComponent::DumpCurrentAssignmentsToCsvString()

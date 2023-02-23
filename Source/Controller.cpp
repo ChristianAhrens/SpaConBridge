@@ -1757,30 +1757,27 @@ void Controller::timerCallback()
 		{
 			auto activateSSId = false;
 			auto deactivateSSId = false;
-			if (soProcessor->GetParameterChanged(DCP_Host, DCT_SoundobjectID))
+			if (soProcessor->PopParameterChanged(DCP_Host, DCT_SoundobjectID))
 			{
 				// SoundsourceID change means update is only required when
 				// remote object is currently activated. 
 				activateSSId = ((comsMode & CM_Rx) == CM_Rx);
 			}
-			soProcessor->PopParameterChanged(DCP_Host, DCT_SoundobjectID);
 
-			if (soProcessor->GetParameterChanged(DCP_Host, DCT_MappingID))
+			if (soProcessor->PopParameterChanged(DCP_Host, DCT_MappingID))
 			{
 				// MappingID change means update is only required when
 				// remote object is currently activated. 
 				activateSSId = ((comsMode & CM_Rx) == CM_Rx);
 			}
-			soProcessor->PopParameterChanged(DCP_Host, DCT_MappingID);
 
-			if (soProcessor->GetParameterChanged(DCP_Host, DCT_ComsMode))
+			if (soProcessor->PopParameterChanged(DCP_Host, DCT_ComsMode))
 			{
 				// ComsMode change means toggling polling for the remote object,
 				// so one of the two activate/deactivate actions is required
 				activateSSId = ((comsMode & CM_Rx) == CM_Rx);
 				deactivateSSId = !activateSSId;
 			}
-			soProcessor->PopParameterChanged(DCP_Host, DCT_ComsMode);
 
 			activeSSIdsChanged = activeSSIdsChanged || activateSSId || deactivateSSId;
 		}
@@ -1908,30 +1905,27 @@ void Controller::timerCallback()
 		{
 			auto activateMIId = false;
 			auto deactivateMIId = false;
-			if (miProcessor->GetParameterChanged(DCP_Host, DCT_MatrixInputID))
+			if (miProcessor->PopParameterChanged(DCP_Host, DCT_MatrixInputID))
 			{
 				// MatrixInputID change means update is only required when
 				// remote object is currently activated. 
 				activateMIId = ((comsMode & CM_Rx) == CM_Rx);
 			}
-			miProcessor->PopParameterChanged(DCP_Host, DCT_MatrixInputID);
 
-			if (miProcessor->GetParameterChanged(DCP_Host, DCT_MappingID))
+			if (miProcessor->PopParameterChanged(DCP_Host, DCT_MappingID))
 			{
 				// MappingID change means update is only required when
 				// remote object is currently activated. 
 				activateMIId = ((comsMode & CM_Rx) == CM_Rx);
 			}
-			miProcessor->PopParameterChanged(DCP_Host, DCT_MappingID);
 
-			if (miProcessor->GetParameterChanged(DCP_Host, DCT_ComsMode))
+			if (miProcessor->PopParameterChanged(DCP_Host, DCT_ComsMode))
 			{
 				// ComsMode change means toggling polling for the remote object,
 				// so one of the two activate/deactivate actions is required
 				activateMIId = ((comsMode & CM_Rx) == CM_Rx);
 				deactivateMIId = !activateMIId;
 			}
-			miProcessor->PopParameterChanged(DCP_Host, DCT_ComsMode);
 
 			activeMIIdsChanged = activeMIIdsChanged || activateMIId || deactivateMIId;
 		}
@@ -2032,30 +2026,27 @@ void Controller::timerCallback()
 		{
 			auto activateMOId = false;
 			auto deactivateMOId = false;
-			if (moProcessor->GetParameterChanged(DCP_Host, DCT_MatrixOutputID))
+			if (moProcessor->PopParameterChanged(DCP_Host, DCT_MatrixOutputID))
 			{
 				// MatrixOutputID change means update is only required when
 				// remote object is currently activated. 
 				activateMOId = ((comsMode & CM_Rx) == CM_Rx);
 			}
-			moProcessor->PopParameterChanged(DCP_Host, DCT_MatrixOutputID);
 
-			if (moProcessor->GetParameterChanged(DCP_Host, DCT_MappingID))
+			if (moProcessor->PopParameterChanged(DCP_Host, DCT_MappingID))
 			{
 				// MappingID change means update is only required when
 				// remote object is currently activated. 
 				activateMOId = ((comsMode & CM_Rx) == CM_Rx);
 			}
-			moProcessor->PopParameterChanged(DCP_Host, DCT_MappingID);
 
-			if (moProcessor->GetParameterChanged(DCP_Host, DCT_ComsMode))
+			if (moProcessor->PopParameterChanged(DCP_Host, DCT_ComsMode))
 			{
 				// ComsMode change means toggling polling for the remote object,
 				// so one of the two activate/deactivate actions is required
 				activateMOId = ((comsMode & CM_Rx) == CM_Rx);
 				deactivateMOId = !activateMOId;
 			}
-			moProcessor->PopParameterChanged(DCP_Host, DCT_ComsMode);
 
 			activeMOIdsChanged = activeMOIdsChanged || activateMOId || deactivateMOId;
 		}

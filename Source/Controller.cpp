@@ -1782,7 +1782,7 @@ void Controller::timerCallback()
 			}
 			soProcessor->PopParameterChanged(DCP_Host, DCT_ComsMode);
 
-			activeSSIdsChanged = activateSSId || deactivateSSId;
+			activeSSIdsChanged = activeSSIdsChanged || activateSSId || deactivateSSId;
 		}
 
 		// Signal every timer tick to each processor instance.
@@ -1933,7 +1933,7 @@ void Controller::timerCallback()
 			}
 			miProcessor->PopParameterChanged(DCP_Host, DCT_ComsMode);
 
-			activeMIIdsChanged = activateMIId || deactivateMIId;
+			activeMIIdsChanged = activeMIIdsChanged || activateMIId || deactivateMIId;
 		}
 
 		// Signal every timer tick to each processor instance.
@@ -2057,7 +2057,7 @@ void Controller::timerCallback()
 			}
 			moProcessor->PopParameterChanged(DCP_Host, DCT_ComsMode);
 
-			activeMOIdsChanged = activateMOId || deactivateMOId;
+			activeMOIdsChanged = activeMOIdsChanged || activateMOId || deactivateMOId;
 		}
 
 		// Signal every timer tick to each processor instance.

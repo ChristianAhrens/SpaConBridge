@@ -167,8 +167,12 @@ void SoundobjectTableComponent::selectedRowsChanged(int lastRowSelected)
 
 	if (ctrl && selMgr)
 	{
-		selMgr->SetSelectedSoundobjectProcessorIds(GetProcessorIdsForRows(GetSelectedRows()), true);
-		ctrl->SetParameterChanged(DCP_SoundobjectTable, DCT_ProcessorSelection);
+		auto selectedRows = GetProcessorIdsForRows(GetSelectedRows());
+		if (selectedRows != selMgr->GetSelectedSoundobjectProcessorIds())
+		{
+			selMgr->SetSelectedSoundobjectProcessorIds(selectedRows, true);
+			ctrl->SetParameterChanged(DCP_SoundobjectTable, DCT_ProcessorSelection);
+		}
 	}
 
 	TableModelComponent::selectedRowsChanged(lastRowSelected);

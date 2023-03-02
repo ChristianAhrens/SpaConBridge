@@ -148,9 +148,18 @@ int MatrixOutputTableComponent::getNumRows()
  */
 void MatrixOutputTableComponent::selectedRowsChanged(int lastRowSelected)
 {
+	auto const ctrl = Controller::GetInstance();
 	auto const selMgr = ProcessorSelectionManager::GetInstance();
-	if (selMgr)
-		selMgr->SetSelectedMatrixOutputProcessorIds(GetProcessorIdsForRows(GetSelectedRows()), true);
+
+	if (ctrl && selMgr)
+	{
+		auto selectedRows = GetProcessorIdsForRows(GetSelectedRows());
+		if (selectedRows != selMgr->GetSelectedMatrixOutputProcessorIds())
+		{
+			selMgr->SetSelectedMatrixOutputProcessorIds(selectedRows, true);
+			ctrl->SetParameterChanged(DCP_MatrixOutputTable, DCT_ProcessorSelection);
+		}
+	}
 
 	TableModelComponent::selectedRowsChanged(lastRowSelected);
 }

@@ -192,7 +192,11 @@ void SoundobjectProcessor::SetParameterChanged(const DataChangeParticipant& chan
 	// Set the specified change flag for all DataChangeTargets.
 	for (auto changeTarget = static_cast<int>(DCP_SoundobjectProcessor); changeTarget < DCP_Max; changeTarget++)
 	{
-		if ((changeSource != changeTarget) || (changeSource == DCP_SoundobjectProcessor)) // speciality: if the source is the processor itself, it must also be set as target, since its UI uses DCP_SoundobjectProcessor for querying as well.
+		if ((changeSource != changeTarget)
+			// specialitiesy: if the source is the processor or multislider, it must also be set as target,
+			// since both UIs uses DCP_SoundobjectProcessor/DCP_MultiSlider for querying as well.
+			|| (changeSource == DCP_SoundobjectProcessor)
+			|| (changeSource == DCP_MultiSlider))
 			m_dataChangesByTarget[static_cast<DataChangeParticipant>(changeTarget)] |= changeTypes;
 	}
 }

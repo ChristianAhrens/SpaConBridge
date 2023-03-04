@@ -112,7 +112,7 @@ public:
 	void SetSingleSelectionOnly(bool singleSelectionOnly);
 
 	std::vector<int> GetSelectedRows() const;
-	void SetSelectedRows(const std::vector<int>& rows);
+	void SetSelectedRows(const std::vector<int>& rowsToBeSelected);
 	void SelectAllRows(bool all);
 
 	//==========================================================================

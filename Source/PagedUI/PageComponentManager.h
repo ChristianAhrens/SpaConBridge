@@ -123,8 +123,11 @@ protected:
 
 	DbLookAndFeelBase::LookAndFeelType	m_lookAndFeelType{ DbLookAndFeelBase::LAFT_InvalidFirst };	/**< Remember the currently selected look and feel type. */
 
-	std::unique_ptr<MultiSoundobjectComponent>	m_multiSoundobjectComponent;
-	std::map<MappingAreaId, Image>				m_multiSoundobjectBackgrounds;		/**< The background images to use for multisoundobjectcomp. */
+	std::unique_ptr<MultiSoundobjectComponent>				m_multiSoundobjectComponent;			/**< The UI component that visualizes multiple soundobjects on a positioning area. */
+	std::map<MappingAreaId, std::pair<Image, MemoryBlock>>	m_multiSoundobjectBackgrounds;			/**	The background images to use for multisoundobjectcomp. 
+																									 *	Both the juce::Image and the png data are held in this member,
+																									 *  to prevent having to generate png from image and image 
+																									 *  from png whenever config is dumped to or read from disk. */
 
 #if USE_FULLSCREEN_WINDOWMODE_TOGGLE
 	bool								m_fullscreenWindowMode{ false };

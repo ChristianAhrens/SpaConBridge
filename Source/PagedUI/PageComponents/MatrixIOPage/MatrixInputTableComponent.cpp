@@ -148,9 +148,18 @@ int MatrixInputTableComponent::getNumRows()
  */
 void MatrixInputTableComponent::selectedRowsChanged(int lastRowSelected)
 {
+	auto const ctrl = Controller::GetInstance();
 	auto const selMgr = ProcessorSelectionManager::GetInstance();
-	if (selMgr)
-		selMgr->SetSelectedMatrixInputProcessorIds(GetProcessorIdsForRows(GetSelectedRows()), true);
+
+	if (ctrl && selMgr)
+	{
+		auto selectedRows = GetProcessorIdsForRows(GetSelectedRows());
+		if (selectedRows != selMgr->GetSelectedMatrixInputProcessorIds())
+		{
+			selMgr->SetSelectedMatrixInputProcessorIds(selectedRows, true);
+			ctrl->SetParameterChanged(DCP_MatrixInputTable, DCT_ProcessorSelection);
+		}
+	}
 
 	TableModelComponent::selectedRowsChanged(lastRowSelected);
 }

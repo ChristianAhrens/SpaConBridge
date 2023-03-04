@@ -349,16 +349,26 @@ std::vector<int> TableModelComponent::GetSelectedRows() const
 
 /**
  * Set the list of rows which are currently selected on the table.
- * @param rows	The std::vector containing all row numbers to be selected.
+ * @param rowsToBeSelected	The std::vector containing all row numbers to be selected.
  */
-void TableModelComponent::SetSelectedRows(const std::vector<int>& rows)
+void TableModelComponent::SetSelectedRows(const std::vector<int>& rowsToBeSelected)
 {
 	if (m_table)
 	{
-		m_table->deselectAllRows();
-
-		for (auto const& row : rows)
-			m_table->selectRow(row, true, false);
+		// not much effort required if only a single row shall be selected
+		if (1 == rowsToBeSelected.size())
+		{
+			m_table->selectRow(rowsToBeSelected.at(0), true, true);
+		}
+		// if more than one row is to be selected, we need to create a sparseset
+		// for juce to be able to efficiently do the selection processing
+		else
+		{
+			auto setOfRowsToBeSelected = juce::SparseSet<int>();
+			for (auto const& row : rowsToBeSelected)
+				setOfRowsToBeSelected.addRange(juce::Range<int>(row, row+1)); // ugly but the only way to do it: juce::Range counts the start as inclusive and end as exclusive, so a single value range must be initialized like this
+			m_table->setSelectedRows(setOfRowsToBeSelected);
+		}
 	}
 }
 

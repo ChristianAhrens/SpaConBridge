@@ -4,12 +4,16 @@ All notable changes to SpaConBridge will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.9.2] - 2023-03-04
 ### Added
 
 ### Changed
+- Improved overall performance when interacting with Soundobject/MatrixInput/MatrixOutput tables
 
 ### Fixed
+- Fixed Soundobject position value handling to avoid retransmissions leading to jittering position visualization on UI
+- Fixed Soundobject 'active' (polling) state sometimes not behaving as configured on UI
+- Fixed OSC+RTTrPM protocols UDP socket port reopening when changed on UI
 
 ## [0.9.1] - 2023-01-28
 ### Added

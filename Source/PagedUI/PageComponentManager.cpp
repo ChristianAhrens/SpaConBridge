@@ -575,19 +575,26 @@ void PageComponentManager::LoadImageForMappingFromFile(MappingAreaId mappingArea
 	}
 	inputStream.reset(); // clean up the test inputstream
     
+	// create juce::Image from file data
     auto image = juce::ImageCache::getFromFile(file);
     if (!image.isValid())
     {
 		ShowUserErrorNotification(SEC_LoadImage_InvalidImage);
         return;
     }
+
+	// create MemoryBlock with png data to hold alongside juce::Image to not have to process png compression whenever dumping config has to be done
+	MemoryOutputStream outputStream;
+	PNGImageFormat formattedImage;
+	formattedImage.writeImageToStream(image, outputStream);
+	MemoryBlock pngData(outputStream.getData(), outputStream.getDataSize());
     
 	if (m_multiSoundobjectBackgrounds.count(mappingArea) != 0)
 		m_multiSoundobjectBackgrounds.erase(mappingArea);
-	m_multiSoundobjectBackgrounds.insert(std::make_pair(mappingArea, image));
+	m_multiSoundobjectBackgrounds.insert(std::make_pair(mappingArea, std::make_pair(image, pngData)));
 
 	if (m_multiSoundobjectComponent)
-		m_multiSoundobjectComponent->SetBackgroundImage(mappingArea, m_multiSoundobjectBackgrounds.at(mappingArea));
+		m_multiSoundobjectComponent->SetBackgroundImage(mappingArea, m_multiSoundobjectBackgrounds.at(mappingArea).first);
 
 	triggerConfigurationUpdate(false);
 }
@@ -947,10 +954,10 @@ bool PageComponentManager::setStateXml(XmlElement* stateXml)
 					if (pngData.fromBase64Encoding(bkgXmlElement->getStringAttribute("pngData", String())))
 					{
 						MemoryInputStream inputStream(pngData.getData(), pngData.getSize(), true);
-						m_multiSoundobjectBackgrounds.insert(std::make_pair(mapping, ImageFileFormat::loadFrom(inputStream)));
+						m_multiSoundobjectBackgrounds.insert(std::make_pair(mapping, std::make_pair(ImageFileFormat::loadFrom(inputStream), pngData)));
 
 						if (m_multiSoundobjectComponent)
-							m_multiSoundobjectComponent->SetBackgroundImage(mapping, m_multiSoundobjectBackgrounds.at(mapping));
+							m_multiSoundobjectComponent->SetBackgroundImage(mapping, m_multiSoundobjectBackgrounds.at(mapping).first);
 					}
 				}
 				else
@@ -1091,18 +1098,11 @@ std::unique_ptr<XmlElement> PageComponentManager::createStateXml()
 			for (int i = MAI_First; i <= MAI_Fourth; i++)
 			{
 				auto mapping = static_cast<MappingAreaId>(i);
-				if (m_multiSoundobjectBackgrounds.count(mapping) > 0 && m_multiSoundobjectBackgrounds.at(mapping).isValid())
+				if (m_multiSoundobjectBackgrounds.count(mapping) > 0 && m_multiSoundobjectBackgrounds.at(mapping).first.isValid() && !m_multiSoundobjectBackgrounds.at(mapping).second.isEmpty())
 				{
 					auto bkgXmlElement = backgroundImagesXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::BACKGROUND) + String(mapping));
 					if (bkgXmlElement)
-					{
-						MemoryOutputStream outputStream;
-						PNGImageFormat formattedImage;
-						formattedImage.writeImageToStream(m_multiSoundobjectBackgrounds.at(mapping), outputStream);
-						MemoryBlock pngData(outputStream.getData(), outputStream.getDataSize());
-
-						bkgXmlElement->setAttribute("pngData", pngData.toBase64Encoding());
-					}
+						bkgXmlElement->setAttribute("pngData", m_multiSoundobjectBackgrounds.at(mapping).second.toBase64Encoding());
 				}
 			}
 		}

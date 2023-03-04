@@ -190,9 +190,9 @@ void SoundobjectProcessor::SetParameterChanged(const DataChangeParticipant& chan
 	SetLastSourceForChangeType(changeSource, changeTypes);
 
 	// Set the specified change flag for all DataChangeTargets.
-	for (auto changeTarget = 0; changeTarget < DCP_Max; changeTarget++)
+	for (auto changeTarget = static_cast<int>(DCP_SoundobjectProcessor); changeTarget < DCP_Max; changeTarget++)
 	{
-		//if ((changeSource != DCP_Protocol) || (changeTarget != DCP_Protocol))
+		if ((changeSource != changeTarget) || (changeSource == DCP_SoundobjectProcessor)) // speciality: if the source is the processor itself, it must also be set as target, since its UI uses DCP_SoundobjectProcessor for querying as well.
 			m_dataChangesByTarget[static_cast<DataChangeParticipant>(changeTarget)] |= changeTypes;
 	}
 }

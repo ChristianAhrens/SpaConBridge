@@ -1375,14 +1375,14 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 		}
 		break;
 	case RemoteObjectIdentifier::ROI_MatrixOutput_Mute:
-	{
-		matrixOutputId = msgData._addrVal._first;
-		jassert(matrixOutputId > 0);
+		{
+			matrixOutputId = msgData._addrVal._first;
+			jassert(matrixOutputId > 0);
 
-		mopIdx = MOI_ParamIdx_Mute;
-		change = DCT_MatrixOutputMute;
-	}
-	break;
+			mopIdx = MOI_ParamIdx_Mute;
+			change = DCT_MatrixOutputMute;
+		}
+		break;
 	case RemoteObjectIdentifier::ROI_RemoteProtocolBridge_SoundObjectSelect:
 	case RemoteObjectIdentifier::ROI_MatrixInput_Select:
 		{
@@ -1596,8 +1596,10 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 							{
 								auto newXValue = static_cast<float*>(msgData._payload)[0];
 								auto newYValue = static_cast<float*>(msgData._payload)[1];
-								// Set the processor's new position.
-								if (processor->GetParameterValue(SPI_ParamIdx_X) != newXValue || processor->GetParameterValue(SPI_ParamIdx_Y))
+
+								// Set the processor's new position; Only if values have changed within dual decimal digit range (DS100 OSC precision)
+								if (static_cast<int>(100.0f * newXValue) != static_cast<int>(100.0f * processor->GetParameterValue(SPI_ParamIdx_X))
+									|| static_cast<int>(100.0f * newYValue) != static_cast<int>(100.0f * processor->GetParameterValue(SPI_ParamIdx_Y)))
 								{
 									processor->SetParameterValue(DCP_Protocol, SPI_ParamIdx_X, newXValue);
 									processor->SetParameterValue(DCP_Protocol, SPI_ParamIdx_Y, newYValue);
@@ -1623,7 +1625,7 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 							break;
 						}
 
-						if (processor->GetParameterValue(sopIdx) != newValue)
+						if (static_cast<int>(100.0f * newValue) != static_cast<int>(100.0f * processor->GetParameterValue(sopIdx)))
 							processor->SetParameterValue(DCP_Protocol, sopIdx, newValue);
 					}
 				}
@@ -1660,7 +1662,7 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 						break;
 					}
 					
-					if (processor->GetParameterValue(mipIdx) != newValue)
+					if (static_cast<int>(100.0f * newValue) != static_cast<int>(100.0f * processor->GetParameterValue(mipIdx)))
 						processor->SetParameterValue(DCP_Protocol, mipIdx, newValue);
 				}
 			}
@@ -1696,7 +1698,7 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 						break;
 					}
 
-					if (processor->GetParameterValue(mopIdx) != newValue)
+					if (static_cast<int>(100.0f * newValue) != static_cast<int>(100.0f * processor->GetParameterValue(mopIdx)))
 						processor->SetParameterValue(DCP_Protocol, mopIdx, newValue);
 				}
 			}

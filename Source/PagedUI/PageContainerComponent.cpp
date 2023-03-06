@@ -210,13 +210,20 @@ void PageContainerComponent::resized()
 
 	// Resize overview table container.
 	auto rect = Rectangle<int>(0, 44, w, getLocalBounds().getHeight() - 89);
-	m_soundobjectsPage->setBounds(rect);
-	m_multiSoundobjectsPage->setBounds(rect);
-    m_matrixIOPage->setBounds(rect);
-	m_settingsPage->setBounds(rect);
-	m_statisticsPage->setBounds(rect);
-	m_scenesPage->setBounds(rect);
-	m_enSpacePage->setBounds(rect);
+	if (!m_soundobjectsPage->isOnDesktop())
+		m_soundobjectsPage->setBounds(rect);
+	if (!m_multiSoundobjectsPage->isOnDesktop())
+		m_multiSoundobjectsPage->setBounds(rect);
+    if (!m_matrixIOPage->isOnDesktop())
+		m_matrixIOPage->setBounds(rect);
+	if (!m_settingsPage->isOnDesktop())
+		m_settingsPage->setBounds(rect);
+	if (!m_statisticsPage->isOnDesktop())
+		m_statisticsPage->setBounds(rect);
+	if (!m_scenesPage->isOnDesktop())
+		m_scenesPage->setBounds(rect);
+	if (!m_enSpacePage->isOnDesktop())
+		m_enSpacePage->setBounds(rect);
 
 	// finally resize the overlay component, if set, visible and therefor on top of everything else at all
 	if (m_overlayComponent && m_overlayComponent->isVisible())
@@ -513,6 +520,72 @@ void PageContainerComponent::SetActivePage(UIPageId pageId)
 	m_enSpacePage->SetPageIsVisible(UPI_EnSpace == pageId);
 
 	m_tabbedComponent->setCurrentTabIndex(m_tabbedComponent->getTabNames().indexOf(GetPageNameFromId(pageId)));
+}
+
+/**
+ * Method to open a given page in a separate window.
+ * @param pageId	The page id to open as window.
+ */
+void PageContainerComponent::OpenPageAsWindow(UIPageId pageId)
+{
+	jassert(pageId > UPI_InvalidMin && pageId < UPI_About);
+
+	m_tabbedComponent->SetIsHandlingChanges(false);
+	if (m_tabbedComponent->getCurrentTabIndex() == m_tabbedComponent->getTabNames().indexOf(GetPageNameFromId(pageId)))
+	{
+		auto newActiveTabPageId = int(pageId) + 1;
+		if (newActiveTabPageId == UPI_About)
+			newActiveTabPageId = UPI_InvalidMin + 1;
+
+		m_soundobjectsPage->SetPageIsVisible(UPI_Soundobjects == newActiveTabPageId);
+		m_multiSoundobjectsPage->SetPageIsVisible(UPI_MultiSoundobjects == newActiveTabPageId);
+		m_matrixIOPage->SetPageIsVisible(UPI_MatrixIOs == newActiveTabPageId);
+		m_settingsPage->SetPageIsVisible(UPI_Settings == newActiveTabPageId);
+		m_statisticsPage->SetPageIsVisible(UPI_Statistics == newActiveTabPageId);
+		m_scenesPage->SetPageIsVisible(UPI_Scenes == newActiveTabPageId);
+		m_enSpacePage->SetPageIsVisible(UPI_EnSpace == newActiveTabPageId);
+
+		m_tabbedComponent->setCurrentTabIndex(m_tabbedComponent->getTabNames().indexOf(GetPageNameFromId(static_cast<UIPageId>(newActiveTabPageId))));
+	}
+	m_tabbedComponent->removeTab(m_tabbedComponent->getTabNames().indexOf(GetPageNameFromId(static_cast<UIPageId>(pageId))));
+	m_tabbedComponent->SetIsHandlingChanges(true);
+
+	auto windowStyleFlags = ComponentPeer::StyleFlags::windowAppearsOnTaskbar
+		| ComponentPeer::StyleFlags::windowHasCloseButton
+		| ComponentPeer::StyleFlags::windowHasMaximiseButton
+		| ComponentPeer::StyleFlags::windowHasMinimiseButton
+		| ComponentPeer::StyleFlags::windowHasTitleBar
+		| ComponentPeer::StyleFlags::windowIsResizable;
+
+	auto newWindowBounds = juce::Rectangle<int>(0, 0, 100, 100);
+	if (auto mainComponent = Desktop::getInstance().getComponent(0))
+		newWindowBounds = mainComponent->getBounds();
+
+	auto windowedPage = static_cast<PageComponentBase*>(nullptr);
+	if (UPI_Soundobjects == pageId)
+		windowedPage = m_soundobjectsPage.get();
+	else if (UPI_MultiSoundobjects == pageId)
+		windowedPage = m_multiSoundobjectsPage.get();
+	else if (UPI_MatrixIOs == pageId)
+		windowedPage = m_matrixIOPage.get();
+	else if (UPI_Settings == pageId)
+		windowedPage = m_settingsPage.get();
+	else if (UPI_Statistics == pageId)
+		windowedPage = m_statisticsPage.get();
+	else if (UPI_Scenes == pageId)
+		windowedPage = m_scenesPage.get();
+	else if (UPI_EnSpace == pageId)
+		windowedPage = m_enSpacePage.get();
+
+	if (windowedPage)
+	{
+		windowedPage->setOpaque(true);
+		windowedPage->SetPageIsVisible(true);
+		windowedPage->addToDesktop(windowStyleFlags);
+		windowedPage->setBounds(newWindowBounds);
+		windowedPage->setVisible(true);
+	}
+
 }
 
 /**
@@ -831,7 +904,14 @@ TabBarButton* CustomButtonTabbedComponent::createTabButton(const String& tabName
 {
 	ignoreUnused(tabIndex);
 
-	return new CustomDrawableTabBarButton(GetPageIdFromName(tabName), getTabbedButtonBar());
+	auto button = new CustomDrawableTabBarButton(GetPageIdFromName(tabName), getTabbedButtonBar());
+	button->onButtonDraggedForTabDetaching = [this] (UIPageId pageId) {
+		PageComponentManager* pageMgr = PageComponentManager::GetInstance();
+		if (pageMgr)
+			pageMgr->OpenPageAsWindow(pageId, false);
+	};
+
+	return button;
 }
 
 /**
@@ -1073,6 +1153,24 @@ bool CustomDrawableTabBarButton::setVisibleDrawable(Drawable* visibleDrawable)
 	m_disabledOnImage->setVisible(m_disabledOnImage.get() == visibleDrawable);
 
 	return true;
+}
+
+/**
+ * Reimplemented from juce::Component to track if a tab was dragged
+ * outside of the bar to have it appear as own window.
+ * @param	event	The details of the mouse movement that lead here.
+ */
+void CustomDrawableTabBarButton::mouseUp(const MouseEvent& event)
+{
+	auto appBounds = getTopLevelComponent()->getLocalBounds();
+	auto clickPos = getBoundsInParent().getPosition() + event.position.toInt();
+	if (!appBounds.contains(clickPos) && onButtonDraggedForTabDetaching)
+	{
+		DBG("Tab was dragged outside of TabBar");
+		onButtonDraggedForTabDetaching(m_pageId);
+	}
+	else
+		TabBarButton::mouseUp(event);
 }
 
 

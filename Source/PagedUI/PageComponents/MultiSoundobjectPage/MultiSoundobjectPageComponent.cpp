@@ -65,6 +65,17 @@ MultiSoundobjectPageComponent::~MultiSoundobjectPageComponent()
 }
 
 /**
+ * Reimplemented to paint background and frame.
+ * @param g		Graphics context that must be used to do the drawing operations.
+ */
+void MultiSoundobjectPageComponent::paint(Graphics& g)
+{
+	// Background
+	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
+	g.fillRect(getLocalBounds());
+}
+
+/**
  * Reimplemented to resize and re-postion controls on the overview window.
  */
 void MultiSoundobjectPageComponent::resized()

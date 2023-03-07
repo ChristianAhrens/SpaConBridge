@@ -487,6 +487,15 @@ void SettingsSectionsComponent::createRTTrPMSettingsSection()
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingAreaLabel.get(), false, false);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingAreaSelect.get(), true, false);
 
+	m_RTTrPMModuleTypeSelect = std::make_unique<ComboBox>();
+	m_RTTrPMModuleTypeSelect->addListener(this);
+	m_RTTrPMModuleTypeSelect->addItemList(m_RTTrPMModuleTypes, 1);
+	m_RTTrPMModuleTypeLabel = std::make_unique<Label>("RTTrPMModuleTypeSelect", "Module Type");
+	m_RTTrPMModuleTypeLabel->setJustificationType(Justification::centred);
+	m_RTTrPMModuleTypeLabel->attachToComponent(m_RTTrPMModuleTypeSelect.get(), true);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMModuleTypeLabel.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMModuleTypeSelect.get(), true, false);
+
 	m_RTTrPMBridgingSettings->resized();
 }
 
@@ -1340,6 +1349,11 @@ void SettingsSectionsComponent::comboBoxChanged(ComboBox* comboBox)
 		m_previousRTTrPMMappingAreaId = m_RTTrPMMappingAreaSelect->getSelectedId();
 		ctrl->SetBridgingMappingArea(PBT_BlacktraxRTTrPM, m_previousRTTrPMMappingAreaId);
 	}
+	else if (m_RTTrPMModuleTypeSelect && m_RTTrPMModuleTypeSelect.get() == comboBox)
+	{
+		auto selectedModuleTypeIdentifier = m_RTTrPMModuleTypeSelect->getItemText(m_RTTrPMModuleTypeSelect->getSelectedId() - 1);
+		ctrl->SetBridgingModuleTypeIdentifier(PBT_BlacktraxRTTrPM, selectedModuleTypeIdentifier);
+	}
 
 	// Generic MIDI settings section
 	else if (m_GenericMIDIInputDeviceSelect && m_GenericMIDIInputDeviceSelect.get() == comboBox)
@@ -1618,7 +1632,8 @@ void SettingsSectionsComponent::processUpdatedRTTrPMConfig()
 		m_RTTrPMBridgingSettings->setToggleActiveState(RTTrPMBridgingActive);
 	if (m_RTTrPMListeningPortEdit)
 		m_RTTrPMListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_BlacktraxRTTrPM)), false);
-    auto RTTrPMMappingAreaId = ctrl->GetBridgingMappingArea(PBT_BlacktraxRTTrPM);
+    
+	auto RTTrPMMappingAreaId = ctrl->GetBridgingMappingArea(PBT_BlacktraxRTTrPM);
 	if (m_RTTrPMInterpretXYRelativeButton)
 	{
 		auto newActiveButtonId = m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[(RTTrPMMappingAreaId == -1) ? 0 : 1]];
@@ -1631,6 +1646,10 @@ void SettingsSectionsComponent::processUpdatedRTTrPMConfig()
 	}
 	if (m_RTTrPMMappingAreaLabel)
 		m_RTTrPMMappingAreaLabel->setEnabled((RTTrPMMappingAreaId != MAI_Invalid));
+	
+	auto RTTrPMModuleTypeIdentifier = ctrl->GetBridgingModuleTypeIdentifier(PBT_BlacktraxRTTrPM);
+	if (m_RTTrPMModuleTypeSelect)
+		m_RTTrPMModuleTypeSelect->setSelectedItemIndex(m_RTTrPMModuleTypes.indexOf(RTTrPMModuleTypeIdentifier));
 }
 
 /**

@@ -553,6 +553,10 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupRTTrPMBridgingProtocol
 	if (mappingAreaIdXmlElement)
 		mappingAreaIdXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), PROTOCOL_DEFAULT_MAPPINGAREA);
 
+	auto moduleTypeForPositioningXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PACKETMODULE));
+	if (moduleTypeForPositioningXmlElement)
+		moduleTypeForPositioningXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), "CentroidPosition");
+
 	auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
 	auto mutedObjects = std::vector<RemoteObject>();
 	if (mutedObjsXmlElement)
@@ -1316,7 +1320,7 @@ int ProtocolBridgingWrapper::GetProtocolMappingArea(ProtocolId protocolId)
 		}
 	}
 
-	return INVALID_PORT_VALUE;
+	return MappingAreaId::MAI_Invalid;
 }
 
 /**
@@ -1347,6 +1351,64 @@ bool ProtocolBridgingWrapper::SetProtocolMappingArea(ProtocolId protocolId, int 
 		else
 			return false;
 
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
+}
+
+/**
+ * Gets the protocol's currently set mapping area id, if available for the given protocol.
+ * @param protocolId The id of the protocol for which to get the currently configured mappingarea id
+ * @return	The mapping area id
+ */
+const String ProtocolBridgingWrapper::GetProtocolModuleTypeIdentifier(ProtocolId protocolId)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto moduleTypeForPositioningXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PACKETMODULE));
+			if (moduleTypeForPositioningXmlElement)
+			{
+				return moduleTypeForPositioningXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE));
+			}
+		}
+	}
+	
+	return String();
+}
+
+/**
+ * Sets the given protocol mapping area id.
+ * This method inserts the mapping area id into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param protocolId The id of the protocol for which to set the ip address
+ * @param remotePort	The new port number to send to
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetProtocolModuleTypeIdentifier(ProtocolId protocolId, const String& moduleTypeIdentifier, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto moduleTypeForPositioningXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PACKETMODULE));
+			if (moduleTypeForPositioningXmlElement)
+			{
+				moduleTypeForPositioningXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), moduleTypeIdentifier);
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+	
 		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
 	}
 	else
@@ -3471,6 +3533,27 @@ int ProtocolBridgingWrapper::GetRTTrPMMappingArea()
 bool ProtocolBridgingWrapper::SetRTTrPMMappingArea(int mappingAreaId, bool dontSendNotification)
 {
 	return SetProtocolMappingArea(RTTRPM_PROCESSINGPROTOCOL_ID, mappingAreaId, dontSendNotification);
+}
+
+/**
+ * Gets the desired protocol module type id.
+ * This method forwards the call to the generic implementation.
+ * @return	The requested module type id
+ */
+const String ProtocolBridgingWrapper::GetRTTrPMModuleTypeIdentifier()
+{
+	return GetProtocolModuleTypeIdentifier(RTTRPM_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol module type.
+ * This method forwards the call to the generic implementation.
+ * @param	moduleTypeIdentifier	The protocol module type to set
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetRTTrPMModuleTypeIdentifier(const String& moduleTypeIdentifier, bool dontSendNotification)
+{
+	return SetProtocolModuleTypeIdentifier(RTTRPM_PROCESSINGPROTOCOL_ID, moduleTypeIdentifier, dontSendNotification);
 }
 
 /**

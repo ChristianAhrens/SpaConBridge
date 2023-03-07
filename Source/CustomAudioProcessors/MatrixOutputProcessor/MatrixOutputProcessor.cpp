@@ -674,7 +674,7 @@ AudioProcessorEditor* MatrixOutputProcessor::createEditor()
 	AudioProcessorEditor* editor = new MatrixOutputProcessorEditor(*this);
 
 	// Initialize GUI with current IP address, etc.
-	SetParameterChanged(DCP_Host, (DCT_MatrixOutputProcessorConfig | DCT_CommunicationConfig | DCT_MatrixOutputParameters));
+	SetParameterChanged(DCP_Protocol, (DCT_MatrixOutputProcessorConfig | DCT_CommunicationConfig | DCT_MatrixOutputParameters)); // We use 'DCP_Protocol' as source here, to not have the initial update be resent as new values via protocol
 
 	return editor;
 }

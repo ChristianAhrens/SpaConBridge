@@ -553,9 +553,9 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupRTTrPMBridgingProtocol
 	if (mappingAreaIdXmlElement)
 		mappingAreaIdXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), PROTOCOL_DEFAULT_MAPPINGAREA);
 
-	auto moduleTypeForPositioningXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PACKETMODULE));
-	if (moduleTypeForPositioningXmlElement)
-		moduleTypeForPositioningXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), "CentroidPosition");
+	auto moduleTypeIdentifierXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PACKETMODULE));
+	if (moduleTypeIdentifierXmlElement)
+		moduleTypeIdentifierXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), "CentroidPosition");
 
 	auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
 	auto mutedObjects = std::vector<RemoteObject>();
@@ -1399,10 +1399,10 @@ bool ProtocolBridgingWrapper::SetProtocolModuleTypeIdentifier(ProtocolId protoco
 		if (protocolXmlElement)
 		{
 			auto moduleTypeForPositioningXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PACKETMODULE));
+			if (!moduleTypeForPositioningXmlElement)
+				moduleTypeForPositioningXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PACKETMODULE));
 			if (moduleTypeForPositioningXmlElement)
-			{
 				moduleTypeForPositioningXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), moduleTypeIdentifier);
-			}
 			else
 				return false;
 		}
@@ -1457,10 +1457,10 @@ bool ProtocolBridgingWrapper::SetProtocolInputDeviceIdentifier(ProtocolId protoc
 		if (protocolXmlElement)
 		{
 			auto inputDeviceIdentifierXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::INPUTDEVICE));
+			if (!inputDeviceIdentifierXmlElement)
+				inputDeviceIdentifierXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::INPUTDEVICE));
 			if (inputDeviceIdentifierXmlElement)
-			{
 				inputDeviceIdentifierXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::DEVICEIDENTIFIER), inputDeviceIdentifier);
-			}
 			else
 				return false;
 		}
@@ -1515,10 +1515,10 @@ bool ProtocolBridgingWrapper::SetProtocolOutputDeviceIdentifier(ProtocolId proto
 		if (protocolXmlElement)
 		{
 			auto outputDeviceIdentifierXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OUTPUTDEVICE));
+			if (!outputDeviceIdentifierXmlElement)
+				outputDeviceIdentifierXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OUTPUTDEVICE));
 			if (outputDeviceIdentifierXmlElement)
-			{
 				outputDeviceIdentifierXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::DEVICEIDENTIFIER), outputDeviceIdentifier);
-			}
 			else
 				return false;
 		}
@@ -2084,47 +2084,51 @@ bool ProtocolBridgingWrapper::SetOscRemapAssignments(ProtocolId protocolId, cons
 			auto oscRemappingsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REMAPPINGS));
 			if (!oscRemappingsXmlElement)
 				oscRemappingsXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REMAPPINGS));
-
-			// collect the xml elements that are no longer used according to new incoming assignments
-			std::vector<XmlElement*> noLongerUsedElements;
-			auto remappingXmlElement = oscRemappingsXmlElement->getFirstChildElement();
-			while (nullptr != remappingXmlElement)
+			if (oscRemappingsXmlElement)
 			{
-				bool stillInUse = false;
+				// collect the xml elements that are no longer used according to new incoming assignments
+				std::vector<XmlElement*> noLongerUsedElements;
+				auto remappingXmlElement = oscRemappingsXmlElement->getFirstChildElement();
+				while (nullptr != remappingXmlElement)
+				{
+					bool stillInUse = false;
+					for (auto const& assi : oscRemapAssignments)
+						if (ProcessingEngineConfig::GetObjectDescription(assi.first).removeCharacters(" ") == remappingXmlElement->getTagName())
+							stillInUse = true;
+					if (!stillInUse)
+						noLongerUsedElements.push_back(remappingXmlElement);
+
+					remappingXmlElement = remappingXmlElement->getNextElement();
+				}
+				// and remove them
+				for (auto const& childToRemove : noLongerUsedElements)
+					oscRemappingsXmlElement->removeChildElement(childToRemove, true);
+
+				// create or update the xml elements according to new incoming assignments
 				for (auto const& assi : oscRemapAssignments)
-					if (ProcessingEngineConfig::GetObjectDescription(assi.first).removeCharacters(" ") == remappingXmlElement->getTagName())
-						stillInUse = true;
-				if (!stillInUse)
-					noLongerUsedElements.push_back(remappingXmlElement);
-
-				remappingXmlElement = remappingXmlElement->getNextElement();
-			}
-			// and remove them
-			for (auto const& childToRemove : noLongerUsedElements)
-				oscRemappingsXmlElement->removeChildElement(childToRemove, true);
-
-			// create or update the xml elements according to new incoming assignments
-			for (auto const& assi : oscRemapAssignments)
-			{
-				auto oscRemappingXmlElement = oscRemappingsXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(assi.first).removeCharacters(" "));
-				if (oscRemappingXmlElement)
 				{
-					auto oscRemappingTextXmlElement = oscRemappingXmlElement->getFirstChildElement();
-					if (oscRemappingTextXmlElement && oscRemappingTextXmlElement->isTextElement())
-						oscRemappingTextXmlElement->setText(assi.second.first);
+					auto oscRemappingXmlElement = oscRemappingsXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(assi.first).removeCharacters(" "));
+					if (oscRemappingXmlElement)
+					{
+						auto oscRemappingTextXmlElement = oscRemappingXmlElement->getFirstChildElement();
+						if (oscRemappingTextXmlElement && oscRemappingTextXmlElement->isTextElement())
+							oscRemappingTextXmlElement->setText(assi.second.first);
+						else
+							oscRemappingTextXmlElement->addTextElement(assi.second.first);
+						oscRemappingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MINVALUE), static_cast<double>(assi.second.second.getStart()));
+						oscRemappingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MAXVALUE), static_cast<double>(assi.second.second.getEnd()));
+					}
 					else
-						oscRemappingTextXmlElement->addTextElement(assi.second.first);
-					oscRemappingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MINVALUE), static_cast<double>(assi.second.second.getStart()));
-					oscRemappingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MAXVALUE), static_cast<double>(assi.second.second.getEnd()));
-				}
-				else
-				{
-					oscRemappingXmlElement = oscRemappingsXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectDescription(assi.first).removeCharacters(" "));
-					oscRemappingXmlElement->addTextElement(assi.second.first);
-					oscRemappingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MINVALUE), static_cast<double>(assi.second.second.getStart()));
-					oscRemappingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MAXVALUE), static_cast<double>(assi.second.second.getEnd()));
+					{
+						oscRemappingXmlElement = oscRemappingsXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectDescription(assi.first).removeCharacters(" "));
+						oscRemappingXmlElement->addTextElement(assi.second.first);
+						oscRemappingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MINVALUE), static_cast<double>(assi.second.second.getStart()));
+						oscRemappingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MAXVALUE), static_cast<double>(assi.second.second.getEnd()));
+					}
 				}
 			}
+			else
+				return false;
 		}
 		else
 			return false;

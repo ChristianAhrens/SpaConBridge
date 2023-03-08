@@ -11,6 +11,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.9.4] - 2023-03-08
+### Added
+- Added dropdown to BlackTrax RTTrPM Bridging section for selection of 'Module Type' to use for positioning data
+
+### Changed
+
+### Fixed
+- Fixed Soundobject details editor to not send initial set of object values when opened
+
 ## [0.9.3] - 2023-03-04
 ### Added
 

@@ -105,7 +105,7 @@ String GetProtocolBridgingShortName(ProtocolBridgingType type)
 		case PBT_GenericOSC:
 			return "OSC";
 		case PBT_BlacktraxRTTrPM:
-			return "Blacktrax";
+			return "BlackTrax";
 		case PBT_GenericMIDI:
 			return "MIDI";
 		case PBT_YamahaSQ:
@@ -142,7 +142,7 @@ String GetProtocolBridgingNiceName(ProtocolBridgingType type)
 	case PBT_GenericOSC:
 		return "d&b Generic OSC";
 	case PBT_BlacktraxRTTrPM:
-		return "Blacktrax RTTrPM";
+		return "BlackTrax RTTrPM";
 	case PBT_GenericMIDI:
 		return "Generic MIDI";
 	case PBT_YamahaSQ:
@@ -179,7 +179,7 @@ String GetProtocolBridgingSystemName(ProtocolBridgingType type)
 	case PBT_GenericOSC:
 		return "GenericOSC";
 	case PBT_BlacktraxRTTrPM:
-		return "BlacktraxRTTrPM";
+		return "BlackTraxRTTrPM";
 	case PBT_GenericMIDI:
 		return "GenericMIDI";
 	case PBT_YamahaSQ:

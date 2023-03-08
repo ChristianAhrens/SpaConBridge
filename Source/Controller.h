@@ -226,6 +226,9 @@ public:
 	std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> GetBridgingOscRemapAssignments(ProtocolBridgingType bridgingType);
 	bool SetBridgingOscRemapAssignments(ProtocolBridgingType bridgingType, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& oscRemapAssignments, bool dontSendNotification = false);
 
+	const String GetBridgingModuleTypeIdentifier(ProtocolBridgingType bridgingType);
+	bool SetBridgingModuleTypeIdentifier(ProtocolBridgingType bridgingType, const String& moduleTypeIdentifier, bool dontSendNotification = false);
+
 	//==========================================================================
 	void InitGlobalSettings(DataChangeParticipant changeSource, String ipAddress, int rate);
 

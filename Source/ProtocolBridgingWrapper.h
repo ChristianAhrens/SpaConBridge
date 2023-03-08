@@ -206,6 +206,8 @@ public:
 	bool SetRTTrPMRemotePort(int remotePort, bool dontSendNotification = false);
 	int GetRTTrPMMappingArea();
 	bool SetRTTrPMMappingArea(int mappingAreaId, bool dontSendNotification = false);
+	const String GetRTTrPMModuleTypeIdentifier();
+	bool SetRTTrPMModuleTypeIdentifier(const String& moduleTypeIdentifier, bool dontSendNotification = false);
 
 	//==========================================================================
 	bool GetMuteGenericOSCSoundobjectProcessorId(SoundobjectProcessorId soundobjectProcessorId);
@@ -387,6 +389,8 @@ private:
 	bool SetProtocolBridgingXYMessageCombined(ProtocolId protocolId, bool combined, bool dontSendNotification = false);
 	std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> GetOscRemapAssignments(ProtocolId protocolId);
 	bool SetOscRemapAssignments(ProtocolId protocolId, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& oscRemapAssignments, bool dontSendNotification = false);
+	const String GetProtocolModuleTypeIdentifier(ProtocolId protocolId);
+	bool SetProtocolModuleTypeIdentifier(ProtocolId protocolId, const String& moduleTypeIdentifier, bool dontSendNotification = false);
 
 	ObjectHandlingState GetProtocolState(ProtocolId protocolId) const;
 	void SetProtocolState(ProtocolId protocolId, ObjectHandlingState state);

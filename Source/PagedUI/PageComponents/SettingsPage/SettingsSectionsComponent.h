@@ -224,6 +224,9 @@ private:
 	std::map<std::string, uint64>								m_RTTrPMInterpretXYRelativeButtonIds;
 	std::unique_ptr<ComboBox>									m_RTTrPMMappingAreaSelect;
 	std::unique_ptr<Label>										m_RTTrPMMappingAreaLabel;
+	std::unique_ptr<ComboBox>									m_RTTrPMModuleTypeSelect;
+	const juce::StringArray										m_RTTrPMModuleTypes{ "CentroidPosition", "CentroidAccelerationAndVelocity", "TrackedPointPosition", "TrackedPointAccelerationAndVelocity" };
+	std::unique_ptr<Label>										m_RTTrPMModuleTypeLabel;
 	int															m_previousRTTrPMMappingAreaId{ 1 };
 
 	// Generic OSC settings section

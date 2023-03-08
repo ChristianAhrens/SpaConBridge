@@ -3638,6 +3638,50 @@ bool Controller::SetBridgingOscRemapAssignments(ProtocolBridgingType bridgingTyp
 	}
 }
 
+const String Controller::GetBridgingModuleTypeIdentifier(ProtocolBridgingType bridgingType)
+{
+	switch (bridgingType)
+	{
+	case PBT_BlacktraxRTTrPM:
+		return m_protocolBridge.GetRTTrPMModuleTypeIdentifier();
+	case PBT_RemapOSC:
+	case PBT_GenericMIDI:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_YamahaOSC:
+	case PBT_ADMOSC:
+	case PBT_HUI:
+	case PBT_DS100:
+	case PBT_DAWPlugin:
+	default:
+		jassertfalse;
+		return String();
+	}
+}
+
+bool Controller::SetBridgingModuleTypeIdentifier(ProtocolBridgingType bridgingType, const String& moduleTypeIdentifier, bool dontSendNotification)
+{
+	switch (bridgingType)
+	{
+	case PBT_BlacktraxRTTrPM:
+		return m_protocolBridge.SetRTTrPMModuleTypeIdentifier(moduleTypeIdentifier, dontSendNotification);
+	case PBT_RemapOSC:
+	case PBT_GenericMIDI:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_YamahaOSC:
+	case PBT_ADMOSC:
+	case PBT_HUI:
+	case PBT_DS100:
+	case PBT_DAWPlugin:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
 /**
  * Method to load a given input file as the new application configuration.
  * This tries to handle possible errors and shows a popup to the user in case an error was detected.

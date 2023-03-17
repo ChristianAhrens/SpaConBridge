@@ -65,9 +65,11 @@ public:
 	float GetParameterValue(MatrixOutputParameterIndex paramIdx, bool normalized = false) const;
 	void SetParameterValue(DataChangeParticipant changeSource, MatrixOutputParameterIndex paramIdx, float newValue);
 
-	bool GetParameterChanged(DataChangeParticipant changeTarget, DataChangeType change);
-	bool PopParameterChanged(DataChangeParticipant changeTarget, DataChangeType change);
-	void SetParameterChanged(DataChangeParticipant changeSource, DataChangeType changeTypes);
+	bool GetParameterChanged(const DataChangeParticipant& changeTarget, const DataChangeType& changeTypes);
+	bool PopParameterChanged(const DataChangeParticipant& changeTarget, const DataChangeType& changeTypes);
+	void SetParameterChanged(const DataChangeParticipant& changeSource, const DataChangeType& changeTypes);
+
+	const DataChangeParticipant GetParameterChangeSource(const DataChangeType& changeType);
 
 	void Tick();
 	void SetParamInTransit(DataChangeType paramsChanged);
@@ -101,62 +103,26 @@ public:
 	void releaseResources() override;
 	void setCurrentProgram(int index) override;
 
-protected:
-	/**
-	 * Matrix input En-Space gain.
-	 */
-	GestureManagedAudioParameterFloat*	m_matrixOutputLevelMeter;
+private:
+	void SetLastSourceForChangeType(const DataChangeParticipant& changeSource, const DataChangeType& changeTypes);
 
-	/**
-	 * Sound object spread.
-	 */
-	GestureManagedAudioParameterFloat*	m_matrixOutputGain;
-
-	/**
-	 * Sound object delay mode (Off, Tight, Full).
-	 */
-	GestureManagedAudioParameterInt*	m_matrixOutputMute;
-
-	/**
-	 * Current OSC communication mode, sending and/or receiving.
-	 */
-	ComsMode					m_comsMode;
-
-	/*
-	 * MatrixOutputProcessor, or matrix input number.
-	 */
-	MatrixOutputProcessorId	m_matrixOutputId;
-
-	/**
-	 * Unique ID of this Processor instance. 
-	 * This is also this Processor's index within the Controller::m_processors array.
-	 */
-	MatrixOutputProcessorId	m_processorId;
-
-	/**
-	 * Keep track of which automation parameters have changed recently. 
-	 * The array has one entry for each application module (see enum DataChangeSource).
-	 */
-	DataChangeType				m_parametersChanged[DCP_Max];
-
-	/**
-	 * Flags used to indicate when a SET command for a parameter is currently out on the network.
-	 * Until such a flag is cleared (in the Tick() method), calls to IsParamInTransit will return true.
-	 * This mechanism is used to ensure that parameters aren't overwritten right after having been
-	 * changed via the Gui or the host.
-	 */
-	DataChangeType				m_paramSetCommandsInTransit = DCT_None;
-
-	/**
-	 * User friendly name for this processor instance
-	 */
-	String						m_processorDisplayName;
-
-	/**
-	 * Member used to ensure that property changes are registered to the correct source.
-	 * See MainProcessor::SetParameterValue().
-	 */
-	DataChangeParticipant		m_currentChangeSource = DCP_Host;
+	GestureManagedAudioParameterFloat*				m_matrixOutputLevelMeter;				/**< MatrixOutput levelmeter value. NOTE: not using std::unique_ptr here, see addParameter(). */
+	GestureManagedAudioParameterFloat*				m_matrixOutputGain;						/**< MatrixOutput gain value. */
+	GestureManagedAudioParameterInt*				m_matrixOutputMute;						/**< MatrixOutput mute value. */
+	ComsMode										m_comsMode;								/**< Current OSC communication mode, sending and/or receiving. */
+	MatrixOutputId									m_matrixOutputId;						/**< matrix output id. */
+	juce::Colour									m_soundobjectColour;					/**< The colour to be used to paint this soundobject on ui. */
+	double											m_soundobjectSize;						/**< The size to be used to paint this soundobject on ui. */
+	MatrixOutputProcessorId							m_processorId;							/**< Unique ID of this Processor instance. This is also this Processor's index within the Controller::m_processors array. */
+	std::map<DataChangeParticipant, DataChangeType>	m_dataChangesByTarget;					/**< Keep track of which automation parameters have changed recently. */
+	std::map<DataChangeType, DataChangeParticipant>	m_dataChangeTypesByLastChangeSource;	/**< Keep track of who has last changed which automation parameters. */
+	DataChangeType									m_paramSetCommandsInTransit = DCT_None;	/**< Flags used to indicate when a SET command for a parameter is currently out on the network.
+																							 * Until such a flag is cleared (in the Tick() method), calls to IsParamInTransit will return true.
+																							 * This mechanism is used to ensure that parameters aren't overwritten right after having been
+																							 * changed via the Gui or the host.
+																							 */
+	String											m_processorDisplayName;					/**< User friendly name for this processor instance. */
+	DataChangeParticipant							m_currentChangeSource = DCP_Host;		/**< Member used to ensure that property changes are registered to the correct source. See MainProcessor::SetParameterValue(). */
 
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixOutputProcessor)

@@ -39,6 +39,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "../../SpaConBridgeCommon.h"
 #include "../../AppConfiguration.h"
 
+#include "../ProcessorBase.h"
+
 #include <RemoteProtocolBridgeCommon.h>
 
 
@@ -56,10 +58,7 @@ class GestureManagedAudioParameterChoice;
 /**
  * Class MainProcessor, a derived AudioProcessor which can be wrapped as VST, AU, or AAX. 
  */
-class SoundobjectProcessor :
-	public AudioProcessor,
-	public AudioProcessorParameter::Listener,
-	public AppConfiguration::XmlConfigurableElement
+class SoundobjectProcessor : public ProcessorBase
 {
 public:
 	explicit SoundobjectProcessor(bool insertToConfig = true);
@@ -79,9 +78,6 @@ public:
 	MappingId GetMappingId() const;
 	void SetMappingId(DataChangeParticipant changeSource, MappingId mappingId);
 
-	ComsMode GetComsMode() const;
-	void SetComsMode(DataChangeParticipant changeSource, ComsMode newMode);
-
 	const juce::Colour& GetSoundobjectColour() const;
 	void SetSoundobjectColour(DataChangeParticipant changeSource, const juce::Colour &colour);
 
@@ -91,67 +87,29 @@ public:
 	float GetParameterValue(SoundobjectParameterIndex paramIdx, bool normalized = false) const;
 	void SetParameterValue(DataChangeParticipant changeSource, SoundobjectParameterIndex paramIdx, float newValue);
 
-	bool GetParameterChanged(const DataChangeParticipant& changeTarget, const DataChangeType& changeTypes);
-	bool PopParameterChanged(const DataChangeParticipant& changeTarget, const DataChangeType& changeTypes);
 	void SetParameterChanged(const DataChangeParticipant& changeSource, const DataChangeType& changeTypes);
 
-	const DataChangeParticipant GetParameterChangeSource(const DataChangeType& changeType);
-
 	void Tick();
-	void SetParamInTransit(DataChangeType paramsChanged);
-	bool IsParamInTransit(DataChangeType paramsChanged) const;
 
 	// Overriden functions of class AppConfiguration::XmlConfigurableElement
 	std::unique_ptr<XmlElement> createStateXml() override;
 	bool setStateXml(XmlElement* stateXml) override;
 
-	// Overriden functions of class AudioProcessor
-	virtual void getStateInformation(MemoryBlock& destData) override;
-	virtual void setStateInformation(const void* data, int sizeInBytes) override;
 	// Overriden functions of class AudioProcessorParameter::Listener
 	virtual void parameterValueChanged(int parameterIndex, float newValue) override;
-	virtual void parameterGestureChanged(int parameterIndex, bool gestureIsStarting) override;
-
-	// Functions which need to be reimplemented from class AudioProcessor, but which 
-	// aren't relevant for our use.
-	bool acceptsMidi() const override;
-	void changeProgramName(int index, const String& newName) override;
 	AudioProcessorEditor* createEditor() override;
-	int getCurrentProgram() override;
-	int getNumPrograms() override;
-	const String getProgramName(int index) override;
-	const String getName() const override;
-	double getTailLengthSeconds() const override;
-	bool hasEditor() const override;
-	void prepareToPlay(double sampleRate, int samplesPerBlock) override;
-	void processBlock(AudioSampleBuffer&, MidiBuffer&) override;
-	bool producesMidi() const override;
-	void releaseResources() override;
-	void setCurrentProgram(int index) override;
 
 private:
-	void SetLastSourceForChangeType(const DataChangeParticipant& changeSource, const DataChangeType& changeTypes);
-
 	GestureManagedAudioParameterFloat*				m_xPos;									/**< X coordinate in meters. NOTE: not using std::unique_ptr here, see addParameter(). */
 	GestureManagedAudioParameterFloat*				m_yPos;									/**< Y coordinate in meters. */
 	GestureManagedAudioParameterFloat*				m_reverbSendGain;						/**< Matrix input En-Space gain. */
 	GestureManagedAudioParameterFloat*				m_sourceSpread;							/**< Sound object spread. */
 	GestureManagedAudioParameterChoice*				m_delayMode;							/**< Sound object delay mode (Off, Tight, Full). */
-	ComsMode										m_comsMode;								/**< Current OSC communication mode, sending and/or receiving. */
 	MappingId										m_mappingId;							/**< Coordinate mapping index (1 to 4). */
 	SoundobjectId									m_soundobjectId;						/**< SoundobjectID, or matrix input number. */
 	juce::Colour									m_soundobjectColour;					/**< The colour to be used to paint this soundobject on ui. */
 	double											m_soundobjectSize;						/**< The size to be used to paint this soundobject on ui. */
 	SoundobjectProcessorId							m_processorId;							/**< Unique ID of this Processor instance. This is also this Processor's index within the Controller::m_processors array. */
-	std::map<DataChangeParticipant, DataChangeType>	m_dataChangesByTarget;					/**< Keep track of which automation parameters have changed recently. */
-	std::map<DataChangeType, DataChangeParticipant>	m_dataChangeTypesByLastChangeSource;	/**< Keep track of who has last changed which automation parameters. */
-	DataChangeType									m_paramSetCommandsInTransit = DCT_None;	/**< Flags used to indicate when a SET command for a parameter is currently out on the network.
-																							 * Until such a flag is cleared (in the Tick() method), calls to IsParamInTransit will return true.
-																							 * This mechanism is used to ensure that parameters aren't overwritten right after having been
-																							 * changed via the Gui or the host.
-																							 */
-	String											m_processorDisplayName;					/**< User friendly name for this processor instance. */
-	DataChangeParticipant							m_currentChangeSource = DCP_Host;		/**< Member used to ensure that property changes are registered to the correct source. See MainProcessor::SetParameterValue(). */
 
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SoundobjectProcessor)

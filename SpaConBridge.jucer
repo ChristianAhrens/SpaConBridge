@@ -396,6 +396,9 @@
         </GROUP>
         <FILE id="KxbyOS" name="Parameters.cpp" compile="1" resource="0" file="Source/CustomAudioProcessors/Parameters.cpp"/>
         <FILE id="pxRBX1" name="Parameters.h" compile="0" resource="0" file="Source/CustomAudioProcessors/Parameters.h"/>
+        <FILE id="HGCMzh" name="ProcessorBase.cpp" compile="1" resource="0"
+              file="Source/CustomAudioProcessors/ProcessorBase.cpp"/>
+        <FILE id="zyjbov" name="ProcessorBase.h" compile="0" resource="0" file="Source/CustomAudioProcessors/ProcessorBase.h"/>
       </GROUP>
       <GROUP id="{ABC3680A-0C49-EE16-E766-E6ED89078A7C}" name="PagedUI">
         <GROUP id="{4680382C-A46A-B4C1-0D87-F92C4050063D}" name="PageComponents">

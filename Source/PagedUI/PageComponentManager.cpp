@@ -182,7 +182,25 @@ void PageComponentManager::OpenPageAsWindow(UIPageId pageId, bool dontUpdateConf
 
 	if (!dontUpdateConfig)
 	{
-		triggerConfigurationUpdate(false);
+		// tabbed/windowed page mode not yet in config! triggerConfigurationUpdate(false);
+	}
+}
+
+/**
+ * Opens the given tab of the main window as separate new window.
+ * @param pageIdx	The page id of the tab that shall be opened as own window.
+ * @param dontUpdateConfig	Indication if the configuration update shall be triggerd as well
+ */
+void PageComponentManager::OpenPageAsTab(UIPageId pageId, bool dontUpdateConfig)
+{
+	if (m_pageContainer != nullptr)
+	{
+		m_pageContainer->OpenPageAsTab(pageId);
+	}
+
+	if (!dontUpdateConfig)
+	{
+		// tabbed/windowed page mode not yet in config! triggerConfigurationUpdate(false);
 	}
 }
 

@@ -19,6 +19,8 @@
 
 #include "PageComponentBase.h"
 
+#include "../PageComponentManager.h"
+
 #include "../../SpaConBridgeCommon.h"
 
 namespace SpaConBridge
@@ -89,6 +91,17 @@ bool PageComponentBase::IsPageVisible() const
 void PageComponentBase::SetPageIsVisible(bool visible)
 {
 	m_isVisible = visible;
+}
+
+/**
+ * Reimplemented method from juce::Component to re-integrate this page
+ * as tab in PageContainerComponent tabbedcomponent.
+ */
+void PageComponentBase::userTriedToCloseWindow()
+{
+	auto pageMgr = SpaConBridge::PageComponentManager::GetInstance();
+	if (pageMgr && isOnDesktop())
+		pageMgr->OpenPageAsTab(m_pageId, false);
 }
 
 /**

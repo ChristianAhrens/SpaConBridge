@@ -56,6 +56,7 @@ public:
 
 	//==============================================================================
 	void OpenPageAsWindow(UIPageId pageId, bool dontUpdateConfig);
+	void OpenPageAsTab(UIPageId pageId, bool dontUpdateConfig);
 
 	//==============================================================================
 	const std::vector<UIPageId>& GetEnabledPages() const;

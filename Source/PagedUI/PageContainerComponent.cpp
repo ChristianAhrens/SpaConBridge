@@ -298,6 +298,31 @@ void PageContainerComponent::toggleAboutPage()
 }
 
 /**
+* Helper method to get the component for a given pageId
+* @param	pageId	The id of the page to get the component for.
+* @return	The PageComponentBase pointer of the component for the given pageId or nullptr if invalid.
+*/
+PageComponentBase* PageContainerComponent::GetComponentForPageId(const UIPageId& pageId)
+{
+	if (UPI_Soundobjects == pageId)
+		return m_soundobjectsPage.get();
+	else if (UPI_MultiSoundobjects == pageId)
+		return m_multiSoundobjectsPage.get();
+	else if (UPI_MatrixIOs == pageId)
+		return m_matrixIOPage.get();
+	else if (UPI_Settings == pageId)
+		return m_settingsPage.get();
+	else if (UPI_Statistics == pageId)
+		return m_statisticsPage.get();
+	else if (UPI_Scenes == pageId)
+		return m_scenesPage.get();
+	else if (UPI_EnSpace == pageId)
+		return m_enSpacePage.get();
+	else
+		return nullptr;
+}
+
+/**
  * Timer callback function, which will be called at regular intervals to update the GUI.
  * Reimplemented from base class Timer.
  */
@@ -559,24 +584,9 @@ void PageContainerComponent::OpenPageAsWindow(UIPageId pageId)
 
 	auto newWindowBounds = juce::Rectangle<int>(0, 0, 100, 100);
 	if (auto mainComponent = Desktop::getInstance().getComponent(0))
-		newWindowBounds = mainComponent->getBounds();
+		newWindowBounds = mainComponent->getBounds() +  juce::Point<int>(10, 10);
 
-	auto windowedPage = static_cast<PageComponentBase*>(nullptr);
-	if (UPI_Soundobjects == pageId)
-		windowedPage = m_soundobjectsPage.get();
-	else if (UPI_MultiSoundobjects == pageId)
-		windowedPage = m_multiSoundobjectsPage.get();
-	else if (UPI_MatrixIOs == pageId)
-		windowedPage = m_matrixIOPage.get();
-	else if (UPI_Settings == pageId)
-		windowedPage = m_settingsPage.get();
-	else if (UPI_Statistics == pageId)
-		windowedPage = m_statisticsPage.get();
-	else if (UPI_Scenes == pageId)
-		windowedPage = m_scenesPage.get();
-	else if (UPI_EnSpace == pageId)
-		windowedPage = m_enSpacePage.get();
-
+	auto windowedPage = GetComponentForPageId(pageId);
 	if (windowedPage)
 	{
 		windowedPage->setOpaque(true);
@@ -586,6 +596,27 @@ void PageContainerComponent::OpenPageAsWindow(UIPageId pageId)
 		windowedPage->setVisible(true);
 	}
 
+}
+
+/**
+ * Method to open a given page as a tab of tabbed component member.
+ * @param pageId	The page id to open as tab.
+ */
+void PageContainerComponent::OpenPageAsTab(UIPageId pageId)
+{
+	m_tabbedComponent->SetIsHandlingChanges(false);
+
+	auto tabPage = GetComponentForPageId(pageId);
+	if (tabPage)
+	{
+		auto tabNamesPresent = m_tabbedComponent->getTabNames().joinIntoString(" ");
+		m_tabbedComponent->addTab(GetPageNameFromId(pageId), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), tabPage, false, pageId);
+		m_tabbedComponent->setCurrentTabIndex(m_tabbedComponent->getTabNames().indexOf(GetPageNameFromId(pageId)));
+	}
+
+	m_tabbedComponent->SetIsHandlingChanges(true);
+
+	resized();
 }
 
 /**

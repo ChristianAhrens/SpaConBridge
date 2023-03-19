@@ -50,6 +50,9 @@ public:
 	virtual void SetPageIsVisible(bool visible);
 
 	//==============================================================================
+	void userTriedToCloseWindow() override;
+
+	//==============================================================================
 	virtual void UpdateGui(bool init) = 0;
 
 protected:

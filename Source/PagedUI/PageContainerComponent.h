@@ -39,6 +39,7 @@ class StatisticsPageComponent;
 class AboutPageComponent;
 class ScenesPageComponent;
 class EnSpacePageComponent;
+class PageComponentBase;
 
 
 /**
@@ -139,6 +140,7 @@ public:
 
 	//==============================================================================
 	void OpenPageAsWindow(UIPageId pageId);
+	void OpenPageAsTab(UIPageId pageId);
 
 	//==============================================================================
 	void SetEnabledPages(const std::vector<UIPageId>& enabledPages);
@@ -176,6 +178,9 @@ public:
 private:
 	//==============================================================================
 	void toggleAboutPage();
+
+	//==============================================================================
+	PageComponentBase* GetComponentForPageId(const UIPageId& pageId);
 
 	//==============================================================================
 	void paint(Graphics&) override;

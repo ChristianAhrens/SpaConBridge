@@ -578,7 +578,6 @@ void PageContainerComponent::OpenPageAsWindow(UIPageId pageId)
 	auto windowStyleFlags = ComponentPeer::StyleFlags::windowAppearsOnTaskbar
 		| ComponentPeer::StyleFlags::windowHasCloseButton
 		| ComponentPeer::StyleFlags::windowHasMaximiseButton
-		| ComponentPeer::StyleFlags::windowHasMinimiseButton
 		| ComponentPeer::StyleFlags::windowHasTitleBar
 		| ComponentPeer::StyleFlags::windowIsResizable;
 

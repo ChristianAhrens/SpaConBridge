@@ -372,27 +372,44 @@ void PageContainerComponent::UpdateGui(bool init)
 		}
 	}
 
+
+	// updating is always required when init is set.
+	// starting of refresh timer only when page is visible.
+	auto updateSoundObjects = init;
+	auto startRefreshSoundObjects = false;
+	auto updateMultiSoundobjects = init;
+	auto startRefreshMultiSoundobjects = false;
+	auto updateMatrixIOs = init;
+	auto startRefreshMatrixIOs = false;
+	auto updateScenes = init;
+	auto startRefreshScenes = false;
+	auto updateEnSpace = init;
+	auto startRefreshEnSpace = false;
+	auto updateStatistics = init;
+	auto startRefreshStatistics = false;
+	auto updateSettings = init;
+	auto startRefreshSettings = false;
+	
+	// queue an update for all windowed pages
+	if (m_soundobjectsPage)
+		updateSoundObjects = updateSoundObjects || m_soundobjectsPage->isOnDesktop();
+	if (m_multiSoundobjectsPage)
+		updateMultiSoundobjects = updateMultiSoundobjects || m_multiSoundobjectsPage->isOnDesktop();
+	if (m_matrixIOPage)
+		updateMatrixIOs = updateMatrixIOs || m_matrixIOPage->isOnDesktop();
+	if (m_scenesPage)
+		updateScenes = updateScenes || m_scenesPage->isOnDesktop();
+	if (m_enSpacePage)
+		updateEnSpace = updateEnSpace || m_enSpacePage->isOnDesktop();
+	if (m_statisticsPage)
+		updateStatistics = updateStatistics ||m_statisticsPage->isOnDesktop();
+	if (m_settingsPage)
+		updateSettings = updateSettings || m_settingsPage->isOnDesktop();
+
+	// queue an update and also if not already active continuous updating for the current page
 	if (m_tabbedComponent)
 	{
 		auto currentPageId = GetPageIdFromName(m_tabbedComponent->getCurrentTabName());
-
-		// updating is always required when init is set.
-		// starting of refresh timer only when page is visible.
-		auto updateSoundObjects = init;
-		auto startRefreshSoundObjects = false;
-		auto updateMultiSoundobjects = init;
-		auto startRefreshMultiSoundobjects = false;
-		auto updateMatrixIOs = init;
-		auto startRefreshMatrixIOs = false;
-		auto updateScenes = init;
-		auto startRefreshScenes = false;
-		auto updateEnSpace = init;
-		auto startRefreshEnSpace = false;
-		auto updateStatistics = init;
-		auto startRefreshStatistics = false;
-		auto updateSettings = init;
-		auto startRefreshSettings = false;
-
 		switch (currentPageId)
 		{
 		case UPI_Soundobjects:
@@ -426,83 +443,84 @@ void PageContainerComponent::UpdateGui(bool init)
 		default:
 			break;
 		}
+	}
 
-		if (updateSoundObjects)
-		{
-			if (m_soundobjectsPage)
-				m_soundobjectsPage->UpdateGui(init);
-		}
-		if (startRefreshSoundObjects)
-		{
-			if (getTimerInterval() != GUI_UPDATE_RATE_SLOW)
-				startTimer(GUI_UPDATE_RATE_SLOW);
-		}
+	// perform updating and continuous updating 
+	if (updateSoundObjects)
+	{
+		if (m_soundobjectsPage)
+			m_soundobjectsPage->UpdateGui(init);
+	}
+	if (startRefreshSoundObjects)
+	{
+		if (getTimerInterval() != GUI_UPDATE_RATE_SLOW)
+			startTimer(GUI_UPDATE_RATE_SLOW);
+	}
 
-		if (updateMultiSoundobjects)
-		{
-			if (m_multiSoundobjectsPage)
-				m_multiSoundobjectsPage->UpdateGui(init);
-		}
-		if (startRefreshMultiSoundobjects)
-		{
-			if (getTimerInterval() != GUI_UPDATE_RATE_FAST)
-				startTimer(GUI_UPDATE_RATE_FAST);
-		}
+	if (updateMultiSoundobjects)
+	{
+		if (m_multiSoundobjectsPage)
+			m_multiSoundobjectsPage->UpdateGui(init);
+	}
+	if (startRefreshMultiSoundobjects)
+	{
+		if (getTimerInterval() != GUI_UPDATE_RATE_FAST)
+			startTimer(GUI_UPDATE_RATE_FAST);
+	}
 
-		if (updateMatrixIOs)
-		{
-			if (m_matrixIOPage)
-				m_matrixIOPage->UpdateGui(init);
-		}
-		if (startRefreshMatrixIOs)
-		{
-			if (getTimerInterval() != GUI_UPDATE_RATE_SLOW)
-				startTimer(GUI_UPDATE_RATE_SLOW);
-		}
+	if (updateMatrixIOs)
+	{
+		if (m_matrixIOPage)
+			m_matrixIOPage->UpdateGui(init);
+	}
+	if (startRefreshMatrixIOs)
+	{
+		if (getTimerInterval() != GUI_UPDATE_RATE_SLOW)
+			startTimer(GUI_UPDATE_RATE_SLOW);
+	}
 
-		if (updateScenes)
-		{
-			if (m_scenesPage)
-				m_scenesPage->UpdateGui(init);
-		}
-		if (startRefreshScenes)
-		{
-			if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
-				startTimer(GUI_UPDATE_RATE_SUPERSLOW);
-		}
+	if (updateScenes)
+	{
+		if (m_scenesPage)
+			m_scenesPage->UpdateGui(init);
+	}
+	if (startRefreshScenes)
+	{
+		if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
+			startTimer(GUI_UPDATE_RATE_SUPERSLOW);
+	}
 		
-		if (updateEnSpace)
-		{
-			if (m_enSpacePage)
-				m_enSpacePage->UpdateGui(init);
-		}
-		if (startRefreshEnSpace)
-		{
-			if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
-				startTimer(GUI_UPDATE_RATE_SUPERSLOW);
-		}
+	if (updateEnSpace)
+	{
+		if (m_enSpacePage)
+			m_enSpacePage->UpdateGui(init);
+	}
+	if (startRefreshEnSpace)
+	{
+		if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
+			startTimer(GUI_UPDATE_RATE_SUPERSLOW);
+	}
 
-		if (updateStatistics)
-		{
-			if (m_statisticsPage)
-				m_statisticsPage->UpdateGui(init);
-		}
-		if (startRefreshStatistics)
-		{
-			if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
-				startTimer(GUI_UPDATE_RATE_SUPERSLOW);
-		}
+	if (updateStatistics)
+	{
+		if (m_statisticsPage)
+			m_statisticsPage->UpdateGui(init);
+	}
+	if (startRefreshStatistics)
+	{
+		if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
+			startTimer(GUI_UPDATE_RATE_SUPERSLOW);
+	}
 
-		if (updateSettings)
-		{
-			if (m_settingsPage)
-				m_settingsPage->UpdateGui(init);
-		}
-		if (startRefreshSettings)
-		{
-			if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
-				startTimer(GUI_UPDATE_RATE_SUPERSLOW);
-		}
+	if (updateSettings)
+	{
+		if (m_settingsPage)
+			m_settingsPage->UpdateGui(init);
+	}
+	if (startRefreshSettings)
+	{
+		if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
+			startTimer(GUI_UPDATE_RATE_SUPERSLOW);
 	}
 }
 

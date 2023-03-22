@@ -134,7 +134,7 @@ void BlackFrameMultiSoundobjectComponentHelper::paint(Graphics& g)
 {
     Component::paint(g);
     auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
-    if (multiSoundobjectComponent && this == multiSoundobjectComponent->getParentComponent() && !multiSoundobjectComponent->isOnDesktop())
+    if (IsInUse() && multiSoundobjectComponent)
     {
         g.setColour(getLookAndFeel().findColour(TextEditor::outlineColourId));
         g.drawRect(getLocalBounds());
@@ -147,8 +147,10 @@ void BlackFrameMultiSoundobjectComponentHelper::paint(Graphics& g)
 void BlackFrameMultiSoundobjectComponentHelper::resized()
 {
     auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
-    if (multiSoundobjectComponent && !multiSoundobjectComponent->isOnDesktop())
-        multiSoundobjectComponent->setBounds(getLocalBounds().reduced(1));
+	if (IsInUse() && multiSoundobjectComponent)
+	{
+		multiSoundobjectComponent->setBounds(getLocalBounds().reduced(1));
+	}
 }
 
 /**
@@ -157,9 +159,13 @@ void BlackFrameMultiSoundobjectComponentHelper::resized()
 void BlackFrameMultiSoundobjectComponentHelper::addInternalComponent()
 {
     auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
-    if (multiSoundobjectComponent && this != multiSoundobjectComponent->getParentComponent() && !multiSoundobjectComponent->isOnDesktop())
+    if (multiSoundobjectComponent	// multisoundobject component exists
+		&& this != multiSoundobjectComponent->getParentComponent() // multisoundobject component is not yet a child of this
+		&& !(multiSoundobjectComponent->getParentComponent() && multiSoundobjectComponent->getParentComponent()->isOnDesktop())) // multisoundobject is not shown as windowed page
     {
+		multiSoundobjectComponent->SetHandleSelectedOnly(true);
         addAndMakeVisible(multiSoundobjectComponent.get());
+		m_inUse = true;
     }
 }
 
@@ -169,10 +175,20 @@ void BlackFrameMultiSoundobjectComponentHelper::addInternalComponent()
 void BlackFrameMultiSoundobjectComponentHelper::removeInternalComponent()
 {
     auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
-    if (multiSoundobjectComponent && this == multiSoundobjectComponent->getParentComponent() && !multiSoundobjectComponent->isOnDesktop())
+    if (multiSoundobjectComponent && this == multiSoundobjectComponent->getParentComponent())
     {
         removeChildComponent(multiSoundobjectComponent.get());
     }
+	m_inUse = false;
+}
+
+/**
+ * Getter for the internal 'in use' state
+ * @return	The 'in use' state (member)
+ */
+bool BlackFrameMultiSoundobjectComponentHelper::IsInUse()
+{
+	return m_inUse;
 }
 
 
@@ -361,11 +377,11 @@ void SoundobjectTablePageComponent::resized()
 	auto layoutWidth = layoutingBounds.getWidth();
 	auto layoutHeight = layoutingBounds.getHeight();
 
-	if (m_selectedProcessorInstanceEditor || (m_multiSoundobjectsActive && m_multiSoundobjectComponentContainer))
+	if (m_selectedProcessorInstanceEditor || (m_multiSoundobjectComponentContainer && m_multiSoundobjectComponentContainer->IsInUse()))
 	{
 		activateStretchableSplitLayout();
 
-		if (m_multiSoundobjectsActive && m_multiSoundobjectComponentContainer)
+		if (m_multiSoundobjectComponentContainer && m_multiSoundobjectComponentContainer->IsInUse())
 		{
             Component* comps[] = { m_soundobjectsTable.get(), m_layoutResizeBar.get(), m_multiSoundobjectComponentContainer.get()};
             m_layoutManager->layOutComponents(comps, 3, layoutOrigX, layoutOrigY, layoutWidth, layoutHeight, IsPortraitAspectRatio(), true);
@@ -499,12 +515,7 @@ void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool acti
 	{
 		SetSoundsourceProcessorEditorActive(INVALID_PROCESSOR_ID);
 
-		auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
-		if (multiSoundobjectComponent && !multiSoundobjectComponent->isOnDesktop())
-		{
-			multiSoundobjectComponent->SetHandleSelectedOnly(true);
-			m_multiSoundobjectComponentContainer->addInternalComponent();
-		}
+		m_multiSoundobjectComponentContainer->addInternalComponent();
 	}
 	else
 	{
@@ -536,12 +547,7 @@ void SoundobjectTablePageComponent::SetPageIsVisible(bool visible)
     }
     else if (m_multiSoundobjectsActive)
     {
-        auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
-		if (multiSoundobjectComponent && !multiSoundobjectComponent->isOnDesktop())
-		{
-			multiSoundobjectComponent->SetHandleSelectedOnly(true);
-			m_multiSoundobjectComponentContainer->addInternalComponent();
-		}
+		m_multiSoundobjectComponentContainer->addInternalComponent();
     }
 
 	PageComponentBase::SetPageIsVisible(visible);
@@ -586,7 +592,7 @@ void SoundobjectTablePageComponent::UpdateGui(bool init)
 	if (m_multiSoundobjectsActive)
 	{
 		auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
-		if (multiSoundobjectComponent && !multiSoundobjectComponent->isOnDesktop())
+		if (multiSoundobjectComponent)
 		{
 			multiSoundobjectComponent->UpdateGui(false);
 		}

@@ -68,6 +68,11 @@ public:
     
     void addInternalComponent();
     void removeInternalComponent();
+
+	bool IsInUse();
+
+private:
+	bool m_inUse{ false };
 };
 
 /**

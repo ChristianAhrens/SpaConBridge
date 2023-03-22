@@ -180,7 +180,7 @@ private:
 	void toggleAboutPage();
 
 	//==============================================================================
-	PageComponentBase* GetComponentForPageId(const UIPageId& pageId);
+	PageComponentBase* GetComponentForPageId(const UIPageId pageId);
 
 	//==============================================================================
 	void paint(Graphics&) override;

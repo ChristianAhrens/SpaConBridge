@@ -579,8 +579,12 @@ void PageContainerComponent::OpenPageAsWindow(UIPageId pageId)
 		for (auto pageIdIter = int(UPI_InvalidMin + 1); pageIdIter < UPI_About; pageIdIter++)
 		{
 			page = GetComponentForPageId(static_cast<UIPageId>(pageIdIter));
-			if (page && !page->isOnDesktop())
-				page->SetPageIsVisible(pageIdIter == newActiveTabPageId);
+			if (page)
+			{
+				page->NotifyPageWasWindowed(pageId, true);
+				if (!page->isOnDesktop())
+					page->SetPageIsVisible(pageIdIter == newActiveTabPageId);
+			}
 		}
 
 		m_tabbedComponent->setCurrentTabIndex(m_tabbedComponent->getTabNames().indexOf(GetPageNameFromId(static_cast<UIPageId>(newActiveTabPageId))));
@@ -629,8 +633,12 @@ void PageContainerComponent::OpenPageAsTab(UIPageId pageId)
 		{
 			auto id = static_cast<UIPageId>(pageIdIter);
 			auto tabPage = GetComponentForPageId(id);
-			if (tabPage && (!tabPage->isOnDesktop() || id == pageId)) // if the page currently is a tab or is the one that shall be added as new tab
-				m_tabbedComponent->addTab(GetPageNameFromId(id), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), tabPage, false, id);
+			if (tabPage)
+			{
+				tabPage->NotifyPageWasWindowed(pageId, false);
+				if (!tabPage->isOnDesktop() || id == pageId) // if the page currently is a tab or is the one that shall be added as new tab
+					m_tabbedComponent->addTab(GetPageNameFromId(id), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), tabPage, false, id);
+			}
 		}
 		m_tabbedComponent->setCurrentTabIndex(m_tabbedComponent->getTabNames().indexOf(GetPageNameFromId(pageId)));
 	}

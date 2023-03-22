@@ -602,5 +602,22 @@ void SoundobjectTablePageComponent::onConfigUpdated()
 	UpdateGui(false);
 }
 
+/**
+ * Reimplemented PageComponentBase method to handle changed MultiSoundobjects windowing
+ * to ensure the surfaceslider is not grabbed by this page to show alongside table view.
+ * @param	pageId		The id of the page that was windowed/tabbed
+ * @param	windowed	Bool indication if the given page was moved to separate window or docked back into the tabbar
+ */
+void SoundobjectTablePageComponent::NotifyPageWasWindowed(UIPageId pageId, bool windowed)
+{
+	switch (pageId)
+	{
+	case UPI_MultiSoundobjects:
+		break;
+	default:
+		break;
+	}
+}
+
 
 } // namespace SpaConBridge

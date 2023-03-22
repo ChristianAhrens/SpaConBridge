@@ -97,6 +97,9 @@ public:
 	//==============================================================================
 	void UpdateGui(bool init) override;
 
+	//==========================================================================
+	void NotifyPageWasWindowed(UIPageId pageId, bool windowed) override;
+
 	//==============================================================================
 	void SetSoundsourceProcessorEditorActive(SoundobjectProcessorId processorId);
 	void SetMultiSoundobjectComponentActive(bool active);

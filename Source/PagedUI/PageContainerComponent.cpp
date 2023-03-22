@@ -622,9 +622,6 @@ void PageContainerComponent::OpenPageAsTab(UIPageId pageId)
 	auto newTabPage = GetComponentForPageId(pageId);
 	if (newTabPage)
 	{
-		// cache the currently active tab to reactivate it after tab recreation (don't default to first tab)
-		auto activeTabId = GetPageIdFromName(m_tabbedComponent->getCurrentTabName());
-
 		// start clearing currently enabled tabs and recreate the ones to be enabled from now on
 		m_tabbedComponent->clearTabs();
 

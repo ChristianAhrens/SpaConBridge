@@ -599,7 +599,6 @@ void PageContainerComponent::OpenPageAsWindow(UIPageId pageId)
 			page = GetComponentForPageId(static_cast<UIPageId>(pageIdIter));
 			if (page)
 			{
-				page->NotifyPageWasWindowed(pageId, true);
 				if (!page->isOnDesktop())
 					page->SetPageIsVisible(pageIdIter == newActiveTabPageId);
 			}
@@ -630,6 +629,13 @@ void PageContainerComponent::OpenPageAsWindow(UIPageId pageId)
 		windowedPage->setVisible(true);
 	}
 
+	// notify all pages of the windowing of the page
+	for (auto pageIdIter = int(UPI_InvalidMin + 1); pageIdIter < UPI_About; pageIdIter++)
+	{
+		auto page = GetComponentForPageId(static_cast<UIPageId>(pageIdIter));
+		if (page)
+			page->NotifyPageWasWindowed(pageId, true);
+	}
 }
 
 /**

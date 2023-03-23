@@ -133,8 +133,7 @@ BlackFrameMultiSoundobjectComponentHelper::~BlackFrameMultiSoundobjectComponentH
 void BlackFrameMultiSoundobjectComponentHelper::paint(Graphics& g)
 {
     Component::paint(g);
-    auto& multiSoundobjectComponent = PageComponentManager::GetInstance()->GetMultiSoundobjectComponent();
-    if (IsInUse() && multiSoundobjectComponent)
+    if (IsInUse())
     {
         g.setColour(getLookAndFeel().findColour(TextEditor::outlineColourId));
         g.drawRect(getLocalBounds());

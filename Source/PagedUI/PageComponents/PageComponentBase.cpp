@@ -102,6 +102,7 @@ void PageComponentBase::userTriedToCloseWindow()
 	auto pageMgr = SpaConBridge::PageComponentManager::GetInstance();
 	if (pageMgr && isOnDesktop())
 		pageMgr->OpenPageAsTab(m_pageId, false);
+	SetPageIsVisible(true);
 }
 
 /**

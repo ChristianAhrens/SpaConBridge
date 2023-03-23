@@ -619,6 +619,7 @@ void SoundobjectTablePageComponent::NotifyPageWasWindowed(UIPageId pageId, bool 
 	switch (pageId)
 	{
 	case UPI_MultiSoundobjects:
+		SetMultiSoundobjectComponentActive(false);
 		break;
 	default:
 		break;

@@ -22,6 +22,8 @@
 #include "../../SpaConBridgeCommon.h"
 #include "../../AppConfiguration.h"
 
+#include "../ProcessorBase.h"
+
 #include <RemoteProtocolBridgeCommon.h>
 
 
@@ -39,10 +41,7 @@ class GestureManagedAudioParameterInt;
 /**
  * Class MatrixOutputProcessor. 
  */
-class MatrixOutputProcessor :
-	public AudioProcessor,
-	public AudioProcessorParameter::Listener,
-	public AppConfiguration::XmlConfigurableElement
+class MatrixOutputProcessor : public ProcessorBase
 {
 public:
 	explicit MatrixOutputProcessor(bool insertToConfig = true);
@@ -59,104 +58,27 @@ public:
 	MatrixOutputId GetMatrixOutputId() const;
 	void SetMatrixOutputId(DataChangeParticipant changeSource, MatrixOutputId MatrixOutputId);
 
-	ComsMode GetComsMode() const;
-	void SetComsMode(DataChangeParticipant changeSource, ComsMode newMode);
-
 	float GetParameterValue(MatrixOutputParameterIndex paramIdx, bool normalized = false) const;
 	void SetParameterValue(DataChangeParticipant changeSource, MatrixOutputParameterIndex paramIdx, float newValue);
 
-	bool GetParameterChanged(DataChangeParticipant changeTarget, DataChangeType change);
-	bool PopParameterChanged(DataChangeParticipant changeTarget, DataChangeType change);
-	void SetParameterChanged(DataChangeParticipant changeSource, DataChangeType changeTypes);
+	void SetParameterChanged(const DataChangeParticipant& changeSource, const DataChangeType& changeTypes) override;
 
 	void Tick();
-	void SetParamInTransit(DataChangeType paramsChanged);
-	bool IsParamInTransit(DataChangeType paramsChanged) const;
 
 	// Overriden functions of class AppConfiguration::XmlConfigurableElement
 	std::unique_ptr<XmlElement> createStateXml() override;
 	bool setStateXml(XmlElement* stateXml) override;
 
-	// Overriden functions of class AudioProcessor
-	virtual void getStateInformation(MemoryBlock& destData) override;
-	virtual void setStateInformation(const void* data, int sizeInBytes) override;
 	// Overriden functions of class AudioProcessorParameter::Listener
 	virtual void parameterValueChanged(int parameterIndex, float newValue) override;
-	virtual void parameterGestureChanged(int parameterIndex, bool gestureIsStarting) override;
-
-	// Functions which need to be reimplemented from class AudioProcessor, but which 
-	// aren't relevant for our use.
-	bool acceptsMidi() const override;
-	void changeProgramName(int index, const String& newName) override;
 	AudioProcessorEditor* createEditor() override;
-	int getCurrentProgram() override;
-	int getNumPrograms() override;
-	const String getProgramName(int index) override;
-	const String getName() const override;
-	double getTailLengthSeconds() const override;
-	bool hasEditor() const override;
-	void prepareToPlay(double sampleRate, int samplesPerBlock) override;
-	void processBlock(AudioSampleBuffer&, MidiBuffer&) override;
-	bool producesMidi() const override;
-	void releaseResources() override;
-	void setCurrentProgram(int index) override;
 
-protected:
-	/**
-	 * Matrix input En-Space gain.
-	 */
-	GestureManagedAudioParameterFloat*	m_matrixOutputLevelMeter;
-
-	/**
-	 * Sound object spread.
-	 */
-	GestureManagedAudioParameterFloat*	m_matrixOutputGain;
-
-	/**
-	 * Sound object delay mode (Off, Tight, Full).
-	 */
-	GestureManagedAudioParameterInt*	m_matrixOutputMute;
-
-	/**
-	 * Current OSC communication mode, sending and/or receiving.
-	 */
-	ComsMode					m_comsMode;
-
-	/*
-	 * MatrixOutputProcessor, or matrix input number.
-	 */
-	MatrixOutputProcessorId	m_matrixOutputId;
-
-	/**
-	 * Unique ID of this Processor instance. 
-	 * This is also this Processor's index within the Controller::m_processors array.
-	 */
-	MatrixOutputProcessorId	m_processorId;
-
-	/**
-	 * Keep track of which automation parameters have changed recently. 
-	 * The array has one entry for each application module (see enum DataChangeSource).
-	 */
-	DataChangeType				m_parametersChanged[DCP_Max];
-
-	/**
-	 * Flags used to indicate when a SET command for a parameter is currently out on the network.
-	 * Until such a flag is cleared (in the Tick() method), calls to IsParamInTransit will return true.
-	 * This mechanism is used to ensure that parameters aren't overwritten right after having been
-	 * changed via the Gui or the host.
-	 */
-	DataChangeType				m_paramSetCommandsInTransit = DCT_None;
-
-	/**
-	 * User friendly name for this processor instance
-	 */
-	String						m_processorDisplayName;
-
-	/**
-	 * Member used to ensure that property changes are registered to the correct source.
-	 * See MainProcessor::SetParameterValue().
-	 */
-	DataChangeParticipant		m_currentChangeSource = DCP_Host;
+private:
+	GestureManagedAudioParameterFloat*				m_matrixOutputLevelMeter;				/**< MatrixOutput levelmeter value. NOTE: not using std::unique_ptr here, see addParameter(). */
+	GestureManagedAudioParameterFloat*				m_matrixOutputGain;						/**< MatrixOutput gain value. */
+	GestureManagedAudioParameterInt*				m_matrixOutputMute;						/**< MatrixOutput mute value. */
+	MatrixOutputId									m_matrixOutputId;						/**< matrix output id. */
+	MatrixOutputProcessorId							m_processorId;							/**< Unique ID of this Processor instance. This is also this Processor's index within the Controller::m_processors array. */
 
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixOutputProcessor)

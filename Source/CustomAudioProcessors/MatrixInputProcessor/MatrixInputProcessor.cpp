@@ -45,6 +45,7 @@ static constexpr MatrixInputId MatrixInput_ID_MAX = 128;		//< Highest maxtrix in
  * Class constructor for the processor.
  */
 MatrixInputProcessor::MatrixInputProcessor(bool insertToConfig)
+	: ProcessorBase()
 {
 	// Automation parameters.
 	// level meter param
@@ -67,14 +68,6 @@ MatrixInputProcessor::MatrixInputProcessor(bool insertToConfig)
 
 	m_matrixInputId = MatrixInput_ID_MIN; // This default sourceId will be overwritten by ctrl->AddProcessor() below.
 	m_processorId = INVALID_PROCESSOR_ID;
-
-	// Default OSC communication mode.
-	m_comsMode = CM_Off;
-
-	// Start with all parameter changed flags cleared. Function setStateInformation() 
-	// will check whether or not we should initialize parameters when starting up.
-	for (int cs = 0; cs < DCP_Max; cs++)
-		m_parametersChanged[cs] = DCT_None;
 
 	// Register this new processor instance to the singleton Controller object's internal list.
 	Controller* ctrl = Controller::GetInstance();
@@ -116,47 +109,23 @@ void MatrixInputProcessor::SetProcessorId(DataChangeParticipant changeSource, Ma
 }
 
 /**
- * Get the state of the desired flag (or flags) for the desired change source.
- * @param changeTarget	The application module querying the change flag.
- * @param change	The desired parameter (or parameters).
- * @return	True if any of the given parameters has changed it's value 
- *			since the last time PopParameterChanged() was called.
- */
-bool MatrixInputProcessor::GetParameterChanged(DataChangeParticipant changeTarget, DataChangeType change)
-{
-	return ((m_parametersChanged[changeTarget] & change) != 0);
-}
-
-/**
- * Reset the state of the desired flag (or flags) for the desired change source.
- * Will return the state of the flag before the resetting.
- * @param changeTarget	The application module querying the change flag.
- * @param change	The desired parameter (or parameters).
- * @return	True if any of the given parameters has changed it's value 
- *			since the last time PopParameterChanged() was called.
- */
-bool MatrixInputProcessor::PopParameterChanged(DataChangeParticipant changeTarget, DataChangeType change)
-{
-	bool ret((m_parametersChanged[changeTarget] & change) != 0);
-	m_parametersChanged[changeTarget] &= ~change; // Reset flag.
-	return ret;
-}
-
-/**
  * Method which will be called every time a parameter or property has been changed.
  * @param changeSource	The application module which is causing the property change.
  * @param changeTypes	Defines which parameter or property has been changed.
  */
-void MatrixInputProcessor::SetParameterChanged(DataChangeParticipant changeSource, DataChangeType changeTypes)
+void MatrixInputProcessor::SetParameterChanged(const DataChangeParticipant& changeSource, const DataChangeType& changeTypes)
 {
-	// Set the specified change flag for all DataChangeSources.
-	for (int cs = 0; cs < DCP_Max; cs++)
+	SetLastSourceForChangeType(changeSource, changeTypes);
+
+	// Set the specified change flag for all DataChangeTargets.
+	for (auto changeTarget = 0; changeTarget < DCP_Max; changeTarget++)
 	{
-		// If the change came from OSC (received message with new param value), 
-		// do not set the specified change flag for OSC. This would trigger an 
-		// OSC Set command to go out for every received message.
-		if ((changeSource != DCP_Protocol) || (cs != DCP_Protocol))
-			m_parametersChanged[cs] |= changeTypes;
+		if ((changeSource != changeTarget)
+			// specialitiesy: if the source is the processor or multislider, it must also be set as target,
+			// since both UIs uses DCP_MatrixInputProcessor/DCP_MultiSlider for querying as well.
+			|| (changeSource == DCP_MatrixInputProcessor)
+			|| (changeSource == DCP_MultiSlider))
+			m_dataChangesByTarget[static_cast<DataChangeParticipant>(changeTarget)] |= changeTypes;
 	}
 }
 
@@ -229,11 +198,6 @@ void MatrixInputProcessor::SetParameterValue(DataChangeParticipant changeSource,
 		jassertfalse; // Unknown parameter index!
 		break;
 	}
-
-	// After the SetParameterChanged() call has been triggered, set the change source to the default.
-	// The host is the only one which can call parameterValueChanged directly. All other modules of the
-	// application do it over this method.
-	m_currentChangeSource = DCP_Host;
 }
 
 /**
@@ -264,24 +228,6 @@ void MatrixInputProcessor::Tick()
 			break;
 		}
 	}
-}
-
-/**
- * The given parameter(s) have a SET command message which has just been sent out on the network.
- * @param paramsChanged		Which parameter(s) should be marked as having a SET command in transit.
- */
-void MatrixInputProcessor::SetParamInTransit(DataChangeType paramsChanged)
-{
-	m_paramSetCommandsInTransit |= paramsChanged;
-}
-
-/**
- * Check if the given parameter(s) have a SET command message which has just been sent out on the network.
- * @return True if the specified paranmeter(s) are marked as having a SET command in transit.
- */
-bool MatrixInputProcessor::IsParamInTransit(DataChangeType paramsChanged) const
-{
-	return ((m_paramSetCommandsInTransit & paramsChanged) != DCT_None);
 }
 
 /**
@@ -321,59 +267,6 @@ bool MatrixInputProcessor::setStateXml(XmlElement* stateXml)
     SetComsMode(DCP_Init, static_cast<ComsMode>(stateXml->getIntAttribute(AppConfiguration::getAttributeName(AppConfiguration::AttributeID::PROCESSORCOMSMODE))));
 
 	return true;
-}
-
-/**
- * The host will call this method when it wants to save the processor's internal state.
- * This must copy any info about the processor's state into the block of memory provided, 
- * so that the host can store this and later restore it using setStateInformation().
- * @param destData		Stream where the processor parameters will be written to.
- */
-void MatrixInputProcessor::getStateInformation(MemoryBlock& destData)
-{
-	ignoreUnused(destData);
-}
-
-/**
- * This method is called when project is loaded, or when a snapshot is recalled.
- * Use this method to restore your parameters from this memory block,
- * whose contents will have been created by the getStateInformation() call.
- * @sa MatrixInputProcessor::DisablePollingForTicks()
- * @param data			Stream where the processor parameters will be read from.
- * @param sizeInBytes	Size of stream buffer.
- */
-void MatrixInputProcessor::setStateInformation(const void* data, int sizeInBytes)
-{
-	ignoreUnused(data);
-	ignoreUnused(sizeInBytes);
-}
-
-/**
- * Set the new OSC communication mode (sending and/or receiving).
- * @param changeSource	The application module which is causing the property change.
- * @param newMode	The new OSC communication mode.
- */
-void MatrixInputProcessor::SetComsMode(DataChangeParticipant changeSource, ComsMode newMode)
-{
-	if (m_comsMode != newMode)
-	{
-		m_comsMode = newMode;
-
-		// Reset response-ignoring mechanism.
-		m_paramSetCommandsInTransit = DCT_None;
-
-		// Signal change to other modules in the processor.
-		SetParameterChanged(changeSource, DCT_ComsMode);
-	}
-}
-
-/**
- * Get the current OSC communication mode (either sending or receiving).
- * @return The current OSC communication mode.
- */
-ComsMode MatrixInputProcessor::GetComsMode() const
-{
-	return m_comsMode;
 }
 
 /**
@@ -495,172 +388,6 @@ void MatrixInputProcessor::parameterValueChanged(int parameterIndex, float newVa
 		// m_currentChangeSource is set properly inside SetParameterValue
 		SetParameterChanged(m_currentChangeSource, changed);
 	}
-}
-
-/**
- * REIMPLEMENTED from AudioProcessorParameter::Listener::parameterGestureChanged()
- * Indicates that a parameter change gesture has started / ended. 
- * This reimplementation does nothing. See GestureManagedAudioParameterFloat::BeginGuiGesture().
- * @param parameterIndex	Index of the procssor parameter being changed.
- * @param gestureIsStarting	True if starting, false if ending.
- */
-void MatrixInputProcessor::parameterGestureChanged(int parameterIndex, bool gestureIsStarting)
-{
-	ignoreUnused(parameterIndex);
-	ignoreUnused(gestureIsStarting);
-}
-
-
-
-//==============================================================================
-// More overriden functions of class AudioProcessor
-
-
-/**
- * Returns the name of this processor.
- * @return The procssor name.
- */
-const String MatrixInputProcessor::getName() const
-{
-	return JUCEApplication::getInstance()->getApplicationName();
-}
-
-/**
- * Returns true if the processor wants midi messages.
- * @return	True if the processor wants midi messages.
- */
-bool MatrixInputProcessor::acceptsMidi() const
-{
-#if JucePlugin_WantsMidiInput
-	return true;
-#else
-	return false;
-#endif
-}
-
-/**
- * Returns true if the processor produces midi messages.
- * @return	True if the processor produces midi messages.
- */
-bool MatrixInputProcessor::producesMidi() const
-{
-#if JucePlugin_ProducesMidiOutput
-	return true;
-#else
-	return false;
-#endif
-}
-
-/**
- * Returns the length of the filter's tail, in seconds.
- * @return	Zero, since no audio delay is introduced.
- */
-
-double MatrixInputProcessor::getTailLengthSeconds() const
-{
-	return 0.0;
-}
-
-/**
- * Returns the number of preset programs the filter supports.
- * The value returned must be valid as soon as this object is created, and must not change over its lifetime.
- * @return Number of preset programs the filter supports. This value shouldn't be less than 1.
- */
-int MatrixInputProcessor::getNumPrograms()
-{
-	return 1;
-}
-
-/**
- * Returns the number of the currently active program.
- * @return Returns the number of the currently active program.
- */
-int MatrixInputProcessor::getCurrentProgram()
-{
-	return 0;
-}
-
-/**
- * Called by the host to change the current program.
- * @param index		New program index.
- */
-void MatrixInputProcessor::setCurrentProgram(int index)
-{
-	ignoreUnused(index);
-}
-
-/**
- * Returns the name of a given program.
- * @param index		Index of the desired program
- * @return			Desired program name.
- */
-const String MatrixInputProcessor::getProgramName(int index)
-{
-	ignoreUnused(index);
-	return m_processorDisplayName;
-}
-
-/**
- * Called by the host to rename a program.
- * @param index		Index of the desired program
- * @param newName	Desired new program name.
- */
-void MatrixInputProcessor::changeProgramName(int index, const String& newName)
-{
-	ignoreUnused(index);
-	m_processorDisplayName = newName;
-
-	// Signal change to other modules in the procssor.
-	SetParameterChanged(DCP_Host, DCT_MatrixInputID);
-}
-
-/**
- * Called before playback starts, to let the filter prepare itself.
- * @param sampleRate	The sample rate is the target sample rate, and will remain constant until playback stops.
- *						You can call getTotalNumInputChannels and getTotalNumOutputChannels or query the busLayout member
- *						variable to find out the number of channels your processBlock callback must process.
- * @param samplesPerBlock	This value is a strong hint about the maximum number of samples that will be provided in each block.
- *							You may want to use this value to resize internal buffers. You should program defensively in case
- *							a buggy host exceeds this value. The actual block sizes that the host uses may be different each time
- *							the callback happens: completely variable block sizes can be expected from some hosts.
- */
-void MatrixInputProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
-{
-	ignoreUnused(sampleRate, samplesPerBlock);
-}
-
-/**
- * Called after playback has stopped, to let the filter free up any resources it no longer needs.
- * When playback stops, you can use this as an opportunity to free up any spare memory, etc.
- */
-void MatrixInputProcessor::releaseResources()
-{
-}
-
-
-/**
- * Renders the next block. This reimplementation does nothing.
- * @param buffer	When this method is called, the buffer contains a number of channels which is at least as great
- *					as the maximum number of input and output channels that this filter is using. It will be filled with the
- *					filter's input data and should be replaced with the filter's output.
- * @param midiMessages	If the filter is receiving a midi input, then the midiMessages array will be filled with the midi
- *						messages for this block. Each message's timestamp will indicate the message's time, as a number of samples
- *						from the start of the block. Any messages left in the midi buffer when this method has finished are assumed
- *						to be the filter's midi output. This means that your filter should be careful to clear any incoming
- *						messages from the array if it doesn't want them to be passed-on.
- */
-void MatrixInputProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
-{
-	ignoreUnused(buffer, midiMessages);
-}
-
-/**
- * This function returns true if the procssor can create an editor component.
- * @return True.
- */
-bool MatrixInputProcessor::hasEditor() const
-{
-	return true;
 }
 
 /**

@@ -210,13 +210,20 @@ void PageContainerComponent::resized()
 
 	// Resize overview table container.
 	auto rect = Rectangle<int>(0, 44, w, getLocalBounds().getHeight() - 89);
-	m_soundobjectsPage->setBounds(rect);
-	m_multiSoundobjectsPage->setBounds(rect);
-    m_matrixIOPage->setBounds(rect);
-	m_settingsPage->setBounds(rect);
-	m_statisticsPage->setBounds(rect);
-	m_scenesPage->setBounds(rect);
-	m_enSpacePage->setBounds(rect);
+	if (!m_soundobjectsPage->isOnDesktop())
+		m_soundobjectsPage->setBounds(rect);
+	if (!m_multiSoundobjectsPage->isOnDesktop())
+		m_multiSoundobjectsPage->setBounds(rect);
+    if (!m_matrixIOPage->isOnDesktop())
+		m_matrixIOPage->setBounds(rect);
+	if (!m_settingsPage->isOnDesktop())
+		m_settingsPage->setBounds(rect);
+	if (!m_statisticsPage->isOnDesktop())
+		m_statisticsPage->setBounds(rect);
+	if (!m_scenesPage->isOnDesktop())
+		m_scenesPage->setBounds(rect);
+	if (!m_enSpacePage->isOnDesktop())
+		m_enSpacePage->setBounds(rect);
 
 	// finally resize the overlay component, if set, visible and therefor on top of everything else at all
 	if (m_overlayComponent && m_overlayComponent->isVisible())
@@ -291,6 +298,31 @@ void PageContainerComponent::toggleAboutPage()
 }
 
 /**
+* Helper method to get the component for a given pageId
+* @param	pageId	The id of the page to get the component for.
+* @return	The PageComponentBase pointer of the component for the given pageId or nullptr if invalid.
+*/
+PageComponentBase* PageContainerComponent::GetComponentForPageId(const UIPageId pageId)
+{
+	if (UPI_Soundobjects == pageId)
+		return m_soundobjectsPage.get();
+	else if (UPI_MultiSoundobjects == pageId)
+		return m_multiSoundobjectsPage.get();
+	else if (UPI_MatrixIOs == pageId)
+		return m_matrixIOPage.get();
+	else if (UPI_Settings == pageId)
+		return m_settingsPage.get();
+	else if (UPI_Statistics == pageId)
+		return m_statisticsPage.get();
+	else if (UPI_Scenes == pageId)
+		return m_scenesPage.get();
+	else if (UPI_EnSpace == pageId)
+		return m_enSpacePage.get();
+	else
+		return nullptr;
+}
+
+/**
  * Timer callback function, which will be called at regular intervals to update the GUI.
  * Reimplemented from base class Timer.
  */
@@ -340,27 +372,44 @@ void PageContainerComponent::UpdateGui(bool init)
 		}
 	}
 
+
+	// updating is always required when init is set.
+	// starting of refresh timer only when page is visible.
+	auto updateSoundObjects = init;
+	auto startRefreshSoundObjects = false;
+	auto updateMultiSoundobjects = init;
+	auto startRefreshMultiSoundobjects = false;
+	auto updateMatrixIOs = init;
+	auto startRefreshMatrixIOs = false;
+	auto updateScenes = init;
+	auto startRefreshScenes = false;
+	auto updateEnSpace = init;
+	auto startRefreshEnSpace = false;
+	auto updateStatistics = init;
+	auto startRefreshStatistics = false;
+	auto updateSettings = init;
+	auto startRefreshSettings = false;
+	
+	// queue an update for all windowed pages
+	if (m_soundobjectsPage)
+		updateSoundObjects = updateSoundObjects || m_soundobjectsPage->isOnDesktop();
+	if (m_multiSoundobjectsPage)
+		updateMultiSoundobjects = updateMultiSoundobjects || m_multiSoundobjectsPage->isOnDesktop();
+	if (m_matrixIOPage)
+		updateMatrixIOs = updateMatrixIOs || m_matrixIOPage->isOnDesktop();
+	if (m_scenesPage)
+		updateScenes = updateScenes || m_scenesPage->isOnDesktop();
+	if (m_enSpacePage)
+		updateEnSpace = updateEnSpace || m_enSpacePage->isOnDesktop();
+	if (m_statisticsPage)
+		updateStatistics = updateStatistics ||m_statisticsPage->isOnDesktop();
+	if (m_settingsPage)
+		updateSettings = updateSettings || m_settingsPage->isOnDesktop();
+
+	// queue an update and also if not already active continuous updating for the current page
 	if (m_tabbedComponent)
 	{
 		auto currentPageId = GetPageIdFromName(m_tabbedComponent->getCurrentTabName());
-
-		// updating is always required when init is set.
-		// starting of refresh timer only when page is visible.
-		auto updateSoundObjects = init;
-		auto startRefreshSoundObjects = false;
-		auto updateMultiSoundobjects = init;
-		auto startRefreshMultiSoundobjects = false;
-		auto updateMatrixIOs = init;
-		auto startRefreshMatrixIOs = false;
-		auto updateScenes = init;
-		auto startRefreshScenes = false;
-		auto updateEnSpace = init;
-		auto startRefreshEnSpace = false;
-		auto updateStatistics = init;
-		auto startRefreshStatistics = false;
-		auto updateSettings = init;
-		auto startRefreshSettings = false;
-
 		switch (currentPageId)
 		{
 		case UPI_Soundobjects:
@@ -394,83 +443,84 @@ void PageContainerComponent::UpdateGui(bool init)
 		default:
 			break;
 		}
+	}
 
-		if (updateSoundObjects)
-		{
-			if (m_soundobjectsPage)
-				m_soundobjectsPage->UpdateGui(init);
-		}
-		if (startRefreshSoundObjects)
-		{
-			if (getTimerInterval() != GUI_UPDATE_RATE_SLOW)
-				startTimer(GUI_UPDATE_RATE_SLOW);
-		}
+	// perform updating and continuous updating 
+	if (updateSoundObjects)
+	{
+		if (m_soundobjectsPage)
+			m_soundobjectsPage->UpdateGui(init);
+	}
+	if (startRefreshSoundObjects)
+	{
+		if (getTimerInterval() != GUI_UPDATE_RATE_SLOW)
+			startTimer(GUI_UPDATE_RATE_SLOW);
+	}
 
-		if (updateMultiSoundobjects)
-		{
-			if (m_multiSoundobjectsPage)
-				m_multiSoundobjectsPage->UpdateGui(init);
-		}
-		if (startRefreshMultiSoundobjects)
-		{
-			if (getTimerInterval() != GUI_UPDATE_RATE_FAST)
-				startTimer(GUI_UPDATE_RATE_FAST);
-		}
+	if (updateMultiSoundobjects)
+	{
+		if (m_multiSoundobjectsPage)
+			m_multiSoundobjectsPage->UpdateGui(init);
+	}
+	if (startRefreshMultiSoundobjects)
+	{
+		if (getTimerInterval() != GUI_UPDATE_RATE_FAST)
+			startTimer(GUI_UPDATE_RATE_FAST);
+	}
 
-		if (updateMatrixIOs)
-		{
-			if (m_matrixIOPage)
-				m_matrixIOPage->UpdateGui(init);
-		}
-		if (startRefreshMatrixIOs)
-		{
-			if (getTimerInterval() != GUI_UPDATE_RATE_SLOW)
-				startTimer(GUI_UPDATE_RATE_SLOW);
-		}
+	if (updateMatrixIOs)
+	{
+		if (m_matrixIOPage)
+			m_matrixIOPage->UpdateGui(init);
+	}
+	if (startRefreshMatrixIOs)
+	{
+		if (getTimerInterval() != GUI_UPDATE_RATE_SLOW)
+			startTimer(GUI_UPDATE_RATE_SLOW);
+	}
 
-		if (updateScenes)
-		{
-			if (m_scenesPage)
-				m_scenesPage->UpdateGui(init);
-		}
-		if (startRefreshScenes)
-		{
-			if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
-				startTimer(GUI_UPDATE_RATE_SUPERSLOW);
-		}
+	if (updateScenes)
+	{
+		if (m_scenesPage)
+			m_scenesPage->UpdateGui(init);
+	}
+	if (startRefreshScenes)
+	{
+		if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
+			startTimer(GUI_UPDATE_RATE_SUPERSLOW);
+	}
 		
-		if (updateEnSpace)
-		{
-			if (m_enSpacePage)
-				m_enSpacePage->UpdateGui(init);
-		}
-		if (startRefreshEnSpace)
-		{
-			if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
-				startTimer(GUI_UPDATE_RATE_SUPERSLOW);
-		}
+	if (updateEnSpace)
+	{
+		if (m_enSpacePage)
+			m_enSpacePage->UpdateGui(init);
+	}
+	if (startRefreshEnSpace)
+	{
+		if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
+			startTimer(GUI_UPDATE_RATE_SUPERSLOW);
+	}
 
-		if (updateStatistics)
-		{
-			if (m_statisticsPage)
-				m_statisticsPage->UpdateGui(init);
-		}
-		if (startRefreshStatistics)
-		{
-			if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
-				startTimer(GUI_UPDATE_RATE_SUPERSLOW);
-		}
+	if (updateStatistics)
+	{
+		if (m_statisticsPage)
+			m_statisticsPage->UpdateGui(init);
+	}
+	if (startRefreshStatistics)
+	{
+		if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
+			startTimer(GUI_UPDATE_RATE_SUPERSLOW);
+	}
 
-		if (updateSettings)
-		{
-			if (m_settingsPage)
-				m_settingsPage->UpdateGui(init);
-		}
-		if (startRefreshSettings)
-		{
-			if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
-				startTimer(GUI_UPDATE_RATE_SUPERSLOW);
-		}
+	if (updateSettings)
+	{
+		if (m_settingsPage)
+			m_settingsPage->UpdateGui(init);
+	}
+	if (startRefreshSettings)
+	{
+		if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
+			startTimer(GUI_UPDATE_RATE_SUPERSLOW);
 	}
 }
 
@@ -485,14 +535,12 @@ void PageContainerComponent::SetPagesBeingInitialized(bool initializing)
 	// the tab component does send config update triggers as well when set to handling changes
 	m_tabbedComponent->SetIsHandlingChanges(!initializing);
 
-	m_soundobjectsPage->SetPageIsInitializing(initializing);
-	m_multiSoundobjectsPage->SetPageIsInitializing(initializing);
-	m_matrixIOPage->SetPageIsInitializing(initializing);
-	m_settingsPage->SetPageIsInitializing(initializing);
-	m_statisticsPage->SetPageIsInitializing(initializing);
-	m_aboutPage->SetPageIsInitializing(initializing);
-	m_scenesPage->SetPageIsInitializing(initializing);
-	m_enSpacePage->SetPageIsInitializing(initializing);
+	for (auto pageIdIter = int(UPI_InvalidMin + 1); pageIdIter < UPI_InvalidMax; pageIdIter++)
+	{
+		auto page = GetComponentForPageId(static_cast<UIPageId>(pageIdIter));
+		if (page)
+			page->SetPageIsInitializing(initializing);
+	}
 }
 
 /**
@@ -502,17 +550,126 @@ void PageContainerComponent::SetPagesBeingInitialized(bool initializing)
  */
 void PageContainerComponent::SetActivePage(UIPageId pageId)
 {
-	jassert(pageId > UPI_InvalidMin && pageId < UPI_InvalidMax);
+	jassert(pageId > UPI_InvalidMin && pageId < UPI_About);
 
-	m_soundobjectsPage->SetPageIsVisible(UPI_Soundobjects == pageId);
-	m_multiSoundobjectsPage->SetPageIsVisible(UPI_MultiSoundobjects == pageId);
-	m_matrixIOPage->SetPageIsVisible(UPI_MatrixIOs == pageId);
-	m_settingsPage->SetPageIsVisible(UPI_Settings == pageId);
-	m_statisticsPage->SetPageIsVisible(UPI_Statistics == pageId);
-	m_scenesPage->SetPageIsVisible(UPI_Scenes == pageId);
-	m_enSpacePage->SetPageIsVisible(UPI_EnSpace == pageId);
+	for (auto pageIdIter = int(UPI_InvalidMin + 1); pageIdIter < UPI_About; pageIdIter++)
+	{
+		auto page = GetComponentForPageId(static_cast<UIPageId>(pageIdIter));
+		if (page)
+			page->SetPageIsVisible(static_cast<UIPageId>(pageIdIter) == pageId);
+	}
 
 	m_tabbedComponent->setCurrentTabIndex(m_tabbedComponent->getTabNames().indexOf(GetPageNameFromId(pageId)));
+}
+
+/**
+ * Method to open a given page in a separate window.
+ * @param	pageId		The page id to open as window.
+ * @param	windowPos	The screen positionwhere the window origin shall be placed
+ */
+void PageContainerComponent::OpenPageAsWindow(UIPageId pageId, const juce::Point<int>& windowPos)
+{
+	if (pageId <= UPI_Soundobjects || pageId >= UPI_Settings) // only pages between soundobjects and settings can be windowed - those two shall always remain in main window
+		return;
+
+	m_tabbedComponent->SetIsHandlingChanges(false);
+	if (m_tabbedComponent->getCurrentTabIndex() == m_tabbedComponent->getTabNames().indexOf(GetPageNameFromId(pageId)))
+	{
+		auto newActiveTabPageId = int(pageId);
+		// loop over pages to find the next one to activate (that is not undocked to separate window)
+		PageComponentBase* page = nullptr;
+		do
+		{
+			newActiveTabPageId++;
+			// if we have not found a page that is not shown as separate window, abort to avoid infinite looping
+			if (newActiveTabPageId == pageId)
+				break;
+			// back to first tab if we have iterated until last
+			if (newActiveTabPageId == UPI_About)
+				newActiveTabPageId = UPI_InvalidMin + 1;
+
+			page = GetComponentForPageId(UIPageId(newActiveTabPageId));
+		} while (page && page->isOnDesktop());
+
+		// set page (in-)visibility for all pages that currently are shown as tabs
+		for (auto pageIdIter = int(UPI_InvalidMin + 1); pageIdIter < UPI_About; pageIdIter++)
+		{
+			page = GetComponentForPageId(static_cast<UIPageId>(pageIdIter));
+			if (page)
+			{
+				if (!page->isOnDesktop())
+					page->SetPageIsVisible(pageIdIter == newActiveTabPageId);
+			}
+		}
+
+		m_tabbedComponent->setCurrentTabIndex(m_tabbedComponent->getTabNames().indexOf(GetPageNameFromId(static_cast<UIPageId>(newActiveTabPageId))));
+	}
+	m_tabbedComponent->removeTab(m_tabbedComponent->getTabNames().indexOf(GetPageNameFromId(static_cast<UIPageId>(pageId))));
+	m_tabbedComponent->SetIsHandlingChanges(true);
+
+	auto windowStyleFlags = ComponentPeer::StyleFlags::windowAppearsOnTaskbar
+		| ComponentPeer::StyleFlags::windowHasCloseButton
+		| ComponentPeer::StyleFlags::windowHasMaximiseButton
+		| ComponentPeer::StyleFlags::windowHasTitleBar
+		| ComponentPeer::StyleFlags::windowIsResizable;
+
+	auto newWindowBounds = juce::Rectangle<int>(0, 0, 100, 100);
+	if (auto mainComponent = Desktop::getInstance().getComponent(0))
+		newWindowBounds = mainComponent->getBounds();
+	newWindowBounds.setPosition(windowPos);
+
+	auto windowedPage = GetComponentForPageId(pageId);
+	if (windowedPage)
+	{
+		windowedPage->setOpaque(true);
+		windowedPage->SetPageIsVisible(true);
+		windowedPage->addToDesktop(windowStyleFlags);
+		windowedPage->setName(GetPageNameFromId(pageId));
+		windowedPage->setBounds(newWindowBounds);
+		windowedPage->setVisible(true);
+	}
+
+	// notify all pages of the windowing of the page
+	for (auto pageIdIter = int(UPI_InvalidMin + 1); pageIdIter < UPI_About; pageIdIter++)
+	{
+		auto page = GetComponentForPageId(static_cast<UIPageId>(pageIdIter));
+		if (page)
+			page->NotifyPageWasWindowed(pageId, true);
+	}
+}
+
+/**
+ * Method to open a given page as a tab of tabbed component member.
+ * @param pageId	The page id to open as tab.
+ */
+void PageContainerComponent::OpenPageAsTab(UIPageId pageId)
+{
+	// mute change broadcasting while we modify the tabs
+	m_tabbedComponent->SetIsHandlingChanges(false);
+
+	auto newTabPage = GetComponentForPageId(pageId);
+	if (newTabPage)
+	{
+		// start clearing currently enabled tabs and recreate the ones to be enabled from now on
+		m_tabbedComponent->clearTabs();
+
+		for (auto pageIdIter = int(UPI_InvalidMin + 1); pageIdIter < UPI_About; pageIdIter++)
+		{
+			auto id = static_cast<UIPageId>(pageIdIter);
+			auto tabPage = GetComponentForPageId(id);
+			if (tabPage)
+			{
+				tabPage->NotifyPageWasWindowed(pageId, false);
+				if (!tabPage->isOnDesktop() || id == pageId) // if the page currently is a tab or is the one that shall be added as new tab
+					m_tabbedComponent->addTab(GetPageNameFromId(id), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), tabPage, false, id);
+			}
+		}
+		m_tabbedComponent->setCurrentTabIndex(m_tabbedComponent->getTabNames().indexOf(GetPageNameFromId(pageId)));
+	}
+
+	m_tabbedComponent->SetIsHandlingChanges(true);
+
+	resized();
 }
 
 /**
@@ -521,36 +678,47 @@ void PageContainerComponent::SetActivePage(UIPageId pageId)
  */
 void PageContainerComponent::SetEnabledPages(const std::vector<UIPageId>& enabledPages)
 {
-	// mute change broadcasting while we modify the tabs
-	m_tabbedComponent->SetIsHandlingChanges(false);
+	auto pageIdsToEnable = enabledPages;
+	// settings page must always be active, but usually is not contained in enabledPages, so we add its id manually
+	if (std::find(pageIdsToEnable.begin(), pageIdsToEnable.end(), UIPageId::UPI_Settings) == pageIdsToEnable.end())
+		pageIdsToEnable.push_back(UIPageId::UPI_Settings);
 
 	// cache the currently active tab to reactivate it after tab recreation (don't default to first tab)
 	auto activeTabId = GetPageIdFromName(m_tabbedComponent->getCurrentTabName());
 
+	// iterate over all page ids and close all windowed pages that no longer are in the list of enabled ones
+	for (auto pageIdIter = int(UPI_InvalidMin + 1); pageIdIter < UPI_About; pageIdIter++)
+	{
+		auto pageId = static_cast<UIPageId>(pageIdIter);
+		auto page = GetComponentForPageId(pageId);
+		if (page && page->isOnDesktop())
+		{
+			auto pageIsEnabled = std::find(pageIdsToEnable.begin(), pageIdsToEnable.end(), pageId) != pageIdsToEnable.end();
+			// if the page is valid and shown as separate window but shall be deactivated, remove it
+			if (!pageIsEnabled)
+				OpenPageAsTab(pageId);
+		}
+	}
+
+	// mute change broadcasting while we modify the tabs
+	m_tabbedComponent->SetIsHandlingChanges(false);
+
 	// start clearing currently enabled tabs and recreate the ones to be enabled from now on
 	m_tabbedComponent->clearTabs();
 
-	auto SoundObjectsPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_Soundobjects) != enabledPages.end();
-	auto MultiSliderPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_MultiSoundobjects) != enabledPages.end();
-	auto MatrixIOsPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_MatrixIOs) != enabledPages.end();
-	auto ScenesPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_Scenes) != enabledPages.end();
-	auto EnSpacePageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_EnSpace) != enabledPages.end();
-	auto StatisticsPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_Statistics) != enabledPages.end();
-
-	if (SoundObjectsPageEnabled)
-		m_tabbedComponent->addTab(GetPageNameFromId(UPI_Soundobjects), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_soundobjectsPage.get(), false, UPI_Soundobjects);
-	if (MultiSliderPageEnabled)
-		m_tabbedComponent->addTab(GetPageNameFromId(UPI_MultiSoundobjects), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSoundobjectsPage.get(), false, UPI_MultiSoundobjects);
-	if (MatrixIOsPageEnabled)
-		m_tabbedComponent->addTab(GetPageNameFromId(UPI_MatrixIOs), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_matrixIOPage.get(), false, UPI_MatrixIOs);
-	if (ScenesPageEnabled)
-		m_tabbedComponent->addTab(GetPageNameFromId(UPI_Scenes), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_scenesPage.get(), false, UPI_Scenes);
-	if (EnSpacePageEnabled)
-		m_tabbedComponent->addTab(GetPageNameFromId(UPI_EnSpace), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_enSpacePage.get(), false, UPI_EnSpace);
-	if (StatisticsPageEnabled)
-		m_tabbedComponent->addTab(GetPageNameFromId(UPI_Statistics), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_statisticsPage.get(), false, UPI_Statistics);
-
-	m_tabbedComponent->addTab(GetPageNameFromId(UPI_Settings), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_settingsPage.get(), false, UPI_Settings);
+	// iterate over all page ids and check if they are contained in the incoming list of pages to be active
+	for (auto pageIdIter = int(UPI_InvalidMin + 1); pageIdIter < UPI_About; pageIdIter++)
+	{
+		auto pageId = static_cast<UIPageId>(pageIdIter);
+		auto page = GetComponentForPageId(pageId);
+		if (page && !page->isOnDesktop())
+		{
+			auto pageIsEnabled = std::find(pageIdsToEnable.begin(), pageIdsToEnable.end(), pageId) != pageIdsToEnable.end();
+			// if the page is valid and not currently shown as window, add it as tab
+			if (pageIsEnabled)
+				m_tabbedComponent->addTab(GetPageNameFromId(pageId), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), page, false, pageId);
+		}
+	}
 
 	// restore the previously active tab
 	m_tabbedComponent->setCurrentTabIndex(m_tabbedComponent->getTabNames().indexOf(GetPageNameFromId(activeTabId)));
@@ -604,7 +772,7 @@ void PageContainerComponent::SetSoundobjectTableResizeBarRatio(float ratio)
 bool PageContainerComponent::GetSoundobjectTableSingleSelectionOnly()
 {
 	if (m_soundobjectsPage)
-		return m_soundobjectsPage->GetSingleSelectionOnly();
+		return m_soundobjectsPage->IsSingleSelectionOnly();
 	else
 	{
 		jassertfalse;
@@ -831,7 +999,14 @@ TabBarButton* CustomButtonTabbedComponent::createTabButton(const String& tabName
 {
 	ignoreUnused(tabIndex);
 
-	return new CustomDrawableTabBarButton(GetPageIdFromName(tabName), getTabbedButtonBar());
+	auto button = new CustomDrawableTabBarButton(GetPageIdFromName(tabName), getTabbedButtonBar());
+	button->onButtonDraggedForTabDetaching = [this] (UIPageId pageId, const juce::Point<int>& mouseUpPos) {
+		PageComponentManager* pageMgr = PageComponentManager::GetInstance();
+		if (pageMgr)
+			pageMgr->OpenPageAsWindow(pageId, mouseUpPos, false);
+	};
+
+	return button;
 }
 
 /**
@@ -1073,6 +1248,35 @@ bool CustomDrawableTabBarButton::setVisibleDrawable(Drawable* visibleDrawable)
 	m_disabledOnImage->setVisible(m_disabledOnImage.get() == visibleDrawable);
 
 	return true;
+}
+
+/**
+ * Reimplemented from juce::Component to track if a tab was dragged
+ * outside of the bar to have it appear as own window.
+ * @param	event	The details of the mouse movement that lead here.
+ */
+void CustomDrawableTabBarButton::mouseUp(const MouseEvent& event)
+{
+    
+#if JUCE_IOS || JUCE_ANDROID
+    TabBarButton::mouseUp(event);
+#else
+	if (!getTopLevelComponent() || !getParentComponent())
+		return TabBarButton::mouseUp(event);
+	auto windowPosition = getTopLevelComponent()->getPosition();
+	auto tabBarBounds = getParentComponent()->getLocalBounds();
+	auto tabBarPosition = getParentComponent()->getPosition();
+	auto tabBarButtonPosition = getPosition();
+	auto mouseUpPositionInTabBarButton = event.position.toInt();
+	auto mouseUpPositionInTabBar = tabBarButtonPosition + mouseUpPositionInTabBarButton;
+	if (!tabBarBounds.contains(mouseUpPositionInTabBar) && onButtonDraggedForTabDetaching)
+	{
+		auto mouseUpPosition = windowPosition + tabBarPosition + mouseUpPositionInTabBar;
+		onButtonDraggedForTabDetaching(m_pageId, mouseUpPosition);
+	}
+	else
+        TabBarButton::mouseUp(event);
+#endif
 }
 
 

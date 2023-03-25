@@ -96,9 +96,8 @@ bool ProtocolBridgingWrapper::SendMessage(RemoteObjectIdentifier Id, RemoteObjec
 	}
 	else if (GetDS100ExtensionMode() == EM_Parallel)
 	{
-		auto sendSuccess = true;
-		sendSuccess = sendSuccess && m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
-		sendSuccess = sendSuccess && m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData);
+		auto sendSuccess = m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
+		sendSuccess = m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData) && sendSuccess;
 
 		return sendSuccess;
 	}

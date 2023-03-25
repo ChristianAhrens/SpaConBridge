@@ -50,7 +50,11 @@ public:
 	virtual void SetPageIsVisible(bool visible);
 
 	//==============================================================================
+	void userTriedToCloseWindow() override;
+
+	//==============================================================================
 	virtual void UpdateGui(bool init) = 0;
+	virtual void NotifyPageWasWindowed(UIPageId pageId, bool windowed) { ignoreUnused(pageId); ignoreUnused(windowed); };
 
 protected:
 	bool	IsPortraitAspectRatio();

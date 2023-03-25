@@ -1260,7 +1260,6 @@ void CustomDrawableTabBarButton::mouseUp(const MouseEvent& event)
 	auto tabBarButtonPosition = getPosition();
 	auto mouseUpPositionInTabBarButton = event.position.toInt();
 	auto mouseUpPositionInTabBar = tabBarButtonPosition + mouseUpPositionInTabBarButton;
-	auto mouseDownPositionInTabBarButton = event.mouseDownPosition.toInt();
 	if (!tabBarBounds.contains(mouseUpPositionInTabBar) && onButtonDraggedForTabDetaching)
 	{
 		auto mouseUpPosition = windowPosition + tabBarPosition + mouseUpPositionInTabBar;

@@ -68,6 +68,11 @@ public:
     
     void addInternalComponent();
     void removeInternalComponent();
+
+	bool IsInUse();
+
+private:
+	bool m_inUse{ false };
 };
 
 /**
@@ -89,13 +94,16 @@ public:
     bool IsResizeBarRatioUpdatePending();
 
 	void SetSingleSelectionOnly(bool singleSelectionOnly);
-	bool GetSingleSelectionOnly();
+	bool IsSingleSelectionOnly();
 
 	//==============================================================================
 	void SetPageIsVisible(bool visible) override;
 
 	//==============================================================================
 	void UpdateGui(bool init) override;
+
+	//==========================================================================
+	void NotifyPageWasWindowed(UIPageId pageId, bool windowed) override;
 
 	//==============================================================================
 	void SetSoundsourceProcessorEditorActive(SoundobjectProcessorId processorId);

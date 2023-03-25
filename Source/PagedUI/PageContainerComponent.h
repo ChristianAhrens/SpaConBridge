@@ -39,6 +39,7 @@ class StatisticsPageComponent;
 class AboutPageComponent;
 class ScenesPageComponent;
 class EnSpacePageComponent;
+class PageComponentBase;
 
 
 /**
@@ -138,6 +139,10 @@ public:
 	void SetActivePage(UIPageId pageId);
 
 	//==============================================================================
+	void OpenPageAsWindow(UIPageId pageId, const juce::Point<int>& windowPos);
+	void OpenPageAsTab(UIPageId pageId);
+
+	//==============================================================================
 	void SetEnabledPages(const std::vector<UIPageId>& enabledPages);
 
 	//==============================================================================
@@ -173,6 +178,9 @@ public:
 private:
 	//==============================================================================
 	void toggleAboutPage();
+
+	//==============================================================================
+	PageComponentBase* GetComponentForPageId(const UIPageId pageId);
 
 	//==============================================================================
 	void paint(Graphics&) override;
@@ -223,10 +231,15 @@ public:
 	void SetIsHandlingChanges(bool isHandlingChanges);
 
 protected:
+	//==============================================================================
 	TabBarButton* createTabButton(const String& tabName, int tabIndex) override;
 	void currentTabChanged(int newCurrentTabIndex, const String& newCurrentTabName) override;
+
+	//==============================================================================
 	void resized() override;
 
+private:
+	//==============================================================================
 	bool m_isHandlingChanges{ true };
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CustomButtonTabbedComponent)
@@ -245,11 +258,21 @@ public:
 
 	void updateDrawableButtonImageColours();
 
+	//==============================================================================
 	void lookAndFeelChanged() override;
 
+	//==============================================================================
+	std::function<void(UIPageId, const juce::Point<int>&)> onButtonDraggedForTabDetaching;
+
 protected:
+	//==============================================================================
 	void paintButton(Graphics&, bool, bool) override;
+
+	//==============================================================================
 	void resized() override;
+
+	//==============================================================================
+	void mouseUp(const MouseEvent& event) override;
 
 private:
 	bool setVisibleDrawable(Drawable* visibleDrawable);

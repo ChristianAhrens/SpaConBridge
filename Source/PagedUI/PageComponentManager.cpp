@@ -169,6 +169,43 @@ void PageComponentManager::SetActivePage(UIPageId pageId, bool dontUpdateConfig)
 }
 
 /**
+ * Opens the given tab of the main window as separate new window.
+ * @param	pageIdx				The page id of the tab that shall be opened as own window.
+ * @param	windowPos			The screen positionwhere the window origin shall be placed
+ * @param	dontUpdateConfig	Indication if the configuration update shall be triggerd as well
+ */
+void PageComponentManager::OpenPageAsWindow(UIPageId pageId, const juce::Point<int>& windowPos, bool dontUpdateConfig)
+{
+	if (m_pageContainer != nullptr)
+	{
+		m_pageContainer->OpenPageAsWindow(pageId, windowPos);
+	}
+
+	if (!dontUpdateConfig)
+	{
+		// tabbed/windowed page mode not yet in config! triggerConfigurationUpdate(false);
+	}
+}
+
+/**
+ * Opens the given tab of the main window as separate new window.
+ * @param pageIdx	The page id of the tab that shall be opened as own window.
+ * @param dontUpdateConfig	Indication if the configuration update shall be triggerd as well
+ */
+void PageComponentManager::OpenPageAsTab(UIPageId pageId, bool dontUpdateConfig)
+{
+	if (m_pageContainer != nullptr)
+	{
+		m_pageContainer->OpenPageAsTab(pageId);
+	}
+
+	if (!dontUpdateConfig)
+	{
+		// tabbed/windowed page mode not yet in config! triggerConfigurationUpdate(false);
+	}
+}
+
+/**
  * Getter for the currently enabled pages of the main window.
  * @return The currently enabled pages.
  */

@@ -761,7 +761,7 @@ void PageContainerComponent::SetSoundobjectTableResizeBarRatio(float ratio)
 bool PageContainerComponent::GetSoundobjectTableSingleSelectionOnly()
 {
 	if (m_soundobjectsPage)
-		return m_soundobjectsPage->GetSingleSelectionOnly();
+		return m_soundobjectsPage->IsSingleSelectionOnly();
 	else
 	{
 		jassertfalse;

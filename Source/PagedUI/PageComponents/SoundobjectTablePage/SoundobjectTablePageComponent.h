@@ -94,7 +94,7 @@ public:
     bool IsResizeBarRatioUpdatePending();
 
 	void SetSingleSelectionOnly(bool singleSelectionOnly);
-	bool GetSingleSelectionOnly();
+	bool IsSingleSelectionOnly();
 
 	//==============================================================================
 	void SetPageIsVisible(bool visible) override;

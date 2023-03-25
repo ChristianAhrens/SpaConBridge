@@ -340,7 +340,7 @@ void SoundobjectTablePageComponent::SetSingleSelectionOnly(bool singleSelectionO
  * Getter for the single selection only flag in sound objects table.
  * @return	The single selection only flag.
  */
-bool SoundobjectTablePageComponent::GetSingleSelectionOnly()
+bool SoundobjectTablePageComponent::IsSingleSelectionOnly()
 {
 	if (m_soundobjectsTable)
 		return m_soundobjectsTable->IsSingleSelectionOnly();

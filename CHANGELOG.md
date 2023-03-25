@@ -4,12 +4,15 @@ All notable changes to SpaConBridge will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.10.0] - 2023-03-25
 ### Added
+- Added drag&drop support to undock tab pages to separate windows
 
 ### Changed
 
 ### Fixed
+- Fixed MatrixIO page change handling that was causing settings and in consequence DS100 conection to be continuously restarted
+- Fixed changed protocol data changes to be correctly synced to other active protocols
 
 ## [0.9.4] - 2023-03-08
 ### Added

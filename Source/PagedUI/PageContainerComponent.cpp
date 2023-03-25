@@ -567,9 +567,10 @@ void PageContainerComponent::SetActivePage(UIPageId pageId)
 
 /**
  * Method to open a given page in a separate window.
- * @param pageId	The page id to open as window.
+ * @param	pageId		The page id to open as window.
+ * @param	windowPos	The screen positionwhere the window origin shall be placed
  */
-void PageContainerComponent::OpenPageAsWindow(UIPageId pageId)
+void PageContainerComponent::OpenPageAsWindow(UIPageId pageId, const juce::Point<int>& windowPos)
 {
 	if (pageId <= UPI_InvalidMin || pageId >= UPI_Settings)
 		return;
@@ -617,7 +618,8 @@ void PageContainerComponent::OpenPageAsWindow(UIPageId pageId)
 
 	auto newWindowBounds = juce::Rectangle<int>(0, 0, 100, 100);
 	if (auto mainComponent = Desktop::getInstance().getComponent(0))
-		newWindowBounds = mainComponent->getBounds() +  juce::Point<int>(10, 10);
+		newWindowBounds = mainComponent->getBounds();
+	newWindowBounds.setPosition(windowPos);
 
 	auto windowedPage = GetComponentForPageId(pageId);
 	if (windowedPage)
@@ -989,10 +991,10 @@ TabBarButton* CustomButtonTabbedComponent::createTabButton(const String& tabName
 	ignoreUnused(tabIndex);
 
 	auto button = new CustomDrawableTabBarButton(GetPageIdFromName(tabName), getTabbedButtonBar());
-	button->onButtonDraggedForTabDetaching = [this] (UIPageId pageId) {
+	button->onButtonDraggedForTabDetaching = [this] (UIPageId pageId, const juce::Point<int>& mouseUpPos) {
 		PageComponentManager* pageMgr = PageComponentManager::GetInstance();
 		if (pageMgr)
-			pageMgr->OpenPageAsWindow(pageId, false);
+			pageMgr->OpenPageAsWindow(pageId, mouseUpPos, false);
 	};
 
 	return button;
@@ -1250,12 +1252,19 @@ void CustomDrawableTabBarButton::mouseUp(const MouseEvent& event)
 #if JUCE_IOS || JUCE_ANDROID
     TabBarButton::mouseUp(event);
 #else
-	auto appBounds = getTopLevelComponent()->getLocalBounds();
-	auto clickPos = getBoundsInParent().getPosition() + event.position.toInt();
-	if (!appBounds.contains(clickPos) && onButtonDraggedForTabDetaching)
+	if (!getTopLevelComponent() || !getParentComponent())
+		return TabBarButton::mouseUp(event);
+	auto windowPosition = getTopLevelComponent()->getPosition();
+	auto tabBarBounds = getParentComponent()->getLocalBounds();
+	auto tabBarPosition = getParentComponent()->getPosition();
+	auto tabBarButtonPosition = getPosition();
+	auto mouseUpPositionInTabBarButton = event.position.toInt();
+	auto mouseUpPositionInTabBar = tabBarButtonPosition + mouseUpPositionInTabBarButton;
+	auto mouseDownPositionInTabBarButton = event.mouseDownPosition.toInt();
+	if (!tabBarBounds.contains(mouseUpPositionInTabBar) && onButtonDraggedForTabDetaching)
 	{
-		DBG("Tab was dragged outside of TabBar");
-		onButtonDraggedForTabDetaching(m_pageId);
+		auto mouseUpPosition = windowPosition + tabBarPosition + mouseUpPositionInTabBar;
+		onButtonDraggedForTabDetaching(m_pageId, mouseUpPosition);
 	}
 	else
         TabBarButton::mouseUp(event);

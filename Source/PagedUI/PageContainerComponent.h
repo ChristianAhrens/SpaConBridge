@@ -139,7 +139,7 @@ public:
 	void SetActivePage(UIPageId pageId);
 
 	//==============================================================================
-	void OpenPageAsWindow(UIPageId pageId);
+	void OpenPageAsWindow(UIPageId pageId, const juce::Point<int>& windowPos);
 	void OpenPageAsTab(UIPageId pageId);
 
 	//==============================================================================
@@ -262,7 +262,7 @@ public:
 	void lookAndFeelChanged() override;
 
 	//==============================================================================
-	std::function<void(UIPageId)> onButtonDraggedForTabDetaching;
+	std::function<void(UIPageId, const juce::Point<int>&)> onButtonDraggedForTabDetaching;
 
 protected:
 	//==============================================================================

@@ -55,7 +55,7 @@ public:
 	void SetActivePage(UIPageId pageId, bool dontUpdateConfig);
 
 	//==============================================================================
-	void OpenPageAsWindow(UIPageId pageId, bool dontUpdateConfig);
+	void OpenPageAsWindow(UIPageId pageId, const juce::Point<int>& windowPos, bool dontUpdateConfig);
 	void OpenPageAsTab(UIPageId pageId, bool dontUpdateConfig);
 
 	//==============================================================================

@@ -624,6 +624,7 @@ void PageContainerComponent::OpenPageAsWindow(UIPageId pageId, const juce::Point
 		windowedPage->setOpaque(true);
 		windowedPage->SetPageIsVisible(true);
 		windowedPage->addToDesktop(windowStyleFlags);
+		windowedPage->setName(GetPageNameFromId(pageId));
 		windowedPage->setBounds(newWindowBounds);
 		windowedPage->setVisible(true);
 	}

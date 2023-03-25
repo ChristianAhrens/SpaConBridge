@@ -1247,7 +1247,9 @@ bool CustomDrawableTabBarButton::setVisibleDrawable(Drawable* visibleDrawable)
 void CustomDrawableTabBarButton::mouseUp(const MouseEvent& event)
 {
     
-#if JUCE_MACOSX || JUCE_WINDOWS || JUCE_LINUX
+#if JUCE_IOS || JUCE_ANDROID
+    TabBarButton::mouseUp(event);
+#else
 	auto appBounds = getTopLevelComponent()->getLocalBounds();
 	auto clickPos = getBoundsInParent().getPosition() + event.position.toInt();
 	if (!appBounds.contains(clickPos) && onButtonDraggedForTabDetaching)
@@ -1256,8 +1258,8 @@ void CustomDrawableTabBarButton::mouseUp(const MouseEvent& event)
 		onButtonDraggedForTabDetaching(m_pageId);
 	}
 	else
+        TabBarButton::mouseUp(event);
 #endif
-		TabBarButton::mouseUp(event);
 }
 
 

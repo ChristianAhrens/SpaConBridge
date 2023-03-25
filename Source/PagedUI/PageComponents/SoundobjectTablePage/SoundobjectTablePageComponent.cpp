@@ -520,12 +520,15 @@ void SoundobjectTablePageComponent::SetMultiSoundobjectComponentActive(bool acti
 	{
         m_multiSoundobjectComponentContainer->removeInternalComponent();
 		
-		auto const selMgr = ProcessorSelectionManager::GetInstance();
-		if (selMgr)
+		if (IsSingleSelectionOnly())
 		{
-			auto selectedProcessorIds = selMgr->GetSelectedSoundobjectProcessorIds();
-			if (selectedProcessorIds.size() == 1)
-				SetSoundsourceProcessorEditorActive(selectedProcessorIds.at(0));
+			auto const selMgr = ProcessorSelectionManager::GetInstance();
+			if (selMgr)
+			{
+				auto selectedProcessorIds = selMgr->GetSelectedSoundobjectProcessorIds();
+				if (selectedProcessorIds.size() == 1)
+					SetSoundsourceProcessorEditorActive(selectedProcessorIds.at(0));
+			}
 		}
 	}
 
@@ -618,7 +621,15 @@ void SoundobjectTablePageComponent::NotifyPageWasWindowed(UIPageId pageId, bool 
 	switch (pageId)
 	{
 	case UPI_MultiSoundobjects:
-		SetMultiSoundobjectComponentActive(false);
+		if (windowed)
+		{
+			SetMultiSoundobjectComponentActive(false);
+		}
+		else
+		{
+			if (!IsSingleSelectionOnly())
+				SetMultiSoundobjectComponentActive(true);
+		}
 		break;
 	default:
 		break;

@@ -572,7 +572,7 @@ void PageContainerComponent::SetActivePage(UIPageId pageId)
  */
 void PageContainerComponent::OpenPageAsWindow(UIPageId pageId, const juce::Point<int>& windowPos)
 {
-	if (pageId <= UPI_InvalidMin || pageId >= UPI_Settings)
+	if (pageId <= UPI_Soundobjects || pageId >= UPI_Settings) // only pages between soundobjects and settings can be windowed - those two shall always remain in main window
 		return;
 
 	m_tabbedComponent->SetIsHandlingChanges(false);

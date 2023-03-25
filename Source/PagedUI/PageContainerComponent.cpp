@@ -535,14 +535,12 @@ void PageContainerComponent::SetPagesBeingInitialized(bool initializing)
 	// the tab component does send config update triggers as well when set to handling changes
 	m_tabbedComponent->SetIsHandlingChanges(!initializing);
 
-	m_soundobjectsPage->SetPageIsInitializing(initializing);
-	m_multiSoundobjectsPage->SetPageIsInitializing(initializing);
-	m_matrixIOPage->SetPageIsInitializing(initializing);
-	m_settingsPage->SetPageIsInitializing(initializing);
-	m_statisticsPage->SetPageIsInitializing(initializing);
-	m_aboutPage->SetPageIsInitializing(initializing);
-	m_scenesPage->SetPageIsInitializing(initializing);
-	m_enSpacePage->SetPageIsInitializing(initializing);
+	for (auto pageIdIter = int(UPI_InvalidMin + 1); pageIdIter < UPI_InvalidMax; pageIdIter++)
+	{
+		auto page = GetComponentForPageId(static_cast<UIPageId>(pageIdIter));
+		if (page)
+			page->SetPageIsInitializing(initializing);
+	}
 }
 
 /**
@@ -552,15 +550,14 @@ void PageContainerComponent::SetPagesBeingInitialized(bool initializing)
  */
 void PageContainerComponent::SetActivePage(UIPageId pageId)
 {
-	jassert(pageId > UPI_InvalidMin && pageId < UPI_InvalidMax);
+	jassert(pageId > UPI_InvalidMin && pageId < UPI_About);
 
-	m_soundobjectsPage->SetPageIsVisible(UPI_Soundobjects == pageId);
-	m_multiSoundobjectsPage->SetPageIsVisible(UPI_MultiSoundobjects == pageId);
-	m_matrixIOPage->SetPageIsVisible(UPI_MatrixIOs == pageId);
-	m_settingsPage->SetPageIsVisible(UPI_Settings == pageId);
-	m_statisticsPage->SetPageIsVisible(UPI_Statistics == pageId);
-	m_scenesPage->SetPageIsVisible(UPI_Scenes == pageId);
-	m_enSpacePage->SetPageIsVisible(UPI_EnSpace == pageId);
+	for (auto pageIdIter = int(UPI_InvalidMin + 1); pageIdIter < UPI_About; pageIdIter++)
+	{
+		auto page = GetComponentForPageId(static_cast<UIPageId>(pageIdIter));
+		if (page)
+			page->SetPageIsVisible(static_cast<UIPageId>(pageIdIter) == pageId);
+	}
 
 	m_tabbedComponent->setCurrentTabIndex(m_tabbedComponent->getTabNames().indexOf(GetPageNameFromId(pageId)));
 }
@@ -689,27 +686,23 @@ void PageContainerComponent::SetEnabledPages(const std::vector<UIPageId>& enable
 	// start clearing currently enabled tabs and recreate the ones to be enabled from now on
 	m_tabbedComponent->clearTabs();
 
-	auto SoundObjectsPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_Soundobjects) != enabledPages.end();
-	auto MultiSliderPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_MultiSoundobjects) != enabledPages.end();
-	auto MatrixIOsPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_MatrixIOs) != enabledPages.end();
-	auto ScenesPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_Scenes) != enabledPages.end();
-	auto EnSpacePageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_EnSpace) != enabledPages.end();
-	auto StatisticsPageEnabled = std::find(enabledPages.begin(), enabledPages.end(), UPI_Statistics) != enabledPages.end();
-
-	if (SoundObjectsPageEnabled && m_soundobjectsPage && !m_soundobjectsPage->isOnDesktop())
-		m_tabbedComponent->addTab(GetPageNameFromId(UPI_Soundobjects), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_soundobjectsPage.get(), false, UPI_Soundobjects);
-	if (MultiSliderPageEnabled && m_multiSoundobjectsPage && !m_multiSoundobjectsPage->isOnDesktop())
-		m_tabbedComponent->addTab(GetPageNameFromId(UPI_MultiSoundobjects), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_multiSoundobjectsPage.get(), false, UPI_MultiSoundobjects);
-	if (MatrixIOsPageEnabled && m_matrixIOPage && !m_matrixIOPage->isOnDesktop())
-		m_tabbedComponent->addTab(GetPageNameFromId(UPI_MatrixIOs), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_matrixIOPage.get(), false, UPI_MatrixIOs);
-	if (ScenesPageEnabled && m_scenesPage && !m_scenesPage->isOnDesktop())
-		m_tabbedComponent->addTab(GetPageNameFromId(UPI_Scenes), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_scenesPage.get(), false, UPI_Scenes);
-	if (EnSpacePageEnabled && m_enSpacePage && !m_enSpacePage->isOnDesktop())
-		m_tabbedComponent->addTab(GetPageNameFromId(UPI_EnSpace), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_enSpacePage.get(), false, UPI_EnSpace);
-	if (StatisticsPageEnabled && m_statisticsPage && !m_statisticsPage->isOnDesktop())
-		m_tabbedComponent->addTab(GetPageNameFromId(UPI_Statistics), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_statisticsPage.get(), false, UPI_Statistics);
-
-	m_tabbedComponent->addTab(GetPageNameFromId(UPI_Settings), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), m_settingsPage.get(), false, UPI_Settings);
+	auto pageIdsToIterate = enabledPages;
+	// settings page must always be active, but usually is not contained in enabledPages, so we add its id manually
+	if (std::find(pageIdsToIterate.begin(), pageIdsToIterate.end(), UIPageId::UPI_Settings) == pageIdsToIterate.end())
+		pageIdsToIterate.push_back(UIPageId::UPI_Settings);
+	// iterate over all page ids and check if they are contained in the incoming list of pages to be active
+	for (auto pageIdIter = int(UPI_InvalidMin + 1); pageIdIter < UPI_About; pageIdIter++)
+	{
+		auto pageIsEnabled = std::find(enabledPages.begin(), enabledPages.end(), pageIdIter) != enabledPages.end();
+		if (pageIsEnabled)
+		{
+			auto pageId = static_cast<UIPageId>(pageIdIter);
+			auto page = GetComponentForPageId(pageId);
+			// if the page is valid and not currently shown as window, add it as tab
+			if (page && !page->isOnDesktop())
+				m_tabbedComponent->addTab(GetPageNameFromId(pageId), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), page, false, pageId);
+		}
+	}
 
 	// restore the previously active tab
 	m_tabbedComponent->setCurrentTabIndex(m_tabbedComponent->getTabNames().indexOf(GetPageNameFromId(activeTabId)));

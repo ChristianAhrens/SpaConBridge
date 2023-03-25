@@ -677,29 +677,44 @@ void PageContainerComponent::OpenPageAsTab(UIPageId pageId)
  */
 void PageContainerComponent::SetEnabledPages(const std::vector<UIPageId>& enabledPages)
 {
-	// mute change broadcasting while we modify the tabs
-	m_tabbedComponent->SetIsHandlingChanges(false);
+	auto pageIdsToEnable = enabledPages;
+	// settings page must always be active, but usually is not contained in enabledPages, so we add its id manually
+	if (std::find(pageIdsToEnable.begin(), pageIdsToEnable.end(), UIPageId::UPI_Settings) == pageIdsToEnable.end())
+		pageIdsToEnable.push_back(UIPageId::UPI_Settings);
 
 	// cache the currently active tab to reactivate it after tab recreation (don't default to first tab)
 	auto activeTabId = GetPageIdFromName(m_tabbedComponent->getCurrentTabName());
 
+	// iterate over all page ids and close all windowed pages that no longer are in the list of enabled ones
+	for (auto pageIdIter = int(UPI_InvalidMin + 1); pageIdIter < UPI_About; pageIdIter++)
+	{
+		auto pageId = static_cast<UIPageId>(pageIdIter);
+		auto page = GetComponentForPageId(pageId);
+		if (page && page->isOnDesktop())
+		{
+			auto pageIsEnabled = std::find(pageIdsToEnable.begin(), pageIdsToEnable.end(), pageId) != pageIdsToEnable.end();
+			// if the page is valid and shown as separate window but shall be deactivated, remove it
+			if (!pageIsEnabled)
+				OpenPageAsTab(pageId);
+		}
+	}
+
+	// mute change broadcasting while we modify the tabs
+	m_tabbedComponent->SetIsHandlingChanges(false);
+
 	// start clearing currently enabled tabs and recreate the ones to be enabled from now on
 	m_tabbedComponent->clearTabs();
 
-	auto pageIdsToIterate = enabledPages;
-	// settings page must always be active, but usually is not contained in enabledPages, so we add its id manually
-	if (std::find(pageIdsToIterate.begin(), pageIdsToIterate.end(), UIPageId::UPI_Settings) == pageIdsToIterate.end())
-		pageIdsToIterate.push_back(UIPageId::UPI_Settings);
 	// iterate over all page ids and check if they are contained in the incoming list of pages to be active
 	for (auto pageIdIter = int(UPI_InvalidMin + 1); pageIdIter < UPI_About; pageIdIter++)
 	{
-		auto pageIsEnabled = std::find(enabledPages.begin(), enabledPages.end(), pageIdIter) != enabledPages.end();
-		if (pageIsEnabled)
+		auto pageId = static_cast<UIPageId>(pageIdIter);
+		auto page = GetComponentForPageId(pageId);
+		if (page && !page->isOnDesktop())
 		{
-			auto pageId = static_cast<UIPageId>(pageIdIter);
-			auto page = GetComponentForPageId(pageId);
+			auto pageIsEnabled = std::find(pageIdsToEnable.begin(), pageIdsToEnable.end(), pageId) != pageIdsToEnable.end();
 			// if the page is valid and not currently shown as window, add it as tab
-			if (page && !page->isOnDesktop())
+			if (pageIsEnabled)
 				m_tabbedComponent->addTab(GetPageNameFromId(pageId), getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker(), page, false, pageId);
 		}
 	}

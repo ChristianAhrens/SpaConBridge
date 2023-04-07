@@ -196,6 +196,9 @@ public:
 	int GetBridgingMappingArea(ProtocolBridgingType bridgingType);
 	bool SetBridgingMappingArea(ProtocolBridgingType bridgingType, int mappingAreaId, bool dontSendNotification = false);
 
+	const std::pair<juce::Range<float>, juce::Range<float>> GetBridgingMappingRange(ProtocolBridgingType bridgingType);
+	bool SetBridgingMappingRange(ProtocolBridgingType bridgingType, const std::pair<juce::Range<float>, juce::Range<float>>& mappingXRange, bool dontSendNotification = false);
+
 	String GetBridgingInputDeviceIdentifier(ProtocolBridgingType bridgingType);
 	bool SetBridgingInputDeviceIdentifier(ProtocolBridgingType bridgingType, const String& inputDeviceIdentifier, bool dontSendNotification = false);
 

@@ -1357,9 +1357,97 @@ bool ProtocolBridgingWrapper::SetProtocolMappingArea(ProtocolId protocolId, int 
 }
 
 /**
- * Gets the protocol's currently set mapping area id, if available for the given protocol.
- * @param protocolId The id of the protocol for which to get the currently configured mappingarea id
- * @return	The mapping area id
+ * Gets the protocol's currently set mapping range x/y min/max value, if available for the given protocol.
+ * @param protocolId The id of the protocol for which to get the currently configured mapping range x/y min/max value
+ * @return	The mapping range x/y min/max value, 0..1 min/max range if not available
+ */
+const std::pair<juce::Range<float>, juce::Range<float>> ProtocolBridgingWrapper::GetProtocolMappingRange(ProtocolId protocolId)
+{
+	auto mappingAreaRescaleRangeX = juce::Range<float>(0.0f, 1.0f);
+	auto mappingAreaRescaleRangeY = juce::Range<float>(0.0f, 1.0f);
+
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto mappingAreaRescaleXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MAPPINGAREARESCALE));
+			if (mappingAreaRescaleXmlElement)
+			{
+				auto mappingAreaRescaleTextElement = mappingAreaRescaleXmlElement->getFirstChildElement();
+				if (mappingAreaRescaleTextElement && mappingAreaRescaleTextElement->isTextElement())
+				{
+					auto rangeRescaleValues = StringArray();
+					if (4 != rangeRescaleValues.addTokens(mappingAreaRescaleTextElement->getText(), ";", ""))
+					{
+						mappingAreaRescaleRangeX = juce::Range<float>(0.0f, 1.0f);
+						mappingAreaRescaleRangeY = juce::Range<float>(0.0f, 1.0f);
+					}
+					else
+					{
+						auto minX = rangeRescaleValues[0].getFloatValue();
+						auto maxX = rangeRescaleValues[1].getFloatValue();
+						auto minY = rangeRescaleValues[2].getFloatValue();
+						auto maxY = rangeRescaleValues[3].getFloatValue();
+
+						mappingAreaRescaleRangeX = juce::Range<float>(minX, maxX);
+						mappingAreaRescaleRangeY = juce::Range<float>(minY, maxY);
+					}
+				}
+			}
+		}
+	}
+
+	return std::make_pair(mappingAreaRescaleRangeX, mappingAreaRescaleRangeY);
+}
+
+/**
+ * Sets the given protocol mapping range x/y min/max values.
+ * This method inserts the mapping range into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param protocolId The id of the protocol for which to set the ip address
+ * @param moduleTypeIdentifier	The new module type identifier string.
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetProtocolMappingRange(ProtocolId protocolId, const std::pair<juce::Range<float>, juce::Range<float>>& mappingRange, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto mappingRangeString = juce::String(mappingRange.first.getStart()) + ";" + juce::String(mappingRange.first.getEnd()) + ";" + juce::String(mappingRange.second.getStart()) + ";" + juce::String(mappingRange.second.getEnd());
+			auto mappingAreaRescaleXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MAPPINGAREARESCALE));
+			if (mappingAreaRescaleXmlElement)
+			{
+				auto mappingAreaRescaleTextElement = mappingAreaRescaleXmlElement->getFirstChildElement();
+				if (mappingAreaRescaleTextElement && mappingAreaRescaleTextElement->isTextElement())
+					mappingAreaRescaleTextElement->setText(mappingRangeString);
+				else
+					mappingAreaRescaleXmlElement->addTextElement(mappingRangeString);
+			}
+			else
+			{
+				mappingAreaRescaleXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MAPPINGAREARESCALE));
+				mappingAreaRescaleXmlElement->addTextElement(mappingRangeString);
+			}
+		}
+		else
+			return false;
+
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
+}
+
+/**
+ * Gets the protocol's currently set module type string, if available for the given protocol.
+ * @param protocolId The id of the protocol for which to get the currently configured module type string
+ * @return	The module type string
  */
 const String ProtocolBridgingWrapper::GetProtocolModuleTypeIdentifier(ProtocolId protocolId)
 {
@@ -1381,11 +1469,11 @@ const String ProtocolBridgingWrapper::GetProtocolModuleTypeIdentifier(ProtocolId
 }
 
 /**
- * Sets the given protocol mapping area id.
- * This method inserts the mapping area id into the cached xml element,
+ * Sets the given protocol module type identifier string.
+ * This method inserts the module type identifier string into the cached xml element,
  * pushes the updated xml element into processing node and triggers configuration updating.
  * @param protocolId The id of the protocol for which to set the ip address
- * @param remotePort	The new port number to send to
+ * @param moduleTypeIdentifier	The new module type identifier string.
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  * @return	True on succes, false if failure
  */
@@ -3536,6 +3624,27 @@ int ProtocolBridgingWrapper::GetRTTrPMMappingArea()
 bool ProtocolBridgingWrapper::SetRTTrPMMappingArea(int mappingAreaId, bool dontSendNotification)
 {
 	return SetProtocolMappingArea(RTTRPM_PROCESSINGPROTOCOL_ID, mappingAreaId, dontSendNotification);
+}
+
+/**
+ * Gets the value range to use for mapping on the 0...1 mapping area range
+ * This method forwards the call to the generic implementation.
+ * @return	The range to use for mapping
+ */
+const std::pair<juce::Range<float>, juce::Range<float>> ProtocolBridgingWrapper::GetRTTrPMMappingRange()
+{
+	return GetProtocolMappingRange(RTTRPM_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the value range to use for mapping on the 0...1 mapping area range
+ * This method forwards the call to the generic implementation.
+ * @param	mappingRange	The value range to use for mapping.
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetRTTrPMMappingRange(const std::pair<juce::Range<float>, juce::Range<float>>& mappingRange, bool dontSendNotification)
+{
+	return SetProtocolMappingRange(RTTRPM_PROCESSINGPROTOCOL_ID, mappingRange, dontSendNotification);
 }
 
 /**

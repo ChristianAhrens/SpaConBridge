@@ -487,6 +487,26 @@ void SettingsSectionsComponent::createRTTrPMSettingsSection()
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingAreaLabel.get(), false, false);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingAreaSelect.get(), true, false);
 
+	m_RTTrPMMappingRangeXEditor = std::make_unique<RangeEditorComponent>(0.0f, 1.0f, "min", "max");
+	m_RTTrPMMappingRangeXEditor->SetListener(this);
+	m_RTTrPMMappingRangeXEditor->SetRange(0.0f, 1.0f);
+	m_RTTrPMMappingRangeXEditor->SetRangeLabels("min", "max");
+	m_RTTrPMMappingRangeXLabel = std::make_unique<Label>("RTTrPMMappingRangeXEditor", "Mapping X Range");
+	m_RTTrPMMappingRangeXLabel->setJustificationType(Justification::centred);
+	m_RTTrPMMappingRangeXLabel->attachToComponent(m_RTTrPMMappingRangeXEditor.get(), true);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingRangeXLabel.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingRangeXEditor.get(), true, false);
+
+	m_RTTrPMMappingRangeYEditor = std::make_unique<RangeEditorComponent>(0.0f, 1.0f, "min", "max");
+	m_RTTrPMMappingRangeYEditor->SetListener(this);
+	m_RTTrPMMappingRangeYEditor->SetRange(0.0f, 1.0f);
+	m_RTTrPMMappingRangeYEditor->SetRangeLabels("min", "max");
+	m_RTTrPMMappingRangeYLabel = std::make_unique<Label>("RTTrPMMappingRangeYEditor", "Mapping Y Range");
+	m_RTTrPMMappingRangeYLabel->setJustificationType(Justification::centred);
+	m_RTTrPMMappingRangeYLabel->attachToComponent(m_RTTrPMMappingRangeYEditor.get(), true);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingRangeYLabel.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingRangeYEditor.get(), true, false);
+
 	m_RTTrPMModuleTypeSelect = std::make_unique<ComboBox>();
 	m_RTTrPMModuleTypeSelect->addListener(this);
 	m_RTTrPMModuleTypeSelect->addItemList(m_RTTrPMModuleTypes, 1);
@@ -1389,6 +1409,24 @@ void SettingsSectionsComponent::comboBoxChanged(ComboBox* comboBox)
 }
 
 /**
+ * Reimplemented method to handle range editor component changes
+ * @param editor	The RangeEditorComponent that changes were made in
+ */
+void SettingsSectionsComponent::rangeChanged(RangeEditorComponent* editor)
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return;
+
+	if (m_RTTrPMMappingRangeXEditor && m_RTTrPMMappingRangeYEditor && (m_RTTrPMMappingRangeXEditor.get() == editor || m_RTTrPMMappingRangeYEditor.get() == editor))
+		ctrl->SetBridgingMappingRange(PBT_BlacktraxRTTrPM, std::make_pair(m_RTTrPMMappingRangeXEditor->GetRange(), m_RTTrPMMappingRangeYEditor->GetRange()));
+	else
+		return;
+
+	processUpdatedConfig();
+}
+
+/**
  * Proxy method to activate a single bridging protocol in controller.
  * @param sectionType	The protocolType to be active from now on.
  */
@@ -1646,6 +1684,22 @@ void SettingsSectionsComponent::processUpdatedRTTrPMConfig()
 	}
 	if (m_RTTrPMMappingAreaLabel)
 		m_RTTrPMMappingAreaLabel->setEnabled((RTTrPMMappingAreaId != MAI_Invalid));
+
+	auto RTTrPMMappingRange = ctrl->GetBridgingMappingRange(PBT_BlacktraxRTTrPM);
+	if (m_RTTrPMMappingRangeXEditor)
+	{
+		m_RTTrPMMappingRangeXEditor->SetRange(RTTrPMMappingRange.first.getStart(), RTTrPMMappingRange.first.getEnd());
+		m_RTTrPMMappingRangeXEditor->setEnabled((RTTrPMMappingAreaId != MAI_Invalid));
+	}
+	if (m_RTTrPMMappingRangeXLabel)
+		m_RTTrPMMappingRangeXLabel->setEnabled((RTTrPMMappingAreaId != MAI_Invalid));
+	if (m_RTTrPMMappingRangeYEditor)
+	{
+		m_RTTrPMMappingRangeYEditor->SetRange(RTTrPMMappingRange.second.getStart(), RTTrPMMappingRange.second.getEnd());
+		m_RTTrPMMappingRangeYEditor->setEnabled((RTTrPMMappingAreaId != MAI_Invalid));
+	}
+	if (m_RTTrPMMappingRangeYLabel)
+		m_RTTrPMMappingRangeYLabel->setEnabled((RTTrPMMappingAreaId != MAI_Invalid));
 	
 	auto RTTrPMModuleTypeIdentifier = ctrl->GetBridgingModuleTypeIdentifier(PBT_BlacktraxRTTrPM);
 	if (m_RTTrPMModuleTypeSelect)

@@ -49,7 +49,7 @@ static constexpr int RX_PORT_DIGICO_HOST = 50013;		//< UDP port to which the DiG
 static constexpr int RX_PORT_GENERICOSC_DEVICE = 50014;	//< UDP port which the generic OSC device is listening to for OSC
 static constexpr int RX_PORT_GENERICOSC_HOST = 50015;	//< UDP port to which the generic OSC device will send OSC replies
 
-static constexpr int RX_PORT_RTTRPM_HOST = 24100;		//< UDP port to which the Blacktrax tracker device will send RTTrPM data replies to (us)
+static constexpr int RX_PORT_RTTRPM_HOST = 24002;		//< UDP port to which the Blacktrax tracker device will send RTTrPM data replies to (us)
 
 static constexpr int RX_PORT_YAMAHAOSC_DEVICE = 50016;	//< UDP port which the Yamaha Rivage console is listening to for OSC
 static constexpr int RX_PORT_YAMAHAOSC_HOST = 50017;	//< UDP port to which the Yamaha Rivage console will send OSC replies
@@ -206,6 +206,8 @@ public:
 	bool SetRTTrPMRemotePort(int remotePort, bool dontSendNotification = false);
 	int GetRTTrPMMappingArea();
 	bool SetRTTrPMMappingArea(int mappingAreaId, bool dontSendNotification = false);
+	const std::pair<juce::Range<float>, juce::Range<float>> GetRTTrPMMappingRange();
+	bool SetRTTrPMMappingRange(const std::pair<juce::Range<float>, juce::Range<float>>& mappingRange, bool dontSendNotification = false);
 	const String GetRTTrPMModuleTypeIdentifier();
 	bool SetRTTrPMModuleTypeIdentifier(const String& moduleTypeIdentifier, bool dontSendNotification = false);
 
@@ -369,6 +371,10 @@ private:
 	bool SetProtocolRemotePort(ProtocolId protocolId, int remotePort, bool dontSendNotification = false);
 	int GetProtocolMappingArea(ProtocolId protocolId);
 	bool SetProtocolMappingArea(ProtocolId protocolId, int mappingAreaId, bool dontSendNotification = false);
+
+	const std::pair<juce::Range<float>, juce::Range<float>> GetProtocolMappingRange(ProtocolId protocolId);
+	bool SetProtocolMappingRange(ProtocolId protocolId, const std::pair<juce::Range<float>, juce::Range<float>>& mappingRange, bool dontSendNotification = false);
+
 	String GetProtocolInputDeviceIdentifier(ProtocolId protocolId);
 	bool SetProtocolInputDeviceIdentifier(ProtocolId protocolId, const String& inputDeviceIdentifier, bool dontSendNotification = false);
 	String GetProtocolOutputDeviceIdentifier(ProtocolId protocolId);

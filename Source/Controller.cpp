@@ -3194,6 +3194,50 @@ bool Controller::SetBridgingMappingArea(ProtocolBridgingType bridgingType, int m
 	}
 }
 
+const std::pair<juce::Range<float>, juce::Range<float>> Controller::GetBridgingMappingRange(ProtocolBridgingType bridgingType)
+{
+	switch (bridgingType)
+	{
+	case PBT_BlacktraxRTTrPM:
+		return m_protocolBridge.GetRTTrPMMappingRange();
+	case PBT_YamahaOSC:
+	case PBT_GenericMIDI:
+	case PBT_ADMOSC:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	case PBT_DS100:
+	case PBT_DAWPlugin:
+	case PBT_RemapOSC:
+	default:
+		jassertfalse;
+		return std::make_pair(juce::Range<float>(0.0f, 1.0f), juce::Range<float>(0.0f, 1.0f));
+	}
+}
+
+bool Controller::SetBridgingMappingRange(ProtocolBridgingType bridgingType, const std::pair<juce::Range<float>, juce::Range<float>>& mappingRange, bool dontSendNotification)
+{
+	switch (bridgingType)
+	{
+	case PBT_BlacktraxRTTrPM:
+		return m_protocolBridge.SetRTTrPMMappingRange(mappingRange, dontSendNotification);
+	case PBT_YamahaOSC:
+	case PBT_GenericMIDI:
+	case PBT_ADMOSC:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_HUI:
+	case PBT_DS100:
+	case PBT_DAWPlugin:
+	case PBT_RemapOSC:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
 String Controller::GetBridgingInputDeviceIdentifier(ProtocolBridgingType bridgingType)
 {
 	switch (bridgingType)

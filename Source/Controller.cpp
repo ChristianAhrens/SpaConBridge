@@ -3682,6 +3682,50 @@ bool Controller::SetBridgingOscRemapAssignments(ProtocolBridgingType bridgingTyp
 	}
 }
 
+std::map<int, ChannelId> Controller::GetBridgingChannelRemapAssignments(ProtocolBridgingType bridgingType)
+{
+	switch (bridgingType)
+	{
+	case PBT_BlacktraxRTTrPM:
+		return m_protocolBridge.GetRTTrPMChannelRemapAssignments();
+	case PBT_RemapOSC:
+	case PBT_GenericMIDI:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_YamahaOSC:
+	case PBT_ADMOSC:
+	case PBT_HUI:
+	case PBT_DS100:
+	case PBT_DAWPlugin:
+	default:
+		jassertfalse;
+		return std::map<int, ChannelId>();
+	}
+}
+
+bool Controller::SetBridgingChannelRemapAssignments(ProtocolBridgingType bridgingType, const std::map<int, ChannelId>& channelRemapAssignments, bool dontSendNotification)
+{
+	switch (bridgingType)
+	{
+	case PBT_BlacktraxRTTrPM:
+		return m_protocolBridge.SetRTTrPMChannelRemapAssignments(channelRemapAssignments, dontSendNotification);
+	case PBT_RemapOSC:
+	case PBT_GenericMIDI:
+	case PBT_DiGiCo:
+	case PBT_GenericOSC:
+	case PBT_YamahaSQ:
+	case PBT_YamahaOSC:
+	case PBT_ADMOSC:
+	case PBT_HUI:
+	case PBT_DS100:
+	case PBT_DAWPlugin:
+	default:
+		jassertfalse;
+		return false;
+	}
+}
+
 const String Controller::GetBridgingModuleTypeIdentifier(ProtocolBridgingType bridgingType)
 {
 	switch (bridgingType)

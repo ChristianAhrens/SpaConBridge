@@ -206,8 +206,13 @@ public:
 	bool SetRTTrPMRemotePort(int remotePort, bool dontSendNotification = false);
 	int GetRTTrPMMappingArea();
 	bool SetRTTrPMMappingArea(int mappingAreaId, bool dontSendNotification = false);
+
 	const std::pair<juce::Range<float>, juce::Range<float>> GetRTTrPMMappingRange();
 	bool SetRTTrPMMappingRange(const std::pair<juce::Range<float>, juce::Range<float>>& mappingRange, bool dontSendNotification = false);
+
+	std::map<int, ChannelId> GetRTTrPMChannelRemapAssignments();
+	bool SetRTTrPMChannelRemapAssignments(const std::map<int, ChannelId>& channelRemapAssignments, bool dontSendNotification = false);
+
 	const String GetRTTrPMModuleTypeIdentifier();
 	bool SetRTTrPMModuleTypeIdentifier(const String& moduleTypeIdentifier, bool dontSendNotification = false);
 
@@ -393,10 +398,12 @@ private:
 	bool SetProtocolDataSendingDisabled(ProtocolId protocolId, int disabled, bool dontSendNotification = false);
 	bool GetProtocolBridgingXYMessageCombined(ProtocolId protocolId);
 	bool SetProtocolBridgingXYMessageCombined(ProtocolId protocolId, bool combined, bool dontSendNotification = false);
-	std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> GetOscRemapAssignments(ProtocolId protocolId);
-	bool SetOscRemapAssignments(ProtocolId protocolId, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& oscRemapAssignments, bool dontSendNotification = false);
+	std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> GetProtocolOscRemapAssignments(ProtocolId protocolId);
+	bool SetProtocolOscRemapAssignments(ProtocolId protocolId, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& oscRemapAssignments, bool dontSendNotification = false);
 	const String GetProtocolModuleTypeIdentifier(ProtocolId protocolId);
 	bool SetProtocolModuleTypeIdentifier(ProtocolId protocolId, const String& moduleTypeIdentifier, bool dontSendNotification = false);
+	std::map<int, ChannelId> GetProtocolChannelRemapAssignments(ProtocolId protocolId);
+	bool SetProtocolChannelRemapAssignments(ProtocolId protocolId, const std::map<int, ChannelId>& channelRemapAssignments, bool dontSendNotification = false);
 
 	ObjectHandlingState GetProtocolState(ProtocolId protocolId) const;
 	void SetProtocolState(ProtocolId protocolId, ObjectHandlingState state);

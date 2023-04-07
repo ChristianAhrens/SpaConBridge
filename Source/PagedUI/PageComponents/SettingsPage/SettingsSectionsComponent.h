@@ -39,6 +39,7 @@ class HeaderWithElmListComponent;
 class HorizontalLayouterComponent;
 class SceneIndexToMidiAssignerComponent;
 class RemoteObjectToOscAssignerComponent;
+class IndexToChannelAssignerComponent;
 
 /** 
  *	Custom reimplementation of a Texteditor that simply shows
@@ -131,6 +132,9 @@ private:
 
 	//==============================================================================
 	void handleRemapOscAssisSet(Component* sender, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& roiToCustomOscAssis);
+
+	//==============================================================================
+	void handleRTTrPMBeaconIdxAssisSet(Component* sender, const std::map<int, ChannelId>& idxToChAssis);
 
 	//==============================================================================
 	void processUpdatedGeneralConfig();
@@ -234,6 +238,8 @@ private:
 	std::unique_ptr<Label>										m_RTTrPMMappingRangeXLabel;
 	std::unique_ptr<RangeEditorComponent>						m_RTTrPMMappingRangeYEditor;
 	std::unique_ptr<Label>										m_RTTrPMMappingRangeYLabel;
+	std::unique_ptr<IndexToChannelAssignerComponent>			m_RTTrPMBeaconIdxAssignmentsEditor;
+	std::unique_ptr<Label>										m_RTTrPMBeaconIdxAssignmentsLabel;
 	std::unique_ptr<ComboBox>									m_RTTrPMModuleTypeSelect;
 	const juce::StringArray										m_RTTrPMModuleTypes{ "CentroidPosition", "CentroidAccelerationAndVelocity", "TrackedPointPosition", "TrackedPointAccelerationAndVelocity" };
 	std::unique_ptr<Label>										m_RTTrPMModuleTypeLabel;

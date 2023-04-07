@@ -26,6 +26,7 @@
 
 #include "SceneIndexToMidiAssignerComponent.h"
 #include "RemoteObjectToOscAssignerComponent.h"
+#include "IndexToChannelAssignerComponent.h"
 
 #include <Image_utils.h>
 
@@ -508,6 +509,14 @@ void SettingsSectionsComponent::createRTTrPMSettingsSection()
 	m_RTTrPMMappingRangeYLabel->attachToComponent(m_RTTrPMMappingRangeYEditor.get(), true);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingRangeYLabel.get(), false, false);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingRangeYEditor.get(), true, false);
+
+	m_RTTrPMBeaconIdxAssignmentsEditor = std::make_unique<IndexToChannelAssignerComponent>();
+	m_RTTrPMBeaconIdxAssignmentsEditor->onAssignmentsSet = [=](Component* sender, const std::map<int, ChannelId>& idxToChAssis) { handleRTTrPMBeaconIdxAssisSet(sender, idxToChAssis); };
+	m_RTTrPMBeaconIdxAssignmentsLabel = std::make_unique<Label>("RTTrPMBeaconIdxAssignmentsEditor", "Beacon Indices");
+	m_RTTrPMBeaconIdxAssignmentsLabel->setJustificationType(Justification::centredLeft);
+	m_RTTrPMBeaconIdxAssignmentsLabel->attachToComponent(m_RTTrPMBeaconIdxAssignmentsEditor.get(), true);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMBeaconIdxAssignmentsLabel.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMBeaconIdxAssignmentsEditor.get(), true, false);
 
 	m_RTTrPMModuleTypeSelect = std::make_unique<ComboBox>();
 	m_RTTrPMModuleTypeSelect->addListener(this);
@@ -1702,6 +1711,12 @@ void SettingsSectionsComponent::processUpdatedRTTrPMConfig()
 	}
 	if (m_RTTrPMMappingRangeYLabel)
 		m_RTTrPMMappingRangeYLabel->setEnabled((RTTrPMMappingAreaId != MAI_Invalid));
+
+	if (m_RTTrPMBeaconIdxAssignmentsEditor)
+	{
+		auto assignments = ctrl->GetBridgingChannelRemapAssignments(PBT_BlacktraxRTTrPM);
+		m_RTTrPMBeaconIdxAssignmentsEditor->setCurrentIndexToChannelAssignments(assignments);
+	}
 	
 	auto RTTrPMModuleTypeIdentifier = ctrl->GetBridgingModuleTypeIdentifier(PBT_BlacktraxRTTrPM);
 	if (m_RTTrPMModuleTypeSelect)
@@ -2043,6 +2058,21 @@ void SettingsSectionsComponent::handleRemapOscAssisSet(Component* sender, const 
 		auto ctrl = Controller::GetInstance();
 		if (ctrl)
 			ctrl->SetBridgingOscRemapAssignments(PBT_RemapOSC, roiToCustomOscAssis);
+	}
+}
+
+/**
+ * Callback method to be registered with IndexToChannelAssignerComponent to handle index to channel remap assignment selection.
+ * @param sender			The IndexToChannelAssignerComponent that sent the assignment.
+ * @param idxToChAssis		The sent assignment that was chosen by user
+ */
+void SettingsSectionsComponent::handleRTTrPMBeaconIdxAssisSet(Component* sender, const std::map<int, ChannelId>& idxToChAssis)
+{
+	if (m_RTTrPMBeaconIdxAssignmentsEditor && sender == m_RTTrPMBeaconIdxAssignmentsEditor.get())
+	{
+		auto ctrl = Controller::GetInstance();
+		if (ctrl)
+			ctrl->SetBridgingChannelRemapAssignments(PBT_BlacktraxRTTrPM, idxToChAssis);
 	}
 }
 

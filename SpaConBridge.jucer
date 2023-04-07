@@ -447,6 +447,10 @@
                   resource="0" file="Source/PagedUI/PageComponents/SettingsPage/AssignmentEditOverlayBaseComponents.cpp"/>
             <FILE id="a68j4E" name="AssignmentEditOverlayBaseComponents.h" compile="0"
                   resource="0" file="Source/PagedUI/PageComponents/SettingsPage/AssignmentEditOverlayBaseComponents.h"/>
+            <FILE id="I6vuWu" name="IndexToChannelAssignerComponent.cpp" compile="1"
+                  resource="0" file="Source/PagedUI/PageComponents/SettingsPage/IndexToChannelAssignerComponent.cpp"/>
+            <FILE id="b12b44" name="IndexToChannelAssignerComponent.h" compile="0"
+                  resource="0" file="Source/PagedUI/PageComponents/SettingsPage/IndexToChannelAssignerComponent.h"/>
             <FILE id="v39RUd" name="RemoteObjectToOscAssignerComponent.cpp" compile="1"
                   resource="0" file="Source/PagedUI/PageComponents/SettingsPage/RemoteObjectToOscAssignerComponent.cpp"/>
             <FILE id="D2KuDn" name="RemoteObjectToOscAssignerComponent.h" compile="0"

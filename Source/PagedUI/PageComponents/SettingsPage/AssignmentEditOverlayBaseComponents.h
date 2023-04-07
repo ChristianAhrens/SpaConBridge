@@ -64,9 +64,9 @@ protected:
     bool IsAvailableUiAreaExceeded();
     
     //==============================================================================
-    float m_editorWidth;
-    float m_editorHeight;
-    float m_editorMargin;
+    int m_editorWidth;
+    int m_editorHeight;
+    int m_editorMargin;
     int m_minHeight;
 
 };
@@ -91,6 +91,9 @@ public:
     //==========================================================================
     void lookAndFeelChanged() override;
 
+    //==============================================================================
+    void SetPreferredWidth(int width);
+
 protected:
     //==============================================================================
     std::unique_ptr<AssignmentsListingComponent>    m_contentComponent;
@@ -103,6 +106,8 @@ private:
     std::unique_ptr<DrawableButton>                 m_exportButton;
     std::unique_ptr<DrawableButton>                 m_importButton;
     std::unique_ptr<TextButton>                     m_closeButton;
+
+    int m_preferredWidth{ -1 };
 
 };
 

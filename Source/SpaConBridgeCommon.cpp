@@ -312,6 +312,8 @@ const String GetErrorTitle(const SpaConBridgeErrorCode errorCode)
 	case SEC_SaveScnIdxToMIDI_CannotWrite:
 	case SEC_SaveCustomOSC_CannotAccess:
 	case SEC_SaveCustomOSC_CannotWrite:
+	case SEC_SaveIdxToCh_CannotAccess:
+	case SEC_SaveIdxToCh_CannotWrite:
 		return "Saving Failed";
 	case SEC_LoadImage_CannotAccess:
 	case SEC_LoadImage_CannotRead:
@@ -364,6 +366,8 @@ const String GetErrorInfo(const SpaConBridgeErrorCode errorCode)
 	case SEC_SaveScnIdxToMIDI_CannotAccess:
 	case SEC_LoadCustomOSC_CannotAccess:
 	case SEC_SaveCustomOSC_CannotAccess:
+	case SEC_SaveIdxToCh_CannotAccess:
+	case SEC_SaveIdxToCh_CannotWrite:
 		return JUCEApplication::getInstance()->getApplicationName() + " is not allowed to access the chosen file location.";
 	case SEC_SaveScnIdxToMIDI_CannotWrite:
 	case SEC_SaveCustomOSC_CannotWrite:

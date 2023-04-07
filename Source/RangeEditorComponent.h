@@ -66,6 +66,7 @@ public:
 	void SetRange(float minVal, float maxVal);
 	const juce::Range<float> GetRange();
 	void SetRangeLabels(const juce::String& minValLabel, const juce::String& maxValLabel);
+	void SetRangeValueSuffix(const juce::String& suffix);
 
 	//==============================================================================
 	void textEditorReturnKeyPressed(TextEditor& editor) override;
@@ -75,10 +76,16 @@ public:
 	void resized() override;
 
 private:
+	//==============================================================================
+	void UpdateTextEditorValues();
+
+	//==============================================================================
 	std::unique_ptr<Label>		m_minValLabel;
 	std::unique_ptr<TextEditor>	m_minValEditor;
 	std::unique_ptr<Label>		m_maxValLabel;
 	std::unique_ptr<TextEditor>	m_maxValEditor;
+
+	juce::String m_valueSuffix;
 
 	RangeEditorComponent::Listener* m_listener{ nullptr };
 

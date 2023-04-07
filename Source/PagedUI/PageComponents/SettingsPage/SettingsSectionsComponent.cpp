@@ -491,6 +491,7 @@ void SettingsSectionsComponent::createRTTrPMSettingsSection()
 	m_RTTrPMMappingRangeXEditor->SetListener(this);
 	m_RTTrPMMappingRangeXEditor->SetRange(0.0f, 1.0f);
 	m_RTTrPMMappingRangeXEditor->SetRangeLabels("min", "max");
+	m_RTTrPMMappingRangeXEditor->SetRangeValueSuffix("m");
 	m_RTTrPMMappingRangeXLabel = std::make_unique<Label>("RTTrPMMappingRangeXEditor", "Mapping X Range");
 	m_RTTrPMMappingRangeXLabel->setJustificationType(Justification::centred);
 	m_RTTrPMMappingRangeXLabel->attachToComponent(m_RTTrPMMappingRangeXEditor.get(), true);
@@ -501,6 +502,7 @@ void SettingsSectionsComponent::createRTTrPMSettingsSection()
 	m_RTTrPMMappingRangeYEditor->SetListener(this);
 	m_RTTrPMMappingRangeYEditor->SetRange(0.0f, 1.0f);
 	m_RTTrPMMappingRangeYEditor->SetRangeLabels("min", "max");
+	m_RTTrPMMappingRangeYEditor->SetRangeValueSuffix("m");
 	m_RTTrPMMappingRangeYLabel = std::make_unique<Label>("RTTrPMMappingRangeYEditor", "Mapping Y Range");
 	m_RTTrPMMappingRangeYLabel->setJustificationType(Justification::centred);
 	m_RTTrPMMappingRangeYLabel->attachToComponent(m_RTTrPMMappingRangeYEditor.get(), true);

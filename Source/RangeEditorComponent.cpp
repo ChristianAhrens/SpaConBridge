@@ -106,6 +106,8 @@ void RangeEditorComponent::SetRange(float minVal, float maxVal)
 		m_minValEditor->setText(juce::String(minVal));
 	if (m_maxValEditor)
 		m_maxValEditor->setText(juce::String(maxVal));
+
+	UpdateTextEditorValues();
 }
 
 /**
@@ -136,6 +138,18 @@ void RangeEditorComponent::SetRangeLabels(const juce::String& minValLabel, const
 		m_minValLabel->setText(minValLabel, juce::dontSendNotification);
 	if (m_maxValLabel)
 		m_maxValLabel->setText(maxValLabel, juce::dontSendNotification);
+}
+
+/**
+ * Setter for the suffix to be shown in the two label objects
+ * that are attached to the two internal text editor objects as user hint.
+ * @param	suffix		The suffix string to show after the values in texteditors
+ */
+void RangeEditorComponent::SetRangeValueSuffix(const juce::String& suffix)
+{
+	m_valueSuffix = suffix;
+
+	UpdateTextEditorValues();
 }
 
 /**
@@ -176,6 +190,17 @@ void RangeEditorComponent::resized()
 		m_maxValLabel->setBounds(bounds.removeFromLeft(quarterWidth));
 	if (m_maxValEditor)
 		m_maxValEditor->setBounds(bounds);
+}
+
+/**
+ * Private helper to append the value suffix to the text shown in the editors.
+ */
+void RangeEditorComponent::UpdateTextEditorValues()
+{
+	if (m_minValEditor)
+		m_minValEditor->setText(m_minValEditor->getText() + " " + m_valueSuffix);
+	if (m_maxValEditor)
+		m_maxValEditor->setText(m_maxValEditor->getText() + " " + m_valueSuffix);
 }
 
 

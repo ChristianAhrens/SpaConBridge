@@ -102,8 +102,6 @@ SoundobjectProcessor::SoundobjectProcessor(bool insertToConfig)
 	m_mappingId = DEFAULT_COORD_MAPPING; // Default: coordinate mapping 1.
 	m_processorId = INVALID_PROCESSOR_ID;
 
-	// Default OSC communication mode.
-	m_comsMode = CM_Off;
 
 	// Default painting parameters
 	m_soundobjectColour = Colours::black;

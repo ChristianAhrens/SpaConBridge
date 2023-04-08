@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
-## [0.10.1] - 2023-04-08
+## [0.10.2] - 2023-04-08
 ### Added
 - Added support for defining coordinate range (origin + extent) for BlackTrax RTTrPM positioning data when using coordinate mapping interpretation
 - Added support for BlackTrax RTTrPM beacon index to soundobject number user defined remapping

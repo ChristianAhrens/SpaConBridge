@@ -102,10 +102,7 @@ void RangeEditorComponent::SetListener(RangeEditorComponent::Listener* listener)
  */
 void RangeEditorComponent::SetRange(float minVal, float maxVal)
 {
-	if (m_minValEditor)
-		m_minValEditor->setText(juce::String(minVal));
-	if (m_maxValEditor)
-		m_maxValEditor->setText(juce::String(maxVal));
+	m_valueRange = juce::Range<float>(minVal, maxVal);
 
 	UpdateTextEditorValues();
 }
@@ -116,14 +113,7 @@ void RangeEditorComponent::SetRange(float minVal, float maxVal)
  */
 const juce::Range<float> RangeEditorComponent::GetRange()
 {
-	juce::Range<float> currentRange{ 0.0f, 0.0f };
-
-	if (m_minValEditor)
-		currentRange.setStart(m_minValEditor->getText().getFloatValue());
-	if (m_maxValEditor)
-		currentRange.setEnd(m_maxValEditor->getText().getFloatValue());
-
-	return currentRange;
+	return m_valueRange;
 }
 
 /**
@@ -158,8 +148,34 @@ void RangeEditorComponent::SetRangeValueSuffix(const juce::String& suffix)
  */
 void RangeEditorComponent::textEditorReturnKeyPressed(TextEditor& editor)
 {
-	if ((m_minValEditor.get() == &editor || m_maxValEditor.get() == &editor) && m_listener)
+	if (m_minValEditor && (m_minValEditor.get() == &editor) && m_listener)
 	{
+		auto minVal = m_minValEditor->getText().getFloatValue();
+
+		// if the user input requires it, adjust the max value accordingly
+		if (minVal > m_valueRange.getEnd())
+		{
+			m_valueRange.setEnd(minVal);
+			UpdateTextEditorValues();
+		}
+
+		m_valueRange.setStart(minVal);
+
+		m_listener->rangeChanged(this);
+	}
+	else if (m_maxValEditor && (m_maxValEditor.get() == &editor) && m_listener)
+	{
+		auto maxVal = m_maxValEditor->getText().getFloatValue();
+
+		// if the user input requires it, adjust the min value accordingly
+		if (maxVal < m_valueRange.getStart())
+		{
+			m_valueRange.setStart(maxVal);
+			UpdateTextEditorValues();
+		}
+
+		m_valueRange.setEnd(maxVal);
+
 		m_listener->rangeChanged(this);
 	}
 }
@@ -198,9 +214,9 @@ void RangeEditorComponent::resized()
 void RangeEditorComponent::UpdateTextEditorValues()
 {
 	if (m_minValEditor)
-		m_minValEditor->setText(m_minValEditor->getText() + " " + m_valueSuffix);
+		m_minValEditor->setText(juce::String(m_valueRange.getStart()) + " " + m_valueSuffix);
 	if (m_maxValEditor)
-		m_maxValEditor->setText(m_maxValEditor->getText() + " " + m_valueSuffix);
+		m_maxValEditor->setText(juce::String(m_valueRange.getEnd()) + " " + m_valueSuffix);
 }
 
 

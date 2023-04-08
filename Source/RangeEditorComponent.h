@@ -85,6 +85,8 @@ private:
 	std::unique_ptr<Label>		m_maxValLabel;
 	std::unique_ptr<TextEditor>	m_maxValEditor;
 
+	juce::Range<float>	m_valueRange{ 0.0f, 0.0f };
+
 	juce::String m_valueSuffix;
 
 	RangeEditorComponent::Listener* m_listener{ nullptr };

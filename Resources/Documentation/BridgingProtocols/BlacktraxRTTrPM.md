@@ -1,6 +1,10 @@
 ## BlackTrax RTTrPM bridging settings
 
-![Showreel.023.png](../Showreel/Showreel.023.png "BlackTrax RTTrPM Bridging Settings")
+![Showreel.024.png](../Showreel/Showreel.024.png "BlackTrax RTTrPM Bridging Settings")
+
+![Showreel.025.png](../Showreel/Showreel.025.png "BlackTrax RTTrPM Mapping Range Setup")
+
+![Showreel.026.png](../Showreel/Showreel.026.png "BlackTrax RTTrPM Beacon Index remapping")
 
 Minimal demo video for example setup with BlackTrax simulation software (Simulator software package can be obtained from BlackTrax at https://blacktrax.cast-soft.com/developer/):
 

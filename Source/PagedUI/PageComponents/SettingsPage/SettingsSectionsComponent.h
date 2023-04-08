@@ -20,6 +20,8 @@
 
 #include "../../../SpaConBridgeCommon.h"
 
+#include "../../../RangeEditorComponent.h"
+
 #include <MidiLearnerComponent.h>
 #include <SplitButtonComponent.h>
 #include <TextWithImageButton.h>
@@ -37,6 +39,7 @@ class HeaderWithElmListComponent;
 class HorizontalLayouterComponent;
 class SceneIndexToMidiAssignerComponent;
 class RemoteObjectToOscAssignerComponent;
+class IndexToChannelAssignerComponent;
 
 /** 
  *	Custom reimplementation of a Texteditor that simply shows
@@ -73,7 +76,8 @@ class SettingsSectionsComponent :
 	public Button::Listener,
 	public TextEditor::Listener,
 	public ComboBox::Listener,
-	public JUCEAppBasics::SplitButtonComponent::Listener
+	public JUCEAppBasics::SplitButtonComponent::Listener,
+	public RangeEditorComponent::Listener
 {
 public:
 	SettingsSectionsComponent();
@@ -103,6 +107,9 @@ public:
 	void comboBoxChanged(ComboBox* comboBoxThatHasChanged) override;
 
 	//==========================================================================
+	void rangeChanged(RangeEditorComponent* editor) override;
+
+	//==========================================================================
 	void setSettingsSectionActiveState(HeaderWithElmListComponent* settingsSection, bool activeState);
 
 	//==============================================================================
@@ -125,6 +132,9 @@ private:
 
 	//==============================================================================
 	void handleRemapOscAssisSet(Component* sender, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& roiToCustomOscAssis);
+
+	//==============================================================================
+	void handleRTTrPMBeaconIdxAssisSet(Component* sender, const std::map<int, ChannelId>& idxToChAssis);
 
 	//==============================================================================
 	void processUpdatedGeneralConfig();
@@ -224,6 +234,12 @@ private:
 	std::map<std::string, uint64>								m_RTTrPMInterpretXYRelativeButtonIds;
 	std::unique_ptr<ComboBox>									m_RTTrPMMappingAreaSelect;
 	std::unique_ptr<Label>										m_RTTrPMMappingAreaLabel;
+	std::unique_ptr<RangeEditorComponent>						m_RTTrPMMappingRangeXEditor;
+	std::unique_ptr<Label>										m_RTTrPMMappingRangeXLabel;
+	std::unique_ptr<RangeEditorComponent>						m_RTTrPMMappingRangeYEditor;
+	std::unique_ptr<Label>										m_RTTrPMMappingRangeYLabel;
+	std::unique_ptr<IndexToChannelAssignerComponent>			m_RTTrPMBeaconIdxAssignmentsEditor;
+	std::unique_ptr<Label>										m_RTTrPMBeaconIdxAssignmentsLabel;
 	std::unique_ptr<ComboBox>									m_RTTrPMModuleTypeSelect;
 	const juce::StringArray										m_RTTrPMModuleTypes{ "CentroidPosition", "CentroidAccelerationAndVelocity", "TrackedPointPosition", "TrackedPointAccelerationAndVelocity" };
 	std::unique_ptr<Label>										m_RTTrPMModuleTypeLabel;

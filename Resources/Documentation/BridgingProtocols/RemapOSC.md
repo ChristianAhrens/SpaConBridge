@@ -1,7 +1,7 @@
 ## Customized OSC bridging settings
 
-![Showreel.028.png](../Showreel/Showreel.028.png "Customized OSC bridging settings")
-![Showreel.029.png](../Showreel/Showreel.029.png "Customized OSC assignments editing")
+![Showreel.031.png](../Showreel/Showreel.031.png "Customized OSC bridging settings")
+![Showreel.032.png](../Showreel/Showreel.032.png "Customized OSC assignments editing")
 
 
 ### Available Soundscape remote objects for using as custom OSC assignment target

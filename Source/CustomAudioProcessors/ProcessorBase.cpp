@@ -42,7 +42,7 @@ namespace SpaConBridge
 ProcessorBase::ProcessorBase()
 {
 	// Default OSC communication mode.
-	m_comsMode = CM_Off;
+	m_comsMode = CM_Rx | CM_Tx;
 
 	// Start with all parameter changed flags cleared. Function setStateInformation() 
 	// will check whether or not we should initialize parameters when starting up.

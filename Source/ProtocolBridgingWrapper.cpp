@@ -1357,9 +1357,97 @@ bool ProtocolBridgingWrapper::SetProtocolMappingArea(ProtocolId protocolId, int 
 }
 
 /**
- * Gets the protocol's currently set mapping area id, if available for the given protocol.
- * @param protocolId The id of the protocol for which to get the currently configured mappingarea id
- * @return	The mapping area id
+ * Gets the protocol's currently set mapping range x/y min/max value, if available for the given protocol.
+ * @param protocolId The id of the protocol for which to get the currently configured mapping range x/y min/max value
+ * @return	The mapping range x/y min/max value, 0..1 min/max range if not available
+ */
+const std::pair<juce::Range<float>, juce::Range<float>> ProtocolBridgingWrapper::GetProtocolMappingRange(ProtocolId protocolId)
+{
+	auto mappingAreaRescaleRangeX = juce::Range<float>(0.0f, 1.0f);
+	auto mappingAreaRescaleRangeY = juce::Range<float>(0.0f, 1.0f);
+
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto mappingAreaRescaleXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MAPPINGAREARESCALE));
+			if (mappingAreaRescaleXmlElement)
+			{
+				auto mappingAreaRescaleTextElement = mappingAreaRescaleXmlElement->getFirstChildElement();
+				if (mappingAreaRescaleTextElement && mappingAreaRescaleTextElement->isTextElement())
+				{
+					auto rangeRescaleValues = StringArray();
+					if (4 != rangeRescaleValues.addTokens(mappingAreaRescaleTextElement->getText(), ";", ""))
+					{
+						mappingAreaRescaleRangeX = juce::Range<float>(0.0f, 1.0f);
+						mappingAreaRescaleRangeY = juce::Range<float>(0.0f, 1.0f);
+					}
+					else
+					{
+						auto minX = rangeRescaleValues[0].getFloatValue();
+						auto maxX = rangeRescaleValues[1].getFloatValue();
+						auto minY = rangeRescaleValues[2].getFloatValue();
+						auto maxY = rangeRescaleValues[3].getFloatValue();
+
+						mappingAreaRescaleRangeX = juce::Range<float>(minX, maxX);
+						mappingAreaRescaleRangeY = juce::Range<float>(minY, maxY);
+					}
+				}
+			}
+		}
+	}
+
+	return std::make_pair(mappingAreaRescaleRangeX, mappingAreaRescaleRangeY);
+}
+
+/**
+ * Sets the given protocol mapping range x/y min/max values.
+ * This method inserts the mapping range into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param protocolId The id of the protocol for which to set the ip address
+ * @param moduleTypeIdentifier	The new module type identifier string.
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetProtocolMappingRange(ProtocolId protocolId, const std::pair<juce::Range<float>, juce::Range<float>>& mappingRange, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto mappingRangeString = juce::String(mappingRange.first.getStart()) + ";" + juce::String(mappingRange.first.getEnd()) + ";" + juce::String(mappingRange.second.getStart()) + ";" + juce::String(mappingRange.second.getEnd());
+			auto mappingAreaRescaleXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MAPPINGAREARESCALE));
+			if (mappingAreaRescaleXmlElement)
+			{
+				auto mappingAreaRescaleTextElement = mappingAreaRescaleXmlElement->getFirstChildElement();
+				if (mappingAreaRescaleTextElement && mappingAreaRescaleTextElement->isTextElement())
+					mappingAreaRescaleTextElement->setText(mappingRangeString);
+				else
+					mappingAreaRescaleXmlElement->addTextElement(mappingRangeString);
+			}
+			else
+			{
+				mappingAreaRescaleXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MAPPINGAREARESCALE));
+				mappingAreaRescaleXmlElement->addTextElement(mappingRangeString);
+			}
+		}
+		else
+			return false;
+
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
+}
+
+/**
+ * Gets the protocol's currently set module type string, if available for the given protocol.
+ * @param protocolId The id of the protocol for which to get the currently configured module type string
+ * @return	The module type string
  */
 const String ProtocolBridgingWrapper::GetProtocolModuleTypeIdentifier(ProtocolId protocolId)
 {
@@ -1381,11 +1469,11 @@ const String ProtocolBridgingWrapper::GetProtocolModuleTypeIdentifier(ProtocolId
 }
 
 /**
- * Sets the given protocol mapping area id.
- * This method inserts the mapping area id into the cached xml element,
+ * Sets the given protocol module type identifier string.
+ * This method inserts the module type identifier string into the cached xml element,
  * pushes the updated xml element into processing node and triggers configuration updating.
  * @param protocolId The id of the protocol for which to set the ip address
- * @param remotePort	The new port number to send to
+ * @param moduleTypeIdentifier	The new module type identifier string.
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  * @return	True on succes, false if failure
  */
@@ -2021,7 +2109,7 @@ bool ProtocolBridgingWrapper::SetProtocolBridgingXYMessageCombined(ProtocolId pr
  * @param protocolId	The id of the protocol to get the assignments for.
  * @return	The requested osc remapping assignments.
  */
-std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> ProtocolBridgingWrapper::GetOscRemapAssignments(ProtocolId protocolId)
+std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> ProtocolBridgingWrapper::GetProtocolOscRemapAssignments(ProtocolId protocolId)
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
@@ -2072,7 +2160,7 @@ std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> Pr
  * @param dontSendNotification	Flag if change notification shall be broadcasted.
  * @return	True on succes, false on failure
  */
-bool ProtocolBridgingWrapper::SetOscRemapAssignments(ProtocolId protocolId, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& oscRemapAssignments, bool dontSendNotification)
+bool ProtocolBridgingWrapper::SetProtocolOscRemapAssignments(ProtocolId protocolId, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& oscRemapAssignments, bool dontSendNotification)
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
@@ -2123,6 +2211,127 @@ bool ProtocolBridgingWrapper::SetOscRemapAssignments(ProtocolId protocolId, cons
 						oscRemappingXmlElement->addTextElement(assi.second.first);
 						oscRemappingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MINVALUE), static_cast<double>(assi.second.second.getStart()));
 						oscRemappingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MAXVALUE), static_cast<double>(assi.second.second.getEnd()));
+					}
+				}
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
+}
+
+/**
+ * Gets the currently set index to channel remappings for the given protocol.
+ * @param protocolId	The id of the protocol to get the assignments for.
+ * @return	The requested index to channel remapping assignments.
+ */
+std::map<int, ChannelId> ProtocolBridgingWrapper::GetProtocolChannelRemapAssignments(ProtocolId protocolId)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto channelRemappingsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REMAPPINGS));
+			if (channelRemappingsXmlElement)
+			{
+				std::map<int, ChannelId> channelRemappings;
+				auto channelRemappingXmlElement = channelRemappingsXmlElement->getFirstChildElement();
+				while (nullptr != channelRemappingXmlElement)
+				{
+					if (channelRemappingXmlElement->getTagName() == ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REMAPPINGS))
+					{
+						auto channelRemappingTextElement = channelRemappingXmlElement->getFirstChildElement();
+						if (channelRemappingTextElement && channelRemappingTextElement->isTextElement())
+						{
+							auto index = channelRemappingXmlElement->getIntAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), -1);
+							auto channel = ChannelId(channelRemappingTextElement->getText().getIntValue());
+							channelRemappings.insert(std::make_pair(index, channel));
+						}
+					}
+
+					channelRemappingXmlElement = channelRemappingXmlElement->getNextElement();
+				}
+
+				return channelRemappings;
+			}
+		}
+	}
+
+	return std::map<int, ChannelId>();
+}
+
+/**
+ * Sets the given index to channel remappings for the given protocol.
+ * This method inserts the value into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param protocolId				The id of the protocol to set the flag value for.
+ * @param channelRemapAssignments	The new index to channel remapping assignments value.
+ * @param dontSendNotification		Flag if change notification shall be broadcasted.
+ * @return	True on succes, false on failure
+ */
+bool ProtocolBridgingWrapper::SetProtocolChannelRemapAssignments(ProtocolId protocolId, const std::map<int, ChannelId>& channelRemapAssignments, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto channelRemappingsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REMAPPINGS));
+			if (!channelRemappingsXmlElement)
+				channelRemappingsXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REMAPPINGS));
+			if (channelRemappingsXmlElement)
+			{
+				// collect the xml elements that are no longer used according to new incoming assignments
+				std::vector<XmlElement*> noLongerUsedElements;
+				auto remappingXmlElement = channelRemappingsXmlElement->getFirstChildElement();
+				while (nullptr != remappingXmlElement)
+				{
+					auto index = remappingXmlElement->getIntAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), -1);
+
+					bool stillInUse = false;
+					for (auto const& assi : channelRemapAssignments)
+					{
+						if (assi.first == index)
+						{
+							stillInUse = true;
+							break;
+						}
+					}
+					if (!stillInUse)
+						noLongerUsedElements.push_back(remappingXmlElement);
+
+					remappingXmlElement = remappingXmlElement->getNextElement();
+				}
+				// and remove them
+				for (auto const& childToRemove : noLongerUsedElements)
+					channelRemappingsXmlElement->removeChildElement(childToRemove, true);
+
+				// create or update the xml elements according to new incoming assignments
+				for (auto const& assi : channelRemapAssignments)
+				{
+					auto channelRemappingXmlElement = channelRemappingsXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), juce::String(assi.first));
+					if (channelRemappingXmlElement)
+					{
+						auto channelRemappingTextXmlElement = channelRemappingXmlElement->getFirstChildElement();
+						if (channelRemappingTextXmlElement && channelRemappingTextXmlElement->isTextElement())
+							channelRemappingTextXmlElement->setText(juce::String(assi.second));
+						else
+							channelRemappingTextXmlElement->addTextElement(juce::String(assi.second));
+					}
+					else
+					{
+						channelRemappingXmlElement = channelRemappingsXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REMAPPINGS));
+						channelRemappingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), assi.first);
+						channelRemappingXmlElement->addTextElement(juce::String(assi.second));
 					}
 				}
 			}
@@ -3539,6 +3748,47 @@ bool ProtocolBridgingWrapper::SetRTTrPMMappingArea(int mappingAreaId, bool dontS
 }
 
 /**
+ * Gets the value range to use for mapping on the 0...1 mapping area range
+ * This method forwards the call to the generic implementation.
+ * @return	The range to use for mapping
+ */
+const std::pair<juce::Range<float>, juce::Range<float>> ProtocolBridgingWrapper::GetRTTrPMMappingRange()
+{
+	return GetProtocolMappingRange(RTTRPM_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the value range to use for mapping on the 0...1 mapping area range
+ * This method forwards the call to the generic implementation.
+ * @param	mappingRange	The value range to use for mapping.
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetRTTrPMMappingRange(const std::pair<juce::Range<float>, juce::Range<float>>& mappingRange, bool dontSendNotification)
+{
+	return SetProtocolMappingRange(RTTRPM_PROCESSINGPROTOCOL_ID, mappingRange, dontSendNotification);
+}
+/**
+ * Gets the desired protocol index to channel remappings.
+ * This method forwards the call to the generic implementation.
+ * @return	The requested index to channel remappings
+ */
+std::map<int, ChannelId> ProtocolBridgingWrapper::GetRTTrPMChannelRemapAssignments()
+{
+	return GetProtocolChannelRemapAssignments(RTTRPM_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the desired protocol index to channel remappings.
+ * This method forwards the call to the generic implementation.
+ * @param	channelRemapAssignments		The index to channel remappings to set
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetRTTrPMChannelRemapAssignments(const std::map<int, ChannelId>& channelRemapAssignments, bool dontSendNotification)
+{
+	return SetProtocolChannelRemapAssignments(RTTRPM_PROCESSINGPROTOCOL_ID, channelRemapAssignments, dontSendNotification);
+}
+
+/**
  * Gets the desired protocol module type id.
  * This method forwards the call to the generic implementation.
  * @return	The requested module type id
@@ -4645,7 +4895,7 @@ bool ProtocolBridgingWrapper::SetRemapOSCRemotePort(int remotePort, bool dontSen
  */
 std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> ProtocolBridgingWrapper::GetRemapOSCOscRemapAssignments()
 {
-	return GetOscRemapAssignments(REMAPOSC_PROCESSINGPROTOCOL_ID);
+	return GetProtocolOscRemapAssignments(REMAPOSC_PROCESSINGPROTOCOL_ID);
 }
 
 /**
@@ -4656,7 +4906,7 @@ std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> Pr
  */
 bool ProtocolBridgingWrapper::SetRemapOSCOscRemapAssignments(const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& oscRemapAssignments, bool dontSendNotification)
 {
-	return SetOscRemapAssignments(REMAPOSC_PROCESSINGPROTOCOL_ID, oscRemapAssignments, dontSendNotification);
+	return SetProtocolOscRemapAssignments(REMAPOSC_PROCESSINGPROTOCOL_ID, oscRemapAssignments, dontSendNotification);
 }
 
 /**

@@ -265,6 +265,8 @@ The pages that are visible as tabs on the UI can be set (exception Settings tab,
 
 DS100 OSC communication protocol is always active. The IP address can be manually configured or, if the build of SpaConBridge for the host system supports this, zeroconf discovery button can be used to select on of the discovered devices. OSC UDP communication ports are hardcoded to match the ones used by DS100.
 
+![Showreel.0019.png](Resources/Documentation/Showreel/Showreel.019.png "Undocking of tabs to separate windows")
+
 <a name="appsettingsprotocols" />
 
 #### Implemented bridging protocols

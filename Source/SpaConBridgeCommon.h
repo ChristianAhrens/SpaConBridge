@@ -309,7 +309,8 @@ enum SpaConBridgeErrorCode
 	SEC_LoadCustomOSC_InvalidFile,
 	SEC_SaveCustomOSC_CannotAccess,
 	SEC_SaveCustomOSC_CannotWrite,
-	
+	SEC_SaveIdxToCh_CannotAccess,
+	SEC_SaveIdxToCh_CannotWrite,
 };
 
 /**

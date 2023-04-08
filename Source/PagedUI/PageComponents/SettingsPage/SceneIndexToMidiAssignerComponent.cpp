@@ -201,9 +201,9 @@ SceneIndexToMidiAssignerComponent::SceneIndexAssignmentsListingComponent::SceneI
     : AssignmentEditOverlayBaseComponents::AssignmentsListingComponent(),
       m_deviceIdentifier(deviceIdentifier)
 {
-    m_editorWidth = 225.0f;
-    m_editorHeight = 25.0f;
-    m_editorMargin = 2.0f;
+    m_editorWidth = 225;
+    m_editorHeight = 25;
+    m_editorMargin = 2;
 
     auto refId = std::int16_t(1);
     for (auto const& assignment : initialAssignments)
@@ -268,7 +268,7 @@ void SceneIndexToMidiAssignerComponent::SceneIndexAssignmentsListingComponent::r
     editsBox.flexDirection = juce::FlexBox::Direction::column;
     editsBox.justifyContent = juce::FlexBox::JustifyContent::flexStart;
     for (auto const& editComponent : m_editComponents)
-        editsBox.items.add(juce::FlexItem(*editComponent).withHeight(m_editorHeight).withWidth(m_editorWidth).withMargin(m_editorMargin));
+        editsBox.items.add(juce::FlexItem(*editComponent).withHeight(static_cast<float>(m_editorHeight)).withWidth(static_cast<float>(m_editorWidth)).withMargin(static_cast<float>(m_editorMargin)));
     editsBox.performLayout(bounds.reduced(static_cast<int>(2.0f * m_editorMargin)));
 }
 

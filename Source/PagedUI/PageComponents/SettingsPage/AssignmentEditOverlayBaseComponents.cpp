@@ -37,9 +37,9 @@ AssignmentEditComponent::~AssignmentEditComponent()
 }
 
 AssignmentsListingComponent::AssignmentsListingComponent() :
-    m_editorWidth(0.0f),
-    m_editorHeight(0.0f),
-    m_editorMargin(0.0f),
+    m_editorWidth(0),
+    m_editorHeight(0),
+    m_editorMargin(0),
     m_minHeight(0)
 {
 }
@@ -138,6 +138,12 @@ void AssignmentsViewingComponent::paint(Graphics& g)
 
     auto bounds = getLocalBounds().reduced(45, 25);
 
+    if (0 <= m_preferredWidth && bounds.getWidth() > m_preferredWidth)
+    {
+        auto amountToRemove = (bounds.getWidth() - m_preferredWidth) / 2;
+        bounds.reduce(amountToRemove, 0);
+    }
+
     g.setColour(getLookAndFeel().findColour(AlertWindow::outlineColourId));
     g.drawRect(bounds.toFloat(), 1.0f);
 
@@ -152,6 +158,12 @@ void AssignmentsViewingComponent::paint(Graphics& g)
 void AssignmentsViewingComponent::resized()
 {
     auto bounds = getLocalBounds().reduced(45, 25);
+
+    if (0 <= m_preferredWidth && bounds.getWidth() > m_preferredWidth)
+    {
+        auto amountToRemove = (bounds.getWidth() - m_preferredWidth) / 2;
+        bounds.reduce(amountToRemove, 0);
+    }
 
     auto controlsBounds = bounds.removeFromBottom(35);
     m_addButton->setBounds(controlsBounds.removeFromLeft(45).reduced(6));
@@ -203,6 +215,12 @@ void AssignmentsViewingComponent::onClearClicked()
 
     resized();
 }
+
+void AssignmentsViewingComponent::SetPreferredWidth(int width)
+{
+    m_preferredWidth = width;
+}
+
 
 }
 

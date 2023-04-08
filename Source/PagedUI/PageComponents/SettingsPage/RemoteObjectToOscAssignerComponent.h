@@ -47,7 +47,6 @@ public:
     std::function<void(Component*, std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>)> onAssignmentsSet;
     
     //==============================================================================
-    void setSelectedDeviceIdentifier(const String& deviceIdentifier);
     void setCurrentRemoteObjecToOscAssignments(const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& currentAssignments);
     
 private:

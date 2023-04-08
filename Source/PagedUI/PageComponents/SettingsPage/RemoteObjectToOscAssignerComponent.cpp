@@ -133,11 +133,6 @@ void RemoteObjectToOscAssignerComponent::setCurrentRemoteObjecToOscAssignments(c
         m_currentRoiToOscAssisLabel->setText(String(m_currentRoiToOscAssignments.size()) + " assignments");
 }
 
-void RemoteObjectToOscAssignerComponent::setSelectedDeviceIdentifier(const String& deviceIdentifier)
-{
-    m_deviceIdentifier = deviceIdentifier;
-}
-
 RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::RemoteObjectToOscAssignmentEditComponent(const RemoteObjectIdentifier& remoteObjectId, const std::pair<juce::String, juce::Range<float>>& currentAssi)
     :   AssignmentEditOverlayBaseComponents::AssignmentEditComponent(),
         m_currentRemoteObjectId(remoteObjectId),
@@ -292,8 +287,8 @@ void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponen
 RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComponent::RemoteObjectToOscAssignmentsListingComponent(const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& initialAssignments)
     : AssignmentEditOverlayBaseComponents::AssignmentsListingComponent()
 {
-    m_editorHeight = 25.0f;
-    m_editorMargin = 2.0f;
+    m_editorHeight = 25;
+    m_editorMargin = 2;
 
     for (auto const& assignment : initialAssignments)
     {
@@ -349,7 +344,7 @@ void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsListingComp
     editsBox.flexDirection = juce::FlexBox::Direction::column;
     editsBox.justifyContent = juce::FlexBox::JustifyContent::flexStart;
     for (auto const& editComponent : m_editComponents)
-        editsBox.items.add(juce::FlexItem(*editComponent).withHeight(m_editorHeight).withWidth(bounds.getWidth() - 6.0f * m_editorMargin).withMargin(m_editorMargin));
+        editsBox.items.add(juce::FlexItem(*editComponent).withHeight(static_cast<float>(m_editorHeight)).withWidth(static_cast<float>(bounds.getWidth() - 6 * m_editorMargin)).withMargin(static_cast<float>(m_editorMargin)));
     editsBox.performLayout(bounds.reduced(static_cast<int>(2.0f * m_editorMargin)));
 }
 

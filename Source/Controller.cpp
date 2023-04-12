@@ -2141,6 +2141,44 @@ void Controller::timerCallback()
 }
 
 /**
+ * Convenience helper method to resolve a given protocol type from application layer
+ * into a processing protocol id in the bridging node layer.
+ * @param	type	The protocol type to resolve into a processsing protocol id
+ * @return	The processing protocol id or 0 if resolving failed.
+ */
+const ProtocolId Controller::GetProtocolIdForProtocolType(const ProtocolBridgingType type)
+{
+	switch (type)
+	{
+	case PBT_DiGiCo:
+		return DIGICO_PROCESSINGPROTOCOL_ID;
+	case PBT_DAWPlugin:
+		return DAWPLUGIN_PROCESSINGPROTOCOL_ID;
+	case PBT_GenericOSC:
+		return GENERICOSC_PROCESSINGPROTOCOL_ID;
+	case PBT_BlacktraxRTTrPM:
+		return RTTRPM_PROCESSINGPROTOCOL_ID;
+	case PBT_GenericMIDI:
+		return GENERICMIDI_PROCESSINGPROTOCOL_ID;
+	case PBT_YamahaOSC:
+		return YAMAHAOSC_PROCESSINGPROTOCOL_ID;
+	case PBT_ADMOSC:
+		return ADMOSC_PROCESSINGPROTOCOL_ID;
+	case PBT_RemapOSC:
+		return REMAPOSC_PROCESSINGPROTOCOL_ID;
+	case PBT_YamahaSQ:
+		// yamaha sq protocol is not implemented in rpb
+	case PBT_HUI:
+		// hui protocol is not implemented in rpb
+	case PBT_DS100:
+		// DS100 protocol can either be type 1 or 2, so not supported here
+	default:
+		jassertfalse;
+		return 0;
+	}
+}
+
+/**
  * Overriden from AppConfiguration::XmlConfigurableElement to set this objects' settings
  * from a XML element structure that passed as argument.
  * @param stateXml	The XML element containing this objects' configuration data
@@ -2673,31 +2711,9 @@ void Controller::SetActiveProtocolBridging(ProtocolBridgingType bridgingTypes)
  */
 bool Controller::GetMuteBridgingSoundobjectProcessorId(ProtocolBridgingType bridgingType, SoundobjectProcessorId soundobjectProcessorId)
 {
-	switch (bridgingType)
-	{
-	case PBT_DiGiCo:
-		return m_protocolBridge.GetMuteDiGiCoSoundobjectProcessorId(soundobjectProcessorId);
-	case PBT_DAWPlugin:
-		return m_protocolBridge.GetMuteDAWPluginSoundobjectProcessorId(soundobjectProcessorId);
-	case PBT_GenericOSC:
-		return m_protocolBridge.GetMuteGenericOSCSoundobjectProcessorId(soundobjectProcessorId);
-	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.GetMuteRTTrPMSoundobjectProcessorId(soundobjectProcessorId);
-	case PBT_GenericMIDI:
-		return m_protocolBridge.GetMuteGenericMIDISoundobjectProcessorId(soundobjectProcessorId);
-	case PBT_YamahaOSC:
-		return m_protocolBridge.GetMuteYamahaOSCSoundobjectProcessorId(soundobjectProcessorId);
-	case PBT_ADMOSC:
-		return m_protocolBridge.GetMuteADMOSCSoundobjectProcessorId(soundobjectProcessorId);
-	case PBT_RemapOSC:
-		return m_protocolBridge.GetMuteRemapOSCSoundobjectProcessorId(soundobjectProcessorId);
-	case PBT_YamahaSQ:
-	case PBT_HUI:
-	case PBT_DS100:
-	default:
-		jassertfalse;
-		return false;
-	}
+	auto protocolId = GetProtocolIdForProtocolType(bridgingType);
+
+	return m_protocolBridge.GetMuteProtocolSoundobjectProcessorId(protocolId, soundobjectProcessorId);
 }
 
 /**
@@ -2708,31 +2724,12 @@ bool Controller::GetMuteBridgingSoundobjectProcessorId(ProtocolBridgingType brid
  */
 bool Controller::SetMuteBridgingSoundobjectProcessorId(ProtocolBridgingType bridgingType, SoundobjectId soundobjectProcessorId, bool mute)
 {
-	switch (bridgingType)
-	{
-	case PBT_DiGiCo:
-		return m_protocolBridge.SetMuteDiGiCoSoundobjectProcessorId(soundobjectProcessorId, mute);
-	case PBT_DAWPlugin:
-		return m_protocolBridge.SetMuteDAWPluginSoundobjectProcessorId(soundobjectProcessorId, mute);
-	case PBT_GenericOSC:
-		return m_protocolBridge.SetMuteGenericOSCSoundobjectProcessorId(soundobjectProcessorId, mute);
-	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.SetMuteRTTrPMSoundobjectProcessorId(soundobjectProcessorId, mute);
-	case PBT_GenericMIDI:
-		return m_protocolBridge.SetMuteGenericMIDISoundobjectProcessorId(soundobjectProcessorId, mute);
-	case PBT_YamahaOSC:
-		return m_protocolBridge.SetMuteYamahaOSCSoundobjectProcessorId(soundobjectProcessorId, mute);
-	case PBT_ADMOSC:
-		return m_protocolBridge.SetMuteADMOSCSoundobjectProcessorId(soundobjectProcessorId, mute);
-	case PBT_RemapOSC:
-		return m_protocolBridge.SetMuteRemapOSCSoundobjectProcessorId(soundobjectProcessorId, mute);
-	case PBT_YamahaSQ:
-	case PBT_HUI:
-	case PBT_DS100:
-	default:
-		jassertfalse;
-		return false;
-	}
+	auto protocolId = GetProtocolIdForProtocolType(bridgingType);
+
+	if (mute)
+		return m_protocolBridge.SetMuteProtocolSoundobjectProcessorId(protocolId, soundobjectProcessorId);
+	else
+		return m_protocolBridge.SetUnmuteProtocolSoundobjectProcessorId(protocolId, soundobjectProcessorId);
 }
 
 /**
@@ -2743,31 +2740,12 @@ bool Controller::SetMuteBridgingSoundobjectProcessorId(ProtocolBridgingType brid
  */
 bool Controller::SetMuteBridgingSoundobjectProcessorIds(ProtocolBridgingType bridgingType, const std::vector<SoundobjectProcessorId>& soundobjectProcessorIds, bool mute)
 {
-	switch (bridgingType)
-	{
-	case PBT_DiGiCo:
-		return m_protocolBridge.SetMuteDiGiCoSoundobjectProcessorIds(soundobjectProcessorIds, mute);
-	case PBT_DAWPlugin:
-		return m_protocolBridge.SetMuteDAWPluginSoundobjectProcessorIds(soundobjectProcessorIds, mute);
-	case PBT_GenericOSC:
-		return m_protocolBridge.SetMuteGenericOSCSoundobjectProcessorIds(soundobjectProcessorIds, mute);
-	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.SetMuteRTTrPMSoundobjectProcessorIds(soundobjectProcessorIds, mute);
-	case PBT_GenericMIDI:
-		return m_protocolBridge.SetMuteGenericMIDISoundobjectProcessorIds(soundobjectProcessorIds, mute);
-	case PBT_YamahaOSC:
-		return m_protocolBridge.SetMuteYamahaOSCSoundobjectProcessorIds(soundobjectProcessorIds, mute);
-	case PBT_ADMOSC:
-		return m_protocolBridge.SetMuteADMOSCSoundobjectProcessorIds(soundobjectProcessorIds, mute);
-	case PBT_RemapOSC:
-		return m_protocolBridge.SetMuteRemapOSCSoundobjectProcessorIds(soundobjectProcessorIds, mute);
-	case PBT_YamahaSQ:
-	case PBT_HUI:
-	case PBT_DS100:
-	default:
-		jassertfalse;
-		return false;
-	}
+	auto protocolId = GetProtocolIdForProtocolType(bridgingType);
+
+	if (mute)
+		return m_protocolBridge.SetMuteProtocolSoundobjectProcessorIds(protocolId, soundobjectProcessorIds);
+	else
+		return m_protocolBridge.SetUnmuteProtocolSoundobjectProcessorIds(protocolId, soundobjectProcessorIds);
 }
 
 /**
@@ -2777,31 +2755,9 @@ bool Controller::SetMuteBridgingSoundobjectProcessorIds(ProtocolBridgingType bri
  */
 bool Controller::GetMuteBridgingMatrixInputProcessorId(ProtocolBridgingType bridgingType, MatrixInputId matrixInputProcessorId)
 {
-	switch (bridgingType)
-	{
-	case PBT_DiGiCo:
-		return m_protocolBridge.GetMuteDiGiCoMatrixInputProcessorId(matrixInputProcessorId);
-	case PBT_DAWPlugin:
-		return m_protocolBridge.GetMuteDAWPluginMatrixInputProcessorId(matrixInputProcessorId);
-	case PBT_GenericOSC:
-		return m_protocolBridge.GetMuteGenericOSCMatrixInputProcessorId(matrixInputProcessorId);
-	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.GetMuteRTTrPMMatrixInputProcessorId(matrixInputProcessorId);
-	case PBT_GenericMIDI:
-		return m_protocolBridge.GetMuteGenericMIDIMatrixInputProcessorId(matrixInputProcessorId);
-	case PBT_YamahaOSC:
-		return m_protocolBridge.GetMuteYamahaOSCMatrixInputProcessorId(matrixInputProcessorId);
-	case PBT_ADMOSC:
-		return m_protocolBridge.GetMuteADMOSCMatrixInputProcessorId(matrixInputProcessorId);
-	case PBT_RemapOSC:
-		return m_protocolBridge.GetMuteRemapOSCMatrixInputProcessorId(matrixInputProcessorId);
-	case PBT_YamahaSQ:
-	case PBT_HUI:
-	case PBT_DS100:
-	default:
-		jassertfalse;
-		return false;
-	}
+	auto protocolId = GetProtocolIdForProtocolType(bridgingType);
+
+	return m_protocolBridge.GetMuteProtocolMatrixInputProcessorId(protocolId, matrixInputProcessorId);
 }
 
 /**
@@ -2812,31 +2768,12 @@ bool Controller::GetMuteBridgingMatrixInputProcessorId(ProtocolBridgingType brid
  */
 bool Controller::SetMuteBridgingMatrixInputProcessorId(ProtocolBridgingType bridgingType, MatrixInputId matrixInputProcessorId, bool mute)
 {
-	switch (bridgingType)
-	{
-	case PBT_DiGiCo:
-		return m_protocolBridge.SetMuteDiGiCoMatrixInputProcessorId(matrixInputProcessorId, mute);
-	case PBT_DAWPlugin:
-		return m_protocolBridge.SetMuteDAWPluginMatrixInputProcessorId(matrixInputProcessorId, mute);
-	case PBT_GenericOSC:
-		return m_protocolBridge.SetMuteGenericOSCMatrixInputProcessorId(matrixInputProcessorId, mute);
-	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.SetMuteRTTrPMMatrixInputProcessorId(matrixInputProcessorId, mute);
-	case PBT_GenericMIDI:
-		return m_protocolBridge.SetMuteGenericMIDIMatrixInputProcessorId(matrixInputProcessorId, mute);
-	case PBT_YamahaOSC:
-		return m_protocolBridge.SetMuteYamahaOSCMatrixInputProcessorId(matrixInputProcessorId, mute);
-	case PBT_ADMOSC:
-		return m_protocolBridge.SetMuteADMOSCMatrixInputProcessorId(matrixInputProcessorId, mute);
-	case PBT_RemapOSC:
-		return m_protocolBridge.SetMuteRemapOSCMatrixInputProcessorId(matrixInputProcessorId, mute);
-	case PBT_YamahaSQ:
-	case PBT_HUI:
-	case PBT_DS100:
-	default:
-		jassertfalse;
-		return false;
-	}
+	auto protocolId = GetProtocolIdForProtocolType(bridgingType);
+
+	if (mute)
+		return m_protocolBridge.SetMuteProtocolMatrixInputProcessorId(protocolId, matrixInputProcessorId);
+	else
+		return m_protocolBridge.SetUnmuteProtocolMatrixInputProcessorId(protocolId, matrixInputProcessorId);
 }
 
 /**
@@ -2847,31 +2784,12 @@ bool Controller::SetMuteBridgingMatrixInputProcessorId(ProtocolBridgingType brid
  */
 bool Controller::SetMuteBridgingMatrixInputProcessorIds(ProtocolBridgingType bridgingType, const std::vector<MatrixInputProcessorId>& matrixInputProcessorIds, bool mute)
 {
-	switch (bridgingType)
-	{
-	case PBT_DiGiCo:
-		return m_protocolBridge.SetMuteDiGiCoMatrixInputProcessorIds(matrixInputProcessorIds, mute);
-	case PBT_DAWPlugin:
-		return m_protocolBridge.SetMuteDAWPluginMatrixInputProcessorIds(matrixInputProcessorIds, mute);
-	case PBT_GenericOSC:
-		return m_protocolBridge.SetMuteGenericOSCMatrixInputProcessorIds(matrixInputProcessorIds, mute);
-	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.SetMuteRTTrPMMatrixInputProcessorIds(matrixInputProcessorIds, mute);
-	case PBT_GenericMIDI:
-		return m_protocolBridge.SetMuteGenericMIDIMatrixInputProcessorIds(matrixInputProcessorIds, mute);
-	case PBT_YamahaOSC:
-		return m_protocolBridge.SetMuteYamahaOSCMatrixInputProcessorIds(matrixInputProcessorIds, mute);
-	case PBT_ADMOSC:
-		return m_protocolBridge.SetMuteADMOSCMatrixInputProcessorIds(matrixInputProcessorIds, mute);
-	case PBT_RemapOSC:
-		return m_protocolBridge.SetMuteRemapOSCMatrixInputProcessorIds(matrixInputProcessorIds, mute);
-	case PBT_YamahaSQ:
-	case PBT_HUI:
-	case PBT_DS100:
-	default:
-		jassertfalse;
-		return false;
-	}
+	auto protocolId = GetProtocolIdForProtocolType(bridgingType);
+
+	if (mute)
+		return m_protocolBridge.SetMuteProtocolMatrixInputProcessorIds(protocolId, matrixInputProcessorIds);
+	else
+		return m_protocolBridge.SetUnmuteProtocolMatrixInputProcessorIds(protocolId, matrixInputProcessorIds);
 }
 
 /**
@@ -2881,31 +2799,9 @@ bool Controller::SetMuteBridgingMatrixInputProcessorIds(ProtocolBridgingType bri
  */
 bool Controller::GetMuteBridgingMatrixOutputProcessorId(ProtocolBridgingType bridgingType, MatrixOutputId matrixOutputProcessorId)
 {
-	switch (bridgingType)
-	{
-	case PBT_DiGiCo:
-		return m_protocolBridge.GetMuteDiGiCoMatrixOutputProcessorId(matrixOutputProcessorId);
-	case PBT_DAWPlugin:
-		return m_protocolBridge.GetMuteDAWPluginMatrixOutputProcessorId(matrixOutputProcessorId);
-	case PBT_GenericOSC:
-		return m_protocolBridge.GetMuteGenericOSCMatrixOutputProcessorId(matrixOutputProcessorId);
-	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.GetMuteRTTrPMMatrixOutputProcessorId(matrixOutputProcessorId);
-	case PBT_GenericMIDI:
-		return m_protocolBridge.GetMuteGenericMIDIMatrixOutputProcessorId(matrixOutputProcessorId);
-	case PBT_YamahaOSC:
-		return m_protocolBridge.GetMuteYamahaOSCMatrixOutputProcessorId(matrixOutputProcessorId);
-	case PBT_ADMOSC:
-		return m_protocolBridge.GetMuteADMOSCMatrixOutputProcessorId(matrixOutputProcessorId);
-	case PBT_RemapOSC:
-		return m_protocolBridge.GetMuteRemapOSCMatrixOutputProcessorId(matrixOutputProcessorId);
-	case PBT_YamahaSQ:
-	case PBT_HUI:
-	case PBT_DS100:
-	default:
-		jassertfalse;
-		return false;
-	}
+	auto protocolId = GetProtocolIdForProtocolType(bridgingType);
+
+	return m_protocolBridge.GetMuteProtocolMatrixOutputProcessorId(protocolId, matrixOutputProcessorId);
 }
 
 /**
@@ -2916,31 +2812,12 @@ bool Controller::GetMuteBridgingMatrixOutputProcessorId(ProtocolBridgingType bri
  */
 bool Controller::SetMuteBridgingMatrixOutputProcessorId(ProtocolBridgingType bridgingType, MatrixOutputId matrixOutputProcessorId, bool mute)
 {
-	switch (bridgingType)
-	{
-	case PBT_DiGiCo:
-		return m_protocolBridge.SetMuteDiGiCoMatrixOutputProcessorId(matrixOutputProcessorId, mute);
-	case PBT_DAWPlugin:
-		return m_protocolBridge.SetMuteDAWPluginMatrixOutputProcessorId(matrixOutputProcessorId, mute);
-	case PBT_GenericOSC:
-		return m_protocolBridge.SetMuteGenericOSCMatrixOutputProcessorId(matrixOutputProcessorId, mute);
-	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.SetMuteRTTrPMMatrixOutputProcessorId(matrixOutputProcessorId, mute);
-	case PBT_GenericMIDI:
-		return m_protocolBridge.SetMuteGenericMIDIMatrixOutputProcessorId(matrixOutputProcessorId, mute);
-	case PBT_YamahaOSC:
-		return m_protocolBridge.SetMuteYamahaOSCMatrixOutputProcessorId(matrixOutputProcessorId, mute);
-	case PBT_ADMOSC:
-		return m_protocolBridge.SetMuteADMOSCMatrixOutputProcessorId(matrixOutputProcessorId, mute);
-	case PBT_RemapOSC:
-		return m_protocolBridge.SetMuteRemapOSCMatrixOutputProcessorId(matrixOutputProcessorId, mute);
-	case PBT_YamahaSQ:
-	case PBT_HUI:
-	case PBT_DS100:
-	default:
-		jassertfalse;
-		return false;
-	}
+	auto protocolId = GetProtocolIdForProtocolType(bridgingType);
+
+	if (mute)
+		return m_protocolBridge.SetMuteProtocolMatrixOutputProcessorId(protocolId, matrixOutputProcessorId);
+	else
+		return m_protocolBridge.SetUnmuteProtocolMatrixOutputProcessorId(protocolId, matrixOutputProcessorId);
 }
 
 /**
@@ -2951,823 +2828,182 @@ bool Controller::SetMuteBridgingMatrixOutputProcessorId(ProtocolBridgingType bri
  */
 bool Controller::SetMuteBridgingMatrixOutputProcessorIds(ProtocolBridgingType bridgingType, const std::vector<MatrixOutputProcessorId>& matrixOutputProcessorIds, bool mute)
 {
-	switch (bridgingType)
-	{
-	case PBT_DiGiCo:
-		return m_protocolBridge.SetMuteDiGiCoMatrixOutputProcessorIds(matrixOutputProcessorIds, mute);
-	case PBT_DAWPlugin:
-		return m_protocolBridge.SetMuteDAWPluginMatrixOutputProcessorIds(matrixOutputProcessorIds, mute);
-	case PBT_GenericOSC:
-		return m_protocolBridge.SetMuteGenericOSCMatrixOutputProcessorIds(matrixOutputProcessorIds, mute);
-	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.SetMuteRTTrPMMatrixOutputProcessorIds(matrixOutputProcessorIds, mute);
-	case PBT_GenericMIDI:
-		return m_protocolBridge.SetMuteGenericMIDIMatrixOutputProcessorIds(matrixOutputProcessorIds, mute);
-	case PBT_YamahaOSC:
-		return m_protocolBridge.SetMuteYamahaOSCMatrixOutputProcessorIds(matrixOutputProcessorIds, mute);
-	case PBT_ADMOSC:
-		return m_protocolBridge.SetMuteADMOSCMatrixOutputProcessorIds(matrixOutputProcessorIds, mute);
-	case PBT_RemapOSC:
-		return m_protocolBridge.SetMuteRemapOSCMatrixOutputProcessorIds(matrixOutputProcessorIds, mute);
-	case PBT_YamahaSQ:
-	case PBT_HUI:
-	case PBT_DS100:
-	default:
-		jassertfalse;
-		return false;
-	}
+	auto protocolId = GetProtocolIdForProtocolType(bridgingType);
+
+	if (mute)
+		return m_protocolBridge.SetMuteProtocolMatrixOutputProcessorIds(protocolId, matrixOutputProcessorIds);
+	else
+		return m_protocolBridge.SetUnmuteProtocolMatrixOutputProcessorIds(protocolId, matrixOutputProcessorIds);
 }
 
 String Controller::GetBridgingIpAddress(ProtocolBridgingType bridgingType)
 {
-	switch (bridgingType)
-	{
-	case PBT_DiGiCo:
-		return m_protocolBridge.GetDiGiCoIpAddress();
-	case PBT_DAWPlugin:
-		return m_protocolBridge.GetDAWPluginIpAddress();
-	case PBT_GenericOSC:
-		return m_protocolBridge.GetGenericOSCIpAddress();
-	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.GetRTTrPMIpAddress();
-	case PBT_DS100:
-		return m_protocolBridge.GetDS100IpAddress();
-	case PBT_YamahaOSC:
-		return m_protocolBridge.GetYamahaOSCIpAddress();
-	case PBT_ADMOSC:
-		return m_protocolBridge.GetADMOSCIpAddress();
-	case PBT_RemapOSC:
-		return m_protocolBridge.GetRemapOSCIpAddress();
-	case PBT_GenericMIDI:
-	case PBT_YamahaSQ:
-	case PBT_HUI:
-	default:
-		jassertfalse;
-		return String();
-	}
+	return m_protocolBridge.GetProtocolIpAddress(GetProtocolIdForProtocolType(bridgingType));
 }
 
 bool Controller::SetBridgingIpAddress(ProtocolBridgingType bridgingType, String ipAddress, bool dontSendNotification)
 {
-	switch (bridgingType)
-	{
-	case PBT_DiGiCo:
-		return m_protocolBridge.SetDiGiCoIpAddress(ipAddress, dontSendNotification);
-	case PBT_DAWPlugin:
-		return m_protocolBridge.SetDAWPluginIpAddress(ipAddress, dontSendNotification);
-	case PBT_GenericOSC:
-		return m_protocolBridge.SetGenericOSCIpAddress(ipAddress, dontSendNotification);
-	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.SetRTTrPMIpAddress(ipAddress, dontSendNotification);
-	case PBT_DS100:
-		return m_protocolBridge.SetDS100IpAddress(ipAddress, dontSendNotification);
-	case PBT_YamahaOSC:
-		return m_protocolBridge.SetYamahaOSCIpAddress(ipAddress, dontSendNotification);
-	case PBT_ADMOSC:
-		return m_protocolBridge.SetADMOSCIpAddress(ipAddress, dontSendNotification);
-	case PBT_RemapOSC:
-		return m_protocolBridge.SetRemapOSCIpAddress(ipAddress, dontSendNotification);
-	case PBT_GenericMIDI:
-	case PBT_YamahaSQ:
-	case PBT_HUI:
-	default:
-		jassertfalse;
-		return false;
-	}
+	return m_protocolBridge.SetProtocolIpAddress(GetProtocolIdForProtocolType(bridgingType), ipAddress, dontSendNotification);
 }
 
 int Controller::GetBridgingListeningPort(ProtocolBridgingType bridgingType)
 {
-	switch (bridgingType)
-	{
-	case PBT_DiGiCo:
-		return m_protocolBridge.GetDiGiCoListeningPort();
-	case PBT_GenericOSC:
-		return m_protocolBridge.GetGenericOSCListeningPort();
-	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.GetRTTrPMListeningPort();
-	case PBT_YamahaOSC:
-		return m_protocolBridge.GetYamahaOSCListeningPort();
-	case PBT_ADMOSC:
-		return m_protocolBridge.GetADMOSCListeningPort();
-	case PBT_RemapOSC:
-		return m_protocolBridge.GetRemapOSCListeningPort();
-	case PBT_GenericMIDI:
-	case PBT_YamahaSQ:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	default:
-		jassertfalse;
-		return INVALID_PORT_VALUE;
-	}
+	return m_protocolBridge.GetProtocolListeningPort(GetProtocolIdForProtocolType(bridgingType));
 }
 
 bool Controller::SetBridgingListeningPort(ProtocolBridgingType bridgingType, int listeningPort, bool dontSendNotification)
 {
-	switch (bridgingType)
-	{
-	case PBT_DiGiCo:
-		return m_protocolBridge.SetDiGiCoListeningPort(listeningPort, dontSendNotification);
-	case PBT_GenericOSC:
-		return m_protocolBridge.SetGenericOSCListeningPort(listeningPort, dontSendNotification);
-	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.SetRTTrPMListeningPort(listeningPort, dontSendNotification);
-	case PBT_YamahaOSC:
-		return m_protocolBridge.SetYamahaOSCListeningPort(listeningPort, dontSendNotification);
-	case PBT_ADMOSC:
-		return m_protocolBridge.SetADMOSCListeningPort(listeningPort, dontSendNotification);
-	case PBT_RemapOSC:
-		return m_protocolBridge.SetRemapOSCListeningPort(listeningPort, dontSendNotification);
-	case PBT_GenericMIDI:
-	case PBT_YamahaSQ:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	default:
-		jassertfalse;
-		return false;
-	}
+	return m_protocolBridge.SetProtocolListeningPort(GetProtocolIdForProtocolType(bridgingType), listeningPort, dontSendNotification);
 }
 
 int Controller::GetBridgingRemotePort(ProtocolBridgingType bridgingType)
 {
-	switch (bridgingType)
-	{
-	case PBT_DiGiCo:
-		return m_protocolBridge.GetDiGiCoRemotePort();
-	case PBT_GenericOSC:
-		return m_protocolBridge.GetGenericOSCRemotePort();
-	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.GetRTTrPMRemotePort();
-	case PBT_YamahaOSC:
-		return m_protocolBridge.GetYamahaOSCRemotePort();
-	case PBT_ADMOSC:
-		return m_protocolBridge.GetADMOSCRemotePort();
-	case PBT_RemapOSC:
-		return m_protocolBridge.GetRemapOSCRemotePort();
-	case PBT_GenericMIDI:
-	case PBT_YamahaSQ:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	default:
-		jassertfalse;
-		return INVALID_PORT_VALUE;
-	}
+	return m_protocolBridge.GetProtocolRemotePort(GetProtocolIdForProtocolType(bridgingType));
 }
 
 bool Controller::SetBridgingRemotePort(ProtocolBridgingType bridgingType, int remotePort, bool dontSendNotification)
 {
-	switch (bridgingType)
-	{
-	case PBT_DiGiCo:
-		return m_protocolBridge.SetDiGiCoRemotePort(remotePort, dontSendNotification);
-	case PBT_GenericOSC:
-		return m_protocolBridge.SetGenericOSCRemotePort(remotePort, dontSendNotification);
-	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.SetRTTrPMRemotePort(remotePort, dontSendNotification);
-	case PBT_YamahaOSC:
-		return m_protocolBridge.SetYamahaOSCRemotePort(remotePort, dontSendNotification);
-	case PBT_ADMOSC:
-		return m_protocolBridge.SetADMOSCRemotePort(remotePort, dontSendNotification);
-	case PBT_RemapOSC:
-		return m_protocolBridge.SetRemapOSCRemotePort(remotePort, dontSendNotification);
-	case PBT_GenericMIDI:
-	case PBT_YamahaSQ:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	default:
-		jassertfalse;
-		return false;
-	}
+	return m_protocolBridge.SetProtocolRemotePort(GetProtocolIdForProtocolType(bridgingType), remotePort, dontSendNotification);
 }
 
 int Controller::GetBridgingMappingArea(ProtocolBridgingType bridgingType)
 {
-	switch (bridgingType)
-	{
-	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.GetRTTrPMMappingArea();
-	case PBT_YamahaOSC:
-		return m_protocolBridge.GetYamahaOSCMappingArea();
-	case PBT_GenericMIDI:
-		return m_protocolBridge.GetGenericMIDIMappingArea();
-	case PBT_ADMOSC:
-		return m_protocolBridge.GetADMOSCMappingArea();
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	case PBT_RemapOSC:
-	default:
-		jassertfalse;
-		return INVALID_ADDRESS_VALUE;
-	}
+	return m_protocolBridge.GetProtocolMappingArea(GetProtocolIdForProtocolType(bridgingType));
 }
 
 bool Controller::SetBridgingMappingArea(ProtocolBridgingType bridgingType, int mappingAreaId, bool dontSendNotification)
 {
-	switch (bridgingType)
-	{
-	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.SetRTTrPMMappingArea(mappingAreaId, dontSendNotification);
-	case PBT_YamahaOSC:
-		return m_protocolBridge.SetYamahaOSCMappingArea(mappingAreaId, dontSendNotification);
-	case PBT_GenericMIDI:
-		return m_protocolBridge.SetGenericMIDIMappingArea(mappingAreaId, dontSendNotification);
-	case PBT_ADMOSC:
-		return m_protocolBridge.SetADMOSCMappingArea(mappingAreaId, dontSendNotification);
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	case PBT_RemapOSC:
-	default:
-		jassertfalse;
-		return false;
-	}
+	return m_protocolBridge.SetProtocolMappingArea(GetProtocolIdForProtocolType(bridgingType), mappingAreaId, dontSendNotification);
 }
 
 const std::pair<juce::Range<float>, juce::Range<float>> Controller::GetBridgingMappingRange(ProtocolBridgingType bridgingType)
 {
-	switch (bridgingType)
-	{
-	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.GetRTTrPMMappingRange();
-	case PBT_YamahaOSC:
-	case PBT_GenericMIDI:
-	case PBT_ADMOSC:
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	case PBT_RemapOSC:
-	default:
-		jassertfalse;
-		return std::make_pair(juce::Range<float>(0.0f, 1.0f), juce::Range<float>(0.0f, 1.0f));
-	}
+	return m_protocolBridge.GetProtocolMappingRange(GetProtocolIdForProtocolType(bridgingType));
 }
 
 bool Controller::SetBridgingMappingRange(ProtocolBridgingType bridgingType, const std::pair<juce::Range<float>, juce::Range<float>>& mappingRange, bool dontSendNotification)
 {
-	switch (bridgingType)
-	{
-	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.SetRTTrPMMappingRange(mappingRange, dontSendNotification);
-	case PBT_YamahaOSC:
-	case PBT_GenericMIDI:
-	case PBT_ADMOSC:
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	case PBT_RemapOSC:
-	default:
-		jassertfalse;
-		return false;
-	}
+	return m_protocolBridge.SetProtocolMappingRange(GetProtocolIdForProtocolType(bridgingType), mappingRange, dontSendNotification);
 }
 
 String Controller::GetBridgingInputDeviceIdentifier(ProtocolBridgingType bridgingType)
 {
-	switch (bridgingType)
-	{
-	case PBT_GenericMIDI:
-		return m_protocolBridge.GetGenericMIDIInputDeviceIdentifier();
-	case PBT_BlacktraxRTTrPM:
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_YamahaOSC:
-	case PBT_ADMOSC:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	case PBT_RemapOSC:
-	default:
-		jassertfalse;
-		return String();
-	}
+	return m_protocolBridge.GetProtocolInputDeviceIdentifier(GetProtocolIdForProtocolType(bridgingType));
 }
 
 bool Controller::SetBridgingInputDeviceIdentifier(ProtocolBridgingType bridgingType, const String& inputDeviceIdentifier, bool dontSendNotification)
 {
-	switch (bridgingType)
-	{
-	case PBT_GenericMIDI:
-		return m_protocolBridge.SetGenericMIDIInputDeviceIdentifier(inputDeviceIdentifier, dontSendNotification);
-	case PBT_BlacktraxRTTrPM:
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_YamahaOSC:
-	case PBT_ADMOSC:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	case PBT_RemapOSC:
-	default:
-		jassertfalse;
-		return false;
-	}
+	return m_protocolBridge.SetProtocolInputDeviceIdentifier(GetProtocolIdForProtocolType(bridgingType), inputDeviceIdentifier, dontSendNotification);
 }
 
 String Controller::GetBridgingOutputDeviceIdentifier(ProtocolBridgingType bridgingType)
 {
-	switch (bridgingType)
-	{
-	case PBT_GenericMIDI:
-		return m_protocolBridge.GetGenericMIDIOutputDeviceIdentifier();
-	case PBT_BlacktraxRTTrPM:
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_YamahaOSC:
-	case PBT_ADMOSC:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	case PBT_RemapOSC:
-	default:
-		jassertfalse;
-		return String();
-	}
+	return m_protocolBridge.GetProtocolOutputDeviceIdentifier(GetProtocolIdForProtocolType(bridgingType));
 }
 
 bool Controller::SetBridgingOutputDeviceIdentifier(ProtocolBridgingType bridgingType, const String& outputDeviceIdentifier, bool dontSendNotification)
 {
-	switch (bridgingType)
-	{
-	case PBT_GenericMIDI:
-		return m_protocolBridge.SetGenericMIDIOutputDeviceIdentifier(outputDeviceIdentifier, dontSendNotification);
-	case PBT_BlacktraxRTTrPM:
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_YamahaOSC:
-	case PBT_ADMOSC:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	case PBT_RemapOSC:
-	default:
-		jassertfalse;
-		return false;
-	}
+	return m_protocolBridge.SetProtocolOutputDeviceIdentifier(GetProtocolIdForProtocolType(bridgingType), outputDeviceIdentifier, dontSendNotification);
 }
 
 JUCEAppBasics::MidiCommandRangeAssignment Controller::GetBridgingMidiAssignmentMapping(ProtocolBridgingType bridgingType, RemoteObjectIdentifier remoteObjectId)
 {
-	switch (bridgingType)
-	{
-	case PBT_GenericMIDI:
-		return m_protocolBridge.GetGenericMIDIAssignmentMapping(remoteObjectId);
-	case PBT_BlacktraxRTTrPM:
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_YamahaOSC:
-	case PBT_ADMOSC:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	case PBT_RemapOSC:
-	default:
-		jassertfalse;
-		return JUCEAppBasics::MidiCommandRangeAssignment();
-	}
+	return m_protocolBridge.GetMidiAssignmentMapping(GetProtocolIdForProtocolType(bridgingType), remoteObjectId);
 }
 
 bool Controller::SetBridgingMidiAssignmentMapping(ProtocolBridgingType bridgingType, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification)
 {
-	switch (bridgingType)
-	{
-	case PBT_GenericMIDI:
-		return m_protocolBridge.SetGenericMIDIAssignmentMapping(remoteObjectId, assignmentMapping, dontSendNotification);
-	case PBT_BlacktraxRTTrPM:
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_YamahaOSC:
-	case PBT_ADMOSC:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	case PBT_RemapOSC:
-	default:
-		jassertfalse;
-		return false;
-	}
+	return m_protocolBridge.SetMidiAssignmentMapping(GetProtocolIdForProtocolType(bridgingType), remoteObjectId, assignmentMapping, dontSendNotification);
 }
 
 std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> Controller::GetBridgingScenesToMidiAssignmentMapping(ProtocolBridgingType bridgingType, RemoteObjectIdentifier remoteObjectId)
 {
-	switch (bridgingType)
-	{
-	case PBT_GenericMIDI:
-		return m_protocolBridge.GetGenericMIDIScenesAssignmentMapping(remoteObjectId);
-	case PBT_BlacktraxRTTrPM:
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_YamahaOSC:
-	case PBT_ADMOSC:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	case PBT_RemapOSC:
-	default:
-		jassertfalse;
-		return std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>();
-	}
+	return m_protocolBridge.GetMidiScenesAssignmentMapping(GetProtocolIdForProtocolType(bridgingType), remoteObjectId);
 }
 
 bool Controller::SetBridgingScenesToMidiAssignmentMapping(ProtocolBridgingType bridgingType, RemoteObjectIdentifier remoteObjectId, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& scenesToMidiAssignmentMapping, bool dontSendNotification)
 {
-	switch (bridgingType)
-	{
-	case PBT_GenericMIDI:
-		return m_protocolBridge.SetGenericMIDIScenesAssignmentMapping(remoteObjectId, scenesToMidiAssignmentMapping, dontSendNotification);
-	case PBT_BlacktraxRTTrPM:
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_YamahaOSC:
-	case PBT_ADMOSC:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	case PBT_RemapOSC:
-	default:
-		jassertfalse;
-		return false;
-	}
+	return m_protocolBridge.SetMidiScenesAssignmentMapping(GetProtocolIdForProtocolType(bridgingType), remoteObjectId, scenesToMidiAssignmentMapping, dontSendNotification);
 }
 
 int Controller::GetBridgingXAxisInverted(ProtocolBridgingType bridgingType)
 {
-	switch (bridgingType)
-	{
-	case PBT_ADMOSC:
-		return m_protocolBridge.GetADMOSCXAxisInverted();
-	case PBT_GenericMIDI:
-	case PBT_BlacktraxRTTrPM:
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_YamahaOSC:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	case PBT_RemapOSC:
-	default:
-		jassertfalse;
-		return 0;
-	}
+	return m_protocolBridge.GetProtocolXAxisInverted(GetProtocolIdForProtocolType(bridgingType));
 }
 
 bool Controller::SetBridgingXAxisInverted(ProtocolBridgingType bridgingType, int inverted, bool dontSendNotification)
 {
-	switch (bridgingType)
-	{
-	case PBT_ADMOSC:
-		return m_protocolBridge.SetADMOSCXAxisInverted(inverted, dontSendNotification);
-	case PBT_GenericMIDI:
-	case PBT_BlacktraxRTTrPM:
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_YamahaOSC:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	case PBT_RemapOSC:
-	default:
-		jassertfalse;
-		return false;
-	}
+	return m_protocolBridge.SetProtocolXAxisInverted(GetProtocolIdForProtocolType(bridgingType), inverted, dontSendNotification);
 }
 
 int Controller::GetBridgingYAxisInverted(ProtocolBridgingType bridgingType)
 {
-	switch (bridgingType)
-	{
-	case PBT_ADMOSC:
-		return m_protocolBridge.GetADMOSCYAxisInverted();
-	case PBT_GenericMIDI:
-	case PBT_BlacktraxRTTrPM:
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_YamahaOSC:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	case PBT_RemapOSC:
-	default:
-		jassertfalse;
-		return 0;
-	}
+	return m_protocolBridge.GetProtocolYAxisInverted(GetProtocolIdForProtocolType(bridgingType));
 }
 
 bool Controller::SetBridgingYAxisInverted(ProtocolBridgingType bridgingType, int inverted, bool dontSendNotification)
 {
-	switch (bridgingType)
-	{
-	case PBT_ADMOSC:
-		return m_protocolBridge.SetADMOSCYAxisInverted(inverted, dontSendNotification);
-	case PBT_GenericMIDI:
-	case PBT_BlacktraxRTTrPM:
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_YamahaOSC:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	case PBT_RemapOSC:
-	default:
-		jassertfalse;
-		return false;
-	}
+	return m_protocolBridge.SetProtocolYAxisInverted(GetProtocolIdForProtocolType(bridgingType), inverted, dontSendNotification);
 }
 
 int Controller::GetBridgingXYAxisSwapped(ProtocolBridgingType bridgingType)
 {
-	switch (bridgingType)
-	{
-	case PBT_ADMOSC:
-		return m_protocolBridge.GetADMOSCXYAxisSwapped();
-	case PBT_GenericMIDI:
-	case PBT_BlacktraxRTTrPM:
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_YamahaOSC:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	case PBT_RemapOSC:
-	default:
-		jassertfalse;
-		return 0;
-	}
+	return m_protocolBridge.GetProtocolXYAxisSwapped(GetProtocolIdForProtocolType(bridgingType));
 }
 
 bool Controller::SetBridgingXYAxisSwapped(ProtocolBridgingType bridgingType, int swapped, bool dontSendNotification)
 {
-	switch (bridgingType)
-	{
-	case PBT_ADMOSC:
-		return m_protocolBridge.SetADMOSCXYAxisSwapped(swapped, dontSendNotification);
-	case PBT_GenericMIDI:
-	case PBT_BlacktraxRTTrPM:
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_YamahaOSC:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	case PBT_RemapOSC:
-	default:
-		jassertfalse;
-		return false;
-	}
+	return m_protocolBridge.SetProtocolXYAxisSwapped(GetProtocolIdForProtocolType(bridgingType), swapped, dontSendNotification);
 }
 
 bool Controller::GetBridgingXYMessageCombined(ProtocolBridgingType bridgingType)
 {
-	switch (bridgingType)
-	{
-	case PBT_ADMOSC:
-		return m_protocolBridge.GetADMOSCBridgingXYMessageCombined();
-	case PBT_BlacktraxRTTrPM:
-	case PBT_YamahaOSC:
-	case PBT_GenericMIDI:
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	case PBT_RemapOSC:
-	default:
-		jassertfalse;
-		return false;
-	}
+	return m_protocolBridge.GetProtocolBridgingXYMessageCombined(GetProtocolIdForProtocolType(bridgingType));
 }
 
 bool Controller::SetBridgingXYMessageCombined(ProtocolBridgingType bridgingType, bool combined, bool dontSendNotification)
 {
-	switch (bridgingType)
-	{
-	case PBT_ADMOSC:
-		return m_protocolBridge.SetADMOSCBridgingXYMessageCombined(combined, dontSendNotification);
-	case PBT_BlacktraxRTTrPM:
-	case PBT_YamahaOSC:
-	case PBT_GenericMIDI:
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	case PBT_RemapOSC:
-	default:
-		jassertfalse;
-		return false;
-	}
+	return m_protocolBridge.SetProtocolBridgingXYMessageCombined(GetProtocolIdForProtocolType(bridgingType), combined, dontSendNotification);
 }
 
 int Controller::GetBridgingDataSendingDisabled(ProtocolBridgingType bridgingType)
 {
-	switch (bridgingType)
-	{
-	case PBT_ADMOSC:
-		return m_protocolBridge.GetADMOSCDataSendingDisabled();
-	case PBT_GenericOSC:
-		return m_protocolBridge.GetGenericOSCDataSendingDisabled();
-	case PBT_RemapOSC:
-		return m_protocolBridge.GetRemapOSCDataSendingDisabled();
-	case PBT_GenericMIDI:
-	case PBT_BlacktraxRTTrPM:
-	case PBT_DiGiCo:
-	case PBT_YamahaSQ:
-	case PBT_YamahaOSC:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	default:
-		jassertfalse;
-		return 0;
-	}
+	return m_protocolBridge.GetProtocolDataSendingDisabled(GetProtocolIdForProtocolType(bridgingType));
 }
 
 bool Controller::SetBridgingDataSendingDisabled(ProtocolBridgingType bridgingType, int disabled, bool dontSendNotification)
 {
-	switch (bridgingType)
-	{
-	case PBT_ADMOSC:
-		return m_protocolBridge.SetADMOSCDataSendingDisabled(disabled, dontSendNotification);
-	case PBT_GenericOSC:
-		return m_protocolBridge.SetGenericOSCDataSendingDisabled(disabled, dontSendNotification);
-	case PBT_RemapOSC:
-		return m_protocolBridge.SetRemapOSCDataSendingDisabled(disabled, dontSendNotification);
-	case PBT_GenericMIDI:
-	case PBT_BlacktraxRTTrPM:
-	case PBT_DiGiCo:
-	case PBT_YamahaSQ:
-	case PBT_YamahaOSC:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	default:
-		jassertfalse;
-		return false;
-	}
+	return m_protocolBridge.SetProtocolDataSendingDisabled(GetProtocolIdForProtocolType(bridgingType), disabled, dontSendNotification);
 }
 
 std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> Controller::GetBridgingOscRemapAssignments(ProtocolBridgingType bridgingType)
 {
-	switch (bridgingType)
-	{
-	case PBT_RemapOSC:
-		return m_protocolBridge.GetRemapOSCOscRemapAssignments();
-	case PBT_GenericMIDI:
-	case PBT_BlacktraxRTTrPM:
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_YamahaOSC:
-	case PBT_ADMOSC:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	default:
-		jassertfalse;
-		return std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>();
-	}
+	return m_protocolBridge.GetProtocolOscRemapAssignments(GetProtocolIdForProtocolType(bridgingType));
 }
 
 bool Controller::SetBridgingOscRemapAssignments(ProtocolBridgingType bridgingType, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& oscRemapAssignments, bool dontSendNotification)
 {
-	switch (bridgingType)
-	{
-	case PBT_RemapOSC:
-		return m_protocolBridge.SetRemapOSCOscRemapAssignments(oscRemapAssignments, dontSendNotification);
-	case PBT_GenericMIDI:
-	case PBT_BlacktraxRTTrPM:
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_YamahaOSC:
-	case PBT_ADMOSC:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	default:
-		jassertfalse;
-		return false;
-	}
+	return m_protocolBridge.SetProtocolOscRemapAssignments(GetProtocolIdForProtocolType(bridgingType), oscRemapAssignments, dontSendNotification);
 }
 
 std::map<int, ChannelId> Controller::GetBridgingChannelRemapAssignments(ProtocolBridgingType bridgingType)
 {
-	switch (bridgingType)
-	{
-	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.GetRTTrPMChannelRemapAssignments();
-	case PBT_RemapOSC:
-	case PBT_GenericMIDI:
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_YamahaOSC:
-	case PBT_ADMOSC:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	default:
-		jassertfalse;
-		return std::map<int, ChannelId>();
-	}
+	return m_protocolBridge.GetProtocolChannelRemapAssignments(GetProtocolIdForProtocolType(bridgingType));
 }
 
 bool Controller::SetBridgingChannelRemapAssignments(ProtocolBridgingType bridgingType, const std::map<int, ChannelId>& channelRemapAssignments, bool dontSendNotification)
 {
-	switch (bridgingType)
-	{
-	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.SetRTTrPMChannelRemapAssignments(channelRemapAssignments, dontSendNotification);
-	case PBT_RemapOSC:
-	case PBT_GenericMIDI:
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_YamahaOSC:
-	case PBT_ADMOSC:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	default:
-		jassertfalse;
-		return false;
-	}
+	return m_protocolBridge.SetProtocolChannelRemapAssignments(GetProtocolIdForProtocolType(bridgingType), channelRemapAssignments, dontSendNotification);
 }
 
 const String Controller::GetBridgingModuleTypeIdentifier(ProtocolBridgingType bridgingType)
 {
-	switch (bridgingType)
-	{
-	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.GetRTTrPMModuleTypeIdentifier();
-	case PBT_RemapOSC:
-	case PBT_GenericMIDI:
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_YamahaOSC:
-	case PBT_ADMOSC:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	default:
-		jassertfalse;
-		return String();
-	}
+	return m_protocolBridge.GetProtocolModuleTypeIdentifier(GetProtocolIdForProtocolType(bridgingType));
 }
 
 bool Controller::SetBridgingModuleTypeIdentifier(ProtocolBridgingType bridgingType, const String& moduleTypeIdentifier, bool dontSendNotification)
 {
-	switch (bridgingType)
-	{
-	case PBT_BlacktraxRTTrPM:
-		return m_protocolBridge.SetRTTrPMModuleTypeIdentifier(moduleTypeIdentifier, dontSendNotification);
-	case PBT_RemapOSC:
-	case PBT_GenericMIDI:
-	case PBT_DiGiCo:
-	case PBT_GenericOSC:
-	case PBT_YamahaSQ:
-	case PBT_YamahaOSC:
-	case PBT_ADMOSC:
-	case PBT_HUI:
-	case PBT_DS100:
-	case PBT_DAWPlugin:
-	default:
-		jassertfalse;
-		return false;
-	}
+	return m_protocolBridge.SetProtocolModuleTypeIdentifier(GetProtocolIdForProtocolType(bridgingType), moduleTypeIdentifier, dontSendNotification);
 }
 
 /**

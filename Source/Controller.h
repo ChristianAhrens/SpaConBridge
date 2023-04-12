@@ -269,10 +269,14 @@ public:
 	bool SendMessageDataDirect(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData);
 
 private:
+	//==========================================================================
+	const ProtocolId GetProtocolIdForProtocolType(const ProtocolBridgingType type);
+
+	//==========================================================================
 	void timerCallback() override;
 
 protected:
-	
+	//==========================================================================
 	static std::unique_ptr<Controller>	s_singleton;				/**< The one and only instance of CController. */
 
 	int								m_refreshInterval;				/**< Interval at which the controller internal update is triggered, in ms. */

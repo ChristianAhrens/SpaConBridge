@@ -976,7 +976,8 @@ void Controller::SetDS100IpAddress(DataChangeParticipant changeSource, String ip
 		m_protocolBridge.SetDS100IpAddress(ipAddress, dontSendNotification);
 
 		// Signal the change to all Processors. 
-		SetParameterChanged(changeSource, (DCT_IPAddress | DCT_Connected));
+		SetParameterChanged(changeSource, DCT_IPAddress);
+		SetParameterChanged(changeSource, DCT_Connected);
 
 		Reconnect();
 	}
@@ -1009,7 +1010,8 @@ void Controller::SetSecondDS100IpAddress(DataChangeParticipant changeSource, Str
 		m_protocolBridge.SetSecondDS100IpAddress(ipAddress, dontSendNotification);
 
 		// Signal the change to all Processors. 
-		SetParameterChanged(changeSource, (DCT_IPAddress | DCT_Connected));
+		SetParameterChanged(changeSource, DCT_IPAddress);
+		SetParameterChanged(changeSource, DCT_Connected);
 
 		Reconnect();
 	}
@@ -1184,7 +1186,8 @@ void Controller::SetExtensionMode(DataChangeParticipant changeSource, ExtensionM
 		m_protocolBridge.SetDS100ExtensionMode(mode, dontSendNotification);
 
 		// Signal the change to all Processors. 
-		SetParameterChanged(changeSource, (DCT_ExtensionMode | DCT_Connected));
+		SetParameterChanged(changeSource, DCT_ExtensionMode);
+		SetParameterChanged(changeSource, DCT_Connected);
 
 		Reconnect();
 	}
@@ -1216,7 +1219,8 @@ void Controller::SetActiveParallelModeDS100(DataChangeParticipant changeSource, 
 		m_protocolBridge.SetActiveParallelModeDS100(activeParallelModeDS100, dontSendNotification);
 
 		// Signal the change to all Processors. 
-		SetParameterChanged(changeSource, (DCT_ExtensionMode | DCT_Connected));
+		SetParameterChanged(changeSource, DCT_ExtensionMode);
+		SetParameterChanged(changeSource, DCT_Connected);
 
 		Reconnect();
 	}

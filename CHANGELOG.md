@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.10.3] - 2023-04-17
+### Added
+
+### Changed
+
+### Fixed
+- Fixed iOS mdns DS100 device discovery by adding corresp. entitlement to AppID and .entitlements
+- Fixed default Rx+Tx communication mode being active not only in ui but processing also
+- Fixed OSCProtocolProcessor shutdown on reception of invalid/unkown OSC input
+
 ## [0.10.2] - 2023-04-08
 ### Added
 - Added support for defining coordinate range (origin + extent) for BlackTrax RTTrPM positioning data when using coordinate mapping interpretation

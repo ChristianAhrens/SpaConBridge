@@ -102,15 +102,12 @@ SoundobjectProcessor::SoundobjectProcessor(bool insertToConfig)
 	m_mappingId = DEFAULT_COORD_MAPPING; // Default: coordinate mapping 1.
 	m_processorId = INVALID_PROCESSOR_ID;
 
-
 	// Default painting parameters
 	m_soundobjectColour = Colours::black;
 	m_soundobjectSize = 0.5f;
 
-	// Start with all parameter changed flags cleared. Function setStateInformation() 
-	// will check whether or not we should initialize parameters when starting up.
-	for (auto changeTarget = 0; changeTarget < DCP_Max; changeTarget++)
-		m_dataChangesByTarget[static_cast<DataChangeParticipant>(changeTarget)] = DCT_None;
+	// Default OSC communication mode.
+	SetComsMode(DCP_Init, (CM_Rx | CM_Tx));
 
 	// Register this new procssor instance to the singleton Controller object's internal list.
 	Controller* ctrl = Controller::GetInstance();

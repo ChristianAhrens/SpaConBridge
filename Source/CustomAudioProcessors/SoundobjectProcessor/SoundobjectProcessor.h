@@ -87,7 +87,7 @@ public:
 	float GetParameterValue(SoundobjectParameterIndex paramIdx, bool normalized = false) const;
 	void SetParameterValue(DataChangeParticipant changeSource, SoundobjectParameterIndex paramIdx, float newValue);
 
-	void SetParameterChanged(const DataChangeParticipant& changeSource, const DataChangeType& changeTypes);
+	void SetParameterChanged(const DataChangeParticipant& changeSource, const DataChangeType& changeTypes) override;
 
 	void Tick();
 

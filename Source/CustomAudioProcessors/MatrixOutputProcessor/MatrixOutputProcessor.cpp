@@ -69,6 +69,9 @@ MatrixOutputProcessor::MatrixOutputProcessor(bool insertToConfig)
 	m_matrixOutputId = MatrixOutput_ID_MIN; // This default sourceId will be overwritten by ctrl->AddProcessor() below.
 	m_processorId = INVALID_PROCESSOR_ID;
 
+	// Default communication mode.
+	SetComsMode(DCP_Init, (CM_Rx | CM_Tx));
+
 	// Register this new processor instance to the singleton Controller object's internal list.
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)

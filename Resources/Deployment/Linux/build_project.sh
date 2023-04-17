@@ -10,7 +10,7 @@ ProjectMakefilePath=Builds/LinuxMakefile
 
 # build projucer
 cd "$ProjucerMakefilePath"
-make
+make -j 8
 cd ../../../../../..
 
 # export projucer project
@@ -18,4 +18,4 @@ cd ../../../../../..
 
 # start building the project
 cd "$ProjectMakefilePath"
-make
+make -j 8

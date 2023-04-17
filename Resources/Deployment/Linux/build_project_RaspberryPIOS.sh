@@ -34,7 +34,7 @@ yes | sudo apt install	clang \
 
 # build projucer
 cd "$ProjucerMakefilePath"
-make LDFLAGS=-latomic
+make -j 2 LDFLAGS=-latomic
 cd ../../../../../..
 
 # export projucer project
@@ -42,4 +42,8 @@ cd ../../../../../..
 
 # start building the project
 cd "$ProjectMakefilePath"
-make LDFLAGS=-latomic
+make -j 2 LDFLAGS=-latomic
+
+# -> after a successful build, one could e.g. use the following as contents for .xsession to have the app start in kind of a kiosk mode. VNC of raspbian will still work in this scenario btw
+##!/bin/sh
+#exec Documents/Development/GitHub/SpaConBridge/Builds/LinuxMakefile/build/SpaConBridge

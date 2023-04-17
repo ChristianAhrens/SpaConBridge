@@ -234,6 +234,7 @@ AboutPageComponent::AboutPageComponent()
 {
 	// Close button
 	m_closeButton = std::make_unique<DrawableButton>("Close", DrawableButton::ButtonStyle::ImageFitted);
+	m_closeButton->setColour(juce::DrawableButton::backgroundColourId, juce::Colours::transparentWhite);
 	m_closeButton->onClick = [=] { onCloseClick(); };
 	addAndMakeVisible(m_closeButton.get());
 	lookAndFeelChanged();

@@ -3077,7 +3077,7 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 
 				auto ctrl = Controller::GetInstance();
 				if (ctrl)
-					ctrl->SetSecondDS100IpAddress(DCP_Host, "", dontSendNotification);
+					ctrl->SetSecondDS100IpAddress(DCP_Init, "", dontSendNotification);
 			}
 			break;
 			case EM_Extend:
@@ -3093,7 +3093,7 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 
 					auto ctrl = Controller::GetInstance();
 					if (ctrl)
-						ctrl->SetSecondDS100IpAddress(DCP_Host, PROTOCOL_DEFAULT2_IP, dontSendNotification);
+						ctrl->SetSecondDS100IpAddress(DCP_Init, PROTOCOL_DEFAULT2_IP, dontSendNotification);
 				}
 			}
 			break;

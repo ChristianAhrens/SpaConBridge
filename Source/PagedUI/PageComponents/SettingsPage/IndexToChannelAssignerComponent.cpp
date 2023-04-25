@@ -264,7 +264,7 @@ std::map<int, ChannelId> IndexToChannelAssignerComponent::IndexToChannelAssignme
 
 bool IndexToChannelAssignerComponent::IndexToChannelAssignmentsListingComponent::AddAssignment()
 {
-    auto startIdx = 0;
+    auto startIdx = 1;
     auto startChannel = 1;
 
     if (!m_editComponents.empty())

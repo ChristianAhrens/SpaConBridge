@@ -175,8 +175,10 @@ void IndexToChannelAssignerComponent::IndexToChannelAssignmentEditComponent::han
 {
     if (m_channelAssignmentEditComponent)
     {
+        auto index = m_indexEditComponent->getText().getIntValue();
         auto channelAssi = m_channelAssignmentEditComponent->getText().getIntValue();
-        handleIndexToChannelAssiSet(channelAssi);
+        
+        handleIndexToChannelAssiSet(std::make_pair(index, channelAssi));
     }
 }
 
@@ -199,12 +201,13 @@ void IndexToChannelAssignerComponent::IndexToChannelAssignmentEditComponent::res
     m_indexEditComponent->setBounds(bounds);
 }
 
-void IndexToChannelAssignerComponent::IndexToChannelAssignmentEditComponent::handleIndexToChannelAssiSet(ChannelId channelAssi)
+void IndexToChannelAssignerComponent::IndexToChannelAssignmentEditComponent::handleIndexToChannelAssiSet(const std::pair<int, ChannelId>& idxToChannelAssi)
 {
-    m_currentChannelAssignment = channelAssi;
+    m_currentIndex = idxToChannelAssi.first;
+    m_currentChannelAssignment = idxToChannelAssi.second;
 
     if (onAssignmentSet)
-        onAssignmentSet(this, m_currentIndex, channelAssi);
+        onAssignmentSet(this, idxToChannelAssi);
 }
 
 void IndexToChannelAssignerComponent::IndexToChannelAssignmentEditComponent::handleIndexToChannelAssiReset()
@@ -261,7 +264,7 @@ std::map<int, ChannelId> IndexToChannelAssignerComponent::IndexToChannelAssignme
 
 bool IndexToChannelAssignerComponent::IndexToChannelAssignmentsListingComponent::AddAssignment()
 {
-    auto startIdx = 0;
+    auto startIdx = 1;
     auto startChannel = 1;
 
     if (!m_editComponents.empty())

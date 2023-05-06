@@ -60,11 +60,11 @@ private:
         ChannelId GetCurrentChannelAssignment();
     
         void handleEditorInput();
-        void handleIndexToChannelAssiSet(ChannelId channelAssi);
+        void handleIndexToChannelAssiSet(const std::pair<int, ChannelId>& channelAssi);
         void handleIndexToChannelAssiReset();
     
         //==============================================================================
-        std::function<void(Component*, int, ChannelId)> onAssignmentSet;
+        std::function<void(Component*, const std::pair<int, ChannelId>&)> onAssignmentSet;
     
         //==============================================================================
         void resized() override;

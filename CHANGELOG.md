@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.10.4] - 2023-05-06
+### Added
+
+### Changed
+- Streamlined Linux build scripts and fixed make config
+
+### Fixed
+- Fixed crash when changing DS100 extension mode config
+- Fixed BlackTrax RTTrPM settings beaconIdx to Soundobject assignment dialog to correctly update
+- Fixed BlackTrax RTTrPM bridging to refer beaconIdx 1 to Soundobject 1 as default
+
 ## [0.10.3] - 2023-04-17
 ### Added
 

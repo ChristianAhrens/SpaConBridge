@@ -1,16 +1,3 @@
-# we are in Resources/Deployment/Linux/ -> change directory to project root
-cd ../../../
-
-# setup git submodules first
-git submodule update --init --recursive
-
-# set convenience variables
-JUCEDir=submodules/JUCE
-ProjucerMakefilePath="$JUCEDir"/extras/Projucer/Builds/LinuxMakefile
-ProjucerBinPath="$ProjucerMakefilePath"/build/Projucer
-JucerProjectPath=SpaConBridge.jucer
-ProjectMakefilePath=Builds/LinuxMakefile
-
 # get required dependencies on Raspberry PI OS
 yes | sudo apt-get update
 yes | sudo apt-get upgrade
@@ -32,17 +19,18 @@ yes | sudo apt install	clang \
 						libglu1-mesa-dev \
 						mesa-common-dev
 
-# build projucer
-cd "$ProjucerMakefilePath"
-make -j 2 LDFLAGS=-latomic
-cd ../../../../../..
+# we are in Resources/Deployment/Linux/ -> change directory to project root
+cd ../../../
 
-# export projucer project
-"$ProjucerBinPath" --resave "$JucerProjectPath"
+# setup git submodules first
+git submodule update --init --recursive
 
-# start building the project
-cd "$ProjectMakefilePath"
-make -j 2 LDFLAGS=-latomic
+# we are in project root, change to buildscript directory
+cd Resources/Deployment/Linux
+
+# start the buildscript (make -j 2 instead of default 8 to not overload the poor raspi)
+chmod +x build_project.sh
+./build_project.sh 2
 
 # -> after a successful build, one could e.g. use the following as contents for .xsession to have the app start in kind of a kiosk mode. VNC of raspbian will still work in this scenario btw
 ##!/bin/sh

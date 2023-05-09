@@ -383,14 +383,14 @@ void SettingsSectionsComponent::createRTTrPMSettingsSection()
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMBeaconIdxAssignmentsLabel.get(), false, false);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMBeaconIdxAssignmentsEditor.get(), true, false);
 
-	m_RTTrPMModuleTypeSelect = std::make_unique<ComboBox>();
-	m_RTTrPMModuleTypeSelect->addListener(this);
-	m_RTTrPMModuleTypeSelect->addItemList(m_RTTrPMModuleTypes, 1);
-	m_RTTrPMModuleTypeLabel = std::make_unique<Label>("RTTrPMModuleTypeSelect", "Module Type");
-	m_RTTrPMModuleTypeLabel->setJustificationType(Justification::centred);
-	m_RTTrPMModuleTypeLabel->attachToComponent(m_RTTrPMModuleTypeSelect.get(), true);
-	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMModuleTypeLabel.get(), false, false);
-	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMModuleTypeSelect.get(), true, false);
+	m_RTTrPMDataTypeSelect = std::make_unique<ComboBox>();
+	m_RTTrPMDataTypeSelect->addListener(this);
+	m_RTTrPMDataTypeSelect->addItemList(juce::StringArray{ "Centroid Position", "LED Position" }, 1);
+	m_RTTrPMDataTypeLabel = std::make_unique<Label>("RTTrPMDataTypeSelect", "Data Type");
+	m_RTTrPMDataTypeLabel->setJustificationType(Justification::centred);
+	m_RTTrPMDataTypeLabel->attachToComponent(m_RTTrPMDataTypeSelect.get(), true);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMDataTypeLabel.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMDataTypeSelect.get(), true, false);
 
 	m_RTTrPMBridgingSettings->resized();
 }
@@ -1245,10 +1245,10 @@ void SettingsSectionsComponent::comboBoxChanged(ComboBox* comboBox)
 		m_previousRTTrPMMappingAreaId = m_RTTrPMMappingAreaSelect->getSelectedId();
 		ctrl->SetBridgingMappingArea(PBT_BlacktraxRTTrPM, m_previousRTTrPMMappingAreaId);
 	}
-	else if (m_RTTrPMModuleTypeSelect && m_RTTrPMModuleTypeSelect.get() == comboBox)
+	else if (m_RTTrPMDataTypeSelect && m_RTTrPMDataTypeSelect.get() == comboBox)
 	{
-		auto selectedModuleTypeIdentifier = m_RTTrPMModuleTypeSelect->getItemText(m_RTTrPMModuleTypeSelect->getSelectedId() - 1);
-		ctrl->SetBridgingModuleTypeIdentifier(PBT_BlacktraxRTTrPM, selectedModuleTypeIdentifier);
+		auto selectedDataType = m_RTTrPMDataTypeSelect->getItemText(m_RTTrPMDataTypeSelect->getSelectedId() - 1);
+	 	ctrl->SetBridgingModuleTypeIdentifier(PBT_BlacktraxRTTrPM, m_RTTrPMDataTypes.at(selectedDataType), dontSendNotification);
 	}
 
 	// Generic MIDI settings section
@@ -1584,8 +1584,13 @@ void SettingsSectionsComponent::processUpdatedRTTrPMConfig()
 	}
 	
 	auto RTTrPMModuleTypeIdentifier = ctrl->GetBridgingModuleTypeIdentifier(PBT_BlacktraxRTTrPM);
-	if (m_RTTrPMModuleTypeSelect)
-		m_RTTrPMModuleTypeSelect->setSelectedItemIndex(m_RTTrPMModuleTypes.indexOf(RTTrPMModuleTypeIdentifier));
+	if (m_RTTrPMDataTypeSelect)
+	{
+		if (m_RTTrPMDataTypes.at("Centroid Position") == RTTrPMModuleTypeIdentifier)
+			m_RTTrPMDataTypeSelect->setSelectedItemIndex(0);
+		else
+			m_RTTrPMDataTypeSelect->setSelectedItemIndex(1);
+	}
 }
 
 /**

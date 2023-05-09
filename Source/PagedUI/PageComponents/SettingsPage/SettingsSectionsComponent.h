@@ -217,9 +217,9 @@ private:
 	std::unique_ptr<Label>										m_RTTrPMMappingRangeYLabel;
 	std::unique_ptr<IndexToChannelAssignerComponent>			m_RTTrPMBeaconIdxAssignmentsEditor;
 	std::unique_ptr<Label>										m_RTTrPMBeaconIdxAssignmentsLabel;
-	std::unique_ptr<ComboBox>									m_RTTrPMModuleTypeSelect;
-	const juce::StringArray										m_RTTrPMModuleTypes{ "CentroidPosition", "CentroidAccelerationAndVelocity", "TrackedPointPosition", "TrackedPointAccelerationAndVelocity" };
-	std::unique_ptr<Label>										m_RTTrPMModuleTypeLabel;
+	std::unique_ptr<ComboBox>									m_RTTrPMDataTypeSelect;
+	const std::map<juce::String, juce::String>					m_RTTrPMDataTypes{ { "Centroid Position", { "CentroidPosition;CentroidAccelerationAndVelocity" } }, { "LED Position", { "TrackedPointPosition;TrackedPointAccelerationAndVelocity" } } };
+	std::unique_ptr<Label>										m_RTTrPMDataTypeLabel;
 	int															m_previousRTTrPMMappingAreaId{ 1 };
 
 	// Generic OSC settings section

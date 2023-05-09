@@ -554,7 +554,7 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupRTTrPMBridgingProtocol
 
 	auto moduleTypeIdentifierXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PACKETMODULE));
 	if (moduleTypeIdentifierXmlElement)
-		moduleTypeIdentifierXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), "CentroidPosition");
+		moduleTypeIdentifierXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), "CentroidPosition;CentroidAccelerationAndVelocity");
 
 	auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
 	auto mutedObjects = std::vector<RemoteObject>();

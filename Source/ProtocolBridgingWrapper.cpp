@@ -1359,12 +1359,12 @@ bool ProtocolBridgingWrapper::SetProtocolMappingArea(ProtocolId protocolId, int 
 /**
  * Gets the protocol's currently set mapping range x/y min/max value, if available for the given protocol.
  * @param protocolId The id of the protocol for which to get the currently configured mapping range x/y min/max value
- * @return	The mapping range x/y min/max value, 0..1 min/max range if not available
+ * @return	The mapping range x/y min/max value, -3..3 min/max range if not available
  */
 const std::pair<juce::Range<float>, juce::Range<float>> ProtocolBridgingWrapper::GetProtocolMappingRange(ProtocolId protocolId)
 {
-	auto mappingAreaRescaleRangeX = juce::Range<float>(0.0f, 1.0f);
-	auto mappingAreaRescaleRangeY = juce::Range<float>(0.0f, 1.0f);
+	auto mappingAreaRescaleRangeX = juce::Range<float>(-3.0f, 3.0f);
+	auto mappingAreaRescaleRangeY = juce::Range<float>(-3.0f, 3.0f);
 
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
@@ -1381,8 +1381,8 @@ const std::pair<juce::Range<float>, juce::Range<float>> ProtocolBridgingWrapper:
 					auto rangeRescaleValues = StringArray();
 					if (4 != rangeRescaleValues.addTokens(mappingAreaRescaleTextElement->getText(), ";", ""))
 					{
-						mappingAreaRescaleRangeX = juce::Range<float>(0.0f, 1.0f);
-						mappingAreaRescaleRangeY = juce::Range<float>(0.0f, 1.0f);
+						mappingAreaRescaleRangeX = juce::Range<float>(-3.0f, 3.0f);
+						mappingAreaRescaleRangeY = juce::Range<float>(-3.0f, 3.0f);
 					}
 					else
 					{

@@ -353,7 +353,7 @@ void SettingsSectionsComponent::createRTTrPMSettingsSection()
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingAreaLabel.get(), false, false);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingAreaSelect.get(), true, false);
 
-	m_RTTrPMMappingRangeXEditor = std::make_unique<RangeEditorComponent>(0.0f, 1.0f, "min", "max");
+	m_RTTrPMMappingRangeXEditor = std::make_unique<RangeEditorComponent>(-3.0f, 3.0f, "min", "max");
 	m_RTTrPMMappingRangeXEditor->SetListener(this);
 	m_RTTrPMMappingRangeXEditor->SetRange(0.0f, 1.0f);
 	m_RTTrPMMappingRangeXEditor->SetRangeLabels("min", "max");
@@ -364,7 +364,7 @@ void SettingsSectionsComponent::createRTTrPMSettingsSection()
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingRangeXLabel.get(), false, false);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingRangeXEditor.get(), true, false);
 
-	m_RTTrPMMappingRangeYEditor = std::make_unique<RangeEditorComponent>(0.0f, 1.0f, "min", "max");
+	m_RTTrPMMappingRangeYEditor = std::make_unique<RangeEditorComponent>(-3.0f, 3.0f, "min", "max");
 	m_RTTrPMMappingRangeYEditor->SetListener(this);
 	m_RTTrPMMappingRangeYEditor->SetRange(0.0f, 1.0f);
 	m_RTTrPMMappingRangeYEditor->SetRangeLabels("min", "max");

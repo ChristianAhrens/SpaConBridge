@@ -4,12 +4,16 @@ All notable changes to SpaConBridge will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.10.5] - 2023-05-30
 ### Added
 
 ### Changed
+- Modified BlackTrax RTTrPM bridging settings to let the user only choose between Centroid and LED position handling
+- Modified BlackTrax RTTrPM markdown documentation to refer to actual tracking system config instead of Simulation config
 
 ### Fixed
+- Fixed multiple BlackTrax RTTrPM processing issues
+- Fixed BlackTrax RTTrPM bridging UI 'forwarding mute' button functionality
 
 ## [0.10.4] - 2023-05-06
 ### Added

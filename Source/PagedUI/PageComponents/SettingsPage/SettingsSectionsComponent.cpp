@@ -176,21 +176,23 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 	m_DS100Settings->addComponent(m_DS100IntervalEdit.get(), true, false);
 
 	//first DS100 - ch. 1-64
+	m_DS100ConnectionElmsContainer = std::make_unique<HorizontalLayouterComponent>();
+	m_DS100ConnectionElmsContainer->SetSpacing(5);
 	m_DS100IpAddressEdit = std::make_unique<TextEditor>();
 	m_DS100IpAddressEdit->addListener(this);
 	m_DS100IpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
+	m_DS100ConnectionElmsContainer->AddComponent(m_DS100IpAddressEdit.get(), 5);
 	m_DS100IpAddressLabel = std::make_unique<Label>("DS100IpAddressEdit", "IP Address");
 	m_DS100IpAddressLabel->setJustificationType(Justification::centred);
-	m_DS100IpAddressLabel->attachToComponent(m_DS100IpAddressEdit.get(), true);
-	m_DS100Settings->addComponent(m_DS100IpAddressLabel.get(), false, false);
-	m_DS100Settings->addComponent(m_DS100IpAddressEdit.get(), true, false);
-
+	m_DS100IpAddressLabel->attachToComponent(m_DS100ConnectionElmsContainer.get(), true);
 #ifdef ZEROCONF_SUPPORTED
 	m_DS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>(false, false);
 	m_DS100ZeroconfDiscovery->onServiceSelected = [=](JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, ZeroconfSearcher::ZeroconfSearcher::ServiceInfo* info) { handleDS100ServiceSelected(type, info); };
 	m_DS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC);
-	m_DS100Settings->addComponent(m_DS100ZeroconfDiscovery.get(), true, false);
+	m_DS100ConnectionElmsContainer->AddComponent(m_DS100ZeroconfDiscovery.get(), 1);
 #endif
+	m_DS100Settings->addComponent(m_DS100IpAddressLabel.get(), false, false);
+	m_DS100Settings->addComponent(m_DS100ConnectionElmsContainer.get(), true, false);
 
 	m_SecondDS100ModeButton = std::make_unique<JUCEAppBasics::SplitButtonComponent>();
 	m_SecondDS100ModeButton->addListener(this);
@@ -217,21 +219,23 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 	m_DS100Settings->addComponent(m_SecondDS100ParallelModeButton.get(), true, false);
 
 	//second DS100 - ch. 65-128
+	m_SecondDS100ConnectionElmsContainer = std::make_unique<HorizontalLayouterComponent>();
+	m_SecondDS100ConnectionElmsContainer->SetSpacing(5);
 	m_SecondDS100IpAddressEdit = std::make_unique<TextEditor>();
 	m_SecondDS100IpAddressEdit->addListener(this);
 	m_SecondDS100IpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
+	m_SecondDS100ConnectionElmsContainer->AddComponent(m_SecondDS100IpAddressEdit.get(), 5);
 	m_SecondDS100IpAddressLabel = std::make_unique<Label>("SecondDS100IpAddressEdit", "IP Address");
 	m_SecondDS100IpAddressLabel->setJustificationType(Justification::centred);
-	m_SecondDS100IpAddressLabel->attachToComponent(m_SecondDS100IpAddressEdit.get(), true);
-	m_DS100Settings->addComponent(m_SecondDS100IpAddressLabel.get(), false, false);
-	m_DS100Settings->addComponent(m_SecondDS100IpAddressEdit.get(), true, false);
-
+	m_SecondDS100IpAddressLabel->attachToComponent(m_SecondDS100ConnectionElmsContainer.get(), true);
 #ifdef ZEROCONF_SUPPORTED
 	m_SecondDS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>(false, false);
 	m_SecondDS100ZeroconfDiscovery->onServiceSelected = [=](JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, ZeroconfSearcher::ZeroconfSearcher::ServiceInfo* info) { handleSecondDS100ServiceSelected(type, info); };
 	m_SecondDS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC);
-	m_DS100Settings->addComponent(m_SecondDS100ZeroconfDiscovery.get(), true, false);
+	m_SecondDS100ConnectionElmsContainer->AddComponent(m_SecondDS100ZeroconfDiscovery.get(), 1);
 #endif
+	m_DS100Settings->addComponent(m_SecondDS100IpAddressLabel.get(), false, false);
+	m_DS100Settings->addComponent(m_SecondDS100ConnectionElmsContainer.get(), true, false);
 
 	m_DS100Settings->resized();
 }
@@ -353,7 +357,7 @@ void SettingsSectionsComponent::createRTTrPMSettingsSection()
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingAreaLabel.get(), false, false);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingAreaSelect.get(), true, false);
 
-	m_RTTrPMMappingRangeXEditor = std::make_unique<RangeEditorComponent>(0.0f, 1.0f, "min", "max");
+	m_RTTrPMMappingRangeXEditor = std::make_unique<RangeEditorComponent>(-3.0f, 3.0f, "min", "max");
 	m_RTTrPMMappingRangeXEditor->SetListener(this);
 	m_RTTrPMMappingRangeXEditor->SetRange(0.0f, 1.0f);
 	m_RTTrPMMappingRangeXEditor->SetRangeLabels("min", "max");
@@ -364,7 +368,7 @@ void SettingsSectionsComponent::createRTTrPMSettingsSection()
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingRangeXLabel.get(), false, false);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingRangeXEditor.get(), true, false);
 
-	m_RTTrPMMappingRangeYEditor = std::make_unique<RangeEditorComponent>(0.0f, 1.0f, "min", "max");
+	m_RTTrPMMappingRangeYEditor = std::make_unique<RangeEditorComponent>(-3.0f, 3.0f, "min", "max");
 	m_RTTrPMMappingRangeYEditor->SetListener(this);
 	m_RTTrPMMappingRangeYEditor->SetRange(0.0f, 1.0f);
 	m_RTTrPMMappingRangeYEditor->SetRangeLabels("min", "max");
@@ -383,14 +387,14 @@ void SettingsSectionsComponent::createRTTrPMSettingsSection()
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMBeaconIdxAssignmentsLabel.get(), false, false);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMBeaconIdxAssignmentsEditor.get(), true, false);
 
-	m_RTTrPMModuleTypeSelect = std::make_unique<ComboBox>();
-	m_RTTrPMModuleTypeSelect->addListener(this);
-	m_RTTrPMModuleTypeSelect->addItemList(m_RTTrPMModuleTypes, 1);
-	m_RTTrPMModuleTypeLabel = std::make_unique<Label>("RTTrPMModuleTypeSelect", "Module Type");
-	m_RTTrPMModuleTypeLabel->setJustificationType(Justification::centred);
-	m_RTTrPMModuleTypeLabel->attachToComponent(m_RTTrPMModuleTypeSelect.get(), true);
-	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMModuleTypeLabel.get(), false, false);
-	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMModuleTypeSelect.get(), true, false);
+	m_RTTrPMDataTypeSelect = std::make_unique<ComboBox>();
+	m_RTTrPMDataTypeSelect->addListener(this);
+	m_RTTrPMDataTypeSelect->addItemList(juce::StringArray{ "Centroid Position", "LED Position" }, 1);
+	m_RTTrPMDataTypeLabel = std::make_unique<Label>("RTTrPMDataTypeSelect", "Data Type");
+	m_RTTrPMDataTypeLabel->setJustificationType(Justification::centred);
+	m_RTTrPMDataTypeLabel->attachToComponent(m_RTTrPMDataTypeSelect.get(), true);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMDataTypeLabel.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMDataTypeSelect.get(), true, false);
 
 	m_RTTrPMBridgingSettings->resized();
 }
@@ -1245,10 +1249,10 @@ void SettingsSectionsComponent::comboBoxChanged(ComboBox* comboBox)
 		m_previousRTTrPMMappingAreaId = m_RTTrPMMappingAreaSelect->getSelectedId();
 		ctrl->SetBridgingMappingArea(PBT_BlacktraxRTTrPM, m_previousRTTrPMMappingAreaId);
 	}
-	else if (m_RTTrPMModuleTypeSelect && m_RTTrPMModuleTypeSelect.get() == comboBox)
+	else if (m_RTTrPMDataTypeSelect && m_RTTrPMDataTypeSelect.get() == comboBox)
 	{
-		auto selectedModuleTypeIdentifier = m_RTTrPMModuleTypeSelect->getItemText(m_RTTrPMModuleTypeSelect->getSelectedId() - 1);
-		ctrl->SetBridgingModuleTypeIdentifier(PBT_BlacktraxRTTrPM, selectedModuleTypeIdentifier);
+		auto selectedDataType = m_RTTrPMDataTypeSelect->getItemText(m_RTTrPMDataTypeSelect->getSelectedId() - 1);
+	 	ctrl->SetBridgingModuleTypeIdentifier(PBT_BlacktraxRTTrPM, m_RTTrPMDataTypes.at(selectedDataType), dontSendNotification);
 	}
 
 	// Generic MIDI settings section
@@ -1584,8 +1588,13 @@ void SettingsSectionsComponent::processUpdatedRTTrPMConfig()
 	}
 	
 	auto RTTrPMModuleTypeIdentifier = ctrl->GetBridgingModuleTypeIdentifier(PBT_BlacktraxRTTrPM);
-	if (m_RTTrPMModuleTypeSelect)
-		m_RTTrPMModuleTypeSelect->setSelectedItemIndex(m_RTTrPMModuleTypes.indexOf(RTTrPMModuleTypeIdentifier));
+	if (m_RTTrPMDataTypeSelect)
+	{
+		if (m_RTTrPMDataTypes.at("Centroid Position") == RTTrPMModuleTypeIdentifier)
+			m_RTTrPMDataTypeSelect->setSelectedItemIndex(0);
+		else
+			m_RTTrPMDataTypeSelect->setSelectedItemIndex(1);
+	}
 }
 
 /**

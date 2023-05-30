@@ -4,24 +4,21 @@
 
 ![Showreel.025.png](../Showreel/Showreel.025.png "BlackTrax RTTrPM Mapping Range Setup")
 
-![Showreel.026.png](../Showreel/Showreel.026.png "BlackTrax RTTrPM Beacon Index remapping")
 
-Minimal demo video for example setup with BlackTrax simulation software (Simulator software package can be obtained from BlackTrax at https://blacktrax.cast-soft.com/developer/):
+### Tracker 'Network' config
 
-_[![Example setup with BlackTrax simulation software](https://img.youtube.com/vi/qJaJkVd-tLA/0.jpg)](https://www.youtube.com/watch?v=qJaJkVd-tLA)_
+![SpaConBridge-Blacktrax-NetworkSetup.png](BlackTraxRTTrPM/SpaConBridge-Blacktrax-NetworkSetup.png "BlackTrax RTTrPM Network Settings")
 
+### Tracker 'Advanced' config
 
-### Tracker simulation network connection setup
-
-![SpaConBridge-Blacktrax-ConnectionSetup.png](BlackTraxRTTrPM/SpaConBridge-Blacktrax-ConnectionSetup.png "BlackTrax RTTrPM Connection Settings")
-
-### Tracker simulation protocol contents setup
-
-![SpaConBridge-Blacktrax-ComContentsSetup.png](BlackTraxRTTrPM/SpaConBridge-Blacktrax-ComContentsSetup.png "BlackTrax RTTrPM Communication Protocol Contents Settings")
+![SpaConBridge-Blacktrax-AdvancedSetup.png](BlackTraxRTTrPM/SpaConBridge-Blacktrax-AdvancedSetup.png "BlackTrax RTTrPM Advanced Settings")
 
 ### Beacon Index to Soundobject mapping
 
-![SpaConBridge-Blacktrax-BeaconIdxToSoundobjectTraffic.png](BlackTraxRTTrPM/SpaConBridge-Blacktrax-BeaconIdxToSoundobjectTraffic.png "BlackTrax RTTrPM Beacon Idx to Soundobject number")
+Beacon indices to Soundobject mapping default is 1:1, meaning positioning information for Beacon one is interpreted and forwarded as position for Soundobject one.
+This optionally can be changed using the 'Edit remappings' option, where the mapping from Beacons to Soundobjects can be modified in a table. Any Beacon index entry in the table maps that very Beacons positioning information to the configured Soundobject. For any Beacon not configured in the table, the default 1:1 mapping is used.
+
+![Showreel.026.png](../Showreel/Showreel.026.png "BlackTrax RTTrPM Beacon Index remapping")
 
 
 ### Implemented Soundscape remote objects for protocol bridging

@@ -167,8 +167,8 @@ private:
 	std::unique_ptr<TextEditor>									m_DS100IntervalEdit;
 	std::unique_ptr<Label>										m_DS100IntervalLabel;
 	std::unique_ptr<TextEditor>									m_DS100IpAddressEdit;
+	std::unique_ptr<HorizontalLayouterComponent>				m_DS100ConnectionElmsContainer;
 	std::unique_ptr<Label>										m_DS100IpAddressLabel;
-
 #ifdef ZEROCONF_SUPPORTED
 	std::unique_ptr<JUCEAppBasics::ZeroconfDiscoverComponent>	m_DS100ZeroconfDiscovery;
 #endif
@@ -178,8 +178,11 @@ private:
 	const std::vector<std::string>								m_SecondDS100Modes{ "Off", "Extend", "Parallel", "Mirror" };
 	std::map<std::string, uint64>								m_SecondDS100ModeButtonIds;
 	std::unique_ptr<TextEditor>									m_SecondDS100IpAddressEdit;
+	std::unique_ptr<HorizontalLayouterComponent>				m_SecondDS100ConnectionElmsContainer;
 	std::unique_ptr<Label>										m_SecondDS100IpAddressLabel;
+#ifdef ZEROCONF_SUPPORTED
 	std::unique_ptr<JUCEAppBasics::ZeroconfDiscoverComponent>	m_SecondDS100ZeroconfDiscovery;
+#endif
 
 	std::unique_ptr<JUCEAppBasics::SplitButtonComponent>		m_SecondDS100ParallelModeButton;
 	std::unique_ptr<Label>										m_SecondDS100ParallelModeLabel;

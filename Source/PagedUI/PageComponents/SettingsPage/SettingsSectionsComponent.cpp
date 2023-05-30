@@ -176,21 +176,23 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 	m_DS100Settings->addComponent(m_DS100IntervalEdit.get(), true, false);
 
 	//first DS100 - ch. 1-64
+	m_DS100ConnectionElmsContainer = std::make_unique<HorizontalLayouterComponent>();
+	m_DS100ConnectionElmsContainer->SetSpacing(5);
 	m_DS100IpAddressEdit = std::make_unique<TextEditor>();
 	m_DS100IpAddressEdit->addListener(this);
 	m_DS100IpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
+	m_DS100ConnectionElmsContainer->AddComponent(m_DS100IpAddressEdit.get(), 5);
 	m_DS100IpAddressLabel = std::make_unique<Label>("DS100IpAddressEdit", "IP Address");
 	m_DS100IpAddressLabel->setJustificationType(Justification::centred);
-	m_DS100IpAddressLabel->attachToComponent(m_DS100IpAddressEdit.get(), true);
-	m_DS100Settings->addComponent(m_DS100IpAddressLabel.get(), false, false);
-	m_DS100Settings->addComponent(m_DS100IpAddressEdit.get(), true, false);
-
+	m_DS100IpAddressLabel->attachToComponent(m_DS100ConnectionElmsContainer.get(), true);
 #ifdef ZEROCONF_SUPPORTED
 	m_DS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>(false, false);
 	m_DS100ZeroconfDiscovery->onServiceSelected = [=](JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, ZeroconfSearcher::ZeroconfSearcher::ServiceInfo* info) { handleDS100ServiceSelected(type, info); };
 	m_DS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC);
-	m_DS100Settings->addComponent(m_DS100ZeroconfDiscovery.get(), true, false);
+	m_DS100ConnectionElmsContainer->AddComponent(m_DS100ZeroconfDiscovery.get(), 1);
 #endif
+	m_DS100Settings->addComponent(m_DS100IpAddressLabel.get(), false, false);
+	m_DS100Settings->addComponent(m_DS100ConnectionElmsContainer.get(), true, false);
 
 	m_SecondDS100ModeButton = std::make_unique<JUCEAppBasics::SplitButtonComponent>();
 	m_SecondDS100ModeButton->addListener(this);
@@ -217,21 +219,23 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 	m_DS100Settings->addComponent(m_SecondDS100ParallelModeButton.get(), true, false);
 
 	//second DS100 - ch. 65-128
+	m_SecondDS100ConnectionElmsContainer = std::make_unique<HorizontalLayouterComponent>();
+	m_SecondDS100ConnectionElmsContainer->SetSpacing(5);
 	m_SecondDS100IpAddressEdit = std::make_unique<TextEditor>();
 	m_SecondDS100IpAddressEdit->addListener(this);
 	m_SecondDS100IpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
+	m_SecondDS100ConnectionElmsContainer->AddComponent(m_SecondDS100IpAddressEdit.get(), 5);
 	m_SecondDS100IpAddressLabel = std::make_unique<Label>("SecondDS100IpAddressEdit", "IP Address");
 	m_SecondDS100IpAddressLabel->setJustificationType(Justification::centred);
-	m_SecondDS100IpAddressLabel->attachToComponent(m_SecondDS100IpAddressEdit.get(), true);
-	m_DS100Settings->addComponent(m_SecondDS100IpAddressLabel.get(), false, false);
-	m_DS100Settings->addComponent(m_SecondDS100IpAddressEdit.get(), true, false);
-
+	m_SecondDS100IpAddressLabel->attachToComponent(m_SecondDS100ConnectionElmsContainer.get(), true);
 #ifdef ZEROCONF_SUPPORTED
 	m_SecondDS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>(false, false);
 	m_SecondDS100ZeroconfDiscovery->onServiceSelected = [=](JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, ZeroconfSearcher::ZeroconfSearcher::ServiceInfo* info) { handleSecondDS100ServiceSelected(type, info); };
 	m_SecondDS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC);
-	m_DS100Settings->addComponent(m_SecondDS100ZeroconfDiscovery.get(), true, false);
+	m_SecondDS100ConnectionElmsContainer->AddComponent(m_SecondDS100ZeroconfDiscovery.get(), 1);
 #endif
+	m_DS100Settings->addComponent(m_SecondDS100IpAddressLabel.get(), false, false);
+	m_DS100Settings->addComponent(m_SecondDS100ConnectionElmsContainer.get(), true, false);
 
 	m_DS100Settings->resized();
 }

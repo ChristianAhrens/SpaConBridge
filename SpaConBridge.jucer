@@ -4,25 +4,43 @@
               bundleIdentifier="com.ChristianAhrens.SpaConBridge" companyName="Christian Ahrens"
               companyEmail="christianahrens@me.com" displaySplashScreen="0"
               reportAppUsage="0" companyCopyright="2023" jucerFormatVersion="1"
-              headerPath="../../submodules/RemoteProtocolBridgeCore/Source&#10;../../submodules/JUCE-AppBasics/Source"
+              headerPath="../../submodules/RemoteProtocolBridgeCore/submodules/NanoOcp/Source/&#10;../../submodules/RemoteProtocolBridgeCore/Source&#10;../../submodules/JUCE-AppBasics/Source"
               companyWebsite="https://github.com/ChristianAhrens/SpaConBridge">
   <MAINGROUP id="cS7SrP" name="SpaConBridge">
     <GROUP id="{F93FDF74-FF39-A47E-E403-31E5ADA7ADD3}" name="submodules">
       <GROUP id="{9CCE33BC-DFA0-AFFB-5206-C2377252AD64}" name="RemoteProtocolBridgeCore">
+        <GROUP id="{321C5394-CFC4-BD25-44AD-85E16C351DEA}" name="submodules">
+          <GROUP id="{318B4966-9F78-D995-CDBC-633BA038EF7E}" name="NanoOcp">
+            <FILE id="HiuZei" name="NanoOcp1.cpp" compile="1" resource="0" file="submodules/RemoteProtocolBridgeCore/submodules/NanoOcp/Source/NanoOcp1.cpp"/>
+            <FILE id="e7PRp4" name="NanoOcp1.h" compile="0" resource="0" file="submodules/RemoteProtocolBridgeCore/submodules/NanoOcp/Source/NanoOcp1.h"/>
+            <FILE id="pp5rDb" name="Ocp1Connection.cpp" compile="1" resource="0"
+                  file="submodules/RemoteProtocolBridgeCore/submodules/NanoOcp/Source/Ocp1Connection.cpp"/>
+            <FILE id="tJ35Uv" name="Ocp1Connection.h" compile="0" resource="0"
+                  file="submodules/RemoteProtocolBridgeCore/submodules/NanoOcp/Source/Ocp1Connection.h"/>
+            <FILE id="l0VRDQ" name="Ocp1ConnectionServer.cpp" compile="1" resource="0"
+                  file="submodules/RemoteProtocolBridgeCore/submodules/NanoOcp/Source/Ocp1ConnectionServer.cpp"/>
+            <FILE id="vBrO9D" name="Ocp1ConnectionServer.h" compile="0" resource="0"
+                  file="submodules/RemoteProtocolBridgeCore/submodules/NanoOcp/Source/Ocp1ConnectionServer.h"/>
+            <FILE id="FkICD0" name="Ocp1Message.cpp" compile="1" resource="0" file="submodules/RemoteProtocolBridgeCore/submodules/NanoOcp/Source/Ocp1Message.cpp"/>
+            <FILE id="PCY7og" name="Ocp1Message.h" compile="0" resource="0" file="submodules/RemoteProtocolBridgeCore/submodules/NanoOcp/Source/Ocp1Message.h"/>
+          </GROUP>
+        </GROUP>
         <GROUP id="{F0157EC5-9555-900E-531F-BF6E4749BCDB}" name="Source">
           <GROUP id="{2E8BFFBC-4304-5502-C5BC-5ED6245F5602}" name="ProcessingEngine">
             <GROUP id="{F34634AA-7C63-8492-0796-EA519DFF7646}" name="ProtocolProcessor">
+              <GROUP id="{6229E86E-3EE8-7268-007E-0F86792E20C8}" name="OCP1ProtocolProcessor">
+                <FILE id="JW4Gnb" name="Ocp1DS100ObjectDefinitions.h" compile="0" resource="0"
+                      file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/OCP1ProtocolProcessor/Ocp1DS100ObjectDefinitions.h"/>
+                <FILE id="rF47EZ" name="OCP1ProtocolProcessor.cpp" compile="1" resource="0"
+                      file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/OCP1ProtocolProcessor/OCP1ProtocolProcessor.cpp"/>
+                <FILE id="qldUiO" name="OCP1ProtocolProcessor.h" compile="0" resource="0"
+                      file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/OCP1ProtocolProcessor/OCP1ProtocolProcessor.h"/>
+              </GROUP>
               <GROUP id="{7CCE187C-388D-8526-47CA-5EE7427602EA}" name="MIDIProtocolProcessor">
                 <FILE id="nLm0me" name="MIDIProtocolProcessor.cpp" compile="1" resource="0"
                       file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/MIDIProtocolProcessor/MIDIProtocolProcessor.cpp"/>
                 <FILE id="ZVjAjd" name="MIDIProtocolProcessor.h" compile="0" resource="0"
                       file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/MIDIProtocolProcessor/MIDIProtocolProcessor.h"/>
-              </GROUP>
-              <GROUP id="{175B3E9C-4C35-7D01-9379-6009FADBF04F}" name="OCAProtocolProcessor">
-                <FILE id="hvAGIw" name="OCAProtocolProcessor.cpp" compile="1" resource="0"
-                      file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/OCAProtocolProcessor/OCAProtocolProcessor.cpp"/>
-                <FILE id="RKB4Jo" name="OCAProtocolProcessor.h" compile="0" resource="0"
-                      file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/OCAProtocolProcessor/OCAProtocolProcessor.h"/>
               </GROUP>
               <GROUP id="{3AC151D8-BEE7-5CBC-2C43-F243FDC23462}" name="OSCProtocolProcessor">
                 <FILE id="dW5MJI" name="ADMOSCProtocolProcessor.cpp" compile="1" resource="0"

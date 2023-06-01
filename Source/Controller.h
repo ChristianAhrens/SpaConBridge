@@ -144,6 +144,10 @@ public:
 	std::vector<RemoteObject> GetMatrixOutputProcessorRemoteObjects(MatrixOutputProcessorId matrixOutputProcessorId);
 
 	//==========================================================================
+	ProtocolType GetDS100ProtocolType() const;
+	void SetDS100ProtocolType(DataChangeParticipant changeSource, ProtocolType protocol, bool dontSendNotification = false);
+
+	//==========================================================================
 	String GetDS100IpAddress() const;
 	void SetDS100IpAddress(DataChangeParticipant changeSource, String ipAddress, bool dontSendNotification = false);
 	String GetSecondDS100IpAddress() const;
@@ -288,6 +292,7 @@ protected:
 
 	ProtocolBridgingWrapper			m_protocolBridge;				/**< The wrapper for protocol bridging node, allowing to easily interface with it. */
 
+	ProtocolType					m_DS100ProtocolType;			/** Current protocol type. This has impact on other parameters being available on ui or not. */
 	String							m_DS100IpAddress;				/**< IP Address where OSC messages will be sent to / received from. */
 	ExtensionMode					m_DS100ExtensionMode;			/**< Current extension mode. This has impact on if second DS100 is active or not. */
 	ActiveParallelModeDS100			m_DS100ActiveParallelModeDS100;	/**< Currently active DS100 when in extension mode "parallel". */

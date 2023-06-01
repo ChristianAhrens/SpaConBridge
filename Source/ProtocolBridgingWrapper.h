@@ -129,6 +129,9 @@ public:
 	//==========================================================================
 	bool UpdateActiveDS100RemoteObjectIds();
 
+	ProtocolType GetDS100ProtocolType();
+	bool SetDS100ProtocolType(ProtocolType protocolType, bool dontSendNotification = false);
+
 	String GetDS100IpAddress();
 	bool SetDS100IpAddress(String ipAddress, bool dontSendNotification = false);
 

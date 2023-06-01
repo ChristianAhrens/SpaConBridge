@@ -166,6 +166,17 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 	m_DS100Settings->setHasActiveToggle(false);
 	addAndMakeVisible(m_DS100Settings.get());
 
+	m_DS100ProtocolSelectButton = std::make_unique<JUCEAppBasics::SplitButtonComponent>();
+	m_DS100ProtocolSelectButton->addListener(this);
+	m_DS100ProtocolSelectButtonIds[m_DS100ProtocolSelects[0]] = m_DS100ProtocolSelectButton->addButton(m_DS100ProtocolSelects[0]);
+	m_DS100ProtocolSelectButtonIds[m_DS100ProtocolSelects[1]] = m_DS100ProtocolSelectButton->addButton(m_DS100ProtocolSelects[1]);
+	m_DS100ProtocolSelectButton->setButtonDown(m_DS100ProtocolSelectButtonIds[m_SecondDS100Modes[0]]);
+	m_DS100ProtocolSelectLabel = std::make_unique<Label>("DS100ProtocolSelectButton", "DS100 Protocol");
+	m_DS100ProtocolSelectLabel->setJustificationType(Justification::centred);
+	m_DS100ProtocolSelectLabel->attachToComponent(m_DS100ProtocolSelectButton.get(), true);
+	m_DS100Settings->addComponent(m_DS100ProtocolSelectLabel.get(), false, false);
+	m_DS100Settings->addComponent(m_DS100ProtocolSelectButton.get(), true, false);
+
 	m_DS100IntervalEdit = std::make_unique<TextEditor>();
 	m_DS100IntervalEdit->addListener(this);
 	m_DS100IntervalEdit->setInputFilter(m_intervalEditFilter.get(), false);
@@ -1055,8 +1066,21 @@ void SettingsSectionsComponent::buttonClicked(JUCEAppBasics::SplitButtonComponen
 	if (button && !button->isEnabled())
 		return;
 
+	// DS100 protocol settings section
+	if (m_DS100ProtocolSelectButton && m_DS100ProtocolSelectButton.get() == button)
+	{
+		if (m_DS100ProtocolSelectButtonIds[m_DS100ProtocolSelects[0]] == buttonId) // OSC
+		{
+			ctrl->SetDS100ProtocolType(DCP_Settings, PT_OSCProtocol);
+		}
+		else if (m_DS100ProtocolSelectButtonIds[m_DS100ProtocolSelects[1]] == buttonId) // OCP1
+		{
+			ctrl->SetDS100ProtocolType(DCP_Settings, PT_OCP1Protocol);
+		}
+	}
+
 	// DS100 mode settings section
-	if (m_SecondDS100ModeButton && m_SecondDS100ModeButton.get() == button)
+	else if (m_SecondDS100ModeButton && m_SecondDS100ModeButton.get() == button)
 	{
 		if (m_SecondDS100ModeButtonIds[m_SecondDS100Modes[0]] == buttonId) // Off
 		{
@@ -1466,6 +1490,13 @@ void SettingsSectionsComponent::processUpdatedDS100Config()
 		return;
 
 	// DS100 settings section
+	if (m_DS100ProtocolSelectButton)
+	{
+		auto newActiveButtonId = m_DS100ProtocolSelectButtonIds[m_DS100ProtocolSelects[0]];
+		if (ctrl->GetDS100ProtocolType() == PT_OCP1Protocol)
+			newActiveButtonId = m_DS100ProtocolSelectButtonIds[m_DS100ProtocolSelects[1]];
+		m_DS100ProtocolSelectButton->setButtonDown(newActiveButtonId);
+	}
 	if (m_DS100IntervalEdit)
 		m_DS100IntervalEdit->setText(String(ctrl->GetRefreshInterval()) + UNIT_MILLISECOND);
 	if (m_DS100IpAddressEdit)

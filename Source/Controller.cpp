@@ -950,6 +950,36 @@ std::vector<MatrixOutputProcessorId> Controller::GetMatrixOutputProcessorIds() c
 
 
 /**
+ * Getter function for the DS100 protocol type currently used.
+ * @return	Current protocol type used for communication.
+ */
+ProtocolType Controller::GetDS100ProtocolType() const
+{
+	return m_DS100ProtocolType;
+}
+
+/**
+ * Setter function for the DS100 protocol type to be used.
+ * @param changeSource	The application module which is causing the property change.
+ * @param mode		New protocol type.
+ * @param dontSendNotification	Flag if the app configuration update should be triggered.
+ */
+void Controller::SetDS100ProtocolType(DataChangeParticipant changeSource, ProtocolType protocol, bool dontSendNotification)
+{
+	const ScopedLock lock(m_mutex);
+
+	m_DS100ProtocolType = protocol;
+
+	m_protocolBridge.SetDS100ProtocolType(protocol, dontSendNotification);
+
+	// Signal the change to all Processors. 
+	SetParameterChanged(changeSource, DCT_ProtocolType);
+	SetParameterChanged(changeSource, DCT_Connected);
+
+	Reconnect();
+}
+
+/**
  * Getter function for the IP address to which m_oscSender and m_oscReceiver are connected.
  * @return	Current IP address.
  */

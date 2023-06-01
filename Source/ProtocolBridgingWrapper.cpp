@@ -2697,6 +2697,76 @@ bool ProtocolBridgingWrapper::UpdateActiveDS100RemoteObjectIds()
 }
 
 /**
+ * Getter method for the active DS100 communication protocol type.
+ * This does not return a member variable value but contains logic to derive the mode from internal cached xml element configuration.
+ * @return The DS100 communication protocol type as results from cached xml config. Default PT_OSCProtocol if xml is invalid.
+ */
+ProtocolType ProtocolBridgingWrapper::GetDS100ProtocolType()
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+		{
+			return ProcessingEngineConfig::ProtocolTypeFromString(protocolXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE)));
+		}
+	}
+
+	return PT_OSCProtocol;
+}
+
+/**
+ * Sets the desired protocol type for communication with the DS100(s).
+ * This method inserts the rate value into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param msgRate	The new message rate value in ms
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetDS100ProtocolType(ProtocolType protocolType, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+		{
+			protocolXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), ProcessingEngineConfig::ProtocolTypeToString(protocolType));
+
+			//auto clientPortXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+			//if (clientPortXmlElement)
+			//	clientPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), (protocolType == PT_OSCProtocol ? RX_PORT_DS100_DEVICE : andererport));
+			//
+			//auto hostPortXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
+			//if (hostPortXmlElement)
+			//	hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), (protocolType == PT_OSCProtocol ? RX_PORT_DS100_HOST : andererport));
+		}
+		else
+			return false;
+
+		protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_2_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+		{
+			protocolXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), ProcessingEngineConfig::ProtocolTypeToString(protocolType));
+
+			//auto clientPortXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+			//if (clientPortXmlElement)
+			//	clientPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), (protocolType == PT_OSCProtocol ? RX_PORT_DS100_DEVICE : andererport));
+			//
+			//auto hostPortXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
+			//if (hostPortXmlElement)
+			//	hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), (protocolType == PT_OSCProtocol ? RX_PORT_DS100_HOST : andererport));
+		}
+		// its ok to have no else return false here, since the second DS100 is not mandatory in config!
+
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
+}
+
+/**
  * Gets the currently set DS100 client ip address.
  * This method forwards the call to the generic implementation.
  * @return	The ip address string
@@ -2742,7 +2812,7 @@ bool ProtocolBridgingWrapper::SetSecondDS100IpAddress(String ipAddress, bool don
 
 /**
  * Gets the currently active message rate for protocol polling.
- * @return	True on succes, false if failure
+ * @return	The message rate currently set in xml config
  */
 int ProtocolBridgingWrapper::GetDS100MsgRate()
 {
@@ -2767,7 +2837,7 @@ int ProtocolBridgingWrapper::GetDS100MsgRate()
  * Sets the desired message rate for protocol polling.
  * This method inserts the rate value into the cached xml element,
  * pushes the updated xml element into processing node and triggers configuration updating.
- * @param msgRate	The new message rate value in ms
+ * @param msgRate	The new protocol type enum id
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  * @return	True on succes, false if failure
  */
@@ -2801,8 +2871,7 @@ bool ProtocolBridgingWrapper::SetDS100MsgRate(int msgRate, bool dontSendNotifica
 			else
 				return false;
 		}
-		else
-			return false;
+		// its ok to have no else return false here, since the second DS100 is not mandatory in config!
 
 		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
 	}

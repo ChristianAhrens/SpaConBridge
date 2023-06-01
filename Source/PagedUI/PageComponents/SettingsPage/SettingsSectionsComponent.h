@@ -164,6 +164,10 @@ private:
 
 	// DS100 settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_DS100Settings;
+	std::unique_ptr<JUCEAppBasics::SplitButtonComponent>		m_DS100ProtocolSelectButton;
+	std::unique_ptr<Label>										m_DS100ProtocolSelectLabel;
+	const std::vector<std::string>								m_DS100ProtocolSelects{ "OSC", "OCP1" };
+	std::map<std::string, uint64>								m_DS100ProtocolSelectButtonIds;
 	std::unique_ptr<TextEditor>									m_DS100IntervalEdit;
 	std::unique_ptr<Label>										m_DS100IntervalLabel;
 	std::unique_ptr<TextEditor>									m_DS100IpAddressEdit;

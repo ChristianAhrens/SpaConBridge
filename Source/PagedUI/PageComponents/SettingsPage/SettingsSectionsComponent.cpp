@@ -189,6 +189,7 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 	m_DS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>(false, false);
 	m_DS100ZeroconfDiscovery->onServiceSelected = [=](JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, ZeroconfSearcher::ZeroconfSearcher::ServiceInfo* info) { handleDS100ServiceSelected(type, info); };
 	m_DS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC);
+	m_DS100ZeroconfDiscovery->addPopupCategory("d&b DS100 devices", std::make_pair("db_devicename", "DS100"));
 	m_DS100ConnectionElmsContainer->AddComponent(m_DS100ZeroconfDiscovery.get(), 1);
 #endif
 	m_DS100Settings->addComponent(m_DS100IpAddressLabel.get(), false, false);
@@ -232,6 +233,7 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 	m_SecondDS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>(false, false);
 	m_SecondDS100ZeroconfDiscovery->onServiceSelected = [=](JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, ZeroconfSearcher::ZeroconfSearcher::ServiceInfo* info) { handleSecondDS100ServiceSelected(type, info); };
 	m_SecondDS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC);
+	m_SecondDS100ZeroconfDiscovery->addPopupCategory("d&b DS100 devices", std::make_pair("db_devicename", "DS100"));
 	m_SecondDS100ConnectionElmsContainer->AddComponent(m_SecondDS100ZeroconfDiscovery.get(), 1);
 #endif
 	m_DS100Settings->addComponent(m_SecondDS100IpAddressLabel.get(), false, false);

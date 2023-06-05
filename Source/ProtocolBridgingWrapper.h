@@ -40,6 +40,8 @@ static constexpr int PROTOCOL_DEFAULT_MAPPINGAREA = 1;	//< Mapping Area Id to us
 
 static constexpr int PROTOCOL_DEFAULT_INPUTDEVICEINDEX = 0;	//< Input Device Index to use as default
 
+static constexpr int RX_PORT_DS100_DEVICE_OCP1 = 50014;		//< TCP port which the DS100 is listening to for OCP1 (OCA/AES70) connections
+
 static constexpr int RX_PORT_DS100_DEVICE = 50010;		//< UDP port which the DS100 is listening to for OSC
 static constexpr int RX_PORT_DS100_HOST = 50011;		//< UDP port to which the DS100 will send OSC replies
 

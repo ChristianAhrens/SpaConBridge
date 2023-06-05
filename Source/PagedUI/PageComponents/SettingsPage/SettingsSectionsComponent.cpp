@@ -1482,6 +1482,8 @@ void SettingsSectionsComponent::processUpdatedGeneralConfig()
 
 /**
  * Helper method to update objects for DS100 settings section with updated config
+ * This includes enabling/disabling elements depending on the mode config for a second DS100
+ * and what protocol type is selected to be used to communicate with DS100(s).
  */
 void SettingsSectionsComponent::processUpdatedDS100Config()
 {
@@ -1498,9 +1500,28 @@ void SettingsSectionsComponent::processUpdatedDS100Config()
 		m_DS100ProtocolSelectButton->setButtonDown(newActiveButtonId);
 	}
 	if (m_DS100IntervalEdit)
+	{
 		m_DS100IntervalEdit->setText(String(ctrl->GetRefreshInterval()) + UNIT_MILLISECOND);
+		m_DS100IntervalEdit->setEnabled(ctrl->GetDS100ProtocolType() == PT_OSCProtocol);
+	}
+	if (m_DS100IntervalLabel)
+		m_DS100IntervalLabel->setEnabled(ctrl->GetDS100ProtocolType() == PT_OSCProtocol);
 	if (m_DS100IpAddressEdit)
 		m_DS100IpAddressEdit->setText(ctrl->GetDS100IpAddress());
+	if (m_DS100ZeroconfDiscovery)
+	{
+		if (ctrl->GetDS100ProtocolType() == PT_OCP1Protocol)
+		{
+			m_DS100ZeroconfDiscovery->removeDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC);
+			m_DS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OCA);
+		}
+		else
+		{
+			m_DS100ZeroconfDiscovery->removeDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OCA);
+			m_DS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC);
+		}
+		m_DS100ZeroconfDiscovery->resized();
+	}
 	if (m_SecondDS100ModeButton)
 	{
 		auto newActiveButtonId = m_SecondDS100ModeButtonIds[m_SecondDS100Modes[0]];
@@ -1531,7 +1552,20 @@ void SettingsSectionsComponent::processUpdatedDS100Config()
 	if (m_SecondDS100IpAddressLabel)
 		m_SecondDS100IpAddressLabel->setEnabled(ctrl->GetExtensionMode() != EM_Off);
 	if (m_SecondDS100ZeroconfDiscovery)
+	{
 		m_SecondDS100ZeroconfDiscovery->setEnabled(ctrl->GetExtensionMode() != EM_Off);
+		if (ctrl->GetDS100ProtocolType() == PT_OCP1Protocol)
+		{
+			m_SecondDS100ZeroconfDiscovery->removeDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC);
+			m_SecondDS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OCA);
+		}
+		else
+		{
+			m_SecondDS100ZeroconfDiscovery->removeDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OCA);
+			m_SecondDS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC);
+		}
+		m_SecondDS100ZeroconfDiscovery->resized();
+	}
 }
 
 /**

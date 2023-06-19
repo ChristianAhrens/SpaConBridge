@@ -155,10 +155,10 @@ Controller::Controller()
 	// Controller derives from ProcessingEngineNode::Listener
 	AddProtocolBridgingWrapperListener(this);
 
-	// Default OSC server settings. These might become overwritten 
-	// by setStateInformation()
+	// Some default value initialization just to be sure
 	SetRefreshInterval(DCP_Init, PROTOCOL_INTERVAL_DEF, true);
-	SetDS100IpAddress(DCP_Init, PROTOCOL_DEFAULT_IP, true);
+	SetDS100IpAndPort(DCP_Init, PROTOCOL_DEFAULT_IP, RX_PORT_DS100_DEVICE, true);
+	SetSecondDS100IpAndPort(DCP_Init, PROTOCOL_DEFAULT2_IP, RX_PORT_DS100_DEVICE, true);
 	SetExtensionMode(DCP_Init, EM_Off, true);
 	SetActiveParallelModeDS100(DCP_Init, APM_None, true);
 
@@ -980,12 +980,12 @@ void Controller::SetDS100ProtocolType(DataChangeParticipant changeSource, Protoc
 }
 
 /**
- * Getter function for the IP address to which m_oscSender and m_oscReceiver are connected.
+ * Getter function for the IP address and port to which we are connected.
  * @return	Current IP address.
  */
-String Controller::GetDS100IpAddress() const
+std::pair<juce::String, int> Controller::GetDS100IpAndPort() const
 {
-	return m_DS100IpAddress;
+	return std::make_pair(m_DS100IpAddress, m_DS100Port);
 }
 
 /**
@@ -993,17 +993,20 @@ String Controller::GetDS100IpAddress() const
  * NOTE: changing ip address will disconnect m_oscSender and m_oscReceiver.
  * @param changeSource	The application module which is causing the property change.
  * @param ipAddress		New IP address.
+ * @param port			New port.
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  */
-void Controller::SetDS100IpAddress(DataChangeParticipant changeSource, String ipAddress, bool dontSendNotification)
+void Controller::SetDS100IpAndPort(DataChangeParticipant changeSource, String ipAddress, int port, bool dontSendNotification)
 {
 	if (m_DS100IpAddress != ipAddress)
 	{
 		const ScopedLock lock(m_mutex);
 
 		m_DS100IpAddress = ipAddress;
-
 		m_protocolBridge.SetDS100IpAddress(ipAddress, dontSendNotification);
+
+		m_DS100Port = port;
+		m_protocolBridge.SetDS100Port(port, dontSendNotification);
 
 		// Signal the change to all Processors. 
 		SetParameterChanged(changeSource, DCT_IPAddress);
@@ -1014,12 +1017,12 @@ void Controller::SetDS100IpAddress(DataChangeParticipant changeSource, String ip
 }
 
 /**
- * Getter function for the IP address to which m_oscSender and m_oscReceiver are connected.
- * @return	Current IP address.
+ * Getter function for the IP address and to which we are connected.
+ * @return	Current IP address + port.
  */
-String Controller::GetSecondDS100IpAddress() const
+std::pair<juce::String, int> Controller::GetSecondDS100IpAndPort() const
 {
-	return m_SecondDS100IpAddress;
+	return std::make_pair(m_SecondDS100IpAddress, m_SecondDS100Port);
 }
 
 /**
@@ -1027,17 +1030,20 @@ String Controller::GetSecondDS100IpAddress() const
  * NOTE: changing ip address will disconnect m_oscSender and m_oscReceiver.
  * @param changeSource	The application module which is causing the property change.
  * @param ipAddress		New IP address.
+ * @param port			New port.
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  */
-void Controller::SetSecondDS100IpAddress(DataChangeParticipant changeSource, String ipAddress, bool dontSendNotification)
+void Controller::SetSecondDS100IpAndPort(DataChangeParticipant changeSource, String ipAddress, int port, bool dontSendNotification)
 {
 	if (m_SecondDS100IpAddress != ipAddress)
 	{
 		const ScopedLock lock(m_mutex);
 
 		m_SecondDS100IpAddress = ipAddress;
-
 		m_protocolBridge.SetSecondDS100IpAddress(ipAddress, dontSendNotification);
+
+		m_DS100Port = port;
+		m_protocolBridge.SetDS100Port(port, dontSendNotification);
 
 		// Signal the change to all Processors. 
 		SetParameterChanged(changeSource, DCT_IPAddress);
@@ -1254,18 +1260,6 @@ void Controller::SetActiveParallelModeDS100(DataChangeParticipant changeSource, 
 
 		Reconnect();
 	}
-}
-
-/**
- * Method to initialize IP address and polling rate.
- * @param changeSource			The application module which is causing the property change.
- * @param ipAddress				New IP address.
- * @param rarefreshIntervalte	New refresh interval, in milliseconds.
- */
-void Controller::InitGlobalSettings(DataChangeParticipant changeSource, String ipAddress, int refreshInterval)
-{
-	SetDS100IpAddress(changeSource, ipAddress);
-	SetRefreshInterval(changeSource, refreshInterval);
 }
 
 /**
@@ -2420,8 +2414,8 @@ bool Controller::setStateXml(XmlElement* stateXml)
 		{
 			SetDS100ProtocolType(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100ProtocolType(), true);
 			SetExtensionMode(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100ExtensionMode(), true);
-			SetDS100IpAddress(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100IpAddress(), true);
-			SetSecondDS100IpAddress(DataChangeParticipant::DCP_Init, m_protocolBridge.GetSecondDS100IpAddress(), true);
+			SetDS100IpAndPort(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100IpAddress(), m_protocolBridge.GetDS100Port(), true);
+			SetSecondDS100IpAndPort(DataChangeParticipant::DCP_Init, m_protocolBridge.GetSecondDS100IpAddress(), m_protocolBridge.GetSecondDS100Port(), true);
 			SetRefreshInterval(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100MsgRate(), true);
 			SetActiveParallelModeDS100(DataChangeParticipant::DCP_Init, m_protocolBridge.GetActiveParallelModeDS100(), true);
 		}

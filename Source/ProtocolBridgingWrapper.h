@@ -137,11 +137,17 @@ public:
 	String GetDS100IpAddress();
 	bool SetDS100IpAddress(String ipAddress, bool dontSendNotification = false);
 
+	int GetDS100Port();
+	bool SetDS100Port(int port, bool dontSendNotification = false);
+
 	int GetDS100MsgRate();
 	bool SetDS100MsgRate(int msgRate, bool dontSendNotification = false);
 
 	String GetSecondDS100IpAddress();
 	bool SetSecondDS100IpAddress(String ipAddress, bool dontSendNotification = false);
+
+	int GetSecondDS100Port();
+	bool SetSecondDS100Port(int port, bool dontSendNotification = false);
 
 	ExtensionMode GetDS100ExtensionMode();
 	bool SetDS100ExtensionMode(ExtensionMode mode, bool dontSendNotification = false);

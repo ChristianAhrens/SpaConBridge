@@ -2760,15 +2760,23 @@ bool ProtocolBridgingWrapper::SetDS100ProtocolType(ProtocolType protocolType, bo
 			}
 			else if (ocp1ConnectionModeXmlElement)
 				protocolXmlElement->removeChildElement(ocp1ConnectionModeXmlElement, true);
-			
-			/*todo*/// Ocp1 heartbeat needs to be set to sth around 1s, since this is what RPBCs ObjectHandling_Abstract uses as disconnected state timeout
-			/*todo*/if (protocolType == PT_OCP1Protocol)
-			/*todo*/{
-			/*todo*/	auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
-			/*todo*/	if (!pollingIntervalXmlElement)
-			/*todo*/		pollingIntervalXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
-			/*todo*/	pollingIntervalXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::INTERVAL), 1000);
-			/*todo*/}
+
+			// Ocp1 heartbeat timing is handled internally and should not be interfered with from a potentially leftover OSC polling interval 
+			if (protocolType == PT_OCP1Protocol)
+			{
+				auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
+				if (pollingIntervalXmlElement)
+					protocolXmlElement->removeChildElement(pollingIntervalXmlElement, true);
+			}
+			else if (protocolType == PT_OSCProtocol)
+			{
+				auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
+				if (!pollingIntervalXmlElement)
+				{
+					pollingIntervalXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
+					pollingIntervalXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::INTERVAL), ET_DefaultPollingRate);
+				}
+			}
 		}
 		else
 			return false;
@@ -2805,14 +2813,22 @@ bool ProtocolBridgingWrapper::SetDS100ProtocolType(ProtocolType protocolType, bo
 			else if (ocp1ConnectionModeXmlElement)
 				protocolXmlElement->removeChildElement(ocp1ConnectionModeXmlElement, true);
 
-			/*todo*/// Ocp1 heartbeat needs to be set to sth around 1s, since this is what RPBCs ObjectHandling_Abstract uses as disconnected state timeout
-			/*todo*/if (protocolType == PT_OCP1Protocol)
-			/*todo*/{
-			/*todo*/	auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
-			/*todo*/	if (!pollingIntervalXmlElement)
-			/*todo*/		pollingIntervalXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
-			/*todo*/	pollingIntervalXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::INTERVAL), 1000);
-			/*todo*/}
+			// Ocp1 heartbeat timing is handled internally and should not be interfered with from a potentially leftover OSC polling interval 
+			if (protocolType == PT_OCP1Protocol)
+			{
+				auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
+				if (pollingIntervalXmlElement)
+					protocolXmlElement->removeChildElement(pollingIntervalXmlElement, true);
+			}
+			else if (protocolType == PT_OSCProtocol)
+			{
+				auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
+				if (!pollingIntervalXmlElement)
+				{
+					pollingIntervalXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
+					pollingIntervalXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::INTERVAL), ET_DefaultPollingRate);
+				}
+			}
 		}
 		// its ok to have no else return false here, since the second DS100 is not mandatory in config!
 
@@ -2845,6 +2861,28 @@ bool ProtocolBridgingWrapper::SetDS100IpAddress(String ipAddress, bool dontSendN
 }
 
 /**
+ * Gets the currently used port for the connection to the first DS100 device.
+ * This method forwards the call to the generic implementation.
+ * @return	The port number used.
+ */
+int ProtocolBridgingWrapper::GetDS100Port()
+{
+	return GetProtocolRemotePort(DS100_1_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the port number to currently use the connection to the first DS100 device.
+ * This method forwards the call to the generic implementation.
+ * @param port					The new port number to use
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetDS100Port(int port, bool dontSendNotification)
+{
+	return SetProtocolRemotePort(DS100_1_PROCESSINGPROTOCOL_ID, port, dontSendNotification);
+}
+
+/**
  * Gets the currently set cascade DS100 client ip address.
  * This method forwards the call to the generic implementation.
  * @return	The ip address string
@@ -2864,6 +2902,29 @@ String ProtocolBridgingWrapper::GetSecondDS100IpAddress()
 bool ProtocolBridgingWrapper::SetSecondDS100IpAddress(String ipAddress, bool dontSendNotification)
 {
 	return SetProtocolIpAddress(DS100_2_PROCESSINGPROTOCOL_ID, ipAddress, dontSendNotification);
+}
+
+
+/**
+ * Gets the currently used port for the connection to the second DS100 device.
+ * This method forwards the call to the generic implementation.
+ * @return	The port number used.
+ */
+int ProtocolBridgingWrapper::GetSecondDS100Port()
+{
+	return GetProtocolRemotePort(DS100_2_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the port number to currently use the connection to the second DS100 device.
+ * This method forwards the call to the generic implementation.
+ * @param port					The new port number to use
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetSecondDS100Port(int port, bool dontSendNotification)
+{
+	return SetProtocolRemotePort(DS100_2_PROCESSINGPROTOCOL_ID, port, dontSendNotification);
 }
 
 /**
@@ -3202,7 +3263,7 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 
 				auto ctrl = Controller::GetInstance();
 				if (ctrl)
-					ctrl->SetSecondDS100IpAddress(DCP_Init, "", dontSendNotification);
+					ctrl->SetSecondDS100IpAndPort(DCP_Init, "", 0xffff, dontSendNotification);
 			}
 			break;
 			case EM_Extend:
@@ -3218,7 +3279,7 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 
 					auto ctrl = Controller::GetInstance();
 					if (ctrl)
-						ctrl->SetSecondDS100IpAddress(DCP_Init, PROTOCOL_DEFAULT2_IP, dontSendNotification);
+						ctrl->SetSecondDS100IpAndPort(DCP_Init, PROTOCOL_DEFAULT2_IP, RX_PORT_DS100_DEVICE, dontSendNotification);
 				}
 			}
 			break;

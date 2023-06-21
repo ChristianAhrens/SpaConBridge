@@ -1509,7 +1509,7 @@ void SettingsSectionsComponent::processUpdatedDS100Config()
 	}
 	if (m_DS100IntervalEdit)
 	{
-		m_DS100IntervalEdit->setText(String(ctrl->GetRefreshInterval()) + UNIT_MILLISECOND);
+		m_DS100IntervalEdit->setText((ctrl->GetDS100ProtocolType() == PT_OSCProtocol) ? (juce::String(ctrl->GetRefreshInterval()) + UNIT_MILLISECOND) : "");
 		m_DS100IntervalEdit->setEnabled(ctrl->GetDS100ProtocolType() == PT_OSCProtocol);
 	}
 	if (m_DS100IntervalLabel)

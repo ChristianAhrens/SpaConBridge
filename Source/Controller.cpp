@@ -968,15 +968,26 @@ void Controller::SetDS100ProtocolType(DataChangeParticipant changeSource, Protoc
 {
 	const ScopedLock lock(m_mutex);
 
-	m_DS100ProtocolType = protocol;
+	if (m_DS100ProtocolType != protocol)
+	{
+		m_DS100ProtocolType = protocol;
 
-	m_protocolBridge.SetDS100ProtocolType(protocol, dontSendNotification);
+		m_protocolBridge.SetDS100ProtocolType(protocol, dontSendNotification);
 
-	// Signal the change to all Processors. 
-	SetParameterChanged(changeSource, DCT_ProtocolType);
-	SetParameterChanged(changeSource, DCT_Connected);
+		// IP and port have likely changed when changing the protocol type (new defaults set)
+		m_DS100IpAddress = m_protocolBridge.GetDS100IpAddress();
+		m_DS100Port = m_protocolBridge.GetDS100Port();
 
-	Reconnect();
+		m_SecondDS100IpAddress = m_protocolBridge.GetSecondDS100IpAddress();
+		m_SecondDS100Port = m_protocolBridge.GetSecondDS100Port();
+
+		// Signal the change to all Processors. 
+		SetParameterChanged(changeSource, DCT_ProtocolType);
+		SetParameterChanged(changeSource, DCT_IPAddress);
+		SetParameterChanged(changeSource, DCT_Connected);
+
+		Reconnect();
+	}
 }
 
 /**
@@ -998,7 +1009,7 @@ std::pair<juce::String, int> Controller::GetDS100IpAndPort() const
  */
 void Controller::SetDS100IpAndPort(DataChangeParticipant changeSource, String ipAddress, int port, bool dontSendNotification)
 {
-	if (m_DS100IpAddress != ipAddress)
+	if (m_DS100IpAddress != ipAddress || m_DS100Port != port)
 	{
 		const ScopedLock lock(m_mutex);
 
@@ -1035,15 +1046,15 @@ std::pair<juce::String, int> Controller::GetSecondDS100IpAndPort() const
  */
 void Controller::SetSecondDS100IpAndPort(DataChangeParticipant changeSource, String ipAddress, int port, bool dontSendNotification)
 {
-	if (m_SecondDS100IpAddress != ipAddress)
+	if (m_SecondDS100IpAddress != ipAddress || m_SecondDS100Port != port)
 	{
 		const ScopedLock lock(m_mutex);
 
 		m_SecondDS100IpAddress = ipAddress;
 		m_protocolBridge.SetSecondDS100IpAddress(ipAddress, dontSendNotification);
 
-		m_DS100Port = port;
-		m_protocolBridge.SetDS100Port(port, dontSendNotification);
+		m_SecondDS100Port = port;
+		m_protocolBridge.SetSecondDS100Port(port, dontSendNotification);
 
 		// Signal the change to all Processors. 
 		SetParameterChanged(changeSource, DCT_IPAddress);

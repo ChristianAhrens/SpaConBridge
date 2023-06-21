@@ -2733,19 +2733,31 @@ bool ProtocolBridgingWrapper::SetDS100ProtocolType(ProtocolType protocolType, bo
 		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
 		if (protocolXmlElement)
 		{
+			auto protocolTypeString = ProcessingEngineConfig::ProtocolTypeToString(protocolType);
+			bool protocolTypeChanged = (protocolTypeString != protocolXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE)));
 			// Set the new protocolType. This is responsible for the instantiation of correct ProtocolProcessor type in RPBC when parsing the updated xml
-			protocolXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), ProcessingEngineConfig::ProtocolTypeToString(protocolType));
+			protocolXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), protocolTypeString);
 
 			// DS100 uses different ports for OSC (udp) and OCA (tcp)
 			auto clientPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+			auto clientPortElmWasNewlyCreated = false;
 			if (!clientPortXmlElement)
+			{
 				clientPortXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
-			clientPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), (protocolType == PT_OSCProtocol ? RX_PORT_DS100_DEVICE : RX_PORT_DS100_DEVICE_OCP1));
+				clientPortElmWasNewlyCreated = true;
+			}
+			if (protocolTypeChanged || clientPortElmWasNewlyCreated)
+				clientPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), (protocolType == PT_OSCProtocol ? RX_PORT_DS100_DEVICE : RX_PORT_DS100_DEVICE_OCP1));
 			
 			auto hostPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
+			auto hostPortElmWasNewlyCreated = false;
 			if (!hostPortXmlElement)
+			{
 				hostPortXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
-			hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), (protocolType == PT_OSCProtocol ? RX_PORT_DS100_HOST : 0)); // hostport is not used in Ocp1 RPBC implementation
+				hostPortElmWasNewlyCreated = true;
+			}
+			if (protocolTypeChanged || hostPortElmWasNewlyCreated)
+				hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), (protocolType == PT_OSCProtocol ? RX_PORT_DS100_HOST : 0)); // hostport is not used in Ocp1 RPBC implementation
 
 			// Ocp1 requires the server/client mode to be set. Therefor we need to create the corresp. xml entry if Ocp1 or delete it if OCA becomes active.
 			auto ocp1ConnectionModeXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE));

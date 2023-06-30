@@ -1621,6 +1621,8 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 				bool isReceiveMode = ((mode & CM_Rx) == CM_Rx);
 				bool processorIsAttentive = !(processor->PopParameterChanged(DCP_Host, change));
 
+				/*dbg*/jassert(processorIsAttentive);
+
 				// Only pass on new positions to processors that are in RX mode.
 				// Also, ignore all incoming messages for properties which this processor wants to send a set command.
 				if (!ignoreResponse && isReceiveMode && processorIsAttentive)

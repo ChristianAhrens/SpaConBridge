@@ -28,12 +28,11 @@ namespace SpaConBridge
 {
 
 /**
- *
+ * Constructor
  */
 ProtocolBridgingWrapper::ProtocolBridgingWrapper()
 	: m_bridgingXml(AppConfiguration::getTagName(AppConfiguration::TagID::BRIDGING))
 {
-
 	// Controller derives from ProcessingEngineNode::Listener
 	m_processingNode.AddListener(this);
 
@@ -41,7 +40,7 @@ ProtocolBridgingWrapper::ProtocolBridgingWrapper()
 }
 
 /**
- *
+ * Destructor
  */
 ProtocolBridgingWrapper::~ProtocolBridgingWrapper()
 {

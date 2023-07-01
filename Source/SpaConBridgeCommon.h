@@ -76,7 +76,7 @@ enum DataChangeParticipant
 	DCP_SoundobjectTable,			//< Change was caused or is queried by the soundsource overview table
 	DCP_MultiSlider,				//< Change was caused or is queried by the multislider
 	DCP_Settings,					//< Change was caused or is queried by the SettingsPage UI.	
-	DCP_Host,						//< Change was caused or is queried by the VST/AU/AAX host, i.e. a project was loaded or a DAW preset was recalled.
+	DCP_Host,						//< Change was caused or is queried by the Controller or BridgingWrapper.
 	DCP_Protocol,					//< Change was caused or is queried by an incoming protocol message, or caused by internal operations by the Controller.
 	DCP_Init,						//< Change was caused or is queried by Application initialization process (defaults)
 	DCP_MatrixInputProcessor,		//< Change was caused or is queried by the MatrixInputProcessor UI, i.e. the user turning a knob to change a value.

@@ -1619,13 +1619,10 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 				// If so, ignore the incoming message so that our local data does not jump back to a now outdated value.
 				bool ignoreResponse = processor->IsParamInTransit(change);
 				bool isReceiveMode = ((mode & CM_Rx) == CM_Rx);
-				bool processorIsAttentive = !(processor->PopParameterChanged(DCP_Host, change));
-
-				/*dbg*/jassert(processorIsAttentive);
 
 				// Only pass on new positions to processors that are in RX mode.
 				// Also, ignore all incoming messages for properties which this processor wants to send a set command.
-				if (!ignoreResponse && isReceiveMode && processorIsAttentive)
+				if (!ignoreResponse && isReceiveMode)
 				{
 					// Special handling for X/Y position, since message contains two parameters and MappingID needs to match too.
 					if (sopIdx == SPI_ParamIdx_X)
@@ -1683,11 +1680,10 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 				// If so, ignore the incoming message so that our local data does not jump back to a now outdated value.
 				bool ignoreResponse = processor->IsParamInTransit(change);
 				bool isReceiveMode = ((mode & CM_Rx) == CM_Rx);
-				bool processorIsAttentive = !(processor->PopParameterChanged(DCP_Host, change));
 
 				// Only pass on new positions to processors that are in RX mode.
 				// Also, ignore all incoming messages for properties which this processor wants to send a set command.
-				if (!ignoreResponse && isReceiveMode && processorIsAttentive)
+				if (!ignoreResponse && isReceiveMode)
 				{
 					auto newValue = 0.0f;
 					switch (msgData._valType)
@@ -1719,11 +1715,10 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 				// If so, ignore the incoming message so that our local data does not jump back to a now outdated value.
 				bool ignoreResponse = processor->IsParamInTransit(change);
 				bool isReceiveMode = ((mode & CM_Rx) == CM_Rx);
-				bool processorIsAttentive = !(processor->PopParameterChanged(DCP_Host, change));
 
 				// Only pass on new positions to processors that are in RX mode.
 				// Also, ignore all incoming messages for properties which this processor wants to send a set command.
-				if (!ignoreResponse && isReceiveMode && processorIsAttentive)
+				if (!ignoreResponse && isReceiveMode)
 				{
 					auto newValue = 0.0f;
 					switch (msgData._valType)

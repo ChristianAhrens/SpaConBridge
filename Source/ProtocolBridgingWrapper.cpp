@@ -69,11 +69,11 @@ bool ProtocolBridgingWrapper::SendMessage(RemoteObjectIdentifier Id, RemoteObjec
 	{
 		// if the first DS100 is master, send data to it
 		if ((GetProtocolState(DS100_1_PROCESSINGPROTOCOL_ID) & OHS_Protocol_Master) == OHS_Protocol_Master)
-			return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
+			return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData, ASYNC_EXTID);
 
 		// if the second DS100 is master, send data to it
 		else if ((GetProtocolState(DS100_2_PROCESSINGPROTOCOL_ID) & OHS_Protocol_Master) == OHS_Protocol_Master)
-			return m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData);
+			return m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData, ASYNC_EXTID);
 
 		// of no master is present, we have an undefined state, cannot happen!
 		else
@@ -88,21 +88,21 @@ bool ProtocolBridgingWrapper::SendMessage(RemoteObjectIdentifier Id, RemoteObjec
 				mappedChannel = static_cast<std::int32_t>(DS100_CHANNELCOUNT);
 			msgData._addrVal._first = mappedChannel;
 
-			return m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData);
+			return m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData, ASYNC_EXTID);
 		}
 		else
-			return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
+			return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData, ASYNC_EXTID);
 	}
 	else if (GetDS100ExtensionMode() == EM_Parallel)
 	{
-		auto sendSuccess = m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
-		sendSuccess = m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData) && sendSuccess;
+		auto sendSuccess = m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData, ASYNC_EXTID);
+		sendSuccess = m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData, ASYNC_EXTID) && sendSuccess;
 
 		return sendSuccess;
 	}
 	else
 	{
-		return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
+		return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData, ASYNC_EXTID);
 	}
 }
 

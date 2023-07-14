@@ -91,6 +91,9 @@ public:
 
 	void Tick();
 
+	// Overriden functions of class AudioProcessor
+	void changeProgramName(int index, const String& newName) override;
+
 	// Overriden functions of class AppConfiguration::XmlConfigurableElement
 	std::unique_ptr<XmlElement> createStateXml() override;
 	bool setStateXml(XmlElement* stateXml) override;

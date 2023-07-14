@@ -58,14 +58,13 @@ public:
 	virtual void setStateInformation(const void* data, int sizeInBytes) override;
 	// Overriden functions of class AudioProcessorParameter::Listener
 	virtual void parameterGestureChanged(int parameterIndex, bool gestureIsStarting) override;
+	const String getProgramName(int index) override;
 
 	// Functions which need to be reimplemented from class AudioProcessor, but which 
 	// aren't relevant for our use.
 	bool acceptsMidi() const override;
-	void changeProgramName(int index, const String& newName) override;
 	int getCurrentProgram() override;
 	int getNumPrograms() override;
-	const String getProgramName(int index) override;
 	const String getName() const override;
 	double getTailLengthSeconds() const override;
 	bool hasEditor() const override;

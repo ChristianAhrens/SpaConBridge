@@ -429,24 +429,6 @@ const String ProcessorBase::getProgramName(int index)
 }
 
 /**
- * Called by the host to rename a program.
- * @param index		Index of the desired program
- * @param newName	Desired new program name.
- */
-void ProcessorBase::changeProgramName(int index, const String& newName)
-{
-	if (index != getCurrentProgram())
-		return;
-	if (newName == m_processorDisplayName)
-		return;
-
-	m_processorDisplayName = newName;
-
-	// Signal change to other modules in the procssor.
-	SetParameterChanged(DCP_Host, DCT_MatrixInputID);
-}
-
-/**
  * Called before playback starts, to let the filter prepare itself.
  * @param sampleRate	The sample rate is the target sample rate, and will remain constant until playback stops.
  *						You can call getTotalNumInputChannels and getTotalNumOutputChannels or query the busLayout member

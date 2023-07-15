@@ -77,7 +77,7 @@ public:
 	~StatisticsLog() override;
 
 	//==============================================================================
-	void AddMessageData(StatisticsLogSource logSourceType, RemoteObjectIdentifier Id, const RemoteObjectMessageData& msgData);
+	void AddMessageData(StatisticsLogSource logSourceType, const RemoteObjectIdentifier roi, const RemoteObjectMessageData& msgData);
 
 	//==========================================================================
 	void backgroundClicked(const MouseEvent&) override;

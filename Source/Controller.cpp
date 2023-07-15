@@ -1745,13 +1745,13 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 
 /**
  * Proxy method to allow direct access to bridging module message sending method.
- * @param	Id		The remote object identifier of the message to be sent.
+ * @param	roi		The remote object identifier of the message to be sent.
  * @param	msgData	The message data incl. addressing to be sent.
  * @return	True on success, false on sending failure.
  */
-bool Controller::SendMessageDataDirect(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData)
+bool Controller::SendMessageDataDirect(const RemoteObjectIdentifier roi, RemoteObjectMessageData& msgData)
 {
-	return m_protocolBridge.SendMessage(Id, msgData);
+	return m_protocolBridge.SendMessage(roi, msgData);
 }
 
 /**

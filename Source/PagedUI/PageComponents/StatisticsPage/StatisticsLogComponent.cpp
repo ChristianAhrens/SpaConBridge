@@ -90,10 +90,10 @@ void StatisticsLog::timerCallback()
 /**
  * Method to add the received message data for given receiving bridging type.
  * @param logSourceType	The type of the bridging protocol that received the data
- * @param Id			The remote object id that was received
+ * @param roi			The remote object id that was received
  * @param msgData		The actual message data that shall be logged
  */
-void StatisticsLog::AddMessageData(StatisticsLogSource logSourceType, RemoteObjectIdentifier Id, const RemoteObjectMessageData& msgData)
+void StatisticsLog::AddMessageData(StatisticsLogSource logSourceType, const RemoteObjectIdentifier roi, const RemoteObjectMessageData& msgData)
 {
 	if (!m_showDS100Traffic && (logSourceType == SLS_DS100 || logSourceType == SLS_DS100_2))
 		return;
@@ -128,7 +128,7 @@ void StatisticsLog::AddMessageData(StatisticsLogSource logSourceType, RemoteObje
 	auto mapIdx = m_logEntryCounter % m_logCount; 
 	jassert(mapIdx >= 0);
 	m_logEntries[mapIdx][SLC_Number] = String(m_logEntryCounter);
-	m_logEntries[mapIdx][SLC_ObjectName] = ProcessingEngineConfig::GetObjectShortDescription(Id);
+	m_logEntries[mapIdx][SLC_ObjectName] = ProcessingEngineConfig::GetObjectShortDescription(roi);
 	m_logEntries[mapIdx][SLC_SourceId] = String(msgData._addrVal._first);
 	m_logEntries[mapIdx][SLC_Value] = valueString;
 	m_logEntries[mapIdx][SLC_LogSourceName] = GetLogSourceName(logSourceType);

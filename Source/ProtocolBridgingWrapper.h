@@ -96,7 +96,7 @@ public:
 		 * Method to be overloaded by ancestors to act as an interface
 		 * for handling of received message data
 		 */
-		virtual void HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier Id, const RemoteObjectMessageData& msgData) = 0;
+		virtual void HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier roi, const RemoteObjectMessageData& msgData) = 0;
 	};
 
 public:
@@ -108,7 +108,7 @@ public:
 
 	//==========================================================================
 	void HandleNodeData(const ProcessingEngineNode::NodeCallbackMessage* callbackMessage) override;
-	bool SendMessage(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData);
+	bool SendMessage(RemoteObjectIdentifier roi, RemoteObjectMessageData& msgData);
 
 	//==========================================================================
 	void SetOnline(bool online);
@@ -161,7 +161,7 @@ public:
 	void SetSecondDS100State(ObjectHandlingState state);
 
 	//==========================================================================
-	static bool IsBridgingObjectOnly(RemoteObjectIdentifier id);
+	static bool IsBridgingObjectOnly(const RemoteObjectIdentifier roi);
 
 	//==========================================================================
 	bool GetMuteProtocolSoundobjectProcessorId(ProtocolId protocolId, SoundobjectProcessorId soundobjectProcessorId);
@@ -202,10 +202,10 @@ public:
 	bool SetProtocolInputDeviceIdentifier(ProtocolId protocolId, const String& inputDeviceIdentifier, bool dontSendNotification = false);
 	String GetProtocolOutputDeviceIdentifier(ProtocolId protocolId);
 	bool SetProtocolOutputDeviceIdentifier(ProtocolId protocolId, const String& outputDeviceIdentifier, bool dontSendNotification = false);
-	JUCEAppBasics::MidiCommandRangeAssignment GetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId);
+	JUCEAppBasics::MidiCommandRangeAssignment GetMidiAssignmentMapping(ProtocolId protocolId, const RemoteObjectIdentifier roi);
 	bool SetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification = false);
-	std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> GetMidiScenesAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId);
-	bool SetMidiScenesAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& assignmentMapping, bool dontSendNotification = false);
+	std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> GetMidiScenesAssignmentMapping(ProtocolId protocolId, const RemoteObjectIdentifier roi);
+	bool SetMidiScenesAssignmentMapping(ProtocolId protocolId, const RemoteObjectIdentifier roi, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& assignmentMapping, bool dontSendNotification = false);
 	int GetProtocolXAxisInverted(ProtocolId protocolId);
 	bool SetProtocolXAxisInverted(ProtocolId protocolId, int inverted, bool dontSendNotification = false);
 	int GetProtocolYAxisInverted(ProtocolId protocolId);

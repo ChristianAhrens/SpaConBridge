@@ -59,21 +59,21 @@ void ProtocolBridgingWrapper::AddListener(ProtocolBridgingWrapper::Listener* lis
 
 /**
  * Send a Message out via the active bridging node.
- * @param Id	The id of the remote object to be sent.
+ * @param roi	The id of the remote object to be sent.
  * @param msgData	The message data to be sent.
  * @return True on success, false on failure
  */
-bool ProtocolBridgingWrapper::SendMessage(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData)
+bool ProtocolBridgingWrapper::SendMessage(const RemoteObjectIdentifier roi, RemoteObjectMessageData& msgData)
 {
 	if (GetDS100ExtensionMode() == EM_Mirror)
 	{
 		// if the first DS100 is master, send data to it
 		if ((GetProtocolState(DS100_1_PROCESSINGPROTOCOL_ID) & OHS_Protocol_Master) == OHS_Protocol_Master)
-			return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData, ASYNC_EXTID);
+			return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, roi, msgData, ASYNC_EXTID);
 
 		// if the second DS100 is master, send data to it
 		else if ((GetProtocolState(DS100_2_PROCESSINGPROTOCOL_ID) & OHS_Protocol_Master) == OHS_Protocol_Master)
-			return m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData, ASYNC_EXTID);
+			return m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, roi, msgData, ASYNC_EXTID);
 
 		// of no master is present, we have an undefined state, cannot happen!
 		else
@@ -88,21 +88,21 @@ bool ProtocolBridgingWrapper::SendMessage(RemoteObjectIdentifier Id, RemoteObjec
 				mappedChannel = static_cast<std::int32_t>(DS100_CHANNELCOUNT);
 			msgData._addrVal._first = mappedChannel;
 
-			return m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData, ASYNC_EXTID);
+			return m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, roi, msgData, ASYNC_EXTID);
 		}
 		else
-			return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData, ASYNC_EXTID);
+			return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, roi, msgData, ASYNC_EXTID);
 	}
 	else if (GetDS100ExtensionMode() == EM_Parallel)
 	{
-		auto sendSuccess = m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData, ASYNC_EXTID);
-		sendSuccess = m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData, ASYNC_EXTID) && sendSuccess;
+		auto sendSuccess = m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, roi, msgData, ASYNC_EXTID);
+		sendSuccess = m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, roi, msgData, ASYNC_EXTID) && sendSuccess;
 
 		return sendSuccess;
 	}
 	else
 	{
-		return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData, ASYNC_EXTID);
+		return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, roi, msgData, ASYNC_EXTID);
 	}
 }
 
@@ -150,12 +150,12 @@ bool ProtocolBridgingWrapper::Reconnect()
 
 /**
  * Static helper method to query if the given ROI is not one of those marked for processing in application and only to be bridged to DS100.
- * @param id	The object id to be checked regarding relevance for handling in application.
+ * @param roi	The object id to be checked regarding relevance for handling in application.
  * @return	True if the object shall be only bridged to DS100, false if it is also relevant for application
  */
-bool ProtocolBridgingWrapper::IsBridgingObjectOnly(RemoteObjectIdentifier id)
+bool ProtocolBridgingWrapper::IsBridgingObjectOnly(const RemoteObjectIdentifier roi)
 {
-	switch (id)
+	switch (roi)
 	{
 	case ROI_MatrixInput_Select:
 	case ROI_RemoteProtocolBridge_SoundObjectSelect:
@@ -1620,10 +1620,10 @@ bool ProtocolBridgingWrapper::SetProtocolOutputDeviceIdentifier(ProtocolId proto
 /**
  * Gets the currently set midi assignment mapping for a given remote object, if available, for the given protocol.
  * @param protocolId	The id of the protocol to get the midi assignment for.
- * @param remoteObjectId	The remote object to get the midi mapping for.
+ * @param roi	The remote object to get the midi mapping for.
  * @return	The requested midi assignment mapping
  */
-JUCEAppBasics::MidiCommandRangeAssignment ProtocolBridgingWrapper::GetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId)
+JUCEAppBasics::MidiCommandRangeAssignment ProtocolBridgingWrapper::GetMidiAssignmentMapping(ProtocolId protocolId, const RemoteObjectIdentifier roi)
 {
     auto midiAssiMap = JUCEAppBasics::MidiCommandRangeAssignment();
     
@@ -1633,7 +1633,7 @@ JUCEAppBasics::MidiCommandRangeAssignment ProtocolBridgingWrapper::GetMidiAssign
         auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
         if (protocolXmlElement)
         {
-            auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+            auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(roi).removeCharacters(" "));
             if (assiMapXmlElement)
             {
                 auto assiMapHexStringTextXmlElement = assiMapXmlElement->getFirstChildElement();
@@ -1655,12 +1655,12 @@ JUCEAppBasics::MidiCommandRangeAssignment ProtocolBridgingWrapper::GetMidiAssign
  * This method inserts the mapping area id into the cached xml element,
  * pushes the updated xml element into processing node and triggers configuration updating.
  * @param protocolId	The id of the protocol to set the midi assignment for.
- * @param remoteObjectId	The remote object to set the midi mapping for.
+ * @param roi	The remote object to set the midi mapping for.
  * @param assignmentMapping	The midi mapping to set for the remote object.
  * @param dontSendNotification	Flag if change notification shall be broadcasted.
  * @return	True on succes, false if failure
  */
-bool ProtocolBridgingWrapper::SetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification)
+bool ProtocolBridgingWrapper::SetMidiAssignmentMapping(ProtocolId protocolId, const RemoteObjectIdentifier roi, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification)
 {
     auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
     if (nodeXmlElement)
@@ -1670,7 +1670,7 @@ bool ProtocolBridgingWrapper::SetMidiAssignmentMapping(ProtocolId protocolId, Re
         {
             auto assiMapHexString = assignmentMapping.serializeToHexString();
             
-            auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+            auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(roi).removeCharacters(" "));
             if (assiMapXmlElement)
             {
                 auto assiMapHexStringTextXmlElement = assiMapXmlElement->getFirstChildElement();
@@ -1681,7 +1681,7 @@ bool ProtocolBridgingWrapper::SetMidiAssignmentMapping(ProtocolId protocolId, Re
             }
             else
             {
-                assiMapXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+                assiMapXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectDescription(roi).removeCharacters(" "));
                 assiMapXmlElement->addTextElement(assiMapHexString);
             }
         }
@@ -1697,10 +1697,10 @@ bool ProtocolBridgingWrapper::SetMidiAssignmentMapping(ProtocolId protocolId, Re
 /**
  * Gets the currently set scenes to midi assignment mapping for a given remote object, if available, for the given protocol.
  * @param protocolId	The id of the protocol to get the scenes to midi assignment for.
- * @param remoteObjectId	The remote object to get the scenes to midi mapping for.
+ * @param roi	The remote object to get the scenes to midi mapping for.
  * @return	The requested scenes to midi assignment mapping
  */
-std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> ProtocolBridgingWrapper::GetMidiScenesAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId)
+std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> ProtocolBridgingWrapper::GetMidiScenesAssignmentMapping(ProtocolId protocolId, const RemoteObjectIdentifier roi)
 {
 	auto scenesToMidiAssiMap = std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>();
 
@@ -1710,7 +1710,7 @@ std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> ProtocolBridgingWrap
 		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
 		if (protocolXmlElement)
 		{
-			auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+			auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(roi).removeCharacters(" "));
 			if (assiMapXmlElement)
 			{
 				if (assiMapXmlElement->getIntAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MULTIVALUE)) == 1)
@@ -1739,12 +1739,12 @@ std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> ProtocolBridgingWrap
 /**
  * Sets the desired scenes to midi assignment mapping for a given remote object.
  * @param protocolId	The id of the protocol to set the scenes to midi assignment for.
- * @param remoteObjectId	The remote object to set the scenes to midi mapping for.
+ * @param roi	The remote object to set the scenes to midi mapping for.
  * @param assignmentMapping	The scenes to midi mapping to set for the remote object.
  * @param dontSendNotification	Flag if change notification shall be broadcasted.
  * @return	True on succes, false if failure
  */
-bool ProtocolBridgingWrapper::SetMidiScenesAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const std::map<juce::String, JUCEAppBasics::MidiCommandRangeAssignment>& assignmentMapping, bool dontSendNotification)
+bool ProtocolBridgingWrapper::SetMidiScenesAssignmentMapping(ProtocolId protocolId, const RemoteObjectIdentifier roi, const std::map<juce::String, JUCEAppBasics::MidiCommandRangeAssignment>& assignmentMapping, bool dontSendNotification)
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
@@ -1752,7 +1752,7 @@ bool ProtocolBridgingWrapper::SetMidiScenesAssignmentMapping(ProtocolId protocol
 		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), juce::String(protocolId));
 		if (protocolXmlElement)
 		{
-			auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+			auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(roi).removeCharacters(" "));
 			if (assiMapXmlElement)
 			{
 				// collect the xml elements that are no longer used according to new incoming mappings
@@ -1793,7 +1793,7 @@ bool ProtocolBridgingWrapper::SetMidiScenesAssignmentMapping(ProtocolId protocol
 			}
 			else
 			{
-				assiMapXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+				assiMapXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectDescription(roi).removeCharacters(" "));
 				assiMapXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MULTIVALUE), 1);
 				for (auto const& assi : assignmentMapping)
 				{

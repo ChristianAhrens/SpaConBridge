@@ -264,10 +264,10 @@ public:
 	bool setStateXml(XmlElement* stateXml) override;
 
 	//==========================================================================
-	void HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier Id, const RemoteObjectMessageData& msgData) override;
+	void HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, const RemoteObjectIdentifier roi, const RemoteObjectMessageData& msgData) override;
 
 	//==========================================================================
-	bool SendMessageDataDirect(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData);
+	bool SendMessageDataDirect(const RemoteObjectIdentifier roi, RemoteObjectMessageData& msgData);
 
 private:
 	//==========================================================================

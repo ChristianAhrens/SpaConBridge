@@ -49,7 +49,7 @@ SettingsSectionsComponent::SettingsSectionsComponent()
 {
 	// TextEditor input filters to be used for different editors
 	m_intervalEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890"); // 7 digits: "9999 ms"
-	m_ipAddressEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(15, "1234567890."); // 15 digits: "255.255.255.255"
+	m_ipAddressEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(21, "1234567890.:"); // 21 digits: "255.255.255.255:65535"
 	m_portEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(5, "1234567890"); // 5 digits: "65535"
 	m_mappingEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(1, "1234"); // 1 digit: "4"
 
@@ -166,6 +166,17 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 	m_DS100Settings->setHasActiveToggle(false);
 	addAndMakeVisible(m_DS100Settings.get());
 
+	m_DS100ProtocolSelectButton = std::make_unique<JUCEAppBasics::SplitButtonComponent>();
+	m_DS100ProtocolSelectButton->addListener(this);
+	m_DS100ProtocolSelectButtonIds[m_DS100ProtocolSelects[0]] = m_DS100ProtocolSelectButton->addButton(m_DS100ProtocolSelects[0]);
+	m_DS100ProtocolSelectButtonIds[m_DS100ProtocolSelects[1]] = m_DS100ProtocolSelectButton->addButton(m_DS100ProtocolSelects[1]);
+	m_DS100ProtocolSelectButton->setButtonDown(m_DS100ProtocolSelectButtonIds[m_SecondDS100Modes[0]]);
+	m_DS100ProtocolSelectLabel = std::make_unique<Label>("DS100ProtocolSelectButton", "DS100 Protocol");
+	m_DS100ProtocolSelectLabel->setJustificationType(Justification::centred);
+	m_DS100ProtocolSelectLabel->attachToComponent(m_DS100ProtocolSelectButton.get(), true);
+	m_DS100Settings->addComponent(m_DS100ProtocolSelectLabel.get(), false, false);
+	m_DS100Settings->addComponent(m_DS100ProtocolSelectButton.get(), true, false);
+
 	m_DS100IntervalEdit = std::make_unique<TextEditor>();
 	m_DS100IntervalEdit->addListener(this);
 	m_DS100IntervalEdit->setInputFilter(m_intervalEditFilter.get(), false);
@@ -178,13 +189,13 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 	//first DS100 - ch. 1-64
 	m_DS100ConnectionElmsContainer = std::make_unique<HorizontalLayouterComponent>();
 	m_DS100ConnectionElmsContainer->SetSpacing(5);
-	m_DS100IpAddressEdit = std::make_unique<TextEditor>();
-	m_DS100IpAddressEdit->addListener(this);
-	m_DS100IpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
-	m_DS100ConnectionElmsContainer->AddComponent(m_DS100IpAddressEdit.get(), 5);
-	m_DS100IpAddressLabel = std::make_unique<Label>("DS100IpAddressEdit", "IP Address");
-	m_DS100IpAddressLabel->setJustificationType(Justification::centred);
-	m_DS100IpAddressLabel->attachToComponent(m_DS100ConnectionElmsContainer.get(), true);
+	m_DS100IpAndPortEdit = std::make_unique<TextEditor>();
+	m_DS100IpAndPortEdit->addListener(this);
+	m_DS100IpAndPortEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
+	m_DS100ConnectionElmsContainer->AddComponent(m_DS100IpAndPortEdit.get(), 5);
+	m_DS100IpAndPortLabel = std::make_unique<Label>("DS100IpAndPortEdit", "IP Address");
+	m_DS100IpAndPortLabel->setJustificationType(Justification::centred);
+	m_DS100IpAndPortLabel->attachToComponent(m_DS100ConnectionElmsContainer.get(), true);
 #ifdef ZEROCONF_SUPPORTED
 	m_DS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>(false, false);
 	m_DS100ZeroconfDiscovery->onServiceSelected = [=](JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, ZeroconfSearcher::ZeroconfSearcher::ServiceInfo* info) { handleDS100ServiceSelected(type, info); };
@@ -194,7 +205,7 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 		std::make_pair(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceCategoryMatch::ZSCM_Contain, "DS100")));
 	m_DS100ConnectionElmsContainer->AddComponent(m_DS100ZeroconfDiscovery.get(), 1);
 #endif
-	m_DS100Settings->addComponent(m_DS100IpAddressLabel.get(), false, false);
+	m_DS100Settings->addComponent(m_DS100IpAndPortLabel.get(), false, false);
 	m_DS100Settings->addComponent(m_DS100ConnectionElmsContainer.get(), true, false);
 
 	m_SecondDS100ModeButton = std::make_unique<JUCEAppBasics::SplitButtonComponent>();
@@ -224,13 +235,13 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 	//second DS100 - ch. 65-128
 	m_SecondDS100ConnectionElmsContainer = std::make_unique<HorizontalLayouterComponent>();
 	m_SecondDS100ConnectionElmsContainer->SetSpacing(5);
-	m_SecondDS100IpAddressEdit = std::make_unique<TextEditor>();
-	m_SecondDS100IpAddressEdit->addListener(this);
-	m_SecondDS100IpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
-	m_SecondDS100ConnectionElmsContainer->AddComponent(m_SecondDS100IpAddressEdit.get(), 5);
-	m_SecondDS100IpAddressLabel = std::make_unique<Label>("SecondDS100IpAddressEdit", "IP Address");
-	m_SecondDS100IpAddressLabel->setJustificationType(Justification::centred);
-	m_SecondDS100IpAddressLabel->attachToComponent(m_SecondDS100ConnectionElmsContainer.get(), true);
+	m_SecondDS100IpAndPortEdit = std::make_unique<TextEditor>();
+	m_SecondDS100IpAndPortEdit->addListener(this);
+	m_SecondDS100IpAndPortEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
+	m_SecondDS100ConnectionElmsContainer->AddComponent(m_SecondDS100IpAndPortEdit.get(), 5);
+	m_SecondDS100IpAndPortLabel = std::make_unique<Label>("SecondDS100IpAndPortEdit", "IP Address");
+	m_SecondDS100IpAndPortLabel->setJustificationType(Justification::centred);
+	m_SecondDS100IpAndPortLabel->attachToComponent(m_SecondDS100ConnectionElmsContainer.get(), true);
 #ifdef ZEROCONF_SUPPORTED
 	m_SecondDS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>(false, false);
 	m_SecondDS100ZeroconfDiscovery->onServiceSelected = [=](JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, ZeroconfSearcher::ZeroconfSearcher::ServiceInfo* info) { handleSecondDS100ServiceSelected(type, info); };
@@ -240,7 +251,7 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 		std::make_pair(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceCategoryMatch::ZSCM_Contain, "DS100")));
 	m_SecondDS100ConnectionElmsContainer->AddComponent(m_SecondDS100ZeroconfDiscovery.get(), 1);
 #endif
-	m_DS100Settings->addComponent(m_SecondDS100IpAddressLabel.get(), false, false);
+	m_DS100Settings->addComponent(m_SecondDS100IpAndPortLabel.get(), false, false);
 	m_DS100Settings->addComponent(m_SecondDS100ConnectionElmsContainer.get(), true, false);
 
 	m_DS100Settings->resized();
@@ -1055,8 +1066,21 @@ void SettingsSectionsComponent::buttonClicked(JUCEAppBasics::SplitButtonComponen
 	if (button && !button->isEnabled())
 		return;
 
+	// DS100 protocol settings section
+	if (m_DS100ProtocolSelectButton && m_DS100ProtocolSelectButton.get() == button)
+	{
+		if (m_DS100ProtocolSelectButtonIds[m_DS100ProtocolSelects[0]] == buttonId) // OSC
+		{
+			ctrl->SetDS100ProtocolType(DCP_Settings, PT_OSCProtocol);
+		}
+		else if (m_DS100ProtocolSelectButtonIds[m_DS100ProtocolSelects[1]] == buttonId) // OCP1
+		{
+			ctrl->SetDS100ProtocolType(DCP_Settings, PT_OCP1Protocol);
+		}
+	}
+
 	// DS100 mode settings section
-	if (m_SecondDS100ModeButton && m_SecondDS100ModeButton.get() == button)
+	else if (m_SecondDS100ModeButton && m_SecondDS100ModeButton.get() == button)
 	{
 		if (m_SecondDS100ModeButtonIds[m_SecondDS100Modes[0]] == buttonId) // Off
 		{
@@ -1157,10 +1181,18 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 	// DS100 settings section
 	if (m_DS100IntervalEdit && m_DS100IntervalEdit.get() == &editor)
 		ctrl->SetRefreshInterval(DCP_Settings, m_DS100IntervalEdit->getText().getIntValue());
-	else if (m_DS100IpAddressEdit && m_DS100IpAddressEdit.get() == &editor)
-		ctrl->SetDS100IpAddress(DCP_Settings, m_DS100IpAddressEdit->getText());
-	else if (m_SecondDS100IpAddressEdit && m_SecondDS100IpAddressEdit.get() == &editor)
-		ctrl->SetSecondDS100IpAddress(DCP_Settings, m_SecondDS100IpAddressEdit->getText());
+	else if (m_DS100IpAndPortEdit && m_DS100IpAndPortEdit.get() == &editor)
+	{
+		ctrl->SetDS100IpAndPort(DCP_Settings,
+			m_DS100IpAndPortEdit->getText().upToFirstOccurrenceOf(":", false, true), 
+			m_DS100IpAndPortEdit->getText().fromFirstOccurrenceOf(":", false, true).getIntValue());
+	}
+	else if (m_SecondDS100IpAndPortEdit && m_SecondDS100IpAndPortEdit.get() == &editor)
+	{
+		ctrl->SetSecondDS100IpAndPort(DCP_Settings,
+			m_SecondDS100IpAndPortEdit->getText().upToFirstOccurrenceOf(":", false, true), 
+			m_SecondDS100IpAndPortEdit->getText().fromFirstOccurrenceOf(":", false, true).getIntValue());
+	}
 
 	// DiGiCo settings section
 	else if (m_DiGiCoIpAddressEdit && m_DiGiCoIpAddressEdit.get() == &editor)
@@ -1458,6 +1490,8 @@ void SettingsSectionsComponent::processUpdatedGeneralConfig()
 
 /**
  * Helper method to update objects for DS100 settings section with updated config
+ * This includes enabling/disabling elements depending on the mode config for a second DS100
+ * and what protocol type is selected to be used to communicate with DS100(s).
  */
 void SettingsSectionsComponent::processUpdatedDS100Config()
 {
@@ -1466,10 +1500,39 @@ void SettingsSectionsComponent::processUpdatedDS100Config()
 		return;
 
 	// DS100 settings section
+	if (m_DS100ProtocolSelectButton)
+	{
+		auto newActiveButtonId = m_DS100ProtocolSelectButtonIds[m_DS100ProtocolSelects[0]];
+		if (ctrl->GetDS100ProtocolType() == PT_OCP1Protocol)
+			newActiveButtonId = m_DS100ProtocolSelectButtonIds[m_DS100ProtocolSelects[1]];
+		m_DS100ProtocolSelectButton->setButtonDown(newActiveButtonId);
+	}
 	if (m_DS100IntervalEdit)
-		m_DS100IntervalEdit->setText(String(ctrl->GetRefreshInterval()) + UNIT_MILLISECOND);
-	if (m_DS100IpAddressEdit)
-		m_DS100IpAddressEdit->setText(ctrl->GetDS100IpAddress());
+	{
+		m_DS100IntervalEdit->setText((ctrl->GetDS100ProtocolType() == PT_OSCProtocol) ? (juce::String(ctrl->GetRefreshInterval()) + UNIT_MILLISECOND) : "");
+		m_DS100IntervalEdit->setEnabled(ctrl->GetDS100ProtocolType() == PT_OSCProtocol);
+	}
+	if (m_DS100IntervalLabel)
+		m_DS100IntervalLabel->setEnabled(ctrl->GetDS100ProtocolType() == PT_OSCProtocol);
+	if (m_DS100IpAndPortEdit)
+	{
+		auto ipAndPort = ctrl->GetDS100IpAndPort();
+		m_DS100IpAndPortEdit->setText(ipAndPort.first + ":" + juce::String(ipAndPort.second));
+	}
+	if (m_DS100ZeroconfDiscovery)
+	{
+		if (ctrl->GetDS100ProtocolType() == PT_OCP1Protocol)
+		{
+			m_DS100ZeroconfDiscovery->removeDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC);
+			m_DS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OCA);
+		}
+		else
+		{
+			m_DS100ZeroconfDiscovery->removeDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OCA);
+			m_DS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC);
+		}
+		m_DS100ZeroconfDiscovery->resized();
+	}
 	if (m_SecondDS100ModeButton)
 	{
 		auto newActiveButtonId = m_SecondDS100ModeButtonIds[m_SecondDS100Modes[0]];
@@ -1492,15 +1555,29 @@ void SettingsSectionsComponent::processUpdatedDS100Config()
 	}
 	if (m_SecondDS100ParallelModeLabel)
 		m_SecondDS100ParallelModeLabel->setEnabled(ctrl->GetExtensionMode() == EM_Parallel);
-	if (m_SecondDS100IpAddressEdit)
+	if (m_SecondDS100IpAndPortEdit)
 	{
-		m_SecondDS100IpAddressEdit->setText(ctrl->GetSecondDS100IpAddress());
-		m_SecondDS100IpAddressEdit->setEnabled(ctrl->GetExtensionMode() != EM_Off);
+		auto ipAndPort = ctrl->GetSecondDS100IpAndPort();
+		m_SecondDS100IpAndPortEdit->setText(ctrl->GetExtensionMode() != EM_Off ? (ipAndPort.first + ":" + juce::String(ipAndPort.second)) : "");
+		m_SecondDS100IpAndPortEdit->setEnabled(ctrl->GetExtensionMode() != EM_Off);
 	}
-	if (m_SecondDS100IpAddressLabel)
-		m_SecondDS100IpAddressLabel->setEnabled(ctrl->GetExtensionMode() != EM_Off);
+	if (m_SecondDS100IpAndPortLabel)
+		m_SecondDS100IpAndPortLabel->setEnabled(ctrl->GetExtensionMode() != EM_Off);
 	if (m_SecondDS100ZeroconfDiscovery)
+	{
 		m_SecondDS100ZeroconfDiscovery->setEnabled(ctrl->GetExtensionMode() != EM_Off);
+		if (ctrl->GetDS100ProtocolType() == PT_OCP1Protocol)
+		{
+			m_SecondDS100ZeroconfDiscovery->removeDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC);
+			m_SecondDS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OCA);
+		}
+		else
+		{
+			m_SecondDS100ZeroconfDiscovery->removeDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OCA);
+			m_SecondDS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC);
+		}
+		m_SecondDS100ZeroconfDiscovery->resized();
+	}
 }
 
 /**
@@ -1864,11 +1941,11 @@ void SettingsSectionsComponent::handleDS100ServiceSelected(JUCEAppBasics::Zeroco
 
 	if (info)
 	{
-		m_DS100IpAddressEdit->setText(info->ip, true);
+		m_DS100IpAndPortEdit->setText(juce::String(info->ip) + ":" + juce::String(info->port), true);
         
         auto ctrl = Controller::GetInstance();
         if (ctrl)
-            ctrl->SetDS100IpAddress(DCP_Settings, info->ip);
+			ctrl->SetDS100IpAndPort(DCP_Settings, info->ip, info->port);
 	}
 }
 
@@ -1883,11 +1960,11 @@ void SettingsSectionsComponent::handleSecondDS100ServiceSelected(JUCEAppBasics::
 
 	if (info)
 	{
-		m_SecondDS100IpAddressEdit->setText(info->ip, true);
+		m_SecondDS100IpAndPortEdit->setText(juce::String(info->ip) + ":" + juce::String(info->port), true);
 
 		auto ctrl = Controller::GetInstance();
 		if (ctrl)
-			ctrl->SetSecondDS100IpAddress(DCP_Settings, info->ip);
+			ctrl->SetSecondDS100IpAndPort(DCP_Settings, info->ip, info->port);
 	}
 }
 

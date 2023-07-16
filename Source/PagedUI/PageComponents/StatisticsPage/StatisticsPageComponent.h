@@ -61,7 +61,7 @@ protected:
 	void resized() override;
 
 	//==========================================================================
-	void HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier Id, const RemoteObjectMessageData& msgData) override;
+	void HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier roi, const RemoteObjectMessageData& msgData) override;
 
 private:
 	std::unique_ptr<StatisticsPlot>	m_plotComponent;	/**> Plotting component. */

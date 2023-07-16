@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.10.7] 2023-07-16
+### Added
+
+### Changed
+
+### Fixed
+- Fixed refreshing Soundobject name when data is received
+
 ## [0.10.6] - 2023-06-01
 ### Added
 

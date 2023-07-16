@@ -298,6 +298,24 @@ void SoundobjectProcessor::Tick()
 }
 
 /**
+ * Called by the host to rename a program.
+ * @param index		Index of the desired program
+ * @param newName	Desired new program name.
+ */
+void SoundobjectProcessor::changeProgramName(int index, const String& newName)
+{
+	if (index != getCurrentProgram())
+		return;
+	if (newName == m_processorDisplayName)
+		return;
+
+	m_processorDisplayName = newName;
+
+	// Signal change to other modules in the procssor.
+	SetParameterChanged(DCP_Host, DCT_SoundobjectID);
+}
+
+/**
  * Overriden from AppConfiguration::XmlConfigurableElement to dump this objects' settings
  * to a XML element structure that is returned and written to config file by the
  * singleton AppConfiguration class implementation.

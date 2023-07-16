@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.11.0] 2023-07-16
+### Added
+- Added support for AES70/OCP1 protocol for DS100 communication (testing, ALPHA)
+  - Only objects handled / visible in UI supported for bridging
+  - Scenes + En-Space releated objects still in development (WIP)
+
+### Changed
+
+### Fixed
+
 ## [0.10.7] 2023-07-16
 ### Added
 

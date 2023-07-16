@@ -76,7 +76,7 @@ enum DataChangeParticipant
 	DCP_SoundobjectTable,			//< Change was caused or is queried by the soundsource overview table
 	DCP_MultiSlider,				//< Change was caused or is queried by the multislider
 	DCP_Settings,					//< Change was caused or is queried by the SettingsPage UI.	
-	DCP_Host,						//< Change was caused or is queried by the VST/AU/AAX host, i.e. a project was loaded or a DAW preset was recalled.
+	DCP_Host,						//< Change was caused or is queried by the Controller or BridgingWrapper.
 	DCP_Protocol,					//< Change was caused or is queried by an incoming protocol message, or caused by internal operations by the Controller.
 	DCP_Init,						//< Change was caused or is queried by Application initialization process (defaults)
 	DCP_MatrixInputProcessor,		//< Change was caused or is queried by the MatrixInputProcessor UI, i.e. the user turning a knob to change a value.
@@ -169,7 +169,8 @@ static constexpr DataChangeType DCT_MatrixOutputParameters		= (DCT_MatrixOutputL
 static constexpr DataChangeType DCT_ExtensionMode				= 0x0000001000; //< The extensionmode of bridging module has changed. */
 static constexpr DataChangeType DCT_MuteState					= 0x0000002000; //< The mute state for a channel of a bridging protocol has changed. */
 static constexpr DataChangeType DCT_NumBridgingModules			= 0x0000004000; //< The count of active bridging protocols has changed. */
-static constexpr DataChangeType DCT_BridgingConfig				= (DCT_ExtensionMode | DCT_MuteState | DCT_NumBridgingModules); // < All bridging related parameters. */
+static constexpr DataChangeType DCT_ProtocolType				= 0x0000008000; //< The DS100 communication protocol type of bridging module has changed. */
+static constexpr DataChangeType DCT_BridgingConfig				= (DCT_ExtensionMode | DCT_MuteState | DCT_NumBridgingModules | DCT_ProtocolType); // < All bridging related parameters. */
 static constexpr DataChangeType DCT_DebugMessage				= 0x0000010000; //< There is a new debug message to be displayed on the GUI. */
 static constexpr DataChangeType DCT_ProcessorSelection			= 0x0000020000; //< The currently selected SourceID has changed. */
 static constexpr DataChangeType DCT_TabPageSelection			= 0x0000040000; //< The currently selected Tab Index has changed. */

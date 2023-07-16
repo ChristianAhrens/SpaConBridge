@@ -28,12 +28,11 @@ namespace SpaConBridge
 {
 
 /**
- *
+ * Constructor
  */
 ProtocolBridgingWrapper::ProtocolBridgingWrapper()
 	: m_bridgingXml(AppConfiguration::getTagName(AppConfiguration::TagID::BRIDGING))
 {
-
 	// Controller derives from ProcessingEngineNode::Listener
 	m_processingNode.AddListener(this);
 
@@ -41,7 +40,7 @@ ProtocolBridgingWrapper::ProtocolBridgingWrapper()
 }
 
 /**
- *
+ * Destructor
  */
 ProtocolBridgingWrapper::~ProtocolBridgingWrapper()
 {
@@ -60,21 +59,21 @@ void ProtocolBridgingWrapper::AddListener(ProtocolBridgingWrapper::Listener* lis
 
 /**
  * Send a Message out via the active bridging node.
- * @param Id	The id of the remote object to be sent.
+ * @param roi	The id of the remote object to be sent.
  * @param msgData	The message data to be sent.
  * @return True on success, false on failure
  */
-bool ProtocolBridgingWrapper::SendMessage(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData)
+bool ProtocolBridgingWrapper::SendMessage(const RemoteObjectIdentifier roi, RemoteObjectMessageData& msgData)
 {
 	if (GetDS100ExtensionMode() == EM_Mirror)
 	{
 		// if the first DS100 is master, send data to it
 		if ((GetProtocolState(DS100_1_PROCESSINGPROTOCOL_ID) & OHS_Protocol_Master) == OHS_Protocol_Master)
-			return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
+			return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, roi, msgData, ASYNC_EXTID);
 
 		// if the second DS100 is master, send data to it
 		else if ((GetProtocolState(DS100_2_PROCESSINGPROTOCOL_ID) & OHS_Protocol_Master) == OHS_Protocol_Master)
-			return m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData);
+			return m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, roi, msgData, ASYNC_EXTID);
 
 		// of no master is present, we have an undefined state, cannot happen!
 		else
@@ -89,21 +88,21 @@ bool ProtocolBridgingWrapper::SendMessage(RemoteObjectIdentifier Id, RemoteObjec
 				mappedChannel = static_cast<std::int32_t>(DS100_CHANNELCOUNT);
 			msgData._addrVal._first = mappedChannel;
 
-			return m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData);
+			return m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, roi, msgData, ASYNC_EXTID);
 		}
 		else
-			return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
+			return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, roi, msgData, ASYNC_EXTID);
 	}
 	else if (GetDS100ExtensionMode() == EM_Parallel)
 	{
-		auto sendSuccess = m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
-		sendSuccess = m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, Id, msgData) && sendSuccess;
+		auto sendSuccess = m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, roi, msgData, ASYNC_EXTID);
+		sendSuccess = m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, roi, msgData, ASYNC_EXTID) && sendSuccess;
 
 		return sendSuccess;
 	}
 	else
 	{
-		return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, Id, msgData);
+		return m_processingNode.SendMessageTo(DS100_1_PROCESSINGPROTOCOL_ID, roi, msgData, ASYNC_EXTID);
 	}
 }
 
@@ -151,12 +150,12 @@ bool ProtocolBridgingWrapper::Reconnect()
 
 /**
  * Static helper method to query if the given ROI is not one of those marked for processing in application and only to be bridged to DS100.
- * @param id	The object id to be checked regarding relevance for handling in application.
+ * @param roi	The object id to be checked regarding relevance for handling in application.
  * @return	True if the object shall be only bridged to DS100, false if it is also relevant for application
  */
-bool ProtocolBridgingWrapper::IsBridgingObjectOnly(RemoteObjectIdentifier id)
+bool ProtocolBridgingWrapper::IsBridgingObjectOnly(const RemoteObjectIdentifier roi)
 {
-	switch (id)
+	switch (roi)
 	{
 	case ROI_MatrixInput_Select:
 	case ROI_RemoteProtocolBridge_SoundObjectSelect:
@@ -1621,10 +1620,10 @@ bool ProtocolBridgingWrapper::SetProtocolOutputDeviceIdentifier(ProtocolId proto
 /**
  * Gets the currently set midi assignment mapping for a given remote object, if available, for the given protocol.
  * @param protocolId	The id of the protocol to get the midi assignment for.
- * @param remoteObjectId	The remote object to get the midi mapping for.
+ * @param roi	The remote object to get the midi mapping for.
  * @return	The requested midi assignment mapping
  */
-JUCEAppBasics::MidiCommandRangeAssignment ProtocolBridgingWrapper::GetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId)
+JUCEAppBasics::MidiCommandRangeAssignment ProtocolBridgingWrapper::GetMidiAssignmentMapping(ProtocolId protocolId, const RemoteObjectIdentifier roi)
 {
     auto midiAssiMap = JUCEAppBasics::MidiCommandRangeAssignment();
     
@@ -1634,7 +1633,7 @@ JUCEAppBasics::MidiCommandRangeAssignment ProtocolBridgingWrapper::GetMidiAssign
         auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
         if (protocolXmlElement)
         {
-            auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+            auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(roi).removeCharacters(" "));
             if (assiMapXmlElement)
             {
                 auto assiMapHexStringTextXmlElement = assiMapXmlElement->getFirstChildElement();
@@ -1656,12 +1655,12 @@ JUCEAppBasics::MidiCommandRangeAssignment ProtocolBridgingWrapper::GetMidiAssign
  * This method inserts the mapping area id into the cached xml element,
  * pushes the updated xml element into processing node and triggers configuration updating.
  * @param protocolId	The id of the protocol to set the midi assignment for.
- * @param remoteObjectId	The remote object to set the midi mapping for.
+ * @param roi	The remote object to set the midi mapping for.
  * @param assignmentMapping	The midi mapping to set for the remote object.
  * @param dontSendNotification	Flag if change notification shall be broadcasted.
  * @return	True on succes, false if failure
  */
-bool ProtocolBridgingWrapper::SetMidiAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification)
+bool ProtocolBridgingWrapper::SetMidiAssignmentMapping(ProtocolId protocolId, const RemoteObjectIdentifier roi, const JUCEAppBasics::MidiCommandRangeAssignment& assignmentMapping, bool dontSendNotification)
 {
     auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
     if (nodeXmlElement)
@@ -1671,7 +1670,7 @@ bool ProtocolBridgingWrapper::SetMidiAssignmentMapping(ProtocolId protocolId, Re
         {
             auto assiMapHexString = assignmentMapping.serializeToHexString();
             
-            auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+            auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(roi).removeCharacters(" "));
             if (assiMapXmlElement)
             {
                 auto assiMapHexStringTextXmlElement = assiMapXmlElement->getFirstChildElement();
@@ -1682,7 +1681,7 @@ bool ProtocolBridgingWrapper::SetMidiAssignmentMapping(ProtocolId protocolId, Re
             }
             else
             {
-                assiMapXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+                assiMapXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectDescription(roi).removeCharacters(" "));
                 assiMapXmlElement->addTextElement(assiMapHexString);
             }
         }
@@ -1698,10 +1697,10 @@ bool ProtocolBridgingWrapper::SetMidiAssignmentMapping(ProtocolId protocolId, Re
 /**
  * Gets the currently set scenes to midi assignment mapping for a given remote object, if available, for the given protocol.
  * @param protocolId	The id of the protocol to get the scenes to midi assignment for.
- * @param remoteObjectId	The remote object to get the scenes to midi mapping for.
+ * @param roi	The remote object to get the scenes to midi mapping for.
  * @return	The requested scenes to midi assignment mapping
  */
-std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> ProtocolBridgingWrapper::GetMidiScenesAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId)
+std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> ProtocolBridgingWrapper::GetMidiScenesAssignmentMapping(ProtocolId protocolId, const RemoteObjectIdentifier roi)
 {
 	auto scenesToMidiAssiMap = std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>();
 
@@ -1711,7 +1710,7 @@ std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> ProtocolBridgingWrap
 		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
 		if (protocolXmlElement)
 		{
-			auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+			auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(roi).removeCharacters(" "));
 			if (assiMapXmlElement)
 			{
 				if (assiMapXmlElement->getIntAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MULTIVALUE)) == 1)
@@ -1740,12 +1739,12 @@ std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> ProtocolBridgingWrap
 /**
  * Sets the desired scenes to midi assignment mapping for a given remote object.
  * @param protocolId	The id of the protocol to set the scenes to midi assignment for.
- * @param remoteObjectId	The remote object to set the scenes to midi mapping for.
+ * @param roi	The remote object to set the scenes to midi mapping for.
  * @param assignmentMapping	The scenes to midi mapping to set for the remote object.
  * @param dontSendNotification	Flag if change notification shall be broadcasted.
  * @return	True on succes, false if failure
  */
-bool ProtocolBridgingWrapper::SetMidiScenesAssignmentMapping(ProtocolId protocolId, RemoteObjectIdentifier remoteObjectId, const std::map<juce::String, JUCEAppBasics::MidiCommandRangeAssignment>& assignmentMapping, bool dontSendNotification)
+bool ProtocolBridgingWrapper::SetMidiScenesAssignmentMapping(ProtocolId protocolId, const RemoteObjectIdentifier roi, const std::map<juce::String, JUCEAppBasics::MidiCommandRangeAssignment>& assignmentMapping, bool dontSendNotification)
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
@@ -1753,7 +1752,7 @@ bool ProtocolBridgingWrapper::SetMidiScenesAssignmentMapping(ProtocolId protocol
 		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), juce::String(protocolId));
 		if (protocolXmlElement)
 		{
-			auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+			auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(roi).removeCharacters(" "));
 			if (assiMapXmlElement)
 			{
 				// collect the xml elements that are no longer used according to new incoming mappings
@@ -1794,7 +1793,7 @@ bool ProtocolBridgingWrapper::SetMidiScenesAssignmentMapping(ProtocolId protocol
 			}
 			else
 			{
-				assiMapXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectDescription(remoteObjectId).removeCharacters(" "));
+				assiMapXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectDescription(roi).removeCharacters(" "));
 				assiMapXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MULTIVALUE), 1);
 				for (auto const& assi : assignmentMapping)
 				{
@@ -2697,6 +2696,160 @@ bool ProtocolBridgingWrapper::UpdateActiveDS100RemoteObjectIds()
 }
 
 /**
+ * Getter method for the active DS100 communication protocol type.
+ * This does not return a member variable value but contains logic to derive the mode from internal cached xml element configuration.
+ * @return The DS100 communication protocol type as results from cached xml config. Default PT_OSCProtocol if xml is invalid.
+ */
+ProtocolType ProtocolBridgingWrapper::GetDS100ProtocolType()
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+		{
+			return ProcessingEngineConfig::ProtocolTypeFromString(protocolXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE)));
+		}
+	}
+
+	return PT_OSCProtocol;
+}
+
+/**
+ * Sets the desired protocol type for communication with the DS100(s).
+ * This method inserts the rate value into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param msgRate	The new message rate value in ms
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetDS100ProtocolType(ProtocolType protocolType, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		// First DS100 configuration
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+		{
+			auto protocolTypeString = ProcessingEngineConfig::ProtocolTypeToString(protocolType);
+			bool protocolTypeChanged = (protocolTypeString != protocolXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE)));
+			// Set the new protocolType. This is responsible for the instantiation of correct ProtocolProcessor type in RPBC when parsing the updated xml
+			protocolXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), protocolTypeString);
+
+			// DS100 uses different ports for OSC (udp) and OCA (tcp)
+			auto clientPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+			auto clientPortElmWasNewlyCreated = false;
+			if (!clientPortXmlElement)
+			{
+				clientPortXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+				clientPortElmWasNewlyCreated = true;
+			}
+			if (protocolTypeChanged || clientPortElmWasNewlyCreated)
+				clientPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), (protocolType == PT_OSCProtocol ? RX_PORT_DS100_DEVICE : RX_PORT_DS100_DEVICE_OCP1));
+			
+			auto hostPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
+			auto hostPortElmWasNewlyCreated = false;
+			if (!hostPortXmlElement)
+			{
+				hostPortXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
+				hostPortElmWasNewlyCreated = true;
+			}
+			if (protocolTypeChanged || hostPortElmWasNewlyCreated)
+				hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), (protocolType == PT_OSCProtocol ? RX_PORT_DS100_HOST : 0)); // hostport is not used in Ocp1 RPBC implementation
+
+			// Ocp1 requires the server/client mode to be set. Therefor we need to create the corresp. xml entry if Ocp1 or delete it if OCA becomes active.
+			auto ocp1ConnectionModeXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE));
+			if (protocolType == PT_OCP1Protocol)
+			{
+				if (!ocp1ConnectionModeXmlElement)
+					ocp1ConnectionModeXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE));
+				if (ocp1ConnectionModeXmlElement->getFirstChildElement() && ocp1ConnectionModeXmlElement->getFirstChildElement()->isTextElement())
+					ocp1ConnectionModeXmlElement->getFirstChildElement()->setText("client");
+				else
+					ocp1ConnectionModeXmlElement->addTextElement("client");
+			}
+			else if (ocp1ConnectionModeXmlElement)
+				protocolXmlElement->removeChildElement(ocp1ConnectionModeXmlElement, true);
+
+			// Ocp1 heartbeat timing is handled internally and should not be interfered with from a potentially leftover OSC polling interval 
+			if (protocolType == PT_OCP1Protocol)
+			{
+				auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
+				if (pollingIntervalXmlElement)
+					protocolXmlElement->removeChildElement(pollingIntervalXmlElement, true);
+			}
+			else if (protocolType == PT_OSCProtocol)
+			{
+				auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
+				if (!pollingIntervalXmlElement)
+				{
+					pollingIntervalXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
+					pollingIntervalXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::INTERVAL), ET_DefaultPollingRate);
+				}
+			}
+		}
+		else
+			return false;
+
+		// Second DS100 configuration (if existing)
+		protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_2_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+		{
+			// Set the new protocolType. This is responsible for the instantiation of correct ProtocolProcessor type in RPBC when parsing the updated xml
+			protocolXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), ProcessingEngineConfig::ProtocolTypeToString(protocolType));
+
+			// DS100 uses different ports for OSC (udp) and OCA (tcp)
+			auto clientPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+			if (!clientPortXmlElement)
+				clientPortXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+			clientPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), (protocolType == PT_OSCProtocol ? RX_PORT_DS100_DEVICE : RX_PORT_DS100_DEVICE_OCP1));
+
+			auto hostPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
+			if (!hostPortXmlElement)
+				hostPortXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
+			hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), (protocolType == PT_OSCProtocol ? RX_PORT_DS100_HOST : 0)); // hostport is not used in Ocp1 RPBC implementation
+
+			// Ocp1 requires the server/client mode to be set. Therefor we need to create the corresp. xml entry if Ocp1 or delete it if OCA becomes active.
+			auto ocp1ConnectionModeXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE));
+			if (protocolType == PT_OCP1Protocol)
+			{
+				if (!ocp1ConnectionModeXmlElement)
+					ocp1ConnectionModeXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE));
+				if (ocp1ConnectionModeXmlElement->getFirstChildElement() && ocp1ConnectionModeXmlElement->getFirstChildElement()->isTextElement())
+					ocp1ConnectionModeXmlElement->getFirstChildElement()->setText("client");
+				else
+					ocp1ConnectionModeXmlElement->addTextElement("client");
+			}
+			else if (ocp1ConnectionModeXmlElement)
+				protocolXmlElement->removeChildElement(ocp1ConnectionModeXmlElement, true);
+
+			// Ocp1 heartbeat timing is handled internally and should not be interfered with from a potentially leftover OSC polling interval 
+			if (protocolType == PT_OCP1Protocol)
+			{
+				auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
+				if (pollingIntervalXmlElement)
+					protocolXmlElement->removeChildElement(pollingIntervalXmlElement, true);
+			}
+			else if (protocolType == PT_OSCProtocol)
+			{
+				auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
+				if (!pollingIntervalXmlElement)
+				{
+					pollingIntervalXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
+					pollingIntervalXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::INTERVAL), ET_DefaultPollingRate);
+				}
+			}
+		}
+		// its ok to have no else return false here, since the second DS100 is not mandatory in config!
+
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
+}
+
+/**
  * Gets the currently set DS100 client ip address.
  * This method forwards the call to the generic implementation.
  * @return	The ip address string
@@ -2716,6 +2869,28 @@ String ProtocolBridgingWrapper::GetDS100IpAddress()
 bool ProtocolBridgingWrapper::SetDS100IpAddress(String ipAddress, bool dontSendNotification)
 {
 	return SetProtocolIpAddress(DS100_1_PROCESSINGPROTOCOL_ID, ipAddress, dontSendNotification);
+}
+
+/**
+ * Gets the currently used port for the connection to the first DS100 device.
+ * This method forwards the call to the generic implementation.
+ * @return	The port number used.
+ */
+int ProtocolBridgingWrapper::GetDS100Port()
+{
+	return GetProtocolRemotePort(DS100_1_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the port number to currently use the connection to the first DS100 device.
+ * This method forwards the call to the generic implementation.
+ * @param port					The new port number to use
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetDS100Port(int port, bool dontSendNotification)
+{
+	return SetProtocolRemotePort(DS100_1_PROCESSINGPROTOCOL_ID, port, dontSendNotification);
 }
 
 /**
@@ -2740,9 +2915,32 @@ bool ProtocolBridgingWrapper::SetSecondDS100IpAddress(String ipAddress, bool don
 	return SetProtocolIpAddress(DS100_2_PROCESSINGPROTOCOL_ID, ipAddress, dontSendNotification);
 }
 
+
+/**
+ * Gets the currently used port for the connection to the second DS100 device.
+ * This method forwards the call to the generic implementation.
+ * @return	The port number used.
+ */
+int ProtocolBridgingWrapper::GetSecondDS100Port()
+{
+	return GetProtocolRemotePort(DS100_2_PROCESSINGPROTOCOL_ID);
+}
+
+/**
+ * Sets the port number to currently use the connection to the second DS100 device.
+ * This method forwards the call to the generic implementation.
+ * @param port					The new port number to use
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetSecondDS100Port(int port, bool dontSendNotification)
+{
+	return SetProtocolRemotePort(DS100_2_PROCESSINGPROTOCOL_ID, port, dontSendNotification);
+}
+
 /**
  * Gets the currently active message rate for protocol polling.
- * @return	True on succes, false if failure
+ * @return	The message rate currently set in xml config
  */
 int ProtocolBridgingWrapper::GetDS100MsgRate()
 {
@@ -2767,7 +2965,7 @@ int ProtocolBridgingWrapper::GetDS100MsgRate()
  * Sets the desired message rate for protocol polling.
  * This method inserts the rate value into the cached xml element,
  * pushes the updated xml element into processing node and triggers configuration updating.
- * @param msgRate	The new message rate value in ms
+ * @param msgRate	The new protocol type enum id
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  * @return	True on succes, false if failure
  */
@@ -2801,8 +2999,7 @@ bool ProtocolBridgingWrapper::SetDS100MsgRate(int msgRate, bool dontSendNotifica
 			else
 				return false;
 		}
-		else
-			return false;
+		// its ok to have no else return false here, since the second DS100 is not mandatory in config!
 
 		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
 	}
@@ -3077,7 +3274,7 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 
 				auto ctrl = Controller::GetInstance();
 				if (ctrl)
-					ctrl->SetSecondDS100IpAddress(DCP_Init, "", dontSendNotification);
+					ctrl->SetSecondDS100IpAndPort(DCP_Init, "", 0xffff, dontSendNotification);
 			}
 			break;
 			case EM_Extend:
@@ -3093,7 +3290,7 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 
 					auto ctrl = Controller::GetInstance();
 					if (ctrl)
-						ctrl->SetSecondDS100IpAddress(DCP_Init, PROTOCOL_DEFAULT2_IP, dontSendNotification);
+						ctrl->SetSecondDS100IpAndPort(DCP_Init, PROTOCOL_DEFAULT2_IP, RX_PORT_DS100_DEVICE, dontSendNotification);
 				}
 			}
 			break;

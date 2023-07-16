@@ -144,10 +144,14 @@ public:
 	std::vector<RemoteObject> GetMatrixOutputProcessorRemoteObjects(MatrixOutputProcessorId matrixOutputProcessorId);
 
 	//==========================================================================
-	String GetDS100IpAddress() const;
-	void SetDS100IpAddress(DataChangeParticipant changeSource, String ipAddress, bool dontSendNotification = false);
-	String GetSecondDS100IpAddress() const;
-	void SetSecondDS100IpAddress(DataChangeParticipant changeSource, String ipAddress, bool dontSendNotification = false);
+	ProtocolType GetDS100ProtocolType() const;
+	void SetDS100ProtocolType(DataChangeParticipant changeSource, ProtocolType protocol, bool dontSendNotification = false);
+
+	//==========================================================================
+	std::pair<juce::String, int> GetDS100IpAndPort() const;
+	void SetDS100IpAndPort(DataChangeParticipant changeSource, String ipAddress, int port, bool dontSendNotification = false);
+	std::pair<juce::String, int> GetSecondDS100IpAndPort() const;
+	void SetSecondDS100IpAndPort(DataChangeParticipant changeSource, String ipAddress, int port, bool dontSendNotification = false);
 
 	//==========================================================================
 	int GetRefreshInterval() const;
@@ -236,9 +240,6 @@ public:
 	bool SetBridgingModuleTypeIdentifier(ProtocolBridgingType bridgingType, const String& moduleTypeIdentifier, bool dontSendNotification = false);
 
 	//==========================================================================
-	void InitGlobalSettings(DataChangeParticipant changeSource, String ipAddress, int rate);
-
-	//==========================================================================
 	void Disconnect();
 	void Reconnect();
 	bool IsConnected() const;
@@ -263,10 +264,10 @@ public:
 	bool setStateXml(XmlElement* stateXml) override;
 
 	//==========================================================================
-	void HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier Id, const RemoteObjectMessageData& msgData) override;
+	void HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, const RemoteObjectIdentifier roi, const RemoteObjectMessageData& msgData) override;
 
 	//==========================================================================
-	bool SendMessageDataDirect(RemoteObjectIdentifier Id, RemoteObjectMessageData& msgData);
+	bool SendMessageDataDirect(const RemoteObjectIdentifier roi, RemoteObjectMessageData& msgData);
 
 private:
 	//==========================================================================
@@ -288,10 +289,13 @@ protected:
 
 	ProtocolBridgingWrapper			m_protocolBridge;				/**< The wrapper for protocol bridging node, allowing to easily interface with it. */
 
+	ProtocolType					m_DS100ProtocolType;			/**< Current protocol type. This has impact on other parameters being available on ui or not. */
 	String							m_DS100IpAddress;				/**< IP Address where OSC messages will be sent to / received from. */
+	int								m_DS100Port;					/**< Port on the ds100 device to connect to. */
 	ExtensionMode					m_DS100ExtensionMode;			/**< Current extension mode. This has impact on if second DS100 is active or not. */
 	ActiveParallelModeDS100			m_DS100ActiveParallelModeDS100;	/**< Currently active DS100 when in extension mode "parallel". */
 	String							m_SecondDS100IpAddress;			/**< IP Address where OSC messages will be sent to / received from. */
+	int								m_SecondDS100Port;				/**< Port on a second ds100 device to connect to. */
 
 	DataChangeType					m_parametersChanged[DCP_Max];	/**< Keep track of which OSC parameters have changed recently.
 																	 * The array has one entry for each application module (see enum DataChangeSource). */

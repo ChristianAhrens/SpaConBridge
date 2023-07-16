@@ -4,8 +4,11 @@ All notable changes to SpaConBridge will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.11.0] 2023-07-16
 ### Added
+- Added support for AES70/OCP1 protocol for DS100 communication (testing, ALPHA)
+  - Only objects handled / visible in UI supported for bridging
+  - Scenes + En-Space releated objects still in development (WIP)
 
 ### Changed
 

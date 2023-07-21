@@ -121,11 +121,6 @@ MultiSoundobjectComponent::MultiSoundobjectComponent()
 		AddStandalonePollingObject(ROI_CoordinateMappingSettings_P3virtual, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE));
 		AddStandalonePollingObject(ROI_CoordinateMappingSettings_Flip, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE));
 		AddStandalonePollingObject(ROI_CoordinateMappingSettings_Name, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE));
-		
-		m_mappingCornersReal[i] = { {0.0f, 0.0f, 0.0f}, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f } };
-		m_mappingCornersVirtual[i] = { {0.0f, 0.0f, 0.0f}, { 0.0f, 0.0f, 0.0f } };
-		m_mappingFlip[i] = false;
-		m_mappingName[i] = juce::String("empty");
 	}
 
 	// add the speaker position objects to low-freq local polling
@@ -521,6 +516,12 @@ bool MultiSoundobjectComponent::SetSelectedMapping(MappingAreaId mapping)
 {
 	if (m_multiSoundobjectSlider)
 	{
+		if (mapping == MAI_Invalid)
+		{
+			m_multiSoundobjectSlider->SetCoordinateMappingSettingsDataReady(false);
+			m_multiSoundobjectSlider->SetSpeakerPositionDataReady(false);
+			restartTimer();
+		}
 		m_multiSoundobjectSlider->SetSelectedMapping(mapping);
 
 		resized();
@@ -709,7 +710,12 @@ void MultiSoundobjectComponent::lookAndFeelChanged()
  */
 void MultiSoundobjectComponent::HandleObjectDataInternal(const RemoteObjectIdentifier& roi, const RemoteObjectMessageData& msgData)
 {
+	// all in here relies on existance of m_multiSoundobjectSlider, so we can abort if it doesnt exist
+	if (!m_multiSoundobjectSlider)
+		return;
+
 	auto channel = msgData._addrVal._first;
+	auto mappingAreaId = static_cast<MappingAreaId>(channel);
 
 	switch (roi)
 	{
@@ -717,147 +723,84 @@ void MultiSoundobjectComponent::HandleObjectDataInternal(const RemoteObjectIdent
 		if (msgData._payload != nullptr && msgData._payloadSize == 3 * sizeof(float) && msgData._valCount == 3 && msgData._valType == ROVT_FLOAT)
 		{
 			auto floatPtr = static_cast<float*>(msgData._payload);
-			m_mappingCornersReal[channel][0] = {floatPtr[0], floatPtr[1], floatPtr[2]};
+			m_multiSoundobjectSlider->GetMappingCornersReal()[mappingAreaId][0] = {floatPtr[0], floatPtr[1], floatPtr[2]};
 		}
 		break;
 	case ROI_CoordinateMappingSettings_P2real:
 		if (msgData._payload != nullptr && msgData._payloadSize == 3 * sizeof(float) && msgData._valCount == 3 && msgData._valType == ROVT_FLOAT)
 		{
 			auto floatPtr = static_cast<float*>(msgData._payload);
-			m_mappingCornersReal[channel][1] = { floatPtr[0], floatPtr[1], floatPtr[2] };
+			m_multiSoundobjectSlider->GetMappingCornersReal()[mappingAreaId][1] = { floatPtr[0], floatPtr[1], floatPtr[2] };
 		}
 		break;
 	case ROI_CoordinateMappingSettings_P3real:
 		if (msgData._payload != nullptr && msgData._payloadSize == 3 * sizeof(float) && msgData._valCount == 3 && msgData._valType == ROVT_FLOAT)
 		{
 			auto floatPtr = static_cast<float*>(msgData._payload);
-			m_mappingCornersReal[channel][2] = { floatPtr[0], floatPtr[1], floatPtr[2] };
+			m_multiSoundobjectSlider->GetMappingCornersReal()[mappingAreaId][2] = { floatPtr[0], floatPtr[1], floatPtr[2] };
 		}
 		break;
 	case ROI_CoordinateMappingSettings_P4real:
 		if (msgData._payload != nullptr && msgData._payloadSize == 3 * sizeof(float) && msgData._valCount == 3 && msgData._valType == ROVT_FLOAT)
 		{
 			auto floatPtr = static_cast<float*>(msgData._payload);
-			m_mappingCornersReal[channel][3] = { floatPtr[0], floatPtr[1], floatPtr[2] };
+			m_multiSoundobjectSlider->GetMappingCornersReal()[mappingAreaId][3] = { floatPtr[0], floatPtr[1], floatPtr[2] };
 		}
 		break;
 	case ROI_CoordinateMappingSettings_P1virtual:
 		if (msgData._payload != nullptr && msgData._payloadSize == 3 * sizeof(float) && msgData._valCount == 3 && msgData._valType == ROVT_FLOAT)
 		{
 			auto floatPtr = static_cast<float*>(msgData._payload);
-			m_mappingCornersVirtual[channel][0] = { floatPtr[0], floatPtr[1], floatPtr[2] };
+			m_multiSoundobjectSlider->GetMappingCornersVirtual()[mappingAreaId][0] = { floatPtr[0], floatPtr[1], floatPtr[2] };
 		}
 		break;
 	case ROI_CoordinateMappingSettings_P3virtual:
 		if (msgData._payload != nullptr && msgData._payloadSize == 3 * sizeof(float) && msgData._valCount == 3 && msgData._valType == ROVT_FLOAT)
 		{
 			auto floatPtr = static_cast<float*>(msgData._payload);
-			m_mappingCornersVirtual[channel][1] = { floatPtr[0], floatPtr[1], floatPtr[2] };
+			m_multiSoundobjectSlider->GetMappingCornersVirtual()[mappingAreaId][1] = { floatPtr[0], floatPtr[1], floatPtr[2] };
 		}
 		break;
 	case ROI_CoordinateMappingSettings_Flip:
 		if (msgData._payload != nullptr && msgData._payloadSize == sizeof(int) && msgData._valCount == 1 && msgData._valType == ROVT_INT)
 		{
-			m_mappingFlip[channel] = (1 == *static_cast<int*>(msgData._payload));
+			m_multiSoundobjectSlider->GetMappingFlip()[mappingAreaId] = (1 == *static_cast<int*>(msgData._payload));
 		}
 		break;
 	case ROI_CoordinateMappingSettings_Name:
-		if (msgData._payload != nullptr && msgData._payloadSize == msgData._valCount * sizeof(float) && msgData._valType == ROVT_STRING)
+		if (msgData._payload != nullptr && msgData._payloadSize == msgData._valCount * sizeof(char) && msgData._valType == ROVT_STRING)
 		{
-			m_mappingName[channel] = juce::String(static_cast<char*>(msgData._payload), msgData._valCount);
+			m_multiSoundobjectSlider->GetMappingName()[mappingAreaId] = juce::String(static_cast<char*>(msgData._payload), msgData._valCount);
 		}
 		break;
 	case ROI_Positioning_SpeakerPosition:
 		if (msgData._payload != nullptr && msgData._payloadSize == 6 * sizeof(float) && msgData._valCount == 6 && msgData._valType == ROVT_FLOAT)
 		{
 			auto floatPtr = static_cast<float*>(msgData._payload);
-			m_speakerPositions[channel] = std::make_pair(juce::Vector3D(floatPtr[0], floatPtr[1], floatPtr[2]), juce::Vector3D(floatPtr[3], floatPtr[4], floatPtr[5]));
+			m_multiSoundobjectSlider->GetSpeakerPositions()[mappingAreaId] = std::make_pair(juce::Vector3D(floatPtr[0], floatPtr[1], floatPtr[2]), juce::Vector3D(floatPtr[3], floatPtr[4], floatPtr[5]));
 		}
 		break;
 	default:
 		break;
 	}
 
-	if (CheckCoordinateMappingSettingsDataCompleteness() && !IsCoordinateMappingsSettingsDataReady())
+	if (m_multiSoundobjectSlider->CheckCoordinateMappingSettingsDataCompleteness() && !m_multiSoundobjectSlider->IsCoordinateMappingsSettingsDataReady())
 	{
-		SetCoordinateMappingSettingsDataReady(true);
+		m_multiSoundobjectSlider->SetCoordinateMappingSettingsDataReady(true);
 		DBG(juce::String(__FUNCTION__) + " we now have the required CoordinateMappingSettings data at hand to do fancy stuff.");
 	}
 
-	if (CheckSpeakerPositionDataCompleteness() && !IsSpeakerPositionDataReady())
+	if (m_multiSoundobjectSlider->CheckSpeakerPositionDataCompleteness() && !m_multiSoundobjectSlider->IsSpeakerPositionDataReady())
 	{
-		SetSpeakerPositionDataReady(true);
+		m_multiSoundobjectSlider->SetSpeakerPositionDataReady(true);
 		DBG(juce::String(__FUNCTION__) + " we now have the required SpeakerPosition data at hand to do fancy stuff.");
 	}
-}
 
-/**
- * Helper method to check the internal data maps for if all coordmapsettings have been received
- * @return	True if data for all four mapping areas is contained in the internal maps
- */
-bool MultiSoundobjectComponent::CheckCoordinateMappingSettingsDataCompleteness()
-{
-	auto requiredRealPoints = 4;
-	auto requiredVirtualPoints = 2;
-	auto cornRealIsComplete = m_mappingCornersReal.count(MAI_First) == 1 && m_mappingCornersReal.count(MAI_Second) == 1 && m_mappingCornersReal.count(MAI_Third) == 1 && m_mappingCornersReal.count(MAI_Fourth) == 1
-		&& m_mappingCornersReal.at(MAI_First).size() == requiredRealPoints && m_mappingCornersReal.at(MAI_Second).size() == requiredRealPoints && m_mappingCornersReal.at(MAI_Third).size() == requiredRealPoints && m_mappingCornersReal.at(MAI_Fourth).size() == requiredRealPoints;
-	auto cornVirtIsComplete = m_mappingCornersVirtual.count(MAI_First) == 1 && m_mappingCornersVirtual.count(MAI_Second) == 1 && m_mappingCornersVirtual.count(MAI_Third) == 1 && m_mappingCornersVirtual.count(MAI_Fourth) == 1
-		&& m_mappingCornersVirtual.at(MAI_First).size() == requiredVirtualPoints && m_mappingCornersVirtual.at(MAI_Second).size() == requiredVirtualPoints && m_mappingCornersVirtual.at(MAI_Third).size() == requiredVirtualPoints && m_mappingCornersVirtual.at(MAI_Fourth).size() == requiredVirtualPoints;
-	auto flipIsComplete = m_mappingFlip.count(MAI_First) == 1 && m_mappingFlip.count(MAI_Second) == 1 && m_mappingFlip.count(MAI_Third) == 1 && m_mappingFlip.count(MAI_Fourth) == 1;
-	auto nameIsComplete = m_mappingName.count(MAI_First) == 1 && m_mappingName.count(MAI_Second) == 1 && m_mappingName.count(MAI_Third) == 1 && m_mappingName.count(MAI_Fourth) == 1;
-
-	return cornRealIsComplete && cornVirtIsComplete && flipIsComplete && nameIsComplete;
-}
-
-/**
- * Setter for the internal member m_coordinateMappingSettingsReady
- * @param	ready	Value to set as new m_coordinateMappingSettingsReady
- */
-void MultiSoundobjectComponent::SetCoordinateMappingSettingsDataReady(bool ready)
-{
-	m_coordinateMappingSettingsDataReady = ready;
-}
-
-/**
- * Getter for the internal member m_coordinateMappingSettingsReady
- * @return Current value of m_coordinateMappingSettingsReady
- */
-bool MultiSoundobjectComponent::IsCoordinateMappingsSettingsDataReady()
-{
-	return m_coordinateMappingSettingsDataReady;
-}
-
-/**
- * Helper method to check the internal data maps for if all coordmapsettings have been received
- * @return	True if data for all four mapping areas is contained in the internal maps
- */
-bool MultiSoundobjectComponent::CheckSpeakerPositionDataCompleteness()
-{
-	for (auto i = 1; i <= DS100_CHANNELCOUNT; i++)
+	if (m_multiSoundobjectSlider->IsCoordinateMappingsSettingsDataReady() && m_multiSoundobjectSlider->IsSpeakerPositionDataReady())
 	{
-		if (m_speakerPositions.count(i) != 1)
-			return false;
+		stopTimer();
+		DBG(juce::String(__FUNCTION__) + " we now have the required CoordinateMappingSettings and SpeakerPosition data at hand to do fancy stuff.");
 	}
-
-	return true;
-}
-
-/**
- * Setter for the internal member m_speakerPositionDataReady
- * @param	ready	Value to set as new m_speakerPositionDataReady
- */
-void MultiSoundobjectComponent::SetSpeakerPositionDataReady(bool ready)
-{
-	m_speakerPositionDataReady = ready;
-}
-
-/**
- * Getter for the internal member m_speakerPositionDataReady
- * @return Current value of m_speakerPositionDataReady
- */
-bool MultiSoundobjectComponent::IsSpeakerPositionDataReady()
-{
-	return m_speakerPositionDataReady;
 }
 
 

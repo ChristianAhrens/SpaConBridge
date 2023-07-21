@@ -51,6 +51,14 @@ void StandalonePollingBase::setRefreshRateMs(int rateInMs)
 {
 	m_refreshRateMs = rateInMs;
 
+	restartTimer();
+}
+
+/**
+ * Helper method to restart the timer with the interval already present in internal member field
+ */
+void StandalonePollingBase::restartTimer()
+{
 	startTimer(m_refreshRateMs);
 }
 

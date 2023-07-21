@@ -130,8 +130,25 @@ public:
 
 	void UpdateParameters(const ParameterCache& positions, bool externalTrigger = false);
 
+	//==============================================================================
+	bool CheckCoordinateMappingSettingsDataCompleteness();
+	void SetCoordinateMappingSettingsDataReady(bool ready);
+	bool IsCoordinateMappingsSettingsDataReady();
+	std::map<MappingAreaId, std::vector<juce::Vector3D<float>>>& GetMappingCornersReal() { return m_mappingCornersReal; };
+	std::map<MappingAreaId, std::vector<juce::Vector3D<float>>>& GetMappingCornersVirtual() { return m_mappingCornersVirtual; };
+	std::map<MappingAreaId, bool>& GetMappingFlip() { return m_mappingFlip; };
+	std::map<MappingAreaId, juce::String>& GetMappingName() { return m_mappingName; };
+
+	//==============================================================================
+	bool CheckSpeakerPositionDataCompleteness();
+	void SetSpeakerPositionDataReady(bool ready);
+	bool IsSpeakerPositionDataReady();
+	std::map<ChannelId, std::pair<juce::Vector3D<float>, juce::Vector3D<float>>>& GetSpeakerPositions() { return m_speakerPositions; };
+
 protected:
 	void paint(Graphics& g) override;
+	void paintMappingArea2DVisu(Graphics& g);
+	void paintSpeakersAndMappingAreas2DVisu(Graphics& g);
 
 	void resized() override;
 
@@ -153,6 +170,13 @@ private:
 	void applyObjectsRotAndScale(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<float>& cog, const float rotation, const float scaling);
 	void finalizeObjectsRotAndScale(const std::vector<SoundobjectProcessorId>& objectIds, const juce::Point<float>& cog, const float rotation, const float scaling);
 
+	//==============================================================================
+	void ComputeRealBoundingRect();
+	juce::Rectangle<float>	m_realBoundingRect;
+
+	juce::Point<float>	GetPointForRealCoordinate(const juce::Vector3D<float>& realCoordinate);
+
+	//==============================================================================
 	SoundobjectProcessorId										m_currentlyDraggedId;				                        /**< ProcessorId of the currently selected knob, if any. */
 	std::vector<SoundobjectId>									m_highlightedIds;					                        /**< SourceIds of the currently highlighted knobs, if any. */
 	ParameterCache												m_cachedParameters;					                        /**< To save us from iterating over all Soundobject Processors at every click, cache their current parametervalues.
@@ -172,7 +196,17 @@ private:
 	std::map<SoundobjectProcessorId, juce::Point<float>>		m_objectPosMultiEditStartValues;							/**< Startvalues for editing multiple SO positions. */
 
 	std::unique_ptr<MultiSOSelectionVisualizerComponent>		m_multiselectionVisualizer;									/**< Helper component to do the painting and user interaction tracking for multiselection interaction. */
-    
+	
+	//==============================================================================
+	bool																			m_coordinateMappingSettingsDataReady{ false };
+	std::map<MappingAreaId, std::vector<juce::Vector3D<float>>>						m_mappingCornersReal;
+	std::map<MappingAreaId, std::vector<juce::Vector3D<float>>>						m_mappingCornersVirtual;
+	std::map<MappingAreaId, bool>													m_mappingFlip;
+	std::map<MappingAreaId, juce::String>											m_mappingName;
+	
+	bool																			m_speakerPositionDataReady{ false };
+	std::map<ChannelId, std::pair<juce::Vector3D<float>, juce::Vector3D<float>>>	m_speakerPositions;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSoundobjectSlider)
 };
 

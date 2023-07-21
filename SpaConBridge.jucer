@@ -381,6 +381,10 @@
       <FILE id="Q7vthe" name="README.md" compile="0" resource="1" file="README.md"/>
     </GROUP>
     <GROUP id="{2B9DD386-1093-ADF5-E47F-5954774132B5}" name="Source">
+      <FILE id="nnHnjD" name="StandalonePollingBase.cpp" compile="1" resource="0"
+            file="Source/StandalonePollingBase.cpp"/>
+      <FILE id="PbWuB9" name="StandalonePollingBase.h" compile="0" resource="0"
+            file="Source/StandalonePollingBase.h"/>
       <FILE id="bXREPM" name="IPAddressDisplay.cpp" compile="1" resource="0"
             file="Source/IPAddressDisplay.cpp"/>
       <FILE id="TRYB5O" name="IPAddressDisplay.h" compile="0" resource="0"

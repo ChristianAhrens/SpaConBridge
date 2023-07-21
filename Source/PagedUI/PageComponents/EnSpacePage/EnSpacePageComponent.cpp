@@ -185,17 +185,17 @@ void EnSpacePageComponent::sliderValueChanged(Slider* slider)
 
 /**
  * Reimplemented method to handle updated object data for objects that have been added for standalone polling.
- * @param	objectId	The remote object identifier of the object that shall be handled.
+ * @param	roi			The remote object identifier of the object that shall be handled.
  * @param	msgData		The remote object message data that was received and shall be handled.
  */
-void EnSpacePageComponent::HandleObjectDataInternal(RemoteObjectIdentifier objectId, const RemoteObjectMessageData& msgData)
+void EnSpacePageComponent::HandleObjectDataInternal(const RemoteObjectIdentifier& roi, const RemoteObjectMessageData& msgData)
 {
 	if (msgData._addrVal != RemoteObjectAddressing())
 		return;
 	if (msgData._valCount != 1)
 		return;
 
-	switch (objectId)
+	switch (roi)
 	{
 	case ROI_MatrixSettings_ReverbRoomId:
 		{

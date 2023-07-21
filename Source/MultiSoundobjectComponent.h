@@ -21,6 +21,8 @@
 
 #include "SpaConBridgeCommon.h"
 
+#include "StandalonePollingBase.h"
+
 
 namespace SpaConBridge
 {
@@ -37,7 +39,8 @@ class SelectGroupSelector;
  */
 class MultiSoundobjectComponent :	public Component,
 									public ComboBox::Listener,
-									public ToggleButton::Listener
+									public ToggleButton::Listener,
+									public StandalonePollingBase
 {
 public:
 	MultiSoundobjectComponent();
@@ -78,7 +81,21 @@ protected:
 	//==============================================================================
 	void buttonClicked(Button* button) override;
 
+	//==============================================================================
+	void HandleObjectDataInternal(const RemoteObjectIdentifier& roi, const RemoteObjectMessageData& msgData) override;
+
 private:
+	//==============================================================================
+	bool CheckCoordinateMappingSettingsDataCompleteness();
+	void SetCoordinateMappingSettingsDataReady(bool ready);
+	bool IsCoordinateMappingsSettingsDataReady();
+
+	//==============================================================================
+	bool CheckSpeakerPositionDataCompleteness();
+	void SetSpeakerPositionDataReady(bool ready);
+	bool IsSpeakerPositionDataReady();
+
+	//==============================================================================
 	std::unique_ptr<MultiSoundobjectSlider>	m_multiSoundobjectSlider;	/**> Multi-source 2D-Slider. */
 
 	std::unique_ptr<ComboBox>				m_mappingAreaSelect;		/**> ComboBox selector for the coordinate mapping area. */
@@ -95,6 +112,17 @@ private:
 	std::unique_ptr<DrawableButton>			m_reverbEnable;				/**> Checkbox for reverb send gain enable. */
 
 	std::unique_ptr<DrawableButton>			m_spreadEnable;				/**> Checkbox for spread factor enable. */
+
+	//==============================================================================
+	std::map<int, std::vector<juce::Vector3D<float>>>	m_mappingCornersReal;
+	std::map<int, std::vector<juce::Vector3D<float>>>	m_mappingCornersVirtual;
+	std::map<int, bool>									m_mappingFlip;
+	std::map<int, juce::String>							m_mappingName;
+	bool												m_coordinateMappingSettingsDataReady{ false };
+
+	//==============================================================================
+	std::map<int, std::pair<juce::Vector3D<float>, juce::Vector3D<float>>>	m_speakerPositions;
+	bool												m_speakerPositionDataReady{ false };
 
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSoundobjectComponent)

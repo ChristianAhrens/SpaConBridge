@@ -173,11 +173,6 @@ Controller::~Controller()
 	stopTimer();
 	Disconnect();
 
-	// Destroy overView window and overView Manager
-	auto pageMgr = PageComponentManager::GetInstance();
-	if (pageMgr)
-		pageMgr->ClosePageContainer(true);
-
 	const ScopedLock lock(m_mutex);
 	m_soundobjectProcessors.clearQuick();
 	m_matrixInputProcessors.clearQuick();

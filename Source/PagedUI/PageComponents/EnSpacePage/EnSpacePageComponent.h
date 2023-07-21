@@ -70,7 +70,7 @@ public:
 	void lookAndFeelChanged() override;
 
 protected:
-	void HandleObjectDataInternal(RemoteObjectIdentifier objectId, const RemoteObjectMessageData& msgData) override;
+	void HandleObjectDataInternal(const RemoteObjectIdentifier& roi, const RemoteObjectMessageData& msgData) override;
 
 private:
 	std::map<int, std::unique_ptr<TextButton>>	m_roomIdButtons;

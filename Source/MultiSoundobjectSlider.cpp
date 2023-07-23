@@ -329,13 +329,13 @@ void MultiSoundobjectSlider::paint(Graphics& g)
 void MultiSoundobjectSlider::paintSpeakersAndMappingAreas2DVisu(Graphics& g)
 {
     // Solid surface background
-    auto backgroundRect = getLocalBounds().toFloat().reduced(2);
+    auto backgroundRect = GetAspectAndMarginCorrectedBounds().toFloat().reduced(2);
     g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
     g.fillRect(backgroundRect);
     
     // Surface frame
     g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
-    g.drawRect(getLocalBounds().toFloat(), 1.5f);
+    g.drawRect(GetAspectAndMarginCorrectedBounds().toFloat(), 1.5f);
 
     // Mapping Areas
     g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
@@ -351,7 +351,7 @@ void MultiSoundobjectSlider::paintSpeakersAndMappingAreas2DVisu(Graphics& g)
                 {
                     auto& p = m_mappingCornersReal.at(mappingAreaId).at(j);
                     auto mappingAreaCornerPoint = GetPointForRealCoordinate(p);
-                    g.drawRect(juce::Rectangle<float>(prevPoint, mappingAreaCornerPoint), 2.0f);
+                    g.drawLine(prevPoint.getX(), prevPoint.getY(), mappingAreaCornerPoint.getX(), mappingAreaCornerPoint.getY(), 2.0f);
                     prevPoint = mappingAreaCornerPoint;
                 }
             }
@@ -363,15 +363,15 @@ void MultiSoundobjectSlider::paintSpeakersAndMappingAreas2DVisu(Graphics& g)
     for (auto i = 1; i <= DS100_CHANNELCOUNT; i++)
     {
         auto channelId = static_cast<ChannelId>(i);
-        if (m_speakerPositions.count(channelId) != 1)
+        if (m_speakerPositions.count(channelId) == 1 && m_speakerPositions.at(channelId).first.length() != 0.0f)
         {
             auto& p = m_speakerPositions.at(channelId).first;
             auto speakerCenterPoint = GetPointForRealCoordinate(p);
             auto speakerArea = juce::Rectangle<float>(
                 speakerCenterPoint.getX() - 3.0f,
                 speakerCenterPoint.getY() - 3.0f,
-                speakerCenterPoint.getX() + 3.0f,
-                speakerCenterPoint.getY() + 3.0f);
+                6.0f,
+                6.0f);
             g.drawEllipse(speakerArea, 2.0f);
         }
     }
@@ -1545,7 +1545,10 @@ bool MultiSoundobjectSlider::IsSpeakerPositionDataReady()
 void MultiSoundobjectSlider::ComputeRealBoundingRect()
 {
     jassert(m_speakerPositions.count(1) == 1);
-    m_realBoundingRect.setBounds(m_speakerPositions.at(1).first.x, m_speakerPositions.at(1).first.y, 0.0f, 0.0f);
+    m_realXBoundingRange.setStart(m_speakerPositions.at(1).first.x);
+    m_realXBoundingRange.setEnd(m_speakerPositions.at(1).first.x);
+    m_realYBoundingRange.setStart(m_speakerPositions.at(1).first.y);
+    m_realYBoundingRange.setEnd(m_speakerPositions.at(1).first.y);
 
     for (auto i = 1; i <= DS100_CHANNELCOUNT; i++)
     {
@@ -1553,14 +1556,14 @@ void MultiSoundobjectSlider::ComputeRealBoundingRect()
         if (m_speakerPositions.count(channelId) == 1)
         {
             auto& p = m_speakerPositions.at(channelId).first;
-            if (m_realBoundingRect.getBottom() > p.y)
-                m_realBoundingRect.setBottom(p.y);
-            if (m_realBoundingRect.getTopLeft().getY() < p.y)
-                m_realBoundingRect.setTop(p.y);
-            if (m_realBoundingRect.getTopLeft().getX() > p.x)
-                m_realBoundingRect.setLeft(p.x);
-            if (m_realBoundingRect.getRight() < p.x)
-                m_realBoundingRect.setRight(p.x);
+            if (m_realXBoundingRange.getEnd() < p.x)
+                m_realXBoundingRange.setEnd(p.x);
+            if (m_realXBoundingRange.getStart() > p.x)
+                m_realXBoundingRange.setStart(p.x);
+            if (m_realYBoundingRange.getEnd() < p.y)
+                m_realYBoundingRange.setEnd(p.y);
+            if (m_realYBoundingRange.getStart() > p.y)
+                m_realYBoundingRange.setStart(p.y);
         }
     }
 
@@ -1574,14 +1577,14 @@ void MultiSoundobjectSlider::ComputeRealBoundingRect()
                 if (m_mappingCornersReal.at(mappingAreaId).size() > j)
                 {
                     auto& p = m_mappingCornersReal.at(mappingAreaId).at(j);
-                    if (m_realBoundingRect.getBottom() > p.y)
-                        m_realBoundingRect.setBottom(p.y);
-                    if (m_realBoundingRect.getTopLeft().getY() < p.y)
-                        m_realBoundingRect.setTop(p.y);
-                    if (m_realBoundingRect.getTopLeft().getX() > p.x)
-                        m_realBoundingRect.setLeft(p.x);
-                    if (m_realBoundingRect.getRight() < p.x)
-                        m_realBoundingRect.setRight(p.x);
+                    if (m_realXBoundingRange.getEnd() < p.x)
+                        m_realXBoundingRange.setEnd(p.x);
+                    if (m_realXBoundingRange.getStart() > p.x)
+                        m_realXBoundingRange.setStart(p.x);
+                    if (m_realYBoundingRange.getEnd() < p.y)
+                        m_realYBoundingRange.setEnd(p.y);
+                    if (m_realYBoundingRange.getStart() > p.y)
+                        m_realYBoundingRange.setStart(p.y);
                 }
             }
         }
@@ -1595,13 +1598,31 @@ void MultiSoundobjectSlider::ComputeRealBoundingRect()
  */
 juce::Point<float> MultiSoundobjectSlider::GetPointForRealCoordinate(const juce::Vector3D<float>& realCoordinate)
 {
-    if (m_realBoundingRect.getHeight() == 0.0f || m_realBoundingRect.getWidth())
+    if (m_realXBoundingRange.getLength() == 0.0f || m_realYBoundingRange.getLength() == 0.0f)
         return juce::Point<float>(0.0f, 0.0f);
 
-    auto relativeX = (realCoordinate.x - m_realBoundingRect.getTopLeft().getX()) / m_realBoundingRect.getWidth();
-    auto relativeY = (realCoordinate.y - m_realBoundingRect.getBottom()) / m_realBoundingRect.getHeight();
+    auto relativeX = (realCoordinate.x - m_realXBoundingRange.getStart()) / m_realXBoundingRange.getLength();
+    auto relativeY = (realCoordinate.y - m_realYBoundingRange.getStart()) / m_realYBoundingRange.getLength();
 
-    return getLocalBounds().getRelativePoint(relativeX, relativeY).toFloat();
+    return GetAspectAndMarginCorrectedBounds().getRelativePoint(relativeX, relativeY).toFloat();
+}
+
+
+juce::Rectangle<int> MultiSoundobjectSlider::GetAspectAndMarginCorrectedBounds()
+{
+    auto bounds = getLocalBounds();
+
+    bounds.reduce(3, 3);
+
+    auto boundsAspect = bounds.toFloat().getAspectRatio();
+    auto realAspect = m_realYBoundingRange.getLength() / m_realXBoundingRange.getLength();
+
+    if (boundsAspect > realAspect)
+        //remove sth from real width
+    else if (boundsAspect < realAspect)
+        //remove sth from real height
+
+    return bounds;
 }
 
 

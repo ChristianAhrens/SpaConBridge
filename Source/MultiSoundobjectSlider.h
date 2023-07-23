@@ -172,9 +172,12 @@ private:
 
 	//==============================================================================
 	void ComputeRealBoundingRect();
-	juce::Rectangle<float>	m_realBoundingRect;
+	juce::Range<float>	m_realXBoundingRange;
+	juce::Range<float>	m_realYBoundingRange;
 
 	juce::Point<float>	GetPointForRealCoordinate(const juce::Vector3D<float>& realCoordinate);
+
+	juce::Rectangle<int>	GetAspectAndMarginCorrectedBounds();
 
 	//==============================================================================
 	SoundobjectProcessorId										m_currentlyDraggedId;				                        /**< ProcessorId of the currently selected knob, if any. */

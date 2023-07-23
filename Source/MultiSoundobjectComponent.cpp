@@ -131,6 +131,7 @@ MultiSoundobjectComponent::MultiSoundobjectComponent()
 
 	// start the object refresh timer now
 	setRefreshRateMs(3000);
+	triggerPollOnce();
 }
 
 /**
@@ -521,6 +522,7 @@ bool MultiSoundobjectComponent::SetSelectedMapping(MappingAreaId mapping)
 			m_multiSoundobjectSlider->SetCoordinateMappingSettingsDataReady(false);
 			m_multiSoundobjectSlider->SetSpeakerPositionDataReady(false);
 			restartTimer();
+			triggerPollOnce();
 		}
 		m_multiSoundobjectSlider->SetSelectedMapping(mapping);
 

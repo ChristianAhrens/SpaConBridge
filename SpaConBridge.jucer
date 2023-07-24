@@ -354,6 +354,7 @@
             <FILE id="nSAA4c" name="tune-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/tune-24px.svg"/>
             <FILE id="YFXXxo" name="vertical_split-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/vertical_split-24px.svg"/>
+            <FILE id="uRlzoc" name="volume_down.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/volume_down.svg"/>
             <FILE id="bmwxej" name="volume_off-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/volume_off-24px.svg"/>
           </GROUP>

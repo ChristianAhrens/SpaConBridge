@@ -131,6 +131,8 @@ MultiSoundobjectSlider::MultiSoundobjectSlider(bool spreadEnabled, bool reverbSn
         auto channelId = static_cast<ChannelId>(i);
         m_speakerPositions[channelId] = std::make_pair(juce::Vector3D(0.0f, 0.0f, 0.0f), juce::Vector3D(0.0f, 0.0f, 0.0f));
     }
+
+    lookAndFeelChanged();
 }
 
 /**
@@ -138,6 +140,17 @@ MultiSoundobjectSlider::MultiSoundobjectSlider(bool spreadEnabled, bool reverbSn
  */
 MultiSoundobjectSlider::~MultiSoundobjectSlider()
 {
+}
+
+/**
+ * Reimplemented method to handle colour changes for manually painted svg member objects
+ */
+void MultiSoundobjectSlider::lookAndFeelChanged()
+{
+    Component::lookAndFeelChanged();
+
+    m_speakerDrawable = Drawable::createFromSVG(*XmlDocument::parse(BinaryData::volume_down_svg));
+    m_speakerDrawable->replaceColour(Colours::black, getLookAndFeel().findColour(TextButton::textColourOnId));
 }
 
 /**
@@ -367,12 +380,14 @@ void MultiSoundobjectSlider::paintSpeakersAndMappingAreas2DVisu(Graphics& g)
         {
             auto& p = m_speakerPositions.at(channelId).first;
             auto speakerCenterPoint = GetPointForRealCoordinate(p);
+            auto speakerRotation = m_speakerPositions.at(channelId).second;
             auto speakerArea = juce::Rectangle<float>(
-                speakerCenterPoint.getX() - 3.0f,
-                speakerCenterPoint.getY() - 3.0f,
-                6.0f,
-                6.0f);
-            g.drawEllipse(speakerArea, 2.0f);
+                speakerCenterPoint.getX() - 9.0f,
+                speakerCenterPoint.getY() - 9.0f,
+                18.0f,
+                18.0f);
+            //m_speakerDrawable->setDrawableTransform(juce::AffineTransform::rotation(speakerRotation.x));
+            m_speakerDrawable->drawWithin(g, speakerArea, juce::RectanglePlacement::fillDestination, 1.0f);
         }
     }
 
@@ -1621,15 +1636,15 @@ juce::Rectangle<int> MultiSoundobjectSlider::GetAspectAndMarginCorrectedBounds()
     {
         //remove sth from bounds height
         auto widthToRemove = bounds.getWidth() * (1 - (realAspect / boundsAspect));
-        bounds.removeFromLeft(0.5f * widthToRemove);
-        bounds.removeFromRight(0.5f * widthToRemove);
+        bounds.removeFromLeft(static_cast<int>(0.5f * widthToRemove));
+        bounds.removeFromRight(static_cast<int>(0.5f * widthToRemove));
     }
     else if (boundsAspect < realAspect)
     {
         //remove sth from bounds width
         auto heightToRemove = bounds.getHeight() * (1 - (boundsAspect / realAspect));
-        bounds.removeFromTop(0.5f * heightToRemove);
-        bounds.removeFromBottom(0.5f * heightToRemove);
+        bounds.removeFromTop(static_cast<int>(0.5f * heightToRemove));
+        bounds.removeFromBottom(static_cast<int>(0.5f * heightToRemove));
     }
 
     return bounds;

@@ -108,6 +108,8 @@ public:
 	MultiSoundobjectSlider(bool spreadEnabled, bool reverbSndGainEnabled);
 	~MultiSoundobjectSlider() override;
 
+	void lookAndFeelChanged() override;
+
 	MappingAreaId GetSelectedMapping() const;
 	void SetSelectedMapping(MappingAreaId mapping);
 
@@ -209,6 +211,8 @@ private:
 	
 	bool																			m_speakerPositionDataReady{ false };
 	std::map<ChannelId, std::pair<juce::Vector3D<float>, juce::Vector3D<float>>>	m_speakerPositions;
+
+	std::unique_ptr<juce::Drawable>													m_speakerDrawable;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSoundobjectSlider)
 };

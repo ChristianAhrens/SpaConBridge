@@ -695,6 +695,9 @@ void MultiSoundobjectComponent::lookAndFeelChanged()
 	// first forward the call to base implementation
 	Component::lookAndFeelChanged();
 
+	if (m_multiSoundobjectSlider)
+		m_multiSoundobjectSlider->lookAndFeelChanged();
+
 	// Update drawable button images with updated lookAndFeel colours
 	UpdateDrawableButtonImages(m_loadImage, BinaryData::image_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_removeImage, BinaryData::hide_image_black_24dp_svg, &getLookAndFeel());

@@ -384,7 +384,7 @@ void ScenesPageComponent::HandleObjectDataInternal(RemoteObjectIdentifier object
 	// all remote objects that are read here are of type string and must meet these common criteria
 	if (msgData._valType == ROVT_STRING
 		&& msgData._valCount * sizeof(char) == msgData._payloadSize
-		&& msgData._payload != nullptr)
+		&& (msgData._payload != nullptr || msgData._valCount == 0))
 	{
 		auto remoteObjectContentString = String(static_cast<char*>(msgData._payload), msgData._payloadSize);
 

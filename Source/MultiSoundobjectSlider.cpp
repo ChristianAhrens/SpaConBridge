@@ -1618,9 +1618,19 @@ juce::Rectangle<int> MultiSoundobjectSlider::GetAspectAndMarginCorrectedBounds()
     auto realAspect = m_realYBoundingRange.getLength() / m_realXBoundingRange.getLength();
 
     if (boundsAspect > realAspect)
-        //remove sth from real width
+    {
+        //remove sth from bounds height
+        auto widthToRemove = bounds.getWidth() * (1 - (realAspect / boundsAspect));
+        bounds.removeFromLeft(0.5f * widthToRemove);
+        bounds.removeFromRight(0.5f * widthToRemove);
+    }
     else if (boundsAspect < realAspect)
-        //remove sth from real height
+    {
+        //remove sth from bounds width
+        auto heightToRemove = bounds.getHeight() * (1 - (boundsAspect / realAspect));
+        bounds.removeFromTop(0.5f * heightToRemove);
+        bounds.removeFromBottom(0.5f * heightToRemove);
+    }
 
     return bounds;
 }

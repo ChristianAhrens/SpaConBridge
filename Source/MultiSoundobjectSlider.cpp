@@ -149,8 +149,9 @@ void MultiSoundobjectSlider::lookAndFeelChanged()
 {
     Component::lookAndFeelChanged();
 
-    m_speakerDrawable = Drawable::createFromSVG(*XmlDocument::parse(BinaryData::volume_down_svg));
-    m_speakerDrawable->replaceColour(Colours::black, getLookAndFeel().findColour(TextButton::textColourOnId));
+    for (auto const& speakerDrawableKV : m_speakerDrawables)
+        if (speakerDrawableKV.second)
+            speakerDrawableKV.second->replaceColour(Colours::black, getLookAndFeel().findColour(TextButton::textColourOnId));
 }
 
 /**
@@ -322,7 +323,7 @@ void MultiSoundobjectSlider::paint(Graphics& g)
         if (!IsCoordinateMappingsSettingsDataReady() && !IsSpeakerPositionDataReady())
         {
             g.setColour(getLookAndFeel().findColour(TextEditor::textColourId));
-            g.drawText("CoordinateMapping setting and speaker positions not yet ready", getLocalBounds(), Justification::centred);
+            g.drawText("CoordinateMapping settings and speaker positions not yet read from device", getLocalBounds(), Justification::centred);
         }
         else
         {
@@ -355,42 +356,17 @@ void MultiSoundobjectSlider::paintSpeakersAndMappingAreas2DVisu(Graphics& g)
     for (auto i = int(MAI_First); i <= int(MAI_Fourth); i++)
     {
         auto mappingAreaId = static_cast<MappingAreaId>(i);
-        if (m_mappingCornersReal.count(mappingAreaId) == 1)
-        {
-            auto prevPoint = GetPointForRealCoordinate(m_mappingCornersReal.at(mappingAreaId).at(3));
-            for (auto j = 0; j < 4; j++) // p1 real - p4 real
-            {
-                if (m_mappingCornersReal.at(mappingAreaId).size() > j)
-                {
-                    auto& p = m_mappingCornersReal.at(mappingAreaId).at(j);
-                    auto mappingAreaCornerPoint = GetPointForRealCoordinate(p);
-                    g.drawLine(prevPoint.getX(), prevPoint.getY(), mappingAreaCornerPoint.getX(), mappingAreaCornerPoint.getY(), 2.0f);
-                    prevPoint = mappingAreaCornerPoint;
-                }
-            }
-        }
+        if (m_mappingAreaPaths.count(mappingAreaId) == 1 )
+            g.fillPath(m_mappingAreaPaths.at(mappingAreaId));
     }
 
     // Speaker positions
     g.setColour(getLookAndFeel().findColour(TextEditor::textColourId));
-    for (auto i = 1; i <= DS100_CHANNELCOUNT; i++)
+    for (auto const& speakerDrawableKV : m_speakerDrawables)
     {
-        auto channelId = static_cast<ChannelId>(i);
-        if (m_speakerPositions.count(channelId) == 1 && m_speakerPositions.at(channelId).first.length() != 0.0f)
-        {
-            auto& p = m_speakerPositions.at(channelId).first;
-            auto speakerCenterPoint = GetPointForRealCoordinate(p);
-            auto speakerRotation = m_speakerPositions.at(channelId).second;
-            auto speakerArea = juce::Rectangle<float>(
-                speakerCenterPoint.getX() - 9.0f,
-                speakerCenterPoint.getY() - 9.0f,
-                18.0f,
-                18.0f);
-            //m_speakerDrawable->setDrawableTransform(juce::AffineTransform::rotation(speakerRotation.x));
-            m_speakerDrawable->drawWithin(g, speakerArea, juce::RectanglePlacement::fillDestination, 1.0f);
-        }
+        speakerDrawableKV.second->drawWithin(g, m_speakerDrawableAreas[speakerDrawableKV.first], juce::RectanglePlacement::centred, 1.0f);
+        /*test*/g.drawRect(m_speakerDrawableAreas[speakerDrawableKV.first]);
     }
-
 }
 
 /**
@@ -698,6 +674,8 @@ void MultiSoundobjectSlider::resized()
             }
         }
     }
+
+    PrerenderSpeakerAndMappingAreaInBounds();
 }
 
 /**
@@ -1483,6 +1461,9 @@ void MultiSoundobjectSlider::SetCoordinateMappingSettingsDataReady(bool ready)
     if (m_coordinateMappingSettingsDataReady && IsSpeakerPositionDataReady())
     {
         ComputeRealBoundingRect();
+
+        PrerenderSpeakerAndMappingAreaInBounds();
+
         repaint();
     }
     else if (!m_coordinateMappingSettingsDataReady)
@@ -1535,11 +1516,29 @@ void MultiSoundobjectSlider::SetSpeakerPositionDataReady(bool ready)
     if (m_speakerPositionDataReady && IsCoordinateMappingsSettingsDataReady())
     {
         ComputeRealBoundingRect();
+        
+        for (auto i = 1; i <= DS100_CHANNELCOUNT; i++)
+        {
+            auto channelId = static_cast<ChannelId>(i);
+            if (m_speakerPositions.count(channelId) == 1 && m_speakerPositions.at(channelId).first.length() != 0.0f)
+            {
+                auto& pos = m_speakerPositions.at(channelId).first;
+                auto& rot = m_speakerPositions.at(channelId).second;
+                m_speakerDrawables[channelId] = Drawable::createFromSVG(*XmlDocument::parse(BinaryData::volume_down_svg));
+                m_speakerDrawables.at(channelId)->replaceColour(Colours::black, getLookAndFeel().findColour(TextButton::textColourOnId));
+                m_speakerDrawables.at(channelId)->setDrawableTransform(juce::AffineTransform::rotation(degreesToRadians(rot.x), 0.5f, 0.5f));
+            }
+        }
+
+        PrerenderSpeakerAndMappingAreaInBounds();
+
         repaint();
     }
     else if (!m_speakerPositionDataReady)
     {
         m_speakerPositions.clear();
+        m_speakerDrawableAreas.clear();
+        m_speakerDrawables.clear();
     }
 }
 
@@ -1622,7 +1621,11 @@ juce::Point<float> MultiSoundobjectSlider::GetPointForRealCoordinate(const juce:
     return GetAspectAndMarginCorrectedBounds().getRelativePoint(relativeX, relativeY).toFloat();
 }
 
-
+/**
+ * Helper method to create a rect to use as bounds that respects the real aspect
+ * ratio of the speaker and mappingarea dimensions
+ * @return  The rectangle<int> that defines the max usable bounds and still keep the required aspect ratio
+ */
 juce::Rectangle<int> MultiSoundobjectSlider::GetAspectAndMarginCorrectedBounds()
 {
     auto bounds = getLocalBounds();
@@ -1648,6 +1651,51 @@ juce::Rectangle<int> MultiSoundobjectSlider::GetAspectAndMarginCorrectedBounds()
     }
 
     return bounds;
+}
+
+/**
+ * Helper method to prepare speaker position drawables (pos+rot) as well
+ * as mapping area paths to later be drawn in paint method
+ */
+void MultiSoundobjectSlider::PrerenderSpeakerAndMappingAreaInBounds()
+{
+    // Speaker positions
+    for (auto i = 1; i <= DS100_CHANNELCOUNT; i++)
+    {
+        auto channelId = static_cast<ChannelId>(i);
+        if (m_speakerDrawables.count(channelId) == 1 && m_speakerPositions.count(channelId) == 1 && m_speakerPositions.at(channelId).first.length() != 0.0f)
+        {
+            auto& p = m_speakerPositions.at(channelId).first;
+            auto speakerCenterPoint = GetPointForRealCoordinate(p);
+            auto speakerArea = juce::Rectangle<float>(
+                speakerCenterPoint.getX() - 9.0f,
+                speakerCenterPoint.getY() - 9.0f,
+                18.0f,
+                18.0f);
+            m_speakerDrawableAreas[channelId] = speakerArea;
+        }
+    }
+
+    // Mapping Areas
+    for (auto i = int(MAI_First); i <= int(MAI_Fourth); i++)
+    {
+        auto mappingAreaId = static_cast<MappingAreaId>(i);
+        m_mappingAreaPaths[mappingAreaId].clear();
+        if (m_mappingCornersReal.count(mappingAreaId) == 1)
+        {
+            auto prevPoint = GetPointForRealCoordinate(m_mappingCornersReal.at(mappingAreaId).at(3));
+            for (auto j = 0; j < 4; j++) // p1 real - p4 real
+            {
+                if (m_mappingCornersReal.at(mappingAreaId).size() > j)
+                {
+                    auto& p = m_mappingCornersReal.at(mappingAreaId).at(j);
+                    auto mappingAreaCornerPoint = GetPointForRealCoordinate(p);
+                    m_mappingAreaPaths[mappingAreaId].addLineSegment(juce::Line<float>(prevPoint.getX(), prevPoint.getY(), mappingAreaCornerPoint.getX(), mappingAreaCornerPoint.getY()), 2.0f);
+                    prevPoint = mappingAreaCornerPoint;
+                }
+            }
+        }
+    }
 }
 
 

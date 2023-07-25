@@ -181,6 +181,8 @@ private:
 
 	juce::Rectangle<int>	GetAspectAndMarginCorrectedBounds();
 
+	void PrerenderSpeakerAndMappingAreaInBounds();
+
 	//==============================================================================
 	SoundobjectProcessorId										m_currentlyDraggedId;				                        /**< ProcessorId of the currently selected knob, if any. */
 	std::vector<SoundobjectId>									m_highlightedIds;					                        /**< SourceIds of the currently highlighted knobs, if any. */
@@ -212,7 +214,9 @@ private:
 	bool																			m_speakerPositionDataReady{ false };
 	std::map<ChannelId, std::pair<juce::Vector3D<float>, juce::Vector3D<float>>>	m_speakerPositions;
 
-	std::unique_ptr<juce::Drawable>													m_speakerDrawable;
+	std::map<MappingAreaId, juce::Path>												m_mappingAreaPaths;
+	std::map<ChannelId, std::unique_ptr<juce::Drawable>>							m_speakerDrawables;
+	std::map<ChannelId, juce::Rectangle<float>>										m_speakerDrawableAreas;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSoundobjectSlider)
 };

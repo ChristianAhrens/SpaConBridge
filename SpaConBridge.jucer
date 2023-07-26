@@ -320,6 +320,10 @@
                   resource="1" file="submodules/JUCE-AppBasics/Resources/Images/keyboard_arrow_right-24px.svg"/>
             <FILE id="y6pBYT" name="keyboard_arrow_up-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/keyboard_arrow_up-24px.svg"/>
+            <FILE id="g7JkTw" name="loudspeaker_hor-24px.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/loudspeaker_hor-24px.svg"/>
+            <FILE id="JOZpVp" name="loudspeaker_vert-24px.svg" compile="0" resource="1"
+                  file="submodules/JUCE-AppBasics/Resources/Images/loudspeaker_vert-24px.svg"/>
             <FILE id="Jc6pvI" name="mobiledata_off-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/mobiledata_off-24px.svg"/>
             <FILE id="ivAap7" name="open_in_full-24px.svg" compile="0" resource="1"
@@ -354,7 +358,6 @@
             <FILE id="nSAA4c" name="tune-24px.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/tune-24px.svg"/>
             <FILE id="YFXXxo" name="vertical_split-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/vertical_split-24px.svg"/>
-            <FILE id="uRlzoc" name="volume_down.svg" compile="0" resource="1" file="submodules/JUCE-AppBasics/Resources/Images/volume_down.svg"/>
             <FILE id="bmwxej" name="volume_off-24px.svg" compile="0" resource="1"
                   file="submodules/JUCE-AppBasics/Resources/Images/volume_off-24px.svg"/>
           </GROUP>

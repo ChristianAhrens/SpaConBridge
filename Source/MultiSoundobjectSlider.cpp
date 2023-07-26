@@ -364,8 +364,10 @@ void MultiSoundobjectSlider::paintSpeakersAndMappingAreas2DVisu(Graphics& g)
     g.setColour(getLookAndFeel().findColour(TextEditor::textColourId));
     for (auto const& speakerDrawableKV : m_speakerDrawables)
     {
+        // draw speaker icons in target area
         speakerDrawableKV.second->drawWithin(g, m_speakerDrawableAreas[speakerDrawableKV.first], juce::RectanglePlacement::centred, 1.0f);
-        /*test*/g.drawRect(m_speakerDrawableAreas[speakerDrawableKV.first]);
+        // draw framing rect around icons, 2px larger than icon target area itself
+        g.drawRect(m_speakerDrawableAreas[speakerDrawableKV.first].expanded(2.0f));
     }
 }
 
@@ -1522,11 +1524,15 @@ void MultiSoundobjectSlider::SetSpeakerPositionDataReady(bool ready)
             auto channelId = static_cast<ChannelId>(i);
             if (m_speakerPositions.count(channelId) == 1 && m_speakerPositions.at(channelId).first.length() != 0.0f)
             {
-                auto& pos = m_speakerPositions.at(channelId).first;
                 auto& rot = m_speakerPositions.at(channelId).second;
-                m_speakerDrawables[channelId] = Drawable::createFromSVG(*XmlDocument::parse(BinaryData::volume_down_svg));
-                m_speakerDrawables.at(channelId)->replaceColour(Colours::black, getLookAndFeel().findColour(TextButton::textColourOnId));
-                m_speakerDrawables.at(channelId)->setDrawableTransform(juce::AffineTransform::rotation(degreesToRadians(rot.x), 0.5f, 0.5f));
+                if ((int(rot.y) % 180) > 75 && (int(rot.y) % 180) < 105) // use icon without directivity if angle is too steep (+-15deg)
+                    m_speakerDrawables[channelId] = Drawable::createFromSVG(*XmlDocument::parse(BinaryData::loudspeaker_vert24px_svg));
+                else
+                    m_speakerDrawables[channelId] = Drawable::createFromSVG(*XmlDocument::parse(BinaryData::loudspeaker_hor24px_svg));
+                auto& drawable = m_speakerDrawables.at(channelId);
+                drawable->replaceColour(Colours::black, getLookAndFeel().findColour(TextButton::textColourOnId));
+                auto drawableBounds = drawable->getBounds().toFloat();
+                drawable->setTransform(juce::AffineTransform::rotation(degreesToRadians(rot.x), drawableBounds.getCentreX(), drawableBounds.getCentreY()));
             }
         }
 
@@ -1630,7 +1636,7 @@ juce::Rectangle<int> MultiSoundobjectSlider::GetAspectAndMarginCorrectedBounds()
 {
     auto bounds = getLocalBounds();
 
-    bounds.reduce(3, 3);
+    bounds.reduce(12, 12);
 
     auto boundsAspect = bounds.toFloat().getAspectRatio();
     auto realAspect = m_realYBoundingRange.getLength() / m_realXBoundingRange.getLength();

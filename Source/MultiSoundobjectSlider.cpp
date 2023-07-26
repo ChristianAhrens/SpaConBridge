@@ -58,60 +58,95 @@ MultiSoundobjectSlider::MultiSoundobjectSlider(bool spreadEnabled, bool reverbSn
     m_multiselectionVisualizer = std::make_unique<MultiSOSelectionVisualizerComponent>();
     m_multiselectionVisualizer->onMouseInteractionStarted = [this](void) {
         auto objectIdsToCache = std::vector<SoundobjectProcessorId>();
-        for (auto const& paramsKV : std::get<0>(m_cachedParameters))
+        for (auto const& paramsByMappingsKV : std::get<0>(m_cachedParameters))
         {
-            if (!paramsKV.second._selected)
-                continue;
-        
-            objectIdsToCache.push_back(paramsKV.first);
+            auto& mappingAreaId = paramsByMappingsKV.first;
+            if (GetSelectedMapping() == mappingAreaId || GetSelectedMapping() == MAI_Invalid)
+            {
+                for (auto const& paramsKV : paramsByMappingsKV.second)
+                {
+                    if (!paramsKV.second._selected)
+                        continue;
+
+                    objectIdsToCache.push_back(paramsKV.first);
+                }
+            }
         }
         
         cacheObjectsXYPos(objectIdsToCache);
     };
     m_multiselectionVisualizer->onMouseXYPosChanged = [this](const juce::Point<int>& posDelta) {
         auto objectIdsToModify = std::vector<SoundobjectProcessorId>();
-        for (auto const& paramsKV : std::get<0>(m_cachedParameters))
+        for (auto const& paramsByMappingsKV : std::get<0>(m_cachedParameters))
         {
-            if (!paramsKV.second._selected)
-                continue;
-        
-            objectIdsToModify.push_back(paramsKV.first);
+            auto& mappingAreaId = paramsByMappingsKV.first;
+            if (GetSelectedMapping() == mappingAreaId || GetSelectedMapping() == MAI_Invalid)
+            {
+                for (auto const& paramsKV : paramsByMappingsKV.second)
+                {
+                    if (!paramsKV.second._selected)
+                        continue;
+
+                    objectIdsToModify.push_back(paramsKV.first);
+                }
+            }
         }
         
         moveObjectsXYPos(objectIdsToModify, posDelta);
     };
     m_multiselectionVisualizer->onMouseXYPosFinished = [this](const juce::Point<int>& posDelta) {
         auto objectIdsToModify = std::vector<SoundobjectProcessorId>();
-        for (auto const& paramsKV : std::get<0>(m_cachedParameters))
+        for (auto const& paramsByMappingsKV : std::get<0>(m_cachedParameters))
         {
-            if (!paramsKV.second._selected)
-                continue;
-        
-            objectIdsToModify.push_back(paramsKV.first);
+            auto& mappingAreaId = paramsByMappingsKV.first;
+            if (GetSelectedMapping() == mappingAreaId || GetSelectedMapping() == MAI_Invalid)
+            {
+                for (auto const& paramsKV : paramsByMappingsKV.second)
+                {
+                    if (!paramsKV.second._selected)
+                        continue;
+
+                    objectIdsToModify.push_back(paramsKV.first);
+                }
+            }
         }
         
         finalizeObjectsXYPos(objectIdsToModify, posDelta);
     };
     m_multiselectionVisualizer->onMouseRotAndScaleChanged = [this](const juce::Point<float>& cog, const float roation, const float scaling) {
         auto objectIdsToModify = std::vector<SoundobjectProcessorId>();
-        for (auto const& paramsKV : std::get<0>(m_cachedParameters))
+        for (auto const& paramsByMappingsKV : std::get<0>(m_cachedParameters))
         {
-            if (!paramsKV.second._selected)
-                continue;
+            auto& mappingAreaId = paramsByMappingsKV.first;
+            if (GetSelectedMapping() == mappingAreaId || GetSelectedMapping() == MAI_Invalid)
+            {
+                for (auto const& paramsKV : paramsByMappingsKV.second)
+                {
+                    if (!paramsKV.second._selected)
+                        continue;
 
-            objectIdsToModify.push_back(paramsKV.first);
+                    objectIdsToModify.push_back(paramsKV.first);
+                }
+            }
         }
 
         applyObjectsRotAndScale(objectIdsToModify, cog, roation, scaling);
     };
     m_multiselectionVisualizer->onMouseRotAndScaleFinished = [this](const juce::Point<float>& cog, const float roation, const float scaling) {
         auto objectIdsToModify = std::vector<SoundobjectProcessorId>();
-        for (auto const& paramsKV : std::get<0>(m_cachedParameters))
+        for (auto const& paramsByMappingsKV : std::get<0>(m_cachedParameters))
         {
-            if (!paramsKV.second._selected)
-                continue;
+            auto& mappingAreaId = paramsByMappingsKV.first;
+            if (GetSelectedMapping() == mappingAreaId || GetSelectedMapping() == MAI_Invalid)
+            {
+                for (auto const& paramsKV : paramsByMappingsKV.second)
+                {
+                    if (!paramsKV.second._selected)
+                        continue;
 
-            objectIdsToModify.push_back(paramsKV.first);
+                    objectIdsToModify.push_back(paramsKV.first);
+                }
+            }
         }
 
         finalizeObjectsRotAndScale(objectIdsToModify, cog, roation, scaling);
@@ -420,161 +455,168 @@ void MultiSoundobjectSlider::paintMappingArea2DVisu(Graphics & g)
 
     auto selectedCoords = std::vector<juce::Point<float>>();
 
-    for (auto const& paramsKV : soundobjectParameterMap)
+    for (auto const& paramsByMappingsKV : soundobjectParameterMap)
     {
-        auto const& isSelected = paramsKV.second._selected;
-
-        if (m_handleSelectedOnly && !isSelected)
-            continue;
-
-        auto knobColour = paramsKV.second._colour;
-
-        auto knobSizeScaleFactor = static_cast<float>(1.0f + (2.0f * paramsKV.second._size));
-        auto knobSize = refKnobSize * knobSizeScaleFactor;
-        auto knobThickness = 3.0f * knobSizeScaleFactor;
-
-        // Map the x/y coordinates to the pixel-wise dimensions of the surface area.
-        auto const& pt = paramsKV.second._pos;
-
-        auto currentCoords = juce::Point<float>(pt.x * w, h - (pt.y * h));
-        selectedCoords.push_back(currentCoords);
-        auto const& x = currentCoords.getX();
-        auto const& y = currentCoords.getY();
-
-        auto metaInfoSize = 6 * refKnobSize;
-        auto innerRadius = 0.5f * knobSize;
-
-        if (m_currentlyDraggedId == paramsKV.first)
+        auto& mappingAreaId = paramsByMappingsKV.first;
+        if (GetSelectedMapping() == mappingAreaId || GetSelectedMapping() == MAI_Invalid)
         {
-            // Paint 'currently dragged crosshair'
-            auto& crosshairColour = knobColour;
-            g.setColour(crosshairColour);
-            g.drawLine(0, y, w, y, 1);
-            g.drawLine(x, 0, x, h, 1);
-
-            // Paint 'currently dual-multitouch points indication'
-            auto& p1 = m_multiTouchPoints._p2_init;
-            auto& p2 = m_multiTouchPoints._p2;
-            auto goodVisibilityDistance = 16;
-            switch (m_multiTouchTargetOperation)
+            for (auto const& paramsKV : paramsByMappingsKV.second)
             {
-            case MTDT_HorizontalEnSpaceSendGain:
-            {
-                g.setColour(crosshairColour);
-                g.drawDashedLine(Line<float>(p1.toFloat().getX(), 0.0f, p1.toFloat().getX(), h), dashLengths, 2, lineThickness);
-                g.drawDashedLine(Line<float>(p2.toFloat().getX(), 0.0f, p2.toFloat().getX(), h), dashLengths, 2, lineThickness);
-                g.setOpacity(0.15f);
-                g.fillRect(Rectangle<float>(p1.toFloat().getX(), 0.0f, p2.toFloat().getX() - p1.toFloat().getX(), h));
+                auto const& isSelected = paramsKV.second._selected;
 
-                auto font = Font(static_cast<float>(goodVisibilityDistance), Font::plain);
-                g.setFont(font);
+                if (m_handleSelectedOnly && !isSelected)
+                    continue;
+
+                // Map the x/y coordinates to the pixel-wise dimensions of the surface area.
+                auto const& pt = paramsKV.second._pos;
+                auto currentCoords = juce::Point<float>(pt.x * w, h - (pt.y * h));
+
+                auto knobColour = paramsKV.second._colour;
+
+                auto knobSizeScaleFactor = static_cast<float>(1.0f + (2.0f * paramsKV.second._size));
+                auto knobSize = refKnobSize * knobSizeScaleFactor;
+                auto knobThickness = 3.0f * knobSizeScaleFactor;
+
+                selectedCoords.push_back(currentCoords);
+                auto const& x = currentCoords.getX();
+                auto const& y = currentCoords.getY();
+
+                auto metaInfoSize = 6 * refKnobSize;
+                auto innerRadius = 0.5f * knobSize;
+
+                if (m_currentlyDraggedId == paramsKV.first)
+                {
+                    // Paint 'currently dragged crosshair'
+                    auto& crosshairColour = knobColour;
+                    g.setColour(crosshairColour);
+                    g.drawLine(0, y, w, y, 1);
+                    g.drawLine(x, 0, x, h, 1);
+
+                    // Paint 'currently dual-multitouch points indication'
+                    auto& p1 = m_multiTouchPoints._p2_init;
+                    auto& p2 = m_multiTouchPoints._p2;
+                    auto goodVisibilityDistance = 16;
+                    switch (m_multiTouchTargetOperation)
+                    {
+                    case MTDT_HorizontalEnSpaceSendGain:
+                    {
+                        g.setColour(crosshairColour);
+                        g.drawDashedLine(Line<float>(p1.toFloat().getX(), 0.0f, p1.toFloat().getX(), h), dashLengths, 2, lineThickness);
+                        g.drawDashedLine(Line<float>(p2.toFloat().getX(), 0.0f, p2.toFloat().getX(), h), dashLengths, 2, lineThickness);
+                        g.setOpacity(0.15f);
+                        g.fillRect(Rectangle<float>(p1.toFloat().getX(), 0.0f, p2.toFloat().getX() - p1.toFloat().getX(), h));
+
+                        auto font = Font(static_cast<float>(goodVisibilityDistance), Font::plain);
+                        g.setFont(font);
+                        g.setOpacity(1.0f);
+                        auto textLabel = String("EnSpace Gain ") + String(paramsKV.second._reverbSndGain, 2) + String("dB");
+                        auto fontDependantWidth = font.getStringWidth(textLabel);
+                        auto textLeftOfMouse = (getWidth() - p2.getX() - goodVisibilityDistance) < fontDependantWidth;
+                        if (textLeftOfMouse)
+                            g.drawText(textLabel, goodVisibilityDistance, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
+                        else
+                            g.drawText(textLabel, getWidth() - goodVisibilityDistance - fontDependantWidth, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centredLeft, true);
+                    }
+                    break;
+                    case MTDT_VerticalSpread:
+                    {
+                        g.setColour(crosshairColour);
+                        g.drawDashedLine(Line<float>(0.0f, p1.toFloat().getY(), w, p1.toFloat().getY()), dashLengths, 2, lineThickness);
+                        g.drawDashedLine(Line<float>(0.0f, p2.toFloat().getY(), w, p2.toFloat().getY()), dashLengths, 2, lineThickness);
+                        g.setOpacity(0.15f);
+                        g.fillRect(Rectangle<float>(0.0f, p1.toFloat().getY(), w, p2.toFloat().getY() - p1.toFloat().getY()));
+
+                        auto font = Font(static_cast<float>(goodVisibilityDistance), Font::plain);
+                        g.setFont(font);
+                        g.setOpacity(1.0f);
+                        auto textLabel = String("Spread Factor ") + String(paramsKV.second._spread, 2);
+                        auto fontDependantWidth = font.getStringWidth(textLabel);
+                        auto textBelowMouse = (p2.getY() - goodVisibilityDistance) < goodVisibilityDistance;
+                        if (textBelowMouse)
+                            g.drawText(textLabel, goodVisibilityDistance, getHeight() - 2 * goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
+                        else
+                            g.drawText(textLabel, goodVisibilityDistance, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
+                    }
+                    break;
+                    case MTDT_PendingInputDecision:
+                    default:
+                        break;
+                    }
+                }
+
+                // Paint spread if enabled
+                if (m_spreadEnabled)
+                {
+                    auto spreadSize = metaInfoSize * paramsKV.second._spread;
+                    auto spreadColour = knobColour;
+
+                    auto outerRadius = refKnobSize + (0.5f * spreadSize);
+
+                    auto spreadPath = juce::Path();
+                    spreadPath.startNewSubPath(x, y);
+                    spreadPath.addCentredArc(x, y, outerRadius, outerRadius, 0, 0.0f, 2.0f * juce::MathConstants<float>::pi);
+                    spreadPath.addCentredArc(x, y, innerRadius, innerRadius, 0, 2.0f * juce::MathConstants<float>::pi, 0.0f);
+                    spreadPath.closeSubPath();
+
+                    g.setColour(spreadColour);
+                    g.setOpacity(0.4f);
+                    g.fillPath(spreadPath);
+                }
+
+                // Paint reverbSendGain if enabled
+                if (m_reverbSndGainEnabled)
+                {
+                    auto miRevSndGainRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
+                    auto normalizedRevSndGain = jmap(paramsKV.second._reverbSndGain, miRevSndGainRange.getStart(), miRevSndGainRange.getEnd(), 0.0f, 1.0f);
+                    auto reverbSize = metaInfoSize * normalizedRevSndGain;
+                    auto reverbColour = knobColour;
+
+                    auto outerRadius = refKnobSize + (0.5f * reverbSize);
+
+                    auto reverbPath = juce::Path();
+                    reverbPath.startNewSubPath(x, y);
+                    reverbPath.addCentredArc(x, y, outerRadius, outerRadius, 0, 0.35f * juce::MathConstants<float>::pi, 0.65f * juce::MathConstants<float>::pi);
+                    reverbPath.addCentredArc(x, y, innerRadius, innerRadius, 0, 0.65f * juce::MathConstants<float>::pi, 0.35f * juce::MathConstants<float>::pi);
+                    reverbPath.closeSubPath();
+                    reverbPath.startNewSubPath(x, y);
+                    reverbPath.addCentredArc(x, y, outerRadius, outerRadius, 0, 1.35f * juce::MathConstants<float>::pi, 1.65f * juce::MathConstants<float>::pi);
+                    reverbPath.addCentredArc(x, y, innerRadius, innerRadius, 0, 1.65f * juce::MathConstants<float>::pi, 1.35f * juce::MathConstants<float>::pi);
+                    reverbPath.closeSubPath();
+
+                    g.setColour(reverbColour);
+                    g.setOpacity(0.6f);
+                    g.fillPath(reverbPath);
+                }
+
+                // Paint knob
+                g.setColour(knobColour);
                 g.setOpacity(1.0f);
-                auto textLabel = String("EnSpace Gain ") + String(paramsKV.second._reverbSndGain, 2) + String("dB");
-                auto fontDependantWidth = font.getStringWidth(textLabel);
-                auto textLeftOfMouse = (getWidth() - p2.getX() - goodVisibilityDistance) < fontDependantWidth;
-                if (textLeftOfMouse)
-                    g.drawText(textLabel, goodVisibilityDistance, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
+                if (isSelected && !IsMuSelVisuEnabled())
+                {
+                    // if the current SO is the only selected one, paint it with a circle indicator and solid fill
+                    auto fillSize = knobSize + knobThickness;
+                    auto outlineSize = 8 * refKnobSize;
+                    g.fillEllipse(Rectangle<float>(x - (fillSize / 2.0f), y - (fillSize / 2.0f), fillSize, fillSize));
+                    g.drawEllipse(Rectangle<float>(x - (outlineSize / 2.0f), y - (outlineSize / 2.0f), outlineSize, outlineSize), 1.0f);
+                }
                 else
-                    g.drawText(textLabel, getWidth() - goodVisibilityDistance - fontDependantWidth, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centredLeft, true);
-            }
-            break;
-            case MTDT_VerticalSpread:
-            {
-                g.setColour(crosshairColour);
-                g.drawDashedLine(Line<float>(0.0f, p1.toFloat().getY(), w, p1.toFloat().getY()), dashLengths, 2, lineThickness);
-                g.drawDashedLine(Line<float>(0.0f, p2.toFloat().getY(), w, p2.toFloat().getY()), dashLengths, 2, lineThickness);
-                g.setOpacity(0.15f);
-                g.fillRect(Rectangle<float>(0.0f, p1.toFloat().getY(), w, p2.toFloat().getY() - p1.toFloat().getY()));
+                {
+                    g.drawEllipse(Rectangle<float>(x - (knobSize / 2.0f), y - (knobSize / 2.0f), knobSize, knobSize), knobThickness);
+                }
 
-                auto font = Font(static_cast<float>(goodVisibilityDistance), Font::plain);
+                // Soundobject text labeling
+                String textLabel;
+                if (m_soundObjectNamesEnabled)
+                    textLabel = paramsKV.second._objectName;
+                else
+                    textLabel = String(paramsKV.second._id);
+                auto fontSizeScaleFactor = static_cast<float>(2.0f * paramsKV.second._size);
+                auto font = Font(12.0f + 5.0f * fontSizeScaleFactor, Font::plain);
+                auto fontDependantWidth = static_cast<float>(font.getStringWidth(textLabel));
                 g.setFont(font);
-                g.setOpacity(1.0f);
-                auto textLabel = String("Spread Factor ") + String(paramsKV.second._spread, 2);
-                auto fontDependantWidth = font.getStringWidth(textLabel);
-                auto textBelowMouse = (p2.getY() - goodVisibilityDistance) < goodVisibilityDistance;
-                if (textBelowMouse)
-                    g.drawText(textLabel, goodVisibilityDistance, getHeight() - 2 * goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
-                else
-                    g.drawText(textLabel, goodVisibilityDistance, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
-            }
-            break;
-            case MTDT_PendingInputDecision:
-            default:
-                break;
+                g.drawText(textLabel, Rectangle<float>(x - (0.5f * fontDependantWidth), y + 3, fontDependantWidth, knobSize * 2.0f), Justification::centred, true);
             }
         }
-
-        // Paint spread if enabled
-        if (m_spreadEnabled)
-        {
-            auto spreadSize = metaInfoSize * paramsKV.second._spread;
-            auto spreadColour = knobColour;
-
-            auto outerRadius = refKnobSize + (0.5f * spreadSize);
-
-            auto spreadPath = juce::Path();
-            spreadPath.startNewSubPath(x, y);
-            spreadPath.addCentredArc(x, y, outerRadius, outerRadius, 0, 0.0f, 2.0f * juce::MathConstants<float>::pi);
-            spreadPath.addCentredArc(x, y, innerRadius, innerRadius, 0, 2.0f * juce::MathConstants<float>::pi, 0.0f);
-            spreadPath.closeSubPath();
-
-            g.setColour(spreadColour);
-            g.setOpacity(0.4f);
-            g.fillPath(spreadPath);
-        }
-
-        // Paint reverbSendGain if enabled
-        if (m_reverbSndGainEnabled)
-        {
-            auto miRevSndGainRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
-            auto normalizedRevSndGain = jmap(paramsKV.second._reverbSndGain, miRevSndGainRange.getStart(), miRevSndGainRange.getEnd(), 0.0f, 1.0f);
-            auto reverbSize = metaInfoSize * normalizedRevSndGain;
-            auto reverbColour = knobColour;
-
-            auto outerRadius = refKnobSize + (0.5f * reverbSize);
-
-            auto reverbPath = juce::Path();
-            reverbPath.startNewSubPath(x, y);
-            reverbPath.addCentredArc(x, y, outerRadius, outerRadius, 0, 0.35f * juce::MathConstants<float>::pi, 0.65f * juce::MathConstants<float>::pi);
-            reverbPath.addCentredArc(x, y, innerRadius, innerRadius, 0, 0.65f * juce::MathConstants<float>::pi, 0.35f * juce::MathConstants<float>::pi);
-            reverbPath.closeSubPath();
-            reverbPath.startNewSubPath(x, y);
-            reverbPath.addCentredArc(x, y, outerRadius, outerRadius, 0, 1.35f * juce::MathConstants<float>::pi, 1.65f * juce::MathConstants<float>::pi);
-            reverbPath.addCentredArc(x, y, innerRadius, innerRadius, 0, 1.65f * juce::MathConstants<float>::pi, 1.35f * juce::MathConstants<float>::pi);
-            reverbPath.closeSubPath();
-
-            g.setColour(reverbColour);
-            g.setOpacity(0.6f);
-            g.fillPath(reverbPath);
-        }
-
-        // Paint knob
-        g.setColour(knobColour);
-        g.setOpacity(1.0f);
-        if (isSelected && !IsMuSelVisuEnabled())
-        {
-            // if the current SO is the only selected one, paint it with a circle indicator and solid fill
-            auto fillSize = knobSize + knobThickness;
-            auto outlineSize = 8 * refKnobSize;
-            g.fillEllipse(Rectangle<float>(x - (fillSize / 2.0f), y - (fillSize / 2.0f), fillSize, fillSize));
-            g.drawEllipse(Rectangle<float>(x - (outlineSize / 2.0f), y - (outlineSize / 2.0f), outlineSize, outlineSize), 1.0f);
-        }
-        else
-        {
-            g.drawEllipse(Rectangle<float>(x - (knobSize / 2.0f), y - (knobSize / 2.0f), knobSize, knobSize), knobThickness);
-        }
-
-        // Soundobject text labeling
-        String textLabel;
-        if (m_soundObjectNamesEnabled)
-            textLabel = paramsKV.second._objectName;
-        else
-            textLabel = String(paramsKV.second._id);
-        auto fontSizeScaleFactor = static_cast<float>(2.0f * paramsKV.second._size);
-        auto font = Font(12.0f + 5.0f * fontSizeScaleFactor, Font::plain);
-        auto fontDependantWidth = static_cast<float>(font.getStringWidth(textLabel));
-        g.setFont(font);
-        g.drawText(textLabel, Rectangle<float>(x - (0.5f * fontDependantWidth), y + 3, fontDependantWidth, knobSize * 2.0f), Justification::centred, true);
     }
 
     auto singleSoundobjectCurrentlyEdited = INVALID_PROCESSOR_ID != m_currentlyDraggedId;
@@ -663,13 +705,20 @@ void MultiSoundobjectSlider::resized()
                 auto w = getLocalBounds().toFloat().getWidth();
                 auto h = getLocalBounds().toFloat().getHeight();
 
-                for (auto const& paramsKV : soundobjectParameterMap)
+                for (auto const& paramsByMappingsKV : soundobjectParameterMap)
                 {
-                    auto const& isSelected = paramsKV.second._selected;
-                    auto const& pt = paramsKV.second._pos;
+                    auto& mappingAreaId = paramsByMappingsKV.first;
+                    if (GetSelectedMapping() == mappingAreaId || GetSelectedMapping() == MAI_Invalid)
+                    {
+                        for (auto const& paramsKV : paramsByMappingsKV.second)
+                        {
+                            auto const& isSelected = paramsKV.second._selected;
+                            auto const& pt = paramsKV.second._pos;
 
-                    if (isSelected)
-                        selectedCoords.push_back(juce::Point<float>(pt.x * w, h - (pt.y * h)));
+                            if (isSelected)
+                                selectedCoords.push_back(juce::Point<float>(pt.x * w, h - (pt.y * h)));
+                        }
+                    }
                 }
 
                 m_multiselectionVisualizer->SetSelectionPoints(selectedCoords);
@@ -699,57 +748,64 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
 
 	float refKnobSize = 10.0f;
 
-	for (auto const& paramsKV : std::get<0>(m_cachedParameters))
-	{
-        auto const& selected = paramsKV.second._selected;
+    for (auto const& paramsByMappingsKV : std::get<0>(m_cachedParameters))
+    {
+        auto& mappingAreaId = paramsByMappingsKV.first;
+        if (GetSelectedMapping() == mappingAreaId || GetSelectedMapping() == MAI_Invalid)
+        {
+            for (auto const& paramsKV : paramsByMappingsKV.second)
+            {
+                auto const& selected = paramsKV.second._selected;
 
-        if (m_handleSelectedOnly && !selected)
-            continue;
-        
-		// Map the x/y coordinates to the pixel-wise dimensions of the surface area.
-		auto const& pt = paramsKV.second._pos;
-		float x = pt.x * w;
-		float y = h - (pt.y * h);
+                if (m_handleSelectedOnly && !selected)
+                    continue;
 
-		auto knobSizeScaleFactor = static_cast<float>(1.0f + (1.5f * paramsKV.second._size));
-		auto knobSize = refKnobSize * knobSizeScaleFactor;
-		auto knobThickness = 3.0f * knobSizeScaleFactor;
+                // Map the x/y coordinates to the pixel-wise dimensions of the surface area.
+                auto const& pt = paramsKV.second._pos;
+                float x = pt.x * w;
+                float y = h - (pt.y * h);
 
-		Path knobPath;
-		auto fillSize = knobSize + knobThickness;
-		knobPath.addEllipse(Rectangle<float>(x - (fillSize / 2.0f), y - (fillSize / 2.0f), fillSize, fillSize));
+                auto knobSizeScaleFactor = static_cast<float>(1.0f + (1.5f * paramsKV.second._size));
+                auto knobSize = refKnobSize * knobSizeScaleFactor;
+                auto knobThickness = 3.0f * knobSizeScaleFactor;
 
-		// Check if the mouse click landed inside any of the knobs.
-		if (knobPath.contains(mousePos))
-		{
-			// Set this source as "selected" and begin a drag gesture.
-			m_currentlyDraggedId = paramsKV.first;
+                Path knobPath;
+                auto fillSize = knobSize + knobThickness;
+                knobPath.addEllipse(Rectangle<float>(x - (fillSize / 2.0f), y - (fillSize / 2.0f), fillSize, fillSize));
 
-			if (!IsInFakeALTMultiTouch() && m_multiTouchTargetOperation == MTDT_PendingInputDecision)
-			{
-				auto ctrl = Controller::GetInstance();
-				if (ctrl)
-				{
-					auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
-					jassert(processor);
-					if (processor)
-					{
-                        DBG(String(__FUNCTION__) + String(" BeginGuiGesture for id ") + String(m_currentlyDraggedId));
-						auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
-						if (param)
-							param->BeginGuiGesture();
-						param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_Y]);
-						if (param)
-							param->BeginGuiGesture();
-					}
-				}
-			}
+                // Check if the mouse click landed inside any of the knobs.
+                if (knobPath.contains(mousePos))
+                {
+                    // Set this source as "selected" and begin a drag gesture.
+                    m_currentlyDraggedId = paramsKV.first;
 
-			// Found a knob to select, skip the rest.
-            repaint();
-			break;
-		}
-	}
+                    if (!IsInFakeALTMultiTouch() && m_multiTouchTargetOperation == MTDT_PendingInputDecision)
+                    {
+                        auto ctrl = Controller::GetInstance();
+                        if (ctrl)
+                        {
+                            auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
+                            jassert(processor);
+                            if (processor)
+                            {
+                                DBG(String(__FUNCTION__) + String(" BeginGuiGesture for id ") + String(m_currentlyDraggedId));
+                                auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_X]);
+                                if (param)
+                                    param->BeginGuiGesture();
+                                param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_Y]);
+                                if (param)
+                                    param->BeginGuiGesture();
+                            }
+                        }
+                    }
+
+                    // Found a knob to select, skip the rest.
+                    repaint();
+                    break;
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -896,34 +952,41 @@ void MultiSoundobjectSlider::dualPointMultitouchUpdated(const juce::Point<int>& 
         }
         else
         {
-            for (auto const& paramsKV : std::get<0>(m_cachedParameters))
+            for (auto const& paramsByMappingsKV : std::get<0>(m_cachedParameters))
             {
-                auto const& selected = paramsKV.second._selected;
-                if (selected)
+                auto& mappingAreaId = paramsByMappingsKV.first;
+                if (GetSelectedMapping() == mappingAreaId || GetSelectedMapping() == MAI_Invalid)
                 {
-                    auto const& id = paramsKV.first;
-                    auto processor = ctrl->GetSoundobjectProcessor(id);
-                    if (processor)
+                    for (auto const& paramsKV : paramsByMappingsKV.second)
                     {
-                        switch (m_multiTouchTargetOperation)
+                        auto const& selected = paramsKV.second._selected;
+                        if (selected)
                         {
-                            case MTDT_VerticalSpread:
+                            auto const& id = paramsKV.first;
+                            auto processor = ctrl->GetSoundobjectProcessor(id);
+                            if (processor)
+                            {
+                                switch (m_multiTouchTargetOperation)
+                                {
+                                case MTDT_VerticalSpread:
                                 {
                                     auto spreadFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_Positioning_SourceSpread);
                                     auto newVal = jlimit(spreadFactorRange.getStart(), spreadFactorRange.getEnd(), m_multiTouchModNormalValues.at(id) - getMultiTouchFactorValue() * spreadFactorRange.getLength());
                                     processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_ObjectSpread, newVal);
                                 }
                                 break;
-                            case MTDT_HorizontalEnSpaceSendGain:
+                                case MTDT_HorizontalEnSpaceSendGain:
                                 {
                                     auto enSpacGainRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
                                     auto newVal = jlimit(enSpacGainRange.getStart(), enSpacGainRange.getEnd(), m_multiTouchModNormalValues.at(id) - getMultiTouchFactorValue() * enSpacGainRange.getLength());
                                     processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_ReverbSendGain, newVal);
                                 }
                                 break;
-                            case MTDT_PendingInputDecision:
-                            default:
-                                break;
+                                case MTDT_PendingInputDecision:
+                                default:
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
@@ -971,33 +1034,40 @@ void MultiSoundobjectSlider::dualPointMultitouchFinished()
         }
         else
         {
-            for (auto const& paramsKV : std::get<0>(m_cachedParameters))
+            for (auto const& paramsByMappingsKV : std::get<0>(m_cachedParameters))
             {
-                auto const& selected = paramsKV.second._selected;
-                if (selected)
+                auto& mappingAreaId = paramsByMappingsKV.first;
+                if (GetSelectedMapping() == mappingAreaId || GetSelectedMapping() == MAI_Invalid)
                 {
-                    auto processor = ctrl->GetSoundobjectProcessor(paramsKV.second._id);
-                    if (processor)
+                    for (auto const& paramsKV : paramsByMappingsKV.second)
                     {
-                        auto param = static_cast<GestureManagedAudioParameterFloat*>(nullptr);
-                        
-                        switch (m_multiTouchTargetOperation)
+                        auto const& selected = paramsKV.second._selected;
+                        if (selected)
                         {
-                            case MTDT_VerticalSpread:
-                                param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ObjectSpread]);
-                                jassert(param);
-                                break;
-                            case MTDT_HorizontalEnSpaceSendGain:
-                                param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ReverbSendGain]);
-                                jassert(param);
-                                break;
-                            case MTDT_PendingInputDecision:
-                            default:
-                                break;
+                            auto processor = ctrl->GetSoundobjectProcessor(paramsKV.second._id);
+                            if (processor)
+                            {
+                                auto param = static_cast<GestureManagedAudioParameterFloat*>(nullptr);
+
+                                switch (m_multiTouchTargetOperation)
+                                {
+                                case MTDT_VerticalSpread:
+                                    param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ObjectSpread]);
+                                    jassert(param);
+                                    break;
+                                case MTDT_HorizontalEnSpaceSendGain:
+                                    param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ReverbSendGain]);
+                                    jassert(param);
+                                    break;
+                                case MTDT_PendingInputDecision:
+                                default:
+                                    break;
+                                }
+
+                                if (param)
+                                    param->EndGuiGesture();
+                            }
                         }
-                        
-                        if (param)
-                            param->EndGuiGesture();
                     }
                 }
             }
@@ -1081,42 +1151,49 @@ void MultiSoundobjectSlider::updateMultiTouch(const juce::Point<int>& p1, const 
                 }
                 else
                 {
-                    for (auto const& paramsKV : std::get<0>(m_cachedParameters))
+                    for (auto const& paramsByMappingsKV : std::get<0>(m_cachedParameters))
                     {
-                        auto const& selected = paramsKV.second._selected;
-                        
-                        if (selected)
+                        auto& mappingAreaId = paramsByMappingsKV.first;
+                        if (GetSelectedMapping() == mappingAreaId || GetSelectedMapping() == MAI_Invalid)
                         {
-                            auto& id = paramsKV.first;
-                            auto processor = ctrl->GetSoundobjectProcessor(id);
-                            if (processor)
+                            for (auto const& paramsKV : paramsByMappingsKV.second)
                             {
-                                if (isSpreadFactorChange)
+                                auto const& selected = paramsKV.second._selected;
+
+                                if (selected)
                                 {
-                                    auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ObjectSpread]);
-                                    jassert(param);
-                                    if (param)
-                                        param->BeginGuiGesture();
-                                    
-                                    auto spreadFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_Positioning_SourceSpread);
-                                    m_multiTouchModNormalValues[id] = jmap(processor->GetParameterValue(SPI_ParamIdx_ObjectSpread), spreadFactorRange.getStart(), spreadFactorRange.getEnd(), 0.0f, 1.0f);
-                                    
-                                    m_multiTouchTargetOperation = MTDT_VerticalSpread;
+                                    auto& id = paramsKV.first;
+                                    auto processor = ctrl->GetSoundobjectProcessor(id);
+                                    if (processor)
+                                    {
+                                        if (isSpreadFactorChange)
+                                        {
+                                            auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ObjectSpread]);
+                                            jassert(param);
+                                            if (param)
+                                                param->BeginGuiGesture();
+
+                                            auto spreadFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_Positioning_SourceSpread);
+                                            m_multiTouchModNormalValues[id] = jmap(processor->GetParameterValue(SPI_ParamIdx_ObjectSpread), spreadFactorRange.getStart(), spreadFactorRange.getEnd(), 0.0f, 1.0f);
+
+                                            m_multiTouchTargetOperation = MTDT_VerticalSpread;
+                                        }
+                                        else if (isEnSpaceGainChange)
+                                        {
+                                            auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ReverbSendGain]);
+                                            jassert(param);
+                                            if (param)
+                                                param->BeginGuiGesture();
+
+                                            auto enSpacGainRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
+                                            m_multiTouchModNormalValues[id] = jmap(processor->GetParameterValue(SPI_ParamIdx_ReverbSendGain), enSpacGainRange.getStart(), enSpacGainRange.getEnd(), 0.0f, 1.0f);
+
+                                            m_multiTouchTargetOperation = MTDT_HorizontalEnSpaceSendGain;
+                                        }
+                                        else
+                                            jassertfalse;
+                                    }
                                 }
-                                else if (isEnSpaceGainChange)
-                                {
-                                    auto param = dynamic_cast<GestureManagedAudioParameterFloat*>(processor->getParameters()[SPI_ParamIdx_ReverbSendGain]);
-                                    jassert(param);
-                                    if (param)
-                                        param->BeginGuiGesture();
-                                    
-                                    auto enSpacGainRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
-                                    m_multiTouchModNormalValues[id] = jmap(processor->GetParameterValue(SPI_ParamIdx_ReverbSendGain), enSpacGainRange.getStart(), enSpacGainRange.getEnd(), 0.0f, 1.0f);
-                                    
-                                    m_multiTouchTargetOperation = MTDT_HorizontalEnSpaceSendGain;
-                                }
-                                else
-                                    jassertfalse;
                             }
                         }
                     }
@@ -1193,8 +1270,8 @@ void MultiSoundobjectSlider::cacheObjectsXYPos(const std::vector<SoundobjectProc
                 param->BeginGuiGesture();
 
             auto& soundobjectParameterMap = std::get<0>(m_cachedParameters);
-            jassert(soundobjectParameterMap.count(objectId) > 0);
-            m_objectPosMultiEditStartValues[objectId] = soundobjectParameterMap.at(objectId)._pos;
+            jassert(soundobjectParameterMap[GetSelectedMapping()].count(objectId) > 0);
+            m_objectPosMultiEditStartValues[objectId] = soundobjectParameterMap.at(GetSelectedMapping()).at(objectId)._pos;
         }
     }
 }
@@ -1405,13 +1482,20 @@ void MultiSoundobjectSlider::UpdateParameters(const ParameterCache& parameters, 
             auto w = getLocalBounds().toFloat().getWidth();
             auto h = getLocalBounds().toFloat().getHeight();
 
-            for (auto const& paramsKV : soundobjectParameterMap)
+            for (auto const& paramsByMappingsKV : soundobjectParameterMap)
             {
-                auto const& isSelected = paramsKV.second._selected;
-                auto const& pt = paramsKV.second._pos;
+                auto& mappingAreaId = paramsByMappingsKV.first;
+                if (GetSelectedMapping() == mappingAreaId || GetSelectedMapping() == MAI_Invalid)
+                {
+                    for (auto const& paramsKV : paramsByMappingsKV.second)
+                    {
+                        auto const& isSelected = paramsKV.second._selected;
+                        auto const& pt = paramsKV.second._pos;
 
-                if (isSelected)
-                    selectedCoords.push_back(juce::Point<float>(pt.x * w, h - (pt.y * h)));
+                        if (isSelected)
+                            selectedCoords.push_back(juce::Point<float>(pt.x * w, h - (pt.y * h)));
+                    }
+                }
             }
 
             auto selectionCountChanged = selectedCoords.size() != m_multiselectionVisualizer->GetSelectionPoints().size();

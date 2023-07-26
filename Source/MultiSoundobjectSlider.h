@@ -85,7 +85,7 @@ public:
 		MultiSelection = 0x0001,
 	};
 	using CacheFlags = std::uint16_t;
-	typedef std::tuple<std::map<SoundobjectProcessorId, SoundobjectParameters>, CacheFlags> ParameterCache;
+	typedef std::tuple<std::map<MappingAreaId, std::map<SoundobjectProcessorId, SoundobjectParameters>>, CacheFlags> ParameterCache;
     
     struct MultiTouchPoints
     {
@@ -178,6 +178,7 @@ private:
 	juce::Range<float>	m_realYBoundingRange;
 
 	juce::Point<float>	GetPointForRealCoordinate(const juce::Vector3D<float>& realCoordinate);
+	juce::Point<float>	GetPointForRelativePosOnMapping(const juce::Point<float>& relativePos, const MappingAreaId& mapping);
 
 	juce::Rectangle<int>	GetAspectAndMarginCorrectedBounds();
 

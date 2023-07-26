@@ -333,23 +333,20 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 			auto processor = ctrl->GetSoundobjectProcessor(processorId);
 			if (processor)
 			{
-				// NOTE: only soundobjects are used that match the selected viewing mapping.
-				if (processor->GetMappingId() == GetSelectedMapping())
-				{
-					auto soundobjectId	= processor->GetSoundobjectId();
-					auto pos			= Point<float>(processor->GetParameterValue(SPI_ParamIdx_X), processor->GetParameterValue(SPI_ParamIdx_Y));
-					auto spread			= processor->GetParameterValue(SPI_ParamIdx_ObjectSpread);
-					auto reverbSendGain	= processor->GetParameterValue(SPI_ParamIdx_ReverbSendGain);
-					auto selected		= selMgr->IsSoundobjectProcessorIdSelected(processorId);
-					auto colour			= processor->GetSoundobjectColour();
-					auto size			= processor->GetSoundobjectSize();
-					auto objectName		= processor->getProgramName(processor->getCurrentProgram());
+				auto soundobjectId	= processor->GetSoundobjectId();
+				auto pos			= Point<float>(processor->GetParameterValue(SPI_ParamIdx_X), processor->GetParameterValue(SPI_ParamIdx_Y));
+				auto spread			= processor->GetParameterValue(SPI_ParamIdx_ObjectSpread);
+				auto reverbSendGain	= processor->GetParameterValue(SPI_ParamIdx_ReverbSendGain);
+				auto selected		= selMgr->IsSoundobjectProcessorIdSelected(processorId);
+				auto colour			= processor->GetSoundobjectColour();
+				auto size			= processor->GetSoundobjectSize();
+				auto objectName		= processor->getProgramName(processor->getCurrentProgram());
 
-					soundobjectParameterMap.insert(std::make_pair(processorId, MultiSoundobjectSlider::SoundobjectParameters(soundobjectId, pos, spread, reverbSendGain, selected, colour, size, objectName)));
+				jassert(processor->GetMappingId() > MAI_Invalid && processor->GetMappingId() <= MAI_Fourth);
+				soundobjectParameterMap[static_cast<MappingAreaId>(processor->GetMappingId())].insert(std::make_pair(processorId, MultiSoundobjectSlider::SoundobjectParameters(soundobjectId, pos, spread, reverbSendGain, selected, colour, size, objectName)));
 
-					if (selected)
-						selectedSOs++;
-				}
+				if (selected)
+					selectedSOs++;
 
 #ifdef UNDEF//DEBUG
 				if (processor->PopParameterChanged(DCP_MultiSlider, DCT_SoundobjectProcessorConfig))

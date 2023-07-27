@@ -148,10 +148,10 @@ public:
 	void SetDS100ProtocolType(DataChangeParticipant changeSource, ProtocolType protocol, bool dontSendNotification = false);
 
 	//==========================================================================
-	std::pair<juce::String, int> GetDS100IpAndPort() const;
-	void SetDS100IpAndPort(DataChangeParticipant changeSource, String ipAddress, int port, bool dontSendNotification = false);
-	std::pair<juce::String, int> GetSecondDS100IpAndPort() const;
-	void SetSecondDS100IpAndPort(DataChangeParticipant changeSource, String ipAddress, int port, bool dontSendNotification = false);
+	std::pair<juce::IPAddress, int> GetDS100IpAndPort() const;
+	void SetDS100IpAndPort(DataChangeParticipant changeSource, juce::IPAddress ipAddress, int port, bool dontSendNotification = false);
+	std::pair<juce::IPAddress, int> GetSecondDS100IpAndPort() const;
+	void SetSecondDS100IpAndPort(DataChangeParticipant changeSource, juce::IPAddress ipAddress, int port, bool dontSendNotification = false);
 
 	//==========================================================================
 	int GetRefreshInterval() const;
@@ -188,8 +188,8 @@ public:
 	bool SetMuteBridgingMatrixOutputProcessorId(ProtocolBridgingType bridgingType, MatrixOutputProcessorId matrixOutputProcessorId, bool mute);
 	bool SetMuteBridgingMatrixOutputProcessorIds(ProtocolBridgingType bridgingType, const std::vector<MatrixOutputProcessorId>& matrixOutputProcessorIds, bool mute);
 
-	String GetBridgingIpAddress(ProtocolBridgingType bridgingType);
-	bool SetBridgingIpAddress(ProtocolBridgingType bridgingType, String ipAddress, bool dontSendNotification = false);
+	juce::IPAddress GetBridgingIpAddress(ProtocolBridgingType bridgingType);
+	bool SetBridgingIpAddress(ProtocolBridgingType bridgingType, juce::IPAddress ipAddress, bool dontSendNotification = false);
 
 	int GetBridgingListeningPort(ProtocolBridgingType bridgingType);
 	bool SetBridgingListeningPort(ProtocolBridgingType bridgingType, int listeningPort, bool dontSendNotification = false);
@@ -290,11 +290,11 @@ protected:
 	ProtocolBridgingWrapper			m_protocolBridge;				/**< The wrapper for protocol bridging node, allowing to easily interface with it. */
 
 	ProtocolType					m_DS100ProtocolType;			/**< Current protocol type. This has impact on other parameters being available on ui or not. */
-	String							m_DS100IpAddress;				/**< IP Address where OSC messages will be sent to / received from. */
+	juce::IPAddress					m_DS100IpAddress;				/**< IP Address where OSC messages will be sent to / received from. */
 	int								m_DS100Port;					/**< Port on the ds100 device to connect to. */
 	ExtensionMode					m_DS100ExtensionMode;			/**< Current extension mode. This has impact on if second DS100 is active or not. */
 	ActiveParallelModeDS100			m_DS100ActiveParallelModeDS100;	/**< Currently active DS100 when in extension mode "parallel". */
-	String							m_SecondDS100IpAddress;			/**< IP Address where OSC messages will be sent to / received from. */
+	juce::IPAddress					m_SecondDS100IpAddress;			/**< IP Address where OSC messages will be sent to / received from. */
 	int								m_SecondDS100Port;				/**< Port on a second ds100 device to connect to. */
 
 	DataChangeType					m_parametersChanged[DCP_Max];	/**< Keep track of which OSC parameters have changed recently.

@@ -157,8 +157,8 @@ Controller::Controller()
 
 	// Some default value initialization just to be sure
 	SetRefreshInterval(DCP_Init, PROTOCOL_INTERVAL_DEF, true);
-	SetDS100IpAndPort(DCP_Init, PROTOCOL_DEFAULT_IP, RX_PORT_DS100_DEVICE, true);
-	SetSecondDS100IpAndPort(DCP_Init, PROTOCOL_DEFAULT2_IP, RX_PORT_DS100_DEVICE, true);
+	SetDS100IpAndPort(DCP_Init, juce::IPAddress(PROTOCOL_DEFAULT_IP), RX_PORT_DS100_DEVICE, true);
+	SetSecondDS100IpAndPort(DCP_Init, juce::IPAddress(PROTOCOL_DEFAULT2_IP), RX_PORT_DS100_DEVICE, true);
 	SetExtensionMode(DCP_Init, EM_Off, true);
 	SetActiveParallelModeDS100(DCP_Init, APM_None, true);
 
@@ -994,7 +994,7 @@ void Controller::SetDS100ProtocolType(DataChangeParticipant changeSource, Protoc
  * Getter function for the IP address and port to which we are connected.
  * @return	Current IP address.
  */
-std::pair<juce::String, int> Controller::GetDS100IpAndPort() const
+std::pair<juce::IPAddress, int> Controller::GetDS100IpAndPort() const
 {
 	return std::make_pair(m_DS100IpAddress, m_DS100Port);
 }
@@ -1007,7 +1007,7 @@ std::pair<juce::String, int> Controller::GetDS100IpAndPort() const
  * @param port			New port.
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  */
-void Controller::SetDS100IpAndPort(DataChangeParticipant changeSource, String ipAddress, int port, bool dontSendNotification)
+void Controller::SetDS100IpAndPort(DataChangeParticipant changeSource, juce::IPAddress ipAddress, int port, bool dontSendNotification)
 {
 	if (m_DS100IpAddress != ipAddress || m_DS100Port != port)
 	{
@@ -1031,7 +1031,7 @@ void Controller::SetDS100IpAndPort(DataChangeParticipant changeSource, String ip
  * Getter function for the IP address and to which we are connected.
  * @return	Current IP address + port.
  */
-std::pair<juce::String, int> Controller::GetSecondDS100IpAndPort() const
+std::pair<juce::IPAddress, int> Controller::GetSecondDS100IpAndPort() const
 {
 	return std::make_pair(m_SecondDS100IpAddress, m_SecondDS100Port);
 }
@@ -1044,7 +1044,7 @@ std::pair<juce::String, int> Controller::GetSecondDS100IpAndPort() const
  * @param port			New port.
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  */
-void Controller::SetSecondDS100IpAndPort(DataChangeParticipant changeSource, String ipAddress, int port, bool dontSendNotification)
+void Controller::SetSecondDS100IpAndPort(DataChangeParticipant changeSource, juce::IPAddress ipAddress, int port, bool dontSendNotification)
 {
 	if (m_SecondDS100IpAddress != ipAddress || m_SecondDS100Port != port)
 	{
@@ -2873,12 +2873,12 @@ bool Controller::SetMuteBridgingMatrixOutputProcessorIds(ProtocolBridgingType br
 		return m_protocolBridge.SetUnmuteProtocolMatrixOutputProcessorIds(protocolId, matrixOutputProcessorIds);
 }
 
-String Controller::GetBridgingIpAddress(ProtocolBridgingType bridgingType)
+juce::IPAddress Controller::GetBridgingIpAddress(ProtocolBridgingType bridgingType)
 {
 	return m_protocolBridge.GetProtocolIpAddress(GetProtocolIdForProtocolType(bridgingType));
 }
 
-bool Controller::SetBridgingIpAddress(ProtocolBridgingType bridgingType, String ipAddress, bool dontSendNotification)
+bool Controller::SetBridgingIpAddress(ProtocolBridgingType bridgingType, juce::IPAddress ipAddress, bool dontSendNotification)
 {
 	return m_protocolBridge.SetProtocolIpAddress(GetProtocolIdForProtocolType(bridgingType), ipAddress, dontSendNotification);
 }

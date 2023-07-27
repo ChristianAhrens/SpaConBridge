@@ -151,6 +151,7 @@ protected:
 	void paint(Graphics& g) override;
 	void paintMappingArea2DVisu(Graphics& g);
 	void paintSpeakersAndMappingAreas2DVisu(Graphics& g);
+	void paintSoundobjects(Graphics& g);
 
 	void resized() override;
 

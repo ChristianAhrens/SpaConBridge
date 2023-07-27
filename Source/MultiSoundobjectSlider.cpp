@@ -404,6 +404,9 @@ void MultiSoundobjectSlider::paintSpeakersAndMappingAreas2DVisu(Graphics& g)
         // draw framing rect around icons, 2px larger than icon target area itself
         g.drawRect(m_speakerDrawableAreas[speakerDrawableKV.first].expanded(2.0f));
     }
+
+    // All cached soundobjects
+    paintSoundobjects(g);
 }
 
 /**
@@ -442,9 +445,23 @@ void MultiSoundobjectSlider::paintMappingArea2DVisu(Graphics & g)
     g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
     g.drawRect(Rectangle<float>(0.0f, 0.0f, w, h), 1.5f);
 
+    // All cached soundobjects
+    paintSoundobjects(g);
+}
 
-    // painting for all cached soundobjects, based on cached parameter values
+/**
+ * Painting helper method for painting of soundobjects
+ * @param g		The graphics context that must be used to do the drawing operations.
+ */
+void MultiSoundobjectSlider::paintSoundobjects(Graphics& g)
+{
     float refKnobSize = 10.0f;
+
+    auto w = getLocalBounds().toFloat().getWidth();
+    auto h = getLocalBounds().toFloat().getHeight();
+
+    const float dashLengths[2] = { 5.0f, 6.0f };
+    const float lineThickness = 1.0f;
 
     auto& soundobjectParameterMap = std::get<0>(m_cachedParameters);
     auto& parameterFlags = std::get<1>(m_cachedParameters);
@@ -467,9 +484,7 @@ void MultiSoundobjectSlider::paintMappingArea2DVisu(Graphics & g)
                 if (m_handleSelectedOnly && !isSelected)
                     continue;
 
-                // Map the x/y coordinates to the pixel-wise dimensions of the surface area.
-                auto const& pt = paramsKV.second._pos;
-                auto currentCoords = juce::Point<float>(pt.x * w, h - (pt.y * h));
+                auto currentCoords = GetPointForRelativePosOnMapping(paramsKV.second._pos, mappingAreaId);
 
                 auto knobColour = paramsKV.second._colour;
 
@@ -1709,6 +1724,42 @@ juce::Point<float> MultiSoundobjectSlider::GetPointForRealCoordinate(const juce:
     auto relativeY = (realCoordinate.y - m_realYBoundingRange.getStart()) / m_realYBoundingRange.getLength();
 
     return GetAspectAndMarginCorrectedBounds().getRelativePoint(relativeX, relativeY).toFloat();
+}
+
+/**
+ * Helper method to convert a given relative 0...1 range point to a position on screen.
+ * In case a valid mapping area is the currently selected, the point is mapped to the entire screen space.
+ * If currently selected is invalid, the screen position is calculated based on the real bounding rect
+ * and the position of mapping areas within.
+ * @param   relativePos     The relative position of a soundobject in a mappingarea
+ * @param   mapping         The mappingarea the relative position relates to
+ * @return  The derived position in pixel coordinates
+ */
+juce::Point<float> MultiSoundobjectSlider::GetPointForRelativePosOnMapping(const juce::Point<float>& relativePos, const MappingAreaId& mapping)
+{
+    if (GetSelectedMapping() == MAI_Invalid && IsCoordinateMappingsSettingsDataReady())
+    {
+        auto mappingCornersReal = m_mappingCornersReal.at(mapping);
+        auto mappingCornersVirtual = m_mappingCornersVirtual.at(mapping);
+        auto mappingFlip = m_mappingFlip.at(mapping);
+
+        auto realPos = juce::Vector3D<float>();
+
+        /*todo*/
+
+        return GetPointForRealCoordinate(realPos);
+    }
+    else if (GetSelectedMapping() == mapping)
+    {
+        auto w = getLocalBounds().toFloat().getWidth();
+        auto h = getLocalBounds().toFloat().getHeight();
+        // Map the x/y coordinates to the pixel-wise dimensions of the surface area.
+        return juce::Point<float>(relativePos.x * w, h - (relativePos.y * h));
+    }
+    else
+    {
+        return getLocalBounds().getTopLeft().toFloat();
+    }
 }
 
 /**

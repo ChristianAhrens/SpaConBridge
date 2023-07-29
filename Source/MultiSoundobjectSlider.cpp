@@ -391,8 +391,14 @@ void MultiSoundobjectSlider::paintSpeakersAndMappingAreas2DVisu(Graphics& g)
     for (auto i = int(MAI_First); i <= int(MAI_Fourth); i++)
     {
         auto mappingAreaId = static_cast<MappingAreaId>(i);
+
         if (m_mappingAreaPaths.count(mappingAreaId) == 1 )
             g.fillPath(m_mappingAreaPaths.at(mappingAreaId));
+
+        auto mappingString = juce::String("CoordinateMapping ") + juce::String(mappingAreaId);
+        if (m_mappingName.count(mappingAreaId) == 1 && m_mappingName.at(mappingAreaId).isNotEmpty())
+            mappingString = m_mappingName.at(mappingAreaId);
+        g.drawText(mappingString, m_mappingAreaPaths.at(mappingAreaId).getBounds(), juce::Justification::centred);
     }
 
     // Speaker positions

@@ -427,23 +427,23 @@ void MultiSoundobjectSlider::paintMappingArea2DVisu(Graphics & g)
         g.drawImage(GetBackgroundImage(GetSelectedMapping()), backgroundRect);
     }
 
-    auto w = getLocalBounds().toFloat().getWidth();
-    auto h = getLocalBounds().toFloat().getHeight();
+    auto width = getLocalBounds().toFloat().getWidth();
+    auto height = getLocalBounds().toFloat().getHeight();
 
     // Draw grid
     const float dashLengths[2] = { 5.0f, 6.0f };
     const float lineThickness = 1.0f;
     g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId).brighter(0.15f));
-    g.drawDashedLine(Line<float>(w * 0.25f, 0.0f, w * 0.25f, h), dashLengths, 2, lineThickness);
-    g.drawDashedLine(Line<float>(w * 0.50f, 0.0f, w * 0.50f, h), dashLengths, 2, lineThickness);
-    g.drawDashedLine(Line<float>(w * 0.75f, 0.0f, w * 0.75f, h), dashLengths, 2, lineThickness);
-    g.drawDashedLine(Line<float>(0.0f, h * 0.25f, w, h * 0.25f), dashLengths, 2, lineThickness);
-    g.drawDashedLine(Line<float>(0.0f, h * 0.50f, w, h * 0.50f), dashLengths, 2, lineThickness);
-    g.drawDashedLine(Line<float>(0.0f, h * 0.75f, w, h * 0.75f), dashLengths, 2, lineThickness);
+    g.drawDashedLine(Line<float>(width * 0.25f, 0.0f, width * 0.25f, height), dashLengths, 2, lineThickness);
+    g.drawDashedLine(Line<float>(width * 0.50f, 0.0f, width * 0.50f, height), dashLengths, 2, lineThickness);
+    g.drawDashedLine(Line<float>(width * 0.75f, 0.0f, width * 0.75f, height), dashLengths, 2, lineThickness);
+    g.drawDashedLine(Line<float>(0.0f, height * 0.25f, width, height * 0.25f), dashLengths, 2, lineThickness);
+    g.drawDashedLine(Line<float>(0.0f, height * 0.50f, width, height * 0.50f), dashLengths, 2, lineThickness);
+    g.drawDashedLine(Line<float>(0.0f, height * 0.75f, width, height * 0.75f), dashLengths, 2, lineThickness);
 
     // Surface frame
     g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
-    g.drawRect(Rectangle<float>(0.0f, 0.0f, w, h), 1.5f);
+    g.drawRect(Rectangle<float>(0.0f, 0.0f, width, height), 1.5f);
 
     // All cached soundobjects
     paintSoundobjects(g);
@@ -457,8 +457,8 @@ void MultiSoundobjectSlider::paintSoundobjects(Graphics& g)
 {
     float refKnobSize = 10.0f;
 
-    auto w = getLocalBounds().toFloat().getWidth();
-    auto h = getLocalBounds().toFloat().getHeight();
+    auto width = getLocalBounds().toFloat().getWidth();
+    auto height = getLocalBounds().toFloat().getHeight();
 
     const float dashLengths[2] = { 5.0f, 6.0f };
     const float lineThickness = 1.0f;
@@ -504,8 +504,8 @@ void MultiSoundobjectSlider::paintSoundobjects(Graphics& g)
                     // Paint 'currently dragged crosshair'
                     auto& crosshairColour = knobColour;
                     g.setColour(crosshairColour);
-                    g.drawLine(0, y, w, y, 1);
-                    g.drawLine(x, 0, x, h, 1);
+                    g.drawLine(0, y, width, y, 1);
+                    g.drawLine(x, 0, x, height, 1);
 
                     // Paint 'currently dual-multitouch points indication'
                     auto& p1 = m_multiTouchPoints._p2_init;
@@ -516,10 +516,10 @@ void MultiSoundobjectSlider::paintSoundobjects(Graphics& g)
                     case MTDT_HorizontalEnSpaceSendGain:
                     {
                         g.setColour(crosshairColour);
-                        g.drawDashedLine(Line<float>(p1.toFloat().getX(), 0.0f, p1.toFloat().getX(), h), dashLengths, 2, lineThickness);
-                        g.drawDashedLine(Line<float>(p2.toFloat().getX(), 0.0f, p2.toFloat().getX(), h), dashLengths, 2, lineThickness);
+                        g.drawDashedLine(Line<float>(p1.toFloat().getX(), 0.0f, p1.toFloat().getX(), height), dashLengths, 2, lineThickness);
+                        g.drawDashedLine(Line<float>(p2.toFloat().getX(), 0.0f, p2.toFloat().getX(), height), dashLengths, 2, lineThickness);
                         g.setOpacity(0.15f);
-                        g.fillRect(Rectangle<float>(p1.toFloat().getX(), 0.0f, p2.toFloat().getX() - p1.toFloat().getX(), h));
+                        g.fillRect(Rectangle<float>(p1.toFloat().getX(), 0.0f, p2.toFloat().getX() - p1.toFloat().getX(), height));
 
                         auto font = Font(static_cast<float>(goodVisibilityDistance), Font::plain);
                         g.setFont(font);
@@ -536,10 +536,10 @@ void MultiSoundobjectSlider::paintSoundobjects(Graphics& g)
                     case MTDT_VerticalSpread:
                     {
                         g.setColour(crosshairColour);
-                        g.drawDashedLine(Line<float>(0.0f, p1.toFloat().getY(), w, p1.toFloat().getY()), dashLengths, 2, lineThickness);
-                        g.drawDashedLine(Line<float>(0.0f, p2.toFloat().getY(), w, p2.toFloat().getY()), dashLengths, 2, lineThickness);
+                        g.drawDashedLine(Line<float>(0.0f, p1.toFloat().getY(), width, p1.toFloat().getY()), dashLengths, 2, lineThickness);
+                        g.drawDashedLine(Line<float>(0.0f, p2.toFloat().getY(), width, p2.toFloat().getY()), dashLengths, 2, lineThickness);
                         g.setOpacity(0.15f);
-                        g.fillRect(Rectangle<float>(0.0f, p1.toFloat().getY(), w, p2.toFloat().getY() - p1.toFloat().getY()));
+                        g.fillRect(Rectangle<float>(0.0f, p1.toFloat().getY(), width, p2.toFloat().getY() - p1.toFloat().getY()));
 
                         auto font = Font(static_cast<float>(goodVisibilityDistance), Font::plain);
                         g.setFont(font);
@@ -648,10 +648,10 @@ void MultiSoundobjectSlider::paintSoundobjects(Graphics& g)
         case MTDT_HorizontalEnSpaceSendGain:
         {
             g.setColour(multitouchIndicationColour);
-            g.drawDashedLine(Line<float>(p1.toFloat().getX(), 0.0f, p1.toFloat().getX(), h), dashLengths, 2, lineThickness);
-            g.drawDashedLine(Line<float>(p2.toFloat().getX(), 0.0f, p2.toFloat().getX(), h), dashLengths, 2, lineThickness);
+            g.drawDashedLine(Line<float>(p1.toFloat().getX(), 0.0f, p1.toFloat().getX(), height), dashLengths, 2, lineThickness);
+            g.drawDashedLine(Line<float>(p2.toFloat().getX(), 0.0f, p2.toFloat().getX(), height), dashLengths, 2, lineThickness);
             g.setOpacity(0.15f);
-            g.fillRect(Rectangle<float>(p1.toFloat().getX(), 0.0f, p2.toFloat().getX() - p1.toFloat().getX(), h));
+            g.fillRect(Rectangle<float>(p1.toFloat().getX(), 0.0f, p2.toFloat().getX() - p1.toFloat().getX(), height));
 
             auto font = Font(static_cast<float>(goodVisibilityDistance), Font::plain);
             g.setFont(font);
@@ -670,10 +670,10 @@ void MultiSoundobjectSlider::paintSoundobjects(Graphics& g)
         case MTDT_VerticalSpread:
         {
             g.setColour(multitouchIndicationColour);
-            g.drawDashedLine(Line<float>(0.0f, p1.toFloat().getY(), w, p1.toFloat().getY()), dashLengths, 2, lineThickness);
-            g.drawDashedLine(Line<float>(0.0f, p2.toFloat().getY(), w, p2.toFloat().getY()), dashLengths, 2, lineThickness);
+            g.drawDashedLine(Line<float>(0.0f, p1.toFloat().getY(), width, p1.toFloat().getY()), dashLengths, 2, lineThickness);
+            g.drawDashedLine(Line<float>(0.0f, p2.toFloat().getY(), width, p2.toFloat().getY()), dashLengths, 2, lineThickness);
             g.setOpacity(0.15f);
-            g.fillRect(Rectangle<float>(0.0f, p1.toFloat().getY(), w, p2.toFloat().getY() - p1.toFloat().getY()));
+            g.fillRect(Rectangle<float>(0.0f, p1.toFloat().getY(), width, p2.toFloat().getY() - p1.toFloat().getY()));
 
             auto font = Font(static_cast<float>(goodVisibilityDistance), Font::plain);
             g.setFont(font);

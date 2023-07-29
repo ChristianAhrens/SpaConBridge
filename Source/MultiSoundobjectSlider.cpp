@@ -1739,13 +1739,25 @@ juce::Point<float> MultiSoundobjectSlider::GetPointForRelativePosOnMapping(const
 {
     if (GetSelectedMapping() == MAI_Invalid && IsCoordinateMappingsSettingsDataReady())
     {
-        auto mappingCornersReal = m_mappingCornersReal.at(mapping);
-        auto mappingCornersVirtual = m_mappingCornersVirtual.at(mapping);
-        auto mappingFlip = m_mappingFlip.at(mapping);
+        auto& mappingCornersReal = m_mappingCornersReal.at(mapping);
+        auto& mappingP1 = mappingCornersReal.at(0);
+        auto& mappingP2 = mappingCornersReal.at(1);
+        auto& mappingP3 = mappingCornersReal.at(2);
+        auto& mappingP4 = mappingCornersReal.at(3);
+        auto& mappingCornersVirtual = m_mappingCornersVirtual.at(mapping);
+        auto& mappingVP1 = mappingCornersVirtual.at(0);
+        auto& mappingVP2 = mappingCornersVirtual.at(1);
+        auto& mappingFlip = m_mappingFlip.at(mapping);
 
-        auto realPos = juce::Vector3D<float>();
+        /*WIP*/
+        auto vectorX = mappingP2 - mappingP1;
+        auto vectorY = mappingP3 - mappingP2;
 
-        /*todo*/
+        auto relVectorX = vectorX * relativePos.x;
+        auto relVectorY = vectorY * relativePos.y;
+
+        auto realPos = mappingP1 + relVectorX + relVectorY;
+        /*WIP*/
 
         return GetPointForRealCoordinate(realPos);
     }

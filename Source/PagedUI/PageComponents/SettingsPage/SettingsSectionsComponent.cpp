@@ -365,6 +365,32 @@ void SettingsSectionsComponent::createRTTrPMSettingsSection()
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMInterpretXYRelativeLabel.get(), false, false);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMInterpretXYRelativeButton.get(), true, false);
 
+	m_RTTrPMAbsoluteXYFlipLabel = std::make_unique<Label>("RTTrPMAbsoluteXYFlipButton", "XY interpret mode");
+	m_RTTrPMAbsoluteXYFlipButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("Flip XY axis");
+	m_RTTrPMAbsoluteXYFlipButton->setClickingTogglesState(true);
+	m_RTTrPMAbsoluteXYFlipButton->addListener(this);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMAbsoluteXYFlipLabel.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMAbsoluteXYFlipButton.get(), true, false);
+
+	m_RTTrPMAbsoluteOriginElmsContainer = std::make_unique<HorizontalLayouterComponent>();
+	m_RTTrPMAbsoluteOriginElmsContainer->SetSpacing(5);
+	m_RTTrPMAbsoluteOriginXLabel = std::make_unique<Label>("RTTrPMAbsolutOriginXEdit", "x:");
+	m_RTTrPMAbsoluteOriginElmsContainer->AddComponent(m_RTTrPMAbsoluteOriginXLabel.get(), 0.2f);
+	m_RTTrPMAbsoluteOriginXEdit = std::make_unique<TextEditor>();
+	m_RTTrPMAbsoluteOriginXEdit->addListener(this);
+	m_RTTrPMAbsoluteOriginXEdit->setInputFilter(std::make_unique<TextEditor::LengthAndCharacterRestriction>(6, "1234567890.").release(), true);
+	m_RTTrPMAbsoluteOriginElmsContainer->AddComponent(m_RTTrPMAbsoluteOriginXEdit.get(), 0.8f);
+	m_RTTrPMAbsoluteOriginYLabel = std::make_unique<Label>("RTTrPMAbsolutOriginYEdit", "y:");
+	m_RTTrPMAbsoluteOriginElmsContainer->AddComponent(m_RTTrPMAbsoluteOriginYLabel.get(), 0.2f);
+	m_RTTrPMAbsoluteOriginYEdit = std::make_unique<TextEditor>();
+	m_RTTrPMAbsoluteOriginYEdit->addListener(this);
+	m_RTTrPMAbsoluteOriginYEdit->setInputFilter(std::make_unique<TextEditor::LengthAndCharacterRestriction>(6, "1234567890.").release(), true);
+	m_RTTrPMAbsoluteOriginElmsContainer->AddComponent(m_RTTrPMAbsoluteOriginYEdit.get(), 0.8f);
+	m_RTTrPMAbsoluteOriginLabel = std::make_unique<Label>("RTTrPMAbsolutOrigin", "XY origin");
+	m_RTTrPMAbsoluteOriginLabel->attachToComponent(m_RTTrPMAbsoluteOriginElmsContainer.get(), true);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMAbsoluteOriginLabel.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMAbsoluteOriginElmsContainer.get(), true, false);
+
 	m_RTTrPMMappingAreaSelect = std::make_unique<ComboBox>();
 	m_RTTrPMMappingAreaSelect->addListener(this);
 	m_RTTrPMMappingAreaSelect->addItemList({ "1", "2", "3", "4" }, MAI_First);
@@ -1021,6 +1047,12 @@ void SettingsSectionsComponent::buttonClicked(Button* button)
 		pageMgr->SetFullscreenWindowMode(m_ToggleFullscreenButton->getToggleState(), false);
 #endif
 
+	// RTTrPM settings section
+	else if (m_RTTrPMAbsoluteXYFlipButton && m_RTTrPMAbsoluteXYFlipButton.get() == button)
+	{
+		ctrl->SetBridgingAbsoluteXYFlip(PBT_BlacktraxRTTrPM, m_RTTrPMAbsoluteXYFlipButton->getToggleState(), juce::dontSendNotification);
+	}
+
 	// ADM-OSC Settings section
 	else if (m_ADMOSCInvertXButton.get() == button)
 	{
@@ -1209,6 +1241,8 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 	// RTTrPM settings section
 	else if (m_RTTrPMListeningPortEdit && m_RTTrPMListeningPortEdit.get() == &editor)
 		ctrl->SetBridgingListeningPort(PBT_BlacktraxRTTrPM, m_RTTrPMListeningPortEdit->getText().getIntValue() % 0xffff);
+	else if (m_RTTrPMAbsoluteOriginXEdit && m_RTTrPMAbsoluteOriginYEdit && (m_RTTrPMAbsoluteOriginXEdit.get() == &editor || m_RTTrPMAbsoluteOriginYEdit.get() == &editor))
+		ctrl->SetBridgingAbsoluteOrigin(PBT_BlacktraxRTTrPM, juce::Point<float>(m_RTTrPMAbsoluteOriginXEdit->getText().getFloatValue(), m_RTTrPMAbsoluteOriginYEdit->getText().getFloatValue()));
 
 	// Generic OSC settings section
 	else if (m_GenericOSCIpAddressEdit && m_GenericOSCIpAddressEdit.get() == &editor)
@@ -1640,29 +1674,50 @@ void SettingsSectionsComponent::processUpdatedRTTrPMConfig()
 		auto newActiveButtonId = m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[(RTTrPMMappingAreaId == -1) ? 0 : 1]];
 		m_RTTrPMInterpretXYRelativeButton->setButtonDown(newActiveButtonId);
 	}
+	auto RTTrPMAbsoluteXYFlip = ctrl->GetBridgingAbsoluteXYFlip(PBT_BlacktraxRTTrPM);
+	if (m_RTTrPMAbsoluteXYFlipButton)
+	{
+		m_RTTrPMAbsoluteXYFlipButton->setToggleState(RTTrPMAbsoluteXYFlip, juce::dontSendNotification);
+		m_RTTrPMAbsoluteXYFlipButton->setEnabled(RTTrPMMappingAreaId == MAI_Invalid);
+	}
+	if (m_RTTrPMAbsoluteOriginLabel)
+	{
+		m_RTTrPMAbsoluteOriginLabel->setEnabled(RTTrPMMappingAreaId == MAI_Invalid);
+	}
+	auto RTTrPMAbsoluteOrigin = ctrl->GetBridgingAbsoluteOrigin(PBT_BlacktraxRTTrPM);
+	if (m_RTTrPMAbsoluteOriginXEdit)
+	{
+		m_RTTrPMAbsoluteOriginXEdit->setText(juce::String(RTTrPMAbsoluteOrigin.getX()));
+		m_RTTrPMAbsoluteOriginXEdit->setEnabled(RTTrPMMappingAreaId == MAI_Invalid);
+	}
+	if (m_RTTrPMAbsoluteOriginYEdit)
+	{
+		m_RTTrPMAbsoluteOriginYEdit->setText(juce::String(RTTrPMAbsoluteOrigin.getY()));
+		m_RTTrPMAbsoluteOriginYEdit->setEnabled(RTTrPMMappingAreaId == MAI_Invalid);
+	}
 	if (m_RTTrPMMappingAreaSelect)
 	{
 		m_RTTrPMMappingAreaSelect->setSelectedId(RTTrPMMappingAreaId, sendNotificationAsync);
-		m_RTTrPMMappingAreaSelect->setEnabled((RTTrPMMappingAreaId != MAI_Invalid));
+		m_RTTrPMMappingAreaSelect->setEnabled(RTTrPMMappingAreaId != MAI_Invalid);
 	}
 	if (m_RTTrPMMappingAreaLabel)
-		m_RTTrPMMappingAreaLabel->setEnabled((RTTrPMMappingAreaId != MAI_Invalid));
+		m_RTTrPMMappingAreaLabel->setEnabled(RTTrPMMappingAreaId != MAI_Invalid);
 
 	auto RTTrPMMappingRange = ctrl->GetBridgingMappingRange(PBT_BlacktraxRTTrPM);
 	if (m_RTTrPMMappingRangeXEditor)
 	{
 		m_RTTrPMMappingRangeXEditor->SetRange(RTTrPMMappingRange.first.getStart(), RTTrPMMappingRange.first.getEnd());
-		m_RTTrPMMappingRangeXEditor->setEnabled((RTTrPMMappingAreaId != MAI_Invalid));
+		m_RTTrPMMappingRangeXEditor->setEnabled(RTTrPMMappingAreaId != MAI_Invalid);
 	}
 	if (m_RTTrPMMappingRangeXLabel)
-		m_RTTrPMMappingRangeXLabel->setEnabled((RTTrPMMappingAreaId != MAI_Invalid));
+		m_RTTrPMMappingRangeXLabel->setEnabled(RTTrPMMappingAreaId != MAI_Invalid);
 	if (m_RTTrPMMappingRangeYEditor)
 	{
 		m_RTTrPMMappingRangeYEditor->SetRange(RTTrPMMappingRange.second.getStart(), RTTrPMMappingRange.second.getEnd());
-		m_RTTrPMMappingRangeYEditor->setEnabled((RTTrPMMappingAreaId != MAI_Invalid));
+		m_RTTrPMMappingRangeYEditor->setEnabled(RTTrPMMappingAreaId != MAI_Invalid);
 	}
 	if (m_RTTrPMMappingRangeYLabel)
-		m_RTTrPMMappingRangeYLabel->setEnabled((RTTrPMMappingAreaId != MAI_Invalid));
+		m_RTTrPMMappingRangeYLabel->setEnabled(RTTrPMMappingAreaId != MAI_Invalid);
 
 	if (m_RTTrPMBeaconIdxAssignmentsEditor)
 	{

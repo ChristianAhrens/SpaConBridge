@@ -1355,6 +1355,26 @@ bool ProtocolBridgingWrapper::SetProtocolMappingArea(ProtocolId protocolId, int 
 		return false;
 }
 
+bool ProtocolBridgingWrapper::GetProtocolAbsoluteXYFlip(ProtocolId protocolId)
+{
+	return false;
+}
+
+bool ProtocolBridgingWrapper::SetProtocolAbsoluteXYFlip(ProtocolId protocolId, bool flip, bool dontSendNotification)
+{
+	return false;
+}
+
+const juce::Point<float> ProtocolBridgingWrapper::GetProtocolAbsoluteOrigin(ProtocolId protocolId)
+{
+	return { 0.0f, 0.0f };
+}
+
+bool ProtocolBridgingWrapper::SetProtocolAbsoluteOrigin(ProtocolId protocolId, const juce::Point<float>& origin, bool dontSendNotification)
+{
+	return false;
+}
+
 /**
  * Gets the protocol's currently set mapping range x/y min/max value, if available for the given protocol.
  * @param protocolId The id of the protocol for which to get the currently configured mapping range x/y min/max value

@@ -195,6 +195,12 @@ public:
 	int GetProtocolMappingArea(ProtocolId protocolId);
 	bool SetProtocolMappingArea(ProtocolId protocolId, int mappingAreaId, bool dontSendNotification = false);
 
+	bool GetProtocolAbsoluteXYFlip(ProtocolId protocolId);
+	bool SetProtocolAbsoluteXYFlip(ProtocolId protocolId, bool flip, bool dontSendNotification = false);
+
+	const juce::Point<float> GetProtocolAbsoluteOrigin(ProtocolId protocolId);
+	bool SetProtocolAbsoluteOrigin(ProtocolId protocolId, const juce::Point<float>& origin, bool dontSendNotification = false);
+
 	const std::pair<juce::Range<float>, juce::Range<float>> GetProtocolMappingRange(ProtocolId protocolId);
 	bool SetProtocolMappingRange(ProtocolId protocolId, const std::pair<juce::Range<float>, juce::Range<float>>& mappingRange, bool dontSendNotification = false);
 

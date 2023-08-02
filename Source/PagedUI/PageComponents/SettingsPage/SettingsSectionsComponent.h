@@ -216,6 +216,14 @@ private:
 	std::unique_ptr<Label>										m_RTTrPMInterpretXYRelativeLabel;
 	const std::vector<std::string>								m_RTTrPMInterpretXYRelativeModes{ "Absolute", "Relative" };
 	std::map<std::string, uint64>								m_RTTrPMInterpretXYRelativeButtonIds;
+	std::unique_ptr<Label>										m_RTTrPMAbsoluteXYFlipLabel;
+	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_RTTrPMAbsoluteXYFlipButton;
+	std::unique_ptr<Label>										m_RTTrPMAbsoluteOriginLabel;
+	std::unique_ptr<TextEditor>									m_RTTrPMAbsoluteOriginXEdit;
+	std::unique_ptr<Label>										m_RTTrPMAbsoluteOriginXLabel;
+	std::unique_ptr<TextEditor>									m_RTTrPMAbsoluteOriginYEdit;
+	std::unique_ptr<Label>										m_RTTrPMAbsoluteOriginYLabel;
+	std::unique_ptr<HorizontalLayouterComponent>				m_RTTrPMAbsoluteOriginElmsContainer;
 	std::unique_ptr<ComboBox>									m_RTTrPMMappingAreaSelect;
 	std::unique_ptr<Label>										m_RTTrPMMappingAreaLabel;
 	std::unique_ptr<RangeEditorComponent>						m_RTTrPMMappingRangeXEditor;

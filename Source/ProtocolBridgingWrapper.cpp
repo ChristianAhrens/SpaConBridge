@@ -560,6 +560,21 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupRTTrPMBridgingProtocol
 	if (mutedObjsXmlElement)
 		ProcessingEngineConfig::WriteMutedObjects(mutedObjsXmlElement, mutedObjects);
 
+	auto mappingAreaRescaleXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MAPPINGAREARESCALE));
+	if (mappingAreaRescaleXmlElement)
+		mappingAreaRescaleXmlElement->addTextElement("-3;3;-3;3");
+
+	auto oscRemappingsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REMAPPINGS));
+	ignoreUnused(oscRemappingsXmlElement); // newly created element is taken into a variable above only for debugging, no need to have the unused-warning in the build output...
+
+	auto xyAxisSwappedXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::XYSWAPPED));
+	if (xyAxisSwappedXmlElement)
+		xyAxisSwappedXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
+
+	auto originOffsetXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ORIGINOFFSET));
+	if (originOffsetXmlElement)
+		originOffsetXmlElement->addTextElement("0;0");
+
 	return protocolBXmlElement;
 }
 
@@ -1128,7 +1143,7 @@ bool ProtocolBridgingWrapper::SetUnmuteProtocolRemoteObjects(ProtocolId protocol
  * @param protocolId The id of the protocol for which to get the currently configured ip address
  * @return	The ip address string
  */
-String ProtocolBridgingWrapper::GetProtocolIpAddress(ProtocolId protocolId)
+juce::IPAddress ProtocolBridgingWrapper::GetProtocolIpAddress(ProtocolId protocolId)
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
@@ -1139,12 +1154,12 @@ String ProtocolBridgingWrapper::GetProtocolIpAddress(ProtocolId protocolId)
 			auto ipAddressXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
 			if (ipAddressXmlElement)
 			{
-				return ipAddressXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS));
+				return juce::IPAddress(ipAddressXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS)));
 			}
 		}
 	}
 
-	return INVALID_IPADDRESS_VALUE;
+	return juce::IPAddress(INVALID_IPADDRESS_VALUE);
 }
 
 /**
@@ -1156,7 +1171,7 @@ String ProtocolBridgingWrapper::GetProtocolIpAddress(ProtocolId protocolId)
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  * @return	True on succes, false if failure
  */
-bool ProtocolBridgingWrapper::SetProtocolIpAddress(ProtocolId protocolId, String ipAddress, bool dontSendNotification)
+bool ProtocolBridgingWrapper::SetProtocolIpAddress(ProtocolId protocolId, juce::IPAddress ipAddress, bool dontSendNotification)
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
@@ -1167,7 +1182,7 @@ bool ProtocolBridgingWrapper::SetProtocolIpAddress(ProtocolId protocolId, String
 			auto ipAddressXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
 			if (ipAddressXmlElement)
 			{
-				ipAddressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), ipAddress);
+				ipAddressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), ipAddress.toString());
 			}
 			else
 				return false;
@@ -1356,6 +1371,85 @@ bool ProtocolBridgingWrapper::SetProtocolMappingArea(ProtocolId protocolId, int 
 }
 
 /**
+ * Gets the protocol's currently set offset from origin value, if available for the given protocol.
+ * @param protocolId The id of the protocol for which to get the currently configured offset from origin value
+ * @return	The offset from origin value, 0/0 if not available
+ */
+const juce::Point<float> ProtocolBridgingWrapper::GetProtocolOriginOffset(ProtocolId protocolId)
+{
+	auto absoluteOrigin = juce::Point<float>(0.0f, 0.0f);
+
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto originOffsetXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ORIGINOFFSET));
+			if (originOffsetXmlElement)
+			{
+				auto originOffsetTextElement = originOffsetXmlElement->getFirstChildElement();
+				if (originOffsetTextElement && originOffsetTextElement->isTextElement())
+				{
+					auto rangeRescaleValues = StringArray();
+					if (2 == rangeRescaleValues.addTokens(originOffsetTextElement->getText(), ";", ""))
+					{
+						auto xOrigOffset = rangeRescaleValues[0].getFloatValue();
+						auto yOrigOffset = rangeRescaleValues[1].getFloatValue();
+
+						absoluteOrigin = juce::Point<float>(xOrigOffset, yOrigOffset);
+					}
+				}
+			}
+		}
+	}
+
+	return absoluteOrigin;
+}
+
+/**
+ * Sets the given protocol offset from origin value.
+ * This method inserts the mapping range into the cached xml element,
+ * pushes the updated xml element into processing node and triggers configuration updating.
+ * @param protocolId			The id of the protocol for which to set the offset from origin
+ * @param originOffset			The new offset from origin value
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetProtocolOriginOffset(ProtocolId protocolId, const juce::Point<float>& originOffset, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto originOffsetString = juce::String(originOffset.getX()) + ";" + juce::String(originOffset.getY());
+			auto originOffsetXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ORIGINOFFSET));
+			if (originOffsetXmlElement)
+			{
+				auto originOffsetTextElement = originOffsetXmlElement->getFirstChildElement();
+				if (originOffsetTextElement && originOffsetTextElement->isTextElement())
+					originOffsetTextElement->setText(originOffsetString);
+				else
+					originOffsetXmlElement->addTextElement(originOffsetString);
+			}
+			else
+			{
+				originOffsetXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ORIGINOFFSET));
+				originOffsetXmlElement->addTextElement(originOffsetString);
+			}
+		}
+		else
+			return false;
+
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
+}
+
+/**
  * Gets the protocol's currently set mapping range x/y min/max value, if available for the given protocol.
  * @param protocolId The id of the protocol for which to get the currently configured mapping range x/y min/max value
  * @return	The mapping range x/y min/max value, -3..3 min/max range if not available
@@ -1405,8 +1499,8 @@ const std::pair<juce::Range<float>, juce::Range<float>> ProtocolBridgingWrapper:
  * Sets the given protocol mapping range x/y min/max values.
  * This method inserts the mapping range into the cached xml element,
  * pushes the updated xml element into processing node and triggers configuration updating.
- * @param protocolId The id of the protocol for which to set the ip address
- * @param moduleTypeIdentifier	The new module type identifier string.
+ * @param protocolId			The id of the protocol for which to set the mapping range
+ * @param mappingRange			The new mapping range value, consisting of two ranges. first for x, second for y.
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  * @return	True on succes, false if failure
  */
@@ -2854,7 +2948,7 @@ bool ProtocolBridgingWrapper::SetDS100ProtocolType(ProtocolType protocolType, bo
  * This method forwards the call to the generic implementation.
  * @return	The ip address string
  */
-String ProtocolBridgingWrapper::GetDS100IpAddress()
+juce::IPAddress ProtocolBridgingWrapper::GetDS100IpAddress()
 {
 	return GetProtocolIpAddress(DS100_1_PROCESSINGPROTOCOL_ID);
 }
@@ -2866,7 +2960,7 @@ String ProtocolBridgingWrapper::GetDS100IpAddress()
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  * @return	True on succes, false if failure
  */
-bool ProtocolBridgingWrapper::SetDS100IpAddress(String ipAddress, bool dontSendNotification)
+bool ProtocolBridgingWrapper::SetDS100IpAddress(juce::IPAddress ipAddress, bool dontSendNotification)
 {
 	return SetProtocolIpAddress(DS100_1_PROCESSINGPROTOCOL_ID, ipAddress, dontSendNotification);
 }
@@ -2898,7 +2992,7 @@ bool ProtocolBridgingWrapper::SetDS100Port(int port, bool dontSendNotification)
  * This method forwards the call to the generic implementation.
  * @return	The ip address string
  */
-String ProtocolBridgingWrapper::GetSecondDS100IpAddress()
+juce::IPAddress ProtocolBridgingWrapper::GetSecondDS100IpAddress()
 {
 	return GetProtocolIpAddress(DS100_2_PROCESSINGPROTOCOL_ID);
 }
@@ -2910,7 +3004,7 @@ String ProtocolBridgingWrapper::GetSecondDS100IpAddress()
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  * @return	True on succes, false if failure
  */
-bool ProtocolBridgingWrapper::SetSecondDS100IpAddress(String ipAddress, bool dontSendNotification)
+bool ProtocolBridgingWrapper::SetSecondDS100IpAddress(juce::IPAddress ipAddress, bool dontSendNotification)
 {
 	return SetProtocolIpAddress(DS100_2_PROCESSINGPROTOCOL_ID, ipAddress, dontSendNotification);
 }
@@ -3274,7 +3368,7 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 
 				auto ctrl = Controller::GetInstance();
 				if (ctrl)
-					ctrl->SetSecondDS100IpAndPort(DCP_Init, "", 0xffff, dontSendNotification);
+					ctrl->SetSecondDS100IpAndPort(DCP_Init, juce::IPAddress(), 0xffff, dontSendNotification);
 			}
 			break;
 			case EM_Extend:
@@ -3290,7 +3384,7 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 
 					auto ctrl = Controller::GetInstance();
 					if (ctrl)
-						ctrl->SetSecondDS100IpAndPort(DCP_Init, PROTOCOL_DEFAULT2_IP, RX_PORT_DS100_DEVICE, dontSendNotification);
+						ctrl->SetSecondDS100IpAndPort(DCP_Init, juce::IPAddress(PROTOCOL_DEFAULT2_IP), RX_PORT_DS100_DEVICE, dontSendNotification);
 				}
 			}
 			break;

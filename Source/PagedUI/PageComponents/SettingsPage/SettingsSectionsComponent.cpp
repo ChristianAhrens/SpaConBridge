@@ -365,6 +365,36 @@ void SettingsSectionsComponent::createRTTrPMSettingsSection()
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMInterpretXYRelativeLabel.get(), false, false);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMInterpretXYRelativeButton.get(), true, false);
 
+	m_RTTrPMAbsoluteXYSwapButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("swap XY");
+	m_RTTrPMAbsoluteXYSwapButton->setTooltip("Swap X/Y coordinates.");
+	m_RTTrPMAbsoluteXYSwapButton->setImagePosition(Justification::centredLeft);
+	m_RTTrPMAbsoluteXYSwapButton->setClickingTogglesState(true);
+	m_RTTrPMAbsoluteXYSwapButton->addListener(this);
+	m_RTTrPMCoordSysModLabel = std::make_unique<Label>("RTTrPMCoordSysModLabel", "XY coord. processing");
+	m_RTTrPMCoordSysModLabel->setJustificationType(Justification::centred);
+	m_RTTrPMCoordSysModLabel->attachToComponent(m_RTTrPMAbsoluteXYSwapButton.get(), true);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMCoordSysModLabel.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMAbsoluteXYSwapButton.get(), true, false);
+
+	m_RTTrPMAbsoluteOriginElmsContainer = std::make_unique<HorizontalLayouterComponent>();
+	m_RTTrPMAbsoluteOriginElmsContainer->SetSpacing(5);
+	m_RTTrPMAbsoluteOriginXLabel = std::make_unique<Label>("RTTrPMAbsolutOriginXEdit", "x");
+	m_RTTrPMAbsoluteOriginElmsContainer->AddComponent(m_RTTrPMAbsoluteOriginXLabel.get(), 0.25f);
+	m_RTTrPMAbsoluteOriginXEdit = std::make_unique<TextEditor>();
+	m_RTTrPMAbsoluteOriginXEdit->addListener(this);
+	m_RTTrPMAbsoluteOriginXEdit->setInputFilter(std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890.,").release(), true);
+	m_RTTrPMAbsoluteOriginElmsContainer->AddComponent(m_RTTrPMAbsoluteOriginXEdit.get(), 0.75f);
+	m_RTTrPMAbsoluteOriginYLabel = std::make_unique<Label>("RTTrPMAbsolutOriginYEdit", "y");
+	m_RTTrPMAbsoluteOriginElmsContainer->AddComponent(m_RTTrPMAbsoluteOriginYLabel.get(), 0.25f);
+	m_RTTrPMAbsoluteOriginYEdit = std::make_unique<TextEditor>();
+	m_RTTrPMAbsoluteOriginYEdit->addListener(this);
+	m_RTTrPMAbsoluteOriginYEdit->setInputFilter(std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890.,").release(), true);
+	m_RTTrPMAbsoluteOriginElmsContainer->AddComponent(m_RTTrPMAbsoluteOriginYEdit.get(), 0.75f);
+	m_RTTrPMAbsoluteOriginLabel = std::make_unique<Label>("RTTrPMAbsolutOrigin", "Origin offset");
+	m_RTTrPMAbsoluteOriginLabel->attachToComponent(m_RTTrPMAbsoluteOriginElmsContainer.get(), true);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMAbsoluteOriginLabel.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMAbsoluteOriginElmsContainer.get(), true, false);
+
 	m_RTTrPMMappingAreaSelect = std::make_unique<ComboBox>();
 	m_RTTrPMMappingAreaSelect->addListener(this);
 	m_RTTrPMMappingAreaSelect->addItemList({ "1", "2", "3", "4" }, MAI_First);
@@ -976,6 +1006,7 @@ void SettingsSectionsComponent::lookAndFeelChanged()
 	UpdateDrawableButtonImages(m_ToggleFullscreenButton, BinaryData::open_in_full24px_svg, &getLookAndFeel());
 #endif
 	UpdateDrawableButtonImages(m_RemapOSCDisableSendingButton, BinaryData::mobiledata_off24px_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_RTTrPMAbsoluteXYSwapButton, BinaryData::compare_black_24dp_svg, &getLookAndFeel());
 }
 
 /**
@@ -1020,6 +1051,12 @@ void SettingsSectionsComponent::buttonClicked(Button* button)
 	if (m_ToggleFullscreenButton.get() == button)
 		pageMgr->SetFullscreenWindowMode(m_ToggleFullscreenButton->getToggleState(), false);
 #endif
+
+	// RTTrPM settings section
+	else if (m_RTTrPMAbsoluteXYSwapButton && m_RTTrPMAbsoluteXYSwapButton.get() == button)
+	{
+		ctrl->SetBridgingXYAxisSwapped(PBT_BlacktraxRTTrPM, m_RTTrPMAbsoluteXYSwapButton->getToggleState() ? 1 : 0, juce::dontSendNotification);
+	}
 
 	// ADM-OSC Settings section
 	else if (m_ADMOSCInvertXButton.get() == button)
@@ -1184,69 +1221,71 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 	else if (m_DS100IpAndPortEdit && m_DS100IpAndPortEdit.get() == &editor)
 	{
 		ctrl->SetDS100IpAndPort(DCP_Settings,
-			m_DS100IpAndPortEdit->getText().upToFirstOccurrenceOf(":", false, true), 
-			m_DS100IpAndPortEdit->getText().fromFirstOccurrenceOf(":", false, true).getIntValue());
+			juce::IPAddress(m_DS100IpAndPortEdit->getText().upToFirstOccurrenceOf(":", false, true)),
+			m_DS100IpAndPortEdit->getText().fromFirstOccurrenceOf(":", false, true).getIntValue() % 0xffff);
 	}
 	else if (m_SecondDS100IpAndPortEdit && m_SecondDS100IpAndPortEdit.get() == &editor)
 	{
 		ctrl->SetSecondDS100IpAndPort(DCP_Settings,
-			m_SecondDS100IpAndPortEdit->getText().upToFirstOccurrenceOf(":", false, true), 
-			m_SecondDS100IpAndPortEdit->getText().fromFirstOccurrenceOf(":", false, true).getIntValue());
+			juce::IPAddress(m_SecondDS100IpAndPortEdit->getText().upToFirstOccurrenceOf(":", false, true)),
+			m_SecondDS100IpAndPortEdit->getText().fromFirstOccurrenceOf(":", false, true).getIntValue() % 0xffff);
 	}
 
 	// DiGiCo settings section
 	else if (m_DiGiCoIpAddressEdit && m_DiGiCoIpAddressEdit.get() == &editor)
-		ctrl->SetBridgingIpAddress(PBT_DiGiCo, m_DiGiCoIpAddressEdit->getText());
+		ctrl->SetBridgingIpAddress(PBT_DiGiCo, juce::IPAddress(m_DiGiCoIpAddressEdit->getText()));
 	else if (m_DiGiCoListeningPortEdit && m_DiGiCoListeningPortEdit.get() == &editor)
-		ctrl->SetBridgingListeningPort(PBT_DiGiCo, m_DiGiCoListeningPortEdit->getText().getIntValue());
+		ctrl->SetBridgingListeningPort(PBT_DiGiCo, m_DiGiCoListeningPortEdit->getText().getIntValue() % 0xffff);
 	else if (m_DiGiCoRemotePortEdit && m_DiGiCoRemotePortEdit.get() == &editor)
-		ctrl->SetBridgingRemotePort(PBT_DiGiCo, m_DiGiCoRemotePortEdit->getText().getIntValue());
+		ctrl->SetBridgingRemotePort(PBT_DiGiCo, m_DiGiCoRemotePortEdit->getText().getIntValue() % 0xffff);
 
 	// DAWPlugin settings section
 	else if (m_DAWPluginIpAddressEdit && m_DAWPluginIpAddressEdit.get() == &editor)
-		ctrl->SetBridgingIpAddress(PBT_DAWPlugin, m_DAWPluginIpAddressEdit->getText());
+		ctrl->SetBridgingIpAddress(PBT_DAWPlugin, juce::IPAddress(m_DAWPluginIpAddressEdit->getText()));
 
 	// RTTrPM settings section
 	else if (m_RTTrPMListeningPortEdit && m_RTTrPMListeningPortEdit.get() == &editor)
-		ctrl->SetBridgingListeningPort(PBT_BlacktraxRTTrPM, m_RTTrPMListeningPortEdit->getText().getIntValue());
+		ctrl->SetBridgingListeningPort(PBT_BlacktraxRTTrPM, m_RTTrPMListeningPortEdit->getText().getIntValue() % 0xffff);
+	else if (m_RTTrPMAbsoluteOriginXEdit && m_RTTrPMAbsoluteOriginYEdit && (m_RTTrPMAbsoluteOriginXEdit.get() == &editor || m_RTTrPMAbsoluteOriginYEdit.get() == &editor))
+		ctrl->SetBridgingOriginOffset(PBT_BlacktraxRTTrPM, juce::Point<float>(m_RTTrPMAbsoluteOriginXEdit->getText().getFloatValue(), m_RTTrPMAbsoluteOriginYEdit->getText().getFloatValue()));
 
 	// Generic OSC settings section
 	else if (m_GenericOSCIpAddressEdit && m_GenericOSCIpAddressEdit.get() == &editor)
-		ctrl->SetBridgingIpAddress(PBT_GenericOSC, m_GenericOSCIpAddressEdit->getText());
+		ctrl->SetBridgingIpAddress(PBT_GenericOSC, juce::IPAddress(m_GenericOSCIpAddressEdit->getText()));
 	else if (m_GenericOSCListeningPortEdit && m_GenericOSCListeningPortEdit.get() == &editor)
-		ctrl->SetBridgingListeningPort(PBT_GenericOSC, m_GenericOSCListeningPortEdit->getText().getIntValue());
+		ctrl->SetBridgingListeningPort(PBT_GenericOSC, m_GenericOSCListeningPortEdit->getText().getIntValue() % 0xffff);
 	else if (m_GenericOSCRemotePortEdit && m_GenericOSCRemotePortEdit.get() == &editor)
-		ctrl->SetBridgingRemotePort(PBT_GenericOSC, m_GenericOSCRemotePortEdit->getText().getIntValue());
+		ctrl->SetBridgingRemotePort(PBT_GenericOSC, m_GenericOSCRemotePortEdit->getText().getIntValue() % 0xffff);
 
 	// ADM OSC settings section
 	else if (m_ADMOSCIpAddressEdit && m_ADMOSCIpAddressEdit.get() == &editor)
-		ctrl->SetBridgingIpAddress(PBT_ADMOSC, m_ADMOSCIpAddressEdit->getText());
+		ctrl->SetBridgingIpAddress(PBT_ADMOSC, juce::IPAddress(m_ADMOSCIpAddressEdit->getText()));
 	else if (m_ADMOSCListeningPortEdit && m_ADMOSCListeningPortEdit.get() == &editor)
-		ctrl->SetBridgingListeningPort(PBT_ADMOSC, m_ADMOSCListeningPortEdit->getText().getIntValue());
+		ctrl->SetBridgingListeningPort(PBT_ADMOSC, m_ADMOSCListeningPortEdit->getText().getIntValue() % 0xffff);
 	else if (m_ADMOSCRemotePortEdit && m_ADMOSCRemotePortEdit.get() == &editor)
-		ctrl->SetBridgingRemotePort(PBT_ADMOSC, m_ADMOSCRemotePortEdit->getText().getIntValue());
+		ctrl->SetBridgingRemotePort(PBT_ADMOSC, m_ADMOSCRemotePortEdit->getText().getIntValue() % 0xffff);
 	else if (m_ADMOSCListeningPortEdit && m_ADMOSCListeningPortEdit.get() == &editor)
-		ctrl->SetBridgingListeningPort(PBT_ADMOSC, m_ADMOSCListeningPortEdit->getText().getIntValue());
+		ctrl->SetBridgingListeningPort(PBT_ADMOSC, m_ADMOSCListeningPortEdit->getText().getIntValue() % 0xffff);
 
 	// Yamaha OSC settings section
 	else if (m_YamahaOSCIpAddressEdit && m_YamahaOSCIpAddressEdit.get() == &editor)
-		ctrl->SetBridgingIpAddress(PBT_YamahaOSC, m_YamahaOSCIpAddressEdit->getText());
+		ctrl->SetBridgingIpAddress(PBT_YamahaOSC, juce::IPAddress(m_YamahaOSCIpAddressEdit->getText()));
 	else if (m_YamahaOSCListeningPortEdit && m_YamahaOSCListeningPortEdit.get() == &editor)
-		ctrl->SetBridgingListeningPort(PBT_YamahaOSC, m_YamahaOSCListeningPortEdit->getText().getIntValue());
+		ctrl->SetBridgingListeningPort(PBT_YamahaOSC, m_YamahaOSCListeningPortEdit->getText().getIntValue() % 0xffff);
 	else if (m_YamahaOSCRemotePortEdit && m_YamahaOSCRemotePortEdit.get() == &editor)
-		ctrl->SetBridgingRemotePort(PBT_YamahaOSC, m_YamahaOSCRemotePortEdit->getText().getIntValue());
+		ctrl->SetBridgingRemotePort(PBT_YamahaOSC, m_YamahaOSCRemotePortEdit->getText().getIntValue() % 0xffff);
 	else if (m_YamahaOSCListeningPortEdit && m_YamahaOSCListeningPortEdit.get() == &editor)
-		ctrl->SetBridgingListeningPort(PBT_YamahaOSC, m_YamahaOSCListeningPortEdit->getText().getIntValue());
+		ctrl->SetBridgingListeningPort(PBT_YamahaOSC, m_YamahaOSCListeningPortEdit->getText().getIntValue() % 0xffff);
 
 	// Remap OSC settings section
 	else if (m_RemapOSCIpAddressEdit && m_RemapOSCIpAddressEdit.get() == &editor)
-		ctrl->SetBridgingIpAddress(PBT_RemapOSC, m_RemapOSCIpAddressEdit->getText());
+		ctrl->SetBridgingIpAddress(PBT_RemapOSC, juce::IPAddress(m_RemapOSCIpAddressEdit->getText()));
 	else if (m_RemapOSCListeningPortEdit && m_RemapOSCListeningPortEdit.get() == &editor)
-		ctrl->SetBridgingListeningPort(PBT_RemapOSC, m_RemapOSCListeningPortEdit->getText().getIntValue());
+		ctrl->SetBridgingListeningPort(PBT_RemapOSC, m_RemapOSCListeningPortEdit->getText().getIntValue() % 0xffff);
 	else if (m_RemapOSCRemotePortEdit && m_RemapOSCRemotePortEdit.get() == &editor)
-		ctrl->SetBridgingRemotePort(PBT_RemapOSC, m_RemapOSCRemotePortEdit->getText().getIntValue());
+		ctrl->SetBridgingRemotePort(PBT_RemapOSC, m_RemapOSCRemotePortEdit->getText().getIntValue() % 0xffff);
 	else if (m_RemapOSCListeningPortEdit && m_RemapOSCListeningPortEdit.get() == &editor)
-		ctrl->SetBridgingListeningPort(PBT_RemapOSC, m_RemapOSCListeningPortEdit->getText().getIntValue());
+		ctrl->SetBridgingListeningPort(PBT_RemapOSC, m_RemapOSCListeningPortEdit->getText().getIntValue() % 0xffff);
 
 	// return without config update trigger if the editor was unknown
 	else
@@ -1517,7 +1556,7 @@ void SettingsSectionsComponent::processUpdatedDS100Config()
 	if (m_DS100IpAndPortEdit)
 	{
 		auto ipAndPort = ctrl->GetDS100IpAndPort();
-		m_DS100IpAndPortEdit->setText(ipAndPort.first + ":" + juce::String(ipAndPort.second));
+		m_DS100IpAndPortEdit->setText(ipAndPort.first.toString() + ":" + juce::String(ipAndPort.second));
 	}
 	if (m_DS100ZeroconfDiscovery)
 	{
@@ -1558,7 +1597,7 @@ void SettingsSectionsComponent::processUpdatedDS100Config()
 	if (m_SecondDS100IpAndPortEdit)
 	{
 		auto ipAndPort = ctrl->GetSecondDS100IpAndPort();
-		m_SecondDS100IpAndPortEdit->setText(ctrl->GetExtensionMode() != EM_Off ? (ipAndPort.first + ":" + juce::String(ipAndPort.second)) : "");
+		m_SecondDS100IpAndPortEdit->setText(ctrl->GetExtensionMode() != EM_Off ? (ipAndPort.first.toString() + ":" + juce::String(ipAndPort.second)) : "");
 		m_SecondDS100IpAndPortEdit->setEnabled(ctrl->GetExtensionMode() != EM_Off);
 	}
 	if (m_SecondDS100IpAndPortLabel)
@@ -1594,7 +1633,7 @@ void SettingsSectionsComponent::processUpdatedDiGiCoConfig()
 	if (m_DiGiCoBridgingSettings)
 		m_DiGiCoBridgingSettings->setToggleActiveState(DiGiCoBridgingActive);
 	if (m_DiGiCoIpAddressEdit)
-		m_DiGiCoIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_DiGiCo));
+		m_DiGiCoIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_DiGiCo).toString());
 	if (m_DiGiCoListeningPortEdit)
 		m_DiGiCoListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_DiGiCo)), false);
 	if (m_DiGiCoRemotePortEdit)
@@ -1615,7 +1654,7 @@ void SettingsSectionsComponent::processUpdatedDAWPluginConfig()
 	if (m_DAWPluginBridgingSettings)
 		m_DAWPluginBridgingSettings->setToggleActiveState(DAWPluginBridgingActive);
 	if (m_DAWPluginIpAddressEdit)
-		m_DAWPluginIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_DAWPlugin));
+		m_DAWPluginIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_DAWPlugin).toString());
 }
 
 /**
@@ -1640,29 +1679,62 @@ void SettingsSectionsComponent::processUpdatedRTTrPMConfig()
 		auto newActiveButtonId = m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[(RTTrPMMappingAreaId == -1) ? 0 : 1]];
 		m_RTTrPMInterpretXYRelativeButton->setButtonDown(newActiveButtonId);
 	}
+	auto RTTrPMAbsoluteXYSwap = ctrl->GetBridgingXYAxisSwapped(PBT_BlacktraxRTTrPM);
+	if (m_RTTrPMAbsoluteXYSwapButton)
+	{
+		m_RTTrPMAbsoluteXYSwapButton->setToggleState(RTTrPMAbsoluteXYSwap, juce::dontSendNotification);
+		m_RTTrPMAbsoluteXYSwapButton->setEnabled(RTTrPMMappingAreaId == MAI_Invalid);
+	}
+	if (m_RTTrPMCoordSysModLabel)
+	{
+		m_RTTrPMCoordSysModLabel->setEnabled(RTTrPMMappingAreaId == MAI_Invalid);
+	}
+	auto RTTrPMAbsoluteOrigin = ctrl->GetBridgingOriginOffset(PBT_BlacktraxRTTrPM);
+	if (m_RTTrPMAbsoluteOriginLabel)
+	{
+		m_RTTrPMAbsoluteOriginLabel->setEnabled(RTTrPMMappingAreaId == MAI_Invalid);
+	}
+	if (m_RTTrPMAbsoluteOriginXEdit)
+	{
+		m_RTTrPMAbsoluteOriginXEdit->setText(juce::String(RTTrPMAbsoluteOrigin.getX()) + " m");
+		m_RTTrPMAbsoluteOriginXEdit->setEnabled(RTTrPMMappingAreaId == MAI_Invalid);
+	}
+	if (m_RTTrPMAbsoluteOriginXLabel)
+	{
+		m_RTTrPMAbsoluteOriginXLabel->setEnabled(RTTrPMMappingAreaId == MAI_Invalid);
+	}
+	if (m_RTTrPMAbsoluteOriginYEdit)
+	{
+		m_RTTrPMAbsoluteOriginYEdit->setText(juce::String(RTTrPMAbsoluteOrigin.getY()) + " m");
+		m_RTTrPMAbsoluteOriginYEdit->setEnabled(RTTrPMMappingAreaId == MAI_Invalid);
+	}
+	if (m_RTTrPMAbsoluteOriginYLabel)
+	{
+		m_RTTrPMAbsoluteOriginYLabel->setEnabled(RTTrPMMappingAreaId == MAI_Invalid);
+	}
 	if (m_RTTrPMMappingAreaSelect)
 	{
 		m_RTTrPMMappingAreaSelect->setSelectedId(RTTrPMMappingAreaId, sendNotificationAsync);
-		m_RTTrPMMappingAreaSelect->setEnabled((RTTrPMMappingAreaId != MAI_Invalid));
+		m_RTTrPMMappingAreaSelect->setEnabled(RTTrPMMappingAreaId != MAI_Invalid);
 	}
 	if (m_RTTrPMMappingAreaLabel)
-		m_RTTrPMMappingAreaLabel->setEnabled((RTTrPMMappingAreaId != MAI_Invalid));
+		m_RTTrPMMappingAreaLabel->setEnabled(RTTrPMMappingAreaId != MAI_Invalid);
 
 	auto RTTrPMMappingRange = ctrl->GetBridgingMappingRange(PBT_BlacktraxRTTrPM);
 	if (m_RTTrPMMappingRangeXEditor)
 	{
 		m_RTTrPMMappingRangeXEditor->SetRange(RTTrPMMappingRange.first.getStart(), RTTrPMMappingRange.first.getEnd());
-		m_RTTrPMMappingRangeXEditor->setEnabled((RTTrPMMappingAreaId != MAI_Invalid));
+		m_RTTrPMMappingRangeXEditor->setEnabled(RTTrPMMappingAreaId != MAI_Invalid);
 	}
 	if (m_RTTrPMMappingRangeXLabel)
-		m_RTTrPMMappingRangeXLabel->setEnabled((RTTrPMMappingAreaId != MAI_Invalid));
+		m_RTTrPMMappingRangeXLabel->setEnabled(RTTrPMMappingAreaId != MAI_Invalid);
 	if (m_RTTrPMMappingRangeYEditor)
 	{
 		m_RTTrPMMappingRangeYEditor->SetRange(RTTrPMMappingRange.second.getStart(), RTTrPMMappingRange.second.getEnd());
-		m_RTTrPMMappingRangeYEditor->setEnabled((RTTrPMMappingAreaId != MAI_Invalid));
+		m_RTTrPMMappingRangeYEditor->setEnabled(RTTrPMMappingAreaId != MAI_Invalid);
 	}
 	if (m_RTTrPMMappingRangeYLabel)
-		m_RTTrPMMappingRangeYLabel->setEnabled((RTTrPMMappingAreaId != MAI_Invalid));
+		m_RTTrPMMappingRangeYLabel->setEnabled(RTTrPMMappingAreaId != MAI_Invalid);
 
 	if (m_RTTrPMBeaconIdxAssignmentsEditor)
 	{
@@ -1694,7 +1766,7 @@ void SettingsSectionsComponent::processUpdatedGenericOSCConfig()
 	if (m_GenericOSCBridgingSettings)
 		m_GenericOSCBridgingSettings->setToggleActiveState(GenericOSCBridgingActive);
 	if (m_GenericOSCIpAddressEdit)
-		m_GenericOSCIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_GenericOSC));
+		m_GenericOSCIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_GenericOSC).toString());
 	if (m_GenericOSCListeningPortEdit)
 		m_GenericOSCListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_GenericOSC)), false);
 	if (m_GenericOSCRemotePortEdit)
@@ -1837,7 +1909,7 @@ void SettingsSectionsComponent::processUpdatedYamahaOSCConfig()
 	if (m_YamahaOSCBridgingSettings)
 		m_YamahaOSCBridgingSettings->setToggleActiveState(YamahaOSCBridgingActive);
 	if (m_YamahaOSCIpAddressEdit)
-		m_YamahaOSCIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_YamahaOSC));
+		m_YamahaOSCIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_YamahaOSC).toString());
 	if (m_YamahaOSCListeningPortEdit)
 		m_YamahaOSCListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_YamahaOSC)), false);
 	if (m_YamahaOSCRemotePortEdit)
@@ -1865,7 +1937,7 @@ void SettingsSectionsComponent::processUpdatedADMOSCConfig()
 	if (m_ADMOSCBridgingSettings)
 		m_ADMOSCBridgingSettings->setToggleActiveState(ADMOSCBridgingActive);
 	if (m_ADMOSCIpAddressEdit)
-		m_ADMOSCIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_ADMOSC));
+		m_ADMOSCIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_ADMOSC).toString());
 	if (m_ADMOSCListeningPortEdit)
 		m_ADMOSCListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_ADMOSC)), false);
 	if (m_ADMOSCRemotePortEdit)
@@ -1913,7 +1985,7 @@ void SettingsSectionsComponent::processUpdatedRemapOSCConfig()
 	if (m_RemapOSCBridgingSettings)
 		m_RemapOSCBridgingSettings->setToggleActiveState(remapOSCBridgingActive);
 	if (m_RemapOSCIpAddressEdit)
-		m_RemapOSCIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_RemapOSC));
+		m_RemapOSCIpAddressEdit->setText(ctrl->GetBridgingIpAddress(PBT_RemapOSC).toString());
 	if (m_RemapOSCListeningPortEdit)
 		m_RemapOSCListeningPortEdit->setText(String(ctrl->GetBridgingListeningPort(PBT_RemapOSC)), false);
 	if (m_RemapOSCRemotePortEdit)
@@ -1945,7 +2017,7 @@ void SettingsSectionsComponent::handleDS100ServiceSelected(JUCEAppBasics::Zeroco
         
         auto ctrl = Controller::GetInstance();
         if (ctrl)
-			ctrl->SetDS100IpAndPort(DCP_Settings, info->ip, info->port);
+			ctrl->SetDS100IpAndPort(DCP_Settings, juce::IPAddress(info->ip), info->port);
 	}
 }
 
@@ -1964,7 +2036,7 @@ void SettingsSectionsComponent::handleSecondDS100ServiceSelected(JUCEAppBasics::
 
 		auto ctrl = Controller::GetInstance();
 		if (ctrl)
-			ctrl->SetSecondDS100IpAndPort(DCP_Settings, info->ip, info->port);
+			ctrl->SetSecondDS100IpAndPort(DCP_Settings, juce::IPAddress(info->ip), info->port);
 	}
 }
 

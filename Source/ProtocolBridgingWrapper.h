@@ -134,8 +134,8 @@ public:
 	ProtocolType GetDS100ProtocolType();
 	bool SetDS100ProtocolType(ProtocolType protocolType, bool dontSendNotification = false);
 
-	String GetDS100IpAddress();
-	bool SetDS100IpAddress(String ipAddress, bool dontSendNotification = false);
+	juce::IPAddress GetDS100IpAddress();
+	bool SetDS100IpAddress(juce::IPAddress ipAddress, bool dontSendNotification = false);
 
 	int GetDS100Port();
 	bool SetDS100Port(int port, bool dontSendNotification = false);
@@ -143,8 +143,8 @@ public:
 	int GetDS100MsgRate();
 	bool SetDS100MsgRate(int msgRate, bool dontSendNotification = false);
 
-	String GetSecondDS100IpAddress();
-	bool SetSecondDS100IpAddress(String ipAddress, bool dontSendNotification = false);
+	juce::IPAddress GetSecondDS100IpAddress();
+	bool SetSecondDS100IpAddress(juce::IPAddress ipAddress, bool dontSendNotification = false);
 
 	int GetSecondDS100Port();
 	bool SetSecondDS100Port(int port, bool dontSendNotification = false);
@@ -186,14 +186,17 @@ public:
 	bool SetMuteProtocolRemoteObjects(ProtocolId protocolId, const std::vector<RemoteObject>& objects);
 	bool SetUnmuteProtocolRemoteObjects(ProtocolId protocolId, const std::vector<RemoteObject>& objects);
 
-	String GetProtocolIpAddress(ProtocolId protocolId);
-	bool SetProtocolIpAddress(ProtocolId protocolId, String ipAddress, bool dontSendNotification = false);
+	juce::IPAddress GetProtocolIpAddress(ProtocolId protocolId);
+	bool SetProtocolIpAddress(ProtocolId protocolId, juce::IPAddress ipAddress, bool dontSendNotification = false);
 	int GetProtocolListeningPort(ProtocolId protocolId);
 	bool SetProtocolListeningPort(ProtocolId protocolId, int listeningPort, bool dontSendNotification = false);
 	int GetProtocolRemotePort(ProtocolId protocolId);
 	bool SetProtocolRemotePort(ProtocolId protocolId, int remotePort, bool dontSendNotification = false);
 	int GetProtocolMappingArea(ProtocolId protocolId);
 	bool SetProtocolMappingArea(ProtocolId protocolId, int mappingAreaId, bool dontSendNotification = false);
+
+	const juce::Point<float> GetProtocolOriginOffset(ProtocolId protocolId);
+	bool SetProtocolOriginOffset(ProtocolId protocolId, const juce::Point<float>& originOffset, bool dontSendNotification = false);
 
 	const std::pair<juce::Range<float>, juce::Range<float>> GetProtocolMappingRange(ProtocolId protocolId);
 	bool SetProtocolMappingRange(ProtocolId protocolId, const std::pair<juce::Range<float>, juce::Range<float>>& mappingRange, bool dontSendNotification = false);

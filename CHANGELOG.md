@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.11.1] 2023-08-03
+### Added
+- Added support for BlackTrax RTTrPM protocol bridging x/y axis swapping and origin offset
+- Added support for Scenes and En-Space object handling when using AES70/OCP1 (OCA) protocol
+
+### Changed
+
+### Fixed
+- Fixed data bridging forwarding for 3rd party value resending after internal changes
+- Fixed handling of MatrixNode, MatrixInput and MatrixOutput DelayEnable OSC objects
+- Fixed app freeze when entering invalid ip address values for DS100 connections
+
 ## [0.11.0] 2023-07-16
 ### Added
 - Added support for AES70/OCP1 protocol for DS100 communication (testing, ALPHA)

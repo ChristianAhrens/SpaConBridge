@@ -2913,24 +2913,14 @@ bool Controller::SetBridgingMappingArea(ProtocolBridgingType bridgingType, int m
 	return m_protocolBridge.SetProtocolMappingArea(GetProtocolIdForProtocolType(bridgingType), mappingAreaId, dontSendNotification);
 }
 
-bool Controller::GetBridgingAbsoluteXYFlip(ProtocolBridgingType bridgingType)
+const juce::Point<float> Controller::GetBridgingOriginOffset(ProtocolBridgingType bridgingType)
 {
-	return m_protocolBridge.GetProtocolAbsoluteXYFlip(GetProtocolIdForProtocolType(bridgingType));
+	return m_protocolBridge.GetProtocolOriginOffset(GetProtocolIdForProtocolType(bridgingType));
 }
 
-bool Controller::SetBridgingAbsoluteXYFlip(ProtocolBridgingType bridgingType, bool flip, bool dontSendNotification)
+bool Controller::SetBridgingOriginOffset(ProtocolBridgingType bridgingType, const juce::Point<float>& origin, bool dontSendNotification)
 {
-	return m_protocolBridge.SetProtocolAbsoluteXYFlip(GetProtocolIdForProtocolType(bridgingType), flip, dontSendNotification);
-}
-
-const juce::Point<float> Controller::GetBridgingAbsoluteOrigin(ProtocolBridgingType bridgingType)
-{
-	return m_protocolBridge.GetProtocolAbsoluteOrigin(GetProtocolIdForProtocolType(bridgingType));
-}
-
-bool Controller::SetBridgingAbsoluteOrigin(ProtocolBridgingType bridgingType, const juce::Point<float>& origin, bool dontSendNotification)
-{
-	return m_protocolBridge.SetProtocolAbsoluteOrigin(GetProtocolIdForProtocolType(bridgingType), origin, dontSendNotification);
+	return m_protocolBridge.SetProtocolOriginOffset(GetProtocolIdForProtocolType(bridgingType), origin, dontSendNotification);
 }
 
 const std::pair<juce::Range<float>, juce::Range<float>> Controller::GetBridgingMappingRange(ProtocolBridgingType bridgingType)

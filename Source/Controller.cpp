@@ -2913,6 +2913,16 @@ bool Controller::SetBridgingMappingArea(ProtocolBridgingType bridgingType, int m
 	return m_protocolBridge.SetProtocolMappingArea(GetProtocolIdForProtocolType(bridgingType), mappingAreaId, dontSendNotification);
 }
 
+const juce::Point<float> Controller::GetBridgingOriginOffset(ProtocolBridgingType bridgingType)
+{
+	return m_protocolBridge.GetProtocolOriginOffset(GetProtocolIdForProtocolType(bridgingType));
+}
+
+bool Controller::SetBridgingOriginOffset(ProtocolBridgingType bridgingType, const juce::Point<float>& origin, bool dontSendNotification)
+{
+	return m_protocolBridge.SetProtocolOriginOffset(GetProtocolIdForProtocolType(bridgingType), origin, dontSendNotification);
+}
+
 const std::pair<juce::Range<float>, juce::Range<float>> Controller::GetBridgingMappingRange(ProtocolBridgingType bridgingType)
 {
 	return m_protocolBridge.GetProtocolMappingRange(GetProtocolIdForProtocolType(bridgingType));

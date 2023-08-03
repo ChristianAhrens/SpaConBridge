@@ -4,12 +4,17 @@ All notable changes to SpaConBridge will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.11.1] 2023-08-03
 ### Added
+- Added support for BlackTrax RTTrPM protocol bridging x/y axis swapping and origin offset
+- Added support for Scenes and En-Space object handling when using AES70/OCP1 (OCA) protocol
 
 ### Changed
 
 ### Fixed
+- Fixed data bridging forwarding for 3rd party value resending after internal changes
+- Fixed handling of MatrixNode, MatrixInput and MatrixOutput DelayEnable OSC objects
+- Fixed app freeze when entering invalid ip address values for DS100 connections
 
 ## [0.11.0] 2023-07-16
 ### Added

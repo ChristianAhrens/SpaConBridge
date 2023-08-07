@@ -359,22 +359,22 @@ void SettingsSectionsComponent::createRTTrPMSettingsSection()
 	m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[0]] = m_RTTrPMInterpretXYRelativeButton->addButton(m_RTTrPMInterpretXYRelativeModes[0]);
 	m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[1]] = m_RTTrPMInterpretXYRelativeButton->addButton(m_RTTrPMInterpretXYRelativeModes[1]);
 	m_RTTrPMInterpretXYRelativeButton->setButtonDown(m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[0]]);
-	m_RTTrPMInterpretXYRelativeLabel = std::make_unique<Label>("RTTrPMInterpretXYRelativeButton", "XY interpret mode");
+	m_RTTrPMInterpretXYRelativeLabel = std::make_unique<Label>("RTTrPMInterpretXYRelativeButton", "Soundscape Coordinates");
 	m_RTTrPMInterpretXYRelativeLabel->setJustificationType(Justification::centred);
 	m_RTTrPMInterpretXYRelativeLabel->attachToComponent(m_RTTrPMInterpretXYRelativeButton.get(), true);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMInterpretXYRelativeLabel.get(), false, false);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMInterpretXYRelativeButton.get(), true, false);
 
-	m_RTTrPMAbsoluteXYSwapButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("swap XY");
-	m_RTTrPMAbsoluteXYSwapButton->setTooltip("Swap X/Y coordinates.");
-	m_RTTrPMAbsoluteXYSwapButton->setImagePosition(Justification::centredLeft);
-	m_RTTrPMAbsoluteXYSwapButton->setClickingTogglesState(true);
-	m_RTTrPMAbsoluteXYSwapButton->addListener(this);
-	m_RTTrPMCoordSysModLabel = std::make_unique<Label>("RTTrPMCoordSysModLabel", "XY coord. processing");
-	m_RTTrPMCoordSysModLabel->setJustificationType(Justification::centred);
-	m_RTTrPMCoordSysModLabel->attachToComponent(m_RTTrPMAbsoluteXYSwapButton.get(), true);
-	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMCoordSysModLabel.get(), false, false);
-	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMAbsoluteXYSwapButton.get(), true, false);
+	m_RTTrPMXYSwapButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("swap XY");
+	m_RTTrPMXYSwapButton->setTooltip("Swap X/Y coordinates.");
+	m_RTTrPMXYSwapButton->setImagePosition(Justification::centredLeft);
+	m_RTTrPMXYSwapButton->setClickingTogglesState(true);
+	m_RTTrPMXYSwapButton->addListener(this);
+	m_RTTrPMXYSwapLabel = std::make_unique<Label>("RTTrPMXYSwapLabel", "XY coord. processing");
+	m_RTTrPMXYSwapLabel->setJustificationType(Justification::centred);
+	m_RTTrPMXYSwapLabel->attachToComponent(m_RTTrPMXYSwapButton.get(), true);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMXYSwapLabel.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMXYSwapButton.get(), true, false);
 
 	m_RTTrPMAbsoluteOriginElmsContainer = std::make_unique<HorizontalLayouterComponent>();
 	m_RTTrPMAbsoluteOriginElmsContainer->SetSpacing(5);
@@ -1006,7 +1006,7 @@ void SettingsSectionsComponent::lookAndFeelChanged()
 	UpdateDrawableButtonImages(m_ToggleFullscreenButton, BinaryData::open_in_full24px_svg, &getLookAndFeel());
 #endif
 	UpdateDrawableButtonImages(m_RemapOSCDisableSendingButton, BinaryData::mobiledata_off24px_svg, &getLookAndFeel());
-	UpdateDrawableButtonImages(m_RTTrPMAbsoluteXYSwapButton, BinaryData::compare_black_24dp_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_RTTrPMXYSwapButton, BinaryData::compare_black_24dp_svg, &getLookAndFeel());
 }
 
 /**
@@ -1053,9 +1053,9 @@ void SettingsSectionsComponent::buttonClicked(Button* button)
 #endif
 
 	// RTTrPM settings section
-	else if (m_RTTrPMAbsoluteXYSwapButton && m_RTTrPMAbsoluteXYSwapButton.get() == button)
+	else if (m_RTTrPMXYSwapButton && m_RTTrPMXYSwapButton.get() == button)
 	{
-		ctrl->SetBridgingXYAxisSwapped(PBT_BlacktraxRTTrPM, m_RTTrPMAbsoluteXYSwapButton->getToggleState() ? 1 : 0, juce::dontSendNotification);
+		ctrl->SetBridgingXYAxisSwapped(PBT_BlacktraxRTTrPM, m_RTTrPMXYSwapButton->getToggleState() ? 1 : 0, juce::dontSendNotification);
 	}
 
 	// ADM-OSC Settings section
@@ -1680,14 +1680,9 @@ void SettingsSectionsComponent::processUpdatedRTTrPMConfig()
 		m_RTTrPMInterpretXYRelativeButton->setButtonDown(newActiveButtonId);
 	}
 	auto RTTrPMAbsoluteXYSwap = ctrl->GetBridgingXYAxisSwapped(PBT_BlacktraxRTTrPM);
-	if (m_RTTrPMAbsoluteXYSwapButton)
+	if (m_RTTrPMXYSwapButton)
 	{
-		m_RTTrPMAbsoluteXYSwapButton->setToggleState(RTTrPMAbsoluteXYSwap, juce::dontSendNotification);
-		m_RTTrPMAbsoluteXYSwapButton->setEnabled(RTTrPMMappingAreaId == MAI_Invalid);
-	}
-	if (m_RTTrPMCoordSysModLabel)
-	{
-		m_RTTrPMCoordSysModLabel->setEnabled(RTTrPMMappingAreaId == MAI_Invalid);
+		m_RTTrPMXYSwapButton->setToggleState(RTTrPMAbsoluteXYSwap, juce::dontSendNotification);
 	}
 	auto RTTrPMAbsoluteOrigin = ctrl->GetBridgingOriginOffset(PBT_BlacktraxRTTrPM);
 	if (m_RTTrPMAbsoluteOriginLabel)

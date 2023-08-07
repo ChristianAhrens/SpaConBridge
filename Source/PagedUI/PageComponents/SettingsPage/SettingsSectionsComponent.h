@@ -20,8 +20,6 @@
 
 #include "../../../SpaConBridgeCommon.h"
 
-#include "../../../RangeEditorComponent.h"
-
 #include <MidiLearnerComponent.h>
 #include <SplitButtonComponent.h>
 #include <TextWithImageButton.h>
@@ -53,8 +51,7 @@ class SettingsSectionsComponent :
 	public Button::Listener,
 	public TextEditor::Listener,
 	public ComboBox::Listener,
-	public JUCEAppBasics::SplitButtonComponent::Listener,
-	public RangeEditorComponent::Listener
+	public JUCEAppBasics::SplitButtonComponent::Listener
 {
 public:
 	SettingsSectionsComponent();
@@ -82,9 +79,6 @@ public:
 
 	//==========================================================================
 	void comboBoxChanged(ComboBox* comboBoxThatHasChanged) override;
-
-	//==========================================================================
-	void rangeChanged(RangeEditorComponent* editor) override;
 
 	//==========================================================================
 	void setSettingsSectionActiveState(HeaderWithElmListComponent* settingsSection, bool activeState);
@@ -226,10 +220,18 @@ private:
 	std::unique_ptr<HorizontalLayouterComponent>				m_RTTrPMAbsoluteOriginElmsContainer;
 	std::unique_ptr<ComboBox>									m_RTTrPMMappingAreaSelect;
 	std::unique_ptr<Label>										m_RTTrPMMappingAreaLabel;
-	std::unique_ptr<RangeEditorComponent>						m_RTTrPMMappingRangeXEditor;
-	std::unique_ptr<Label>										m_RTTrPMMappingRangeXLabel;
-	std::unique_ptr<RangeEditorComponent>						m_RTTrPMMappingRangeYEditor;
-	std::unique_ptr<Label>										m_RTTrPMMappingRangeYLabel;
+	std::unique_ptr<Label>										m_RTTrPMMappingPoint1Label;
+	std::unique_ptr<TextEditor>									m_RTTrPMMappingPoint1XEdit;
+	std::unique_ptr<Label>										m_RTTrPMMappingPoint1XLabel;
+	std::unique_ptr<TextEditor>									m_RTTrPMMappingPoint1YEdit;
+	std::unique_ptr<Label>										m_RTTrPMMappingPoint1YLabel;
+	std::unique_ptr<HorizontalLayouterComponent>				m_RTTrPMMappingPoint1ElmsContainer;
+	std::unique_ptr<Label>										m_RTTrPMMappingPoint2Label;
+	std::unique_ptr<TextEditor>									m_RTTrPMMappingPoint2XEdit;
+	std::unique_ptr<Label>										m_RTTrPMMappingPoint2XLabel;
+	std::unique_ptr<TextEditor>									m_RTTrPMMappingPoint2YEdit;
+	std::unique_ptr<Label>										m_RTTrPMMappingPoint2YLabel;
+	std::unique_ptr<HorizontalLayouterComponent>				m_RTTrPMMappingPoint2ElmsContainer;
 	std::unique_ptr<IndexToChannelAssignerComponent>			m_RTTrPMBeaconIdxAssignmentsEditor;
 	std::unique_ptr<Label>										m_RTTrPMBeaconIdxAssignmentsLabel;
 	std::unique_ptr<ComboBox>									m_RTTrPMDataTypeSelect;

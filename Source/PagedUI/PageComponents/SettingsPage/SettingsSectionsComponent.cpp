@@ -354,78 +354,6 @@ void SettingsSectionsComponent::createRTTrPMSettingsSection()
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMListeningPortLabel.get(), false, false);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMListeningPortEdit.get(), true, false);
 
-	m_RTTrPMInterpretXYRelativeButton = std::make_unique<JUCEAppBasics::SplitButtonComponent>();
-	m_RTTrPMInterpretXYRelativeButton->addListener(this);
-	m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[0]] = m_RTTrPMInterpretXYRelativeButton->addButton(m_RTTrPMInterpretXYRelativeModes[0]);
-	m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[1]] = m_RTTrPMInterpretXYRelativeButton->addButton(m_RTTrPMInterpretXYRelativeModes[1]);
-	m_RTTrPMInterpretXYRelativeButton->setButtonDown(m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[0]]);
-	m_RTTrPMInterpretXYRelativeLabel = std::make_unique<Label>("RTTrPMInterpretXYRelativeButton", "XY interpret mode");
-	m_RTTrPMInterpretXYRelativeLabel->setJustificationType(Justification::centred);
-	m_RTTrPMInterpretXYRelativeLabel->attachToComponent(m_RTTrPMInterpretXYRelativeButton.get(), true);
-	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMInterpretXYRelativeLabel.get(), false, false);
-	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMInterpretXYRelativeButton.get(), true, false);
-
-	m_RTTrPMAbsoluteXYSwapButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("swap XY");
-	m_RTTrPMAbsoluteXYSwapButton->setTooltip("Swap X/Y coordinates.");
-	m_RTTrPMAbsoluteXYSwapButton->setImagePosition(Justification::centredLeft);
-	m_RTTrPMAbsoluteXYSwapButton->setClickingTogglesState(true);
-	m_RTTrPMAbsoluteXYSwapButton->addListener(this);
-	m_RTTrPMCoordSysModLabel = std::make_unique<Label>("RTTrPMCoordSysModLabel", "XY coord. processing");
-	m_RTTrPMCoordSysModLabel->setJustificationType(Justification::centred);
-	m_RTTrPMCoordSysModLabel->attachToComponent(m_RTTrPMAbsoluteXYSwapButton.get(), true);
-	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMCoordSysModLabel.get(), false, false);
-	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMAbsoluteXYSwapButton.get(), true, false);
-
-	m_RTTrPMAbsoluteOriginElmsContainer = std::make_unique<HorizontalLayouterComponent>();
-	m_RTTrPMAbsoluteOriginElmsContainer->SetSpacing(5);
-	m_RTTrPMAbsoluteOriginXLabel = std::make_unique<Label>("RTTrPMAbsolutOriginXEdit", "x");
-	m_RTTrPMAbsoluteOriginElmsContainer->AddComponent(m_RTTrPMAbsoluteOriginXLabel.get(), 0.25f);
-	m_RTTrPMAbsoluteOriginXEdit = std::make_unique<TextEditor>();
-	m_RTTrPMAbsoluteOriginXEdit->addListener(this);
-	m_RTTrPMAbsoluteOriginXEdit->setInputFilter(std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890.,").release(), true);
-	m_RTTrPMAbsoluteOriginElmsContainer->AddComponent(m_RTTrPMAbsoluteOriginXEdit.get(), 0.75f);
-	m_RTTrPMAbsoluteOriginYLabel = std::make_unique<Label>("RTTrPMAbsolutOriginYEdit", "y");
-	m_RTTrPMAbsoluteOriginElmsContainer->AddComponent(m_RTTrPMAbsoluteOriginYLabel.get(), 0.25f);
-	m_RTTrPMAbsoluteOriginYEdit = std::make_unique<TextEditor>();
-	m_RTTrPMAbsoluteOriginYEdit->addListener(this);
-	m_RTTrPMAbsoluteOriginYEdit->setInputFilter(std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890.,").release(), true);
-	m_RTTrPMAbsoluteOriginElmsContainer->AddComponent(m_RTTrPMAbsoluteOriginYEdit.get(), 0.75f);
-	m_RTTrPMAbsoluteOriginLabel = std::make_unique<Label>("RTTrPMAbsolutOrigin", "Origin offset");
-	m_RTTrPMAbsoluteOriginLabel->attachToComponent(m_RTTrPMAbsoluteOriginElmsContainer.get(), true);
-	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMAbsoluteOriginLabel.get(), false, false);
-	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMAbsoluteOriginElmsContainer.get(), true, false);
-
-	m_RTTrPMMappingAreaSelect = std::make_unique<ComboBox>();
-	m_RTTrPMMappingAreaSelect->addListener(this);
-	m_RTTrPMMappingAreaSelect->addItemList({ "1", "2", "3", "4" }, MAI_First);
-	m_RTTrPMMappingAreaLabel = std::make_unique<Label>("RTTrPMMappingAreaSelect", "Mapping Area");
-	m_RTTrPMMappingAreaLabel->setJustificationType(Justification::centred);
-	m_RTTrPMMappingAreaLabel->attachToComponent(m_RTTrPMMappingAreaSelect.get(), true);
-	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingAreaLabel.get(), false, false);
-	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingAreaSelect.get(), true, false);
-
-	m_RTTrPMMappingRangeXEditor = std::make_unique<RangeEditorComponent>(-3.0f, 3.0f, "min", "max");
-	m_RTTrPMMappingRangeXEditor->SetListener(this);
-	m_RTTrPMMappingRangeXEditor->SetRange(0.0f, 1.0f);
-	m_RTTrPMMappingRangeXEditor->SetRangeLabels("min", "max");
-	m_RTTrPMMappingRangeXEditor->SetRangeValueSuffix("m");
-	m_RTTrPMMappingRangeXLabel = std::make_unique<Label>("RTTrPMMappingRangeXEditor", "Mapping X Range");
-	m_RTTrPMMappingRangeXLabel->setJustificationType(Justification::centred);
-	m_RTTrPMMappingRangeXLabel->attachToComponent(m_RTTrPMMappingRangeXEditor.get(), true);
-	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingRangeXLabel.get(), false, false);
-	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingRangeXEditor.get(), true, false);
-
-	m_RTTrPMMappingRangeYEditor = std::make_unique<RangeEditorComponent>(-3.0f, 3.0f, "min", "max");
-	m_RTTrPMMappingRangeYEditor->SetListener(this);
-	m_RTTrPMMappingRangeYEditor->SetRange(0.0f, 1.0f);
-	m_RTTrPMMappingRangeYEditor->SetRangeLabels("min", "max");
-	m_RTTrPMMappingRangeYEditor->SetRangeValueSuffix("m");
-	m_RTTrPMMappingRangeYLabel = std::make_unique<Label>("RTTrPMMappingRangeYEditor", "Mapping Y Range");
-	m_RTTrPMMappingRangeYLabel->setJustificationType(Justification::centred);
-	m_RTTrPMMappingRangeYLabel->attachToComponent(m_RTTrPMMappingRangeYEditor.get(), true);
-	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingRangeYLabel.get(), false, false);
-	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingRangeYEditor.get(), true, false);
-
 	m_RTTrPMBeaconIdxAssignmentsEditor = std::make_unique<IndexToChannelAssignerComponent>();
 	m_RTTrPMBeaconIdxAssignmentsEditor->onAssignmentsSet = [=](Component* sender, const std::map<int, ChannelId>& idxToChAssis) { handleRTTrPMBeaconIdxAssisSet(sender, idxToChAssis); };
 	m_RTTrPMBeaconIdxAssignmentsLabel = std::make_unique<Label>("RTTrPMBeaconIdxAssignmentsEditor", "Beacon Indices");
@@ -442,6 +370,98 @@ void SettingsSectionsComponent::createRTTrPMSettingsSection()
 	m_RTTrPMDataTypeLabel->attachToComponent(m_RTTrPMDataTypeSelect.get(), true);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMDataTypeLabel.get(), false, false);
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMDataTypeSelect.get(), true, false);
+
+	m_RTTrPMInterpretXYRelativeButton = std::make_unique<JUCEAppBasics::SplitButtonComponent>();
+	m_RTTrPMInterpretXYRelativeButton->addListener(this);
+	m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[0]] = m_RTTrPMInterpretXYRelativeButton->addButton(m_RTTrPMInterpretXYRelativeModes[0]);
+	m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[1]] = m_RTTrPMInterpretXYRelativeButton->addButton(m_RTTrPMInterpretXYRelativeModes[1]);
+	m_RTTrPMInterpretXYRelativeButton->setButtonDown(m_RTTrPMInterpretXYRelativeButtonIds[m_RTTrPMInterpretXYRelativeModes[0]]);
+	m_RTTrPMInterpretXYRelativeLabel = std::make_unique<Label>("RTTrPMInterpretXYRelativeButton", "Soundscape Coords.");
+	m_RTTrPMInterpretXYRelativeLabel->setJustificationType(Justification::centred);
+	m_RTTrPMInterpretXYRelativeLabel->attachToComponent(m_RTTrPMInterpretXYRelativeButton.get(), true);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMInterpretXYRelativeLabel.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMInterpretXYRelativeButton.get(), true, false);
+
+	m_RTTrPMXYSwapButton = std::make_unique<JUCEAppBasics::TextWithImageButton>("swap XY");
+	m_RTTrPMXYSwapButton->setTooltip("Swap X/Y coordinates.");
+	m_RTTrPMXYSwapButton->setImagePosition(Justification::centredLeft);
+	m_RTTrPMXYSwapButton->setClickingTogglesState(true);
+	m_RTTrPMXYSwapButton->addListener(this);
+	m_RTTrPMXYSwapLabel = std::make_unique<Label>("RTTrPMXYSwapLabel", "XY Coord. Processing");
+	m_RTTrPMXYSwapLabel->setJustificationType(Justification::centred);
+	m_RTTrPMXYSwapLabel->attachToComponent(m_RTTrPMXYSwapButton.get(), true);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMXYSwapLabel.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMXYSwapButton.get(), true, false);
+
+	m_RTTrPMAbsoluteOriginElmsContainer = std::make_unique<HorizontalLayouterComponent>();
+	m_RTTrPMAbsoluteOriginElmsContainer->SetSpacing(5);
+	m_RTTrPMAbsoluteOriginXLabel = std::make_unique<Label>("RTTrPMAbsolutOriginXEdit", "x");
+	m_RTTrPMAbsoluteOriginElmsContainer->AddComponent(m_RTTrPMAbsoluteOriginXLabel.get(), 0.25f);
+	m_RTTrPMAbsoluteOriginXEdit = std::make_unique<TextEditor>();
+	m_RTTrPMAbsoluteOriginXEdit->addListener(this);
+	m_RTTrPMAbsoluteOriginXEdit->setInputFilter(std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890.,").release(), true);
+	m_RTTrPMAbsoluteOriginElmsContainer->AddComponent(m_RTTrPMAbsoluteOriginXEdit.get(), 0.75f);
+	m_RTTrPMAbsoluteOriginYLabel = std::make_unique<Label>("RTTrPMAbsolutOriginYEdit", "y");
+	m_RTTrPMAbsoluteOriginElmsContainer->AddComponent(m_RTTrPMAbsoluteOriginYLabel.get(), 0.25f);
+	m_RTTrPMAbsoluteOriginYEdit = std::make_unique<TextEditor>();
+	m_RTTrPMAbsoluteOriginYEdit->addListener(this);
+	m_RTTrPMAbsoluteOriginYEdit->setInputFilter(std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890.,").release(), true);
+	m_RTTrPMAbsoluteOriginElmsContainer->AddComponent(m_RTTrPMAbsoluteOriginYEdit.get(), 0.75f);
+	m_RTTrPMAbsoluteOriginLabel = std::make_unique<Label>("RTTrPMAbsolutOrigin", "Origin Offset");
+	m_RTTrPMAbsoluteOriginLabel->setTooltip("Only available when using '" + m_RTTrPMInterpretXYRelativeModes[0] + "' Soundscape coordinates.");
+	m_RTTrPMAbsoluteOriginLabel->attachToComponent(m_RTTrPMAbsoluteOriginElmsContainer.get(), true);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMAbsoluteOriginLabel.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMAbsoluteOriginElmsContainer.get(), true, false);
+
+	m_RTTrPMMappingAreaSelect = std::make_unique<ComboBox>();
+	m_RTTrPMMappingAreaSelect->addListener(this);
+	m_RTTrPMMappingAreaSelect->addItemList({ "1", "2", "3", "4" }, MAI_First);
+	m_RTTrPMMappingAreaLabel = std::make_unique<Label>("RTTrPMMappingAreaSelect", "Mapping Area");
+	m_RTTrPMMappingAreaLabel->setJustificationType(Justification::centred);
+	m_RTTrPMMappingAreaLabel->setTooltip("Only available when using '" + m_RTTrPMInterpretXYRelativeModes[1] + "' Soundscape coordinates.");
+	m_RTTrPMMappingAreaLabel->attachToComponent(m_RTTrPMMappingAreaSelect.get(), true);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingAreaLabel.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingAreaSelect.get(), true, false);
+
+	m_RTTrPMMappingPoint1ElmsContainer = std::make_unique<HorizontalLayouterComponent>();
+	m_RTTrPMMappingPoint1ElmsContainer->SetSpacing(5);
+	m_RTTrPMMappingPoint1XLabel = std::make_unique<Label>("RTTrPMMappingPoint1XEdit", "x");
+	m_RTTrPMMappingPoint1ElmsContainer->AddComponent(m_RTTrPMMappingPoint1XLabel.get(), 0.25f);
+	m_RTTrPMMappingPoint1XEdit = std::make_unique<TextEditor>();
+	m_RTTrPMMappingPoint1XEdit->addListener(this);
+	m_RTTrPMMappingPoint1XEdit->setInputFilter(std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890.,").release(), true);
+	m_RTTrPMMappingPoint1ElmsContainer->AddComponent(m_RTTrPMMappingPoint1XEdit.get(), 0.75f);
+	m_RTTrPMMappingPoint1YLabel = std::make_unique<Label>("RTTrPMMappingPoint1YEdit", "y");
+	m_RTTrPMMappingPoint1ElmsContainer->AddComponent(m_RTTrPMMappingPoint1YLabel.get(), 0.25f);
+	m_RTTrPMMappingPoint1YEdit = std::make_unique<TextEditor>();
+	m_RTTrPMMappingPoint1YEdit->addListener(this);
+	m_RTTrPMMappingPoint1YEdit->setInputFilter(std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890.,").release(), true);
+	m_RTTrPMMappingPoint1ElmsContainer->AddComponent(m_RTTrPMMappingPoint1YEdit.get(), 0.75f);
+	m_RTTrPMMappingPoint1Label = std::make_unique<Label>("RTTrPMMappingPoint1", "Mapping Min");
+	m_RTTrPMMappingPoint1Label->setTooltip("Only available when using '" + m_RTTrPMInterpretXYRelativeModes[1] + "' Soundscape coordinates.");
+	m_RTTrPMMappingPoint1Label->attachToComponent(m_RTTrPMMappingPoint1ElmsContainer.get(), true);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingPoint1Label.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingPoint1ElmsContainer.get(), true, false);
+
+	m_RTTrPMMappingPoint2ElmsContainer = std::make_unique<HorizontalLayouterComponent>();
+	m_RTTrPMMappingPoint2ElmsContainer->SetSpacing(5);
+	m_RTTrPMMappingPoint2XLabel = std::make_unique<Label>("RTTrPMMappingPoint2XEdit", "x");
+	m_RTTrPMMappingPoint2ElmsContainer->AddComponent(m_RTTrPMMappingPoint2XLabel.get(), 0.25f);
+	m_RTTrPMMappingPoint2XEdit = std::make_unique<TextEditor>();
+	m_RTTrPMMappingPoint2XEdit->addListener(this);
+	m_RTTrPMMappingPoint2XEdit->setInputFilter(std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890.,").release(), true);
+	m_RTTrPMMappingPoint2ElmsContainer->AddComponent(m_RTTrPMMappingPoint2XEdit.get(), 0.75f);
+	m_RTTrPMMappingPoint2YLabel = std::make_unique<Label>("RTTrPMMappingPoint2YEdit", "y");
+	m_RTTrPMMappingPoint2ElmsContainer->AddComponent(m_RTTrPMMappingPoint2YLabel.get(), 0.25f);
+	m_RTTrPMMappingPoint2YEdit = std::make_unique<TextEditor>();
+	m_RTTrPMMappingPoint2YEdit->addListener(this);
+	m_RTTrPMMappingPoint2YEdit->setInputFilter(std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890.,").release(), true);
+	m_RTTrPMMappingPoint2ElmsContainer->AddComponent(m_RTTrPMMappingPoint2YEdit.get(), 0.75f);
+	m_RTTrPMMappingPoint2Label = std::make_unique<Label>("RTTrPMMappingPoint2", "Mapping Max");
+	m_RTTrPMMappingPoint2Label->setTooltip("Only available when using '" + m_RTTrPMInterpretXYRelativeModes[1] + "' Soundscape coordinates.");
+	m_RTTrPMMappingPoint2Label->attachToComponent(m_RTTrPMMappingPoint2ElmsContainer.get(), true);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingPoint2Label.get(), false, false);
+	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMMappingPoint2ElmsContainer.get(), true, false);
 
 	m_RTTrPMBridgingSettings->resized();
 }
@@ -1006,7 +1026,7 @@ void SettingsSectionsComponent::lookAndFeelChanged()
 	UpdateDrawableButtonImages(m_ToggleFullscreenButton, BinaryData::open_in_full24px_svg, &getLookAndFeel());
 #endif
 	UpdateDrawableButtonImages(m_RemapOSCDisableSendingButton, BinaryData::mobiledata_off24px_svg, &getLookAndFeel());
-	UpdateDrawableButtonImages(m_RTTrPMAbsoluteXYSwapButton, BinaryData::compare_black_24dp_svg, &getLookAndFeel());
+	UpdateDrawableButtonImages(m_RTTrPMXYSwapButton, BinaryData::compare_black_24dp_svg, &getLookAndFeel());
 }
 
 /**
@@ -1053,9 +1073,9 @@ void SettingsSectionsComponent::buttonClicked(Button* button)
 #endif
 
 	// RTTrPM settings section
-	else if (m_RTTrPMAbsoluteXYSwapButton && m_RTTrPMAbsoluteXYSwapButton.get() == button)
+	else if (m_RTTrPMXYSwapButton && m_RTTrPMXYSwapButton.get() == button)
 	{
-		ctrl->SetBridgingXYAxisSwapped(PBT_BlacktraxRTTrPM, m_RTTrPMAbsoluteXYSwapButton->getToggleState() ? 1 : 0, juce::dontSendNotification);
+		ctrl->SetBridgingXYAxisSwapped(PBT_BlacktraxRTTrPM, m_RTTrPMXYSwapButton->getToggleState() ? 1 : 0, juce::dontSendNotification);
 	}
 
 	// ADM-OSC Settings section
@@ -1248,6 +1268,15 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 		ctrl->SetBridgingListeningPort(PBT_BlacktraxRTTrPM, m_RTTrPMListeningPortEdit->getText().getIntValue() % 0xffff);
 	else if (m_RTTrPMAbsoluteOriginXEdit && m_RTTrPMAbsoluteOriginYEdit && (m_RTTrPMAbsoluteOriginXEdit.get() == &editor || m_RTTrPMAbsoluteOriginYEdit.get() == &editor))
 		ctrl->SetBridgingOriginOffset(PBT_BlacktraxRTTrPM, juce::Point<float>(m_RTTrPMAbsoluteOriginXEdit->getText().getFloatValue(), m_RTTrPMAbsoluteOriginYEdit->getText().getFloatValue()));
+	else if (m_RTTrPMMappingPoint1XEdit && m_RTTrPMMappingPoint1YEdit && m_RTTrPMMappingPoint2XEdit && m_RTTrPMMappingPoint2YEdit
+		&& (m_RTTrPMMappingPoint1XEdit.get() == &editor || m_RTTrPMMappingPoint1YEdit.get() == &editor || m_RTTrPMMappingPoint2XEdit.get() == &editor || m_RTTrPMMappingPoint2YEdit.get() == &editor))
+	{
+		// Bridging uses a range for x and y to map the RTTrPM incoming absolute coords to d&b relative.
+		// For better usability, this is reflected by a min and a max point on the ui that has to be translated here
+		ctrl->SetBridgingMappingRange(PBT_BlacktraxRTTrPM, std::make_pair(
+			juce::Range<float>(m_RTTrPMMappingPoint1XEdit->getText().getFloatValue(), m_RTTrPMMappingPoint2XEdit->getText().getFloatValue()),
+			juce::Range<float>(m_RTTrPMMappingPoint1YEdit->getText().getFloatValue(), m_RTTrPMMappingPoint2YEdit->getText().getFloatValue())));
+	}
 
 	// Generic OSC settings section
 	else if (m_GenericOSCIpAddressEdit && m_GenericOSCIpAddressEdit.get() == &editor)
@@ -1359,24 +1388,6 @@ void SettingsSectionsComponent::comboBoxChanged(ComboBox* comboBox)
 		ctrl->SetBridgingMappingArea(PBT_YamahaOSC, m_YamahaOSCMappingAreaSelect->getSelectedId());
 
 	// return without config update trigger if the comboBox was unknown
-	else
-		return;
-
-	processUpdatedConfig();
-}
-
-/**
- * Reimplemented method to handle range editor component changes
- * @param editor	The RangeEditorComponent that changes were made in
- */
-void SettingsSectionsComponent::rangeChanged(RangeEditorComponent* editor)
-{
-	auto ctrl = Controller::GetInstance();
-	if (!ctrl)
-		return;
-
-	if (m_RTTrPMMappingRangeXEditor && m_RTTrPMMappingRangeYEditor && (m_RTTrPMMappingRangeXEditor.get() == editor || m_RTTrPMMappingRangeYEditor.get() == editor))
-		ctrl->SetBridgingMappingRange(PBT_BlacktraxRTTrPM, std::make_pair(m_RTTrPMMappingRangeXEditor->GetRange(), m_RTTrPMMappingRangeYEditor->GetRange()));
 	else
 		return;
 
@@ -1680,14 +1691,9 @@ void SettingsSectionsComponent::processUpdatedRTTrPMConfig()
 		m_RTTrPMInterpretXYRelativeButton->setButtonDown(newActiveButtonId);
 	}
 	auto RTTrPMAbsoluteXYSwap = ctrl->GetBridgingXYAxisSwapped(PBT_BlacktraxRTTrPM);
-	if (m_RTTrPMAbsoluteXYSwapButton)
+	if (m_RTTrPMXYSwapButton)
 	{
-		m_RTTrPMAbsoluteXYSwapButton->setToggleState(RTTrPMAbsoluteXYSwap, juce::dontSendNotification);
-		m_RTTrPMAbsoluteXYSwapButton->setEnabled(RTTrPMMappingAreaId == MAI_Invalid);
-	}
-	if (m_RTTrPMCoordSysModLabel)
-	{
-		m_RTTrPMCoordSysModLabel->setEnabled(RTTrPMMappingAreaId == MAI_Invalid);
+		m_RTTrPMXYSwapButton->setToggleState(RTTrPMAbsoluteXYSwap, juce::dontSendNotification);
 	}
 	auto RTTrPMAbsoluteOrigin = ctrl->GetBridgingOriginOffset(PBT_BlacktraxRTTrPM);
 	if (m_RTTrPMAbsoluteOriginLabel)
@@ -1721,20 +1727,28 @@ void SettingsSectionsComponent::processUpdatedRTTrPMConfig()
 		m_RTTrPMMappingAreaLabel->setEnabled(RTTrPMMappingAreaId != MAI_Invalid);
 
 	auto RTTrPMMappingRange = ctrl->GetBridgingMappingRange(PBT_BlacktraxRTTrPM);
-	if (m_RTTrPMMappingRangeXEditor)
+	if (m_RTTrPMMappingPoint1XEdit && m_RTTrPMMappingPoint1YEdit)
 	{
-		m_RTTrPMMappingRangeXEditor->SetRange(RTTrPMMappingRange.first.getStart(), RTTrPMMappingRange.first.getEnd());
-		m_RTTrPMMappingRangeXEditor->setEnabled(RTTrPMMappingAreaId != MAI_Invalid);
+		// Bridging uses a range for y to map the RTTrPM incoming absolute coords to d&b relative.
+		// For better usability, this is reflected by a min point on the ui that has to be translated here
+		m_RTTrPMMappingPoint1XEdit->setText(juce::String(RTTrPMMappingRange.first.getStart()) + " m");
+		m_RTTrPMMappingPoint1XEdit->setEnabled(RTTrPMMappingAreaId != MAI_Invalid);
+		m_RTTrPMMappingPoint1YEdit->setText(juce::String(RTTrPMMappingRange.second.getStart()) + " m");
+		m_RTTrPMMappingPoint1YEdit->setEnabled(RTTrPMMappingAreaId != MAI_Invalid);
 	}
-	if (m_RTTrPMMappingRangeXLabel)
-		m_RTTrPMMappingRangeXLabel->setEnabled(RTTrPMMappingAreaId != MAI_Invalid);
-	if (m_RTTrPMMappingRangeYEditor)
+	if (m_RTTrPMMappingPoint1Label)
+		m_RTTrPMMappingPoint1Label->setEnabled(RTTrPMMappingAreaId != MAI_Invalid);
+	if (m_RTTrPMMappingPoint2XEdit && m_RTTrPMMappingPoint2YEdit)
 	{
-		m_RTTrPMMappingRangeYEditor->SetRange(RTTrPMMappingRange.second.getStart(), RTTrPMMappingRange.second.getEnd());
-		m_RTTrPMMappingRangeYEditor->setEnabled(RTTrPMMappingAreaId != MAI_Invalid);
+		// Bridging uses a range for x to map the RTTrPM incoming absolute coords to d&b relative.
+		// For better usability, this is reflected by a max point on the ui that has to be translated here
+		m_RTTrPMMappingPoint2XEdit->setText(juce::String(RTTrPMMappingRange.first.getEnd()) + " m");
+		m_RTTrPMMappingPoint2XEdit->setEnabled(RTTrPMMappingAreaId != MAI_Invalid);
+		m_RTTrPMMappingPoint2YEdit->setText(juce::String(RTTrPMMappingRange.second.getEnd()) + " m");
+		m_RTTrPMMappingPoint2YEdit->setEnabled(RTTrPMMappingAreaId != MAI_Invalid);
 	}
-	if (m_RTTrPMMappingRangeYLabel)
-		m_RTTrPMMappingRangeYLabel->setEnabled(RTTrPMMappingAreaId != MAI_Invalid);
+	if (m_RTTrPMMappingPoint2Label)
+		m_RTTrPMMappingPoint2Label->setEnabled(RTTrPMMappingAreaId != MAI_Invalid);
 
 	if (m_RTTrPMBeaconIdxAssignmentsEditor)
 	{

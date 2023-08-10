@@ -581,6 +581,14 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupRTTrPMBridgingProtocol
 	if (xyAxisSwappedXmlElement)
 		xyAxisSwappedXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
 
+	auto xAxisInvertedXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::XINVERTED));
+	if (xAxisInvertedXmlElement)
+		xAxisInvertedXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
+
+	auto yAxisInvertedXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::YINVERTED));
+	if (yAxisInvertedXmlElement)
+		yAxisInvertedXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
+
 	auto originOffsetXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ORIGINOFFSET));
 	if (originOffsetXmlElement)
 		originOffsetXmlElement->addTextElement("0;0");

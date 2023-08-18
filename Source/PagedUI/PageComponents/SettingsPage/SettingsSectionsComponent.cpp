@@ -977,6 +977,9 @@ void SettingsSectionsComponent::resized()
 		if (bounds.getHeight() < static_cast<int>(minHeight))
 			bounds.setHeight(static_cast<int>(minHeight));
 
+		if (onContentMinRequiredSizeChangedCallback)
+			onContentMinRequiredSizeChangedCallback(bounds);
+
 		setBounds(bounds);
 	}
 
@@ -1527,6 +1530,11 @@ void SettingsSectionsComponent::processUpdatedConfig()
 	processUpdatedADMOSCConfig();
 	processUpdatedYamahaOSCConfig();
 	processUpdatedRemapOSCConfig();
+
+	resized();
+
+	if (onContentSizesChangedCallback)
+		onContentSizesChangedCallback();
 }
 
 /**

@@ -186,6 +186,9 @@ void HeaderWithElmListComponent::setElementsActiveState(bool toggleState)
 		component.first->setEnabled(m_toggleState);
 	}
 
+	if (m_helpButton)
+		m_helpButton->setEnabled(m_toggleState);
+
 	resized();
 	repaint();
 	lookAndFeelChanged();
@@ -234,6 +237,7 @@ void HeaderWithElmListComponent::setHelpUrl(const URL& helpUrl)
 		m_helpButton->onClick = [this] { 
 			m_helpUrl->launchInDefaultBrowser();
 		};
+		m_helpButton->setEnabled(m_toggleState);
 		addAndMakeVisible(m_helpButton.get());
 
 		resized();

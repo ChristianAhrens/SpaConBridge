@@ -75,7 +75,13 @@ SettingsPageComponent::SettingsPageComponent()
 
 	// The component containing configuration sections, etc. to be shown in a viewport for scrolling capabilities
 	m_settingsComponent = std::make_unique<SettingsSectionsComponent>();
-	m_settingsComponent->onContentSizesChangedCallback = [this] { resized(); };
+	m_settingsComponent->onContentSizesChangedCallback = [this] {
+		resized();
+	};
+	m_settingsComponent->onContentMinRequiredSizeChangedCallback = [this](const juce::Rectangle<int>&) {
+		if (m_tempCachedViewPosition.isOrigin())
+			m_tempCachedViewPosition = m_settingsViewport->getViewPosition();
+	};
 	m_settingsViewport = std::make_unique<Viewport>();
 	m_settingsViewport->setViewedComponent(m_settingsComponent.get(), false);
 	addAndMakeVisible(m_settingsViewport.get());
@@ -144,6 +150,11 @@ void SettingsPageComponent::resized()
 
 	if (m_settingsComponent && m_settingsViewport)
 	{
+		// cache the currently viewed position before resizing stuff, leading to a reset to viewing 0,0
+		// (only when no viewed position was already cached to be preserved beforehand)
+		if (m_tempCachedViewPosition.isOrigin())
+			m_tempCachedViewPosition = m_settingsViewport->getViewPosition();
+
 		m_settingsComponent->setBounds(bounds);
 		m_settingsViewport->setBounds(bounds);
 
@@ -159,6 +170,10 @@ void SettingsPageComponent::resized()
 
 			m_settingsComponent->setBounds(boundsWithoutScrollbars);
 		}
+
+		// reactivate the viewed position after resizing took place
+		m_settingsViewport->setViewPosition(m_tempCachedViewPosition);
+		m_tempCachedViewPosition.setXY(0, 0); // reset viewed position to not be dangling
 	}
 
 	// raw config textfield, etc. - not always visible!

@@ -84,7 +84,8 @@ public:
 	void setSettingsSectionActiveState(HeaderWithElmListComponent* settingsSection, bool activeState);
 
 	//==============================================================================
-	std::function<void()>	onContentSizesChangedCallback;
+	std::function<void()>								onContentSizesChangedCallback;
+	std::function<void(const juce::Rectangle<int>&)>	onContentMinRequiredSizeChangedCallback;
 
 private:
 	void updateAvailableMidiInputDevices();

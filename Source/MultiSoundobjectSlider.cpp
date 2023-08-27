@@ -761,8 +761,9 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
     if (GetPrimaryMouseInputSourceIndex() != e.source.getIndex()) // dont check IsInFakeALTMultiTouch() here but somewhere below to allow to perform the click-hit-check first
         return;
     
-	float w = static_cast<float>(getLocalBounds().getWidth());
-	float h = static_cast<float>(getLocalBounds().getHeight());
+    auto orig = GetAspectAndMarginCorrectedBounds().getTopLeft().toFloat();
+	auto w = static_cast<float>(GetAspectAndMarginCorrectedBounds().getWidth());
+	auto h = static_cast<float>(GetAspectAndMarginCorrectedBounds().getHeight());
 
 	// Mouse click position (in pixel units)
 	Point<float> mousePos(static_cast<float>(e.getMouseDownPosition().x), static_cast<float>(e.getMouseDownPosition().y));
@@ -783,8 +784,8 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
 
                 // Map the x/y coordinates to the pixel-wise dimensions of the surface area.
                 auto const& pt = paramsKV.second._pos;
-                float x = pt.x * w;
-                float y = h - (pt.y * h);
+                auto x = orig.x + (pt.x * w);
+                auto y = orig.y + (h - (pt.y * h));
 
                 auto knobSizeScaleFactor = static_cast<float>(1.0f + (1.5f * paramsKV.second._size));
                 auto knobSize = refKnobSize * knobSizeScaleFactor;
@@ -851,10 +852,14 @@ void MultiSoundobjectSlider::mouseDrag(const MouseEvent& e)
                 auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
                 if (processor)
                 {
+                    auto orig = GetAspectAndMarginCorrectedBounds().getTopLeft().toFloat();
+                    auto w = static_cast<float>(GetAspectAndMarginCorrectedBounds().getWidth());
+                    auto h = static_cast<float>(GetAspectAndMarginCorrectedBounds().getHeight());
+
                     // Get mouse pixel-wise position and scale it between 0 and 1.
-                    auto const& pos = e.getPosition();
-                    auto x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / getLocalBounds().getWidth())));
-                    auto y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / getLocalBounds().getHeight())));
+                    auto const& pos = e.getPosition().toFloat() - orig;
+                    auto x = jmin<float>(1.0f, jmax<float>(0.0f, (pos.getX() / w)));
+                    auto y = 1.0f - jmin<float>(1.0f, jmax<float>(0.0f, (pos.getY() / h)));
 
                     processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, x);
                     processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, y);
@@ -895,10 +900,14 @@ void MultiSoundobjectSlider::mouseUp(const MouseEvent& e)
                     if (param)
                         param->EndGuiGesture();
 
+                    auto orig = GetAspectAndMarginCorrectedBounds().getTopLeft().toFloat();
+                    auto w = static_cast<float>(GetAspectAndMarginCorrectedBounds().getWidth());
+                    auto h = static_cast<float>(GetAspectAndMarginCorrectedBounds().getHeight());
+
                     // Get mouse pixel-wise position and scale it between 0 and 1.
-                    auto pos = e.getPosition();
-                    auto x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / getLocalBounds().getWidth())));
-                    auto y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / getLocalBounds().getHeight())));
+                    auto const& pos = e.getPosition().toFloat() - orig;
+                    auto x = jmin<float>(1.0f, jmax<float>(0.0f, (pos.getX() / w)));
+                    auto y = 1.0f - jmin<float>(1.0f, jmax<float>(0.0f, (pos.getY() / h)));
 
                     processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, x);
                     processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, y);
@@ -1598,6 +1607,90 @@ bool MultiSoundobjectSlider::IsCoordinateMappingsSettingsDataReady()
 }
 
 /**
+ * Getter for the mapping corner real point positions.
+ * @return  The map of positions for all mappings
+ */
+const std::map<MappingAreaId, std::vector<juce::Vector3D<float>>>& MultiSoundobjectSlider::GetMappingCornersReal() 
+{ 
+    return m_mappingCornersReal; 
+}
+
+/**
+ * Getter for the mapping corner virtual point positions.
+ * @return  The map of positions for all mappings
+ */
+const std::map<MappingAreaId, std::vector<juce::Vector3D<float>>>& MultiSoundobjectSlider::GetMappingCornersVirtual() 
+{ 
+    return m_mappingCornersVirtual; 
+}
+
+/**
+ * Getter for the flip property of all mappings
+ * @return  The map of flip properties for all mappings
+ */
+const std::map<MappingAreaId, bool>& MultiSoundobjectSlider::GetMappingFlip() 
+{ 
+    return m_mappingFlip; 
+}
+
+/**
+ * Getter for the name of all mappings
+ * @return  The map of names for all mappings
+ */
+const std::map<MappingAreaId, juce::String>& MultiSoundobjectSlider::GetMappingName() 
+{ 
+    return m_mappingName; 
+}
+
+/**
+ * Setter for a mapping corner real point position.
+ * @param   mappingAreaId       The id of the mapping area to set the value for.
+ * @param   cornerIndex         The index of the corner to set the value for.
+ * @param   mappingCornerReal   The actual corner pos value to set.
+ */
+void MultiSoundobjectSlider::SetMappingCornerReal(const MappingAreaId mappingAreaId, int cornerIndex, const juce::Vector3D<float>& mappingCornerReal)
+{
+    if (m_mappingCornersReal[mappingAreaId].size() <= cornerIndex)
+        return;
+
+    m_mappingCornersReal[mappingAreaId][cornerIndex] = ComputeNonDBRealPointCoordinate(mappingCornerReal);
+}
+
+/**
+ * Setter for a mapping corner virtual point position.
+ * @param   mappingAreaId       The id of the mapping area to set the value for.
+ * @param   cornerIndex         The index of the corner to set the value for.
+ * @param   mappingCornerReal   The actual corner pos value to set.
+ */
+void MultiSoundobjectSlider::SetMappingCornerVirtual(const MappingAreaId mappingAreaId, int cornerIndex, const juce::Vector3D<float>& mappingCornerVirtual)
+{
+    if (m_mappingCornersVirtual[mappingAreaId].size() <= cornerIndex)
+        return;
+
+    m_mappingCornersVirtual[mappingAreaId][cornerIndex] = mappingCornerVirtual;
+}
+
+/**
+ * Setter for the flip property of a mappings
+ * @param   mappingAreaId   The id of the mapping area to set the value for.
+ * @param   mappingFlip     The flip value to set.
+ */
+void MultiSoundobjectSlider::SetMappingFlip(const MappingAreaId mappingAreaId, bool mappingFlip)
+{
+    m_mappingFlip[mappingAreaId] = mappingFlip;
+}
+
+/**
+ * Setter for the name of a mappings
+ * @param   mappingAreaId   The id of the mapping area to set the value for.
+ * @param   mappingName     The name string to set.
+ */
+void MultiSoundobjectSlider::SetMappingName(const MappingAreaId mappingAreaId, const juce::String& mappingName)
+{
+    m_mappingName[mappingAreaId] = mappingName;
+}
+
+/**
  * Helper method to check the internal data maps for if all coordmapsettings have been received
  * @return	True if data for all four mapping areas is contained in the internal maps
  */
@@ -1637,7 +1730,7 @@ void MultiSoundobjectSlider::SetSpeakerPositionDataReady(bool ready)
                 auto& drawable = m_speakerDrawables.at(channelId);
                 drawable->replaceColour(Colours::black, getLookAndFeel().findColour(TextButton::textColourOnId));
                 auto drawableBounds = drawable->getBounds().toFloat();
-                drawable->setTransform(juce::AffineTransform::rotation(degreesToRadians(rot.x), drawableBounds.getCentreX(), drawableBounds.getCentreY()));
+                drawable->setTransform(juce::AffineTransform::rotation(juce::degreesToRadians(rot.x), drawableBounds.getCentreX(), drawableBounds.getCentreY()));
             }
         }
 
@@ -1660,6 +1753,25 @@ void MultiSoundobjectSlider::SetSpeakerPositionDataReady(bool ready)
 bool MultiSoundobjectSlider::IsSpeakerPositionDataReady()
 {
     return m_speakerPositionDataReady;
+}
+
+/**
+ * Getter for the speakerpositions currently known.
+ * @return  The map of speaker positions per channel.
+ */
+const std::map<ChannelId, std::pair<juce::Vector3D<float>, juce::Vector3D<float>>>& MultiSoundobjectSlider::GetSpeakerPositions()
+{
+    return m_speakerPositions;
+}
+
+/**
+ * Setter for a speakerposition for a channel.
+ * @param   channelId           The channel to set the speakerposition for.
+ * @param   speakerPosition     The position to set.
+ */
+void MultiSoundobjectSlider::SetSpeakerPosition(const ChannelId channelId, const std::pair<juce::Vector3D<float>, const juce::Vector3D<float>>& speakerPosition)
+{
+    m_speakerPositions[channelId] = std::make_pair(ComputeNonDBRealPointCoordinate(speakerPosition.first), ComputeNonDBRealPointRotation(speakerPosition.second));
 }
 
 /**
@@ -1751,18 +1863,35 @@ juce::Point<float> MultiSoundobjectSlider::GetPointForRelativePosOnMapping(const
         auto& mappingP3 = mappingCornersReal.at(2);
         auto& mappingP4 = mappingCornersReal.at(3);
         auto& mappingCornersVirtual = m_mappingCornersVirtual.at(mapping);
-        auto& mappingVP1 = mappingCornersVirtual.at(0);
-        auto& mappingVP2 = mappingCornersVirtual.at(1);
-        auto& mappingFlip = m_mappingFlip.at(mapping);
+        auto& mappingVirtP1 = mappingCornersVirtual.at(0);
+        auto& mappingVirtP3 = mappingCornersVirtual.at(1);
+        auto mappingVirtP2 = juce::Vector3D<float>(mappingVirtP1.x, mappingVirtP3.y, 0.0f);
+        auto mappingVirtP4 = juce::Vector3D<float>(mappingVirtP3.x, mappingVirtP1.y, 0.0f);
+        auto& isFlipped = m_mappingFlip.at(mapping);
 
         /*WIP*/
-        auto vectorX = mappingP2 - mappingP1;
-        auto vectorY = mappingP3 - mappingP2;
+        auto relPosWithSwap = isFlipped ? juce::Point<float>(relativePos.y, relativePos.x) : relativePos;
 
-        auto relVectorX = vectorX * relativePos.x;
-        auto relVectorY = vectorY * relativePos.y;
+        auto vectorVirtX = mappingVirtP2 - mappingVirtP3;
+        auto vectorX = mappingP2 - mappingP3;
+        auto vectorVirtY = mappingVirtP4 - mappingVirtP3;
+        auto vectorY = mappingP4 - mappingP3;
 
-        auto realPos = mappingP1 + relVectorX + relVectorY;
+        /*wtf - this is a hack due to lazyness and lack of knowledge of linear algebra*/
+        auto xs = 1.0f;
+        auto ys = 1.0f;
+        if (vectorVirtX.x < 0 || vectorVirtX.y < 0)
+            xs = -1.0f;
+        if (vectorVirtY.x < 0 || vectorVirtY.y < 0)
+            ys = -1.0f;
+
+        auto relVectorX = vectorX * (relPosWithSwap.x / vectorVirtX.length()) * xs;
+        auto relVectorY = vectorY * (relPosWithSwap.y / vectorVirtY.length()) * ys;
+
+        auto origVector = (mappingVirtP3.x < mappingVirtP1.x && mappingVirtP3.y < mappingVirtP1.y) ? mappingP3 : mappingP1;
+        /*wtf*/
+
+        auto realPos = origVector + relVectorX + relVectorY;
         /*WIP*/
 
         return GetPointForRealCoordinate(realPos);
@@ -1789,24 +1918,27 @@ juce::Rectangle<int> MultiSoundobjectSlider::GetAspectAndMarginCorrectedBounds()
 {
     auto bounds = getLocalBounds();
 
-    bounds.reduce(12, 12);
-
-    auto boundsAspect = bounds.toFloat().getAspectRatio();
-    auto realAspect = m_realYBoundingRange.getLength() / m_realXBoundingRange.getLength();
-
-    if (boundsAspect > realAspect)
+    if (GetSelectedMapping() == MAI_Invalid)
     {
-        //remove sth from bounds height
-        auto widthToRemove = bounds.getWidth() * (1 - (realAspect / boundsAspect));
-        bounds.removeFromLeft(static_cast<int>(0.5f * widthToRemove));
-        bounds.removeFromRight(static_cast<int>(0.5f * widthToRemove));
-    }
-    else if (boundsAspect < realAspect)
-    {
-        //remove sth from bounds width
-        auto heightToRemove = bounds.getHeight() * (1 - (boundsAspect / realAspect));
-        bounds.removeFromTop(static_cast<int>(0.5f * heightToRemove));
-        bounds.removeFromBottom(static_cast<int>(0.5f * heightToRemove));
+        bounds.reduce(12, 12);
+
+        auto boundsAspect = bounds.toFloat().getAspectRatio();
+        auto realAspect = m_realYBoundingRange.getLength() / m_realXBoundingRange.getLength();
+
+        if (boundsAspect > realAspect)
+        {
+            //remove sth from bounds height
+            auto widthToRemove = bounds.getWidth() * (1 - (realAspect / boundsAspect));
+            bounds.removeFromLeft(static_cast<int>(0.5f * widthToRemove));
+            bounds.removeFromRight(static_cast<int>(0.5f * widthToRemove));
+        }
+        else if (boundsAspect < realAspect)
+        {
+            //remove sth from bounds width
+            auto heightToRemove = bounds.getHeight() * (1 - (boundsAspect / realAspect));
+            bounds.removeFromTop(static_cast<int>(0.5f * heightToRemove));
+            bounds.removeFromBottom(static_cast<int>(0.5f * heightToRemove));
+        }
     }
 
     return bounds;
@@ -1855,6 +1987,26 @@ void MultiSoundobjectSlider::PrerenderSpeakerAndMappingAreaInBounds()
             }
         }
     }
+}
+
+/**
+ * Helper to compute a given points coordinates in outside world (non-d&b) nomenclature (x horizontally and y vertically).
+ * @param   coordinate  The value to recompute into outside world nomenclature.
+ * @return  The computed value.
+ */
+const juce::Vector3D<float>	MultiSoundobjectSlider::ComputeNonDBRealPointCoordinate(const juce::Vector3D<float>& coordinate)
+{
+    return juce::Vector3D<float>(coordinate.y, coordinate.x, coordinate.z);
+}
+
+/**
+ * Helper to compute a given points coordinates in outside world (non-d&b) nomenclature (x horizontally and y vertically).
+ * @param   coordinate  The value to recompute into outside world nomenclature.
+ * @return  The computed value.
+ */
+const juce::Vector3D<float>	MultiSoundobjectSlider::ComputeNonDBRealPointRotation(const juce::Vector3D<float>& rotation)
+{
+    return juce::Vector3D<float>((rotation.x - 90) * -1.0f, rotation.y, rotation.z);
 }
 
 

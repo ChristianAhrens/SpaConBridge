@@ -725,61 +725,71 @@ void MultiSoundobjectComponent::HandleObjectDataInternal(const RemoteObjectIdent
 		if (msgData._payload != nullptr && msgData._payloadSize == 3 * sizeof(float) && msgData._valCount == 3 && msgData._valType == ROVT_FLOAT)
 		{
 			auto floatPtr = static_cast<float*>(msgData._payload);
-			m_multiSoundobjectSlider->GetMappingCornersReal()[mappingAreaId][0] = {floatPtr[0], floatPtr[1], floatPtr[2]};
+			auto mappingCornerReal = juce::Vector3D<float>{ floatPtr[0], floatPtr[1], floatPtr[2] };
+			m_multiSoundobjectSlider->SetMappingCornerReal(mappingAreaId, 0, mappingCornerReal);
 		}
 		break;
 	case ROI_CoordinateMappingSettings_P2real:
 		if (msgData._payload != nullptr && msgData._payloadSize == 3 * sizeof(float) && msgData._valCount == 3 && msgData._valType == ROVT_FLOAT)
 		{
 			auto floatPtr = static_cast<float*>(msgData._payload);
-			m_multiSoundobjectSlider->GetMappingCornersReal()[mappingAreaId][1] = { floatPtr[0], floatPtr[1], floatPtr[2] };
+			auto mappingCornerReal = juce::Vector3D<float>{ floatPtr[0], floatPtr[1], floatPtr[2] };
+			m_multiSoundobjectSlider->SetMappingCornerReal(mappingAreaId, 1, mappingCornerReal);
 		}
 		break;
 	case ROI_CoordinateMappingSettings_P3real:
 		if (msgData._payload != nullptr && msgData._payloadSize == 3 * sizeof(float) && msgData._valCount == 3 && msgData._valType == ROVT_FLOAT)
 		{
 			auto floatPtr = static_cast<float*>(msgData._payload);
-			m_multiSoundobjectSlider->GetMappingCornersReal()[mappingAreaId][2] = { floatPtr[0], floatPtr[1], floatPtr[2] };
+			auto mappingCornerReal = juce::Vector3D<float>{ floatPtr[0], floatPtr[1], floatPtr[2] };
+			m_multiSoundobjectSlider->SetMappingCornerReal(mappingAreaId, 2, mappingCornerReal);
 		}
 		break;
 	case ROI_CoordinateMappingSettings_P4real:
 		if (msgData._payload != nullptr && msgData._payloadSize == 3 * sizeof(float) && msgData._valCount == 3 && msgData._valType == ROVT_FLOAT)
 		{
 			auto floatPtr = static_cast<float*>(msgData._payload);
-			m_multiSoundobjectSlider->GetMappingCornersReal()[mappingAreaId][3] = { floatPtr[0], floatPtr[1], floatPtr[2] };
+			auto mappingCornerReal = juce::Vector3D<float>{ floatPtr[0], floatPtr[1], floatPtr[2] };
+			m_multiSoundobjectSlider->SetMappingCornerReal(mappingAreaId, 3, mappingCornerReal);
 		}
 		break;
 	case ROI_CoordinateMappingSettings_P1virtual:
 		if (msgData._payload != nullptr && msgData._payloadSize == 3 * sizeof(float) && msgData._valCount == 3 && msgData._valType == ROVT_FLOAT)
 		{
 			auto floatPtr = static_cast<float*>(msgData._payload);
-			m_multiSoundobjectSlider->GetMappingCornersVirtual()[mappingAreaId][0] = { floatPtr[0], floatPtr[1], floatPtr[2] };
+			auto mappingCornerVirtual = juce::Vector3D<float>{ floatPtr[0], floatPtr[1], floatPtr[2] };
+			m_multiSoundobjectSlider->SetMappingCornerVirtual(mappingAreaId, 0, mappingCornerVirtual);
 		}
 		break;
 	case ROI_CoordinateMappingSettings_P3virtual:
 		if (msgData._payload != nullptr && msgData._payloadSize == 3 * sizeof(float) && msgData._valCount == 3 && msgData._valType == ROVT_FLOAT)
 		{
 			auto floatPtr = static_cast<float*>(msgData._payload);
-			m_multiSoundobjectSlider->GetMappingCornersVirtual()[mappingAreaId][1] = { floatPtr[0], floatPtr[1], floatPtr[2] };
+			auto mappingCornerVirtual = juce::Vector3D<float>{ floatPtr[0], floatPtr[1], floatPtr[2] };
+			m_multiSoundobjectSlider->SetMappingCornerVirtual(mappingAreaId, 1, mappingCornerVirtual);
 		}
 		break;
 	case ROI_CoordinateMappingSettings_Flip:
 		if (msgData._payload != nullptr && msgData._payloadSize == sizeof(int) && msgData._valCount == 1 && msgData._valType == ROVT_INT)
 		{
-			m_multiSoundobjectSlider->GetMappingFlip()[mappingAreaId] = (1 == *static_cast<int*>(msgData._payload));
+			auto flip = (1 == *static_cast<int*>(msgData._payload));
+			m_multiSoundobjectSlider->SetMappingFlip(mappingAreaId, flip);
 		}
 		break;
 	case ROI_CoordinateMappingSettings_Name:
 		if (msgData._payload != nullptr && msgData._payloadSize == msgData._valCount * sizeof(char) && msgData._valType == ROVT_STRING)
 		{
-			m_multiSoundobjectSlider->GetMappingName()[mappingAreaId] = juce::String(static_cast<char*>(msgData._payload), msgData._valCount);
+			auto name = juce::String(static_cast<char*>(msgData._payload), msgData._valCount);
+			m_multiSoundobjectSlider->SetMappingName(mappingAreaId, name);
 		}
 		break;
 	case ROI_Positioning_SpeakerPosition:
 		if (msgData._payload != nullptr && msgData._payloadSize == 6 * sizeof(float) && msgData._valCount == 6 && msgData._valType == ROVT_FLOAT)
 		{
 			auto floatPtr = static_cast<float*>(msgData._payload);
-			m_multiSoundobjectSlider->GetSpeakerPositions()[mappingAreaId] = std::make_pair(juce::Vector3D(floatPtr[0], floatPtr[1], floatPtr[2]), juce::Vector3D(floatPtr[3], floatPtr[4], floatPtr[5]));
+			auto pos = juce::Vector3D(floatPtr[0], floatPtr[1], floatPtr[2]);
+			auto rot = juce::Vector3D(floatPtr[3], floatPtr[4], floatPtr[5]);
+			m_multiSoundobjectSlider->SetSpeakerPosition(channel, std::make_pair(pos, rot));
 		}
 		break;
 	default:

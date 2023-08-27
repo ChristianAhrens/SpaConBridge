@@ -136,16 +136,21 @@ public:
 	bool CheckCoordinateMappingSettingsDataCompleteness();
 	void SetCoordinateMappingSettingsDataReady(bool ready);
 	bool IsCoordinateMappingsSettingsDataReady();
-	std::map<MappingAreaId, std::vector<juce::Vector3D<float>>>& GetMappingCornersReal() { return m_mappingCornersReal; };
-	std::map<MappingAreaId, std::vector<juce::Vector3D<float>>>& GetMappingCornersVirtual() { return m_mappingCornersVirtual; };
-	std::map<MappingAreaId, bool>& GetMappingFlip() { return m_mappingFlip; };
-	std::map<MappingAreaId, juce::String>& GetMappingName() { return m_mappingName; };
+	const std::map<MappingAreaId, std::vector<juce::Vector3D<float>>>& GetMappingCornersReal();
+	const std::map<MappingAreaId, std::vector<juce::Vector3D<float>>>& GetMappingCornersVirtual();
+	const std::map<MappingAreaId, bool>& GetMappingFlip();
+	const std::map<MappingAreaId, juce::String>& GetMappingName();
+	void SetMappingCornerReal(const MappingAreaId mappingAreaId, int cornerIndex, const juce::Vector3D<float>& mappingCornerReal);
+	void SetMappingCornerVirtual(const MappingAreaId mappingAreaId, int cornerIndex, const juce::Vector3D<float>& mappingCornerVirtual);
+	void SetMappingFlip(const MappingAreaId mappingAreaId, bool mappingFlip);
+	void SetMappingName(const MappingAreaId mappingAreaId, const juce::String& mappingName);
 
 	//==============================================================================
 	bool CheckSpeakerPositionDataCompleteness();
 	void SetSpeakerPositionDataReady(bool ready);
 	bool IsSpeakerPositionDataReady();
-	std::map<ChannelId, std::pair<juce::Vector3D<float>, juce::Vector3D<float>>>& GetSpeakerPositions() { return m_speakerPositions; };
+	const std::map<ChannelId, std::pair<juce::Vector3D<float>, juce::Vector3D<float>>>& GetSpeakerPositions();
+	void SetSpeakerPosition(const ChannelId channelId, const std::pair<juce::Vector3D<float>, const juce::Vector3D<float>>& speakerPosition);
 
 protected:
 	void paint(Graphics& g) override;
@@ -184,6 +189,9 @@ private:
 	juce::Rectangle<int>	GetAspectAndMarginCorrectedBounds();
 
 	void PrerenderSpeakerAndMappingAreaInBounds();
+
+	const juce::Vector3D<float>	ComputeNonDBRealPointCoordinate(const juce::Vector3D<float>& coordinate);
+	const juce::Vector3D<float>	ComputeNonDBRealPointRotation(const juce::Vector3D<float>& rotation);
 
 	//==============================================================================
 	SoundobjectProcessorId										m_currentlyDraggedId;				                        /**< ProcessorId of the currently selected knob, if any. */

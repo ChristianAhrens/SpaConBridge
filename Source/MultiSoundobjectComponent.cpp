@@ -514,7 +514,7 @@ bool MultiSoundobjectComponent::SetSelectedMapping(MappingAreaId mapping)
 {
 	if (m_multiSoundobjectSlider)
 	{
-		if (mapping == MAI_Invalid)
+		if (mapping == MAI_Invalid && m_multiSoundobjectSlider->GetSelectedMapping() != MAI_Invalid)
 		{
 			m_multiSoundobjectSlider->SetCoordinateMappingSettingsDataReady(false);
 			m_multiSoundobjectSlider->SetSpeakerPositionDataReady(false);

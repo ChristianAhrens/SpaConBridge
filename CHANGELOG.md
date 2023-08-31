@@ -4,12 +4,19 @@ All notable changes to SpaConBridge will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.11.2] 2023-08-31
 ### Added
+- Added support for BlackTrax RTTrPM protocol bridging x/y axis swapping for 'Relative' coordinate handling
+- Added support for BlackTrax RTTrPM protocol bridging x/y axis inversion for both 'Relative' and 'Absolute' corrdinate handling
 
 ### Changed
+- Modified 'Own IP Address' display to show 'Multi' when the host has more than one valid IPs (clickable for list)
 
 ### Fixed
+- Fixed multiple data handling issues in bridging module RPBC
+- Fixed ZeroconfDiscoverComponent popup to appear at random positions
+- Fixed settings page sections layouting issue
+- Fixed performance bottlenecks
 
 ## [0.11.1] 2023-08-03
 ### Added

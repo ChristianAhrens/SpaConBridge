@@ -896,6 +896,9 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 			if (textEdit == nullptr)
 				textEdit = new TextEditorContainer(*this);
 
+			// set up the correct input filter
+			textEdit->setLengthAndCharacterRestriction(3, "1234567890");
+
 			// Ensure that the component knows which row number it is located at.
 			textEdit->SetRow(rowNumber);
 
@@ -913,6 +916,9 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 			if (textEdit == nullptr)
 				textEdit = new TextEditorContainer(*this);
 
+			// set up the correct input filter
+			textEdit->setLengthAndCharacterRestriction(3, "1234567890");
+
 			// Ensure that the component knows which row number it is located at.
 			textEdit->SetRow(rowNumber);
 
@@ -929,6 +935,9 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 			// if not, we'll have to create one.
 			if (textEdit == nullptr)
 				textEdit = new TextEditorContainer(*this);
+
+			// set up the correct input filter
+			textEdit->setLengthAndCharacterRestriction(3, "1234567890");
 
 			// Ensure that the component knows which row number it is located at.
 			textEdit->SetRow(rowNumber);

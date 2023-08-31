@@ -72,6 +72,7 @@ private:
 	//==============================================================================
 	std::unique_ptr<SettingsSectionsComponent>	m_settingsComponent;
 	std::unique_ptr<Viewport>					m_settingsViewport;
+	juce::Point<int>							m_tempCachedViewPosition;	// helper member to store a view position that shall be kept when performing a resize
 
 	std::unique_ptr<TextButton>		m_settingsRawApplyButton;
 	std::unique_ptr<TextButton>		m_settingsResetToDefaultButton;

@@ -598,7 +598,7 @@ AudioProcessorEditor* SoundobjectProcessor::createEditor()
 	AudioProcessorEditor* editor = new SoundobjectProcessorEditor(*this);
 
 	// Initialize GUI with current IP address, etc.
-	SetParameterChanged(DCP_Protocol, (DCT_SoundobjectProcessorConfig | DCT_CommunicationConfig | DCT_SoundobjectParameters)); // We use 'DCP_Protocol' as source here, to not have the initial update be resent as new values via protocol
+	SetParameterChanged(DCP_Protocol, DCT_SoundobjectParameters); // We use 'DCP_Protocol' as source here, to not have the initial update be resent as new values via protocol
 
 	return editor;
 }

@@ -457,6 +457,19 @@ void TextEditorContainer::SetRow(int newRow)
 	}
 }
 
+/**
+ * Setter vor the values to use in internal length and character restriction filter instance.
+ * @param maxNumChars			if this is > 0, it sets a maximum length limit; if <= 0, no
+ * 								limit is set
+ * @param allowedCharacters		if this is non-empty, then only characters that occur in
+ * 								this string are allowed to be entered into the editor.
+ */
+void TextEditorContainer::setLengthAndCharacterRestriction(int maxNumChars, const juce::String& allowedCharacters)
+{
+	m_lengthAndCharacterFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(maxNumChars, allowedCharacters);
+	m_editor.setInputFilter(m_lengthAndCharacterFilter.get(), false);
+}
+
 
 /*
 ===============================================================================

@@ -129,8 +129,11 @@ public:
 
 	void textEditorFocusLost(TextEditor&) override;
 
+	void setLengthAndCharacterRestriction(int maxNumChars, const String& allowedCharacters);
+
 protected:
-	TextEditor				m_editor;	/**> Actual text editor. */
+	TextEditor													m_editor;					/**> Actual text editor. */
+	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_lengthAndCharacterFilter;	/**> The filter object for allowed characters. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TextEditorContainer)
 };

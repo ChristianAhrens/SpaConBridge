@@ -36,20 +36,25 @@ namespace SpaConBridge
 * Class constructor.
 */
 IPAddressDisplay::IPAddressDisplay()
-    : TextEditor()
+    : juce::TextEditor()
 {
-    auto ip = juce::IPAddress::getLocalAddress();
-    if (!IsMultiCast(ip) && !IsUPnPDiscoverAddress(ip) && !IsLoopbackAddress(ip) && !IsBroadcastAddress(ip))
-        setText(juce::IPAddress::getLocalAddress().toString());
-    else
-    {
-        auto IPs = getRelevantIPs();
-        if (!IPs.empty())
-            setText(IPs.begin()->toString());
-    }
+    lookAndFeelChanged(); // Do this first, since all text that is added to a TextEditor uses the colour currently set
 
-    if (juce::IPAddress::getAllAddresses().size() > 1)
+    auto ip = juce::IPAddress::getLocalAddress();
+    auto allIPs = getRelevantIPs();
+
+    auto hasMultiIPs = allIPs.size() > 1;
+
+    if (hasMultiIPs)
+        setText("<<Multiple IPs>>");
+    else if (!IsMultiCast(ip) && !IsUPnPDiscoverAddress(ip) && !IsLoopbackAddress(ip) && !IsBroadcastAddress(ip))
+        setText(ip.toString());
+    else
+        setText("<<None>>");
+
+    if (hasMultiIPs)
         setPopupMenuEnabled(true);
+
     setEnabled(false);
 }
 
@@ -58,7 +63,7 @@ IPAddressDisplay::IPAddressDisplay()
     * @param	menuToAddTo			The menu to populate
     * @param	mouseClickEvent		Initiating mouse event that is ignored
     */
-void IPAddressDisplay::addPopupMenuItems(PopupMenu& menuToAddTo, const MouseEvent* mouseClickEvent)
+void IPAddressDisplay::addPopupMenuItems(juce::PopupMenu& menuToAddTo, const juce::MouseEvent* mouseClickEvent)
 {
     menuToAddTo.clear();
     ignoreUnused(mouseClickEvent);
@@ -73,6 +78,16 @@ void IPAddressDisplay::addPopupMenuItems(PopupMenu& menuToAddTo, const MouseEven
         }
     }
     setEnabled(false);
+}
+
+/**
+ * Reimplemented with the single purpose to have the texteditor text colour reflect its deactive state.
+ */
+void IPAddressDisplay::lookAndFeelChanged()
+{
+    juce::TextEditor::lookAndFeelChanged();
+
+    applyColourToAllText(getLookAndFeel().findColour(juce::TextEditor::ColourIds::textColourId).withAlpha(0.7f));
 }
 
 /**
@@ -158,7 +173,7 @@ void IPAddressDisplay::mouseDown(const MouseEvent& e)
         e.getNumberOfClicks(),
         e.mouseWasDraggedSinceMouseDown());
 
-    TextEditor::mouseDown(eventCopy);
+    juce::TextEditor::mouseDown(eventCopy);
 }
 
 

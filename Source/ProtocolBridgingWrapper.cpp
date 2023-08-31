@@ -310,6 +310,16 @@ bool ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridg
         else
             precisionXmlElement->addTextElement(String(DS100_VALUCHANGE_SENSITIVITY));
 
+		// update typeA (DS100) to have the valueAck expected flag set
+		auto protocolsAcknowledgeXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::VALUEACK));
+		if (!protocolsAcknowledgeXmlElement)
+			protocolsAcknowledgeXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::VALUEACK));
+		auto protocolsAcknowledgeTextXmlElement = protocolsAcknowledgeXmlElement->getFirstChildElement();
+		if (protocolsAcknowledgeTextXmlElement && protocolsAcknowledgeTextXmlElement->isTextElement())
+			protocolsAcknowledgeTextXmlElement->setText(String(DS100_ACKNOWLEDGES_SENT_VALUES_MASK));
+		else
+			protocolsAcknowledgeXmlElement->addTextElement(String(DS100_ACKNOWLEDGES_SENT_VALUES_MASK));
+
 		// update reaction monitored protocols element
 		auto reactMoniProtosTextValue = String(DS100_1_PROCESSINGPROTOCOL_ID) + "," + String(DS100_2_PROCESSINGPROTOCOL_ID);
 		auto reactMoniProtosXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REACTMONIPROTOS));
@@ -570,6 +580,14 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupRTTrPMBridgingProtocol
 	auto xyAxisSwappedXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::XYSWAPPED));
 	if (xyAxisSwappedXmlElement)
 		xyAxisSwappedXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
+
+	auto xAxisInvertedXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::XINVERTED));
+	if (xAxisInvertedXmlElement)
+		xAxisInvertedXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
+
+	auto yAxisInvertedXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::YINVERTED));
+	if (yAxisInvertedXmlElement)
+		yAxisInvertedXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
 
 	auto originOffsetXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ORIGINOFFSET));
 	if (originOffsetXmlElement)
@@ -3198,6 +3216,16 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 					else
 						precisionXmlElement->addTextElement(String(DS100_VALUCHANGE_SENSITIVITY));
 
+					// update typeA (DS100) to have the valueAck expected flag set
+					auto protocolsAcknowledgeXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::VALUEACK));
+					if (!protocolsAcknowledgeXmlElement)
+						protocolsAcknowledgeXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::VALUEACK));
+					auto protocolsAcknowledgeTextXmlElement = protocolsAcknowledgeXmlElement->getFirstChildElement();
+					if (protocolsAcknowledgeTextXmlElement && protocolsAcknowledgeTextXmlElement->isTextElement())
+						protocolsAcknowledgeTextXmlElement->setText(String(DS100_ACKNOWLEDGES_SENT_VALUES_MASK));
+					else
+						protocolsAcknowledgeXmlElement->addTextElement(String(DS100_ACKNOWLEDGES_SENT_VALUES_MASK));
+
 					// update reaction monitored protocols element
 					auto reactMoniProtosTextValue = String(DS100_1_PROCESSINGPROTOCOL_ID) + "," + String(DS100_2_PROCESSINGPROTOCOL_ID);
 					auto reactMoniProtosXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REACTMONIPROTOS));
@@ -3236,6 +3264,16 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 						precisionTextXmlElement->setText(String(DS100_VALUCHANGE_SENSITIVITY));
 					else
 						precisionXmlElement->addTextElement(String(DS100_VALUCHANGE_SENSITIVITY));
+
+					// update typeA (DS100) to have the valueAck expected flag set
+					auto protocolsAcknowledgeXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::VALUEACK));
+					if (!protocolsAcknowledgeXmlElement)
+						protocolsAcknowledgeXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::VALUEACK));
+					auto protocolsAcknowledgeTextXmlElement = protocolsAcknowledgeXmlElement->getFirstChildElement();
+					if (protocolsAcknowledgeTextXmlElement && protocolsAcknowledgeTextXmlElement->isTextElement())
+						protocolsAcknowledgeTextXmlElement->setText(String(DS100_ACKNOWLEDGES_SENT_VALUES_MASK));
+					else
+						protocolsAcknowledgeXmlElement->addTextElement(String(DS100_ACKNOWLEDGES_SENT_VALUES_MASK));
 
 					// update reaction monitored protocols element
 					auto reactMoniProtosTextValue = String(DS100_1_PROCESSINGPROTOCOL_ID) + "," + String(DS100_2_PROCESSINGPROTOCOL_ID);
@@ -3289,6 +3327,16 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 					else
 						precisionXmlElement->addTextElement(String(DS100_VALUCHANGE_SENSITIVITY));
 
+					// update typeA (DS100) to have the valueAck expected flag set
+					auto protocolsAcknowledgeXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::VALUEACK));
+					if (!protocolsAcknowledgeXmlElement)
+						protocolsAcknowledgeXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::VALUEACK));
+					auto protocolsAcknowledgeTextXmlElement = protocolsAcknowledgeXmlElement->getFirstChildElement();
+					if (protocolsAcknowledgeTextXmlElement && protocolsAcknowledgeTextXmlElement->isTextElement())
+						protocolsAcknowledgeTextXmlElement->setText(String(DS100_ACKNOWLEDGES_SENT_VALUES_MASK));
+					else
+						protocolsAcknowledgeXmlElement->addTextElement(String(DS100_ACKNOWLEDGES_SENT_VALUES_MASK));
+
 					// update reaction monitored protocols element
 					auto reactMoniProtosTextValue = String(DS100_1_PROCESSINGPROTOCOL_ID) + "," + String(DS100_2_PROCESSINGPROTOCOL_ID);
 					auto reactMoniProtosXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REACTMONIPROTOS));
@@ -3333,6 +3381,16 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 						precisionTextXmlElement->setText(String(DS100_VALUCHANGE_SENSITIVITY));
 					else if (precisionTextXmlElement)
 						precisionXmlElement->addTextElement(String(DS100_VALUCHANGE_SENSITIVITY));
+
+					// update typeA (DS100) to have the valueAck expected flag set
+					auto protocolsAcknowledgeXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::VALUEACK));
+					if (!protocolsAcknowledgeXmlElement)
+						protocolsAcknowledgeXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::VALUEACK));
+					auto protocolsAcknowledgeTextXmlElement = protocolsAcknowledgeXmlElement->getFirstChildElement();
+					if (protocolsAcknowledgeTextXmlElement && protocolsAcknowledgeTextXmlElement->isTextElement())
+						protocolsAcknowledgeTextXmlElement->setText(String(DS100_ACKNOWLEDGES_SENT_VALUES_MASK));
+					else
+						protocolsAcknowledgeXmlElement->addTextElement(String(DS100_ACKNOWLEDGES_SENT_VALUES_MASK));
 
 					// update reaction monitored protocols element
 					auto reactMoniProtosTextValue = String(DS100_1_PROCESSINGPROTOCOL_ID) + "," + String(DS100_2_PROCESSINGPROTOCOL_ID);

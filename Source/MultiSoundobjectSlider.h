@@ -225,6 +225,7 @@ private:
 	std::map<ChannelId, std::pair<juce::Vector3D<float>, juce::Vector3D<float>>>	m_speakerPositions;
 
 	std::map<MappingAreaId, juce::Path>												m_mappingAreaPaths;
+	std::map<MappingAreaId, std::pair<juce::Point<int>, float>>						m_mappingTextAnchorPointAndRot;
 	std::map<ChannelId, std::unique_ptr<juce::Drawable>>							m_speakerDrawables;
 	std::map<ChannelId, juce::Rectangle<float>>										m_speakerDrawableAreas;
 

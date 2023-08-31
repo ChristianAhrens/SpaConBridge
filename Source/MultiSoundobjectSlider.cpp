@@ -388,17 +388,30 @@ void MultiSoundobjectSlider::paintSpeakersAndMappingAreas2DVisu(Graphics& g)
 
     // Mapping Areas
     g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
+    g.setFont(18);
     for (auto i = int(MAI_First); i <= int(MAI_Fourth); i++)
     {
         auto mappingAreaId = static_cast<MappingAreaId>(i);
 
-        if (m_mappingAreaPaths.count(mappingAreaId) == 1 )
+        if (m_mappingAreaPaths.count(mappingAreaId) == 1 
+            && m_mappingName.count(mappingAreaId) == 1
+            && m_mappingTextAnchorPointAndRot.count(mappingAreaId) == 1)
+        {
             g.fillPath(m_mappingAreaPaths.at(mappingAreaId));
 
-        auto mappingString = juce::String("CoordinateMapping ") + juce::String(mappingAreaId);
-        if (m_mappingName.count(mappingAreaId) == 1 && m_mappingName.at(mappingAreaId).isNotEmpty())
-            mappingString = m_mappingName.at(mappingAreaId);
-        g.drawText(mappingString, m_mappingAreaPaths.at(mappingAreaId).getBounds(), juce::Justification::centred);
+            auto mappingString = juce::String("CoordinateMapping ") + juce::String(mappingAreaId);
+            if (m_mappingName.at(mappingAreaId).isNotEmpty())
+                mappingString = m_mappingName.at(mappingAreaId);
+
+            g.saveState();
+            auto margin = 5;
+            auto& anchorPoint = m_mappingTextAnchorPointAndRot.at(mappingAreaId).first;
+            auto& angle = m_mappingTextAnchorPointAndRot.at(mappingAreaId).second;
+            g.setOrigin(anchorPoint);
+            g.addTransform(juce::AffineTransform().rotated(angle));
+            g.drawSingleLineText(mappingString, margin, -margin);
+            g.restoreState();
+        }
     }
 
     // Speaker positions
@@ -1974,6 +1987,10 @@ void MultiSoundobjectSlider::PrerenderSpeakerAndMappingAreaInBounds()
         m_mappingAreaPaths[mappingAreaId].clear();
         if (m_mappingCornersReal.count(mappingAreaId) == 1)
         {
+            auto& p0 = m_mappingCornersReal.at(mappingAreaId).at(2);
+            auto& p1 = m_mappingCornersReal.at(mappingAreaId).at(3);
+            m_mappingTextAnchorPointAndRot[mappingAreaId].first = GetPointForRealCoordinate(p0).toInt();
+            m_mappingTextAnchorPointAndRot[mappingAreaId].second = juce::Line<int>(p0.x, p0.y, p1.x, p1.y).getAngle();
             auto prevPoint = GetPointForRealCoordinate(m_mappingCornersReal.at(mappingAreaId).at(3));
             for (auto j = 0; j < 4; j++) // p1 real - p4 real
             {

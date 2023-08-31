@@ -197,7 +197,7 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 	m_DS100IpAndPortLabel->setJustificationType(Justification::centred);
 	m_DS100IpAndPortLabel->attachToComponent(m_DS100ConnectionElmsContainer.get(), true);
 #ifdef ZEROCONF_SUPPORTED
-	m_DS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>(false, false);
+	m_DS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>("ZDC1");
 	m_DS100ZeroconfDiscovery->onServiceSelected = [=](JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, ZeroconfSearcher::ZeroconfSearcher::ServiceInfo* info) { handleDS100ServiceSelected(type, info); };
 	m_DS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC);
 	m_DS100ZeroconfDiscovery->addPopupCategory("d&b DS100 devices", std::make_pair(
@@ -243,7 +243,7 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 	m_SecondDS100IpAndPortLabel->setJustificationType(Justification::centred);
 	m_SecondDS100IpAndPortLabel->attachToComponent(m_SecondDS100ConnectionElmsContainer.get(), true);
 #ifdef ZEROCONF_SUPPORTED
-	m_SecondDS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>(false, false);
+	m_SecondDS100ZeroconfDiscovery = std::make_unique<JUCEAppBasics::ZeroconfDiscoverComponent>("ZDC2");
 	m_SecondDS100ZeroconfDiscovery->onServiceSelected = [=](JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType type, ZeroconfSearcher::ZeroconfSearcher::ServiceInfo* info) { handleSecondDS100ServiceSelected(type, info); };
 	m_SecondDS100ZeroconfDiscovery->addDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC);
 	m_SecondDS100ZeroconfDiscovery->addPopupCategory("d&b DS100 devices", std::make_pair(

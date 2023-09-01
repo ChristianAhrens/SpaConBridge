@@ -150,7 +150,7 @@ String GetProtocolBridgingNiceName(ProtocolBridgingType type)
 	case PBT_HUI:
 		return "Generic HUI";
 	case PBT_YamahaOSC:
-		return "Yamaha OSC";
+		return "Yamaha/L'ISA OSC";
 	case PBT_ADMOSC:
 		return "ADM OSC";
 	case PBT_RemapOSC:

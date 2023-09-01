@@ -60,7 +60,7 @@ PageComponentManager::PageComponentManager()
 	// init values of this instance are going to be used for default config.
 	m_activePage = UPI_Soundobjects;
 	for (int id = UPI_InvalidMin + 1; id < UPI_InvalidMax; id++) m_enabledPages.push_back(static_cast<UIPageId>(id));
-	m_lookAndFeelType = DbLookAndFeelBase::LAFT_Dark;
+		m_lookAndFeelType = DbLookAndFeelBase::LAFT_Dark;
 
 	m_multiSoundobjectComponent = std::make_unique<MultiSoundobjectComponent>();
 }

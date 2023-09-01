@@ -44,6 +44,7 @@ namespace SpaConBridge
  * Class constructor.
  */
 MultiSoundobjectComponent::MultiSoundobjectComponent()
+	: StandalonePollingBase()
 {
 	// Add multi-slider
 	m_multiSoundobjectSlider = std::make_unique<MultiSoundobjectSlider>();
@@ -52,10 +53,11 @@ MultiSoundobjectComponent::MultiSoundobjectComponent()
 	// Mapping selector
 	m_mappingAreaSelect = std::make_unique<ComboBox>("Coordinate mapping");
 	m_mappingAreaSelect->setEditableText(false);
-	m_mappingAreaSelect->addItem("Mapping Area 1", 1);
-	m_mappingAreaSelect->addItem("Mapping Area 2", 2);
-	m_mappingAreaSelect->addItem("Mapping Area 3", 3);
-	m_mappingAreaSelect->addItem("Mapping Area 4", 4);
+	m_mappingAreaSelect->addItem("All", MAI_Invalid);
+	m_mappingAreaSelect->addItem("Mapping Area 1", MAI_First);
+	m_mappingAreaSelect->addItem("Mapping Area 2", MAI_Second);
+	m_mappingAreaSelect->addItem("Mapping Area 3", MAI_Third);
+	m_mappingAreaSelect->addItem("Mapping Area 4", MAI_Fourth);
 	m_mappingAreaSelect->addListener(this);
 	m_mappingAreaSelect->setTooltip("Show sound objects assigned to selected Mapping Area");
 	addAndMakeVisible(m_mappingAreaSelect.get());
@@ -75,7 +77,7 @@ MultiSoundobjectComponent::MultiSoundobjectComponent()
 	// extended multiselection interaction enable
 	m_muselvisuEnable = std::make_unique<DrawableButton>("MuselVisuInteraction", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_muselvisuEnable->addListener(this);
-	m_muselvisuEnable->setTooltip("Enable extended multiselection interaction");
+	m_muselvisuEnable->setTooltip("Enable extended multiselection interaction.\nOnly available when specific Mapping Area is selected.");
 	m_muselvisuEnable->setClickingTogglesState(true);
 	addAndMakeVisible(m_muselvisuEnable.get());
 
@@ -107,6 +109,29 @@ MultiSoundobjectComponent::MultiSoundobjectComponent()
 
 	// trigger lookandfeel update
 	lookAndFeelChanged();
+
+	// add the coordinatemapping settings objects to low-freq local polling
+	for (auto i = int(MAI_First); i <= int(MAI_Fourth); i++)
+	{
+		AddStandalonePollingObject(ROI_CoordinateMappingSettings_P1real, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE));
+		AddStandalonePollingObject(ROI_CoordinateMappingSettings_P2real, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE));
+		AddStandalonePollingObject(ROI_CoordinateMappingSettings_P3real, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE));
+		AddStandalonePollingObject(ROI_CoordinateMappingSettings_P4real, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE));
+		AddStandalonePollingObject(ROI_CoordinateMappingSettings_P1virtual, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE));
+		AddStandalonePollingObject(ROI_CoordinateMappingSettings_P3virtual, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE));
+		AddStandalonePollingObject(ROI_CoordinateMappingSettings_Flip, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE));
+		AddStandalonePollingObject(ROI_CoordinateMappingSettings_Name, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE));
+	}
+
+	// add the speaker position objects to low-freq local polling
+	for (auto i = 1; i <= DS100_CHANNELCOUNT; i++)
+	{
+		AddStandalonePollingObject(ROI_Positioning_SpeakerPosition, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE));
+	}
+
+	// start the object refresh timer now
+	setRefreshRateMs(3000);
+	triggerPollOnce();
 }
 
 /**
@@ -308,23 +333,20 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 			auto processor = ctrl->GetSoundobjectProcessor(processorId);
 			if (processor)
 			{
-				// NOTE: only soundobjects are used that match the selected viewing mapping.
-				if (processor->GetMappingId() == GetSelectedMapping())
-				{
-					auto soundobjectId	= processor->GetSoundobjectId();
-					auto pos			= Point<float>(processor->GetParameterValue(SPI_ParamIdx_X), processor->GetParameterValue(SPI_ParamIdx_Y));
-					auto spread			= processor->GetParameterValue(SPI_ParamIdx_ObjectSpread);
-					auto reverbSendGain	= processor->GetParameterValue(SPI_ParamIdx_ReverbSendGain);
-					auto selected		= selMgr->IsSoundobjectProcessorIdSelected(processorId);
-					auto colour			= processor->GetSoundobjectColour();
-					auto size			= processor->GetSoundobjectSize();
-					auto objectName		= processor->getProgramName(processor->getCurrentProgram());
+				auto soundobjectId	= processor->GetSoundobjectId();
+				auto pos			= Point<float>(processor->GetParameterValue(SPI_ParamIdx_X), processor->GetParameterValue(SPI_ParamIdx_Y));
+				auto spread			= processor->GetParameterValue(SPI_ParamIdx_ObjectSpread);
+				auto reverbSendGain	= processor->GetParameterValue(SPI_ParamIdx_ReverbSendGain);
+				auto selected		= selMgr->IsSoundobjectProcessorIdSelected(processorId);
+				auto colour			= processor->GetSoundobjectColour();
+				auto size			= processor->GetSoundobjectSize();
+				auto objectName		= processor->getProgramName(processor->getCurrentProgram());
 
-					soundobjectParameterMap.insert(std::make_pair(processorId, MultiSoundobjectSlider::SoundobjectParameters(soundobjectId, pos, spread, reverbSendGain, selected, colour, size, objectName)));
+				jassert(processor->GetMappingId() > MAI_Invalid && processor->GetMappingId() <= MAI_Fourth);
+				soundobjectParameterMap[static_cast<MappingAreaId>(processor->GetMappingId())].insert(std::make_pair(processorId, MultiSoundobjectSlider::SoundobjectParameters(soundobjectId, pos, spread, reverbSendGain, selected, colour, size, objectName)));
 
-					if (selected)
-						selectedSOs++;
-				}
+				if (selected)
+					selectedSOs++;
 
 #ifdef UNDEF//DEBUG
 				if (processor->PopParameterChanged(DCP_MultiSlider, DCT_SoundobjectProcessorConfig))
@@ -490,8 +512,32 @@ MappingAreaId MultiSoundobjectComponent::GetSelectedMapping() const
  */
 bool MultiSoundobjectComponent::SetSelectedMapping(MappingAreaId mapping)
 {
-	if (m_multiSoundobjectSlider)
+	if (m_multiSoundobjectSlider && m_loadImage && m_removeImage && m_muselvisuEnable)
 	{
+		if (mapping == MAI_Invalid)
+		{
+			if (m_multiSoundobjectSlider->GetSelectedMapping() != MAI_Invalid)
+			{
+				m_multiSoundobjectSlider->SetCoordinateMappingSettingsDataReady(false);
+				m_multiSoundobjectSlider->SetSpeakerPositionDataReady(false);
+
+				restartTimer();
+				triggerPollOnce();
+			}
+            
+            m_loadImage->setEnabled(false);
+            m_removeImage->setEnabled(false);
+
+			m_muselvisuEnable->setToggleState(false, juce::dontSendNotification);
+			m_muselvisuEnable->setEnabled(false);
+			SetMuSelVisuEnabled(false);
+		}
+		else
+        {
+            m_loadImage->setEnabled(true);
+            m_removeImage->setEnabled(true);
+            m_muselvisuEnable->setEnabled(true);
+        }
 		m_multiSoundobjectSlider->SetSelectedMapping(mapping);
 
 		resized();
@@ -663,6 +709,9 @@ void MultiSoundobjectComponent::lookAndFeelChanged()
 	// first forward the call to base implementation
 	Component::lookAndFeelChanged();
 
+	if (m_multiSoundobjectSlider)
+		m_multiSoundobjectSlider->lookAndFeelChanged();
+
 	// Update drawable button images with updated lookAndFeel colours
 	UpdateDrawableButtonImages(m_loadImage, BinaryData::image_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_removeImage, BinaryData::hide_image_black_24dp_svg, &getLookAndFeel());
@@ -670,6 +719,117 @@ void MultiSoundobjectComponent::lookAndFeelChanged()
 	UpdateDrawableButtonImages(m_reverbEnable, BinaryData::sensors_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_spreadEnable, BinaryData::adjust_black_24dp_svg, &getLookAndFeel());
 	UpdateDrawableButtonImages(m_objectNamesEnable, BinaryData::text_fields_black_24dp_svg, &getLookAndFeel());
+}
+
+/**
+ * Reimplemented from StandalonePollingBase to handle the incoming values from polling that were requested
+ * and insert them to internal member data maps
+ * @param	roi			The roi that was received. In this method the CoordinateMappingSettings objects are handled
+ * @param	msgData		The object message value data.
+ */
+void MultiSoundobjectComponent::HandleObjectDataInternal(const RemoteObjectIdentifier& roi, const RemoteObjectMessageData& msgData)
+{
+	// all in here relies on existance of m_multiSoundobjectSlider, so we can abort if it doesnt exist
+	if (!m_multiSoundobjectSlider)
+		return;
+
+	auto channel = msgData._addrVal._first;
+	auto mappingAreaId = static_cast<MappingAreaId>(channel);
+
+	switch (roi)
+	{
+	case ROI_CoordinateMappingSettings_P1real:
+		if (msgData._payload != nullptr && msgData._payloadSize == 3 * sizeof(float) && msgData._valCount == 3 && msgData._valType == ROVT_FLOAT)
+		{
+			auto floatPtr = static_cast<float*>(msgData._payload);
+			auto mappingCornerReal = juce::Vector3D<float>{ floatPtr[0], floatPtr[1], floatPtr[2] };
+			m_multiSoundobjectSlider->SetMappingCornerReal(mappingAreaId, 0, mappingCornerReal);
+		}
+		break;
+	case ROI_CoordinateMappingSettings_P2real:
+		if (msgData._payload != nullptr && msgData._payloadSize == 3 * sizeof(float) && msgData._valCount == 3 && msgData._valType == ROVT_FLOAT)
+		{
+			auto floatPtr = static_cast<float*>(msgData._payload);
+			auto mappingCornerReal = juce::Vector3D<float>{ floatPtr[0], floatPtr[1], floatPtr[2] };
+			m_multiSoundobjectSlider->SetMappingCornerReal(mappingAreaId, 1, mappingCornerReal);
+		}
+		break;
+	case ROI_CoordinateMappingSettings_P3real:
+		if (msgData._payload != nullptr && msgData._payloadSize == 3 * sizeof(float) && msgData._valCount == 3 && msgData._valType == ROVT_FLOAT)
+		{
+			auto floatPtr = static_cast<float*>(msgData._payload);
+			auto mappingCornerReal = juce::Vector3D<float>{ floatPtr[0], floatPtr[1], floatPtr[2] };
+			m_multiSoundobjectSlider->SetMappingCornerReal(mappingAreaId, 2, mappingCornerReal);
+		}
+		break;
+	case ROI_CoordinateMappingSettings_P4real:
+		if (msgData._payload != nullptr && msgData._payloadSize == 3 * sizeof(float) && msgData._valCount == 3 && msgData._valType == ROVT_FLOAT)
+		{
+			auto floatPtr = static_cast<float*>(msgData._payload);
+			auto mappingCornerReal = juce::Vector3D<float>{ floatPtr[0], floatPtr[1], floatPtr[2] };
+			m_multiSoundobjectSlider->SetMappingCornerReal(mappingAreaId, 3, mappingCornerReal);
+		}
+		break;
+	case ROI_CoordinateMappingSettings_P1virtual:
+		if (msgData._payload != nullptr && msgData._payloadSize == 3 * sizeof(float) && msgData._valCount == 3 && msgData._valType == ROVT_FLOAT)
+		{
+			auto floatPtr = static_cast<float*>(msgData._payload);
+			auto mappingCornerVirtual = juce::Vector3D<float>{ floatPtr[0], floatPtr[1], floatPtr[2] };
+			m_multiSoundobjectSlider->SetMappingCornerVirtual(mappingAreaId, 0, mappingCornerVirtual);
+		}
+		break;
+	case ROI_CoordinateMappingSettings_P3virtual:
+		if (msgData._payload != nullptr && msgData._payloadSize == 3 * sizeof(float) && msgData._valCount == 3 && msgData._valType == ROVT_FLOAT)
+		{
+			auto floatPtr = static_cast<float*>(msgData._payload);
+			auto mappingCornerVirtual = juce::Vector3D<float>{ floatPtr[0], floatPtr[1], floatPtr[2] };
+			m_multiSoundobjectSlider->SetMappingCornerVirtual(mappingAreaId, 1, mappingCornerVirtual);
+		}
+		break;
+	case ROI_CoordinateMappingSettings_Flip:
+		if (msgData._payload != nullptr && msgData._payloadSize == sizeof(int) && msgData._valCount == 1 && msgData._valType == ROVT_INT)
+		{
+			auto flip = (1 == *static_cast<int*>(msgData._payload));
+			m_multiSoundobjectSlider->SetMappingFlip(mappingAreaId, flip);
+		}
+		break;
+	case ROI_CoordinateMappingSettings_Name:
+		if (msgData._payload != nullptr && msgData._payloadSize == msgData._valCount * sizeof(char) && msgData._valType == ROVT_STRING)
+		{
+			auto name = juce::String(static_cast<char*>(msgData._payload), msgData._valCount);
+			m_multiSoundobjectSlider->SetMappingName(mappingAreaId, name);
+		}
+		break;
+	case ROI_Positioning_SpeakerPosition:
+		if (msgData._payload != nullptr && msgData._payloadSize == 6 * sizeof(float) && msgData._valCount == 6 && msgData._valType == ROVT_FLOAT)
+		{
+			auto floatPtr = static_cast<float*>(msgData._payload);
+			auto pos = juce::Vector3D(floatPtr[0], floatPtr[1], floatPtr[2]);
+			auto rot = juce::Vector3D(floatPtr[3], floatPtr[4], floatPtr[5]);
+			m_multiSoundobjectSlider->SetSpeakerPosition(channel, std::make_pair(pos, rot));
+		}
+		break;
+	default:
+		break;
+	}
+
+	if (m_multiSoundobjectSlider->CheckCoordinateMappingSettingsDataCompleteness() && !m_multiSoundobjectSlider->IsCoordinateMappingsSettingsDataReady())
+	{
+		m_multiSoundobjectSlider->SetCoordinateMappingSettingsDataReady(true);
+		DBG(juce::String(__FUNCTION__) + " we now have the required CoordinateMappingSettings data at hand to do fancy stuff.");
+	}
+
+	if (m_multiSoundobjectSlider->CheckSpeakerPositionDataCompleteness() && !m_multiSoundobjectSlider->IsSpeakerPositionDataReady())
+	{
+		m_multiSoundobjectSlider->SetSpeakerPositionDataReady(true);
+		DBG(juce::String(__FUNCTION__) + " we now have the required SpeakerPosition data at hand to do fancy stuff.");
+	}
+
+	if (m_multiSoundobjectSlider->IsCoordinateMappingsSettingsDataReady() && m_multiSoundobjectSlider->IsSpeakerPositionDataReady())
+	{
+		stopTimer();
+		DBG(juce::String(__FUNCTION__) + " we now have the required CoordinateMappingSettings and SpeakerPosition data at hand to do fancy stuff.");
+	}
 }
 
 

@@ -95,7 +95,7 @@ __Note:__ In consequence, devices being plugged in / coming online while app is 
 
 ## Quick Start
 
-1. If no DS100 is available, the minimal simulation tool [SpaConSim](https://github.com/ChristianAhrens/SpaConSim) or the generic bridging tool [RemoteProtocolBridgeUI](https://github.com/ChristianAhrens/RemoteProtocolBridgeUI) can be used for testing and debugging.
+1. If no DS100 is available, the minimal simulation tool [SpaConSim](https://github.com/ChristianAhrens/SpaConSim) might be considered for testing and debugging.
 2. Launch SpaConBridge
     * Sound Object table has no entries, no bridging protocol is active
     * App is 'offline' since no Sound Object is active
@@ -104,18 +104,14 @@ __Note:__ In consequence, devices being plugged in / coming online while app is 
 5. Go to [Settings](#appsettings) tab
     * If you do not have a DS100 at hand, now is the time to launch [SpaConSim](https://github.com/ChristianAhrens/SpaConSim) simulation tool
 6. Set up the DS100 connection
-    * iPhoneOS/iPadOS/macOS: Click on discovery button below IP address text edit field to get a list of devices that announce _osc._udp zeroconf service and choose the DS100 or [SpaConSim](https://github.com/ChristianAhrens/SpaConSim) simulation tool you want to connect to
-    * Windows: Enter the IP address of the DS100 or [SpaConSim](https://github.com/ChristianAhrens/SpaConSim) simulation tool you want to connect to manually
+    * Click on discovery button below IP address text edit field to get a list of devices that announce _osc._udp (DS100 OSC communication active) or _oca._tcp (DS100 OCP1/AES70 communication active) zeroconf service and choose the DS100 or [SpaConSim](https://github.com/ChristianAhrens/SpaConSim) simulation tool you want to connect to
 7. 'Online' inidicator on bottom right of the UI becomes active
-    * If using SpaConSim, adjust the refresh rate slider on the tool's UI to the desired interval (= object value change speed). The tool's UI displays current object value polling rate in the performance metering.
 8. Go to [Statistics](#protocolbridgingtrafficloggingandplotting) tab and click on DS100 legend item to activate DS100 protocol traffic plotting/logging.
 9. Go to [Sound Object Table](#soundobjecttable) tab and select one of the Sound Objects for which you previously activated receiving object values (button with 'incoming' arrow symbol)
 10. Details editor is opened for the Sound Object and shows live object value changes
 11. Go to [Multi Sound Object XY Pad](#twodimensionalpositionslider) tab to see the live object value changes for all objects with activated value receiving
-13. Go to [Sound Object Table](#soundobjecttable) tab, select a Sound Object and enable sending object values to DS100 by toggling the button with 'outgoing' arrow symbol
-    * When modifying the x, y, Reverb, Spread and Mode values through UI, they are now sent to DS100. Note: When using [SpaConSim](https://github.com/ChristianAhrens/SpaConSim), set its update interval to 0, otherwise it will immediately update the just sent value with a new simulated value.
-14. You now can set up a bridging protocol in [Settings](#appsettings) tab if you like, following instructions provided for each individual [implemented protocol](#appsettingprotocols)
-    * Keep in mind that incoming protocol values are only forwarded to DS100 and not directly shown on UI. The updated values are shown on UI as soon as values are reflected by DS100. Without a working connection to DS100 device or simulation, the UI will not show the changes.
+12. You now can set up a bridging protocol in [Settings](#appsettings) tab if you like, following instructions provided for each individual [implemented protocol](#appsettingprotocols)
+    * Keep in mind that incoming protocol values are only forwarded to DS100 and not directly shown on UI. The updated values are shown on UI as soon as values are reflected by DS100. Without a working connection to DS100 device or simulation, the UI will not show external/3rdParty changes.
     * [Statistics](#protocolbridgingtrafficloggingandplotting) tab shows bridging traffic and therefor can be used to monitor incoming protocl values without a working connection to DS100 device or simulation.
 
 
@@ -169,10 +165,13 @@ A dropdown menu below the multiselection visualization area can be used to store
 
 ### Multi Sound Object XY Pad
 
-![Showreel.006.png](Resources/Documentation/Showreel/Showreel.006.png "Multislider")
+![Showreel.033.png](Resources/Documentation/Showreel/Showreel.033.png "MultisliderAll")
 
-All Sound Objects assigned to the selected DS100 mapping area are shown simultaneously. The dropdown on the bottom can be used to switch the selection to one of the four available mapping areas.
-The selection / multiselection in Sound Object table is followed here and reflected in Sound Object circle sizing - selected objects are shown enlarged.
+When 'All' is selected in the mapping area dropdown, all SoundObjects that are configured in SoundObjects table, are shown alongside a visual representation of loudspeaker positions and coordinate mappings as are configured in the connected DS100 device.
+
+![Showreel.006.png](Resources/Documentation/Showreel/Showreel.006.png "MultisliderMapping")
+
+When a specific coordinate mapping is selected in the mapping area dropdown, only the Soundobjects that are setup respectively in the Soundobjects table are shown. The selection / multiselection in SoundObject table is followed here and reflected in SoundObject circle sizing - selected objects are shown enlarged.
 
 ![Showreel.007.png](Resources/Documentation/Showreel/Showreel.007.png "Multislider Bkg+Names")
 
@@ -201,7 +200,7 @@ Alternatively the mode can be used with a keyboard+mouse setup as well by clicki
 
 ![Showreel.012.png](Resources/Documentation/Showreel/Showreel.012.png "Multislider extended multiselection interaction")
 
-Extended Sound Object multiselection visualization and interaction can be activated with a toggle button in the lower button bar.
+Extended SoundObject multiselection visualization and interaction can be activated with a toggle button in the lower button bar.
 When enabled, the currently active multiselection of Sound Objects can be moved, rotated and scaled using the two interaction-handles. The Sound Objects part of the currently active multiselection are visualized with connecting lines.
 
 
@@ -278,7 +277,7 @@ For details on the settings for the implemented protocols, see the individual do
   * [Generic d&b OSC protocol communication](Resources/Documentation/BridgingProtocols/GenericOSC.md)
   * [d&b DAW plugin communication](Resources/Documentation/BridgingProtocols/DAWPlugin.md)
   * [DiGiCo SD series mixing console communication](Resources/Documentation/BridgingProtocols/DiGiCoOSC.md)
-  * [Blacktrax tracking system communication *](Resources/Documentation/BridgingProtocols/BlacktraxRTTrPM.md)
+  * [Blacktrax tracking system communication](Resources/Documentation/BridgingProtocols/BlacktraxRTTrPM.md)
   * [Generic MIDI communication](Resources/Documentation/BridgingProtocols/GenericMIDI.md)
   * [Yamaha OSC communication *](Resources/Documentation/BridgingProtocols/YamahaOSC.md)
   * [ADM OSC communication *](Resources/Documentation/BridgingProtocols/ADMOSC.md)

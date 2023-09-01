@@ -21,6 +21,8 @@
 
 #include "SpaConBridgeCommon.h"
 
+#include "StandalonePollingBase.h"
+
 
 namespace SpaConBridge
 {
@@ -37,7 +39,8 @@ class SelectGroupSelector;
  */
 class MultiSoundobjectComponent :	public Component,
 									public ComboBox::Listener,
-									public ToggleButton::Listener
+									public ToggleButton::Listener,
+									public StandalonePollingBase
 {
 public:
 	MultiSoundobjectComponent();
@@ -78,7 +81,11 @@ protected:
 	//==============================================================================
 	void buttonClicked(Button* button) override;
 
+	//==============================================================================
+	void HandleObjectDataInternal(const RemoteObjectIdentifier& roi, const RemoteObjectMessageData& msgData) override;
+
 private:
+	//==============================================================================
 	std::unique_ptr<MultiSoundobjectSlider>	m_multiSoundobjectSlider;	/**> Multi-source 2D-Slider. */
 
 	std::unique_ptr<ComboBox>				m_mappingAreaSelect;		/**> ComboBox selector for the coordinate mapping area. */

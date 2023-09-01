@@ -376,10 +376,10 @@ void ScenesPageComponent::textEditorFocusLost(TextEditor& textEdit)
 
 /**
  * Reimplemented method to handle updated object data for objects that have been added for standalone polling.
- * @param	objectId	The remote object identifier of the object that shall be handled.
+ * @param	roi			The remote object identifier of the object that shall be handled.
  * @param	msgData		The remote object message data that was received and shall be handled.
  */
-void ScenesPageComponent::HandleObjectDataInternal(RemoteObjectIdentifier objectId, const RemoteObjectMessageData& msgData)
+void ScenesPageComponent::HandleObjectDataInternal(const RemoteObjectIdentifier& roi, const RemoteObjectMessageData& msgData)
 {
 	// all remote objects that are read here are of type string and must meet these common criteria
 	if (msgData._valType == ROVT_STRING
@@ -388,7 +388,7 @@ void ScenesPageComponent::HandleObjectDataInternal(RemoteObjectIdentifier object
 	{
 		auto remoteObjectContentString = String(static_cast<char*>(msgData._payload), msgData._payloadSize);
 
-		switch (objectId)
+		switch (roi)
 		{
 		case ROI_Scene_SceneIndex:
 			{

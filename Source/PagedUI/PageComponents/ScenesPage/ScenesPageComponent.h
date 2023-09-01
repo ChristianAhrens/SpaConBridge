@@ -63,7 +63,7 @@ public:
 	void lookAndFeelChanged() override;
 
 protected:
-	void HandleObjectDataInternal(RemoteObjectIdentifier objectId, const RemoteObjectMessageData& msgData) override;
+	void HandleObjectDataInternal(const RemoteObjectIdentifier& roi, const RemoteObjectMessageData& msgData) override;
 
 private:
 	void PinSceneRecall(const std::pair<int, int>& sceneIndex);

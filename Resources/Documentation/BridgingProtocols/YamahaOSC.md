@@ -1,6 +1,6 @@
-## Yamaha OSC bridging settings
+## Yamaha / L'ISA OSC bridging settings
 
-**Yamaha OSC bridging support is purely experimental - if the commands as described below can actually be used in PM series consoles has yet to be verified/tested. If you are interested in this functionality and have the means to try it out, feedback is welcome!**
+**Yamaha OSC bridging support is experimental - the commands as described below are used in the L'ISA control UI integrated in Yamaha PM series consoles and have been tested only once to actually work ;)**
 
 ![Showreel.029.png](../Showreel/Showreel.029.png "Yamaha OSC bridging settings")
 

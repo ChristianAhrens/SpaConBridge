@@ -24,7 +24,7 @@
 #include "PageComponentBase.h"
 #include "HeaderWithElmListComponent.h"
 
-#include "../../ProtocolBridgingWrapper.h"
+#include "../../StandalonePollingBase.h"
 
 
 namespace SpaConBridge
@@ -131,8 +131,7 @@ private:
  * as base component for pages that use remote objects for internal use only without
  * submitting them as active for bridging.
  */
-class StandalonePollingPageComponentBase :	public PageComponentBase,
-											public ProtocolBridgingWrapper::Listener
+class StandalonePollingPageComponentBase :	public PageComponentBase, public StandalonePollingBase
 {
 public:
 	explicit StandalonePollingPageComponentBase(UIPageId id);
@@ -147,23 +146,7 @@ public:
 	void paint(Graphics&) override;
 	void resized() override;
 
-protected:
-	const std::map<RemoteObjectIdentifier, std::vector<RemoteObjectAddressing>>& GetStandalonePollingObjects() const;
-	void SetStandalonePollingObjects(const std::map<RemoteObjectIdentifier, std::vector<RemoteObjectAddressing>>& objects);
-	void AddStandalonePollingObject(const RemoteObjectIdentifier roi, const RemoteObjectAddressing& addressing);
-    
-    void triggerPollOnce();
-
-	//==========================================================================
-	void HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier objectId, const RemoteObjectMessageData& msgData) override;
-
-	//==============================================================================
-	virtual void HandleObjectDataInternal(RemoteObjectIdentifier objectId, const RemoteObjectMessageData& msgData) = 0;
-
-
 private:
-	std::map<RemoteObjectIdentifier, std::vector<RemoteObjectAddressing>>	m_objectsForStandalonePolling;	/**< Objects that are registered for 'monitoring' */
-
 	//==============================================================================
 	std::unique_ptr<HeaderWithElmListComponent>	m_elementsContainer;
 	std::unique_ptr<BorderedComponentContainer>	m_borderedElementsContainer;

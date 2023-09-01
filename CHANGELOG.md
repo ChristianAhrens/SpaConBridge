@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.12.0] 2023-09-01
+### Added
+- Added support for visualizing all coordinate mappings and loudspeaker positions in MultiSoundobject UI (and read them from connected DS100 devices ofc)
+
+### Changed
+- Modified BlackTrax RTTrPM protocol bridging settings section to no longer show 'Beta' background
+- Modified default config to use settings page as starting point
+
+### Fixed
+
 ## [0.11.2] 2023-08-31
 ### Added
 - Added support for BlackTrax RTTrPM protocol bridging x/y axis swapping for 'Relative' coordinate handling

@@ -1882,30 +1882,32 @@ juce::Point<float> MultiSoundobjectSlider::GetPointForRelativePosOnMapping(const
         auto mappingVirtP4 = juce::Vector3D<float>(mappingVirtP3.x, mappingVirtP1.y, 0.0f);
         auto& isFlipped = m_mappingFlip.at(mapping);
 
-        /*WIP*/
-        auto relPosWithSwap = isFlipped ? juce::Point<float>(relativePos.y, relativePos.x) : relativePos;
-
-        auto vectorVirtX = mappingVirtP2 - mappingVirtP3;
-        auto vectorX = mappingP2 - mappingP3;
-        auto vectorVirtY = mappingVirtP4 - mappingVirtP3;
-        auto vectorY = mappingP4 - mappingP3;
-
-        /*wtf - this is a hack due to lazyness and lack of knowledge of linear algebra*/
-        auto xs = 1.0f;
-        auto ys = 1.0f;
-        if (vectorVirtX.x < 0 || vectorVirtX.y < 0)
-            xs = -1.0f;
-        if (vectorVirtY.x < 0 || vectorVirtY.y < 0)
-            ys = -1.0f;
-
-        auto relVectorX = vectorX * (relPosWithSwap.x / vectorVirtX.length()) * xs;
-        auto relVectorY = vectorY * (relPosWithSwap.y / vectorVirtY.length()) * ys;
-
-        auto origVector = (mappingVirtP3.x < mappingVirtP1.x && mappingVirtP3.y < mappingVirtP1.y) ? mappingP3 : mappingP1;
+        /*wtf - following is hacky due to lazyness and lack of knowledge of linear algebra*/
+        /**/auto relPosWithSwap = isFlipped ? juce::Point<float>(relativePos.y, relativePos.x) : relativePos;
+        /**/
+        /**/auto vectorVirtX = mappingVirtP2 - mappingVirtP3;
+        /**/auto vectorX = mappingP2 - mappingP3;
+        /**/auto vectorVirtY = mappingVirtP4 - mappingVirtP3;
+        /**/auto vectorY = mappingP4 - mappingP3;
+        /**/
+        /**/// get a factor for inversion if virt point config suggests inverted movement
+        /**/auto xs = 1.0f;
+        /**/auto ys = 1.0f;
+        /**/if (vectorVirtX.x < 0 || vectorVirtX.y < 0)
+        /**/    xs = -1.0f;
+        /**/if (vectorVirtY.x < 0 || vectorVirtY.y < 0)
+        /**/    ys = -1.0f;
+        /**/
+        /**/// get real and relative origin vectors
+        /**/auto relOrigVector = (mappingVirtP3.x < mappingVirtP1.x && mappingVirtP3.y < mappingVirtP1.y) ? mappingVirtP3 : mappingVirtP1;
+        /**/auto origVector = (mappingVirtP3.x < mappingVirtP1.x && mappingVirtP3.y < mappingVirtP1.y) ? mappingP3 : mappingP1;
+        /**/
+        /**/// combine that information 
+        /**/auto relVectorX = vectorX * (relPosWithSwap.x - relOrigVector.x) / vectorVirtX.length() * xs;
+        /**/auto relVectorY = vectorY * (relPosWithSwap.y - relOrigVector.y) / vectorVirtY.length() * ys;
+        /**/
+        /**/auto realPos = origVector + relVectorX + relVectorY;
         /*wtf*/
-
-        auto realPos = origVector + relVectorX + relVectorY;
-        /*WIP*/
 
         return GetPointForRealCoordinate(realPos);
     }

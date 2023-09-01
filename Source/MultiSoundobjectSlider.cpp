@@ -387,15 +387,17 @@ void MultiSoundobjectSlider::paintSpeakersAndMappingAreas2DVisu(Graphics& g)
     g.drawRect(GetAspectAndMarginCorrectedBounds().toFloat(), 1.5f);
 
     // Mapping Areas
-    g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
-    g.setFont(18);
     for (auto i = int(MAI_First); i <= int(MAI_Fourth); i++)
     {
         auto mappingAreaId = static_cast<MappingAreaId>(i);
 
+        g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
+
         if (m_mappingAreaPaths.count(mappingAreaId) == 1 
             && m_mappingName.count(mappingAreaId) == 1
-            && m_mappingTextAnchorPointAndRot.count(mappingAreaId) == 1)
+            && m_mappingTextAnchorPointAndRot.count(mappingAreaId) == 1
+            && m_mappingCornersVirtual.count(mappingAreaId) == 1
+            && m_mappingCornersVirtualPoints.count(mappingAreaId) == 1)
         {
             g.fillPath(m_mappingAreaPaths.at(mappingAreaId));
 
@@ -404,6 +406,7 @@ void MultiSoundobjectSlider::paintSpeakersAndMappingAreas2DVisu(Graphics& g)
                 mappingString = m_mappingName.at(mappingAreaId);
 
             g.saveState();
+            g.setFont(18);
             auto margin = 5;
             auto& anchorPoint = m_mappingTextAnchorPointAndRot.at(mappingAreaId).first;
             auto& angle = m_mappingTextAnchorPointAndRot.at(mappingAreaId).second;
@@ -411,6 +414,24 @@ void MultiSoundobjectSlider::paintSpeakersAndMappingAreas2DVisu(Graphics& g)
             g.addTransform(juce::AffineTransform().rotated(angle));
             g.drawSingleLineText(mappingString, margin, -margin);
             g.restoreState();
+
+            g.setFont(12);
+            auto& virtCorners = m_mappingCornersVirtual.at(mappingAreaId);
+            auto& virtPoints = m_mappingCornersVirtualPoints.at(mappingAreaId);
+            if (virtCorners.size() >= 2)
+            {
+                auto& p1Point = virtPoints.at(0);
+                auto& p1Corner = virtCorners.at(0);
+                juce::String p1Str;
+                p1Str << "M" << mappingAreaId << "P1(" << p1Corner.x << "," << p1Corner.y << ")";
+                g.drawSingleLineText(p1Str, p1Point.x + margin, p1Point.y - margin);
+
+                auto& p3Point = virtPoints.at(1);
+                auto& p3Corner = virtCorners.at(1);
+                juce::String p3Str;
+                p3Str << "M" << mappingAreaId << "P3(" << p3Corner.x << "," << p3Corner.y << ")";
+                g.drawSingleLineText(p3Str, p3Point.x - g.getCurrentFont().getStringWidth(p3Str) - margin, p3Point.y + margin);
+            }
         }
     }
 
@@ -1991,8 +2012,9 @@ void MultiSoundobjectSlider::PrerenderSpeakerAndMappingAreaInBounds()
         {
             auto& p0 = m_mappingCornersReal.at(mappingAreaId).at(2);
             auto& p1 = m_mappingCornersReal.at(mappingAreaId).at(3);
+            auto& p2 = m_mappingCornersReal.at(mappingAreaId).at(0);
             m_mappingTextAnchorPointAndRot[mappingAreaId].first = GetPointForRealCoordinate(p0).toInt();
-            m_mappingTextAnchorPointAndRot[mappingAreaId].second = juce::Line<int>(p0.x, p0.y, p1.x, p1.y).getAngle();
+            m_mappingTextAnchorPointAndRot[mappingAreaId].second = juce::Line<float>(p0.x, p0.y, p1.x, p1.y).getAngle();
             auto prevPoint = GetPointForRealCoordinate(m_mappingCornersReal.at(mappingAreaId).at(3));
             for (auto j = 0; j < 4; j++) // p1 real - p4 real
             {
@@ -2004,6 +2026,10 @@ void MultiSoundobjectSlider::PrerenderSpeakerAndMappingAreaInBounds()
                     prevPoint = mappingAreaCornerPoint;
                 }
             }
+
+            m_mappingCornersVirtualPoints[mappingAreaId].resize(2);
+            m_mappingCornersVirtualPoints[mappingAreaId][0] = GetPointForRealCoordinate(p2).toInt();
+            m_mappingCornersVirtualPoints[mappingAreaId][1] = GetPointForRealCoordinate(p0).toInt();
         }
     }
 }

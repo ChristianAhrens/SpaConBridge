@@ -218,6 +218,7 @@ private:
 	bool																			m_coordinateMappingSettingsDataReady{ false };
 	std::map<MappingAreaId, std::vector<juce::Vector3D<float>>>						m_mappingCornersReal;
 	std::map<MappingAreaId, std::vector<juce::Vector3D<float>>>						m_mappingCornersVirtual;
+	std::map<MappingAreaId, std::vector<juce::Point<int>>>							m_mappingCornersVirtualPoints;
 	std::map<MappingAreaId, bool>													m_mappingFlip;
 	std::map<MappingAreaId, juce::String>											m_mappingName;
 	

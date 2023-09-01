@@ -512,7 +512,7 @@ MappingAreaId MultiSoundobjectComponent::GetSelectedMapping() const
  */
 bool MultiSoundobjectComponent::SetSelectedMapping(MappingAreaId mapping)
 {
-	if (m_multiSoundobjectSlider)
+	if (m_multiSoundobjectSlider && m_loadImage && m_removeImage && m_muselvisuEnable)
 	{
 		if (mapping == MAI_Invalid)
 		{
@@ -524,13 +524,20 @@ bool MultiSoundobjectComponent::SetSelectedMapping(MappingAreaId mapping)
 				restartTimer();
 				triggerPollOnce();
 			}
+            
+            m_loadImage->setEnabled(false);
+            m_removeImage->setEnabled(false);
 
 			m_muselvisuEnable->setToggleState(false, juce::dontSendNotification);
 			m_muselvisuEnable->setEnabled(false);
 			SetMuSelVisuEnabled(false);
 		}
 		else
-			m_muselvisuEnable->setEnabled(true);
+        {
+            m_loadImage->setEnabled(true);
+            m_removeImage->setEnabled(true);
+            m_muselvisuEnable->setEnabled(true);
+        }
 		m_multiSoundobjectSlider->SetSelectedMapping(mapping);
 
 		resized();

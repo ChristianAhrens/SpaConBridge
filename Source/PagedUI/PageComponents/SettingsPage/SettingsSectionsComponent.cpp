@@ -337,7 +337,6 @@ void SettingsSectionsComponent::createRTTrPMSettingsSection()
 {
 	// BlackTrax RTTrPM settings section
 	m_RTTrPMBridgingSettings = std::make_unique<HeaderWithElmListComponent>();
-	m_RTTrPMBridgingSettings->setBackgroundDecorationText("Beta");
 	m_RTTrPMBridgingSettings->setActiveToggleText("Use " + GetProtocolBridgingNiceName(PBT_BlacktraxRTTrPM) + " Bridging");
 	m_RTTrPMBridgingSettings->setHeaderText(GetProtocolBridgingNiceName(PBT_BlacktraxRTTrPM) + " Bridging Settings");
 	m_RTTrPMBridgingSettings->setHelpUrl(URL(GetDocumentationBaseWebUrl() + "BridgingProtocols/BlacktraxRTTrPM.md"));

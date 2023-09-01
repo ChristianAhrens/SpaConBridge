@@ -77,7 +77,7 @@ MultiSoundobjectComponent::MultiSoundobjectComponent()
 	// extended multiselection interaction enable
 	m_muselvisuEnable = std::make_unique<DrawableButton>("MuselVisuInteraction", DrawableButton::ButtonStyle::ImageOnButtonBackground);
 	m_muselvisuEnable->addListener(this);
-	m_muselvisuEnable->setTooltip("Enable extended multiselection interaction");
+	m_muselvisuEnable->setTooltip("Enable extended multiselection interaction.\nOnly available when specific Mapping Area is selected.");
 	m_muselvisuEnable->setClickingTogglesState(true);
 	addAndMakeVisible(m_muselvisuEnable.get());
 
@@ -514,13 +514,23 @@ bool MultiSoundobjectComponent::SetSelectedMapping(MappingAreaId mapping)
 {
 	if (m_multiSoundobjectSlider)
 	{
-		if (mapping == MAI_Invalid && m_multiSoundobjectSlider->GetSelectedMapping() != MAI_Invalid)
+		if (mapping == MAI_Invalid)
 		{
-			m_multiSoundobjectSlider->SetCoordinateMappingSettingsDataReady(false);
-			m_multiSoundobjectSlider->SetSpeakerPositionDataReady(false);
-			restartTimer();
-			triggerPollOnce();
+			if (m_multiSoundobjectSlider->GetSelectedMapping() != MAI_Invalid)
+			{
+				m_multiSoundobjectSlider->SetCoordinateMappingSettingsDataReady(false);
+				m_multiSoundobjectSlider->SetSpeakerPositionDataReady(false);
+
+				restartTimer();
+				triggerPollOnce();
+			}
+
+			m_muselvisuEnable->setToggleState(false, juce::dontSendNotification);
+			m_muselvisuEnable->setEnabled(false);
+			SetMuSelVisuEnabled(false);
 		}
+		else
+			m_muselvisuEnable->setEnabled(true);
 		m_multiSoundobjectSlider->SetSelectedMapping(mapping);
 
 		resized();

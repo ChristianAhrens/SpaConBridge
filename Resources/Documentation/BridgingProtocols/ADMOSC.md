@@ -13,7 +13,7 @@ _* Incoming polar and cartesian coordinate values are buffered in an internal va
 | -- | -- | -- |
 | _/adm/obj/[CH]/azim_ | Combined Mapped Sound Object Position XY | _DS100 target mapping area id is filled in from config_ |
 | _/adm/obj/[CH]/elev_ | Combined Mapped Sound Object Position XY | _DS100 target mapping area id is filled in from config_ |
-| _/adm/obj/[CH]/dist_ | _not used_ |  |
+| _/adm/obj/[CH]/dist_ | Combined Mapped Sound Object Position XY | _DS100 target mapping area id is filled in from config_ |  |
 | _/adm/obj/[CH]/aed_ | Combined Mapped Sound Object Position XY | _DS100 target mapping area id is filled in from config_ |
 | _/adm/obj/[CH]/x_ | Combined Mapped Sound Object Position XY | _DS100 target mapping area id is filled in from config_ |
 | _/adm/obj/[CH]/y_ | Combined Mapped Sound Object Position XY | _DS100 target mapping area id is filled in from config_ |
@@ -21,4 +21,4 @@ _* Incoming polar and cartesian coordinate values are buffered in an internal va
 | _/adm/obj/[CH]/xyz_ | Combined Mapped Sound Object Position XY | _DS100 target mapping area id is filled in from config_ |
 | _/adm/obj/[CH]/gain_ | Matrix Input Gain | |
 | _/adm/obj/[CH]/w_ | Sound Object Spread | |
-| _/adm/config/obj/1/cartesian_ | | _Triggers sync of internal cache contents (cartesian->polar or polar->cartesian)_ |
+| _/adm/config/obj/1/cartesian_ | | _Triggers sync of internal cache contents (cartesian->polar or polar->cartesian) and 'cartesian' is sent out when previous input was in 'polar'_ |

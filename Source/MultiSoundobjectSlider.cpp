@@ -1959,7 +1959,7 @@ juce::Rectangle<int> MultiSoundobjectSlider::GetAspectAndMarginCorrectedBounds()
         bounds.reduce(12, 12);
 
         auto boundsAspect = bounds.toFloat().getAspectRatio();
-        auto realAspect = m_realYBoundingRange.getLength() / m_realXBoundingRange.getLength();
+        auto realAspect = m_realXBoundingRange.getLength() / m_realYBoundingRange.getLength();
 
         if (boundsAspect > realAspect)
         {

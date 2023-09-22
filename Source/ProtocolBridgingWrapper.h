@@ -182,9 +182,9 @@ public:
 	bool SetUnmuteProtocolMatrixOutputProcessorId(ProtocolId protocolId, MatrixOutputProcessorId matrixOutputProcessorId);
 	bool SetUnmuteProtocolMatrixOutputProcessorIds(ProtocolId protocolId, const std::vector<MatrixOutputProcessorId>& matrixOutputProcessorIds);
 
-	bool GetMuteProtocolRemoteObjects(ProtocolId protocolId, const std::vector<RemoteObject>& objects);
-	bool SetMuteProtocolRemoteObjects(ProtocolId protocolId, const std::vector<RemoteObject>& objects);
-	bool SetUnmuteProtocolRemoteObjects(ProtocolId protocolId, const std::vector<RemoteObject>& objects);
+	bool GetProtocolRemoteObjectsMutedState(ProtocolId protocolId, const std::vector<RemoteObject>& objects);
+	bool SetProtocolRemoteObjectsStateMuted(ProtocolId protocolId, const std::vector<RemoteObject>& objects);
+	bool SetProtocolRemoteObjectsStateUnmuted(ProtocolId protocolId, const std::vector<RemoteObject>& objects);
 
 	juce::IPAddress GetProtocolIpAddress(ProtocolId protocolId);
 	bool SetProtocolIpAddress(ProtocolId protocolId, juce::IPAddress ipAddress, bool dontSendNotification = false);
@@ -245,6 +245,7 @@ private:
 
 	//==========================================================================
 	bool UpdateMutedProtocolRemoteObjects(ProtocolId protocolId, const std::vector<RemoteObject>& objects, bool unmuteObjects);
+	const std::vector<RemoteObject> GetMutedProtocolRemoteObjects(ProtocolId protocolId);
 
 	/**
 	 * A processing engine node can send data to and receive data from multiple protocols that is encapsulates.

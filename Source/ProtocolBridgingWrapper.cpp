@@ -814,7 +814,7 @@ bool ProtocolBridgingWrapper::GetMuteProtocolSoundobjectProcessorId(ProtocolId p
 	if (!ctrl)
 		return false;
 		
-	return GetMuteProtocolRemoteObjects(protocolId, ctrl->GetSoundobjectProcessorRemoteObjects(soundobjectProcessorId));
+	return GetProtocolRemoteObjectsMutedState(protocolId, ctrl->GetSoundobjectProcessorRemoteObjects(soundobjectProcessorId));
 }
 
 /**
@@ -841,12 +841,13 @@ bool ProtocolBridgingWrapper::SetMuteProtocolSoundobjectProcessorIds(ProtocolId 
 	if (!ctrl)
 		return false;
 
-	auto remoteObjects = std::vector<RemoteObject>();
+	auto remoteObjects = GetMutedProtocolRemoteObjects(protocolId);
 	for (auto const& soundobjectProcessorId : soundobjectProcessorIds)
 		for (auto const& object : ctrl->GetSoundobjectProcessorRemoteObjects(soundobjectProcessorId))
-			remoteObjects.push_back(object);
+			if (std::find(remoteObjects.begin(), remoteObjects.end(), object) == remoteObjects.end())
+				remoteObjects.push_back(object);
 
-	return SetMuteProtocolRemoteObjects(protocolId, remoteObjects);
+	return SetProtocolRemoteObjectsStateMuted(protocolId, remoteObjects);
 }
 
 /**
@@ -878,7 +879,7 @@ bool ProtocolBridgingWrapper::SetUnmuteProtocolSoundobjectProcessorIds(ProtocolI
 		for (auto const& object : ctrl->GetSoundobjectProcessorRemoteObjects(soundobjectProcessorId))
 			remoteObjects.push_back(object);
 
-	return SetUnmuteProtocolRemoteObjects(protocolId, remoteObjects);
+	return SetProtocolRemoteObjectsStateUnmuted(protocolId, remoteObjects);
 }
 
 /**
@@ -893,7 +894,7 @@ bool ProtocolBridgingWrapper::GetMuteProtocolMatrixInputProcessorId(ProtocolId p
 	if (!ctrl)
 		return false;
 
-	return GetMuteProtocolRemoteObjects(protocolId, ctrl->GetMatrixInputProcessorRemoteObjects(matrixInputProcessorId));
+	return GetProtocolRemoteObjectsMutedState(protocolId, ctrl->GetMatrixInputProcessorRemoteObjects(matrixInputProcessorId));
 }
 
 /**
@@ -920,12 +921,13 @@ bool ProtocolBridgingWrapper::SetMuteProtocolMatrixInputProcessorIds(ProtocolId 
 	if (!ctrl)
 		return false;
 
-	auto remoteObjects = std::vector<RemoteObject>();
+	auto remoteObjects = GetMutedProtocolRemoteObjects(protocolId);
 	for (auto const& matrixInputProcessorId : matrixInputProcessorIds)
 		for (auto const& object : ctrl->GetMatrixInputProcessorRemoteObjects(matrixInputProcessorId))
-			remoteObjects.push_back(object);
+			if (std::find(remoteObjects.begin(), remoteObjects.end(), object) == remoteObjects.end())
+				remoteObjects.push_back(object);
 
-	return SetMuteProtocolRemoteObjects(protocolId, remoteObjects);
+	return SetProtocolRemoteObjectsStateMuted(protocolId, remoteObjects);
 }
 
 /**
@@ -957,7 +959,7 @@ bool ProtocolBridgingWrapper::SetUnmuteProtocolMatrixInputProcessorIds(ProtocolI
 		for (auto const& object : ctrl->GetMatrixInputProcessorRemoteObjects(matrixInputProcessorId))
 			remoteObjects.push_back(object);
 
-	return SetUnmuteProtocolRemoteObjects(protocolId, remoteObjects);
+	return SetProtocolRemoteObjectsStateUnmuted(protocolId, remoteObjects);
 }
 
 /**
@@ -972,7 +974,7 @@ bool ProtocolBridgingWrapper::GetMuteProtocolMatrixOutputProcessorId(ProtocolId 
 	if (!ctrl)
 		return false;
 
-	return GetMuteProtocolRemoteObjects(protocolId, ctrl->GetMatrixOutputProcessorRemoteObjects(matrixOutputProcessorId));
+	return GetProtocolRemoteObjectsMutedState(protocolId, ctrl->GetMatrixOutputProcessorRemoteObjects(matrixOutputProcessorId));
 }
 
 /**
@@ -999,12 +1001,13 @@ bool ProtocolBridgingWrapper::SetMuteProtocolMatrixOutputProcessorIds(ProtocolId
 	if (!ctrl)
 		return false;
 
-	auto remoteObjects = std::vector<RemoteObject>();
+	auto remoteObjects = GetMutedProtocolRemoteObjects(protocolId);
 	for (auto const& matrixOutputProcessorId : matrixOutputProcessorIds)
 		for (auto const& object : ctrl->GetMatrixOutputProcessorRemoteObjects(matrixOutputProcessorId))
-			remoteObjects.push_back(object);
+			if (std::find(remoteObjects.begin(), remoteObjects.end(), object) == remoteObjects.end())
+				remoteObjects.push_back(object);
 
-	return SetMuteProtocolRemoteObjects(protocolId, remoteObjects);
+	return SetProtocolRemoteObjectsStateMuted(protocolId, remoteObjects);
 }
 
 /**
@@ -1036,7 +1039,7 @@ bool ProtocolBridgingWrapper::SetUnmuteProtocolMatrixOutputProcessorIds(Protocol
 		for (auto const& object : ctrl->GetMatrixOutputProcessorRemoteObjects(matrixOutputProcessorId))
 			remoteObjects.push_back(object);
 
-	return SetUnmuteProtocolRemoteObjects(protocolId, remoteObjects);
+	return SetProtocolRemoteObjectsStateUnmuted(protocolId, remoteObjects);
 }
 
 /**
@@ -1046,28 +1049,9 @@ bool ProtocolBridgingWrapper::SetUnmuteProtocolMatrixOutputProcessorIds(Protocol
  * @param objects		The list of objects of the protocol to get the mute states for.
  * @return				True if all given objects of the given protocol are muted, false if not.
  */
-bool ProtocolBridgingWrapper::GetMuteProtocolRemoteObjects(ProtocolId protocolId, const std::vector<RemoteObject>& objects)
+bool ProtocolBridgingWrapper::GetProtocolRemoteObjectsMutedState(ProtocolId protocolId, const std::vector<RemoteObject>& objects)
 {
-	auto mutedObjects = std::vector<RemoteObject>();
-
-	if (0 != m_bridgingProtocolMutedObjects.count(protocolId))
-	{
-		mutedObjects = m_bridgingProtocolMutedObjects.at(protocolId);
-	}
-	else
-	{
-		auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
-		if (nodeXmlElement)
-		{
-			auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
-			if (protocolXmlElement)
-			{
-				auto mutedObjsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
-				ProcessingEngineConfig::ReadMutedObjects(mutedObjsXmlElement, mutedObjects);
-				m_bridgingProtocolMutedObjects[protocolId] = mutedObjects;
-			}
-		}
-	}
+	auto mutedObjects = GetMutedProtocolRemoteObjects(protocolId);
 
 	if (mutedObjects.empty())
 		return false;
@@ -1086,7 +1070,7 @@ bool ProtocolBridgingWrapper::GetMuteProtocolRemoteObjects(ProtocolId protocolId
  * @param objects		The list of objects of the protocol to set the mute states for.
  * @return				True setting mute state succeeded, false if not.
  */
-bool ProtocolBridgingWrapper::SetMuteProtocolRemoteObjects(ProtocolId protocolId, const std::vector<RemoteObject>& objects)
+bool ProtocolBridgingWrapper::SetProtocolRemoteObjectsStateMuted(ProtocolId protocolId, const std::vector<RemoteObject>& objects)
 {
 	return UpdateMutedProtocolRemoteObjects(protocolId, objects, false);
 }
@@ -1098,7 +1082,7 @@ bool ProtocolBridgingWrapper::SetMuteProtocolRemoteObjects(ProtocolId protocolId
  * @param objects		The list of objects of the protocol to set the mute states for.
  * @return				True setting mute state succeeded, false if not.
  */
-bool ProtocolBridgingWrapper::SetUnmuteProtocolRemoteObjects(ProtocolId protocolId, const std::vector<RemoteObject>& objects)
+bool ProtocolBridgingWrapper::SetProtocolRemoteObjectsStateUnmuted(ProtocolId protocolId, const std::vector<RemoteObject>& objects)
 {
 	return UpdateMutedProtocolRemoteObjects(protocolId, objects, true);
 }
@@ -1122,15 +1106,38 @@ bool ProtocolBridgingWrapper::UpdateMutedProtocolRemoteObjects(ProtocolId protoc
 			auto mutedObjects = std::vector<RemoteObject>();
 			ProcessingEngineConfig::ReadMutedObjects(mutedObjsXmlElement, mutedObjects);
 			auto oldMutedObjects = mutedObjects;
-			for (auto const& object : objects)
+
+			if (unmuteObjects)
 			{
-				auto objIter = std::find(mutedObjects.begin(), mutedObjects.end(), object);
-				if (unmuteObjects && objIter != mutedObjects.end())
-					mutedObjects.erase(objIter);
-				else if (!unmuteObjects && objIter == mutedObjects.end())
-					mutedObjects.push_back(object);
+				// if list objects shall be unmuted, iterate through new list and remove them if they are present
+				for (auto const& object : objects)
+				{
+					auto objIter = std::find(mutedObjects.begin(), mutedObjects.end(), object);
+					if (objIter != mutedObjects.end())
+						mutedObjects.erase(objIter);
+				}
+			}
+			else if (!unmuteObjects)
+			{
+				// iterate through old list of muted objects and remove all that are not contained in the list of new objects
+				auto remainingMutedObjects = std::vector<RemoteObject>();
+				for (auto const& mutedObject : mutedObjects)
+				{
+					auto objIter = std::find(objects.begin(), objects.end(), mutedObject);
+					if (objIter != objects.end())
+						remainingMutedObjects.push_back(mutedObject);
+				}
+				mutedObjects = remainingMutedObjects;
+				// iterate through new list of objects and add them if not yet present
+				for (auto const& object : objects)
+				{
+					auto objIter = std::find(mutedObjects.begin(), mutedObjects.end(), object);
+					if (objIter == mutedObjects.end())
+						mutedObjects.push_back(object);
+				}
 			}
 
+			// if there the list was actually modified, apply the modifications
 			if (oldMutedObjects != mutedObjects)
 			{
 				ProcessingEngineConfig::WriteMutedObjects(mutedObjsXmlElement, mutedObjects);
@@ -1148,6 +1155,33 @@ bool ProtocolBridgingWrapper::UpdateMutedProtocolRemoteObjects(ProtocolId protoc
 	}
 
 	return false;
+}
+
+/**
+ * Private helper method to get the list of remote objects that are currently muted for the given bridging protocol.
+ * @param	protocolId		The id of the protocol to get the mute states for.
+ * @return	The requested list of muted objects. Can be empty.
+ */
+const std::vector<RemoteObject> ProtocolBridgingWrapper::GetMutedProtocolRemoteObjects(ProtocolId protocolId)
+{
+	auto mutedObjects = m_bridgingProtocolMutedObjects[protocolId];
+	// if our cache turned out to be empty, fill in what can be read from xml config
+	if (mutedObjects.empty())
+	{
+		auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+		if (nodeXmlElement)
+		{
+			auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+			if (protocolXmlElement)
+			{
+				auto mutedObjsXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
+				ProcessingEngineConfig::ReadMutedObjects(mutedObjsXmlElement, mutedObjects);
+				m_bridgingProtocolMutedObjects[protocolId] = mutedObjects;
+			}
+		}
+	}
+
+	return mutedObjects;
 }
 
 /**

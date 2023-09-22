@@ -114,6 +114,7 @@ public:
 	std::vector<SoundobjectProcessorId> GetSoundobjectProcessorIds() const;
 
 	void UpdateActiveSoundobjects();
+	void CleanupMutedSoundobjects();
 
 	std::vector<RemoteObject> GetSoundobjectProcessorRemoteObjects(SoundobjectProcessorId soundobjectProcessorId);
 
@@ -127,6 +128,7 @@ public:
 	std::vector<MatrixInputProcessorId> GetMatrixInputProcessorIds() const;
 
 	void UpdateActiveMatrixInputs();
+	void CleanupMutedMatrixInputs();
 
 	std::vector<RemoteObject> GetMatrixInputProcessorRemoteObjects(MatrixInputProcessorId matrixInputProcessorId);
 
@@ -140,6 +142,7 @@ public:
 	std::vector<MatrixOutputProcessorId> GetMatrixOutputProcessorIds() const;
 
 	void UpdateActiveMatrixOutputs();
+	void CleanupMutedMatrixOutputs();
 
 	std::vector<RemoteObject> GetMatrixOutputProcessorRemoteObjects(MatrixOutputProcessorId matrixOutputProcessorId);
 
@@ -170,6 +173,10 @@ public:
 	const std::vector<RemoteObject> GetActivatedSoundObjectRemoteObjects();
 	const std::vector<RemoteObject> GetActivatedMatrixInputRemoteObjects();
 	const std::vector<RemoteObject> GetActivatedMatrixOutputRemoteObjects();
+
+	const std::vector<RemoteObject> GetMutedSoundObjectRemoteObjects(const ProtocolBridgingType& bridgingType);
+	const std::vector<RemoteObject> GetMutedMatrixInputRemoteObjects(const ProtocolBridgingType& bridgingType);
+	const std::vector<RemoteObject> GetMutedMatrixOutputRemoteObjects(const ProtocolBridgingType& bridgingType);
 
 	//==========================================================================
 	ProtocolBridgingType GetActiveProtocolBridging();

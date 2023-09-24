@@ -11,6 +11,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.12.1] 2023-09-24
+### Added
+
+### Changed
+- Modified default config to enable showing Soundobject names
+
+### Fixed
+- Fixed excessive CPU resource usage for xml processing by introducing 'bridging mute' state caching
+- Fixed ADM OSC bridging xyz sending when combined value sending is configured
+- Fixed 'all' mapping area multi Soundobject visualization aspect ratio
+- Fixed OCP1/AES70 sending of relative y position values as combination of cached x, z and modified y value
+- Fixed MIDI learner popup to show menu anchored to the learner component instead of mouse cursor position
+
 ## [0.12.0] 2023-09-01
 ### Added
 - Added support for visualizing all coordinate mappings and loudspeaker positions in MultiSoundobject UI (and read them from connected DS100 devices ofc)

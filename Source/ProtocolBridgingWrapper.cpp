@@ -1164,10 +1164,15 @@ bool ProtocolBridgingWrapper::UpdateMutedProtocolRemoteObjects(ProtocolId protoc
  */
 const std::vector<RemoteObject> ProtocolBridgingWrapper::GetMutedProtocolRemoteObjects(ProtocolId protocolId)
 {
-	auto mutedObjects = m_bridgingProtocolMutedObjects[protocolId];
-	// if our cache turned out to be empty, fill in what can be read from xml config
-	if (mutedObjects.empty())
+	auto mutedObjects = std::vector<RemoteObject>();
+
+	if (0 != m_bridgingProtocolMutedObjects.count(protocolId))
 	{
+		mutedObjects = m_bridgingProtocolMutedObjects.at(protocolId);
+	}
+	else
+	{
+		// if our cache turned out to be empty, fill in what can be read from xml config
 		auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 		if (nodeXmlElement)
 		{

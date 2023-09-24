@@ -256,7 +256,6 @@ private:
 	XmlElement											m_bridgingXml;					/**< The current xml config for bridging (contains node xml). */
 	std::map<ProtocolBridgingType, XmlElement>			m_bridgingProtocolCacheMap;		/**< Map that holds the xml config elements of bridging elements when currently not active, to be able to reactivate correct previous config on request. */
 	std::map<ProtocolId, ObjectHandlingState>			m_bridgingProtocolState;		/**< Map that holds the current protocol status as were communicated by protocol processing engine node data handling object. */
-	std::map<ProtocolId, std::vector<RemoteObject>>		m_bridgingProtocolActiveObjects;/**< Map that holds (caches) the currently active objects per protocol. */
 	std::map<ProtocolId, std::vector<RemoteObject>>		m_bridgingProtocolMutedObjects;	/**< Map that holds (caches) the currently muted objects per protocol. */
 	std::vector<ProtocolBridgingWrapper::Listener*>		m_listeners;					/**< The listner objects, for message data handling callback. */
 

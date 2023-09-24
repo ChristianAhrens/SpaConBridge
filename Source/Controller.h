@@ -171,6 +171,10 @@ public:
 	const std::vector<RemoteObject> GetActivatedMatrixInputRemoteObjects();
 	const std::vector<RemoteObject> GetActivatedMatrixOutputRemoteObjects();
 
+	const std::vector<RemoteObject> GetMutedSoundObjectRemoteObjects(const ProtocolBridgingType& bridgingType);
+	const std::vector<RemoteObject> GetMutedMatrixInputRemoteObjects(const ProtocolBridgingType& bridgingType);
+	const std::vector<RemoteObject> GetMutedMatrixOutputRemoteObjects(const ProtocolBridgingType& bridgingType);
+
 	//==========================================================================
 	ProtocolBridgingType GetActiveProtocolBridging();
 	void SetActiveProtocolBridging(ProtocolBridgingType bridgingType);
@@ -275,6 +279,9 @@ public:
 private:
 	//==========================================================================
 	const ProtocolId GetProtocolIdForProtocolType(const ProtocolBridgingType type);
+	
+	//==========================================================================
+	void CleanupMutedObjects();
 
 	//==========================================================================
 	void timerCallback() override;

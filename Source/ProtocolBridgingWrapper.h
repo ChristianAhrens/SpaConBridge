@@ -182,9 +182,9 @@ public:
 	bool SetUnmuteProtocolMatrixOutputProcessorId(ProtocolId protocolId, MatrixOutputProcessorId matrixOutputProcessorId);
 	bool SetUnmuteProtocolMatrixOutputProcessorIds(ProtocolId protocolId, const std::vector<MatrixOutputProcessorId>& matrixOutputProcessorIds);
 
-	bool GetMuteProtocolRemoteObjects(ProtocolId protocolId, const std::vector<RemoteObject>& objects);
-	bool SetMuteProtocolRemoteObjects(ProtocolId protocolId, const std::vector<RemoteObject>& objects);
-	bool SetUnmuteProtocolRemoteObjects(ProtocolId protocolId, const std::vector<RemoteObject>& objects);
+	bool GetProtocolRemoteObjectsMutedState(ProtocolId protocolId, const std::vector<RemoteObject>& objects);
+	bool SetProtocolRemoteObjectsStateMuted(ProtocolId protocolId, const std::vector<RemoteObject>& objects);
+	bool SetProtocolRemoteObjectsStateUnmuted(ProtocolId protocolId, const std::vector<RemoteObject>& objects);
 
 	juce::IPAddress GetProtocolIpAddress(ProtocolId protocolId);
 	bool SetProtocolIpAddress(ProtocolId protocolId, juce::IPAddress ipAddress, bool dontSendNotification = false);
@@ -243,18 +243,21 @@ private:
 	std::unique_ptr<XmlElement> SetupYamahaOSCBridgingProtocol();
 	std::unique_ptr<XmlElement> SetupRemapOSCBridgingProtocol();
 
+	//==========================================================================
+	bool UpdateMutedProtocolRemoteObjects(ProtocolId protocolId, const std::vector<RemoteObject>& objects, bool unmuteObjects);
+	const std::vector<RemoteObject> GetMutedProtocolRemoteObjects(ProtocolId protocolId);
+
 	/**
 	 * A processing engine node can send data to and receive data from multiple protocols that is encapsulates.
 	 * Depending on the node configuration, there can exist two groups of protocols, A and B, that are handled
 	 * in a specific way to pass incoming and outgoing data to each other and this parent controller instance.
 	 */
-	ProcessingEngineNode								m_processingNode;			/**< The node that encapsulates the protocols that are used to send, receive and bridge data. */
-	XmlElement											m_bridgingXml;				/**< The current xml config for bridging (contains node xml). */
-	std::map<ProtocolBridgingType, XmlElement>			m_bridgingProtocolCacheMap;	/**< Map that holds the xml config elements of bridging elements when currently not active, 
-																										 * to be able to reactivate correct previous config on request. */
-	std::map<ProtocolId, ObjectHandlingState>			m_bridgingProtocolState;	/**< Map that holds the current protocol status as were communicated by protocol processing engine node data handling object. */
-
-	std::vector<ProtocolBridgingWrapper::Listener*>		m_listeners;				/**< The listner objects, for message data handling callback. */
+	ProcessingEngineNode								m_processingNode;				/**< The node that encapsulates the protocols that are used to send, receive and bridge data. */
+	XmlElement											m_bridgingXml;					/**< The current xml config for bridging (contains node xml). */
+	std::map<ProtocolBridgingType, XmlElement>			m_bridgingProtocolCacheMap;		/**< Map that holds the xml config elements of bridging elements when currently not active, to be able to reactivate correct previous config on request. */
+	std::map<ProtocolId, ObjectHandlingState>			m_bridgingProtocolState;		/**< Map that holds the current protocol status as were communicated by protocol processing engine node data handling object. */
+	std::map<ProtocolId, std::vector<RemoteObject>>		m_bridgingProtocolMutedObjects;	/**< Map that holds (caches) the currently muted objects per protocol. */
+	std::vector<ProtocolBridgingWrapper::Listener*>		m_listeners;					/**< The listner objects, for message data handling callback. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ProtocolBridgingWrapper)
 };

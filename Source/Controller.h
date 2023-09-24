@@ -114,7 +114,6 @@ public:
 	std::vector<SoundobjectProcessorId> GetSoundobjectProcessorIds() const;
 
 	void UpdateActiveSoundobjects();
-	void CleanupMutedSoundobjects();
 
 	std::vector<RemoteObject> GetSoundobjectProcessorRemoteObjects(SoundobjectProcessorId soundobjectProcessorId);
 
@@ -128,7 +127,6 @@ public:
 	std::vector<MatrixInputProcessorId> GetMatrixInputProcessorIds() const;
 
 	void UpdateActiveMatrixInputs();
-	void CleanupMutedMatrixInputs();
 
 	std::vector<RemoteObject> GetMatrixInputProcessorRemoteObjects(MatrixInputProcessorId matrixInputProcessorId);
 
@@ -142,7 +140,6 @@ public:
 	std::vector<MatrixOutputProcessorId> GetMatrixOutputProcessorIds() const;
 
 	void UpdateActiveMatrixOutputs();
-	void CleanupMutedMatrixOutputs();
 
 	std::vector<RemoteObject> GetMatrixOutputProcessorRemoteObjects(MatrixOutputProcessorId matrixOutputProcessorId);
 
@@ -282,6 +279,9 @@ public:
 private:
 	//==========================================================================
 	const ProtocolId GetProtocolIdForProtocolType(const ProtocolBridgingType type);
+	
+	//==========================================================================
+	void CleanupMutedObjects();
 
 	//==========================================================================
 	void timerCallback() override;

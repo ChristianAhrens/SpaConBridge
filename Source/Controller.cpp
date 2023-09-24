@@ -1779,8 +1779,9 @@ void Controller::timerCallback()
 	int newIntValue;
 	RemoteObjectMessageData newMsgData;
 
+	auto cleanupMutedObjectsRequired = false;
+
 	auto activeSSIdsChanged = false;
-	auto cleanupMutedSSIdsRequired = false;
 	for (auto const& soProcessor : m_soundobjectProcessors)
 	{
 		auto comsMode = soProcessor->GetComsMode();
@@ -1796,7 +1797,7 @@ void Controller::timerCallback()
 				// SoundsourceID change means update is only required when
 				// remote object is currently activated. 
 				activateSSId = ((comsMode & CM_Rx) == CM_Rx);
-				cleanupMutedSSIdsRequired = true;
+				cleanupMutedObjectsRequired = true;
 			}
 
 			if (soProcessor->PopParameterChanged(DCP_Host, DCT_MappingID))
@@ -1804,7 +1805,7 @@ void Controller::timerCallback()
 				// MappingID change means update is only required when
 				// remote object is currently activated. 
 				activateSSId = ((comsMode & CM_Rx) == CM_Rx);
-				cleanupMutedSSIdsRequired = true;
+				cleanupMutedObjectsRequired = true;
 			}
 
 			if (soProcessor->PopParameterChanged(DCP_Host, DCT_ComsMode))
@@ -1929,11 +1930,8 @@ void Controller::timerCallback()
 	}
 	if (activeSSIdsChanged)
 		UpdateActiveSoundobjects();
-	if (cleanupMutedSSIdsRequired)
-		CleanupMutedSoundobjects();
 
 	auto activeMIIdsChanged = false;
-	auto cleanupMutedMIIdsRequired = false;
 	for (auto const& miProcessor : m_matrixInputProcessors)
 	{
 		auto comsMode = miProcessor->GetComsMode();
@@ -1949,7 +1947,7 @@ void Controller::timerCallback()
 				// MatrixInputID change means update is only required when
 				// remote object is currently activated. 
 				activateMIId = ((comsMode & CM_Rx) == CM_Rx);
-				cleanupMutedMIIdsRequired = true;
+				cleanupMutedObjectsRequired = true;
 			}
 
 			if (miProcessor->PopParameterChanged(DCP_Host, DCT_MappingID))
@@ -1957,7 +1955,7 @@ void Controller::timerCallback()
 				// MappingID change means update is only required when
 				// remote object is currently activated. 
 				activateMIId = ((comsMode & CM_Rx) == CM_Rx);
-				cleanupMutedMIIdsRequired = true;
+				cleanupMutedObjectsRequired = true;
 			}
 
 			if (miProcessor->PopParameterChanged(DCP_Host, DCT_ComsMode))
@@ -2055,11 +2053,8 @@ void Controller::timerCallback()
 	}
 	if (activeMIIdsChanged)
 		UpdateActiveMatrixInputs();
-	if (cleanupMutedMIIdsRequired)
-		CleanupMutedMatrixInputs();
 
 	auto activeMOIdsChanged = false;
-	auto cleanupMutedMOIdsRequired = false;
 	for (auto const& moProcessor : m_matrixOutputProcessors)
 	{
 		auto comsMode = moProcessor->GetComsMode();
@@ -2075,7 +2070,7 @@ void Controller::timerCallback()
 				// MatrixOutputID change means update is only required when
 				// remote object is currently activated. 
 				activateMOId = ((comsMode & CM_Rx) == CM_Rx);
-				cleanupMutedMOIdsRequired = true;
+				cleanupMutedObjectsRequired = true;
 			}
 
 			if (moProcessor->PopParameterChanged(DCP_Host, DCT_MappingID))
@@ -2083,7 +2078,7 @@ void Controller::timerCallback()
 				// MappingID change means update is only required when
 				// remote object is currently activated. 
 				activateMOId = ((comsMode & CM_Rx) == CM_Rx);
-				cleanupMutedMOIdsRequired = true;
+				cleanupMutedObjectsRequired = true;
 			}
 
 			if (moProcessor->PopParameterChanged(DCP_Host, DCT_ComsMode))
@@ -2181,8 +2176,9 @@ void Controller::timerCallback()
 	}
 	if (activeMOIdsChanged)
 		UpdateActiveMatrixOutputs();
-	if (cleanupMutedMOIdsRequired)
-		CleanupMutedMatrixOutputs();
+
+	if (cleanupMutedObjectsRequired)
+		CleanupMutedObjects();
 
 }
 
@@ -2588,25 +2584,6 @@ const std::vector<RemoteObject> Controller::GetMutedSoundObjectRemoteObjects(con
 }
 
 /**
- * Cleanup the soundobjects mute states in config
- * esp. checking if mute states are present, for which 
- * no soundobject is handled any more is of importance here.
- */
-void Controller::CleanupMutedSoundobjects()
-{
-	auto activeBridgingBitmask = GetActiveProtocolBridging();
-	for (auto const& bridgingType : ProtocolBridgingTypes)
-	{
-		if ((activeBridgingBitmask & bridgingType) == bridgingType)
-		{
-			m_protocolBridge.SetProtocolRemoteObjectsStateMuted(
-				Controller::GetProtocolIdForProtocolType(bridgingType),
-				GetMutedSoundObjectRemoteObjects(bridgingType));
-		}
-	}
-}
-
-/**
  * Helper method to collect all remote objects that are used by a soundobject processor.
  * @param soundobjectProcessorId		The id of the sound object processor to get the used remote objects for.
  * @return		The list of used remote objects.
@@ -2687,20 +2664,24 @@ const std::vector<RemoteObject> Controller::GetMutedMatrixInputRemoteObjects(con
 }
 
 /**
- * Cleanup the matrix inputs mute states in config
+ * Cleanup the soundobject, matrix inputs and outputs mute states in config
  * esp. checking if mute states are present, for which
- * no matrix input is handled any more is of importance here.
+ * no so/mi/mo is handled any more is of importance here.
  */
-void Controller::CleanupMutedMatrixInputs()
+void Controller::CleanupMutedObjects()
 {
 	auto activeBridgingBitmask = GetActiveProtocolBridging();
 	for (auto const& bridgingType : ProtocolBridgingTypes)
 	{
 		if ((activeBridgingBitmask & bridgingType) == bridgingType)
 		{
-			m_protocolBridge.SetProtocolRemoteObjectsStateMuted(
-				Controller::GetProtocolIdForProtocolType(bridgingType),
-				GetMutedMatrixInputRemoteObjects(bridgingType));
+			auto mutedObjects = GetMutedSoundObjectRemoteObjects(bridgingType);
+			auto mutedMIObjects = GetMutedMatrixInputRemoteObjects(bridgingType);
+			mutedObjects.insert(mutedObjects.end(), mutedMIObjects.begin(), mutedMIObjects.end());
+			auto mutedMOObjects = GetMutedMatrixOutputRemoteObjects(bridgingType);
+			mutedObjects.insert(mutedObjects.end(), mutedMOObjects.begin(), mutedMOObjects.end());
+
+			m_protocolBridge.SetProtocolRemoteObjectsStateMuted(Controller::GetProtocolIdForProtocolType(bridgingType), mutedObjects);
 		}
 	}
 }
@@ -2782,25 +2763,6 @@ const std::vector<RemoteObject> Controller::GetMutedMatrixOutputRemoteObjects(co
 		}
 	}
 	return mutedRemoteObjects;
-}
-
-/**
- * Cleanup the matrix outputs mute states in config
- * esp. checking if mute states are present, for which
- * no matrix output is handled any more is of importance here.
- */
-void Controller::CleanupMutedMatrixOutputs()
-{
-	auto activeBridgingBitmask = GetActiveProtocolBridging();
-	for (auto const& bridgingType : ProtocolBridgingTypes)
-	{
-		if ((activeBridgingBitmask & bridgingType) == bridgingType)
-		{
-			m_protocolBridge.SetProtocolRemoteObjectsStateMuted(
-				Controller::GetProtocolIdForProtocolType(bridgingType),
-				GetMutedMatrixOutputRemoteObjects(bridgingType));
-		}
-	}
 }
 
 /**

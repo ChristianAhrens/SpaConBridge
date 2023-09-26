@@ -125,6 +125,10 @@
                     file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/ProtocolProcessorBase.cpp"/>
               <FILE id="LxTbKH" name="ProtocolProcessorBase.h" compile="0" resource="0"
                     file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/ProtocolProcessorBase.h"/>
+              <FILE id="NfzSc6" name="NoProtocolProtocolProcessor.cpp" compile="1"
+                    resource="0" file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/NoProtocolProtocolProcessor.cpp"/>
+              <FILE id="AUy3RN" name="NoProtocolProtocolProcessor.h" compile="0"
+                    resource="0" file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/NoProtocolProtocolProcessor.h"/>
             </GROUP>
             <GROUP id="{DAC3D2E0-7E73-9402-80DB-F7F79EBFECF9}" name="ObjectDataHandling">
               <GROUP id="{453DD5F0-B25A-1F8F-CB6D-065B3DC4485C}" name="A2active_withValFilter">

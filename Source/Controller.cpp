@@ -2213,10 +2213,6 @@ const ProtocolId Controller::GetProtocolIdForProtocolType(const ProtocolBridging
 		return ADMOSC_PROCESSINGPROTOCOL_ID;
 	case PBT_RemapOSC:
 		return REMAPOSC_PROCESSINGPROTOCOL_ID;
-	case PBT_YamahaSQ:
-		// yamaha sq protocol is not implemented in rpb
-	case PBT_HUI:
-		// hui protocol is not implemented in rpb
 	case PBT_DS100:
 		// DS100 protocol can either be type 1 or 2, so not supported here
 	default:
@@ -2826,10 +2822,6 @@ int Controller::GetActiveProtocolBridgingCount()
 	if ((activeBridging & PBT_BlacktraxRTTrPM) == PBT_BlacktraxRTTrPM)
 		activeProtocolBridgingCount++;
 	if ((activeBridging & PBT_GenericMIDI) == PBT_GenericMIDI)
-		activeProtocolBridgingCount++;
-	if ((activeBridging & PBT_YamahaSQ) == PBT_YamahaSQ)
-		activeProtocolBridgingCount++;
-	if ((activeBridging & PBT_HUI) == PBT_HUI)
 		activeProtocolBridgingCount++;
 	if ((activeBridging & PBT_DS100) == PBT_DS100)
 		activeProtocolBridgingCount++;

@@ -171,7 +171,7 @@ private:
 	std::unique_ptr<HeaderWithElmListComponent>					m_DS100Settings;
 	std::unique_ptr<JUCEAppBasics::SplitButtonComponent>		m_DS100ProtocolSelectButton;
 	std::unique_ptr<Label>										m_DS100ProtocolSelectLabel;
-	const std::vector<std::string>								m_DS100ProtocolSelects{ "OSC", "AES70/OCP1" };
+	const std::vector<std::pair<std::string, std::float_t>>		m_DS100ProtocolSelectTexts{ { "OSC", 1.0f}, { "AES70/OCP1", 1.0f }, { "None", 0.6f } };
 	std::map<std::string, uint64>								m_DS100ProtocolSelectButtonIds;
 	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_DS100IntervalEdit;
 	std::unique_ptr<Label>										m_DS100IntervalLabel;

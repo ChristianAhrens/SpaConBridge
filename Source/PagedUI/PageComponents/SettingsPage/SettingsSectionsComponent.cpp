@@ -171,8 +171,10 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 
 	m_DS100ProtocolSelectButton = std::make_unique<JUCEAppBasics::SplitButtonComponent>();
 	m_DS100ProtocolSelectButton->addListener(this);
-	m_DS100ProtocolSelectButtonIds[m_DS100ProtocolSelects[0]] = m_DS100ProtocolSelectButton->addButton(m_DS100ProtocolSelects[0]);
-	m_DS100ProtocolSelectButtonIds[m_DS100ProtocolSelects[1]] = m_DS100ProtocolSelectButton->addButton(m_DS100ProtocolSelects[1]);
+	auto& t = m_DS100ProtocolSelectTexts;
+	m_DS100ProtocolSelectButtonIds[t[0].first] = m_DS100ProtocolSelectButton->addButton(t[0].first, t[0].second);
+	m_DS100ProtocolSelectButtonIds[t[1].first] = m_DS100ProtocolSelectButton->addButton(t[1].first, t[1].second);
+	m_DS100ProtocolSelectButtonIds[t[2].first] = m_DS100ProtocolSelectButton->addButton(t[2].first, t[2].second);
 	m_DS100ProtocolSelectButton->setButtonDown(m_DS100ProtocolSelectButtonIds[m_SecondDS100Modes[0]]);
 	m_DS100ProtocolSelectLabel = std::make_unique<Label>("DS100ProtocolSelectButton", "DS100 Protocol");
 	m_DS100ProtocolSelectLabel->setJustificationType(Justification::centred);
@@ -1156,13 +1158,17 @@ void SettingsSectionsComponent::buttonClicked(JUCEAppBasics::SplitButtonComponen
 	// DS100 protocol settings section
 	if (m_DS100ProtocolSelectButton && m_DS100ProtocolSelectButton.get() == button)
 	{
-		if (m_DS100ProtocolSelectButtonIds[m_DS100ProtocolSelects[0]] == buttonId) // OSC
+		if (m_DS100ProtocolSelectButtonIds[m_DS100ProtocolSelectTexts[0].first] == buttonId) // OSC
 		{
 			ctrl->SetDS100ProtocolType(DCP_Settings, PT_OSCProtocol);
 		}
-		else if (m_DS100ProtocolSelectButtonIds[m_DS100ProtocolSelects[1]] == buttonId) // OCP1
+		else if (m_DS100ProtocolSelectButtonIds[m_DS100ProtocolSelectTexts[1].first] == buttonId) // OCP1
 		{
 			ctrl->SetDS100ProtocolType(DCP_Settings, PT_OCP1Protocol);
+		}
+		else if (m_DS100ProtocolSelectButtonIds[m_DS100ProtocolSelectTexts[2].first] == buttonId) // NoProtocol
+		{
+			ctrl->SetDS100ProtocolType(DCP_Settings, PT_NoProtocol);
 		}
 	}
 
@@ -1587,9 +1593,11 @@ void SettingsSectionsComponent::processUpdatedDS100Config()
 	// DS100 settings section
 	if (m_DS100ProtocolSelectButton)
 	{
-		auto newActiveButtonId = m_DS100ProtocolSelectButtonIds[m_DS100ProtocolSelects[0]];
+		auto newActiveButtonId = m_DS100ProtocolSelectButtonIds[m_DS100ProtocolSelectTexts[0].first];
 		if (ctrl->GetDS100ProtocolType() == PT_OCP1Protocol)
-			newActiveButtonId = m_DS100ProtocolSelectButtonIds[m_DS100ProtocolSelects[1]];
+			newActiveButtonId = m_DS100ProtocolSelectButtonIds[m_DS100ProtocolSelectTexts[1].first];
+		else if (ctrl->GetDS100ProtocolType() == PT_NoProtocol)
+			newActiveButtonId = m_DS100ProtocolSelectButtonIds[m_DS100ProtocolSelectTexts[2].first];
 		m_DS100ProtocolSelectButton->setButtonDown(newActiveButtonId);
 	}
 	if (m_DS100IntervalEdit)
@@ -1603,9 +1611,13 @@ void SettingsSectionsComponent::processUpdatedDS100Config()
 	{
 		auto ipAndPort = ctrl->GetDS100IpAndPort();
 		m_DS100IpAndPortEdit->setText(ipAndPort.first.toString() + ":" + juce::String(ipAndPort.second));
+		m_DS100IpAndPortEdit->setEnabled(ctrl->GetDS100ProtocolType() != PT_NoProtocol);
 	}
+	if (m_DS100IpAndPortLabel)
+		m_DS100IpAndPortLabel->setEnabled(ctrl->GetDS100ProtocolType() != PT_NoProtocol);
 	if (m_DS100ZeroconfDiscovery)
 	{
+		m_DS100ZeroconfDiscovery->setEnabled(ctrl->GetDS100ProtocolType() != PT_NoProtocol);
 		if (ctrl->GetDS100ProtocolType() == PT_OCP1Protocol)
 		{
 			m_DS100ZeroconfDiscovery->removeDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC);
@@ -1628,10 +1640,13 @@ void SettingsSectionsComponent::processUpdatedDS100Config()
 		else if (ctrl->GetExtensionMode() == EM_Mirror)
 			newActiveButtonId = m_SecondDS100ModeButtonIds[m_SecondDS100Modes[3]];
 		m_SecondDS100ModeButton->setButtonDown(newActiveButtonId);
+		m_SecondDS100ModeButton->setEnabled(ctrl->GetDS100ProtocolType() != PT_NoProtocol);
 	}
+	if (m_SecondDS100ModeLabel)
+		m_SecondDS100ModeLabel->setEnabled(ctrl->GetDS100ProtocolType() != PT_NoProtocol);
 	if (m_SecondDS100ParallelModeButton)
 	{
-		m_SecondDS100ParallelModeButton->setEnabled(ctrl->GetExtensionMode() == EM_Parallel);
+		m_SecondDS100ParallelModeButton->setEnabled(ctrl->GetExtensionMode() == EM_Parallel && ctrl->GetDS100ProtocolType() != PT_NoProtocol);
 
 		auto newActiveButtonId = m_SecondDS100ParallelModeButtonIds[m_SecondDS100ParallelModes[0]];
 		if (ctrl->GetActiveParallelModeDS100() == APM_2nd)
@@ -1639,18 +1654,18 @@ void SettingsSectionsComponent::processUpdatedDS100Config()
 		m_SecondDS100ParallelModeButton->setButtonDown(newActiveButtonId);
 	}
 	if (m_SecondDS100ParallelModeLabel)
-		m_SecondDS100ParallelModeLabel->setEnabled(ctrl->GetExtensionMode() == EM_Parallel);
+		m_SecondDS100ParallelModeLabel->setEnabled(ctrl->GetExtensionMode() == EM_Parallel && ctrl->GetDS100ProtocolType() != PT_NoProtocol);
 	if (m_SecondDS100IpAndPortEdit)
 	{
 		auto ipAndPort = ctrl->GetSecondDS100IpAndPort();
 		m_SecondDS100IpAndPortEdit->setText(ctrl->GetExtensionMode() != EM_Off ? (ipAndPort.first.toString() + ":" + juce::String(ipAndPort.second)) : "");
-		m_SecondDS100IpAndPortEdit->setEnabled(ctrl->GetExtensionMode() != EM_Off);
+		m_SecondDS100IpAndPortEdit->setEnabled(ctrl->GetExtensionMode() != EM_Off && ctrl->GetDS100ProtocolType() != PT_NoProtocol);
 	}
 	if (m_SecondDS100IpAndPortLabel)
-		m_SecondDS100IpAndPortLabel->setEnabled(ctrl->GetExtensionMode() != EM_Off);
+		m_SecondDS100IpAndPortLabel->setEnabled(ctrl->GetExtensionMode() != EM_Off && ctrl->GetDS100ProtocolType() != PT_NoProtocol);
 	if (m_SecondDS100ZeroconfDiscovery)
 	{
-		m_SecondDS100ZeroconfDiscovery->setEnabled(ctrl->GetExtensionMode() != EM_Off);
+		m_SecondDS100ZeroconfDiscovery->setEnabled(ctrl->GetExtensionMode() != EM_Off && ctrl->GetDS100ProtocolType() != PT_NoProtocol);
 		if (ctrl->GetDS100ProtocolType() == PT_OCP1Protocol)
 		{
 			m_SecondDS100ZeroconfDiscovery->removeDiscoverService(JUCEAppBasics::ZeroconfDiscoverComponent::ZeroconfServiceType::ZST_OSC);

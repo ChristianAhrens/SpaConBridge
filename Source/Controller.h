@@ -93,6 +93,7 @@ public:
 	~Controller() override;
 	static Controller* GetInstance();
 	void DestroyInstance();
+	static bool Exists() { return bool(s_singleton); };
 
 	bool GetParameterChanged(DataChangeParticipant changeTarget, DataChangeType change);
 	bool PopParameterChanged(DataChangeParticipant changeTarget, DataChangeType change);

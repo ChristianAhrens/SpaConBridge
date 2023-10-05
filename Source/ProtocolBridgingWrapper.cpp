@@ -2513,6 +2513,8 @@ void ProtocolBridgingWrapper::SetProtocolState(ProtocolId protocolId, ObjectHand
 {
 	m_bridgingProtocolState[protocolId] = state;
 
+	if (!Controller::Exists()) // avoid creating controller singleton here
+		return;
 	auto ctrl = Controller::GetInstance();
 	if (ctrl)
 		ctrl->SetParameterChanged(DCP_Protocol, DCT_Connected);

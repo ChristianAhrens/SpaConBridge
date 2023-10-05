@@ -49,6 +49,7 @@ class SceneIndexToMidiAssignerComponent;
 class RemoteObjectToOscAssignerComponent;
 class IndexToChannelAssignerComponent;
 class IPAddressDisplay;
+class ProjectDummyDataLoaderComponent;
 
 
 /**
@@ -197,6 +198,9 @@ private:
 	std::unique_ptr<Label>										m_SecondDS100ParallelModeLabel;
 	const std::vector<std::string>								m_SecondDS100ParallelModes{ "1st", "2nd" };
 	std::map<std::string, uint64>								m_SecondDS100ParallelModeButtonIds;
+
+	std::unique_ptr<ProjectDummyDataLoaderComponent>			m_DS100ProjectDummyDataLoader;
+	std::unique_ptr<Label>										m_DS100ProjectDummyDataLabel;
 
 	// DiGiCo settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_DiGiCoBridgingSettings;

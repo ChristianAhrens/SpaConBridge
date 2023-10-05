@@ -28,6 +28,7 @@
 #include "SceneIndexToMidiAssignerComponent.h"
 #include "RemoteObjectToOscAssignerComponent.h"
 #include "IndexToChannelAssignerComponent.h"
+#include "ProjectDummyDataLoaderComponent.h"
 
 #include <Image_utils.h>
 #include <MidiLearnerComponent.h>
@@ -258,6 +259,20 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 #endif
 	m_DS100Settings->addComponent(m_SecondDS100IpAndPortLabel.get(), false, false);
 	m_DS100Settings->addComponent(m_SecondDS100ConnectionElmsContainer.get(), true, false);
+
+	//dummy DS100 projectdata loading elements
+	m_DS100ProjectDummyDataLoader = std::make_unique<ProjectDummyDataLoaderComponent>();
+	m_DS100ProjectDummyDataLoader->onProjectDummyDataLoaded = [=](const juce::String& projectDummyData) {
+#ifdef USE_DBPR_PROJECT_UTILS
+		auto test = ProjectData::FromString(projectDummyData);
+		DBG(juce::String(__FUNCTION__) << " " << test.ToString());
+#endif
+	};
+	m_DS100ProjectDummyDataLabel = std::make_unique<Label>("ProjectDummyDataLoaderComponent", "Project Dummy Data");
+	m_DS100ProjectDummyDataLabel->setJustificationType(Justification::centredLeft);
+	m_DS100ProjectDummyDataLabel->attachToComponent(m_DS100ProjectDummyDataLoader.get(), true);
+	m_DS100Settings->addComponent(m_DS100ProjectDummyDataLabel.get(), false, false);
+	m_DS100Settings->addComponent(m_DS100ProjectDummyDataLoader.get(), true, false);
 
 	m_DS100Settings->resized();
 }
@@ -1678,6 +1693,10 @@ void SettingsSectionsComponent::processUpdatedDS100Config()
 		}
 		m_SecondDS100ZeroconfDiscovery->resized();
 	}
+	if (m_DS100ProjectDummyDataLoader)
+		m_DS100ProjectDummyDataLoader->setEnabled(ctrl->GetDS100ProtocolType() == PT_NoProtocol);
+	if (m_DS100ProjectDummyDataLabel)
+		m_DS100ProjectDummyDataLabel->setEnabled(ctrl->GetDS100ProtocolType() == PT_NoProtocol);
 }
 
 /**

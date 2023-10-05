@@ -33,7 +33,6 @@ namespace SpaConBridge
 ProtocolBridgingWrapper::ProtocolBridgingWrapper()
 	: m_bridgingXml(AppConfiguration::getTagName(AppConfiguration::TagID::BRIDGING))
 {
-	// Controller derives from ProcessingEngineNode::Listener
 	m_processingNode.AddListener(this);
 
 	SetupBridgingNode();
@@ -44,6 +43,11 @@ ProtocolBridgingWrapper::ProtocolBridgingWrapper()
  */
 ProtocolBridgingWrapper::~ProtocolBridgingWrapper()
 {
+	if (auto objHandling = m_processingNode.GetObjectDataHandling())
+		objHandling->RemoveStateListener(this);
+
+	m_processingNode.RemoveListener(this);
+
 	m_listeners.clear();
 }
 

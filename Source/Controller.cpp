@@ -1274,6 +1274,38 @@ void Controller::SetActiveParallelModeDS100(DataChangeParticipant changeSource, 
 }
 
 /**
+ * Getter for the dummy project config data set for DS100 'None' protocol.
+ * @return	Current string dummy project config data.
+ */
+juce::String Controller::GetDS100DummyProjectData() const
+{
+	return m_DS100DummyProjectData;
+}
+
+/**
+ * Setter for the dummy project config data set for DS100 'None' protocol.
+ * @param changeSource			The application module which is causing the property change.
+ * @param projectDummyData		New dummy project config data.
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ */
+void Controller::SetDS100DummyProjectData(DataChangeParticipant changeSource, const juce::String& projectDummyData)
+{
+	if (m_DS100DummyProjectData != projectDummyData)
+	{
+		const ScopedLock lock(m_mutex);
+
+		m_DS100DummyProjectData = projectDummyData;
+
+		m_protocolBridge.SetDS100dbprData(projectDummyData, dontSendNotification);
+
+		// Signal the change to all Processors.
+		SetParameterChanged(changeSource, DCT_Connected);
+
+		Reconnect();
+	}
+}
+
+/**
  * Reimplemented callback for bridging wrapper callback to process incoming protocol data.
  * It forwards the message to all registered Processor objects.
  * @param nodeId	The bridging node that the message data was received on (only a single default id node supported currently).

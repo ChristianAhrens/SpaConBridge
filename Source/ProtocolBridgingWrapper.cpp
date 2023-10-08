@@ -3667,5 +3667,66 @@ void ProtocolBridgingWrapper::SetSecondDS100State(ObjectHandlingState state)
 	SetProtocolState(DS100_2_PROCESSINGPROTOCOL_ID, state);
 }
 
+/**
+ * Gets the current string project data representation from xml config.
+ * @return	The current string project data representation if present, empty if not
+ */
+const juce::String ProtocolBridgingWrapper::GetDS100dbprData() const
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+		{
+			if (1 == protocolXmlElement->getNumChildElements() && protocolXmlElement->getFirstChildElement()->isTextElement())
+			{
+				auto projectDummyData = protocolXmlElement->getFirstChildElement()->getAllSubText();
+				return projectDummyData;
+			}
+		}
+	}
+
+	return {};
+}
+
+/**
+ * Sets the given string project data representation to xml config and triggers applying it.
+ * This method inserts the given string as xml textelement to the protocol xml node and eliminates
+ * existing non textelement contents if present.
+ * @param projectDummyData	The new dummy dbpr project data to apply
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetDS100dbprData(const juce::String& projectDummyData, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+		{
+			protocolXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::USESACTIVEOBJ), 0);
+			if (1 == protocolXmlElement->getNumChildElements() && protocolXmlElement->getFirstChildElement()->isTextElement())
+			{
+				protocolXmlElement->getFirstChildElement()->setText(projectDummyData);
+			}
+			else if (1 != protocolXmlElement->getNumChildElements() || !protocolXmlElement->getFirstChildElement()->isTextElement())
+			{
+				protocolXmlElement->deleteAllChildElements();
+				protocolXmlElement->addTextElement(projectDummyData);
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
+}
+
 
 }

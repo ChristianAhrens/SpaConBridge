@@ -262,12 +262,7 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 
 	//dummy DS100 projectdata loading elements
 	m_DS100ProjectDummyDataLoader = std::make_unique<ProjectDummyDataLoaderComponent>();
-	m_DS100ProjectDummyDataLoader->onProjectDummyDataLoaded = [=](const juce::String& projectDummyData) {
-#ifdef USE_DBPR_PROJECT_UTILS
-		auto test = ProjectData::FromString(projectDummyData);
-		DBG(juce::String(__FUNCTION__) << " " << test.ToString());
-#endif
-	};
+	m_DS100ProjectDummyDataLoader->onProjectDummyDataLoaded = [=](const juce::String& projectDummyData) { handleDS100dbprData(projectDummyData); };
 	m_DS100ProjectDummyDataLabel = std::make_unique<Label>("ProjectDummyDataLoaderComponent", "Project Dummy Data");
 	m_DS100ProjectDummyDataLabel->setJustificationType(Justification::centredLeft);
 	m_DS100ProjectDummyDataLabel->attachToComponent(m_DS100ProjectDummyDataLoader.get(), true);
@@ -374,7 +369,7 @@ void SettingsSectionsComponent::createRTTrPMSettingsSection()
 	m_RTTrPMBridgingSettings->addComponent(m_RTTrPMListeningPortEdit.get(), true, false);
 
 	m_RTTrPMBeaconIdxAssignmentsEditor = std::make_unique<IndexToChannelAssignerComponent>();
-	m_RTTrPMBeaconIdxAssignmentsEditor->onAssignmentsSet = [=](Component* sender, const std::map<int, ChannelId>& idxToChAssis) { handleRTTrPMBeaconIdxAssisSet(sender, idxToChAssis); };
+	m_RTTrPMBeaconIdxAssignmentsEditor->onAssignmentsSet = [=](Component* sender, const std::map<int, ChannelId>& idxToChAssis) { ignoreUnused(sender); handleRTTrPMBeaconIdxAssisSet(idxToChAssis); };
 	m_RTTrPMBeaconIdxAssignmentsLabel = std::make_unique<Label>("RTTrPMBeaconIdxAssignmentsEditor", "Beacon Indices");
 	m_RTTrPMBeaconIdxAssignmentsLabel->setJustificationType(Justification::centredLeft);
 	m_RTTrPMBeaconIdxAssignmentsLabel->attachToComponent(m_RTTrPMBeaconIdxAssignmentsEditor.get(), true);
@@ -933,7 +928,7 @@ void SettingsSectionsComponent::createRemapOSCSettingsSection()
 	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCRemotePortEdit.get(), true, false);
 
 	m_RemapOSCAssignmentsEditor = std::make_unique<RemoteObjectToOscAssignerComponent>();
-	m_RemapOSCAssignmentsEditor->onAssignmentsSet = [=](Component* sender, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& roiToCustomOscAssis) { handleRemapOscAssisSet(sender, roiToCustomOscAssis); };
+	m_RemapOSCAssignmentsEditor->onAssignmentsSet = [=](Component* sender, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& roiToCustomOscAssis) { ignoreUnused(sender); handleRemapOscAssisSet(roiToCustomOscAssis); };
 	m_RemapOSCAssignmentsLabel = std::make_unique<Label>("RemapOSCAssignmentsEditor", GetProtocolBridgingNiceName(PBT_RemapOSC));
 	m_RemapOSCAssignmentsLabel->setJustificationType(Justification::centredLeft);
 	m_RemapOSCAssignmentsLabel->attachToComponent(m_RemapOSCAssignmentsEditor.get(), true);
@@ -2157,32 +2152,35 @@ void SettingsSectionsComponent::handleScenesToMidiAssiSet(Component* sender, con
 
 /**
  * Callback method to be registered with RemoteObjectToOscAssignerComponent to handle custom osc remap assignment selection.
- * @param sender				The RemoteObjectToOscAssignerComponent that sent the assignment.
  * @param roiToCustomOscAssis	The sent assignment that was chosen by user
  */
-void SettingsSectionsComponent::handleRemapOscAssisSet(Component* sender, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& roiToCustomOscAssis)
+void SettingsSectionsComponent::handleRemapOscAssisSet(const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& roiToCustomOscAssis)
 {
-	if (m_RemapOSCAssignmentsEditor && sender == m_RemapOSCAssignmentsEditor.get())
-	{
-		auto ctrl = Controller::GetInstance();
-		if (ctrl)
-			ctrl->SetBridgingOscRemapAssignments(PBT_RemapOSC, roiToCustomOscAssis);
-	}
+	auto ctrl = Controller::GetInstance();
+	if (ctrl)
+		ctrl->SetBridgingOscRemapAssignments(PBT_RemapOSC, roiToCustomOscAssis);
 }
 
 /**
  * Callback method to be registered with IndexToChannelAssignerComponent to handle index to channel remap assignment selection.
- * @param sender			The IndexToChannelAssignerComponent that sent the assignment.
  * @param idxToChAssis		The sent assignment that was chosen by user
  */
-void SettingsSectionsComponent::handleRTTrPMBeaconIdxAssisSet(Component* sender, const std::map<int, ChannelId>& idxToChAssis)
+void SettingsSectionsComponent::handleRTTrPMBeaconIdxAssisSet(const std::map<int, ChannelId>& idxToChAssis)
 {
-	if (m_RTTrPMBeaconIdxAssignmentsEditor && sender == m_RTTrPMBeaconIdxAssignmentsEditor.get())
-	{
-		auto ctrl = Controller::GetInstance();
-		if (ctrl)
-			ctrl->SetBridgingChannelRemapAssignments(PBT_BlacktraxRTTrPM, idxToChAssis);
-	}
+	auto ctrl = Controller::GetInstance();
+	if (ctrl)
+		ctrl->SetBridgingChannelRemapAssignments(PBT_BlacktraxRTTrPM, idxToChAssis);
+}
+
+/**
+ * Callback method to be registered with IndexToChannelAssignerComponent to handle index to channel remap assignment selection.
+ * @param projectDummyData		The sent assignment that was chosen by user
+ */
+void SettingsSectionsComponent::handleDS100dbprData(const juce::String& projectDummyData)
+{
+	auto ctrl = Controller::GetInstance();
+	if (ctrl)
+		ctrl->SetDS100DummyProjectData(DCP_Settings, projectDummyData);
 }
 
 

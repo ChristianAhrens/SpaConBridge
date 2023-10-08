@@ -114,10 +114,13 @@ private:
 	void handleScenesToMidiAssiSet(Component* sender, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& scenesToMidiAssi);
 
 	//==============================================================================
-	void handleRemapOscAssisSet(Component* sender, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& roiToCustomOscAssis);
+	void handleRemapOscAssisSet(const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& roiToCustomOscAssis);
 
 	//==============================================================================
-	void handleRTTrPMBeaconIdxAssisSet(Component* sender, const std::map<int, ChannelId>& idxToChAssis);
+	void handleRTTrPMBeaconIdxAssisSet(const std::map<int, ChannelId>& idxToChAssis);
+
+	//==============================================================================
+	void handleDS100dbprData(const juce::String& projectDummyData);
 
 	//==============================================================================
 	void processUpdatedGeneralConfig();

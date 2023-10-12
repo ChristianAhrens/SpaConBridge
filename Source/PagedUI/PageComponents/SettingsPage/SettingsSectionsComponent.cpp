@@ -1689,7 +1689,11 @@ void SettingsSectionsComponent::processUpdatedDS100Config()
 		m_SecondDS100ZeroconfDiscovery->resized();
 	}
 	if (m_DS100ProjectDummyDataLoader)
+	{
 		m_DS100ProjectDummyDataLoader->setEnabled(ctrl->GetDS100ProtocolType() == PT_NoProtocol);
+		if (ctrl->GetDS100ProtocolType() == PT_NoProtocol && ctrl->GetDS100DummyProjectData().isNotEmpty())
+			m_DS100ProjectDummyDataLoader->setProjectDummyData(ctrl->GetDS100DummyProjectData());
+	}
 	if (m_DS100ProjectDummyDataLabel)
 		m_DS100ProjectDummyDataLabel->setEnabled(ctrl->GetDS100ProtocolType() == PT_NoProtocol);
 }

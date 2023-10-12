@@ -3679,7 +3679,7 @@ const juce::String ProtocolBridgingWrapper::GetDS100dbprData() const
 		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
 		if (protocolXmlElement)
 		{
-			if (1 == protocolXmlElement->getNumChildElements() && protocolXmlElement->getFirstChildElement()->isTextElement())
+			if (nullptr != protocolXmlElement->getFirstChildElement() && protocolXmlElement->getFirstChildElement()->isTextElement())
 			{
 				auto projectDummyData = protocolXmlElement->getFirstChildElement()->getAllSubText();
 				return projectDummyData;

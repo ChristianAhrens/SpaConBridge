@@ -1288,7 +1288,7 @@ juce::String Controller::GetDS100DummyProjectData() const
  * @param projectDummyData		New dummy project config data.
  * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
  */
-void Controller::SetDS100DummyProjectData(DataChangeParticipant changeSource, const juce::String& projectDummyData)
+void Controller::SetDS100DummyProjectData(DataChangeParticipant changeSource, const juce::String& projectDummyData, bool dontSendNotification)
 {
 	if (m_DS100DummyProjectData != projectDummyData)
 	{
@@ -2465,6 +2465,7 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			SetSecondDS100IpAndPort(DataChangeParticipant::DCP_Init, m_protocolBridge.GetSecondDS100IpAddress(), m_protocolBridge.GetSecondDS100Port(), true);
 			SetRefreshInterval(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100MsgRate(), true);
 			SetActiveParallelModeDS100(DataChangeParticipant::DCP_Init, m_protocolBridge.GetActiveParallelModeDS100(), true);
+			SetDS100DummyProjectData(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100dbprData(), true);
 		}
 	}
 

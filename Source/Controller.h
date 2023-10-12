@@ -169,7 +169,7 @@ public:
 
 	//==========================================================================
 	juce::String GetDS100DummyProjectData() const;
-	void SetDS100DummyProjectData(DataChangeParticipant changeSource, const juce::String& projectDummyData);
+	void SetDS100DummyProjectData(DataChangeParticipant changeSource, const juce::String& projectDummyData, bool dontSendNotification = false);
 
 	//==========================================================================
 	const std::vector<RemoteObject> GetActivatedSoundObjectRemoteObjects();

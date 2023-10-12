@@ -18,13 +18,15 @@
 
 #include "ProjectDummyDataLoaderComponent.h"
 
+#include <FixedFontTextEditor.h>
+
 namespace SpaConBridge
 {
 
 //==============================================================================
 ProjectDummyDataLoaderComponent::ProjectDummyDataLoaderComponent()
 {
-	m_currentProjectDummyDataInfoLabel = std::make_unique<TextEditor>("CurrentProjectDummyDataInfoLabel");
+	m_currentProjectDummyDataInfoLabel = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
     m_currentProjectDummyDataInfoLabel->setEnabled(false);
     m_currentProjectDummyDataInfoLabel->setReadOnly(true);
 	addAndMakeVisible(m_currentProjectDummyDataInfoLabel.get());

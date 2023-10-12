@@ -22,6 +22,13 @@
 
 #include "dbprProjectUtils.h"
 
+ /**
+ * Fwd. decls.
+ */
+namespace JUCEAppBasics {
+    class FixedFontTextEditor;
+}
+
 namespace SpaConBridge
 {
 
@@ -50,8 +57,8 @@ private:
     void openAndReadProject(const juce::String& fileName);
 
     //==============================================================================
-    std::unique_ptr<juce::TextEditor>   m_currentProjectDummyDataInfoLabel;
-    std::unique_ptr<juce::TextButton>   m_loadProjectDummyDataButton;
+    std::unique_ptr<JUCEAppBasics::FixedFontTextEditor> m_currentProjectDummyDataInfoLabel;
+    std::unique_ptr<juce::TextButton>                   m_loadProjectDummyDataButton;
 
 #ifdef USE_DBPR_PROJECT_UTILS
     ProjectData     m_currentProjectDummyData;

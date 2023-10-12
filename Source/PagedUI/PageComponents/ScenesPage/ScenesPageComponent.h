@@ -24,6 +24,12 @@
 
 #include "../StandalonePollingPageComponentBase.h"
 
+ /**
+  * Fwd. decls.
+  */
+namespace JUCEAppBasics {
+	class FixedFontTextEditor;
+}
 
 namespace SpaConBridge
 {
@@ -80,12 +86,12 @@ private:
 	std::unique_ptr<DrawableButton>								m_pinSceneIdxRecallButton;
 	std::unique_ptr<Label>										m_sceneIdxLabel;
 	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_sceneIdxFilter;
-	std::unique_ptr<TextEditor>									m_sceneIdxEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_sceneIdxEdit;
 	
-	std::unique_ptr<Label>		m_sceneNameLabel;
-	std::unique_ptr<TextEditor>	m_sceneNameEdit;
-	std::unique_ptr<Label>		m_sceneCommentLabel;
-	std::unique_ptr<TextEditor>	m_sceneCommentEdit;
+	std::unique_ptr<Label>								m_sceneNameLabel;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>	m_sceneNameEdit;
+	std::unique_ptr<Label>								m_sceneCommentLabel;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>	m_sceneCommentEdit;
 
 	std::unique_ptr<Label>														m_pinnedSceneIdxRecallLabel;
 	std::map<std::pair<int, int>, std::unique_ptr<HorizontalLayouterComponent>>	m_pinnedSceneIdxRecallLayoutContainer;

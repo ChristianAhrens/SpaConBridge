@@ -240,6 +240,10 @@
           </GROUP>
         </GROUP>
         <GROUP id="{AEF488F2-ECE4-B5B0-0BC4-9A3644EF8A18}" name="Source">
+          <FILE id="aiYNdO" name="FixedFontTextEditor.cpp" compile="1" resource="0"
+                file="submodules/JUCE-AppBasics/Source/FixedFontTextEditor.cpp"/>
+          <FILE id="WZsR7R" name="FixedFontTextEditor.h" compile="0" resource="0"
+                file="submodules/JUCE-AppBasics/Source/FixedFontTextEditor.h"/>
           <FILE id="CRqn2u" name="DualPointMultitouchCatcherComponent.cpp" compile="1"
                 resource="0" file="submodules/JUCE-AppBasics/Source/DualPointMultitouchCatcherComponent.cpp"/>
           <FILE id="O4EHdQ" name="DualPointMultitouchCatcherComponent.h" compile="0"

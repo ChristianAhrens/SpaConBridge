@@ -18,7 +18,10 @@
 
 #include "RemoteObjectToOscAssignerComponent.h"
 
-#include "Image_utils.h"
+#include <Image_utils.h>
+#include <FixedFontTextEditor.h>
+#include <TextWithImageButton.h>
+
 #include "../../PageContainerComponent.h"
 #include "../../PageComponentManager.h"
 
@@ -30,7 +33,7 @@ namespace SpaConBridge
 //==============================================================================
 RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignerComponent()
 {
-	m_currentRoiToOscAssisLabel = std::make_unique<TextEditor>("CurrentRoiToOscAssisLabel");
+	m_currentRoiToOscAssisLabel = std::make_unique<JUCEAppBasics::FixedFontTextEditor>("CurrentRoiToOscAssisLabel");
     m_currentRoiToOscAssisLabel->setText("0 assignments");
     m_currentRoiToOscAssisLabel->setEnabled(false);
     m_currentRoiToOscAssisLabel->setReadOnly(true);
@@ -160,7 +163,7 @@ RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::Re
     addAndMakeVisible(m_remoteObjectSelect.get());
 
     // create and setup osc string textedit
-    m_oscAssignmentEditComponent = std::make_unique<juce::TextEditor>("OscRemapAssignment");
+    m_oscAssignmentEditComponent = std::make_unique<JUCEAppBasics::FixedFontTextEditor>("OscRemapAssignment");
     m_oscAssignmentEditComponent->onEscapeKey = [=]() {
         handleRemoteObjectToOscAssiReset(); 
     };
@@ -173,7 +176,7 @@ RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::Re
     addAndMakeVisible(m_oscAssignmentEditComponent.get());
 
     // create and setup range min textedit
-    m_oscAssignmentMinRangeValEditComponent = std::make_unique<TextEditor>("OscMinAssignment");
+    m_oscAssignmentMinRangeValEditComponent = std::make_unique<JUCEAppBasics::FixedFontTextEditor>("OscMinAssignment");
     m_oscAssignmentMinRangeValEditComponent->onEscapeKey = [=]() {
         handleRemoteObjectToOscAssiReset();
     };
@@ -186,7 +189,7 @@ RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentEditComponent::Re
     addAndMakeVisible(m_oscAssignmentMinRangeValEditComponent.get());
 
     // create and setup range max textedit
-    m_oscAssignmentMaxRangeValEditComponent = std::make_unique<TextEditor>("OscMaxAssignment");
+    m_oscAssignmentMaxRangeValEditComponent = std::make_unique<JUCEAppBasics::FixedFontTextEditor>("OscMaxAssignment");
     m_oscAssignmentMaxRangeValEditComponent->onEscapeKey = [=]() {
         handleRemoteObjectToOscAssiReset();
     };

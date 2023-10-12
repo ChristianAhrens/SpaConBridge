@@ -23,6 +23,7 @@
 #include "../../../LookAndFeel.h"
 
 #include <Image_utils.h>
+#include <FixedFontTextEditor.h>
 
 
 namespace SpaConBridge
@@ -76,7 +77,7 @@ ScenesPageComponent::ScenesPageComponent()
 	m_recallIdxSubLayoutContainer->SetSpacing(5);
 
 	m_sceneIdxFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(6, "1234567890.");
-	m_sceneIdxEdit = std::make_unique<TextEditor>();
+	m_sceneIdxEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_sceneIdxEdit->addListener(this);
 	m_sceneIdxEdit->setInputFilter(m_sceneIdxFilter.get(), false);
 	m_recallIdxLayoutContainer->AddComponent(m_sceneIdxEdit.get(), 1);
@@ -93,7 +94,7 @@ ScenesPageComponent::ScenesPageComponent()
 	m_recallIdxLayoutContainer->AddComponent(m_recallIdxSubLayoutContainer.get(), 1);
 
 	// scene name and comment as full-width elements, comment with special height
-	m_sceneNameEdit = std::make_unique<TextEditor>();
+	m_sceneNameEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_sceneNameEdit->setReadOnly(true);
 	m_sceneNameLabel = std::make_unique<Label>();
 	m_sceneNameLabel->setJustificationType(Justification::centred);
@@ -104,7 +105,7 @@ ScenesPageComponent::ScenesPageComponent()
 		GetElementsContainer()->addComponent(m_sceneNameLabel.get(), false, false);
 		GetElementsContainer()->addComponent(m_sceneNameEdit.get(), true, false);
 	}
-	m_sceneCommentEdit = std::make_unique<TextEditor>();
+	m_sceneCommentEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_sceneCommentEdit->setReadOnly(true);
 	m_sceneCommentEdit->setMultiLine(true, true);
 	m_sceneCommentLabel = std::make_unique<Label>();

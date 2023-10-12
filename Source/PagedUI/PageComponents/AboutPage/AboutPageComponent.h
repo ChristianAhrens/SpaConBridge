@@ -21,6 +21,13 @@
 
 #include "../PageComponentBase.h"	//<USE PageComponentBase
 
+/**
+ * Fwd. decls.
+ */
+namespace JUCEAppBasics {
+	class FixedFontTextEditor;
+}
+
 
 namespace SpaConBridge
 {
@@ -53,9 +60,9 @@ private:
 	std::unique_ptr<Label>				m_materialLabel;		/**> MATERIAL.IO copyright label. */
 	std::unique_ptr<HyperlinkButton>	m_materialLink;			/**> Hyperlink to material.io. */
 
-	std::unique_ptr<TextEditor>         m_licenseGPLv3Field;	/**> Text field containing Licensing info. */
-	std::unique_ptr<TextEditor>         m_licenseAPACHEv2Field;	/**> Text field containing Licensing info. */
-	std::unique_ptr<TextEditor>         m_licenseLGPLv3Field;	/**> Text field containing Licensing info. */
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>         m_licenseGPLv3Field;	/**> Text field containing Licensing info. */
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>         m_licenseAPACHEv2Field;	/**> Text field containing Licensing info. */
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>         m_licenseLGPLv3Field;	/**> Text field containing Licensing info. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AboutPageContentComponent)
 };

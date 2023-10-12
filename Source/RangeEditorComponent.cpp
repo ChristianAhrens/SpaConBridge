@@ -21,6 +21,8 @@
 
 #include "LookAndFeel.h"
 
+#include <FixedFontTextEditor.h>
+
 
 namespace SpaConBridge
 {
@@ -56,7 +58,7 @@ RangeEditorComponent::RangeEditorComponent(float minVal, float maxVal, const juc
 RangeEditorComponent::RangeEditorComponent(const String& componentName)
 	: Component(componentName)
 {
-	m_minValEditor = std::make_unique<TextEditor>();
+	m_minValEditor = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_minValEditor->setInputFilter(new FloatValueInputFilter, true);
 	m_minValEditor->addListener(this);
 	addAndMakeVisible(m_minValEditor.get());
@@ -65,7 +67,7 @@ RangeEditorComponent::RangeEditorComponent(const String& componentName)
 	m_minValLabel->attachToComponent(m_minValEditor.get(), true);
 	addAndMakeVisible(m_minValLabel.get());
 
-	m_maxValEditor = std::make_unique<TextEditor>();
+	m_maxValEditor = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_maxValEditor->setInputFilter(new FloatValueInputFilter, true);
 	m_maxValEditor->addListener(this);
 	addAndMakeVisible(m_maxValEditor.get());

@@ -20,12 +20,22 @@
 
 #include "../../../SpaConBridgeCommon.h"
 
-#include <MidiLearnerComponent.h>
 #include <SplitButtonComponent.h>
-#include <TextWithImageButton.h>
 #include <ZeroconfDiscoverComponent.h>
 
+
 #define ZEROCONF_SUPPORTED
+
+
+/**
+ * Fwd. decls.
+ */
+namespace JUCEAppBasics {
+	class FixedFontTextEditor;
+	class TextWithImageButton;
+	class MidiLearnerComponent;
+	class MidiCommandRangeAssignment;
+}
 
 namespace SpaConBridge
 {
@@ -154,7 +164,7 @@ private:
 	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_ToggleFullscreenButton;
 #endif
 	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_StaticObjectsPollingButton;
-	std::unique_ptr<TextEditor>									m_SystemIpInfoEdit;
+	std::unique_ptr<IPAddressDisplay>							m_SystemIpInfoEdit;
 	std::unique_ptr<Label>										m_SystemIpInfoLabel;
 
 	// DS100 settings section
@@ -163,9 +173,9 @@ private:
 	std::unique_ptr<Label>										m_DS100ProtocolSelectLabel;
 	const std::vector<std::string>								m_DS100ProtocolSelects{ "OSC", "AES70/OCP1" };
 	std::map<std::string, uint64>								m_DS100ProtocolSelectButtonIds;
-	std::unique_ptr<TextEditor>									m_DS100IntervalEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_DS100IntervalEdit;
 	std::unique_ptr<Label>										m_DS100IntervalLabel;
-	std::unique_ptr<TextEditor>									m_DS100IpAndPortEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_DS100IpAndPortEdit;
 	std::unique_ptr<HorizontalLayouterComponent>				m_DS100ConnectionElmsContainer;
 	std::unique_ptr<Label>										m_DS100IpAndPortLabel;
 #ifdef ZEROCONF_SUPPORTED
@@ -176,7 +186,7 @@ private:
 	std::unique_ptr<Label>										m_SecondDS100ModeLabel;
 	const std::vector<std::string>								m_SecondDS100Modes{ "Off", "Extend", "Parallel", "Mirror" };
 	std::map<std::string, uint64>								m_SecondDS100ModeButtonIds;
-	std::unique_ptr<TextEditor>									m_SecondDS100IpAndPortEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_SecondDS100IpAndPortEdit;
 	std::unique_ptr<HorizontalLayouterComponent>				m_SecondDS100ConnectionElmsContainer;
 	std::unique_ptr<Label>										m_SecondDS100IpAndPortLabel;
 #ifdef ZEROCONF_SUPPORTED
@@ -190,22 +200,22 @@ private:
 
 	// DiGiCo settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_DiGiCoBridgingSettings;
-	std::unique_ptr<TextEditor>									m_DiGiCoIpAddressEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_DiGiCoIpAddressEdit;
 	std::unique_ptr<Label>										m_DiGiCoIpAddressLabel;
-	std::unique_ptr<TextEditor>									m_DiGiCoListeningPortEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_DiGiCoListeningPortEdit;
 	std::unique_ptr<Label>										m_DiGiCoListeningPortLabel;
-	std::unique_ptr<TextEditor>									m_DiGiCoRemotePortEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_DiGiCoRemotePortEdit;
 	std::unique_ptr<Label>										m_DiGiCoRemotePortLabel;
 
 	// Soundscape DAW Plugin settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_DAWPluginBridgingSettings;
-	std::unique_ptr<TextEditor>									m_DAWPluginIpAddressEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_DAWPluginIpAddressEdit;
 	std::unique_ptr<Label>										m_DAWPluginIpAddressLabel;
 	std::unique_ptr<Label>										m_DAWPluginDifferentHostInfoLabel;
 
 	// RTTrPM settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_RTTrPMBridgingSettings;
-	std::unique_ptr<TextEditor>									m_RTTrPMListeningPortEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_RTTrPMListeningPortEdit;
 	std::unique_ptr<Label>										m_RTTrPMListeningPortLabel;
 	std::unique_ptr<JUCEAppBasics::SplitButtonComponent>		m_RTTrPMInterpretXYRelativeButton;
 	std::unique_ptr<Label>										m_RTTrPMInterpretXYRelativeLabel;
@@ -217,23 +227,23 @@ private:
 	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_RTTrPMInvertXButton;
 	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_RTTrPMInvertYButton;
 	std::unique_ptr<Label>										m_RTTrPMAbsoluteOriginLabel;
-	std::unique_ptr<TextEditor>									m_RTTrPMAbsoluteOriginXEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_RTTrPMAbsoluteOriginXEdit;
 	std::unique_ptr<Label>										m_RTTrPMAbsoluteOriginXLabel;
-	std::unique_ptr<TextEditor>									m_RTTrPMAbsoluteOriginYEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_RTTrPMAbsoluteOriginYEdit;
 	std::unique_ptr<Label>										m_RTTrPMAbsoluteOriginYLabel;
 	std::unique_ptr<HorizontalLayouterComponent>				m_RTTrPMAbsoluteOriginElmsContainer;
 	std::unique_ptr<ComboBox>									m_RTTrPMMappingAreaSelect;
 	std::unique_ptr<Label>										m_RTTrPMMappingAreaLabel;
 	std::unique_ptr<Label>										m_RTTrPMMappingPoint1Label;
-	std::unique_ptr<TextEditor>									m_RTTrPMMappingPoint1XEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_RTTrPMMappingPoint1XEdit;
 	std::unique_ptr<Label>										m_RTTrPMMappingPoint1XLabel;
-	std::unique_ptr<TextEditor>									m_RTTrPMMappingPoint1YEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_RTTrPMMappingPoint1YEdit;
 	std::unique_ptr<Label>										m_RTTrPMMappingPoint1YLabel;
 	std::unique_ptr<HorizontalLayouterComponent>				m_RTTrPMMappingPoint1ElmsContainer;
 	std::unique_ptr<Label>										m_RTTrPMMappingPoint2Label;
-	std::unique_ptr<TextEditor>									m_RTTrPMMappingPoint2XEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_RTTrPMMappingPoint2XEdit;
 	std::unique_ptr<Label>										m_RTTrPMMappingPoint2XLabel;
-	std::unique_ptr<TextEditor>									m_RTTrPMMappingPoint2YEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_RTTrPMMappingPoint2YEdit;
 	std::unique_ptr<Label>										m_RTTrPMMappingPoint2YLabel;
 	std::unique_ptr<HorizontalLayouterComponent>				m_RTTrPMMappingPoint2ElmsContainer;
 	std::unique_ptr<IndexToChannelAssignerComponent>			m_RTTrPMBeaconIdxAssignmentsEditor;
@@ -245,11 +255,11 @@ private:
 
 	// Generic OSC settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_GenericOSCBridgingSettings;
-	std::unique_ptr<TextEditor>									m_GenericOSCIpAddressEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_GenericOSCIpAddressEdit;
 	std::unique_ptr<Label>										m_GenericOSCIpAddressLabel;
-	std::unique_ptr<TextEditor>									m_GenericOSCListeningPortEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_GenericOSCListeningPortEdit;
 	std::unique_ptr<Label>										m_GenericOSCListeningPortLabel;
-	std::unique_ptr<TextEditor>									m_GenericOSCRemotePortEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_GenericOSCRemotePortEdit;
 	std::unique_ptr<Label>										m_GenericOSCRemotePortLabel; 
 	std::unique_ptr<JUCEAppBasics::TextWithImageButton>			m_GenericOSCDisableSendingButton;
 
@@ -294,11 +304,11 @@ private:
 
 	// ADM OSC settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_ADMOSCBridgingSettings;
-	std::unique_ptr<TextEditor>									m_ADMOSCIpAddressEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_ADMOSCIpAddressEdit;
 	std::unique_ptr<Label>										m_ADMOSCIpAddressLabel;
-	std::unique_ptr<TextEditor>									m_ADMOSCListeningPortEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_ADMOSCListeningPortEdit;
 	std::unique_ptr<Label>										m_ADMOSCListeningPortLabel;
-	std::unique_ptr<TextEditor>									m_ADMOSCRemotePortEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_ADMOSCRemotePortEdit;
 	std::unique_ptr<Label>										m_ADMOSCRemotePortLabel;
 	std::unique_ptr<ComboBox>									m_ADMOSCMappingAreaSelect;
 	std::unique_ptr<Label>										m_ADMOSCMappingAreaLabel;
@@ -315,22 +325,22 @@ private:
 
 	// Yamaha OSC settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_YamahaOSCBridgingSettings;
-	std::unique_ptr<TextEditor>									m_YamahaOSCIpAddressEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_YamahaOSCIpAddressEdit;
 	std::unique_ptr<Label>										m_YamahaOSCIpAddressLabel;
-	std::unique_ptr<TextEditor>									m_YamahaOSCListeningPortEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_YamahaOSCListeningPortEdit;
 	std::unique_ptr<Label>										m_YamahaOSCListeningPortLabel;
-	std::unique_ptr<TextEditor>									m_YamahaOSCRemotePortEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_YamahaOSCRemotePortEdit;
 	std::unique_ptr<Label>										m_YamahaOSCRemotePortLabel;
 	std::unique_ptr<ComboBox>									m_YamahaOSCMappingAreaSelect;
 	std::unique_ptr<Label>										m_YamahaOSCMappingAreaLabel;
 
 	// Remap OSC settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_RemapOSCBridgingSettings;
-	std::unique_ptr<TextEditor>									m_RemapOSCIpAddressEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_RemapOSCIpAddressEdit;
 	std::unique_ptr<Label>										m_RemapOSCIpAddressLabel;
-	std::unique_ptr<TextEditor>									m_RemapOSCListeningPortEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_RemapOSCListeningPortEdit;
 	std::unique_ptr<Label>										m_RemapOSCListeningPortLabel;
-	std::unique_ptr<TextEditor>									m_RemapOSCRemotePortEdit;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_RemapOSCRemotePortEdit;
 	std::unique_ptr<Label>										m_RemapOSCRemotePortLabel;
 	std::unique_ptr<RemoteObjectToOscAssignerComponent>			m_RemapOSCAssignmentsEditor;
 	std::unique_ptr<Label>										m_RemapOSCAssignmentsLabel;

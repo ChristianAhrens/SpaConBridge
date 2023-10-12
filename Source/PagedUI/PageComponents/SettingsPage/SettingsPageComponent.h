@@ -25,7 +25,13 @@
 #include "../../../AppConfiguration.h"
 #include "../../../LookAndFeel.h"
 
-#include <TextWithImageButton.h>
+/**
+ * Fwd. decls.
+ */
+namespace JUCEAppBasics {
+	class FixedFontTextEditor;
+	class TextWithImageButton;
+}
 
 
 namespace SpaConBridge
@@ -74,9 +80,9 @@ private:
 	std::unique_ptr<Viewport>					m_settingsViewport;
 	juce::Point<int>							m_tempCachedViewPosition;	// helper member to store a view position that shall be kept when performing a resize
 
-	std::unique_ptr<TextButton>		m_settingsRawApplyButton;
-	std::unique_ptr<TextButton>		m_settingsResetToDefaultButton;
-	std::unique_ptr<TextEditor>		m_settingsRawEditor;
+	std::unique_ptr<TextButton>							m_settingsRawApplyButton;
+	std::unique_ptr<TextButton>							m_settingsResetToDefaultButton;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>	m_settingsRawEditor;
 
 	std::unique_ptr<JUCEAppBasics::TextWithImageButton>	m_loadConfigButton;
 	std::unique_ptr<JUCEAppBasics::TextWithImageButton>	m_saveConfigButton;

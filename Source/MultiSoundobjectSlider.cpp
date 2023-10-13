@@ -796,8 +796,6 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
         return;
     
     auto orig = GetAspectAndMarginCorrectedBounds().getTopLeft().toFloat();
-	auto w = static_cast<float>(GetAspectAndMarginCorrectedBounds().getWidth());
-	auto h = static_cast<float>(GetAspectAndMarginCorrectedBounds().getHeight());
 
 	// Mouse click position (in pixel units)
 	Point<float> mousePos(static_cast<float>(e.getMouseDownPosition().x), static_cast<float>(e.getMouseDownPosition().y));
@@ -817,9 +815,7 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
                     continue;
 
                 // Map the x/y coordinates to the pixel-wise dimensions of the surface area.
-                auto const& pt = paramsKV.second._pos;
-                auto x = orig.x + (pt.x * w);
-                auto y = orig.y + (h - (pt.y * h));
+                auto pt = GetPointForRelativePosOnMapping(paramsKV.second._pos, mappingAreaId);
 
                 auto knobSizeScaleFactor = static_cast<float>(1.0f + (1.5f * paramsKV.second._size));
                 auto knobSize = refKnobSize * knobSizeScaleFactor;
@@ -827,7 +823,7 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
 
                 Path knobPath;
                 auto fillSize = knobSize + knobThickness;
-                knobPath.addEllipse(Rectangle<float>(x - (fillSize / 2.0f), y - (fillSize / 2.0f), fillSize, fillSize));
+                knobPath.addEllipse(Rectangle<float>(pt.x - (fillSize / 2.0f), pt.y - (fillSize / 2.0f), fillSize, fillSize));
 
                 // Check if the mouse click landed inside any of the knobs.
                 if (knobPath.contains(mousePos))
@@ -886,17 +882,10 @@ void MultiSoundobjectSlider::mouseDrag(const MouseEvent& e)
                 auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
                 if (processor)
                 {
-                    auto orig = GetAspectAndMarginCorrectedBounds().getTopLeft().toFloat();
-                    auto w = static_cast<float>(GetAspectAndMarginCorrectedBounds().getWidth());
-                    auto h = static_cast<float>(GetAspectAndMarginCorrectedBounds().getHeight());
+                    auto relPos = GetPosOnMappingForPoint(e.getPosition().toFloat(), MappingAreaId(processor->GetMappingId()));
 
-                    // Get mouse pixel-wise position and scale it between 0 and 1.
-                    auto const& pos = e.getPosition().toFloat() - orig;
-                    auto x = jmin<float>(1.0f, jmax<float>(0.0f, (pos.getX() / w)));
-                    auto y = 1.0f - jmin<float>(1.0f, jmax<float>(0.0f, (pos.getY() / h)));
-
-                    processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, x);
-                    processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, y);
+                    processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, relPos.getX());
+                    processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, relPos.getY());
                 }
             }
         }
@@ -934,17 +923,10 @@ void MultiSoundobjectSlider::mouseUp(const MouseEvent& e)
                     if (param)
                         param->EndGuiGesture();
 
-                    auto orig = GetAspectAndMarginCorrectedBounds().getTopLeft().toFloat();
-                    auto w = static_cast<float>(GetAspectAndMarginCorrectedBounds().getWidth());
-                    auto h = static_cast<float>(GetAspectAndMarginCorrectedBounds().getHeight());
+                    auto relPos = GetPosOnMappingForPoint(e.getPosition().toFloat(), MappingAreaId(processor->GetMappingId()));
 
-                    // Get mouse pixel-wise position and scale it between 0 and 1.
-                    auto const& pos = e.getPosition().toFloat() - orig;
-                    auto x = jmin<float>(1.0f, jmax<float>(0.0f, (pos.getX() / w)));
-                    auto y = 1.0f - jmin<float>(1.0f, jmax<float>(0.0f, (pos.getY() / h)));
-
-                    processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, x);
-                    processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, y);
+                    processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, relPos.getX());
+                    processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, relPos.getY());
                 }
             }
         }
@@ -1942,6 +1924,41 @@ juce::Point<float> MultiSoundobjectSlider::GetPointForRelativePosOnMapping(const
     else
     {
         return getLocalBounds().getTopLeft().toFloat();
+    }
+}
+
+/**
+ * Helper method to convert a given position on screen to a relative 0...1 range point in the scope of a given mapping area.
+ * In case a valid mapping area is the currently selected, the point is mapped to the entire screen space.
+ * If currently selected is invalid, the screen position is calculated based on the real bounding rect
+ * and the position of mapping areas within.
+ * @param   pointInBounds   The position on screen (within bounds)
+ * @param   mapping         The mappingarea the relative position shall relate
+ * @return  The derived position in pixel coordinates
+ */
+juce::Point<float> MultiSoundobjectSlider::GetPosOnMappingForPoint(const juce::Point<float>& pointInBounds, const MappingAreaId& mapping)
+{
+    if (GetSelectedMapping() == MAI_Invalid && IsCoordinateMappingsSettingsDataReady())
+    {
+        /*todo*/
+        jassertfalse;
+    }
+    else if (GetSelectedMapping() == mapping)
+    {
+        auto orig = GetAspectAndMarginCorrectedBounds().getTopLeft().toFloat();
+        auto w = static_cast<float>(GetAspectAndMarginCorrectedBounds().getWidth());
+        auto h = static_cast<float>(GetAspectAndMarginCorrectedBounds().getHeight());
+
+        // Get mouse pixel-wise position and scale it between 0 and 1.
+        auto const& pos = pointInBounds - orig;
+        auto x = jmin<float>(1.0f, jmax<float>(0.0f, (pos.getX() / w)));
+        auto y = 1.0f - jmin<float>(1.0f, jmax<float>(0.0f, (pos.getY() / h)));
+
+        return { x, y };
+    }
+    else
+    {
+        return { 0.0f ,0.0f };
     }
 }
 

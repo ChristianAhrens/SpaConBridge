@@ -137,6 +137,7 @@ void StaticObjectsPollingHelper::pollOnce()
  * The one and only instance of Controller.
  */
 std::unique_ptr<Controller> Controller::s_singleton;
+bool Controller::s_constructionFinished{ false };
 
 /**
  * Constructs an Controller object.
@@ -163,6 +164,8 @@ Controller::Controller()
 	SetActiveParallelModeDS100(DCP_Init, APM_None, true);
 
 	m_pollingHelper = std::make_unique<StaticObjectsPollingHelper>(PROTOCOL_INTERVAL_STATIC_OBJS);
+
+	s_constructionFinished = true;
 }
 
 /**
@@ -170,6 +173,8 @@ Controller::Controller()
  */
 Controller::~Controller()
 {
+	s_constructionFinished = false;
+
 	stopTimer();
 	Disconnect();
 

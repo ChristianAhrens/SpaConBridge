@@ -183,9 +183,10 @@ private:
 	juce::Range<float>	m_realXBoundingRange;
 	juce::Range<float>	m_realYBoundingRange;
 
-	juce::Point<float>	GetPointForRealCoordinate(const juce::Vector3D<float>& realCoordinate);
-	juce::Point<float>	GetPointForRelativePosOnMapping(const juce::Point<float>& relativePos, const MappingAreaId& mapping);
-	juce::Point<float>	GetPosOnMappingForPoint(const juce::Point<float>& pointInBounds, const MappingAreaId& mapping);
+	juce::Point<float>		GetPointForRealCoordinate(const juce::Vector3D<float>& realCoordinate);
+	juce::Vector3D<float>	GetRealCoordinateForPoint(const juce::Point<float>& pointInBounds);
+	juce::Point<float>		GetPointForRelativePosOnMapping(const juce::Point<float>& relativePos, const MappingAreaId& mapping);
+	juce::Point<float>		GetPosOnMappingForPoint(const juce::Point<float>& pointInBounds, const MappingAreaId& mapping);
 
 	juce::Rectangle<int>	GetAspectAndMarginCorrectedBounds();
 

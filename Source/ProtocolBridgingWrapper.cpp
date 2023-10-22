@@ -1231,10 +1231,10 @@ bool ProtocolBridgingWrapper::SetProtocolIpAddress(ProtocolId protocolId, juce::
 		if (protocolXmlElement)
 		{
 			auto ipAddressXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
+			if (!ipAddressXmlElement)
+				ipAddressXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
 			if (ipAddressXmlElement)
-			{
 				ipAddressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), ipAddress.toString());
-			}
 			else
 				return false;
 		}
@@ -1289,10 +1289,10 @@ bool ProtocolBridgingWrapper::SetProtocolListeningPort(ProtocolId protocolId, in
 		if (protocolXmlElement)
 		{
 			auto listeningPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
+			if (!listeningPortXmlElement)
+				listeningPortXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
 			if (listeningPortXmlElement)
-			{
 				listeningPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), listeningPort);
-			}
 			else
 				return false;
 		}
@@ -1347,10 +1347,10 @@ bool ProtocolBridgingWrapper::SetProtocolRemotePort(ProtocolId protocolId, int r
 		if (protocolXmlElement)
 		{
 			auto remotePortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+			if (!remotePortXmlElement)
+				remotePortXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
 			if (remotePortXmlElement)
-			{
 				remotePortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), remotePort);
-			}
 			else
 				return false;
 		}

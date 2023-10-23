@@ -208,6 +208,42 @@ bool ProtocolBridgingWrapper::setStateXml(XmlElement* stateXml)
 		auto nodeXmlElement = stateXml->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::NODE));
 		if (nodeXmlElement)
 		{
+			// verify object handling element
+			auto objectHandlingXmlElement = nodeXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OBJECTHANDLING));
+			if (!objectHandlingXmlElement)
+				objectHandlingXmlElement = nodeXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OBJECTHANDLING));
+			if (objectHandlingXmlElement)
+			{
+				if (objectHandlingXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE)).isEmpty())
+					objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Forward_only_valueChanges));
+
+				// init precision element
+				auto precisionXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
+				if (!precisionXmlElement)
+				{
+					precisionXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
+					precisionXmlElement->addTextElement(String(DS100_VALUCHANGE_SENSITIVITY));
+				}
+
+				// init typeA (DS100) to have the valueAck expected flag set
+				auto protocolsAcknowledgeXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::VALUEACK));
+				if (!protocolsAcknowledgeXmlElement)
+				{
+					protocolsAcknowledgeXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::VALUEACK));
+					protocolsAcknowledgeXmlElement->addTextElement(String(DS100_ACKNOWLEDGES_SENT_VALUES_MASK));
+				}
+
+				// init reaction monitored protocols element
+				auto reactMoniProtosTextValue = String(DS100_1_PROCESSINGPROTOCOL_ID) + "," + String(DS100_2_PROCESSINGPROTOCOL_ID);
+				auto reactMoniProtosXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REACTMONIPROTOS));
+				if (!reactMoniProtosXmlElement)
+				{
+					reactMoniProtosXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REACTMONIPROTOS));
+					reactMoniProtosXmlElement->addTextElement(reactMoniProtosTextValue);
+				}
+			}
+
+			// cache all bridging protocol elements
 			auto digicoProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DIGICO_PROCESSINGPROTOCOL_ID));
 			if (digicoProtocolXmlElement)
 				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_DiGiCo, *digicoProtocolXmlElement));

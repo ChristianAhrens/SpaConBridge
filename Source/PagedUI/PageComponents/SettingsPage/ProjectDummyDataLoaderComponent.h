@@ -43,6 +43,9 @@ public:
     void resized() override;
 
     //==============================================================================
+    void lookAndFeelChanged() override;
+
+    //==============================================================================
     std::function<void(const juce::String&)> onProjectDummyDataLoaded;
     
 #ifdef USE_DBPR_PROJECT_UTILS
@@ -54,11 +57,13 @@ public:
 private:
     //==============================================================================
     void loadProjectClicked();
+    void clearProjectClicked();
     void openAndReadProject(const juce::String& fileName);
 
     //==============================================================================
     std::unique_ptr<JUCEAppBasics::FixedFontTextEditor> m_currentProjectDummyDataInfoLabel;
     std::unique_ptr<juce::TextButton>                   m_loadProjectDummyDataButton;
+    std::unique_ptr<juce::DrawableButton>               m_clearProjectDummyDataButton;
 
 #ifdef USE_DBPR_PROJECT_UTILS
     ProjectData     m_currentProjectDummyData;

@@ -20,6 +20,8 @@
 
 #include <FixedFontTextEditor.h>
 
+#include "../../../SpaConBridgeCommon.h"
+
 namespace SpaConBridge
 {
 
@@ -31,13 +33,20 @@ ProjectDummyDataLoaderComponent::ProjectDummyDataLoaderComponent()
     m_currentProjectDummyDataInfoLabel->setReadOnly(true);
 	addAndMakeVisible(m_currentProjectDummyDataInfoLabel.get());
 
-    m_loadProjectDummyDataButton = std::make_unique<TextButton>("Load dbpr");
+    m_loadProjectDummyDataButton = std::make_unique<juce::TextButton>("Load dbpr");
     m_loadProjectDummyDataButton->onClick = [=]() { loadProjectClicked(); };
 	addAndMakeVisible(m_loadProjectDummyDataButton.get());
+
+    m_clearProjectDummyDataButton = std::make_unique<juce::DrawableButton>("Clear dbpr", DrawableButton::ButtonStyle::ImageOnButtonBackground);
+    m_clearProjectDummyDataButton->onClick = [=]() { clearProjectClicked(); };
+    addAndMakeVisible(m_clearProjectDummyDataButton.get());
 
 #ifdef USE_DBPR_PROJECT_UTILS
     setProjectDummyData(ProjectData());
 #endif
+
+    // trigger lookandfeel update to init button images
+    lookAndFeelChanged();
 }
 
 ProjectDummyDataLoaderComponent::~ProjectDummyDataLoaderComponent()
@@ -49,9 +58,11 @@ void ProjectDummyDataLoaderComponent::resized()
 {
 	auto bounds = getLocalBounds();
 
-    m_currentProjectDummyDataInfoLabel->setBounds(bounds.removeFromRight(static_cast<int>(0.6f * bounds.getWidth()) - 2));
-	bounds.removeFromRight(4);
-    m_loadProjectDummyDataButton->setBounds(bounds);
+    m_clearProjectDummyDataButton->setBounds(bounds.removeFromRight(bounds.getHeight()));
+    bounds.removeFromRight(4);
+    m_loadProjectDummyDataButton->setBounds(bounds.removeFromLeft(3 * bounds.getHeight()));
+    bounds.removeFromLeft(4);
+    m_currentProjectDummyDataInfoLabel->setBounds(bounds);
 }
 
 #ifdef USE_DBPR_PROJECT_UTILS
@@ -89,6 +100,17 @@ void ProjectDummyDataLoaderComponent::loadProjectClicked()
     chooser.release();
 }
 
+void ProjectDummyDataLoaderComponent::clearProjectClicked()
+{
+#ifdef USE_DBPR_PROJECT_UTILS
+    ProjectData emptyPD;
+    setProjectDummyData(emptyPD);
+
+    if (onProjectDummyDataLoaded)
+        onProjectDummyDataLoaded(emptyPD.ToString());
+#endif
+}
+
 void ProjectDummyDataLoaderComponent::openAndReadProject(const juce::String& fileName)
 {
 #ifdef USE_DBPR_PROJECT_UTILS
@@ -99,6 +121,15 @@ void ProjectDummyDataLoaderComponent::openAndReadProject(const juce::String& fil
     if (onProjectDummyDataLoaded)
         onProjectDummyDataLoaded(m_currentProjectDummyData.ToString());
 #endif
+}
+
+void ProjectDummyDataLoaderComponent::lookAndFeelChanged()
+{
+    // first forward the call to base implementation
+    Component::lookAndFeelChanged();
+
+    // Update drawable button images with updated lookAndFeel colours
+    UpdateDrawableButtonImages(m_clearProjectDummyDataButton, BinaryData::clear_black_24dp_svg, &getLookAndFeel());
 }
 
 

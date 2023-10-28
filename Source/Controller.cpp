@@ -972,9 +972,16 @@ void Controller::SetDS100ProtocolType(DataChangeParticipant changeSource, Protoc
 	{
 		m_DS100ProtocolType = protocol;
 
+		// special case NoProtocol - this requires shutting off any extension mode
+		if (m_DS100ProtocolType == PT_NoProtocol)
+		{
+			if (m_protocolBridge.SetDS100ExtensionMode(EM_Off, true))
+				m_DS100ExtensionMode = EM_Off;
+		}
+
 		m_protocolBridge.SetDS100ProtocolType(protocol, dontSendNotification);
 
-		// IP and port have likely changed when changing the protocol type (new defaults set)
+		// IP, port, etc. have likely changed when changing the protocol type (new defaults set)
 		m_DS100IpAddress = m_protocolBridge.GetDS100IpAddress();
 		m_DS100Port = m_protocolBridge.GetDS100Port();
 
@@ -983,6 +990,7 @@ void Controller::SetDS100ProtocolType(DataChangeParticipant changeSource, Protoc
 
 		// Signal the change to all Processors. 
 		SetParameterChanged(changeSource, DCT_ProtocolType);
+		SetParameterChanged(changeSource, DCT_ExtensionMode);
 		SetParameterChanged(changeSource, DCT_IPAddress);
 		SetParameterChanged(changeSource, DCT_Connected);
 

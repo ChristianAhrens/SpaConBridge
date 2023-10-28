@@ -1588,6 +1588,8 @@ bool MultiSoundobjectSlider::CheckCoordinateMappingSettingsDataCompleteness()
  */
 void MultiSoundobjectSlider::SetCoordinateMappingSettingsDataReady(bool ready)
 {
+    auto readyChange = (ready != m_coordinateMappingSettingsDataReady);
+
     m_coordinateMappingSettingsDataReady = ready;
 
     if (m_coordinateMappingSettingsDataReady && IsSpeakerPositionDataReady())
@@ -1595,8 +1597,6 @@ void MultiSoundobjectSlider::SetCoordinateMappingSettingsDataReady(bool ready)
         ComputeRealBoundingRect();
 
         PrerenderSpeakerAndMappingAreaInBounds();
-
-        repaint();
     }
     else if (!m_coordinateMappingSettingsDataReady)
     {
@@ -1611,6 +1611,9 @@ void MultiSoundobjectSlider::SetCoordinateMappingSettingsDataReady(bool ready)
         m_mappingFlip.clear();
         m_mappingName.clear();
     }
+
+    if (readyChange)
+        repaint();
 }
 
 /**
@@ -1727,6 +1730,8 @@ bool MultiSoundobjectSlider::CheckSpeakerPositionDataCompleteness()
  */
 void MultiSoundobjectSlider::SetSpeakerPositionDataReady(bool ready)
 {
+    auto readyChange = (ready != m_speakerPositionDataReady);
+
     m_speakerPositionDataReady = ready;
 
     if (m_speakerPositionDataReady && IsCoordinateMappingsSettingsDataReady())
@@ -1751,8 +1756,6 @@ void MultiSoundobjectSlider::SetSpeakerPositionDataReady(bool ready)
         }
 
         PrerenderSpeakerAndMappingAreaInBounds();
-
-        repaint();
     }
     else if (!m_speakerPositionDataReady)
     {
@@ -1760,6 +1763,9 @@ void MultiSoundobjectSlider::SetSpeakerPositionDataReady(bool ready)
         m_speakerDrawableAreas.clear();
         m_speakerDrawables.clear();
     }
+
+    if (readyChange)
+        repaint();
 }
 
 /**

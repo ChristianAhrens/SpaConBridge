@@ -1307,7 +1307,7 @@ void Controller::SetDS100DummyProjectData(DataChangeParticipant changeSource, co
 		m_protocolBridge.SetDS100dbprData(projectDummyData, dontSendNotification);
 
 		// Signal the change to all Processors.
-		SetParameterChanged(changeSource, DCT_Connected);
+		SetParameterChanged(changeSource, DCT_Connected | DCT_SpeakerPositionData | DCT_CoordinateMappingSettingsData);
 
 		Reconnect();
 	}

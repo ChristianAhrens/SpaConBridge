@@ -1958,63 +1958,39 @@ juce::Point<float> MultiSoundobjectSlider::GetPointForRelativePosOnMapping(const
  */
 juce::Point<float> MultiSoundobjectSlider::GetPosOnMappingForPoint(const juce::Point<float>& pointInBounds, const MappingAreaId& mapping)
 {
-    DBG(juce::String(__FUNCTION__) << " piB " << pointInBounds.toString());
     if (GetSelectedMapping() == MAI_Invalid && IsCoordinateMappingsSettingsDataReady())
     {
         auto realPos = GetRealCoordinateForPoint(pointInBounds);
-        DBG(juce::String(__FUNCTION__) << " rP " << realPos.x << ";" << realPos.y);
 
         auto& mappingCornersReal = m_mappingCornersReal.at(mapping);
-        auto& mappingP1 = mappingCornersReal.at(0);
         auto& mappingP2 = mappingCornersReal.at(1);
         auto& mappingP3 = mappingCornersReal.at(2);
         auto& mappingP4 = mappingCornersReal.at(3);
-        auto& mappingCornersVirtual = m_mappingCornersVirtual.at(mapping);
-        auto& mappingVirtP1 = mappingCornersVirtual.at(0);
-        auto& mappingVirtP3 = mappingCornersVirtual.at(1);
-        auto mappingVirtP2 = juce::Vector3D<float>(mappingVirtP1.x, mappingVirtP3.y, 0.0f);
-        auto mappingVirtP4 = juce::Vector3D<float>(mappingVirtP3.x, mappingVirtP1.y, 0.0f);
         auto& isFlipped = m_mappingFlip.at(mapping);
+        
+        auto deltaP3Pos_x = mappingP3.x - realPos.x;
+        auto deltaP3Pos_y = mappingP3.y - realPos.y;
+        auto deltaP2P3_x = mappingP2.x - mappingP3.x;
+        auto deltaP2P3_y = mappingP2.y - mappingP3.y;
+        auto deltaP4P3_x = mappingP4.x - mappingP3.x;
+        auto deltaP4P3_y = mappingP4.y - mappingP3.y;
 
-        /*wtf - following is hacky due to lazyness and lack of knowledge of linear algebra*/
-        /**/
-        /**/// get real and relative origin vectors
-        /**/auto relOrigVector = (mappingVirtP3.x < mappingVirtP1.x && mappingVirtP3.y < mappingVirtP1.y) ? mappingVirtP3 : mappingVirtP1;
-        /**/auto origVector = (mappingVirtP3.x < mappingVirtP1.x && mappingVirtP3.y < mappingVirtP1.y) ? mappingP3 : mappingP1;
-        /**/
-        /**/auto posVector = realPos - origVector;
-        /**/
-        /**/auto vectorVirtX = mappingVirtP2 - mappingVirtP3;
-        /**/auto vectorX = mappingP2 - mappingP3;
-        /**/auto vectorVirtY = mappingVirtP4 - mappingVirtP3;
-        /**/auto vectorY = mappingP4 - mappingP3;
-        /**/
-        /**/if (vectorX.x != 0.0f && vectorY.y != 0.0f)
-        /**/{
-        /**/    jassert(vectorX.y == 0.0f); // the implementation here is not complete (does not take rotated mappingareas into account - WIP)
-        /**/    jassert(vectorY.x == 0.0f); // the implementation here is not complete (does not take rotated mappingareas into account - WIP)
-        /**/    auto relX = posVector.x / vectorX.x;
-        /**/    auto relY = posVector.y / vectorY.y;
-        /**/    return { relX, relY };
-        /**/}
-        /**/else
-        /**/    return { 0.0f, 0.0f };
-        /**/
-        //**/// get a factor for inversion if virt point config suggests inverted movement
-        //**/auto xs = 1.0f;
-        //**/auto ys = 1.0f;
-        //**/if (vectorVirtX.x < 0 || vectorVirtX.y < 0)
-        //**/    xs = -1.0f;
-        //**/if (vectorVirtY.x < 0 || vectorVirtY.y < 0)
-        //**/    ys = -1.0f;
-        //**/
-        //**/// combine that information 
-        //**/auto relVectorX = vectorX * (relPosWithSwap.x - relOrigVector.x) / vectorVirtX.length() * xs;
-        //**/auto relVectorY = vectorY * (relPosWithSwap.y - relOrigVector.y) / vectorVirtY.length() * ys;
-        //**/
-        //**/auto realPos = origVector + relVectorX + relVectorY;
-        /*wtf*/
+        auto dotP = deltaP3Pos_x * deltaP2P3_x + deltaP3Pos_y * deltaP2P3_y;
 
+        auto P2P3sqrSum = deltaP2P3_x * deltaP2P3_x + deltaP2P3_y * deltaP2P3_y;
+        auto P4P3sqrSum = (deltaP4P3_x * deltaP4P3_x + deltaP4P3_y * deltaP4P3_y);
+        if (P2P3sqrSum != 0.0f && P4P3sqrSum != 0.0f)
+        {
+            auto relX = -(dotP / P2P3sqrSum);
+            auto relY = -((deltaP3Pos_x - relX * deltaP2P3_x) * deltaP4P3_x + (deltaP3Pos_y - relX * deltaP2P3_y) * deltaP4P3_y) / P4P3sqrSum;
+
+            if (isFlipped)
+                return { relY, relX };
+            else
+                return { relX, relY };
+        }
+        else
+            return { 0.0f, 0.0f };
     }
     else if (GetSelectedMapping() == mapping)
     {
@@ -2024,10 +2000,10 @@ juce::Point<float> MultiSoundobjectSlider::GetPosOnMappingForPoint(const juce::P
 
         // Get mouse pixel-wise position and scale it between 0 and 1.
         auto const& pos = pointInBounds - orig;
-        auto x = jmin<float>(1.0f, jmax<float>(0.0f, (pos.getX() / w)));
-        auto y = 1.0f - jmin<float>(1.0f, jmax<float>(0.0f, (pos.getY() / h)));
+        auto relX = jmin<float>(1.0f, jmax<float>(0.0f, (pos.getX() / w)));
+        auto relY = 1.0f - jmin<float>(1.0f, jmax<float>(0.0f, (pos.getY() / h)));
 
-        return { x, y };
+        return { relX, relY };
     }
     else
     {

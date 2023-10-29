@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.12.2] 2023-10-29
+### Added
+
+### Changed
+- Updated JUCE submodule version to v7.0.8
+
+### Fixed
+- Fixed 'all' mapping area multi Soundobject visualization mouse interaction for rotated or unusually parametrized mapping areas
+- Fixed occasional incorrect online indication state
+- Fixed runtime lookAndFeel change text editor text updating
+- Fixed protocol bridging to not forward DS100 data acknowledge messages to 3rd party that triggered the change
+
 ## [0.12.1] 2023-09-24
 ### Added
 

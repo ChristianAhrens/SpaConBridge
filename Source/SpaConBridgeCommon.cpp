@@ -108,10 +108,6 @@ String GetProtocolBridgingShortName(ProtocolBridgingType type)
 			return "BlackTrax";
 		case PBT_GenericMIDI:
 			return "MIDI";
-		case PBT_YamahaSQ:
-			return "YamahaSQ";
-		case PBT_HUI:
-			return "HUI";
 		case PBT_YamahaOSC:
 			return "Yamaha";
 		case PBT_ADMOSC:
@@ -145,10 +141,6 @@ String GetProtocolBridgingNiceName(ProtocolBridgingType type)
 		return "BlackTrax RTTrPM";
 	case PBT_GenericMIDI:
 		return "Generic MIDI";
-	case PBT_YamahaSQ:
-		return "Yamaha SQ";
-	case PBT_HUI:
-		return "Generic HUI";
 	case PBT_YamahaOSC:
 		return "Yamaha/L'ISA OSC";
 	case PBT_ADMOSC:
@@ -182,10 +174,6 @@ String GetProtocolBridgingSystemName(ProtocolBridgingType type)
 		return "BlackTraxRTTrPM";
 	case PBT_GenericMIDI:
 		return "GenericMIDI";
-	case PBT_YamahaSQ:
-		return "DummyYamahaSQ";
-	case PBT_HUI:
-		return "DummyHUI";
 	case PBT_YamahaOSC:
 		return "YamahaOSC";
 	case PBT_ADMOSC:
@@ -225,9 +213,7 @@ const Colour GetProtocolBridgingColour(ProtocolBridgingType type)
 		return Colour(217, 0, 122);
 	case PBT_RemapOSC:
 		return Colour(124, 255, 0);
-	case PBT_YamahaSQ:
 	case PBT_DS100:
-	case PBT_HUI:
 	case PBT_None:
 	default:
 		return Colour();

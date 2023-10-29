@@ -168,6 +168,10 @@ public:
 	void SetActiveParallelModeDS100(DataChangeParticipant changeSource, ActiveParallelModeDS100 activeParallelModeDS100, bool dontSendNotification = false);
 
 	//==========================================================================
+	juce::String GetDS100DummyProjectData() const;
+	void SetDS100DummyProjectData(DataChangeParticipant changeSource, const juce::String& projectDummyData, bool dontSendNotification = false);
+
+	//==========================================================================
 	const std::vector<RemoteObject> GetActivatedSoundObjectRemoteObjects();
 	const std::vector<RemoteObject> GetActivatedMatrixInputRemoteObjects();
 	const std::vector<RemoteObject> GetActivatedMatrixOutputRemoteObjects();
@@ -308,6 +312,7 @@ protected:
 	ActiveParallelModeDS100			m_DS100ActiveParallelModeDS100;	/**< Currently active DS100 when in extension mode "parallel". */
 	juce::IPAddress					m_SecondDS100IpAddress;			/**< IP Address where OSC messages will be sent to / received from. */
 	int								m_SecondDS100Port;				/**< Port on a second ds100 device to connect to. */
+	juce::String					m_DS100DummyProjectData;		/**< Dummy dbpr project data excerpt as string. */
 
 	DataChangeType					m_parametersChanged[DCP_Max];	/**< Keep track of which OSC parameters have changed recently.
 																	 * The array has one entry for each application module (see enum DataChangeSource). */

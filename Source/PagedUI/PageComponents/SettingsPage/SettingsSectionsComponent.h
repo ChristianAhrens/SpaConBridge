@@ -49,6 +49,7 @@ class SceneIndexToMidiAssignerComponent;
 class RemoteObjectToOscAssignerComponent;
 class IndexToChannelAssignerComponent;
 class IPAddressDisplay;
+class ProjectDummyDataLoaderComponent;
 
 
 /**
@@ -113,10 +114,13 @@ private:
 	void handleScenesToMidiAssiSet(Component* sender, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& scenesToMidiAssi);
 
 	//==============================================================================
-	void handleRemapOscAssisSet(Component* sender, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& roiToCustomOscAssis);
+	void handleRemapOscAssisSet(const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& roiToCustomOscAssis);
 
 	//==============================================================================
-	void handleRTTrPMBeaconIdxAssisSet(Component* sender, const std::map<int, ChannelId>& idxToChAssis);
+	void handleRTTrPMBeaconIdxAssisSet(const std::map<int, ChannelId>& idxToChAssis);
+
+	//==============================================================================
+	void handleDS100dbprData(const juce::String& projectDummyData);
 
 	//==============================================================================
 	void processUpdatedGeneralConfig();
@@ -171,7 +175,7 @@ private:
 	std::unique_ptr<HeaderWithElmListComponent>					m_DS100Settings;
 	std::unique_ptr<JUCEAppBasics::SplitButtonComponent>		m_DS100ProtocolSelectButton;
 	std::unique_ptr<Label>										m_DS100ProtocolSelectLabel;
-	const std::vector<std::string>								m_DS100ProtocolSelects{ "OSC", "AES70/OCP1" };
+	const std::vector<std::pair<std::string, std::float_t>>		m_DS100ProtocolSelectTexts{ { "OSC", 1.0f}, { "AES70/OCP1", 1.0f }, { "None", 0.6f } };
 	std::map<std::string, uint64>								m_DS100ProtocolSelectButtonIds;
 	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_DS100IntervalEdit;
 	std::unique_ptr<Label>										m_DS100IntervalLabel;
@@ -197,6 +201,9 @@ private:
 	std::unique_ptr<Label>										m_SecondDS100ParallelModeLabel;
 	const std::vector<std::string>								m_SecondDS100ParallelModes{ "1st", "2nd" };
 	std::map<std::string, uint64>								m_SecondDS100ParallelModeButtonIds;
+
+	std::unique_ptr<ProjectDummyDataLoaderComponent>			m_DS100ProjectDummyDataLoader;
+	std::unique_ptr<Label>										m_DS100ProjectDummyDataLabel;
 
 	// DiGiCo settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_DiGiCoBridgingSettings;

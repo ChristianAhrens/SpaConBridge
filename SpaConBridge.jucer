@@ -1,13 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="MFvkL5" name="SpaConBridge" projectType="guiapp" version="0.12.3"
+<JUCERPROJECT id="MFvkL5" name="SpaConBridge" projectType="guiapp" version="0.13.0"
               bundleIdentifier="com.ChristianAhrens.SpaConBridge" companyName="Christian Ahrens"
               companyEmail="christianahrens@me.com" displaySplashScreen="0"
               reportAppUsage="0" companyCopyright="2023" jucerFormatVersion="1"
-              headerPath="../../submodules/RemoteProtocolBridgeCore/submodules/NanoOcp/Source/&#10;../../submodules/RemoteProtocolBridgeCore/Source&#10;../../submodules/JUCE-AppBasics/Source"
-              companyWebsite="https://github.com/ChristianAhrens/SpaConBridge">
+              headerPath="../../submodules/RemoteProtocolBridgeCore/submodules/NanoOcp/Source/&#10;../../submodules/RemoteProtocolBridgeCore/Source&#10;../../submodules/JUCE-AppBasics/Source&#10;../../submodules/SQLiteCpp/include&#10;../../submodules/SQLiteCpp/sqlite3"
+              companyWebsite="https://github.com/ChristianAhrens/SpaConBridge"
+              defines="SQLITE_ENABLE_COLUMN_METADATA=1&#10;USE_DBPR_PROJECT_UTILS=1">
   <MAINGROUP id="cS7SrP" name="SpaConBridge">
     <GROUP id="{F93FDF74-FF39-A47E-E403-31E5ADA7ADD3}" name="submodules">
+      <GROUP id="{ABDE5966-4366-3448-7A14-89E6D88C1E6A}" name="SQLiteCpp">
+        <GROUP id="{A9FECB7A-6D33-4FBA-91AA-2A8EA0EE38A0}" name="include">
+          <GROUP id="{C7B439F8-A546-811F-1DDE-33776FBF1BF1}" name="SQLiteCpp">
+            <FILE id="j8B1ec" name="Assertion.h" compile="0" resource="0" file="submodules/SQLiteCpp/include/SQLiteCpp/Assertion.h"/>
+            <FILE id="D4MlIh" name="Backup.h" compile="0" resource="0" file="submodules/SQLiteCpp/include/SQLiteCpp/Backup.h"/>
+            <FILE id="ekuSDl" name="Column.h" compile="0" resource="0" file="submodules/SQLiteCpp/include/SQLiteCpp/Column.h"/>
+            <FILE id="fbJclg" name="Database.h" compile="0" resource="0" file="submodules/SQLiteCpp/include/SQLiteCpp/Database.h"/>
+            <FILE id="j32Z0g" name="Exception.h" compile="0" resource="0" file="submodules/SQLiteCpp/include/SQLiteCpp/Exception.h"/>
+            <FILE id="VCP6C5" name="ExecuteMany.h" compile="0" resource="0" file="submodules/SQLiteCpp/include/SQLiteCpp/ExecuteMany.h"/>
+            <FILE id="PDhWEa" name="Savepoint.h" compile="0" resource="0" file="submodules/SQLiteCpp/include/SQLiteCpp/Savepoint.h"/>
+            <FILE id="clnbrn" name="SQLiteCpp.h" compile="0" resource="0" file="submodules/SQLiteCpp/include/SQLiteCpp/SQLiteCpp.h"/>
+            <FILE id="hicEvC" name="SQLiteCppExport.h" compile="0" resource="0"
+                  file="submodules/SQLiteCpp/include/SQLiteCpp/SQLiteCppExport.h"/>
+            <FILE id="Jhdzoc" name="Statement.h" compile="0" resource="0" file="submodules/SQLiteCpp/include/SQLiteCpp/Statement.h"/>
+            <FILE id="xDaCWU" name="Transaction.h" compile="0" resource="0" file="submodules/SQLiteCpp/include/SQLiteCpp/Transaction.h"/>
+            <FILE id="vTBwyi" name="Utils.h" compile="0" resource="0" file="submodules/SQLiteCpp/include/SQLiteCpp/Utils.h"/>
+            <FILE id="wiSzdZ" name="VariadicBind.h" compile="0" resource="0" file="submodules/SQLiteCpp/include/SQLiteCpp/VariadicBind.h"/>
+          </GROUP>
+        </GROUP>
+        <GROUP id="{048251B2-EA5A-570E-B7EB-61E1DD0FE93B}" name="sqlite3">
+          <FILE id="vvfOgx" name="sqlite3.c" compile="1" resource="0" file="submodules/SQLiteCpp/sqlite3/sqlite3.c"/>
+          <FILE id="OTKvjz" name="sqlite3.h" compile="0" resource="0" file="submodules/SQLiteCpp/sqlite3/sqlite3.h"/>
+        </GROUP>
+        <GROUP id="{EE8FD02C-2A93-7667-7AA3-654B457B9513}" name="src">
+          <FILE id="OhQ3xk" name="Backup.cpp" compile="1" resource="0" file="submodules/SQLiteCpp/src/Backup.cpp"/>
+          <FILE id="Pk3Ho4" name="Column.cpp" compile="1" resource="0" file="submodules/SQLiteCpp/src/Column.cpp"/>
+          <FILE id="Hi73y9" name="Database.cpp" compile="1" resource="0" file="submodules/SQLiteCpp/src/Database.cpp"/>
+          <FILE id="xgaQpL" name="Exception.cpp" compile="1" resource="0" file="submodules/SQLiteCpp/src/Exception.cpp"/>
+          <FILE id="fiw5Gu" name="Savepoint.cpp" compile="1" resource="0" file="submodules/SQLiteCpp/src/Savepoint.cpp"/>
+          <FILE id="HQvrLP" name="Statement.cpp" compile="1" resource="0" file="submodules/SQLiteCpp/src/Statement.cpp"/>
+          <FILE id="NHoK02" name="Transaction.cpp" compile="1" resource="0" file="submodules/SQLiteCpp/src/Transaction.cpp"/>
+        </GROUP>
+      </GROUP>
       <GROUP id="{9CCE33BC-DFA0-AFFB-5206-C2377252AD64}" name="RemoteProtocolBridgeCore">
         <GROUP id="{321C5394-CFC4-BD25-44AD-85E16C351DEA}" name="submodules">
           <GROUP id="{318B4966-9F78-D995-CDBC-633BA038EF7E}" name="NanoOcp">
@@ -125,6 +159,10 @@
                     file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/ProtocolProcessorBase.cpp"/>
               <FILE id="LxTbKH" name="ProtocolProcessorBase.h" compile="0" resource="0"
                     file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/ProtocolProcessorBase.h"/>
+              <FILE id="NfzSc6" name="NoProtocolProtocolProcessor.cpp" compile="1"
+                    resource="0" file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/NoProtocolProtocolProcessor.cpp"/>
+              <FILE id="AUy3RN" name="NoProtocolProtocolProcessor.h" compile="0"
+                    resource="0" file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/NoProtocolProtocolProcessor.h"/>
             </GROUP>
             <GROUP id="{DAC3D2E0-7E73-9402-80DB-F7F79EBFECF9}" name="ObjectDataHandling">
               <GROUP id="{453DD5F0-B25A-1F8F-CB6D-065B3DC4485C}" name="A2active_withValFilter">
@@ -222,6 +260,8 @@
                 file="submodules/RemoteProtocolBridgeCore/Source/LoggingTarget_Interface.h"/>
           <FILE id="IUZ0hg" name="RemoteProtocolBridgeCommon.h" compile="0" resource="0"
                 file="submodules/RemoteProtocolBridgeCore/Source/RemoteProtocolBridgeCommon.h"/>
+          <FILE id="WAza8i" name="dbprProjectUtils.h" compile="0" resource="0"
+                file="submodules/RemoteProtocolBridgeCore/Source/dbprProjectUtils.h"/>
         </GROUP>
       </GROUP>
       <GROUP id="{FAEFB6F6-97A8-A4B1-8911-35FBC344E2EF}" name="JUCE-AppBasics">
@@ -485,6 +525,10 @@
                   resource="0" file="Source/PagedUI/PageComponents/SettingsPage/IndexToChannelAssignerComponent.cpp"/>
             <FILE id="b12b44" name="IndexToChannelAssignerComponent.h" compile="0"
                   resource="0" file="Source/PagedUI/PageComponents/SettingsPage/IndexToChannelAssignerComponent.h"/>
+            <FILE id="ggTKaV" name="ProjectDummyDataLoaderComponent.cpp" compile="1"
+                  resource="0" file="Source/PagedUI/PageComponents/SettingsPage/ProjectDummyDataLoaderComponent.cpp"/>
+            <FILE id="pQxg6K" name="ProjectDummyDataLoaderComponent.h" compile="0"
+                  resource="0" file="Source/PagedUI/PageComponents/SettingsPage/ProjectDummyDataLoaderComponent.h"/>
             <FILE id="v39RUd" name="RemoteObjectToOscAssignerComponent.cpp" compile="1"
                   resource="0" file="Source/PagedUI/PageComponents/SettingsPage/RemoteObjectToOscAssignerComponent.cpp"/>
             <FILE id="D2KuDn" name="RemoteObjectToOscAssignerComponent.h" compile="0"

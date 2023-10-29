@@ -279,14 +279,10 @@ String StatisticsLog::GetLogSourceName(StatisticsLogSource logSourceType)
 		return GetProtocolBridgingShortName(PBT_GenericOSC);
 	case SLS_GenericMIDI:
 		return GetProtocolBridgingShortName(PBT_GenericMIDI);
-	case SLS_YamahaSQ:
-		return GetProtocolBridgingShortName(PBT_YamahaSQ);
 	case SLS_YamahaOSC:
 		return GetProtocolBridgingShortName(PBT_YamahaOSC);
 	case SLS_ADMOSC:
 		return GetProtocolBridgingShortName(PBT_ADMOSC);
-	case SLS_HUI:
-		return GetProtocolBridgingShortName(PBT_HUI);
 	case SLS_DS100:
 		return GetProtocolBridgingShortName(PBT_DS100);
 	case SLS_DS100_2:
@@ -318,14 +314,10 @@ const Colour StatisticsLog::GetLogSourceColour(StatisticsLogSource logSourceType
 		return GetProtocolBridgingColour(PBT_GenericOSC);
 	case SLS_GenericMIDI:
 		return GetProtocolBridgingColour(PBT_GenericMIDI);
-	case SLS_YamahaSQ:
-		return GetProtocolBridgingColour(PBT_YamahaSQ);
 	case SLS_YamahaOSC:
 		return GetProtocolBridgingColour(PBT_YamahaOSC);
 	case SLS_ADMOSC:
 		return GetProtocolBridgingColour(PBT_ADMOSC);
-	case SLS_HUI:
-		return GetProtocolBridgingColour(PBT_HUI);
 	case SLS_DS100:
 	case SLS_DS100_2:
 		return GetProtocolBridgingColour(PBT_DS100);

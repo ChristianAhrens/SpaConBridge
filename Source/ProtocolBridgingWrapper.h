@@ -160,6 +160,9 @@ public:
 	ObjectHandlingState GetSecondDS100State() const;
 	void SetSecondDS100State(ObjectHandlingState state);
 
+	const juce::String GetDS100dbprData() const;
+	bool SetDS100dbprData(const juce::String& projectDummyData, bool dontSendNotification = false);
+
 	//==========================================================================
 	static bool IsBridgingObjectOnly(const RemoteObjectIdentifier roi);
 

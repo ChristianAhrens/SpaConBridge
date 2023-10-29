@@ -11,8 +11,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
-## [0.12.2] 2023-10-29
+## [0.13.0] 2023-10-29
 ### Added
+- Added DS100 connection protocol option 'None', enabling operation without physical device, incl. optional loading of speaker setup and coordinate mapping settings data from dbpr projects
 
 ### Changed
 - Updated JUCE submodule version to v7.0.8

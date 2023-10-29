@@ -93,6 +93,7 @@ public:
 	~Controller() override;
 	static Controller* GetInstance();
 	void DestroyInstance();
+	static bool Exists() { return bool(s_singleton) && s_constructionFinished; };
 
 	bool GetParameterChanged(DataChangeParticipant changeTarget, DataChangeType change);
 	bool PopParameterChanged(DataChangeParticipant changeTarget, DataChangeType change);
@@ -289,6 +290,7 @@ private:
 protected:
 	//==========================================================================
 	static std::unique_ptr<Controller>	s_singleton;				/**< The one and only instance of CController. */
+	static bool							s_constructionFinished;		/**< Bool indicator if construction of the singleton is finished (to ensure no recursion stack overflow happens. */
 
 	int								m_refreshInterval;				/**< Interval at which the controller internal update is triggered, in ms. */
 	bool							m_onlineState{ false };			/**< State of the protocol bridging/communication. This is only the expected state, not the actual connected state. */

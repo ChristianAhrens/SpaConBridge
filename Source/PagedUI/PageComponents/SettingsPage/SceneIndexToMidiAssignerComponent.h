@@ -21,9 +21,16 @@
 #include <JuceHeader.h>
 
 #include <MidiLearnerComponent.h>
-#include <TextWithImageButton.h>
 
 #include "AssignmentEditOverlayBaseComponents.h"
+
+/**
+ * Fwd. decls.
+ */
+namespace JUCEAppBasics {
+    class FixedFontTextEditor;
+    class TextWithImageButton;
+}
 
 namespace SpaConBridge
 {
@@ -74,7 +81,7 @@ private:
         //==============================================================================
         String m_sceneIndex;
 
-        std::unique_ptr<TextEditor>                                 m_sceneIndexEdit;
+        std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>         m_sceneIndexEdit;
         std::unique_ptr<TextEditor::LengthAndCharacterRestriction>  m_sceneIndexEditFilter;
         std::unique_ptr<JUCEAppBasics::MidiLearnerComponent>        m_learnerComponent;
     };
@@ -138,7 +145,7 @@ private:
     void processAssignmentResult(Component* sender, const String& sceneIndex, const JUCEAppBasics::MidiCommandRangeAssignment& midiAssignment);
     void processAssignmentResults(Component* sender, const std::map<String, JUCEAppBasics::MidiCommandRangeAssignment>& midiAssignments);
 
-    std::unique_ptr<TextEditor>                                 m_currentMidiAssisLabel;
+    std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>         m_currentMidiAssisLabel;
     std::unique_ptr<TextButton>                                 m_editAssignmentsButton;
 
     std::unique_ptr<SceneIndexAssignmentsViewingComponent>      m_assignmentsEditionOverlay;

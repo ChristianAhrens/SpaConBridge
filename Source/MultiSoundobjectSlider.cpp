@@ -796,8 +796,6 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
         return;
     
     auto orig = GetAspectAndMarginCorrectedBounds().getTopLeft().toFloat();
-	auto w = static_cast<float>(GetAspectAndMarginCorrectedBounds().getWidth());
-	auto h = static_cast<float>(GetAspectAndMarginCorrectedBounds().getHeight());
 
 	// Mouse click position (in pixel units)
 	Point<float> mousePos(static_cast<float>(e.getMouseDownPosition().x), static_cast<float>(e.getMouseDownPosition().y));
@@ -817,9 +815,7 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
                     continue;
 
                 // Map the x/y coordinates to the pixel-wise dimensions of the surface area.
-                auto const& pt = paramsKV.second._pos;
-                auto x = orig.x + (pt.x * w);
-                auto y = orig.y + (h - (pt.y * h));
+                auto pt = GetPointForRelativePosOnMapping(paramsKV.second._pos, mappingAreaId);
 
                 auto knobSizeScaleFactor = static_cast<float>(1.0f + (1.5f * paramsKV.second._size));
                 auto knobSize = refKnobSize * knobSizeScaleFactor;
@@ -827,7 +823,7 @@ void MultiSoundobjectSlider::mouseDown(const MouseEvent& e)
 
                 Path knobPath;
                 auto fillSize = knobSize + knobThickness;
-                knobPath.addEllipse(Rectangle<float>(x - (fillSize / 2.0f), y - (fillSize / 2.0f), fillSize, fillSize));
+                knobPath.addEllipse(Rectangle<float>(pt.x - (fillSize / 2.0f), pt.y - (fillSize / 2.0f), fillSize, fillSize));
 
                 // Check if the mouse click landed inside any of the knobs.
                 if (knobPath.contains(mousePos))
@@ -886,17 +882,10 @@ void MultiSoundobjectSlider::mouseDrag(const MouseEvent& e)
                 auto processor = ctrl->GetSoundobjectProcessor(m_currentlyDraggedId);
                 if (processor)
                 {
-                    auto orig = GetAspectAndMarginCorrectedBounds().getTopLeft().toFloat();
-                    auto w = static_cast<float>(GetAspectAndMarginCorrectedBounds().getWidth());
-                    auto h = static_cast<float>(GetAspectAndMarginCorrectedBounds().getHeight());
+                    auto relPos = GetPosOnMappingForPoint(e.getPosition().toFloat(), MappingAreaId(processor->GetMappingId()));
 
-                    // Get mouse pixel-wise position and scale it between 0 and 1.
-                    auto const& pos = e.getPosition().toFloat() - orig;
-                    auto x = jmin<float>(1.0f, jmax<float>(0.0f, (pos.getX() / w)));
-                    auto y = 1.0f - jmin<float>(1.0f, jmax<float>(0.0f, (pos.getY() / h)));
-
-                    processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, x);
-                    processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, y);
+                    processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, relPos.getX());
+                    processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, relPos.getY());
                 }
             }
         }
@@ -934,17 +923,10 @@ void MultiSoundobjectSlider::mouseUp(const MouseEvent& e)
                     if (param)
                         param->EndGuiGesture();
 
-                    auto orig = GetAspectAndMarginCorrectedBounds().getTopLeft().toFloat();
-                    auto w = static_cast<float>(GetAspectAndMarginCorrectedBounds().getWidth());
-                    auto h = static_cast<float>(GetAspectAndMarginCorrectedBounds().getHeight());
+                    auto relPos = GetPosOnMappingForPoint(e.getPosition().toFloat(), MappingAreaId(processor->GetMappingId()));
 
-                    // Get mouse pixel-wise position and scale it between 0 and 1.
-                    auto const& pos = e.getPosition().toFloat() - orig;
-                    auto x = jmin<float>(1.0f, jmax<float>(0.0f, (pos.getX() / w)));
-                    auto y = 1.0f - jmin<float>(1.0f, jmax<float>(0.0f, (pos.getY() / h)));
-
-                    processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, x);
-                    processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, y);
+                    processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, relPos.getX());
+                    processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, relPos.getY());
                 }
             }
         }
@@ -1606,6 +1588,8 @@ bool MultiSoundobjectSlider::CheckCoordinateMappingSettingsDataCompleteness()
  */
 void MultiSoundobjectSlider::SetCoordinateMappingSettingsDataReady(bool ready)
 {
+    auto readyChange = (ready != m_coordinateMappingSettingsDataReady);
+
     m_coordinateMappingSettingsDataReady = ready;
 
     if (m_coordinateMappingSettingsDataReady && IsSpeakerPositionDataReady())
@@ -1613,8 +1597,6 @@ void MultiSoundobjectSlider::SetCoordinateMappingSettingsDataReady(bool ready)
         ComputeRealBoundingRect();
 
         PrerenderSpeakerAndMappingAreaInBounds();
-
-        repaint();
     }
     else if (!m_coordinateMappingSettingsDataReady)
     {
@@ -1629,6 +1611,9 @@ void MultiSoundobjectSlider::SetCoordinateMappingSettingsDataReady(bool ready)
         m_mappingFlip.clear();
         m_mappingName.clear();
     }
+
+    if (readyChange)
+        repaint();
 }
 
 /**
@@ -1745,6 +1730,8 @@ bool MultiSoundobjectSlider::CheckSpeakerPositionDataCompleteness()
  */
 void MultiSoundobjectSlider::SetSpeakerPositionDataReady(bool ready)
 {
+    auto readyChange = (ready != m_speakerPositionDataReady);
+
     m_speakerPositionDataReady = ready;
 
     if (m_speakerPositionDataReady && IsCoordinateMappingsSettingsDataReady())
@@ -1769,8 +1756,6 @@ void MultiSoundobjectSlider::SetSpeakerPositionDataReady(bool ready)
         }
 
         PrerenderSpeakerAndMappingAreaInBounds();
-
-        repaint();
     }
     else if (!m_speakerPositionDataReady)
     {
@@ -1778,6 +1763,9 @@ void MultiSoundobjectSlider::SetSpeakerPositionDataReady(bool ready)
         m_speakerDrawableAreas.clear();
         m_speakerDrawables.clear();
     }
+
+    if (readyChange)
+        repaint();
 }
 
 /**
@@ -1870,12 +1858,32 @@ void MultiSoundobjectSlider::ComputeRealBoundingRect()
 juce::Point<float> MultiSoundobjectSlider::GetPointForRealCoordinate(const juce::Vector3D<float>& realCoordinate)
 {
     if (m_realXBoundingRange.getLength() == 0.0f || m_realYBoundingRange.getLength() == 0.0f)
-        return juce::Point<float>(0.0f, 0.0f);
+        return { 0.0f, 0.0f };
 
     auto relativeX = (realCoordinate.x - m_realXBoundingRange.getStart()) / m_realXBoundingRange.getLength();
     auto relativeY = (realCoordinate.y - m_realYBoundingRange.getStart()) / m_realYBoundingRange.getLength();
 
     return GetAspectAndMarginCorrectedBounds().getRelativePoint(relativeX, relativeY).toFloat();
+}
+
+/**
+ * Helper method to convert a given position on screen in bounds of this component to a real coordinate
+ * @param   pointInBounds   The point position in bounds of this component to convert
+ * @return  The real coordinate for the given position
+ */
+juce::Vector3D<float> MultiSoundobjectSlider::GetRealCoordinateForPoint(const juce::Point<float>& pointInBounds)
+{
+    if (m_realXBoundingRange.getLength() == 0.0f || m_realYBoundingRange.getLength() == 0.0f)
+        return { 0.0f, 0.0f, 0.0f};
+
+    auto areaBounds = GetAspectAndMarginCorrectedBounds();
+    auto relativeX = (pointInBounds.x - areaBounds.getTopLeft().x) / areaBounds.getWidth();
+    auto relativeY = (pointInBounds.y - areaBounds.getTopLeft().y) / areaBounds.getHeight();
+
+    auto realX = m_realXBoundingRange.getStart() + (m_realXBoundingRange.getLength() * relativeX);
+    auto realY = m_realYBoundingRange.getStart() + (m_realYBoundingRange.getLength() * relativeY);
+
+    return { realX, realY, 0.0f };
 }
 
 /**
@@ -1903,32 +1911,30 @@ juce::Point<float> MultiSoundobjectSlider::GetPointForRelativePosOnMapping(const
         auto mappingVirtP4 = juce::Vector3D<float>(mappingVirtP3.x, mappingVirtP1.y, 0.0f);
         auto& isFlipped = m_mappingFlip.at(mapping);
 
-        /*wtf - following is hacky due to lazyness and lack of knowledge of linear algebra*/
-        /**/auto relPosWithSwap = isFlipped ? juce::Point<float>(relativePos.y, relativePos.x) : relativePos;
-        /**/
-        /**/auto vectorVirtX = mappingVirtP2 - mappingVirtP3;
-        /**/auto vectorX = mappingP2 - mappingP3;
-        /**/auto vectorVirtY = mappingVirtP4 - mappingVirtP3;
-        /**/auto vectorY = mappingP4 - mappingP3;
-        /**/
-        /**/// get a factor for inversion if virt point config suggests inverted movement
-        /**/auto xs = 1.0f;
-        /**/auto ys = 1.0f;
-        /**/if (vectorVirtX.x < 0 || vectorVirtX.y < 0)
-        /**/    xs = -1.0f;
-        /**/if (vectorVirtY.x < 0 || vectorVirtY.y < 0)
-        /**/    ys = -1.0f;
-        /**/
-        /**/// get real and relative origin vectors
-        /**/auto relOrigVector = (mappingVirtP3.x < mappingVirtP1.x && mappingVirtP3.y < mappingVirtP1.y) ? mappingVirtP3 : mappingVirtP1;
-        /**/auto origVector = (mappingVirtP3.x < mappingVirtP1.x && mappingVirtP3.y < mappingVirtP1.y) ? mappingP3 : mappingP1;
-        /**/
-        /**/// combine that information 
-        /**/auto relVectorX = vectorX * (relPosWithSwap.x - relOrigVector.x) / vectorVirtX.length() * xs;
-        /**/auto relVectorY = vectorY * (relPosWithSwap.y - relOrigVector.y) / vectorVirtY.length() * ys;
-        /**/
-        /**/auto realPos = origVector + relVectorX + relVectorY;
-        /*wtf*/
+        auto relPosWithSwap = isFlipped ? juce::Point<float>(relativePos.y, relativePos.x) : relativePos;
+        
+        auto vectorVirtX = mappingVirtP2 - mappingVirtP3;
+        auto vectorX = mappingP2 - mappingP3;
+        auto vectorVirtY = mappingVirtP4 - mappingVirtP3;
+        auto vectorY = mappingP4 - mappingP3;
+        
+        // get a factor for inversion if virt point config suggests inverted movement
+        auto xs = 1.0f;
+        auto ys = 1.0f;
+        if (vectorVirtX.x < 0 || vectorVirtX.y < 0)
+            xs = -1.0f;
+        if (vectorVirtY.x < 0 || vectorVirtY.y < 0)
+            ys = -1.0f;
+        
+        // get real and relative origin vectors
+        auto relOrigVector = (mappingVirtP3.x < mappingVirtP1.x && mappingVirtP3.y < mappingVirtP1.y) ? mappingVirtP3 : mappingVirtP1;
+        auto origVector = (mappingVirtP3.x < mappingVirtP1.x && mappingVirtP3.y < mappingVirtP1.y) ? mappingP3 : mappingP1;
+        
+        // combine that information 
+        auto relVectorX = vectorX * (relPosWithSwap.x - relOrigVector.x) / vectorVirtX.length() * xs;
+        auto relVectorY = vectorY * (relPosWithSwap.y - relOrigVector.y) / vectorVirtY.length() * ys;
+        
+        auto realPos = origVector + relVectorX + relVectorY;
 
         return GetPointForRealCoordinate(realPos);
     }
@@ -1942,6 +1948,95 @@ juce::Point<float> MultiSoundobjectSlider::GetPointForRelativePosOnMapping(const
     else
     {
         return getLocalBounds().getTopLeft().toFloat();
+    }
+}
+
+/**
+ * Helper method to convert a given position on screen to a relative 0...1 range point in the scope of a given mapping area.
+ * In case a valid mapping area is the currently selected, the point is mapped to the entire screen space.
+ * If currently selected is invalid, the screen position is calculated based on the real bounding rect
+ * and the position of mapping areas within.
+ * @param   pointInBounds   The position on screen (within bounds)
+ * @param   mapping         The mappingarea the relative position shall relate
+ * @return  The derived position in pixel coordinates
+ */
+juce::Point<float> MultiSoundobjectSlider::GetPosOnMappingForPoint(const juce::Point<float>& pointInBounds, const MappingAreaId& mapping)
+{
+    if (GetSelectedMapping() == MAI_Invalid && IsCoordinateMappingsSettingsDataReady())
+    {
+        auto realPos = GetRealCoordinateForPoint(pointInBounds);
+
+        auto& mappingCornersReal = m_mappingCornersReal.at(mapping);
+        auto& mappingP2 = mappingCornersReal.at(1);
+        auto& mappingP3 = mappingCornersReal.at(2);
+        auto& mappingP4 = mappingCornersReal.at(3);
+        auto& mappingCornersVirtual = m_mappingCornersVirtual.at(mapping);
+        auto& mappingVirtP1 = mappingCornersVirtual.at(0);
+        auto& mappingVirtP3 = mappingCornersVirtual.at(1);
+        auto mappingVirtP2 = juce::Vector3D<float>(mappingVirtP1.x, mappingVirtP3.y, 0.0f);
+        auto mappingVirtP4 = juce::Vector3D<float>(mappingVirtP3.x, mappingVirtP1.y, 0.0f);
+        auto& isFlipped = m_mappingFlip.at(mapping);
+        
+        auto vectorVirtX = mappingVirtP2 - mappingVirtP3;
+        auto vectorX = mappingP2 - mappingP3;
+        auto vectorVirtY = mappingVirtP4 - mappingVirtP3;
+        auto vectorY = mappingP4 - mappingP3;
+
+        // get a factor for inversion if virt point config suggests inverted movement
+        auto xs = 1.0f;
+        auto ys = 1.0f;
+        if (vectorVirtX.x < 0 || vectorVirtX.y < 0)
+            xs = -1.0f;
+        if (vectorVirtY.x < 0 || vectorVirtY.y < 0)
+            ys = -1.0f;
+
+        // relative origin vector
+        auto relOrigVector = mappingVirtP3;
+        
+        // calculate the actual relative position on mapping area
+        auto deltaP3Pos_x = mappingP3.x - realPos.x;
+        auto deltaP3Pos_y = mappingP3.y - realPos.y;
+        auto deltaP2P3_x = mappingP2.x - mappingP3.x;
+        auto deltaP2P3_y = mappingP2.y - mappingP3.y;
+        auto deltaP4P3_x = mappingP4.x - mappingP3.x;
+        auto deltaP4P3_y = mappingP4.y - mappingP3.y;
+
+        auto dotP = deltaP3Pos_x * deltaP2P3_x + deltaP3Pos_y * deltaP2P3_y;
+
+        auto P2P3sqrSum = deltaP2P3_x * deltaP2P3_x + deltaP2P3_y * deltaP2P3_y;
+        auto P4P3sqrSum = deltaP4P3_x * deltaP4P3_x + deltaP4P3_y * deltaP4P3_y;
+        if (P2P3sqrSum != 0.0f && P4P3sqrSum != 0.0f)
+        {
+            auto relX = -(dotP / P2P3sqrSum);
+            auto relY = -((deltaP3Pos_x - relX * deltaP2P3_x) * deltaP4P3_x + (deltaP3Pos_y - relX * deltaP2P3_y) * deltaP4P3_y) / P4P3sqrSum;
+
+            // apply potential alterations neccessary due to weird virtual mapping point configurations
+            relX = relOrigVector.x + (relX * vectorVirtX.length() * xs);
+            relY = relOrigVector.y + (relY * vectorVirtY.length() * ys);
+
+            auto relPosWithSwap = isFlipped ? juce::Point<float>(relY, relX) : juce::Point<float>(relX, relY);
+
+            return relPosWithSwap;
+        }
+        else
+            return { 0.0f, 0.0f };
+    }
+    else if (GetSelectedMapping() == mapping)
+    {
+        auto orig = GetAspectAndMarginCorrectedBounds().getTopLeft().toFloat();
+        auto w = static_cast<float>(GetAspectAndMarginCorrectedBounds().getWidth());
+        auto h = static_cast<float>(GetAspectAndMarginCorrectedBounds().getHeight());
+
+        // Get mouse pixel-wise position and scale it between 0 and 1.
+        auto const& pos = pointInBounds - orig;
+        auto relX = jmin<float>(1.0f, jmax<float>(0.0f, (pos.getX() / w)));
+        auto relY = 1.0f - jmin<float>(1.0f, jmax<float>(0.0f, (pos.getY() / h)));
+
+        return { relX, relY };
+    }
+    else
+    {
+        return { 0.0f ,0.0f };
     }
 }
 

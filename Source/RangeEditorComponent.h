@@ -21,6 +21,12 @@
 
 #include <JuceHeader.h>
 
+ /**
+  * Fwd. decls.
+  */
+namespace JUCEAppBasics {
+	class FixedFontTextEditor;
+}
 
 namespace SpaConBridge
 {
@@ -80,10 +86,10 @@ private:
 	void UpdateTextEditorValues();
 
 	//==============================================================================
-	std::unique_ptr<Label>		m_minValLabel;
-	std::unique_ptr<TextEditor>	m_minValEditor;
-	std::unique_ptr<Label>		m_maxValLabel;
-	std::unique_ptr<TextEditor>	m_maxValEditor;
+	std::unique_ptr<Label>								m_minValLabel;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>	m_minValEditor;
+	std::unique_ptr<Label>								m_maxValLabel;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>	m_maxValEditor;
 
 	juce::Range<float>	m_valueRange{ 0.0f, 0.0f };
 

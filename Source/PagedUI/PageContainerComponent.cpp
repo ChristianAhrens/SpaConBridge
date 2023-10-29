@@ -242,9 +242,12 @@ void PageContainerComponent::buttonClicked(Button* button)
 {
 	if (m_onlineButton && m_onlineButton.get() == button)
 	{
-		auto ctrl = Controller::GetInstance();
-		if (ctrl)
-			ctrl->SetOnline(DCP_PageContainer, m_onlineButton->getToggleState());
+		if (Controller::Exists()) // avoid creating the controller singleton here
+		{
+			auto ctrl = Controller::GetInstance();
+			if (ctrl)
+				ctrl->SetOnline(DCP_PageContainer, m_onlineButton->getToggleState());
+		}
 	}
 	else if (m_logoButton && m_logoButton.get() == button && m_aboutPage)
 	{

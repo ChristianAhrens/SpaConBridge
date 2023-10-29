@@ -21,16 +21,12 @@
 
 #include "../../../SpaConBridgeCommon.h"
 
+#include <FixedFontTextEditor.h>
+
 
 namespace SpaConBridge
 {
 
-
-/*
-===============================================================================
-	Class AboutPageContentComponent
-===============================================================================
-*/
 
 /**
  * Class constructor.
@@ -87,7 +83,7 @@ AboutPageContentComponent::AboutPageContentComponent()
 
 	// GPLv3 License
 	String LicenseGPLv3(BinaryData::COPYING, BinaryData::COPYINGSize);
-	m_licenseGPLv3Field = std::make_unique<TextEditor>("GPLv3License");
+	m_licenseGPLv3Field = std::make_unique<JUCEAppBasics::FixedFontTextEditor>("GPLv3License");
 	m_licenseGPLv3Field->setReadOnly(true);
 	m_licenseGPLv3Field->setPopupMenuEnabled(false);
 	m_licenseGPLv3Field->setFont(Font(13.0, Font::plain));
@@ -99,7 +95,7 @@ AboutPageContentComponent::AboutPageContentComponent()
 
 	// Apache License v2
 	String LicenseApachev2(BinaryData::COPYING_apachev2, BinaryData::COPYING_apachev2Size);
-	m_licenseAPACHEv2Field = std::make_unique<TextEditor>("APACHEv2License");
+	m_licenseAPACHEv2Field = std::make_unique<JUCEAppBasics::FixedFontTextEditor>("APACHEv2License");
 	m_licenseAPACHEv2Field->setReadOnly(true);
 	m_licenseAPACHEv2Field->setPopupMenuEnabled(false);
 	m_licenseAPACHEv2Field->setFont(Font(13.0, Font::plain));
@@ -111,7 +107,7 @@ AboutPageContentComponent::AboutPageContentComponent()
 
 	// LGPLv3 License
 	String LicenseLGPLv3(BinaryData::COPYING_LESSER, BinaryData::COPYING_LESSERSize);
-	m_licenseLGPLv3Field = std::make_unique<TextEditor>("LGPLv3License");
+	m_licenseLGPLv3Field = std::make_unique<JUCEAppBasics::FixedFontTextEditor>("LGPLv3License");
 	m_licenseLGPLv3Field->setReadOnly(true);
 	m_licenseLGPLv3Field->setPopupMenuEnabled(false);
 	m_licenseLGPLv3Field->setFont(Font(13.0, Font::plain));

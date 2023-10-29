@@ -25,17 +25,13 @@
 #include "../../../LookAndFeel.h"
 
 #include <Image_utils.h>
+#include <FixedFontTextEditor.h>
+#include <TextWithImageButton.h>
 
 
 namespace SpaConBridge
 {
 
-
-/*
-===============================================================================
- Class SettingsPageComponent
-===============================================================================
-*/
 
 /**
  * Class constructor.
@@ -52,7 +48,7 @@ SettingsPageComponent::SettingsPageComponent()
 	m_settingsResetToDefaultButton->onClick = [this] { onResetToDefaultClicked(); };
 	addAndMakeVisible(m_settingsResetToDefaultButton.get());
 	// Text editor for when raw config is visible
-	m_settingsRawEditor = std::make_unique<TextEditor>();
+	m_settingsRawEditor = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_settingsRawEditor->setMultiLine(true, false);
 	addAndMakeVisible(m_settingsRawEditor.get());
 

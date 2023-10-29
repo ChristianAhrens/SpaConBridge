@@ -30,6 +30,9 @@
 #include "IndexToChannelAssignerComponent.h"
 
 #include <Image_utils.h>
+#include <MidiLearnerComponent.h>
+#include <TextWithImageButton.h>
+#include <FixedFontTextEditor.h>
 
 
 namespace SpaConBridge
@@ -177,7 +180,7 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 	m_DS100Settings->addComponent(m_DS100ProtocolSelectLabel.get(), false, false);
 	m_DS100Settings->addComponent(m_DS100ProtocolSelectButton.get(), true, false);
 
-	m_DS100IntervalEdit = std::make_unique<TextEditor>();
+	m_DS100IntervalEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_DS100IntervalEdit->addListener(this);
 	m_DS100IntervalEdit->setInputFilter(m_intervalEditFilter.get(), false);
 	m_DS100IntervalLabel = std::make_unique<Label>("DS100IntervalEdit", "Interval");
@@ -189,7 +192,7 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 	//first DS100 - ch. 1-64
 	m_DS100ConnectionElmsContainer = std::make_unique<HorizontalLayouterComponent>();
 	m_DS100ConnectionElmsContainer->SetSpacing(5);
-	m_DS100IpAndPortEdit = std::make_unique<TextEditor>();
+	m_DS100IpAndPortEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_DS100IpAndPortEdit->addListener(this);
 	m_DS100IpAndPortEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
 	m_DS100ConnectionElmsContainer->AddComponent(m_DS100IpAndPortEdit.get(), 5);
@@ -235,7 +238,7 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 	//second DS100 - ch. 65-128
 	m_SecondDS100ConnectionElmsContainer = std::make_unique<HorizontalLayouterComponent>();
 	m_SecondDS100ConnectionElmsContainer->SetSpacing(5);
-	m_SecondDS100IpAndPortEdit = std::make_unique<TextEditor>();
+	m_SecondDS100IpAndPortEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_SecondDS100IpAndPortEdit->addListener(this);
 	m_SecondDS100IpAndPortEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
 	m_SecondDS100ConnectionElmsContainer->AddComponent(m_SecondDS100IpAndPortEdit.get(), 5);
@@ -271,7 +274,7 @@ void SettingsSectionsComponent::createDiGiCoSettingsSection()
 	m_DiGiCoBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_DiGiCoBridgingSettings.get());
 
-	m_DiGiCoIpAddressEdit = std::make_unique<TextEditor>();
+	m_DiGiCoIpAddressEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_DiGiCoIpAddressEdit->addListener(this);
 	m_DiGiCoIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
 	m_DiGiCoIpAddressLabel = std::make_unique<Label>("DiGiCoIpAddressEdit", "IP Address");
@@ -280,7 +283,7 @@ void SettingsSectionsComponent::createDiGiCoSettingsSection()
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoIpAddressLabel.get(), false, false);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoIpAddressEdit.get(), true, false);
 
-	m_DiGiCoListeningPortEdit = std::make_unique<TextEditor>();
+	m_DiGiCoListeningPortEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_DiGiCoListeningPortEdit->addListener(this);
 	m_DiGiCoListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
 	m_DiGiCoListeningPortLabel = std::make_unique<Label>("DiGiCoListeningPortEdit", "Listening Port");
@@ -289,7 +292,7 @@ void SettingsSectionsComponent::createDiGiCoSettingsSection()
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoListeningPortLabel.get(), false, false);
 	m_DiGiCoBridgingSettings->addComponent(m_DiGiCoListeningPortEdit.get(), true, false);
 
-	m_DiGiCoRemotePortEdit = std::make_unique<TextEditor>();
+	m_DiGiCoRemotePortEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_DiGiCoRemotePortEdit->addListener(this);
 	m_DiGiCoRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
 	m_DiGiCoRemotePortLabel = std::make_unique<Label>("DiGiCoRemotePortEdit", "Remote Port");
@@ -315,7 +318,7 @@ void SettingsSectionsComponent::createDAWPluginSettingsSection()
 	m_DAWPluginBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_DAWPluginBridgingSettings.get());
 
-	m_DAWPluginIpAddressEdit = std::make_unique<TextEditor>();
+	m_DAWPluginIpAddressEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_DAWPluginIpAddressEdit->addListener(this);
 	m_DAWPluginIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
 	m_DAWPluginIpAddressLabel = std::make_unique<Label>("DAWPluginIpAddressEdit", "IP Address");
@@ -344,7 +347,7 @@ void SettingsSectionsComponent::createRTTrPMSettingsSection()
 	m_RTTrPMBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_RTTrPMBridgingSettings.get());
 
-	m_RTTrPMListeningPortEdit = std::make_unique<TextEditor>();
+	m_RTTrPMListeningPortEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_RTTrPMListeningPortEdit->addListener(this);
 	m_RTTrPMListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
 	m_RTTrPMListeningPortLabel = std::make_unique<Label>("RTTrPMListeningPortEdit", "Listening Port");
@@ -411,13 +414,13 @@ void SettingsSectionsComponent::createRTTrPMSettingsSection()
 	m_RTTrPMAbsoluteOriginElmsContainer->SetSpacing(5);
 	m_RTTrPMAbsoluteOriginXLabel = std::make_unique<Label>("RTTrPMAbsolutOriginXEdit", "x");
 	m_RTTrPMAbsoluteOriginElmsContainer->AddComponent(m_RTTrPMAbsoluteOriginXLabel.get(), 0.25f);
-	m_RTTrPMAbsoluteOriginXEdit = std::make_unique<TextEditor>();
+	m_RTTrPMAbsoluteOriginXEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_RTTrPMAbsoluteOriginXEdit->addListener(this);
 	m_RTTrPMAbsoluteOriginXEdit->setInputFilter(std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890.,-").release(), true);
 	m_RTTrPMAbsoluteOriginElmsContainer->AddComponent(m_RTTrPMAbsoluteOriginXEdit.get(), 0.75f);
 	m_RTTrPMAbsoluteOriginYLabel = std::make_unique<Label>("RTTrPMAbsolutOriginYEdit", "y");
 	m_RTTrPMAbsoluteOriginElmsContainer->AddComponent(m_RTTrPMAbsoluteOriginYLabel.get(), 0.25f);
-	m_RTTrPMAbsoluteOriginYEdit = std::make_unique<TextEditor>();
+	m_RTTrPMAbsoluteOriginYEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_RTTrPMAbsoluteOriginYEdit->addListener(this);
 	m_RTTrPMAbsoluteOriginYEdit->setInputFilter(std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890.,-").release(), true);
 	m_RTTrPMAbsoluteOriginElmsContainer->AddComponent(m_RTTrPMAbsoluteOriginYEdit.get(), 0.75f);
@@ -441,13 +444,13 @@ void SettingsSectionsComponent::createRTTrPMSettingsSection()
 	m_RTTrPMMappingPoint1ElmsContainer->SetSpacing(5);
 	m_RTTrPMMappingPoint1XLabel = std::make_unique<Label>("RTTrPMMappingPoint1XEdit", "x");
 	m_RTTrPMMappingPoint1ElmsContainer->AddComponent(m_RTTrPMMappingPoint1XLabel.get(), 0.25f);
-	m_RTTrPMMappingPoint1XEdit = std::make_unique<TextEditor>();
+	m_RTTrPMMappingPoint1XEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_RTTrPMMappingPoint1XEdit->addListener(this);
 	m_RTTrPMMappingPoint1XEdit->setInputFilter(std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890.,-").release(), true);
 	m_RTTrPMMappingPoint1ElmsContainer->AddComponent(m_RTTrPMMappingPoint1XEdit.get(), 0.75f);
 	m_RTTrPMMappingPoint1YLabel = std::make_unique<Label>("RTTrPMMappingPoint1YEdit", "y");
 	m_RTTrPMMappingPoint1ElmsContainer->AddComponent(m_RTTrPMMappingPoint1YLabel.get(), 0.25f);
-	m_RTTrPMMappingPoint1YEdit = std::make_unique<TextEditor>();
+	m_RTTrPMMappingPoint1YEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_RTTrPMMappingPoint1YEdit->addListener(this);
 	m_RTTrPMMappingPoint1YEdit->setInputFilter(std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890.,-").release(), true);
 	m_RTTrPMMappingPoint1ElmsContainer->AddComponent(m_RTTrPMMappingPoint1YEdit.get(), 0.75f);
@@ -461,13 +464,13 @@ void SettingsSectionsComponent::createRTTrPMSettingsSection()
 	m_RTTrPMMappingPoint2ElmsContainer->SetSpacing(5);
 	m_RTTrPMMappingPoint2XLabel = std::make_unique<Label>("RTTrPMMappingPoint2XEdit", "x");
 	m_RTTrPMMappingPoint2ElmsContainer->AddComponent(m_RTTrPMMappingPoint2XLabel.get(), 0.25f);
-	m_RTTrPMMappingPoint2XEdit = std::make_unique<TextEditor>();
+	m_RTTrPMMappingPoint2XEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_RTTrPMMappingPoint2XEdit->addListener(this);
 	m_RTTrPMMappingPoint2XEdit->setInputFilter(std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890.,-").release(), true);
 	m_RTTrPMMappingPoint2ElmsContainer->AddComponent(m_RTTrPMMappingPoint2XEdit.get(), 0.75f);
 	m_RTTrPMMappingPoint2YLabel = std::make_unique<Label>("RTTrPMMappingPoint2YEdit", "y");
 	m_RTTrPMMappingPoint2ElmsContainer->AddComponent(m_RTTrPMMappingPoint2YLabel.get(), 0.25f);
-	m_RTTrPMMappingPoint2YEdit = std::make_unique<TextEditor>();
+	m_RTTrPMMappingPoint2YEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_RTTrPMMappingPoint2YEdit->addListener(this);
 	m_RTTrPMMappingPoint2YEdit->setInputFilter(std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890.,-").release(), true);
 	m_RTTrPMMappingPoint2ElmsContainer->AddComponent(m_RTTrPMMappingPoint2YEdit.get(), 0.75f);
@@ -494,7 +497,7 @@ void SettingsSectionsComponent::createGenericOSCSettingsSection()
 	m_GenericOSCBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_GenericOSCBridgingSettings.get());
 
-	m_GenericOSCIpAddressEdit = std::make_unique<TextEditor>();
+	m_GenericOSCIpAddressEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_GenericOSCIpAddressEdit->addListener(this);
 	m_GenericOSCIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
 	m_GenericOSCIpAddressLabel = std::make_unique<Label>("GenericOSCIpAddressEdit", "IP Address");
@@ -503,7 +506,7 @@ void SettingsSectionsComponent::createGenericOSCSettingsSection()
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCIpAddressLabel.get(), false, false);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCIpAddressEdit.get(), true, false);
 
-	m_GenericOSCListeningPortEdit = std::make_unique<TextEditor>();
+	m_GenericOSCListeningPortEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_GenericOSCListeningPortEdit->addListener(this);
 	m_GenericOSCListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
 	m_GenericOSCListeningPortLabel = std::make_unique<Label>("GenericOSCListeningPortEdit", "Listening Port");
@@ -512,7 +515,7 @@ void SettingsSectionsComponent::createGenericOSCSettingsSection()
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCListeningPortLabel.get(), false, false);
 	m_GenericOSCBridgingSettings->addComponent(m_GenericOSCListeningPortEdit.get(), true, false);
 
-	m_GenericOSCRemotePortEdit = std::make_unique<TextEditor>();
+	m_GenericOSCRemotePortEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_GenericOSCRemotePortEdit->addListener(this);
 	m_GenericOSCRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
 	m_GenericOSCRemotePortLabel = std::make_unique<Label>("GenericOSCRemotePortEdit", "Remote Port");
@@ -733,7 +736,7 @@ void SettingsSectionsComponent::createYamahaOSCSettingsSection()
 	m_YamahaOSCBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_YamahaOSCBridgingSettings.get());
 
-	m_YamahaOSCIpAddressEdit = std::make_unique<TextEditor>();
+	m_YamahaOSCIpAddressEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_YamahaOSCIpAddressEdit->addListener(this);
 	m_YamahaOSCIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
 	m_YamahaOSCIpAddressLabel = std::make_unique<Label>("YamahaOSCIpAddressEdit", "IP Address");
@@ -742,7 +745,7 @@ void SettingsSectionsComponent::createYamahaOSCSettingsSection()
 	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCIpAddressLabel.get(), false, false);
 	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCIpAddressEdit.get(), true, false);
 
-	m_YamahaOSCListeningPortEdit = std::make_unique<TextEditor>();
+	m_YamahaOSCListeningPortEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_YamahaOSCListeningPortEdit->addListener(this);
 	m_YamahaOSCListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
 	m_YamahaOSCListeningPortLabel = std::make_unique<Label>("YamahaOSCListeningPortEdit", "Listening Port");
@@ -751,7 +754,7 @@ void SettingsSectionsComponent::createYamahaOSCSettingsSection()
 	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCListeningPortLabel.get(), false, false);
 	m_YamahaOSCBridgingSettings->addComponent(m_YamahaOSCListeningPortEdit.get(), true, false);
 
-	m_YamahaOSCRemotePortEdit = std::make_unique<TextEditor>();
+	m_YamahaOSCRemotePortEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_YamahaOSCRemotePortEdit->addListener(this);
 	m_YamahaOSCRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
 	m_YamahaOSCRemotePortLabel = std::make_unique<Label>("YamahaOSCRemotePortEdit", "Remote Port");
@@ -787,7 +790,7 @@ void SettingsSectionsComponent::createADMOSCSettingsSection()
 	m_ADMOSCBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_ADMOSCBridgingSettings.get());
 
-	m_ADMOSCIpAddressEdit = std::make_unique<TextEditor>();
+	m_ADMOSCIpAddressEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_ADMOSCIpAddressEdit->addListener(this);
 	m_ADMOSCIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
 	m_ADMOSCIpAddressLabel = std::make_unique<Label>("ADMOSCIpAddressEdit", "IP Address");
@@ -796,7 +799,7 @@ void SettingsSectionsComponent::createADMOSCSettingsSection()
 	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCIpAddressLabel.get(), false, false);
 	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCIpAddressEdit.get(), true, false);
 
-	m_ADMOSCListeningPortEdit = std::make_unique<TextEditor>();
+	m_ADMOSCListeningPortEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_ADMOSCListeningPortEdit->addListener(this);
 	m_ADMOSCListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
 	m_ADMOSCListeningPortLabel = std::make_unique<Label>("ADMOSCListeningPortEdit", "Listening Port");
@@ -805,7 +808,7 @@ void SettingsSectionsComponent::createADMOSCSettingsSection()
 	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCListeningPortLabel.get(), false, false);
 	m_ADMOSCBridgingSettings->addComponent(m_ADMOSCListeningPortEdit.get(), true, false);
 
-	m_ADMOSCRemotePortEdit = std::make_unique<TextEditor>();
+	m_ADMOSCRemotePortEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_ADMOSCRemotePortEdit->addListener(this);
 	m_ADMOSCRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
 	m_ADMOSCRemotePortLabel = std::make_unique<Label>("ADMOSCRemotePortEdit", "Remote Port");
@@ -885,7 +888,7 @@ void SettingsSectionsComponent::createRemapOSCSettingsSection()
 	m_RemapOSCBridgingSettings->toggleIsActiveCallback = [=](HeaderWithElmListComponent* settingsSection, bool activeState) { setSettingsSectionActiveState(settingsSection, activeState); };
 	addAndMakeVisible(m_RemapOSCBridgingSettings.get());
 
-	m_RemapOSCIpAddressEdit = std::make_unique<TextEditor>();
+	m_RemapOSCIpAddressEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_RemapOSCIpAddressEdit->addListener(this);
 	m_RemapOSCIpAddressEdit->setInputFilter(m_ipAddressEditFilter.get(), false);
 	m_RemapOSCIpAddressLabel = std::make_unique<Label>("RemapOSCIpAddressEdit", "IP Address");
@@ -894,7 +897,7 @@ void SettingsSectionsComponent::createRemapOSCSettingsSection()
 	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCIpAddressLabel.get(), false, false);
 	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCIpAddressEdit.get(), true, false);
 
-	m_RemapOSCListeningPortEdit = std::make_unique<TextEditor>();
+	m_RemapOSCListeningPortEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_RemapOSCListeningPortEdit->addListener(this);
 	m_RemapOSCListeningPortEdit->setInputFilter(m_portEditFilter.get(), false);
 	m_RemapOSCListeningPortLabel = std::make_unique<Label>("RemapOSCListeningPortEdit", "Listening Port");
@@ -903,7 +906,7 @@ void SettingsSectionsComponent::createRemapOSCSettingsSection()
 	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCListeningPortLabel.get(), false, false);
 	m_RemapOSCBridgingSettings->addComponent(m_RemapOSCListeningPortEdit.get(), true, false);
 
-	m_RemapOSCRemotePortEdit = std::make_unique<TextEditor>();
+	m_RemapOSCRemotePortEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
 	m_RemapOSCRemotePortEdit->addListener(this);
 	m_RemapOSCRemotePortEdit->setInputFilter(m_portEditFilter.get(), false);
 	m_RemapOSCRemotePortLabel = std::make_unique<Label>("RemapOSCRemotePortEdit", "Remote Port");

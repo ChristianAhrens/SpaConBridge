@@ -208,6 +208,42 @@ bool ProtocolBridgingWrapper::setStateXml(XmlElement* stateXml)
 		auto nodeXmlElement = stateXml->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::NODE));
 		if (nodeXmlElement)
 		{
+			// verify object handling element
+			auto objectHandlingXmlElement = nodeXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OBJECTHANDLING));
+			if (!objectHandlingXmlElement)
+				objectHandlingXmlElement = nodeXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OBJECTHANDLING));
+			if (objectHandlingXmlElement)
+			{
+				if (objectHandlingXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE)).isEmpty())
+					objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Forward_only_valueChanges));
+
+				// init precision element
+				auto precisionXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
+				if (!precisionXmlElement)
+				{
+					precisionXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
+					precisionXmlElement->addTextElement(String(DS100_VALUCHANGE_SENSITIVITY));
+				}
+
+				// init typeA (DS100) to have the valueAck expected flag set
+				auto protocolsAcknowledgeXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::VALUEACK));
+				if (!protocolsAcknowledgeXmlElement)
+				{
+					protocolsAcknowledgeXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::VALUEACK));
+					protocolsAcknowledgeXmlElement->addTextElement(String(DS100_ACKNOWLEDGES_SENT_VALUES_MASK));
+				}
+
+				// init reaction monitored protocols element
+				auto reactMoniProtosTextValue = String(DS100_1_PROCESSINGPROTOCOL_ID) + "," + String(DS100_2_PROCESSINGPROTOCOL_ID);
+				auto reactMoniProtosXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REACTMONIPROTOS));
+				if (!reactMoniProtosXmlElement)
+				{
+					reactMoniProtosXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::REACTMONIPROTOS));
+					reactMoniProtosXmlElement->addTextElement(reactMoniProtosTextValue);
+				}
+			}
+
+			// cache all bridging protocol elements
 			auto digicoProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DIGICO_PROCESSINGPROTOCOL_ID));
 			if (digicoProtocolXmlElement)
 				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_DiGiCo, *digicoProtocolXmlElement));
@@ -1231,10 +1267,10 @@ bool ProtocolBridgingWrapper::SetProtocolIpAddress(ProtocolId protocolId, juce::
 		if (protocolXmlElement)
 		{
 			auto ipAddressXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
+			if (!ipAddressXmlElement)
+				ipAddressXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
 			if (ipAddressXmlElement)
-			{
 				ipAddressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), ipAddress.toString());
-			}
 			else
 				return false;
 		}
@@ -1289,10 +1325,10 @@ bool ProtocolBridgingWrapper::SetProtocolListeningPort(ProtocolId protocolId, in
 		if (protocolXmlElement)
 		{
 			auto listeningPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
+			if (!listeningPortXmlElement)
+				listeningPortXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
 			if (listeningPortXmlElement)
-			{
 				listeningPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), listeningPort);
-			}
 			else
 				return false;
 		}
@@ -1347,10 +1383,10 @@ bool ProtocolBridgingWrapper::SetProtocolRemotePort(ProtocolId protocolId, int r
 		if (protocolXmlElement)
 		{
 			auto remotePortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+			if (!remotePortXmlElement)
+				remotePortXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
 			if (remotePortXmlElement)
-			{
 				remotePortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), remotePort);
-			}
 			else
 				return false;
 		}
@@ -2511,11 +2547,16 @@ ObjectHandlingState ProtocolBridgingWrapper::GetProtocolState(ProtocolId protoco
  */
 void ProtocolBridgingWrapper::SetProtocolState(ProtocolId protocolId, ObjectHandlingState state)
 {
-	m_bridgingProtocolState[protocolId] = state;
+	if (GetProtocolState(protocolId) != state)
+	{
+		m_bridgingProtocolState[protocolId] = state;
 
-	auto ctrl = Controller::GetInstance();
-	if (ctrl)
-		ctrl->SetParameterChanged(DCP_Protocol, DCT_Connected);
+		if (!Controller::Exists()) // avoid creating controller singleton here
+			return;
+		auto ctrl = Controller::GetInstance();
+		if (ctrl)
+			ctrl->SetParameterChanged(DCP_Protocol, DCT_Connected);
+	}
 }
 
 /**

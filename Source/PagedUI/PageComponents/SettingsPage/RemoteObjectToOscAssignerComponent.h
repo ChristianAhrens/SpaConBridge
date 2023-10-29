@@ -22,9 +22,15 @@
 
 #include "../../../SpaConBridgeCommon.h"
 
-#include <TextWithImageButton.h>
-
 #include "AssignmentEditOverlayBaseComponents.h"
+
+/**
+ * Fwd. decls.
+ */
+namespace JUCEAppBasics {
+    class FixedFontTextEditor;
+    class TextWithImageButton;
+}
 
 namespace SpaConBridge
 {
@@ -77,10 +83,10 @@ private:
         RemoteObjectIdentifier                      m_currentRemoteObjectId;
         std::pair<juce::String, juce::Range<float>> m_currentOscAssignment;
     
-        std::unique_ptr<ComboBox>   m_remoteObjectSelect;
-        std::unique_ptr<TextEditor> m_oscAssignmentEditComponent;
-        std::unique_ptr<TextEditor> m_oscAssignmentMinRangeValEditComponent;
-        std::unique_ptr<TextEditor> m_oscAssignmentMaxRangeValEditComponent;
+        std::unique_ptr<ComboBox>                           m_remoteObjectSelect;
+        std::unique_ptr<JUCEAppBasics::FixedFontTextEditor> m_oscAssignmentEditComponent;
+        std::unique_ptr<JUCEAppBasics::FixedFontTextEditor> m_oscAssignmentMinRangeValEditComponent;
+        std::unique_ptr<JUCEAppBasics::FixedFontTextEditor> m_oscAssignmentMaxRangeValEditComponent;
     };
 
     class RemoteObjectToOscAssignmentsListingComponent : public AssignmentEditOverlayBaseComponents::AssignmentsListingComponent
@@ -134,7 +140,7 @@ private:
     void processAssignmentResult(Component* sender, const RemoteObjectIdentifier& remoteObjectId, const std::pair<juce::String, juce::Range<float>>& roiToOscAssignment);
     void processAssignmentResults(Component* sender, const std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>>& roiToOscAssignments);
 
-    std::unique_ptr<TextEditor>                                                     m_currentRoiToOscAssisLabel;
+    std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>                             m_currentRoiToOscAssisLabel;
     std::unique_ptr<TextButton>                                                     m_editAssignmentsButton;
 
     std::unique_ptr<RemoteObjectToOscAssignmentsViewingComponent>                   m_assignmentsEditionOverlay;

@@ -37,8 +37,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "../../SpaConBridgeCommon.h"
 #include "../../AppConfiguration.h"
-#include "../../../submodules/JUCE-AppBasics/Source/ColourAndSizePickerComponent.h"
 
+#include <ColourAndSizePickerComponent.h>
+#include <FixedFontTextEditor.h>
 
 namespace SpaConBridge
 {
@@ -132,7 +133,7 @@ public:
 	void setLengthAndCharacterRestriction(int maxNumChars, const String& allowedCharacters);
 
 protected:
-	TextEditor													m_editor;					/**> Actual text editor. */
+	JUCEAppBasics::FixedFontTextEditor							m_editor;					/**> Actual text editor. */
 	std::unique_ptr<TextEditor::LengthAndCharacterRestriction>	m_lengthAndCharacterFilter;	/**> The filter object for allowed characters. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TextEditorContainer)

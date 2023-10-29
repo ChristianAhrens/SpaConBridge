@@ -18,7 +18,10 @@
 
 #include "IndexToChannelAssignerComponent.h"
 
-#include "Image_utils.h"
+#include <Image_utils.h>
+#include <FixedFontTextEditor.h>
+#include <TextWithImageButton.h>
+
 #include "../../PageContainerComponent.h"
 #include "../../PageComponentManager.h"
 
@@ -30,7 +33,7 @@ namespace SpaConBridge
 //==============================================================================
 IndexToChannelAssignerComponent::IndexToChannelAssignerComponent()
 {
-	m_currentIdxToChAssisLabel = std::make_unique<TextEditor>("CurrentIdxToChAssisLabel");
+	m_currentIdxToChAssisLabel = std::make_unique<JUCEAppBasics::FixedFontTextEditor>("CurrentIdxToChAssisLabel");
     m_currentIdxToChAssisLabel->setText("0 remappings");
     m_currentIdxToChAssisLabel->setEnabled(false);
     m_currentIdxToChAssisLabel->setReadOnly(true);
@@ -140,7 +143,7 @@ IndexToChannelAssignerComponent::IndexToChannelAssignmentEditComponent::IndexToC
         m_currentChannelAssignment(currentAssi)
 {
     // create and setup index textedit
-    m_indexEditComponent = std::make_unique<juce::TextEditor>("indexAssignment");
+    m_indexEditComponent = std::make_unique<JUCEAppBasics::FixedFontTextEditor>("indexAssignment");
     m_indexEditComponent->onFocusLost = [=]() {
         handleEditorInput();
     };
@@ -150,7 +153,7 @@ IndexToChannelAssignerComponent::IndexToChannelAssignmentEditComponent::IndexToC
     addAndMakeVisible(m_indexEditComponent.get());
 
     // create and setup channelId textedit
-    m_channelAssignmentEditComponent = std::make_unique<juce::TextEditor>("ChannelRemapAssignment");
+    m_channelAssignmentEditComponent = std::make_unique<JUCEAppBasics::FixedFontTextEditor>("ChannelRemapAssignment");
     m_channelAssignmentEditComponent->onEscapeKey = [=]() {
         handleIndexToChannelAssiReset(); 
     };

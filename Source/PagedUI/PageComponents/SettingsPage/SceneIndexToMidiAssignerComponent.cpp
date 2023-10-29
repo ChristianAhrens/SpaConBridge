@@ -18,7 +18,10 @@
 
 #include "SceneIndexToMidiAssignerComponent.h"
 
-#include "Image_utils.h"
+#include <Image_utils.h>
+#include <FixedFontTextEditor.h>
+#include <TextWithImageButton.h>
+
 #include "../../PageContainerComponent.h"
 #include "../../PageComponentManager.h"
 
@@ -30,7 +33,7 @@ SceneIndexToMidiAssignerComponent::SceneIndexToMidiAssignerComponent(std::int16_
 {
     setReferredId(refId);
 
-	m_currentMidiAssisLabel = std::make_unique<TextEditor>("CurrentMidiAssisLabel");
+	m_currentMidiAssisLabel = std::make_unique<JUCEAppBasics::FixedFontTextEditor>("CurrentMidiAssisLabel");
     m_currentMidiAssisLabel->setText("0 assignments");
     m_currentMidiAssisLabel->setEnabled(false);
     m_currentMidiAssisLabel->setReadOnly(true);
@@ -151,7 +154,7 @@ SceneIndexToMidiAssignerComponent::SceneIndexAssignmentEditComponent::SceneIndex
 {
     m_sceneIndexEditFilter = std::make_unique<TextEditor::LengthAndCharacterRestriction>(6, "1234567890."); // 6 digits: "99.999"
 
-    m_sceneIndexEdit = std::make_unique<TextEditor>("SceneIndexEditor");
+    m_sceneIndexEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>("SceneIndexEditor");
     m_sceneIndexEdit->setText(sceneIndex);
     m_sceneIndexEdit->setInputFilter(m_sceneIndexEditFilter.get(), false);
     addAndMakeVisible(m_sceneIndexEdit.get());

@@ -22,9 +22,15 @@
 
 #include "../../../SpaConBridgeCommon.h"
 
-#include <TextWithImageButton.h>
-
 #include "AssignmentEditOverlayBaseComponents.h"
+
+/**
+ * Fwd. decls.
+ */
+namespace JUCEAppBasics {
+    class FixedFontTextEditor;
+    class TextWithImageButton;
+}
 
 namespace SpaConBridge
 {

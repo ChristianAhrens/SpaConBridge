@@ -727,8 +727,10 @@
                   UIFileSharingEnabled="1" iCloudPermissions="1" UIStatusBarHidden="1"
                   UIRequiresFullScreen="0">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" iosDeploymentTarget="12" iosCompatibility="12"/>
-        <CONFIGURATION isDebug="0" name="Release" iosDeploymentTarget="12" iosCompatibility="12"/>
+        <CONFIGURATION isDebug="1" name="Debug" iosDeploymentTarget="15" iosCompatibility="15"
+                       defines="JUCE_SILENCE_XCODE_15_LINKER_WARNING"/>
+        <CONFIGURATION isDebug="0" name="Release" iosDeploymentTarget="15" iosCompatibility="15"
+                       defines="JUCE_SILENCE_XCODE_15_LINKER_WARNING"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_osc" path="submodules/JUCE/modules"/>

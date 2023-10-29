@@ -312,9 +312,26 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 			DBG(String(__FUNCTION__) + String(" ctrl update DCT_RefreshInterval"));
 			update = true;
 		}
+		if (ctrl->PopParameterChanged(DCP_MultiSlider, (DCT_SpeakerPositionData | DCT_CoordinateMappingSettingsData | DCT_ProtocolType)))
+		{
+			DBG(String(__FUNCTION__) + String(" ctrl update DCT_SpeakerPositionData | DCT_CoordinateMappingSettingsData"));
+			if (m_multiSoundobjectSlider->IsSpeakerPositionDataReady())
+				m_multiSoundobjectSlider->SetSpeakerPositionDataReady(false);
+			if (m_multiSoundobjectSlider->IsCoordinateMappingsSettingsDataReady())
+				m_multiSoundobjectSlider->SetCoordinateMappingSettingsDataReady(false);
+			update = true;
+		}
 #else
 		if (ctrl->PopParameterChanged(DCP_MultiSlider, (DCT_NumProcessors | DCT_ProcessorSelection | DCT_SoundobjectColourAndSize | DCT_RefreshInterval)))
 		{
+			update = true;
+		}
+		if (ctrl->PopParameterChanged(DCP_MultiSlider, (DCT_SpeakerPositionData | DCT_CoordinateMappingSettingsData | DCT_ProtocolType)))
+		{
+			if (m_multiSoundobjectSlider->IsSpeakerPositionDataReady())
+				m_multiSoundobjectSlider->SetSpeakerPositionDataReady(false);
+			if (m_multiSoundobjectSlider->IsCoordinateMappingsSettingsDataReady())
+				m_multiSoundobjectSlider->SetCoordinateMappingSettingsDataReady(false);
 			update = true;
 		}
 #endif
@@ -575,7 +592,6 @@ void MultiSoundobjectComponent::SetReverbVisuEnabled(bool enabled)
 	// Trigger an update on the multi-slider
 	UpdateGui(true);
 }
-
 
 /**
  * Getter for the multiselection visu enabled state

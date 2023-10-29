@@ -10,3 +10,6 @@
 [submodule "submodules/JUCE"]
 	path = submodules/JUCE
 	url = https://github.com/juce-framework/JUCE
+[submodule "submodules/SQLiteCpp"]
+	path = submodules/SQLiteCpp
+	url = https://github.com/SRombauts/SQLiteCpp

@@ -972,9 +972,16 @@ void Controller::SetDS100ProtocolType(DataChangeParticipant changeSource, Protoc
 	{
 		m_DS100ProtocolType = protocol;
 
+		// special case NoProtocol - this requires shutting off any extension mode
+		if (m_DS100ProtocolType == PT_NoProtocol)
+		{
+			if (m_protocolBridge.SetDS100ExtensionMode(EM_Off, true))
+				m_DS100ExtensionMode = EM_Off;
+		}
+
 		m_protocolBridge.SetDS100ProtocolType(protocol, dontSendNotification);
 
-		// IP and port have likely changed when changing the protocol type (new defaults set)
+		// IP, port, etc. have likely changed when changing the protocol type (new defaults set)
 		m_DS100IpAddress = m_protocolBridge.GetDS100IpAddress();
 		m_DS100Port = m_protocolBridge.GetDS100Port();
 
@@ -983,6 +990,7 @@ void Controller::SetDS100ProtocolType(DataChangeParticipant changeSource, Protoc
 
 		// Signal the change to all Processors. 
 		SetParameterChanged(changeSource, DCT_ProtocolType);
+		SetParameterChanged(changeSource, DCT_ExtensionMode);
 		SetParameterChanged(changeSource, DCT_IPAddress);
 		SetParameterChanged(changeSource, DCT_Connected);
 
@@ -1268,6 +1276,38 @@ void Controller::SetActiveParallelModeDS100(DataChangeParticipant changeSource, 
 		// Signal the change to all Processors. 
 		SetParameterChanged(changeSource, DCT_ExtensionMode);
 		SetParameterChanged(changeSource, DCT_Connected);
+
+		Reconnect();
+	}
+}
+
+/**
+ * Getter for the dummy project config data set for DS100 'None' protocol.
+ * @return	Current string dummy project config data.
+ */
+juce::String Controller::GetDS100DummyProjectData() const
+{
+	return m_DS100DummyProjectData;
+}
+
+/**
+ * Setter for the dummy project config data set for DS100 'None' protocol.
+ * @param changeSource			The application module which is causing the property change.
+ * @param projectDummyData		New dummy project config data.
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ */
+void Controller::SetDS100DummyProjectData(DataChangeParticipant changeSource, const juce::String& projectDummyData, bool dontSendNotification)
+{
+	if (m_DS100DummyProjectData != projectDummyData)
+	{
+		const ScopedLock lock(m_mutex);
+
+		m_DS100DummyProjectData = projectDummyData;
+
+		m_protocolBridge.SetDS100dbprData(projectDummyData, dontSendNotification);
+
+		// Signal the change to all Processors.
+		SetParameterChanged(changeSource, DCT_Connected | DCT_SpeakerPositionData | DCT_CoordinateMappingSettingsData);
 
 		Reconnect();
 	}
@@ -2213,10 +2253,6 @@ const ProtocolId Controller::GetProtocolIdForProtocolType(const ProtocolBridging
 		return ADMOSC_PROCESSINGPROTOCOL_ID;
 	case PBT_RemapOSC:
 		return REMAPOSC_PROCESSINGPROTOCOL_ID;
-	case PBT_YamahaSQ:
-		// yamaha sq protocol is not implemented in rpb
-	case PBT_HUI:
-		// hui protocol is not implemented in rpb
 	case PBT_DS100:
 		// DS100 protocol can either be type 1 or 2, so not supported here
 	default:
@@ -2437,6 +2473,7 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			SetSecondDS100IpAndPort(DataChangeParticipant::DCP_Init, m_protocolBridge.GetSecondDS100IpAddress(), m_protocolBridge.GetSecondDS100Port(), true);
 			SetRefreshInterval(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100MsgRate(), true);
 			SetActiveParallelModeDS100(DataChangeParticipant::DCP_Init, m_protocolBridge.GetActiveParallelModeDS100(), true);
+			SetDS100DummyProjectData(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100dbprData(), true);
 		}
 	}
 
@@ -2826,10 +2863,6 @@ int Controller::GetActiveProtocolBridgingCount()
 	if ((activeBridging & PBT_BlacktraxRTTrPM) == PBT_BlacktraxRTTrPM)
 		activeProtocolBridgingCount++;
 	if ((activeBridging & PBT_GenericMIDI) == PBT_GenericMIDI)
-		activeProtocolBridgingCount++;
-	if ((activeBridging & PBT_YamahaSQ) == PBT_YamahaSQ)
-		activeProtocolBridgingCount++;
-	if ((activeBridging & PBT_HUI) == PBT_HUI)
 		activeProtocolBridgingCount++;
 	if ((activeBridging & PBT_DS100) == PBT_DS100)
 		activeProtocolBridgingCount++;

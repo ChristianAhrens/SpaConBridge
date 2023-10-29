@@ -33,7 +33,6 @@ namespace SpaConBridge
 ProtocolBridgingWrapper::ProtocolBridgingWrapper()
 	: m_bridgingXml(AppConfiguration::getTagName(AppConfiguration::TagID::BRIDGING))
 {
-	// Controller derives from ProcessingEngineNode::Listener
 	m_processingNode.AddListener(this);
 
 	SetupBridgingNode();
@@ -44,6 +43,11 @@ ProtocolBridgingWrapper::ProtocolBridgingWrapper()
  */
 ProtocolBridgingWrapper::~ProtocolBridgingWrapper()
 {
+	if (auto objHandling = m_processingNode.GetObjectDataHandling())
+		objHandling->RemoveStateListener(this);
+
+	m_processingNode.RemoveListener(this);
+
 	m_listeners.clear();
 }
 
@@ -2923,55 +2927,58 @@ bool ProtocolBridgingWrapper::SetDS100ProtocolType(ProtocolType protocolType, bo
 			// Set the new protocolType. This is responsible for the instantiation of correct ProtocolProcessor type in RPBC when parsing the updated xml
 			protocolXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), protocolTypeString);
 
-			// DS100 uses different ports for OSC (udp) and OCA (tcp)
-			auto clientPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
-			auto clientPortElmWasNewlyCreated = false;
-			if (!clientPortXmlElement)
+			if (protocolType != PT_NoProtocol)
 			{
-				clientPortXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
-				clientPortElmWasNewlyCreated = true;
-			}
-			if (protocolTypeChanged || clientPortElmWasNewlyCreated)
-				clientPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), (protocolType == PT_OSCProtocol ? RX_PORT_DS100_DEVICE : RX_PORT_DS100_DEVICE_OCP1));
-			
-			auto hostPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
-			auto hostPortElmWasNewlyCreated = false;
-			if (!hostPortXmlElement)
-			{
-				hostPortXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
-				hostPortElmWasNewlyCreated = true;
-			}
-			if (protocolTypeChanged || hostPortElmWasNewlyCreated)
-				hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), (protocolType == PT_OSCProtocol ? RX_PORT_DS100_HOST : 0)); // hostport is not used in Ocp1 RPBC implementation
-
-			// Ocp1 requires the server/client mode to be set. Therefor we need to create the corresp. xml entry if Ocp1 or delete it if OCA becomes active.
-			auto ocp1ConnectionModeXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE));
-			if (protocolType == PT_OCP1Protocol)
-			{
-				if (!ocp1ConnectionModeXmlElement)
-					ocp1ConnectionModeXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE));
-				if (ocp1ConnectionModeXmlElement->getFirstChildElement() && ocp1ConnectionModeXmlElement->getFirstChildElement()->isTextElement())
-					ocp1ConnectionModeXmlElement->getFirstChildElement()->setText("client");
-				else
-					ocp1ConnectionModeXmlElement->addTextElement("client");
-			}
-			else if (ocp1ConnectionModeXmlElement)
-				protocolXmlElement->removeChildElement(ocp1ConnectionModeXmlElement, true);
-
-			// Ocp1 heartbeat timing is handled internally and should not be interfered with from a potentially leftover OSC polling interval 
-			if (protocolType == PT_OCP1Protocol)
-			{
-				auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
-				if (pollingIntervalXmlElement)
-					protocolXmlElement->removeChildElement(pollingIntervalXmlElement, true);
-			}
-			else if (protocolType == PT_OSCProtocol)
-			{
-				auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
-				if (!pollingIntervalXmlElement)
+				// DS100 uses different ports for OSC (udp) and OCA (tcp)
+				auto clientPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+				auto clientPortElmWasNewlyCreated = false;
+				if (!clientPortXmlElement)
 				{
-					pollingIntervalXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
-					pollingIntervalXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::INTERVAL), ET_DefaultPollingRate);
+					clientPortXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+					clientPortElmWasNewlyCreated = true;
+				}
+				if (protocolTypeChanged || clientPortElmWasNewlyCreated)
+					clientPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), (protocolType == PT_OSCProtocol ? RX_PORT_DS100_DEVICE : RX_PORT_DS100_DEVICE_OCP1));
+
+				auto hostPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
+				auto hostPortElmWasNewlyCreated = false;
+				if (!hostPortXmlElement)
+				{
+					hostPortXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
+					hostPortElmWasNewlyCreated = true;
+				}
+				if (protocolTypeChanged || hostPortElmWasNewlyCreated)
+					hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), (protocolType == PT_OSCProtocol ? RX_PORT_DS100_HOST : 0)); // hostport is not used in Ocp1 RPBC implementation
+
+				// Ocp1 requires the server/client mode to be set. Therefor we need to create the corresp. xml entry if Ocp1 or delete it if OCA becomes active.
+				auto ocp1ConnectionModeXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE));
+				if (protocolType == PT_OCP1Protocol)
+				{
+					if (!ocp1ConnectionModeXmlElement)
+						ocp1ConnectionModeXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE));
+					if (ocp1ConnectionModeXmlElement->getFirstChildElement() && ocp1ConnectionModeXmlElement->getFirstChildElement()->isTextElement())
+						ocp1ConnectionModeXmlElement->getFirstChildElement()->setText("client");
+					else
+						ocp1ConnectionModeXmlElement->addTextElement("client");
+				}
+				else if (ocp1ConnectionModeXmlElement)
+					protocolXmlElement->removeChildElement(ocp1ConnectionModeXmlElement, true);
+
+				// Ocp1 heartbeat timing is handled internally and should not be interfered with from a potentially leftover OSC polling interval 
+				if (protocolType == PT_OCP1Protocol)
+				{
+					auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
+					if (pollingIntervalXmlElement)
+						protocolXmlElement->removeChildElement(pollingIntervalXmlElement, true);
+				}
+				else if (protocolType == PT_OSCProtocol)
+				{
+					auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
+					if (!pollingIntervalXmlElement)
+					{
+						pollingIntervalXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
+						pollingIntervalXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::INTERVAL), ET_DefaultPollingRate);
+					}
 				}
 			}
 		}
@@ -2985,45 +2992,48 @@ bool ProtocolBridgingWrapper::SetDS100ProtocolType(ProtocolType protocolType, bo
 			// Set the new protocolType. This is responsible for the instantiation of correct ProtocolProcessor type in RPBC when parsing the updated xml
 			protocolXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), ProcessingEngineConfig::ProtocolTypeToString(protocolType));
 
-			// DS100 uses different ports for OSC (udp) and OCA (tcp)
-			auto clientPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
-			if (!clientPortXmlElement)
-				clientPortXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
-			clientPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), (protocolType == PT_OSCProtocol ? RX_PORT_DS100_DEVICE : RX_PORT_DS100_DEVICE_OCP1));
-
-			auto hostPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
-			if (!hostPortXmlElement)
-				hostPortXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
-			hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), (protocolType == PT_OSCProtocol ? RX_PORT_DS100_HOST : 0)); // hostport is not used in Ocp1 RPBC implementation
-
-			// Ocp1 requires the server/client mode to be set. Therefor we need to create the corresp. xml entry if Ocp1 or delete it if OCA becomes active.
-			auto ocp1ConnectionModeXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE));
-			if (protocolType == PT_OCP1Protocol)
+			if (protocolType != PT_NoProtocol)
 			{
-				if (!ocp1ConnectionModeXmlElement)
-					ocp1ConnectionModeXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE));
-				if (ocp1ConnectionModeXmlElement->getFirstChildElement() && ocp1ConnectionModeXmlElement->getFirstChildElement()->isTextElement())
-					ocp1ConnectionModeXmlElement->getFirstChildElement()->setText("client");
-				else
-					ocp1ConnectionModeXmlElement->addTextElement("client");
-			}
-			else if (ocp1ConnectionModeXmlElement)
-				protocolXmlElement->removeChildElement(ocp1ConnectionModeXmlElement, true);
+				// DS100 uses different ports for OSC (udp) and OCA (tcp)
+				auto clientPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+				if (!clientPortXmlElement)
+					clientPortXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+				clientPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), (protocolType == PT_OSCProtocol ? RX_PORT_DS100_DEVICE : RX_PORT_DS100_DEVICE_OCP1));
 
-			// Ocp1 heartbeat timing is handled internally and should not be interfered with from a potentially leftover OSC polling interval 
-			if (protocolType == PT_OCP1Protocol)
-			{
-				auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
-				if (pollingIntervalXmlElement)
-					protocolXmlElement->removeChildElement(pollingIntervalXmlElement, true);
-			}
-			else if (protocolType == PT_OSCProtocol)
-			{
-				auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
-				if (!pollingIntervalXmlElement)
+				auto hostPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
+				if (!hostPortXmlElement)
+					hostPortXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT));
+				hostPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), (protocolType == PT_OSCProtocol ? RX_PORT_DS100_HOST : 0)); // hostport is not used in Ocp1 RPBC implementation
+
+				// Ocp1 requires the server/client mode to be set. Therefor we need to create the corresp. xml entry if Ocp1 or delete it if OCA becomes active.
+				auto ocp1ConnectionModeXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE));
+				if (protocolType == PT_OCP1Protocol)
 				{
-					pollingIntervalXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
-					pollingIntervalXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::INTERVAL), ET_DefaultPollingRate);
+					if (!ocp1ConnectionModeXmlElement)
+						ocp1ConnectionModeXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE));
+					if (ocp1ConnectionModeXmlElement->getFirstChildElement() && ocp1ConnectionModeXmlElement->getFirstChildElement()->isTextElement())
+						ocp1ConnectionModeXmlElement->getFirstChildElement()->setText("client");
+					else
+						ocp1ConnectionModeXmlElement->addTextElement("client");
+				}
+				else if (ocp1ConnectionModeXmlElement)
+					protocolXmlElement->removeChildElement(ocp1ConnectionModeXmlElement, true);
+
+				// Ocp1 heartbeat timing is handled internally and should not be interfered with from a potentially leftover OSC polling interval 
+				if (protocolType == PT_OCP1Protocol)
+				{
+					auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
+					if (pollingIntervalXmlElement)
+						protocolXmlElement->removeChildElement(pollingIntervalXmlElement, true);
+				}
+				else if (protocolType == PT_OSCProtocol)
+				{
+					auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
+					if (!pollingIntervalXmlElement)
+					{
+						pollingIntervalXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
+						pollingIntervalXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::INTERVAL), ET_DefaultPollingRate);
+					}
 				}
 			}
 		}
@@ -3655,6 +3665,67 @@ ObjectHandlingState ProtocolBridgingWrapper::GetSecondDS100State() const
 void ProtocolBridgingWrapper::SetSecondDS100State(ObjectHandlingState state)
 {
 	SetProtocolState(DS100_2_PROCESSINGPROTOCOL_ID, state);
+}
+
+/**
+ * Gets the current string project data representation from xml config.
+ * @return	The current string project data representation if present, empty if not
+ */
+const juce::String ProtocolBridgingWrapper::GetDS100dbprData() const
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+		{
+			if (nullptr != protocolXmlElement->getFirstChildElement() && protocolXmlElement->getFirstChildElement()->isTextElement())
+			{
+				auto projectDummyData = protocolXmlElement->getFirstChildElement()->getAllSubText();
+				return projectDummyData;
+			}
+		}
+	}
+
+	return {};
+}
+
+/**
+ * Sets the given string project data representation to xml config and triggers applying it.
+ * This method inserts the given string as xml textelement to the protocol xml node and eliminates
+ * existing non textelement contents if present.
+ * @param projectDummyData	The new dummy dbpr project data to apply
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * @return	True on succes, false if failure
+ */
+bool ProtocolBridgingWrapper::SetDS100dbprData(const juce::String& projectDummyData, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+		{
+			protocolXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::USESACTIVEOBJ), 0);
+			if (1 == protocolXmlElement->getNumChildElements() && protocolXmlElement->getFirstChildElement()->isTextElement())
+			{
+				protocolXmlElement->getFirstChildElement()->setText(projectDummyData);
+			}
+			else if (1 != protocolXmlElement->getNumChildElements() || !protocolXmlElement->getFirstChildElement()->isTextElement())
+			{
+				protocolXmlElement->deleteAllChildElements();
+				protocolXmlElement->addTextElement(projectDummyData);
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
 }
 
 

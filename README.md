@@ -50,21 +50,12 @@ See [LATEST RELEASE](../../releases/latest) for available binary packages or joi
 </tr>
 </table>
 
-SpaConBridge was created with the idea in mind to have both a simple ui to monitor or control Sound Object parameters of a d&b audiotechnik Soundscape system, esp. the DS100 Signal Engine, via OSC protocol and at the same time the possibility of controlling interfacing with external control data input (MIDI device, OSC control app, ...).
+SpaConBridge was created with the idea in mind to have both a simple ui to monitor or control Sound Object parameters of a d&b audiotechnik Soundscape system, esp. the DS100 Signal Engine, via OSC or AES70/OCP.1 protocol and at the same time the option to integration external control (MIDI device, OSC control app, ...).
 
 It is neither suppported nor driven by official d&b activities.
 
-It was originally inspired by "Soundscape DAW Plugin" made publicly available at https://github.com/dbaudio-soundscape/db-Soundscape-DAW-Plugins and "Soundscape Control with DiGiCo SD consoles" made publicly available at https://github.com/dbaudio-soundscape/db-Soundscape-control-with-DiGiCo-SD-Consoles.
-
-A brief introductory video on usage and features of v0.3.1 of the build for iPadOS can be seen here:
-
-_[![SpaConBridge v0.3.1 Introduction](https://img.youtube.com/vi/ozhQxKidtWc/0.jpg)](https://youtu.be/ozhQxKidtWc)_
-
 
 **Known Issues:**
-
-* LookAndFeel change does not reliably update colour scheme for all UI elements  
-__Note:__ Suspicion: Underlying UI framework issue is the cause for this
 * MIDI device listing is not updated during runtime  
 __Note:__ In consequence, devices being plugged in / coming online while app is running cannot be used unless app is restarted
 
@@ -95,17 +86,17 @@ __Note:__ In consequence, devices being plugged in / coming online while app is 
 
 ## Quick Start
 
-1. If no DS100 is available, the minimal simulation tool [SpaConSim](https://github.com/ChristianAhrens/SpaConSim) might be considered for testing and debugging.
+1. _If no DS100 is available, the option to use 'None' as protocol communication dummy allows testing of bridging inbetween 3rd party devices and is supporting of loading a d&b dbpr project to extract the coordinate mapping setup and speaker system layout for visualization of object positions._
 2. Launch SpaConBridge
-    * Sound Object table has no entries, no bridging protocol is active
-    * App is 'offline' since no Sound Object is active
-3. Add some Sound Objects by clicking the 'Add' button
-4. Enable receiving object values from DS100 by toggling the button with 'incoming' arrow symbol for at least one Sound Object in the table
-5. Go to [Settings](#appsettings) tab
-    * If you do not have a DS100 at hand, now is the time to launch [SpaConSim](https://github.com/ChristianAhrens/SpaConSim) simulation tool
-6. Set up the DS100 connection
-    * Click on discovery button below IP address text edit field to get a list of devices that announce _osc._udp (DS100 OSC communication active) or _oca._tcp (DS100 OCP1/AES70 communication active) zeroconf service and choose the DS100 or [SpaConSim](https://github.com/ChristianAhrens/SpaConSim) simulation tool you want to connect to
-7. 'Online' inidicator on bottom right of the UI becomes active
+3. [Settings](#appsettings) tab is opened as starting page
+4. Set up the DS100 connection
+    * Click on discovery button below IP address text edit field to get a list of devices that announce _osc._udp (DS100 OSC communication active) or _oca._tcp (DS100 OCP1/AES70 communication active) zeroconf service and choose the DS100 you want to connect to
+    * If you do not have a DS100 at hand, now is the time to switch to 'None' as protocol and if available load the dbpr project to work with
+5. Activate the 'Online' button in the lower right corner of the application window
+6. 'Online' inidicator on bottom right of the UI becomes active
+7. Go to [Sound Object Table](#soundobjecttable) tab
+    * Add the Sound Objects you want to control data bridging behaviour for by clicking the 'Add' button
+4. Receiving object values from DS100 is active by default (button with 'incoming' arrow symbol is toggled on)
 8. Go to [Statistics](#protocolbridgingtrafficloggingandplotting) tab and click on DS100 legend item to activate DS100 protocol traffic plotting/logging.
 9. Go to [Sound Object Table](#soundobjecttable) tab and select one of the Sound Objects for which you previously activated receiving object values (button with 'incoming' arrow symbol)
 10. Details editor is opened for the Sound Object and shows live object value changes

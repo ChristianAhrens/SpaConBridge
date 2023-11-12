@@ -172,6 +172,10 @@ public:
 	void SetDS100DummyProjectData(DataChangeParticipant changeSource, const juce::String& projectDummyData, bool dontSendNotification = false);
 
 	//==========================================================================
+	int GetDS100DummyAnimationMode() const;
+	void SetDS100DummyAnimationMode(DataChangeParticipant changeSource, const int& animationMode, bool dontSendNotification = false);
+
+	//==========================================================================
 	const std::vector<RemoteObject> GetActivatedSoundObjectRemoteObjects();
 	const std::vector<RemoteObject> GetActivatedMatrixInputRemoteObjects();
 	const std::vector<RemoteObject> GetActivatedMatrixOutputRemoteObjects();
@@ -313,6 +317,7 @@ protected:
 	juce::IPAddress					m_SecondDS100IpAddress;			/**< IP Address where OSC messages will be sent to / received from. */
 	int								m_SecondDS100Port;				/**< Port on a second ds100 device to connect to. */
 	juce::String					m_DS100DummyProjectData;		/**< Dummy dbpr project data excerpt as string. */
+	int								m_DS100DummyAnimationMode;		/**< Dummy animation mode integer value (0, 1, 2). */
 
 	DataChangeType					m_parametersChanged[DCP_Max];	/**< Keep track of which OSC parameters have changed recently.
 																	 * The array has one entry for each application module (see enum DataChangeSource). */

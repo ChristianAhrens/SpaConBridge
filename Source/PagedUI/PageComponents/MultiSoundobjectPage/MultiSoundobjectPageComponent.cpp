@@ -139,5 +139,22 @@ void MultiSoundobjectPageComponent::UpdateGui(bool init)
 	}
 }
 
+/**
+ * Reimplemented lookandfeel change trigger method to ensure
+ * the multisoundobject component is updated at any time as well.
+ */
+void MultiSoundobjectPageComponent::lookAndFeelChanged()
+{
+	PageComponentBase::lookAndFeelChanged();
+
+	auto pageManager = PageComponentManager::GetInstance();
+	if (pageManager)
+	{
+		auto& multiSoundobjectComponent = pageManager->GetMultiSoundobjectComponent();
+		if (multiSoundobjectComponent)
+			multiSoundobjectComponent->lookAndFeelChanged();
+	}
+}
+
 
 } // namespace SpaConBridge

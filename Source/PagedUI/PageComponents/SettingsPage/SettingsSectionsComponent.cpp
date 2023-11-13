@@ -1735,6 +1735,8 @@ void SettingsSectionsComponent::processUpdatedDS100Config()
 			newActiveButtonId = m_DS100DummyAnimationModeButtonIds[m_DS100DummyAnimationModes[2]];
 		m_DS100DummyAnimationModeButton->setButtonDown(newActiveButtonId);
 	}
+	if (m_DS100DummyAnimationModeLabel)
+		m_DS100DummyAnimationModeLabel->setEnabled(ctrl->GetDS100ProtocolType() == PT_NoProtocol);
 }
 
 /**

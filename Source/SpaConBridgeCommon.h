@@ -313,6 +313,7 @@ enum SpaConBridgeErrorCode
 	SEC_SaveCustomOSC_CannotWrite,
 	SEC_SaveIdxToCh_CannotAccess,
 	SEC_SaveIdxToCh_CannotWrite,
+	SEC_InvalidProjectFile,
 };
 
 /**

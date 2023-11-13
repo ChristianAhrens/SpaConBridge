@@ -83,8 +83,7 @@ void ProjectDummyDataLoaderComponent::setProjectDummyData(const ProjectData& dum
 void ProjectDummyDataLoaderComponent::loadProjectClicked()
 {
     // create the file chooser dialog
-    auto chooser = std::make_unique<FileChooser>("Select a d&b project file to load...",
-        File::getSpecialLocation(File::userDesktopDirectory), "*.dbpr", true, false, this); // onyl dbpr files allowed
+    auto chooser = std::make_unique<FileChooser>("Select a d&b project file to load..."); // onyl dbpr files allowed
     // and trigger opening it
     chooser->launchAsync(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, [this](const FileChooser& chooser)
         {
@@ -115,6 +114,13 @@ void ProjectDummyDataLoaderComponent::openAndReadProject(const juce::String& fil
 {
 #ifdef USE_DBPR_PROJECT_UTILS
     auto projectData = ProjectData::OpenAndReadProject(fileName);
+
+    // some sanity checking
+    if (projectData._coordinateMappingData.empty() || projectData._speakerPositionData.empty())
+    {
+        ShowUserErrorNotification(SEC_InvalidProjectFile);
+        return;
+    }
 
     setProjectDummyData(projectData);
         

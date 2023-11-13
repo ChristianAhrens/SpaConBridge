@@ -433,8 +433,7 @@ void SceneIndexToMidiAssignerComponent::SceneIndexAssignmentsViewingComponent::o
 void SceneIndexToMidiAssignerComponent::SceneIndexAssignmentsViewingComponent::onImportClicked()
 {
     // create the file chooser dialog
-    auto chooser = std::make_unique<FileChooser>("Select a Scene Index to MIDI mapping file to import...",
-        File::getSpecialLocation(File::userDocumentsDirectory), String(), true, false, this); // all filepatterns are allowed for loading (currently seems to not work on iOS and not be regarded on macOS at all)
+    auto chooser = std::make_unique<FileChooser>("Select a Scene Index to MIDI mapping file to import..."); // all filepatterns are allowed for loading (currently seems to not work on iOS and not be regarded on macOS at all)
     // and trigger opening it
     chooser->launchAsync(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, [this](const FileChooser& chooser)
         {

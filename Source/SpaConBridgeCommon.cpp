@@ -289,6 +289,7 @@ const String GetErrorTitle(const SpaConBridgeErrorCode errorCode)
 	case SEC_LoadScnIdxToMIDI_InvalidFile:
 	case SEC_LoadCustomOSC_CannotAccess:
 	case SEC_LoadCustomOSC_InvalidFile:
+	case SEC_InvalidProjectFile:
 		return "Loading Failed";
 	case SEC_SaveConfig_CannotAccess:
 	case SEC_SaveConfig_InternalError:
@@ -358,6 +359,8 @@ const String GetErrorInfo(const SpaConBridgeErrorCode errorCode)
 	case SEC_SaveScnIdxToMIDI_CannotWrite:
 	case SEC_SaveCustomOSC_CannotWrite:
 		return JUCEApplication::getInstance()->getApplicationName() + " is not allowed to write to the chosen file location.";
+	case SEC_InvalidProjectFile:
+		return "The chosen project file cannot be used by " + JUCEApplication::getInstance()->getApplicationName();
 	case SEC_None:
 	default:
 		return "No details available.";

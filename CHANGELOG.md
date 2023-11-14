@@ -4,12 +4,15 @@ All notable changes to SpaConBridge will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.13.1] 2023-11-14
 ### Added
+- Added DS100 connection protocol option 'None' dummy data animation option (Off/Circular/Random)
 
 ### Changed
 
 ### Fixed
+- Fixed iOS config xml loading (and dbpr project + csv mapping loading as well) - FINALLY
+- Fixed multi sound object 'all' visualization updating on protocol type change and correctly handle lookandfeel changes
 
 ## [0.13.0] 2023-10-29
 ### Added

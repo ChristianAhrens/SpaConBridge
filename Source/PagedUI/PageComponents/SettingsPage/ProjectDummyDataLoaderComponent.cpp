@@ -87,6 +87,21 @@ void ProjectDummyDataLoaderComponent::loadProjectClicked()
     // and trigger opening it
     chooser->launchAsync(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, [this](const FileChooser& chooser)
         {
+#if JUCE_IOS || JUCE_ANDROID
+            auto url = chooser.getURLResult();
+        
+#if JUCE_IOS
+            auto inputStream = std::unique_ptr<juce::InputStream>(juce::URLInputSource(url).createInputStream());
+#elif JUCE_ANDROID
+            auto androidDocument = juce::AndroidDocument::fromDocument (url);
+            auto inputStream = std::unique_ptr<juce::InputStream>(androidDocument.createInputStream());
+#endif
+        
+            if (inputStream != nullptr)
+            {
+                openAndReadProject(inputStream);
+            }
+#else
             auto file = chooser.getResult();
     
             // verify that the result is valid (ok clicked)
@@ -94,6 +109,8 @@ void ProjectDummyDataLoaderComponent::loadProjectClicked()
             {
                 openAndReadProject(file.getFullPathName());
             }
+#endif
+        
             delete static_cast<const FileChooser*>(&chooser);
         });
     chooser.release();
@@ -127,6 +144,22 @@ void ProjectDummyDataLoaderComponent::openAndReadProject(const juce::String& fil
     if (onProjectDummyDataLoaded)
         onProjectDummyDataLoaded(m_currentProjectDummyData.ToString());
 #endif
+}
+
+void ProjectDummyDataLoaderComponent::openAndReadProject(const std::unique_ptr<juce::InputStream>& inputStream)
+{
+    juce::MemoryBlock destBlock;
+    inputStream->readIntoMemoryBlock(destBlock);
+    
+    auto tempFileName = juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getFullPathName() + "/tempFile.sq3";
+    auto tempFile = juce::File(tempFileName);
+    auto tempFileOutputStream = std::make_unique<juce::FileOutputStream>(tempFile);
+    tempFileOutputStream->write(destBlock.getData(), destBlock.getSize());
+    
+    openAndReadProject(tempFileName);
+    
+    tempFileOutputStream.reset();
+    tempFile.deleteFile();
 }
 
 void ProjectDummyDataLoaderComponent::lookAndFeelChanged()

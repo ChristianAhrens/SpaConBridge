@@ -59,6 +59,7 @@ private:
     void loadProjectClicked();
     void clearProjectClicked();
     void openAndReadProject(const juce::String& fileName);
+    void openAndReadProject(const std::unique_ptr<juce::InputStream>& inputStream);
 
     //==============================================================================
     std::unique_ptr<JUCEAppBasics::FixedFontTextEditor> m_currentProjectDummyDataInfoLabel;

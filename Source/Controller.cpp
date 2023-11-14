@@ -3278,6 +3278,53 @@ bool Controller::LoadConfigurationFile(const File& fileToLoadFrom)
 }
 
 /**
+ * Method to load a given input file as the new application configuration.
+ * This tries to handle possible errors and shows a popup to the user in case an error was detected.
+ * @param fileStreamToLoadFrom    The input file to load the new app config from.
+ * @return    True on succes, false on failure
+ */
+bool Controller::LoadConfigurationFile(const std::unique_ptr<juce::InputStream>& fileStreamToLoadFrom)
+{
+    if (!fileStreamToLoadFrom)
+    {
+        jassertfalse;
+        return false;
+    }
+    
+    auto config = SpaConBridge::AppConfiguration::getInstance();
+    if (!config)
+    {
+        ShowUserErrorNotification(SEC_LoadConfig_InternalError);
+        return false;
+    }
+
+    auto xmlConfig = juce::parseXML(fileStreamToLoadFrom->readEntireStreamAsString());
+    if (!xmlConfig)
+    {
+        ShowUserErrorNotification(SEC_LoadConfig_InvalidFile);
+        return false;
+    }
+
+    if (!SpaConBridge::AppConfiguration::isValid(xmlConfig))
+    {
+        ShowUserErrorNotification(SEC_LoadConfig_InvalidConfig);
+        return false;
+    }
+
+    config->SetFlushAndUpdateDisabled();
+    if (!config->resetConfigState(std::move(xmlConfig)))
+    {
+        ShowUserErrorNotification(SEC_LoadConfig_ConfigInit);
+        config->ResetFlushAndUpdateDisabled();
+        return false;
+    }
+    config->ResetFlushAndUpdateDisabled();
+
+    SetParameterChanged(DCP_Init, DCT_AllConfigParameters);
+    return true;
+}
+
+/**
  * Method to save the current application configuration to a given input file.
  * This tries to handle possible errors and shows a popup to the user in case an error was detected.
  * @param fileToSaveTo	The output file to save the current config to.

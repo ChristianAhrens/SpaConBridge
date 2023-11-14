@@ -277,15 +277,34 @@ void SettingsPageComponent::onLoadConfigClicked()
     // and trigger opening it
 	chooser->launchAsync(FileBrowserComponent::openMode|FileBrowserComponent::canSelectFiles, [this](const FileChooser& chooser)
 		{
+#if JUCE_IOS || JUCE_ANDROID
+            auto url = chooser.getURLResult();
+        
+#if JUCE_IOS
+            auto inputStream = std::unique_ptr<juce::InputStream>(juce::URLInputSource(url).createInputStream());
+#elif JUCE_ANDROID
+            auto androidDocument = juce::AndroidDocument::fromDocument (url);
+            auto inputStream = std::unique_ptr<juce::InputStream>(androidDocument.createInputStream());
+#endif
+        
+            if (inputStream != nullptr)
+            {
+                auto ctrl = Controller::GetInstance();
+                if (ctrl)
+                    ctrl->LoadConfigurationFile(inputStream);
+            }
+#else
 			auto file = chooser.getResult();
 
 			// verify that the result is valid (ok clicked)
 			if (!file.getFullPathName().isEmpty())
 			{
-				Controller* ctrl = Controller::GetInstance();
+				auto ctrl = Controller::GetInstance();
 				if (ctrl)
 					ctrl->LoadConfigurationFile(file);
 			}
+#endif
+            
 			delete static_cast<const FileChooser*>(&chooser);
 		});
 	chooser.release();

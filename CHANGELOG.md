@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.13.1] 2023-11-14
+### Added
+- Added DS100 connection protocol option 'None' dummy data animation option (Off/Circular/Random)
+
+### Changed
+
+### Fixed
+- Fixed iOS config xml loading (and dbpr project + csv mapping loading as well) - FINALLY
+- Fixed multi sound object 'all' visualization updating on protocol type change and correctly handle lookandfeel changes
+
 ## [0.13.0] 2023-10-29
 ### Added
 - Added DS100 connection protocol option 'None', enabling operation without physical device, incl. optional loading of speaker setup and coordinate mapping settings data from dbpr projects

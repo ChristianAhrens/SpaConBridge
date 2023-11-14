@@ -313,6 +313,7 @@ enum SpaConBridgeErrorCode
 	SEC_SaveCustomOSC_CannotWrite,
 	SEC_SaveIdxToCh_CannotAccess,
 	SEC_SaveIdxToCh_CannotWrite,
+	SEC_InvalidProjectFile,
 };
 
 /**
@@ -329,5 +330,52 @@ bool UpdateDrawableButtonImages(const std::unique_ptr<DrawableButton>& drawableB
 bool UpdateDrawableButtonImages(const std::unique_ptr<JUCEAppBasics::TextWithImageButton>& drawableButton, const String& binarySVGStringData, LookAndFeel* lookAndFeel);
 bool UpdateDrawableButtonImages(DrawableButton* drawableButton, const String& binarySVGStringData, LookAndFeel* lookAndFeel);
 
+/**
+ * Minimal helper class to be able to read a given
+ * InputStream to an internally hidden temp file and
+ * use that files path to access the file contents equal
+ * to input stream contents wherever only file handling 
+ * is supported.
+ * This might e.g. be libs like SQLiteCpp database reading
+ * and comes in handy esp. on plattforms that allow file-on-disk
+ * access through streams only.
+ */
+class SelfDestructingInputStreamBufferFile
+{
+public:
+	~SelfDestructingInputStreamBufferFile() { 
+		m_tmpFile.deleteFile();
+	};
+
+	juce::String GetFullPathName() {
+		return m_tmpFile.getFullPathName();
+	};
+
+	static std::unique_ptr<SelfDestructingInputStreamBufferFile> CreateFileFromInputStream(const std::unique_ptr<juce::InputStream>& inputStream)
+	{
+		auto instanceOfThis = std::make_unique<SelfDestructingInputStreamBufferFile>();
+
+		if (inputStream)
+		{
+			juce::MemoryBlock destBlock;
+			inputStream->readIntoMemoryBlock(destBlock);
+
+			auto tempFileName = juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getFullPathName() + "/file.tmp";
+			instanceOfThis->GetFile() = juce::File(tempFileName);
+			auto tempFileOutputStream = juce::FileOutputStream(instanceOfThis->GetFile());
+			tempFileOutputStream.write(destBlock.getData(), destBlock.getSize());
+		}
+		
+		return std::move(instanceOfThis);
+	}
+
+protected:
+	juce::File& GetFile() {
+		return m_tmpFile;
+	};
+
+private:
+	juce::File	m_tmpFile;
+};
 
 } // namespace SpaConBridge

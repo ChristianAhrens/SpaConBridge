@@ -230,6 +230,7 @@ private:
 	std::map<MappingAreaId, juce::Path>												m_mappingAreaPaths;
 	std::map<MappingAreaId, std::pair<juce::Point<int>, float>>						m_mappingTextAnchorPointAndRot;
 	std::map<ChannelId, std::unique_ptr<juce::Drawable>>							m_speakerDrawables;
+	juce::Colour																	m_speakerDrawablesCurrentColour;
 	std::map<ChannelId, juce::Rectangle<float>>										m_speakerDrawableAreas;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MultiSoundobjectSlider)

@@ -186,7 +186,9 @@ void MultiSoundobjectSlider::lookAndFeelChanged()
 
     for (auto const& speakerDrawableKV : m_speakerDrawables)
         if (speakerDrawableKV.second)
-            speakerDrawableKV.second->replaceColour(Colours::black, getLookAndFeel().findColour(TextButton::textColourOnId));
+            speakerDrawableKV.second->replaceColour(m_speakerDrawablesCurrentColour, getLookAndFeel().findColour(TextButton::textColourOnId));
+
+    m_speakerDrawablesCurrentColour = getLookAndFeel().findColour(TextButton::textColourOnId);
 }
 
 /**
@@ -436,7 +438,7 @@ void MultiSoundobjectSlider::paintSpeakersAndMappingAreas2DVisu(Graphics& g)
     }
 
     // Speaker positions
-    g.setColour(getLookAndFeel().findColour(TextEditor::textColourId));
+    g.setColour(m_speakerDrawablesCurrentColour);
     for (auto const& speakerDrawableKV : m_speakerDrawables)
     {
         // draw speaker icons in target area
@@ -1750,6 +1752,7 @@ void MultiSoundobjectSlider::SetSpeakerPositionDataReady(bool ready)
                     m_speakerDrawables[channelId] = Drawable::createFromSVG(*XmlDocument::parse(BinaryData::loudspeaker_hor24px_svg));
                 auto& drawable = m_speakerDrawables.at(channelId);
                 drawable->replaceColour(Colours::black, getLookAndFeel().findColour(TextButton::textColourOnId));
+                m_speakerDrawablesCurrentColour = getLookAndFeel().findColour(TextButton::textColourOnId);
                 auto drawableBounds = drawable->getBounds().toFloat();
                 drawable->setTransform(juce::AffineTransform::rotation(juce::degreesToRadians(rot.x), drawableBounds.getCentreX(), drawableBounds.getCentreY()));
             }

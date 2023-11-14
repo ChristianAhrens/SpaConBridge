@@ -205,6 +205,11 @@ private:
 	std::unique_ptr<ProjectDummyDataLoaderComponent>			m_DS100ProjectDummyDataLoader;
 	std::unique_ptr<Label>										m_DS100ProjectDummyDataLabel;
 
+	std::unique_ptr<JUCEAppBasics::SplitButtonComponent>		m_DS100DummyAnimationModeButton;
+	std::unique_ptr<Label>										m_DS100DummyAnimationModeLabel;
+	const std::vector<std::string>								m_DS100DummyAnimationModes{ "Off", "Circular", "Random" };
+	std::map<std::string, uint64>								m_DS100DummyAnimationModeButtonIds;
+
 	// DiGiCo settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_DiGiCoBridgingSettings;
 	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_DiGiCoIpAddressEdit;

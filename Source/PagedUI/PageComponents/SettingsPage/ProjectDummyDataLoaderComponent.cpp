@@ -83,18 +83,32 @@ void ProjectDummyDataLoaderComponent::setProjectDummyData(const ProjectData& dum
 void ProjectDummyDataLoaderComponent::loadProjectClicked()
 {
     // create the file chooser dialog
-    auto chooser = std::make_unique<FileChooser>("Select a d&b project file to load...",
-        File::getSpecialLocation(File::userDesktopDirectory), "*.dbpr", true, false, this); // onyl dbpr files allowed
+    auto chooser = std::make_unique<FileChooser>("Select a d&b project file to load..."); // onyl dbpr files allowed
     // and trigger opening it
     chooser->launchAsync(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, [this](const FileChooser& chooser)
         {
-            auto file = chooser.getResult();
+#if JUCE_IOS || JUCE_ANDROID
+            auto url = chooser.getURLResult();
+        
+#if JUCE_IOS
+            auto inputStream = std::unique_ptr<juce::InputStream>(juce::URLInputSource(url).createInputStream());
+#elif JUCE_ANDROID
+            auto androidDocument = juce::AndroidDocument::fromDocument (url);
+            auto inputStream = std::unique_ptr<juce::InputStream>(androidDocument.createInputStream());
+#endif
+        
+            auto tmpFile = SelfDestructingInputStreamBufferFile::CreateFileFromInputStream(inputStream);
+            auto fullFilePathName = tmpFile->GetFullPathName();
+#else
+            auto fullFilePathName = chooser.getResult().getFullPathName();
+#endif
     
             // verify that the result is valid (ok clicked)
-            if (!file.getFullPathName().isEmpty())
+            if (!fullFilePathName.isEmpty())
             {
-                openAndReadProject(file.getFullPathName());
+                openAndReadProject(fullFilePathName);
             }
+        
             delete static_cast<const FileChooser*>(&chooser);
         });
     chooser.release();
@@ -115,6 +129,13 @@ void ProjectDummyDataLoaderComponent::openAndReadProject(const juce::String& fil
 {
 #ifdef USE_DBPR_PROJECT_UTILS
     auto projectData = ProjectData::OpenAndReadProject(fileName);
+
+    // some sanity checking
+    if (projectData._coordinateMappingData.empty() || projectData._speakerPositionData.empty())
+    {
+        ShowUserErrorNotification(SEC_InvalidProjectFile);
+        return;
+    }
 
     setProjectDummyData(projectData);
         

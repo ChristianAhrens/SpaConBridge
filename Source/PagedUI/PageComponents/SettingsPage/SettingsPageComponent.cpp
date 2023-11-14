@@ -273,20 +273,34 @@ void SettingsPageComponent::onResetToDefaultClicked()
 void SettingsPageComponent::onLoadConfigClicked()
 {
     // create the file chooser dialog
-	auto chooser = std::make_unique<FileChooser>("Select a " + JUCEApplication::getInstance()->getApplicationName() + " config file to load...",
-		File::getSpecialLocation(File::userDocumentsDirectory), String(), true, false, this); // all filepatterns are allowed for loading (currently seems to not work on iOS and not be regarded on macOS at all)
+	auto chooser = std::make_unique<FileChooser>("Select a " + JUCEApplication::getInstance()->getApplicationName() + " config file to load..."); // all filepatterns are allowed for loading (currently seems to not work on iOS and not be regarded on macOS at all)
     // and trigger opening it
 	chooser->launchAsync(FileBrowserComponent::openMode|FileBrowserComponent::canSelectFiles, [this](const FileChooser& chooser)
 		{
-			auto file = chooser.getResult();
+#if JUCE_IOS || JUCE_ANDROID
+            auto url = chooser.getURLResult();
+        
+#if JUCE_IOS
+            auto inputStream = std::unique_ptr<juce::InputStream>(juce::URLInputSource(url).createInputStream());
+#elif JUCE_ANDROID
+            auto androidDocument = juce::AndroidDocument::fromDocument (url);
+            auto inputStream = std::unique_ptr<juce::InputStream>(androidDocument.createInputStream());
+#endif
+
+			auto tmpFile = SelfDestructingInputStreamBufferFile::CreateFileFromInputStream(inputStream);
+			auto fullFilePathName = tmpFile->GetFullPathName();
+#else
+			auto fullFilePathName = chooser.getResult().getFullPathName();
+#endif
 
 			// verify that the result is valid (ok clicked)
-			if (!file.getFullPathName().isEmpty())
+			if (!fullFilePathName.isEmpty())
 			{
-				Controller* ctrl = Controller::GetInstance();
+				auto ctrl = Controller::GetInstance();
 				if (ctrl)
-					ctrl->LoadConfigurationFile(file);
+					ctrl->LoadConfigurationFile(juce::File(fullFilePathName));
 			}
+            
 			delete static_cast<const FileChooser*>(&chooser);
 		});
 	chooser.release();

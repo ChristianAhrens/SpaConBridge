@@ -163,6 +163,9 @@ public:
 	const juce::String GetDS100dbprData() const;
 	bool SetDS100dbprData(const juce::String& projectDummyData, bool dontSendNotification = false);
 
+	const int GetDS100AnimationMode() const;
+	bool SetDS100AnimationMode(const int& animationMode, bool dontSendNotification = false);
+
 	//==========================================================================
 	static bool IsBridgingObjectOnly(const RemoteObjectIdentifier roi);
 

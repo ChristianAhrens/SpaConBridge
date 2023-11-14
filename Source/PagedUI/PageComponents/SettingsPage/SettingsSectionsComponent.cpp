@@ -269,6 +269,18 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 	m_DS100Settings->addComponent(m_DS100ProjectDummyDataLabel.get(), false, false);
 	m_DS100Settings->addComponent(m_DS100ProjectDummyDataLoader.get(), true, false);
 
+	m_DS100DummyAnimationModeButton = std::make_unique<JUCEAppBasics::SplitButtonComponent>();
+	m_DS100DummyAnimationModeButton->addListener(this);
+	m_DS100DummyAnimationModeButtonIds[m_DS100DummyAnimationModes[0]] = m_DS100DummyAnimationModeButton->addButton(m_DS100DummyAnimationModes[0]);
+	m_DS100DummyAnimationModeButtonIds[m_DS100DummyAnimationModes[1]] = m_DS100DummyAnimationModeButton->addButton(m_DS100DummyAnimationModes[1]);
+	m_DS100DummyAnimationModeButtonIds[m_DS100DummyAnimationModes[2]] = m_DS100DummyAnimationModeButton->addButton(m_DS100DummyAnimationModes[2]);
+	m_DS100DummyAnimationModeButton->setButtonDown(m_DS100DummyAnimationModeButtonIds[m_DS100DummyAnimationModes[0]]);
+	m_DS100DummyAnimationModeLabel = std::make_unique<Label>("DS100DummyAnimationModeButton", "Dummy Animation");
+	m_DS100DummyAnimationModeLabel->setJustificationType(Justification::centred);
+	m_DS100DummyAnimationModeLabel->attachToComponent(m_DS100DummyAnimationModeButton.get(), true);
+	m_DS100Settings->addComponent(m_DS100DummyAnimationModeLabel.get(), false, false);
+	m_DS100Settings->addComponent(m_DS100DummyAnimationModeButton.get(), true, false);
+
 	m_DS100Settings->resized();
 }
 
@@ -1216,6 +1228,23 @@ void SettingsSectionsComponent::buttonClicked(JUCEAppBasics::SplitButtonComponen
 		}
 	}
 
+	// Dummy DS100 behaviour data animation mode
+	else if (m_DS100DummyAnimationModeButton)
+	{
+		if (m_DS100DummyAnimationModeButtonIds[m_DS100DummyAnimationModes[0]] == buttonId)
+		{
+			ctrl->SetDS100DummyAnimationMode(DCP_Settings, 0);
+		}
+		else if (m_DS100DummyAnimationModeButtonIds[m_DS100DummyAnimationModes[1]] == buttonId)
+		{
+			ctrl->SetDS100DummyAnimationMode(DCP_Settings, 1);
+		}
+		else if (m_DS100DummyAnimationModeButtonIds[m_DS100DummyAnimationModes[2]] == buttonId)
+		{
+			ctrl->SetDS100DummyAnimationMode(DCP_Settings, 2);
+		}
+	}
+
 	// RTTrPM settings section
 	else if (m_RTTrPMInterpretXYRelativeButton && m_RTTrPMInterpretXYRelativeButton.get() == button)
 	{
@@ -1696,6 +1725,18 @@ void SettingsSectionsComponent::processUpdatedDS100Config()
 	}
 	if (m_DS100ProjectDummyDataLabel)
 		m_DS100ProjectDummyDataLabel->setEnabled(ctrl->GetDS100ProtocolType() == PT_NoProtocol);
+	if (m_DS100DummyAnimationModeButton)
+	{
+		m_DS100DummyAnimationModeButton->setEnabled(ctrl->GetDS100ProtocolType() == PT_NoProtocol);
+		auto newActiveButtonId = m_DS100DummyAnimationModeButtonIds[m_DS100DummyAnimationModes[0]];
+		if (ctrl->GetDS100DummyAnimationMode() == 1)
+			newActiveButtonId = m_DS100DummyAnimationModeButtonIds[m_DS100DummyAnimationModes[1]];
+		if (ctrl->GetDS100DummyAnimationMode() == 2)
+			newActiveButtonId = m_DS100DummyAnimationModeButtonIds[m_DS100DummyAnimationModes[2]];
+		m_DS100DummyAnimationModeButton->setButtonDown(newActiveButtonId);
+	}
+	if (m_DS100DummyAnimationModeLabel)
+		m_DS100DummyAnimationModeLabel->setEnabled(ctrl->GetDS100ProtocolType() == PT_NoProtocol);
 }
 
 /**

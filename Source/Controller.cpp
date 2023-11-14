@@ -1314,6 +1314,38 @@ void Controller::SetDS100DummyProjectData(DataChangeParticipant changeSource, co
 }
 
 /**
+ * Getter for the dummy animation mode data set for DS100 'None' protocol.
+ * @return	Current string dummy dummy animation mode.
+ */
+int Controller::GetDS100DummyAnimationMode() const
+{
+	return m_DS100DummyAnimationMode;
+}
+
+/**
+ * Setter for the dummy animation mode set for DS100 'None' protocol.
+ * @param changeSource			The application module which is causing the property change.
+ * @param animationMode			New animation mode config.
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ */
+void Controller::SetDS100DummyAnimationMode(DataChangeParticipant changeSource, const int& animationMode, bool dontSendNotification)
+{
+	if (m_DS100DummyAnimationMode != animationMode)
+	{
+		const ScopedLock lock(m_mutex);
+
+		m_DS100DummyAnimationMode = animationMode;
+
+		m_protocolBridge.SetDS100AnimationMode(animationMode, dontSendNotification);
+
+		// Signal the change to all Processors.
+		SetParameterChanged(changeSource, DCT_Connected);
+
+		Reconnect();
+	}
+}
+
+/**
  * Reimplemented callback for bridging wrapper callback to process incoming protocol data.
  * It forwards the message to all registered Processor objects.
  * @param nodeId	The bridging node that the message data was received on (only a single default id node supported currently).
@@ -2474,6 +2506,7 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			SetRefreshInterval(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100MsgRate(), true);
 			SetActiveParallelModeDS100(DataChangeParticipant::DCP_Init, m_protocolBridge.GetActiveParallelModeDS100(), true);
 			SetDS100DummyProjectData(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100dbprData(), true);
+			SetDS100DummyAnimationMode(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100AnimationMode(), true);
 		}
 	}
 

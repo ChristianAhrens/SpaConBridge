@@ -38,6 +38,8 @@ public:
 	MultiSoundobjectPageComponent();
 	~MultiSoundobjectPageComponent() override;
 
+	void lookAndFeelChanged() override;
+
 	//==============================================================================
 	void SetPageIsVisible(bool visible) override;
 

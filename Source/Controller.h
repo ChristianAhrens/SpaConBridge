@@ -270,7 +270,6 @@ public:
 
 	//==========================================================================
 	bool LoadConfigurationFile(const File& fileToLoadFrom);
-    bool LoadConfigurationFile(const std::unique_ptr<juce::InputStream>& fileStreamToLoadFrom);
 	bool SaveConfigurationFile(const File& fileToSaveTo);
 
 	//==========================================================================

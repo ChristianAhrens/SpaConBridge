@@ -286,24 +286,20 @@ void SettingsPageComponent::onLoadConfigClicked()
             auto androidDocument = juce::AndroidDocument::fromDocument (url);
             auto inputStream = std::unique_ptr<juce::InputStream>(androidDocument.createInputStream());
 #endif
-        
-            if (inputStream != nullptr)
-            {
-                auto ctrl = Controller::GetInstance();
-                if (ctrl)
-                    ctrl->LoadConfigurationFile(inputStream);
-            }
+
+			auto tmpFile = SelfDestructingInputStreamBufferFile::CreateFileFromInputStream(inputStream);
+			auto fullFilePathName = tmpFile->GetFullPathName();
 #else
-			auto file = chooser.getResult();
+			auto fullFilePathName = chooser.getResult().getFullPathName();
+#endif
 
 			// verify that the result is valid (ok clicked)
-			if (!file.getFullPathName().isEmpty())
+			if (!fullFilePathName.isEmpty())
 			{
 				auto ctrl = Controller::GetInstance();
 				if (ctrl)
-					ctrl->LoadConfigurationFile(file);
+					ctrl->LoadConfigurationFile(juce::File(fullFilePathName));
 			}
-#endif
             
 			delete static_cast<const FileChooser*>(&chooser);
 		});

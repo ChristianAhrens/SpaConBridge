@@ -97,19 +97,17 @@ void ProjectDummyDataLoaderComponent::loadProjectClicked()
             auto inputStream = std::unique_ptr<juce::InputStream>(androidDocument.createInputStream());
 #endif
         
-            if (inputStream != nullptr)
-            {
-                openAndReadProject(inputStream);
-            }
+            auto tmpFile = SelfDestructingInputStreamBufferFile::CreateFileFromInputStream(inputStream);
+            auto fullFilePathName = tmpFile->GetFullPathName();
 #else
-            auto file = chooser.getResult();
+            auto fullFilePathName = chooser.getResult().getFullPathName();
+#endif
     
             // verify that the result is valid (ok clicked)
-            if (!file.getFullPathName().isEmpty())
+            if (!fullFilePathName.isEmpty())
             {
-                openAndReadProject(file.getFullPathName());
+                openAndReadProject(fullFilePathName);
             }
-#endif
         
             delete static_cast<const FileChooser*>(&chooser);
         });
@@ -144,22 +142,6 @@ void ProjectDummyDataLoaderComponent::openAndReadProject(const juce::String& fil
     if (onProjectDummyDataLoaded)
         onProjectDummyDataLoaded(m_currentProjectDummyData.ToString());
 #endif
-}
-
-void ProjectDummyDataLoaderComponent::openAndReadProject(const std::unique_ptr<juce::InputStream>& inputStream)
-{
-    juce::MemoryBlock destBlock;
-    inputStream->readIntoMemoryBlock(destBlock);
-    
-    auto tempFileName = juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getFullPathName() + "/tempFile.sq3";
-    auto tempFile = juce::File(tempFileName);
-    auto tempFileOutputStream = std::make_unique<juce::FileOutputStream>(tempFile);
-    tempFileOutputStream->write(destBlock.getData(), destBlock.getSize());
-    
-    openAndReadProject(tempFileName);
-    
-    tempFileOutputStream.reset();
-    tempFile.deleteFile();
 }
 
 void ProjectDummyDataLoaderComponent::lookAndFeelChanged()

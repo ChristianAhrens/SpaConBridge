@@ -437,22 +437,24 @@ void SceneIndexToMidiAssignerComponent::SceneIndexAssignmentsViewingComponent::o
     // and trigger opening it
     chooser->launchAsync(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, [this](const FileChooser& chooser)
         {
-            auto file = chooser.getResult();
+            auto url = chooser.getURLResult();
 
-            // verify that the result is valid (ok clicked)
-            if (!file.getFullPathName().isEmpty())
+            auto inputStream = std::unique_ptr<juce::InputStream>(juce::URLInputSource(url).createInputStream());
+#if JUCE_ANDROID
+            auto androidDocument = juce::AndroidDocument::fromDocument(url);
+            auto inputStream = std::unique_ptr<juce::InputStream>(androidDocument.createInputStream());
+#endif
+
+            if (inputStream)
             {
-                FileInputStream inputStream(file);
-                if (inputStream.openedOk())
-                {
-                    auto csvFileContents = inputStream.readEntireStreamAsString();
-                    if (m_contentComponent)
-                        if (!m_contentComponent->ReadAssignmentsFromCsvString(csvFileContents))
-                            ShowUserErrorNotification(SEC_LoadScnIdxToMIDI_InvalidFile);
-                }
-                else
-                    ShowUserErrorNotification(SEC_LoadScnIdxToMIDI_CannotAccess);
+                auto csvFileContents = inputStream->readEntireStreamAsString();
+                if (m_contentComponent)
+                    if (!m_contentComponent->ReadAssignmentsFromCsvString(csvFileContents))
+                        ShowUserErrorNotification(SEC_LoadScnIdxToMIDI_InvalidFile);
             }
+            else
+                ShowUserErrorNotification(SEC_LoadScnIdxToMIDI_CannotAccess);
+
             delete static_cast<const FileChooser*>(&chooser);
         });
     chooser.release();
@@ -463,7 +465,6 @@ void SceneIndexToMidiAssignerComponent::SceneIndexAssignmentsViewingComponent::o
     if (onAssigningFinished)
         onAssigningFinished(this, GetCurrentAssignments());
 }
-
 
 
 }

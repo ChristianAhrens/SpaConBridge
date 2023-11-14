@@ -503,23 +503,25 @@ void RemoteObjectToOscAssignerComponent::RemoteObjectToOscAssignmentsViewingComp
     // and trigger opening it
     chooser->launchAsync(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, [this](const FileChooser& chooser)
         {
-            auto file = chooser.getResult();
-    
-    // verify that the result is valid (ok clicked)
-    if (!file.getFullPathName().isEmpty())
-    {
-        FileInputStream inputStream(file);
-        if (inputStream.openedOk())
-        {
-            auto csvFileContents = inputStream.readEntireStreamAsString();
-            if (m_contentComponent)
-                if (!m_contentComponent->ReadAssignmentsFromCsvString(csvFileContents))
-                    ShowUserErrorNotification(SEC_LoadCustomOSC_InvalidFile);
-        }
-        else
-            ShowUserErrorNotification(SEC_LoadCustomOSC_CannotAccess);
-    }
-    delete static_cast<const FileChooser*>(&chooser);
+            auto url = chooser.getURLResult();
+
+            auto inputStream = std::unique_ptr<juce::InputStream>(juce::URLInputSource(url).createInputStream());
+#if JUCE_ANDROID
+            auto androidDocument = juce::AndroidDocument::fromDocument(url);
+            auto inputStream = std::unique_ptr<juce::InputStream>(androidDocument.createInputStream());
+#endif
+
+            if (inputStream)
+            {
+                auto csvFileContents = inputStream->readEntireStreamAsString();
+                if (m_contentComponent)
+                    if (!m_contentComponent->ReadAssignmentsFromCsvString(csvFileContents))
+                        ShowUserErrorNotification(SEC_LoadCustomOSC_InvalidFile);
+            }
+            else
+                ShowUserErrorNotification(SEC_LoadCustomOSC_CannotAccess);
+
+            delete static_cast<const FileChooser*>(&chooser);
         });
     chooser.release();
 }

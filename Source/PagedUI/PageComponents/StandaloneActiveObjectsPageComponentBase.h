@@ -147,8 +147,6 @@ public:
 
 protected:
 	//==============================================================================
-	//const std::map<RemoteObjectIdentifier, std::vector<RemoteObjectAddressing>>& GetStandalonePollingObjects() const;
-	const std::vector<RemoteObject>& GetStandalonePollingObjects();
 	void SetStandalonePollingObjects(const std::map<RemoteObjectIdentifier, std::vector<RemoteObjectAddressing>>& objects);
 	void AddStandalonePollingObject(const RemoteObjectIdentifier& roi, const RemoteObjectAddressing& addressing);
 

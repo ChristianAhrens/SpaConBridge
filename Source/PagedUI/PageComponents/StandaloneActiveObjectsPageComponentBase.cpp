@@ -116,19 +116,6 @@ void StandaloneActiveObjectsPageComponentBase::resized()
 }
 
 /**
- * Getter for the map of vectors of the objects that are registered for 'monitoring'.
- * @return	The map of vectors of the objects that are registered for 'monitoring'.
- */
-const std::vector<RemoteObject>& StandaloneActiveObjectsPageComponentBase::GetStandalonePollingObjects()
-{
-	auto const ctrl = Controller::GetInstance();
-	if (ctrl)
-		return ctrl->GetStandaloneActiveRemoteObjects(this);
-	else
-		return {};
-}
-
-/**
  * Setter for the map of vectors of the objects that are registered for 'monitoring'.
  * @param	objects	The map of vectors of the objects that shall be used for 'monitoring'.
  */

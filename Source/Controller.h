@@ -94,7 +94,7 @@ public:
 	juce::int32 GetNextProcessorId();
 
 	//==========================================================================
-	std::vector<RemoteObject> GetStaticRemoteObjects();
+	std::vector<RemoteObject> GetAllStandaloneActiveRemoteObjectsToUse();
 	bool IsStaticRemoteObjectsPollingEnabled();
 	void SetStaticRemoteObjectsPollingEnabled(DataChangeParticipant changeSource, bool enabled);
 
@@ -151,6 +151,7 @@ public:
 	//==========================================================================
 	ProtocolType GetDS100ProtocolType() const;
 	void SetDS100ProtocolType(DataChangeParticipant changeSource, ProtocolType protocol, bool dontSendNotification = false);
+	bool IsPollingDS100ProtocolType();
 
 	//==========================================================================
 	std::pair<juce::IPAddress, int> GetDS100IpAndPort() const;
@@ -299,7 +300,6 @@ private:
 	//==========================================================================
 	void timerCallback() override;
 
-protected:
 	//==========================================================================
 	static std::unique_ptr<Controller>	s_singleton;				/**< The one and only instance of CController. */
 	static bool							s_constructionFinished;		/**< Bool indicator if construction of the singleton is finished (to ensure no recursion stack overflow happens. */
@@ -328,7 +328,8 @@ protected:
 
 	CriticalSection					m_mutex;						/**< A re-entrant mutex. */
 
-private:
+	bool							m_staticProcessorRemoteObjectsPollingEnabled{ false };	/**< Member to define if static processor related objects should be regarded when polling/subscribing (usually object name strings). */
+
 	std::unique_ptr<StaticObjectsPollingHelper>											m_pollingHelper;					/**< Polling helper instance for OSC DS100 communation. */
 	std::vector<Controller::StandaloneActiveObjectsListener*>							m_standaloneActiveObjectListeners;	/**< The listner objects, for message data handling callback. */
 	std::map<Controller::StandaloneActiveObjectsListener*, std::vector<RemoteObject>>	m_standaloneActiveRemoteObjects;	/**< List of remote objects that the controller manages as lowfreq apart from regular hifreq object value subscription/polling. */

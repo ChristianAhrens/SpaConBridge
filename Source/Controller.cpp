@@ -135,7 +135,7 @@ void StaticObjectsPollingHelper::PollOnce()
 	if (!ctrl || !ctrl->IsOnline())
 		return;
 
-	auto remoteObjectsToPoll = ctrl->GetStaticRemoteObjects();
+	auto remoteObjectsToPoll = ctrl->GetAllStandaloneActiveRemoteObjectsToUse();
 	for (auto const& remoteObject : remoteObjectsToPoll)
 	{
 		auto romd = RemoteObjectMessageData(remoteObject._Addr, ROVT_NONE, 0, nullptr, 0);
@@ -358,61 +358,64 @@ juce::int32 Controller::GetNextProcessorId()
  * updated rarely, like channel or device names.
  * @return	The listing of remote objects.
  */
-std::vector<RemoteObject> Controller::GetStaticRemoteObjects()
+std::vector<RemoteObject> Controller::GetAllStandaloneActiveRemoteObjectsToUse()
 {
 	// initially add all RemoteObjects registered as required for standalone app components 
 	std::vector<RemoteObject> remoteObjects = GetStandaloneActiveRemoteObjects();
 
-	// add all RemoteObjects that are specifically required for soundobject related UI
-	auto soProcIds = GetSoundobjectProcessorIds();
-	for (auto const& processorId : soProcIds)
+	if (IsStaticRemoteObjectsPollingEnabled())
 	{
-		auto processor = GetSoundobjectProcessor(processorId);
-		for (auto& roi : SoundobjectProcessor::GetStaticRemoteObjects())
+		// add all RemoteObjects that are specifically required for soundobject related UI
+		auto soProcIds = GetSoundobjectProcessorIds();
+		for (auto const& processorId : soProcIds)
 		{
-			if (ProcessingEngineConfig::IsRecordAddressingObject(roi))
-				jassertfalse;
-			else
+			auto processor = GetSoundobjectProcessor(processorId);
+			for (auto& roi : SoundobjectProcessor::GetStaticRemoteObjects())
 			{
-				auto sosro = RemoteObject(roi, RemoteObjectAddressing(processor->GetSoundobjectId(), INVALID_ADDRESS_VALUE));
-				if (std::find(remoteObjects.begin(), remoteObjects.end(), sosro) == remoteObjects.end())
-					remoteObjects.push_back(sosro);
+				if (ProcessingEngineConfig::IsRecordAddressingObject(roi))
+					jassertfalse;
+				else
+				{
+					auto sosro = RemoteObject(roi, RemoteObjectAddressing(processor->GetSoundobjectId(), INVALID_ADDRESS_VALUE));
+					if (std::find(remoteObjects.begin(), remoteObjects.end(), sosro) == remoteObjects.end())
+						remoteObjects.push_back(sosro);
+				}
 			}
 		}
-	}
 
-	// add all RemoteObjects that are specifically required for matrixinput related UI
-	auto miProcIds = GetMatrixInputProcessorIds();
-	for (auto const& processorId : miProcIds)
-	{
-		auto processor = GetMatrixInputProcessor(processorId);
-		for (auto& roi : MatrixInputProcessor::GetStaticRemoteObjects())
+		// add all RemoteObjects that are specifically required for matrixinput related UI
+		auto miProcIds = GetMatrixInputProcessorIds();
+		for (auto const& processorId : miProcIds)
 		{
-			if (ProcessingEngineConfig::IsRecordAddressingObject(roi))
-				jassertfalse;
-			else
+			auto processor = GetMatrixInputProcessor(processorId);
+			for (auto& roi : MatrixInputProcessor::GetStaticRemoteObjects())
 			{
-				auto misro = RemoteObject(roi, RemoteObjectAddressing(processor->GetMatrixInputId(), INVALID_ADDRESS_VALUE));
-				if (std::find(remoteObjects.begin(), remoteObjects.end(), misro) == remoteObjects.end())
-					remoteObjects.push_back(misro);
+				if (ProcessingEngineConfig::IsRecordAddressingObject(roi))
+					jassertfalse;
+				else
+				{
+					auto misro = RemoteObject(roi, RemoteObjectAddressing(processor->GetMatrixInputId(), INVALID_ADDRESS_VALUE));
+					if (std::find(remoteObjects.begin(), remoteObjects.end(), misro) == remoteObjects.end())
+						remoteObjects.push_back(misro);
+				}
 			}
 		}
-	}
 
-	// add all RemoteObjects that are specifically required for matrixoutput related UI
-	auto moProcIds = GetMatrixOutputProcessorIds();
-	for (auto const& processorId : moProcIds)
-	{
-		auto processor = GetMatrixOutputProcessor(processorId);
-		for (auto& roi : MatrixOutputProcessor::GetStaticRemoteObjects())
+		// add all RemoteObjects that are specifically required for matrixoutput related UI
+		auto moProcIds = GetMatrixOutputProcessorIds();
+		for (auto const& processorId : moProcIds)
 		{
-			if (ProcessingEngineConfig::IsRecordAddressingObject(roi))
-				jassertfalse;
-			else
+			auto processor = GetMatrixOutputProcessor(processorId);
+			for (auto& roi : MatrixOutputProcessor::GetStaticRemoteObjects())
 			{
-				auto mosro = RemoteObject(roi, RemoteObjectAddressing(processor->GetMatrixOutputId(), INVALID_ADDRESS_VALUE));
-				if (std::find(remoteObjects.begin(), remoteObjects.end(), mosro) == remoteObjects.end())
-					remoteObjects.push_back(mosro);
+				if (ProcessingEngineConfig::IsRecordAddressingObject(roi))
+					jassertfalse;
+				else
+				{
+					auto mosro = RemoteObject(roi, RemoteObjectAddressing(processor->GetMatrixOutputId(), INVALID_ADDRESS_VALUE));
+					if (std::find(remoteObjects.begin(), remoteObjects.end(), mosro) == remoteObjects.end())
+						remoteObjects.push_back(mosro);
+				}
 			}
 		}
 	}
@@ -427,24 +430,21 @@ std::vector<RemoteObject> Controller::GetStaticRemoteObjects()
  */
 bool Controller::IsStaticRemoteObjectsPollingEnabled()
 {
-	if (!m_pollingHelper)
-		return false;
-
-	return m_pollingHelper->IsRunning();
+	return m_staticProcessorRemoteObjectsPollingEnabled;
 }
 
 /**
- * Helper to set the running state of internal polling of non-flickering
- * objects through pollinghelper object.
+ * Helper to set the running state of internal active
+ * handling of non-flickering objects.
  * @param	changeSource	
- * @param	enabled			True if pollingHelper shall be set to running, false if to notrunning.
+ * @param	enabled			True if processor related non-flickering objects should be monitored, false if to not.
 
  */
 void Controller::SetStaticRemoteObjectsPollingEnabled(DataChangeParticipant changeSource, bool enabled)
 {
-	if (m_pollingHelper && (m_pollingHelper->IsRunning() != enabled))
+	if (m_staticProcessorRemoteObjectsPollingEnabled != enabled)
 	{
-		m_pollingHelper->SetRunning(enabled);
+		m_staticProcessorRemoteObjectsPollingEnabled = enabled;
 
 		SetParameterChanged(changeSource, DCT_RefreshInterval);
 	}
@@ -1139,6 +1139,7 @@ void Controller::SetDS100ProtocolType(DataChangeParticipant changeSource, Protoc
 				m_DS100ExtensionMode = EM_Off;
 		}
 
+		m_pollingHelper->SetRunning(IsPollingDS100ProtocolType());
 		m_protocolBridge.SetDS100ProtocolType(protocol, dontSendNotification);
 
 		// IP, port, etc. have likely changed when changing the protocol type (new defaults set)
@@ -1155,6 +1156,26 @@ void Controller::SetDS100ProtocolType(DataChangeParticipant changeSource, Protoc
 		SetParameterChanged(changeSource, DCT_Connected);
 
 		Reconnect();
+	}
+}
+
+/***
+ * Helper to get the bool info on if the current
+ * protocol used for DS100 is using polling for
+ * getting updated values.
+ * @return	True if polling is used (OSC, No) or if not (OCP1)
+ */
+bool Controller::IsPollingDS100ProtocolType()
+{
+	switch (m_DS100ProtocolType)
+	{
+	case PT_OSCProtocol:
+	case PT_NoProtocol:
+		return true;
+	case PT_OCP1Protocol:
+	default:
+		return false;
+		break;
 	}
 }
 

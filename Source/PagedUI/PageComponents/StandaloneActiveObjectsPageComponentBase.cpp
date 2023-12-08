@@ -17,7 +17,7 @@
  */
 
 
-#include "StandalonePollingPageComponentBase.h"
+#include "StandaloneActiveObjectsPageComponentBase.h"
 
 #include "../../Controller.h"
 
@@ -28,14 +28,14 @@ namespace SpaConBridge
 
 /*
 ===============================================================================
- Class StandalonePollingPageComponentBase
+ Class StandaloneActiveObjectsPageComponentBase
 ===============================================================================
 */
 
 /**
  * Class constructor.
  */
-StandalonePollingPageComponentBase::StandalonePollingPageComponentBase(UIPageId id)
+StandaloneActiveObjectsPageComponentBase::StandaloneActiveObjectsPageComponentBase(UIPageId id)
 	: PageComponentBase(id), Controller::StandaloneActiveObjectsListener()
 {
 	m_elementsContainer = std::make_unique<HeaderWithElmListComponent>();
@@ -55,7 +55,7 @@ StandalonePollingPageComponentBase::StandalonePollingPageComponentBase(UIPageId 
 /**
  * Class destructor.
  */
-StandalonePollingPageComponentBase::~StandalonePollingPageComponentBase()
+StandaloneActiveObjectsPageComponentBase::~StandaloneActiveObjectsPageComponentBase()
 {
 }
 
@@ -63,7 +63,7 @@ StandalonePollingPageComponentBase::~StandalonePollingPageComponentBase()
  * Getter for the private elements container component to be able to externally add items.
  * @return	The container object pointer, if existing. Otherwise nullptr.
  */
-HeaderWithElmListComponent* StandalonePollingPageComponentBase::GetElementsContainer()
+HeaderWithElmListComponent* StandaloneActiveObjectsPageComponentBase::GetElementsContainer()
 {
 	return m_elementsContainer.get();
 }
@@ -72,7 +72,7 @@ HeaderWithElmListComponent* StandalonePollingPageComponentBase::GetElementsConta
  * Reimplemented to paint background.
  * @param g		Graphics context that must be used to do the drawing operations.
  */
-void StandalonePollingPageComponentBase::paint(Graphics& g)
+void StandaloneActiveObjectsPageComponentBase::paint(Graphics& g)
 {
 	// Paint background to cover the controls behind this overlay.
 	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
@@ -82,7 +82,7 @@ void StandalonePollingPageComponentBase::paint(Graphics& g)
 /**
  * Reimplemented to resize elements container component.
  */
-void StandalonePollingPageComponentBase::resized()
+void StandaloneActiveObjectsPageComponentBase::resized()
 {
 	auto bounds = getLocalBounds().reduced(5);
 
@@ -119,7 +119,7 @@ void StandalonePollingPageComponentBase::resized()
  * Getter for the map of vectors of the objects that are registered for 'monitoring'.
  * @return	The map of vectors of the objects that are registered for 'monitoring'.
  */
-const std::vector<RemoteObject>& StandalonePollingPageComponentBase::GetStandalonePollingObjects()
+const std::vector<RemoteObject>& StandaloneActiveObjectsPageComponentBase::GetStandalonePollingObjects()
 {
 	auto const ctrl = Controller::GetInstance();
 	if (ctrl)
@@ -132,7 +132,7 @@ const std::vector<RemoteObject>& StandalonePollingPageComponentBase::GetStandalo
  * Setter for the map of vectors of the objects that are registered for 'monitoring'.
  * @param	objects	The map of vectors of the objects that shall be used for 'monitoring'.
  */
-void StandalonePollingPageComponentBase::SetStandalonePollingObjects(const std::map<RemoteObjectIdentifier, std::vector<RemoteObjectAddressing>>& objects)
+void StandaloneActiveObjectsPageComponentBase::SetStandalonePollingObjects(const std::map<RemoteObjectIdentifier, std::vector<RemoteObjectAddressing>>& objects)
 {
 	for (auto const& objectsPerROI : objects)
 	{
@@ -147,7 +147,7 @@ void StandalonePollingPageComponentBase::SetStandalonePollingObjects(const std::
  * @param	roi		The id of the remote object to add.
  * @param	addressing	The addressing of the remote object.
  */
-void StandalonePollingPageComponentBase::AddStandalonePollingObject(const RemoteObjectIdentifier& roi, const RemoteObjectAddressing& addressing)
+void StandaloneActiveObjectsPageComponentBase::AddStandalonePollingObject(const RemoteObjectIdentifier& roi, const RemoteObjectAddressing& addressing)
 {
 	auto const ctrl = Controller::GetInstance();
 	if (ctrl)
@@ -159,7 +159,7 @@ void StandalonePollingPageComponentBase::AddStandalonePollingObject(const Remote
  * This might result in a single poll of all objects or subscription established
  * verification, depending on the protocol in use.
  */
-void StandalonePollingPageComponentBase::TriggerConfirmActiveObjects()
+void StandaloneActiveObjectsPageComponentBase::TriggerConfirmActiveObjects()
 {
 	auto const ctrl = Controller::GetInstance();
 	if (ctrl)

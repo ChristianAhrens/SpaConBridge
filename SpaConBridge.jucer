@@ -584,10 +584,10 @@
                 file="Source/PagedUI/PageComponents/PageComponentBase.cpp"/>
           <FILE id="oNGL8i" name="PageComponentBase.h" compile="0" resource="0"
                 file="Source/PagedUI/PageComponents/PageComponentBase.h"/>
-          <FILE id="LSCEoK" name="StandalonePollingPageComponentBase.cpp" compile="1"
-                resource="0" file="Source/PagedUI/PageComponents/StandalonePollingPageComponentBase.cpp"/>
-          <FILE id="jR5BP8" name="StandalonePollingPageComponentBase.h" compile="0"
-                resource="0" file="Source/PagedUI/PageComponents/StandalonePollingPageComponentBase.h"/>
+          <FILE id="LSCEoK" name="StandaloneActiveObjectsPageComponentBase.cpp"
+                compile="1" resource="0" file="Source/PagedUI/PageComponents/StandaloneActiveObjectsPageComponentBase.cpp"/>
+          <FILE id="jR5BP8" name="StandaloneActiveObjectsPageComponentBase.h"
+                compile="0" resource="0" file="Source/PagedUI/PageComponents/StandaloneActiveObjectsPageComponentBase.h"/>
           <FILE id="jHT3Ge" name="TableEditorComponents.cpp" compile="1" resource="0"
                 file="Source/PagedUI/PageComponents/TableEditorComponents.cpp"/>
           <FILE id="zBDbsv" name="TableEditorComponents.h" compile="0" resource="0"

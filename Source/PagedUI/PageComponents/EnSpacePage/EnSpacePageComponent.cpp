@@ -37,7 +37,7 @@ namespace SpaConBridge
  * Class constructor.
  */
 EnSpacePageComponent::EnSpacePageComponent()
-	: StandalonePollingPageComponentBase(UIPageId::UPI_EnSpace)
+	: StandaloneActiveObjectsPageComponentBase(UIPageId::UPI_EnSpace)
 {
 	AddStandalonePollingObject(ROI_MatrixSettings_ReverbRoomId, RemoteObjectAddressing());
 	AddStandalonePollingObject(ROI_MatrixSettings_ReverbPredelayFactor, RemoteObjectAddressing());
@@ -297,7 +297,7 @@ void EnSpacePageComponent::lookAndFeelChanged()
  */
 void EnSpacePageComponent::UpdateGui(bool init)
 {
-	StandalonePollingPageComponentBase::UpdateGui(init);
+	StandaloneActiveObjectsPageComponentBase::UpdateGui(init);
 
 	auto ctrl = Controller::GetInstance();
 	if (!ctrl)

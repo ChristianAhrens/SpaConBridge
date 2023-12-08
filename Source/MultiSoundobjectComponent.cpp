@@ -109,31 +109,8 @@ MultiSoundobjectComponent::MultiSoundobjectComponent()
 	// trigger lookandfeel update
 	lookAndFeelChanged();
 
-	auto const ctrl = Controller::GetInstance();
-	if (ctrl)
-	{
-		// add this class to be notified of object value changes to controller
-		ctrl->AddStandaloneActiveObjectsListener(this);
-
-		// add the coordinatemapping settings objects to low-freq local polling
-		for (auto i = int(MAI_First); i <= int(MAI_Fourth); i++)
-		{
-			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_CoordinateMappingSettings_P1real, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
-			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_CoordinateMappingSettings_P2real, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
-			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_CoordinateMappingSettings_P3real, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
-			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_CoordinateMappingSettings_P4real, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
-			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_CoordinateMappingSettings_P1virtual, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
-			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_CoordinateMappingSettings_P3virtual, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
-			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_CoordinateMappingSettings_Flip, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
-			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_CoordinateMappingSettings_Name, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
-		}
-
-		// add the speaker position objects to low-freq local polling
-		for (auto i = 1; i <= DS100_CHANNELCOUNT; i++)
-		{
-			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_Positioning_SpeakerPosition, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
-		}
-	}
+	// Prepare that the objects required for speaker+mapping visu are fetched from device
+	AddRequiredActiveObjects();
 }
 
 /**
@@ -547,6 +524,8 @@ bool MultiSoundobjectComponent::SetSelectedMapping(MappingAreaId mapping)
 			{
 				m_multiSoundobjectSlider->SetCoordinateMappingSettingsDataReady(false);
 				m_multiSoundobjectSlider->SetSpeakerPositionDataReady(false);
+
+				AddRequiredActiveObjects();
 			}
             
             m_loadImage->setEnabled(false);
@@ -853,8 +832,56 @@ void MultiSoundobjectComponent::HandleObjectDataInternal(const RemoteObjectIdent
 	{
 		DBG(juce::String(__FUNCTION__) + " we now have the required CoordinateMappingSettings and SpeakerPosition data at hand to do fancy stuff.");
 
+		RemoveRequiredActiveObjects();
+
 		UpdateGui(false);
 	}
+}
+
+/**
+ * Helper method to encapuslate what is required to read the object values
+ * for speaker positions and coordinate mapping areas from device.
+ */
+void MultiSoundobjectComponent::AddRequiredActiveObjects()
+{
+	auto const ctrl = Controller::GetInstance();
+	if (ctrl)
+	{
+		// add this class to be notified of object value changes to controller
+		ctrl->AddStandaloneActiveObjectsListener(this);
+
+		// add the coordinatemapping settings objects to low-freq local polling
+		for (auto i = int(MAI_First); i <= int(MAI_Fourth); i++)
+		{
+			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_CoordinateMappingSettings_P1real, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
+			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_CoordinateMappingSettings_P2real, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
+			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_CoordinateMappingSettings_P3real, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
+			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_CoordinateMappingSettings_P4real, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
+			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_CoordinateMappingSettings_P1virtual, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
+			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_CoordinateMappingSettings_P3virtual, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
+			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_CoordinateMappingSettings_Flip, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
+			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_CoordinateMappingSettings_Name, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
+		}
+
+		// add the speaker position objects to low-freq local polling
+		for (auto i = 1; i <= DS100_CHANNELCOUNT; i++)
+		{
+			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_Positioning_SpeakerPosition, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
+		}
+	}
+}
+
+/**
+ * Helper method to encapuslate what is required to no longer 
+ * read the object values for speaker positions
+ * and coordinate mapping areas from device.
+ */
+void MultiSoundobjectComponent::RemoveRequiredActiveObjects()
+{
+	// remove this class from being notified of object value changes (also cleans up the registered objects)
+	auto const ctrl = Controller::GetInstance();
+	if (ctrl)
+		ctrl->RemoveStandaloneActiveObjectsListener(this);
 }
 
 

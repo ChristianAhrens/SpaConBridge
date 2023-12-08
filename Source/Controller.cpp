@@ -538,11 +538,18 @@ bool Controller::RemoveStandaloneActiveRemoteObject(Controller::StandaloneActive
 	}
 }
 
-// TODO
+/**
+ * Helper to trigger refreshing object values registered for a given
+ * standalone active objects listener.
+ * What actually happens to refresh the values depends on 
+ * the communication means to DS100 in use - subscription based
+ * communication e.g. does not require active confirmation of changes.
+ * @param	listener	The listener object instance to refresh the registered object's values for
+ */
 void Controller::TriggerConfirmStandaloneActiveObjects(Controller::StandaloneActiveObjectsListener* listener)
 {
+	// todo
 	m_pollingHelper->TriggerPollOnce(listener);
-	jassertfalse; // TODO
 }
 
 /**
@@ -565,11 +572,14 @@ bool Controller::AddStandaloneActiveObjectsListener(Controller::StandaloneActive
 
 /**
  * Removes a listener instance from the internal list.
+ * Also removes all active remote objects registered for this listener instance from internal hash.
  * @param	listener	The listener object instance to remove
  * @return	True if removed successfully, false if not found in list.
  */
 bool Controller::RemoveStandaloneActiveObjectsListener(Controller::StandaloneActiveObjectsListener* listener)
 {
+	m_standaloneActiveRemoteObjects.erase(listener);
+
 	auto listenerIter = std::find(m_standaloneActiveObjectListeners.begin(), m_standaloneActiveObjectListeners.end(), listener);
 	if (listenerIter != m_standaloneActiveObjectListeners.end())
 	{

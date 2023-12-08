@@ -105,10 +105,12 @@ public:
 	bool RemoveStandaloneActiveRemoteObject(Controller::StandaloneActiveObjectsListener* listener, const RemoteObject& remoteObject);
 	void TriggerConfirmStandaloneActiveObjects(Controller::StandaloneActiveObjectsListener* listener);
 
-	//==========================================================================
 	bool AddStandaloneActiveObjectsListener(Controller::StandaloneActiveObjectsListener* listener);
 	bool RemoveStandaloneActiveObjectsListener(Controller::StandaloneActiveObjectsListener* listener);
 
+	//==========================================================================
+	void UpdateActiveRemoteObjects(bool dontSendNotification = false);
+	
 	//==========================================================================
 	void createNewSoundobjectProcessor();
 	SoundobjectProcessorId AddSoundobjectProcessor(DataChangeParticipant changeSource, SoundobjectProcessor* p);
@@ -117,9 +119,6 @@ public:
 	int GetSoundobjectProcessorCount() const;
 	SoundobjectProcessor* GetSoundobjectProcessor(SoundobjectProcessorId processorId) const;
 	std::vector<SoundobjectProcessorId> GetSoundobjectProcessorIds() const;
-
-	void UpdateActiveSoundobjects();
-
 	std::vector<RemoteObject> GetSoundobjectProcessorRemoteObjects(SoundobjectProcessorId soundobjectProcessorId);
 
 	//==========================================================================
@@ -130,9 +129,6 @@ public:
 	int GetMatrixInputProcessorCount() const;
 	MatrixInputProcessor* GetMatrixInputProcessor(MatrixInputProcessorId processorId) const;
 	std::vector<MatrixInputProcessorId> GetMatrixInputProcessorIds() const;
-
-	void UpdateActiveMatrixInputs();
-
 	std::vector<RemoteObject> GetMatrixInputProcessorRemoteObjects(MatrixInputProcessorId matrixInputProcessorId);
 
 	//==========================================================================
@@ -143,9 +139,6 @@ public:
 	int GetMatrixOutputProcessorCount() const;
 	MatrixOutputProcessor* GetMatrixOutputProcessor(MatrixOutputProcessorId processorId) const;
 	std::vector<MatrixOutputProcessorId> GetMatrixOutputProcessorIds() const;
-
-	void UpdateActiveMatrixOutputs();
-
 	std::vector<RemoteObject> GetMatrixOutputProcessorRemoteObjects(MatrixOutputProcessorId matrixOutputProcessorId);
 
 	//==========================================================================

@@ -2778,9 +2778,11 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
  * Updates the active soundobject ids in DS100 device protocol configuration of bridging node.
  * This method gets all current active remote objects from controller, maps them to one or two (64ch vs 128ch)
  * DS100 devices and inserts them into an xml element that is then set as new config to bridging node.
+ * @param	activeObjects			The objects to set as new active ones in bridging xml (and update RPBC with it)
+ * @param	dontSendNotification	Flag if the app configuration should be triggered to be updated
  * @return	True on succes, false if failure
  */
-bool ProtocolBridgingWrapper::UpdateActiveDS100RemoteObjectIds()
+bool ProtocolBridgingWrapper::UpdateActiveDS100RemoteObjectIds(const std::vector<RemoteObject>& activeObjects, bool dontSendNotification)
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (!nodeXmlElement)
@@ -2795,17 +2797,6 @@ bool ProtocolBridgingWrapper::UpdateActiveDS100RemoteObjectIds()
 		return false;
 
 	auto extensionMode = ctrl->GetExtensionMode();
-
-	// Get currently active objects from controller and split them 
-	// into those relevant for first and second DS100
-	auto activeSoObjects = ctrl->GetActivatedSoundObjectRemoteObjects();
-	auto activeMiObjects = ctrl->GetActivatedMatrixInputRemoteObjects();
-	auto activeMoObjects = ctrl->GetActivatedMatrixOutputRemoteObjects();
-
-	auto activeObjects = std::vector<RemoteObject>();
-	activeObjects.insert(activeObjects.end(), activeSoObjects.begin(), activeSoObjects.end());
-	activeObjects.insert(activeObjects.end(), activeMiObjects.begin(), activeMiObjects.end());
-	activeObjects.insert(activeObjects.end(), activeMoObjects.begin(), activeMoObjects.end());
 
 	auto activeObjectsOnFirstDS100 = std::vector<RemoteObject>{};
 	auto activeObjectsOnSecondDS100 = std::vector<RemoteObject>{};
@@ -2882,7 +2873,7 @@ bool ProtocolBridgingWrapper::UpdateActiveDS100RemoteObjectIds()
 	}
 
 	// set updated xml config live
-	return SetBridgingNodeStateXml(nodeXmlElement);
+	return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
 }
 
 /**

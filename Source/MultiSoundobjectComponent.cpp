@@ -819,13 +819,13 @@ void MultiSoundobjectComponent::HandleObjectDataInternal(const RemoteObjectIdent
 	if (m_multiSoundobjectSlider->CheckCoordinateMappingSettingsDataCompleteness() && !m_multiSoundobjectSlider->IsCoordinateMappingsSettingsDataReady())
 	{
 		m_multiSoundobjectSlider->SetCoordinateMappingSettingsDataReady(true);
-		DBG(juce::String(__FUNCTION__) + " we now have the required CoordinateMappingSettings data at hand to do fancy stuff.");
+		DBG(juce::String(__FUNCTION__) + " we now have CoordinateMappingSettings data at hand" + (m_multiSoundobjectSlider->IsSpeakerPositionDataReady() ? "." : " - waiting for SpeakerPosition data."));
 	}
 
 	if (m_multiSoundobjectSlider->CheckSpeakerPositionDataCompleteness() && !m_multiSoundobjectSlider->IsSpeakerPositionDataReady())
 	{
 		m_multiSoundobjectSlider->SetSpeakerPositionDataReady(true);
-		DBG(juce::String(__FUNCTION__) + " we now have the required SpeakerPosition data at hand to do fancy stuff.");
+		DBG(juce::String(__FUNCTION__) + " we now have SpeakerPosition data at hand" + (m_multiSoundobjectSlider->IsCoordinateMappingsSettingsDataReady() ? "." : " - waiting for CoordinateMappingSettings data."));
 	}
 
 	if (m_multiSoundobjectSlider->IsCoordinateMappingsSettingsDataReady() && m_multiSoundobjectSlider->IsSpeakerPositionDataReady())
@@ -834,7 +834,7 @@ void MultiSoundobjectComponent::HandleObjectDataInternal(const RemoteObjectIdent
 
 		RemoveRequiredActiveObjects();
 
-		UpdateGui(false);
+		UpdateGui(true);
 	}
 }
 

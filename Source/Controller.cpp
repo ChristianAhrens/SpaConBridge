@@ -591,6 +591,32 @@ bool Controller::RemoveStandaloneActiveObjectsListener(Controller::StandaloneAct
 }
 
 /**
+ * Updates the remote objects that are currently being actively handled.
+ * @param dontSendNotification	Flag if the app configuration update should be triggered (fwd. to bridging wrapper).
+ */
+void Controller::UpdateActiveRemoteObjects(bool dontSendNotification)
+{
+	// Get currently active objects from controller and split them 
+	// into those relevant for first and second DS100
+	auto activeSoObjects = GetActivatedSoundObjectRemoteObjects();
+	auto activeMiObjects = GetActivatedMatrixInputRemoteObjects();
+	auto activeMoObjects = GetActivatedMatrixOutputRemoteObjects();
+
+	auto activeObjects = std::vector<RemoteObject>();
+	activeObjects.insert(activeObjects.end(), activeSoObjects.begin(), activeSoObjects.end());
+	activeObjects.insert(activeObjects.end(), activeMiObjects.begin(), activeMiObjects.end());
+	activeObjects.insert(activeObjects.end(), activeMoObjects.begin(), activeMoObjects.end());
+	
+	if (!IsPollingDS100ProtocolType())
+	{
+		auto standaloneActiveObjects = GetAllStandaloneActiveRemoteObjectsToUse();
+		activeObjects.insert(activeObjects.end(), standaloneActiveObjects.begin(), standaloneActiveObjects.end());
+	}
+
+	m_protocolBridge.UpdateActiveDS100RemoteObjectIds(activeObjects, dontSendNotification);
+}
+
+/**
  * Helper method to create a new processor incl. implicit triggering of
  * inserting it into xml config (by setting constructor bool flag to insertToConfig=true)
  */
@@ -658,7 +684,7 @@ void Controller::RemoveSoundobjectProcessor(SoundobjectProcessor* p)
 		// updating will not catch changes, if no soundobjects are
 		// left any more.
 		if (m_soundobjectProcessors.isEmpty())
-			UpdateActiveSoundobjects();
+			UpdateActiveRemoteObjects();
 
 		SetParameterChanged(DCP_Host, DCT_NumProcessors);
 	}
@@ -723,7 +749,7 @@ void Controller::RemoveSoundobjectProcessorIds(const std::vector<SoundobjectProc
 	// updating will not catch changes, if no soundobjects are
 	// left any more.
 	if (m_soundobjectProcessors.isEmpty())
-		UpdateActiveSoundobjects();
+		UpdateActiveRemoteObjects();
 
 	SetParameterChanged(DCP_Host, DCT_NumProcessors);
 }
@@ -828,7 +854,7 @@ void Controller::RemoveMatrixInputProcessor(MatrixInputProcessor* p)
 		// updating will not catch changes, if no matrix inputs are
 		// left any more.
 		if (m_matrixInputProcessors.isEmpty())
-			UpdateActiveMatrixInputs();
+			UpdateActiveRemoteObjects();
 
 		SetParameterChanged(DCP_Host, DCT_NumProcessors);
 	}
@@ -893,7 +919,7 @@ void Controller::RemoveMatrixInputProcessorIds(const std::vector<MatrixInputProc
 	// updating will not catch changes, if no matrix inputs are
 	// left any more.
 	if (m_matrixInputProcessors.isEmpty())
-		UpdateActiveMatrixInputs();
+		UpdateActiveRemoteObjects();
 
 	SetParameterChanged(DCP_Host, DCT_NumProcessors);
 }
@@ -999,7 +1025,7 @@ void Controller::RemoveMatrixOutputProcessor(MatrixOutputProcessor* p)
 		// updating will not catch changes, if no matrix outputs are
 		// left any more.
 		if (m_matrixOutputProcessors.isEmpty())
-			UpdateActiveMatrixOutputs();
+			UpdateActiveRemoteObjects();
 
 		SetParameterChanged(DCP_Host, DCT_NumProcessors);
 	}
@@ -1064,7 +1090,7 @@ void Controller::RemoveMatrixOutputProcessorIds(const std::vector<MatrixOutputPr
 	// updating will not catch changes, if no matrix outputs are
 	// left any more.
 	if (m_matrixOutputProcessors.isEmpty())
-		UpdateActiveMatrixOutputs();
+		UpdateActiveRemoteObjects();
 
 	SetParameterChanged(DCP_Host, DCT_NumProcessors);
 }
@@ -1140,6 +1166,9 @@ void Controller::SetDS100ProtocolType(DataChangeParticipant changeSource, Protoc
 		}
 
 		m_pollingHelper->SetRunning(IsPollingDS100ProtocolType());
+
+		UpdateActiveRemoteObjects(DCP_Init == changeSource); // update objects but propage update only if it is not during init to avoid unfinished app construction asserts
+
 		m_protocolBridge.SetDS100ProtocolType(protocol, dontSendNotification);
 
 		// IP, port, etc. have likely changed when changing the protocol type (new defaults set)
@@ -2198,7 +2227,7 @@ void Controller::timerCallback()
 		soProcessor->PopParameterChanged(DCP_Protocol, DCT_SoundobjectParameters);
 	}
 	if (activeSSIdsChanged)
-		UpdateActiveSoundobjects();
+		UpdateActiveRemoteObjects();
 
 	auto activeMIIdsChanged = false;
 	for (auto const& miProcessor : m_matrixInputProcessors)
@@ -2321,7 +2350,7 @@ void Controller::timerCallback()
 		miProcessor->PopParameterChanged(DCP_Protocol, DCT_MatrixInputParameters);
 	}
 	if (activeMIIdsChanged)
-		UpdateActiveMatrixInputs();
+		UpdateActiveRemoteObjects();
 
 	auto activeMOIdsChanged = false;
 	for (auto const& moProcessor : m_matrixOutputProcessors)
@@ -2444,7 +2473,7 @@ void Controller::timerCallback()
 		moProcessor->PopParameterChanged(DCP_Protocol, DCT_MatrixOutputParameters);
 	}
 	if (activeMOIdsChanged)
-		UpdateActiveMatrixOutputs();
+		UpdateActiveRemoteObjects();
 
 	if (cleanupMutedObjectsRequired)
 		CleanupMutedObjects();
@@ -2813,14 +2842,6 @@ const std::vector<RemoteObject> Controller::GetActivatedSoundObjectRemoteObjects
 }
 
 /**
- * Updates the soundobjects that are currently being actively handled.
- */
-void Controller::UpdateActiveSoundobjects()
-{
-	m_protocolBridge.UpdateActiveDS100RemoteObjectIds();
-}
-
-/**
  * Helper method to get a list of currently muted remote objects.
  * This is generated by dumping all muted processor properties and their objects to a list.
  * @param	bridgingType	The 3rd party protocol type to get the muted objects for
@@ -2896,14 +2917,6 @@ const std::vector<RemoteObject> Controller::GetActivatedMatrixInputRemoteObjects
 		}
 	}
 	return activeRemoteObjects;
-}
-
-/**
- * Updates the matrix inputs that are currently being actively handled.
- */
-void Controller::UpdateActiveMatrixInputs()
-{
-	m_protocolBridge.UpdateActiveDS100RemoteObjectIds();
 }
 
 /**
@@ -3001,13 +3014,6 @@ const std::vector<RemoteObject> Controller::GetActivatedMatrixOutputRemoteObject
 	return activeRemoteObjects;
 }
 
-/**
- * Updates the matrix outputs that are currently being actively handled.
- */
-void Controller::UpdateActiveMatrixOutputs()
-{
-	m_protocolBridge.UpdateActiveDS100RemoteObjectIds();
-}
 /**
  * Helper method to get a list of currently muted remote objects.
  * This is generated by dumping all muted processor properties and their objects to a list.

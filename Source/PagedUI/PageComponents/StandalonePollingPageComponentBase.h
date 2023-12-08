@@ -21,10 +21,9 @@
 
 #include <JuceHeader.h>
 
+#include "../../Controller.h"
 #include "PageComponentBase.h"
 #include "HeaderWithElmListComponent.h"
-
-#include "../../StandalonePollingBase.h"
 
 
 namespace SpaConBridge
@@ -131,7 +130,7 @@ private:
  * as base component for pages that use remote objects for internal use only without
  * submitting them as active for bridging.
  */
-class StandalonePollingPageComponentBase :	public PageComponentBase, public StandalonePollingBase
+class StandalonePollingPageComponentBase :	public PageComponentBase, public Controller::StandaloneActiveObjectsListener
 {
 public:
 	explicit StandalonePollingPageComponentBase(UIPageId id);
@@ -140,11 +139,21 @@ public:
 	HeaderWithElmListComponent* GetElementsContainer();
 
 	//==============================================================================
-	void UpdateGui(bool init) override;
+	void UpdateGui(bool init) override { ignoreUnused(init); };
 
 	//==========================================================================
 	void paint(Graphics&) override;
 	void resized() override;
+
+protected:
+	//==============================================================================
+	//const std::map<RemoteObjectIdentifier, std::vector<RemoteObjectAddressing>>& GetStandalonePollingObjects() const;
+	const std::vector<RemoteObject>& GetStandalonePollingObjects();
+	void SetStandalonePollingObjects(const std::map<RemoteObjectIdentifier, std::vector<RemoteObjectAddressing>>& objects);
+	void AddStandalonePollingObject(const RemoteObjectIdentifier& roi, const RemoteObjectAddressing& addressing);
+
+	//==============================================================================
+	void TriggerConfirmActiveObjects();
 
 private:
 	//==============================================================================

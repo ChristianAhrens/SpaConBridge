@@ -269,7 +269,7 @@ void ScenesPageComponent::buttonClicked(Button* button)
         m_sceneIdxEditTextChanged = false;
         
         // after the recall command was sent, refresh the object values relevant for UI components
-        Timer::callAfterDelay(100, std::bind(&ScenesPageComponent::triggerPollOnce, this));
+        Timer::callAfterDelay(100, std::bind(&ScenesPageComponent::TriggerConfirmActiveObjects, this));
 	}
 	else if (m_previousButton && m_previousButton.get() == button)
 	{
@@ -280,7 +280,7 @@ void ScenesPageComponent::buttonClicked(Button* button)
         m_sceneIdxEditTextChanged = false;
         
         // after the recall command was sent, refresh the object values relevant for UI components
-        Timer::callAfterDelay(100, std::bind(&ScenesPageComponent::triggerPollOnce, this));
+        Timer::callAfterDelay(100, std::bind(&ScenesPageComponent::TriggerConfirmActiveObjects, this));
 	}
 	else if (m_recallButton && m_recallButton.get() == button)
 	{
@@ -290,7 +290,7 @@ void ScenesPageComponent::buttonClicked(Button* button)
         m_sceneIdxEditTextChanged = false;
         
         // after the recall command was sent, refresh the object values relevant for UI components
-        Timer::callAfterDelay(100, std::bind(&ScenesPageComponent::triggerPollOnce, this));
+        Timer::callAfterDelay(100, std::bind(&ScenesPageComponent::TriggerConfirmActiveObjects, this));
 	}
 	else if (m_pinSceneIdxRecallButton && m_pinSceneIdxRecallButton.get() == button)
 	{
@@ -308,7 +308,7 @@ void ScenesPageComponent::buttonClicked(Button* button)
                 m_sceneIdxEditTextChanged = false;
                 
                 // after the recall command was sent, refresh the object values relevant for UI components
-                Timer::callAfterDelay(100, std::bind(&ScenesPageComponent::triggerPollOnce, this));
+                Timer::callAfterDelay(100, std::bind(&ScenesPageComponent::TriggerConfirmActiveObjects, this));
                 
 				return;
 			}
@@ -417,6 +417,7 @@ void ScenesPageComponent::HandleObjectDataInternal(const RemoteObjectIdentifier&
 				m_sceneCommentEdit->setText(remoteObjectContentString);
 			break;
 		default:
+			jassertfalse;
 			break;
 		}
 	}

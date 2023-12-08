@@ -51,31 +51,7 @@ namespace SpaConBridge
 class SoundobjectProcessor;
 class MatrixInputProcessor;
 class MatrixOutputProcessor;
-
-
-/**
- * Class StaticObjectsPollingHelper 
- */
-class StaticObjectsPollingHelper : private Timer
-{
-public:
-	StaticObjectsPollingHelper();
-	explicit StaticObjectsPollingHelper(int interval);
-	~StaticObjectsPollingHelper() override;
-
-	int GetInterval();
-	void SetInterval(int interval);
-
-	bool IsRunning();
-	void SetRunning(bool running);
-
-private:
-	void timerCallback() override;
-	void pollOnce();
-
-	int m_interval{ 0 };
-	bool m_running{ false };
-};
+class StaticObjectsPollingHelper;
 
 
 /**
@@ -89,21 +65,49 @@ class Controller :
 	public ProtocolBridgingWrapper::Listener
 {
 public:
+	class StandaloneActiveObjectsListener
+	{
+	public:
+		StandaloneActiveObjectsListener() {};
+		virtual ~StandaloneActiveObjectsListener() {};
+
+		/**
+		 * Method to be overloaded to interface
+		 * with incoming message data, prefiltered to originate from 
+		 * devices of interest.
+		 */
+		virtual void HandleObjectDataInternal(const RemoteObjectIdentifier& roi, const RemoteObjectMessageData& msgData) = 0;
+	};
+
+public:
 	Controller();
 	~Controller() override;
 	static Controller* GetInstance();
 	void DestroyInstance();
 	static bool Exists() { return bool(s_singleton) && s_constructionFinished; };
 
+	//==========================================================================
 	bool GetParameterChanged(DataChangeParticipant changeTarget, DataChangeType change);
 	bool PopParameterChanged(DataChangeParticipant changeTarget, DataChangeType change);
 	void SetParameterChanged(DataChangeParticipant changeSource, DataChangeType changeTypes);
 
 	juce::int32 GetNextProcessorId();
 
+	//==========================================================================
 	std::vector<RemoteObject> GetStaticRemoteObjects();
 	bool IsStaticRemoteObjectsPollingEnabled();
 	void SetStaticRemoteObjectsPollingEnabled(DataChangeParticipant changeSource, bool enabled);
+
+	const std::vector<RemoteObject> GetStandaloneActiveRemoteObjects();
+	const std::vector<RemoteObject>& GetStandaloneActiveRemoteObjects(Controller::StandaloneActiveObjectsListener* listener);
+	bool ContainsStandaloneActiveRemoteObject(Controller::StandaloneActiveObjectsListener* listener, const RemoteObject& remoteObject);
+	bool AddStandaloneActiveRemoteObject(Controller::StandaloneActiveObjectsListener* listener, const RemoteObject& remoteObject);
+	bool RemoveStandaloneActiveRemoteObject(Controller::StandaloneActiveObjectsListener* listener, const RemoteObject& remoteObject);
+	void TriggerConfirmStandaloneActiveObjects(Controller::StandaloneActiveObjectsListener* listener);
+
+	//==========================================================================
+	bool AddStandaloneActiveObjectsListener(Controller::StandaloneActiveObjectsListener* listener);
+	bool RemoveStandaloneActiveObjectsListener(Controller::StandaloneActiveObjectsListener* listener);
 
 	//==========================================================================
 	void createNewSoundobjectProcessor();
@@ -325,10 +329,40 @@ protected:
 	CriticalSection					m_mutex;						/**< A re-entrant mutex. */
 
 private:
-	std::unique_ptr<StaticObjectsPollingHelper> m_pollingHelper;
+	std::unique_ptr<StaticObjectsPollingHelper>											m_pollingHelper;					/**< Polling helper instance for OSC DS100 communation. */
+	std::vector<Controller::StandaloneActiveObjectsListener*>							m_standaloneActiveObjectListeners;	/**< The listner objects, for message data handling callback. */
+	std::map<Controller::StandaloneActiveObjectsListener*, std::vector<RemoteObject>>	m_standaloneActiveRemoteObjects;	/**< List of remote objects that the controller manages as lowfreq apart from regular hifreq object value subscription/polling. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Controller)
 };
 
+/**
+ * Class StaticObjectsPollingHelper
+ * @brief	Controller specific helper class
+ *			that takes over the task of timerbased
+ *			getting of values defined as static in controller.
+ */
+class StaticObjectsPollingHelper : private Timer
+{
+public:
+	StaticObjectsPollingHelper();
+	explicit StaticObjectsPollingHelper(int interval);
+	~StaticObjectsPollingHelper() override;
+
+	int GetInterval();
+	void SetInterval(int interval);
+
+	bool IsRunning();
+	void SetRunning(bool running);
+
+	void TriggerPollOnce(Controller::StandaloneActiveObjectsListener* listener);
+
+private:
+	void timerCallback() override;
+	void PollOnce();
+
+	int m_interval{ 0 };
+	bool m_running{ false };
+};
 
 } // namespace SpaConBridge

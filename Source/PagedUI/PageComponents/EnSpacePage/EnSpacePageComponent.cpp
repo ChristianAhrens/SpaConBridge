@@ -269,6 +269,7 @@ void EnSpacePageComponent::HandleObjectDataInternal(const RemoteObjectIdentifier
 		}
 		break;
 	default:
+		jassertfalse;
 		break;
 	}
 }

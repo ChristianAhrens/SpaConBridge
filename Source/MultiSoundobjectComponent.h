@@ -19,9 +19,8 @@
 
 #pragma once
 
+#include "Controller.h"
 #include "SpaConBridgeCommon.h"
-
-#include "StandalonePollingBase.h"
 
 
 namespace SpaConBridge
@@ -40,7 +39,7 @@ class SelectGroupSelector;
 class MultiSoundobjectComponent :	public Component,
 									public ComboBox::Listener,
 									public ToggleButton::Listener,
-									public StandalonePollingBase
+									public Controller::StandaloneActiveObjectsListener
 {
 public:
 	MultiSoundobjectComponent();

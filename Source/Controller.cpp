@@ -62,7 +62,7 @@ static constexpr int PROTOCOL_INTERVAL_STATIC_OBJS	= 2000;		//< Object polling r
 
 StaticObjectsPollingHelper::StaticObjectsPollingHelper()
 {
-	pollOnce();
+	PollOnce();
 }
 
 StaticObjectsPollingHelper::StaticObjectsPollingHelper(int interval)
@@ -107,12 +107,29 @@ void StaticObjectsPollingHelper::SetRunning(bool running)
 	}
 }
 
-void StaticObjectsPollingHelper::timerCallback()
+void StaticObjectsPollingHelper::TriggerPollOnce(Controller::StandaloneActiveObjectsListener* listener)
 {
-	pollOnce();
+	if (nullptr == listener)
+		return PollOnce();
+
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl || !ctrl->IsOnline())
+		return;
+
+	auto remoteObjectsToPoll = ctrl->GetStandaloneActiveRemoteObjects(listener);
+	for (auto const& remoteObject : remoteObjectsToPoll)
+	{
+		auto romd = RemoteObjectMessageData(remoteObject._Addr, ROVT_NONE, 0, nullptr, 0);
+		ctrl->SendMessageDataDirect(remoteObject._Id, romd);
+	}
 }
 
-void StaticObjectsPollingHelper::pollOnce()
+void StaticObjectsPollingHelper::timerCallback()
+{
+	PollOnce();
+}
+
+void StaticObjectsPollingHelper::PollOnce()
 {
 	auto ctrl = Controller::GetInstance();
 	if (!ctrl || !ctrl->IsOnline())
@@ -124,7 +141,7 @@ void StaticObjectsPollingHelper::pollOnce()
 		auto romd = RemoteObjectMessageData(remoteObject._Addr, ROVT_NONE, 0, nullptr, 0);
 		ctrl->SendMessageDataDirect(remoteObject._Id, romd);
 	}
-};
+}
 
 
 /*
@@ -343,9 +360,10 @@ juce::int32 Controller::GetNextProcessorId()
  */
 std::vector<RemoteObject> Controller::GetStaticRemoteObjects()
 {
-	std::vector<RemoteObject> remoteObjects;
-	remoteObjects.push_back(RemoteObject(ROI_Settings_DeviceName, RemoteObjectAddressing(INVALID_ADDRESS_VALUE, INVALID_ADDRESS_VALUE)));
+	// initially add all RemoteObjects registered as required for standalone app components 
+	std::vector<RemoteObject> remoteObjects = GetStandaloneActiveRemoteObjects();
 
+	// add all RemoteObjects that are specifically required for soundobject related UI
 	auto soProcIds = GetSoundobjectProcessorIds();
 	for (auto const& processorId : soProcIds)
 	{
@@ -363,6 +381,7 @@ std::vector<RemoteObject> Controller::GetStaticRemoteObjects()
 		}
 	}
 
+	// add all RemoteObjects that are specifically required for matrixinput related UI
 	auto miProcIds = GetMatrixInputProcessorIds();
 	for (auto const& processorId : miProcIds)
 	{
@@ -380,6 +399,7 @@ std::vector<RemoteObject> Controller::GetStaticRemoteObjects()
 		}
 	}
 
+	// add all RemoteObjects that are specifically required for matrixoutput related UI
 	auto moProcIds = GetMatrixOutputProcessorIds();
 	for (auto const& processorId : moProcIds)
 	{
@@ -428,6 +448,136 @@ void Controller::SetStaticRemoteObjectsPollingEnabled(DataChangeParticipant chan
 
 		SetParameterChanged(changeSource, DCT_RefreshInterval);
 	}
+}
+
+/**
+ * Getter for the list of remote objects that are handled
+ * standalone active (read from DS100) as a flat list copy.
+ * @return	The internal list of remote objects.
+ */
+const std::vector<RemoteObject> Controller::GetStandaloneActiveRemoteObjects()
+{
+	std::vector<RemoteObject> currentStandaloneActiveRemoteObjects;
+	for (auto const& objectsPerListener : m_standaloneActiveRemoteObjects)
+	{
+		for (auto const& ro : objectsPerListener.second)
+			currentStandaloneActiveRemoteObjects.push_back(ro);
+	}
+
+	return currentStandaloneActiveRemoteObjects;
+}
+
+/**
+ * Getter for the list of remote objects that are handled
+ * standalone active (read from DS100) for a given listener
+ * as ref to the internal hash.
+ * @param	listener	The listener object to get the currently registered remote objects for
+ * @return	The internal list of remote objects.
+ */
+const std::vector<RemoteObject>& Controller::GetStandaloneActiveRemoteObjects(Controller::StandaloneActiveObjectsListener* listener)
+{
+	return m_standaloneActiveRemoteObjects[listener];
+}
+
+/**
+ * Method to check if a given remote object already is contained
+ * in the internal list of remote objects being actively handled
+ * as standalone.
+ * @param	remoteObject	The object to check.
+ * @return	True if given object is already contained, false if not.
+ */
+bool Controller::ContainsStandaloneActiveRemoteObject(Controller::StandaloneActiveObjectsListener* listener, const RemoteObject& remoteObject)
+{
+	auto objIter = std::find(GetStandaloneActiveRemoteObjects(listener).begin(), GetStandaloneActiveRemoteObjects(listener).end(), remoteObject);
+	return (objIter != GetStandaloneActiveRemoteObjects(listener).end());
+}
+
+/**
+ * Add a given remote object to the list of standalone actively handled objects.
+ * If the adding listener instance is not yet registered as listener, it is also added to list of listeners.
+ * @param	listener		The listener instance that wants to add an object
+ * @param	remoteObject	The object to add
+ * @return	True if adding succeeded, false if it already was present in list
+ */
+bool Controller::AddStandaloneActiveRemoteObject(Controller::StandaloneActiveObjectsListener* listener, const RemoteObject& remoteObject)
+{
+	// check if listener is already registered and if not add it
+	if (std::find(m_standaloneActiveObjectListeners.begin(), m_standaloneActiveObjectListeners.end(), listener) == m_standaloneActiveObjectListeners.end())
+		m_standaloneActiveObjectListeners.push_back(listener);
+
+	// if the object is already registered for th given listener, do not add again
+	if (ContainsStandaloneActiveRemoteObject(listener, remoteObject))
+		return false;
+	else
+	{
+		// if all was ok, add the object for the listener
+		m_standaloneActiveRemoteObjects[listener].push_back(remoteObject);
+		return true;
+	}
+}
+
+/**
+ * Remove a given remote object from the list of standalone actively handled objects.
+ * @param remoteObject	The object to remove
+ * @return	True if removing succeeded, false if it was not found in list
+ */
+bool Controller::RemoveStandaloneActiveRemoteObject(Controller::StandaloneActiveObjectsListener* listener, const RemoteObject& remoteObject)
+{
+	// something is fishy if the listener that wants to remove an object is not even known yet
+	jassert(std::find(m_standaloneActiveObjectListeners.begin(), m_standaloneActiveObjectListeners.end(), listener) != m_standaloneActiveObjectListeners.end());
+
+	// check if the object to remove can be found in the list
+	auto objIter = std::find(m_standaloneActiveRemoteObjects[listener].begin(), m_standaloneActiveRemoteObjects[listener].end(), remoteObject);
+	if (objIter == m_standaloneActiveRemoteObjects[listener].end())
+		return false;
+	else
+	{
+		// if all was ok, remove the object
+		m_standaloneActiveRemoteObjects[listener].erase(objIter);
+		return true;
+	}
+}
+
+// TODO
+void Controller::TriggerConfirmStandaloneActiveObjects(Controller::StandaloneActiveObjectsListener* listener)
+{
+	m_pollingHelper->TriggerPollOnce(listener);
+	jassertfalse; // TODO
+}
+
+/**
+ * Adds a listener instance to the list of objects to be
+ * notified for all incoming bridging layer messages
+ * that come from a relevant source (prefiltered by controller).
+ * @param	listener	The listener object instance to add
+ * @return	True if added successfully, false if already in list.
+ */
+bool Controller::AddStandaloneActiveObjectsListener(Controller::StandaloneActiveObjectsListener* listener)
+{
+	if (std::find(m_standaloneActiveObjectListeners.begin(), m_standaloneActiveObjectListeners.end(), listener) == m_standaloneActiveObjectListeners.end())
+	{
+		m_standaloneActiveObjectListeners.push_back(listener);
+		return true;
+	}
+	else
+		return false;
+}
+
+/**
+ * Removes a listener instance from the internal list.
+ * @param	listener	The listener object instance to remove
+ * @return	True if removed successfully, false if not found in list.
+ */
+bool Controller::RemoveStandaloneActiveObjectsListener(Controller::StandaloneActiveObjectsListener* listener)
+{
+	auto listenerIter = std::find(m_standaloneActiveObjectListeners.begin(), m_standaloneActiveObjectListeners.end(), listener);
+	if (listenerIter != m_standaloneActiveObjectListeners.end())
+	{
+		m_standaloneActiveObjectListeners.erase(listenerIter);
+		return true;
+	}
+	else
+		return false;
 }
 
 /**
@@ -1377,6 +1527,17 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 		// ...nor any protocol data from first DS100 if second is set as active one in parallel extension mode.
 		if (GetActiveParallelModeDS100() == APM_2nd && senderProtocolId != DS100_2_PROCESSINGPROTOCOL_ID)
 			return;
+	}
+
+	// notify all listeners that registered for the incoming object
+	for (auto const& listener : m_standaloneActiveObjectListeners)
+	{
+		if (listener)
+		{
+			auto& objsForListener = GetStandaloneActiveRemoteObjects(listener);
+			if (std::find(objsForListener.begin(), objsForListener.end(), RemoteObject(objectId, msgData._addrVal)) != objsForListener.end())
+				listener->HandleObjectDataInternal(objectId, msgData);
+		}
 	}
 
 	const ScopedLock lock(m_mutex);

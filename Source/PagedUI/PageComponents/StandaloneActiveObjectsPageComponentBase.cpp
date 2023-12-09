@@ -57,6 +57,10 @@ StandaloneActiveObjectsPageComponentBase::StandaloneActiveObjectsPageComponentBa
  */
 StandaloneActiveObjectsPageComponentBase::~StandaloneActiveObjectsPageComponentBase()
 {
+	// add this class to be notified of object value changes to controller
+	auto const ctrl = Controller::GetInstance();
+	if (ctrl)
+		ctrl->RemoveStandaloneActiveObjectsListener(this);
 }
 
 /**

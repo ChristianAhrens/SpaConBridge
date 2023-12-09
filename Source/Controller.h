@@ -94,8 +94,8 @@ public:
 
 	//==========================================================================
 	std::vector<RemoteObject> GetAllStandaloneActiveRemoteObjectsToUse();
-	bool IsStaticRemoteObjectsPollingEnabled();
-	void SetStaticRemoteObjectsPollingEnabled(DataChangeParticipant changeSource, bool enabled);
+	bool IsStaticProcessorRemoteObjectsPollingEnabled();
+	void SetStaticProcessorRemoteObjectsPollingEnabled(DataChangeParticipant changeSource, bool enabled);
 
 	const std::vector<RemoteObject> GetStandaloneActiveRemoteObjects();
 	const std::vector<RemoteObject>& GetStandaloneActiveRemoteObjects(Controller::StandaloneActiveObjectsListener* listener);

@@ -274,7 +274,7 @@ std::vector<RemoteObject> Controller::GetAllStandaloneActiveRemoteObjectsToUse()
 	// initially add all RemoteObjects registered as required for standalone app components 
 	std::vector<RemoteObject> remoteObjects = GetStandaloneActiveRemoteObjects();
 
-	if (IsStaticRemoteObjectsPollingEnabled())
+	if (IsStaticProcessorRemoteObjectsPollingEnabled())
 	{
 		// add all RemoteObjects that are specifically required for soundobject related UI
 		auto soProcIds = GetSoundobjectProcessorIds();
@@ -339,7 +339,7 @@ std::vector<RemoteObject> Controller::GetAllStandaloneActiveRemoteObjectsToUse()
  * non-flickering objects polling.
  * @return	The running state of pollinghelper or false if object not existing.
  */
-bool Controller::IsStaticRemoteObjectsPollingEnabled()
+bool Controller::IsStaticProcessorRemoteObjectsPollingEnabled()
 {
 	return m_staticProcessorRemoteObjectsPollingEnabled;
 }
@@ -351,7 +351,7 @@ bool Controller::IsStaticRemoteObjectsPollingEnabled()
  * @param	enabled			True if processor related non-flickering objects should be monitored, false if to not.
 
  */
-void Controller::SetStaticRemoteObjectsPollingEnabled(DataChangeParticipant changeSource, bool enabled)
+void Controller::SetStaticProcessorRemoteObjectsPollingEnabled(DataChangeParticipant changeSource, bool enabled)
 {
 	if (m_staticProcessorRemoteObjectsPollingEnabled != enabled)
 	{
@@ -2459,7 +2459,7 @@ bool Controller::setStateXml(XmlElement* stateXml)
 	{
 		auto staticObjectsPollingStateTextXmlElement = staticObjectsPollingStateXmlElement->getFirstChildElement();
 		if (staticObjectsPollingStateTextXmlElement && staticObjectsPollingStateTextXmlElement->isTextElement())
-			SetStaticRemoteObjectsPollingEnabled(DCP_Init, staticObjectsPollingStateTextXmlElement->getAllSubText().getIntValue() == 1);
+			SetStaticProcessorRemoteObjectsPollingEnabled(DCP_Init, staticObjectsPollingStateTextXmlElement->getAllSubText().getIntValue() == 1);
 	}
 
 	// create soundobject processors from xml
@@ -2678,9 +2678,9 @@ std::unique_ptr<XmlElement> Controller::createStateXml()
 		staticObjectsPollingStateXmlElement = controllerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::STATICOBJECTSPOLLING));
 	auto staticObjectsPollingStateTextXmlElement = staticObjectsPollingStateXmlElement->getFirstChildElement();
 	if (staticObjectsPollingStateTextXmlElement && staticObjectsPollingStateTextXmlElement->isTextElement())
-		staticObjectsPollingStateTextXmlElement->setText(String(IsStaticRemoteObjectsPollingEnabled() ? 1 : 0));
+		staticObjectsPollingStateTextXmlElement->setText(String(IsStaticProcessorRemoteObjectsPollingEnabled() ? 1 : 0));
 	else
-		staticObjectsPollingStateXmlElement->addTextElement(String(IsStaticRemoteObjectsPollingEnabled() ? 1 : 0));
+		staticObjectsPollingStateXmlElement->addTextElement(String(IsStaticProcessorRemoteObjectsPollingEnabled() ? 1 : 0));
 
 	// create xml from soundobject processors
 	auto soundobjectProcessorsXmlElement = controllerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTPROCESSORS));

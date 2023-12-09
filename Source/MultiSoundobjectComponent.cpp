@@ -269,11 +269,11 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 	}
 
 	// Update the objectnames enabled state
-	if (ctrl->IsStaticRemoteObjectsPollingEnabled() != m_objectNamesEnable->getToggleState())
+	if (ctrl->IsStaticProcessorRemoteObjectsPollingEnabled() != m_objectNamesEnable->getToggleState())
 	{
-		m_objectNamesEnable->setToggleState(ctrl->IsStaticRemoteObjectsPollingEnabled(), dontSendNotification);
+		m_objectNamesEnable->setToggleState(ctrl->IsStaticProcessorRemoteObjectsPollingEnabled(), dontSendNotification);
 		if (m_multiSoundobjectSlider)
-			m_multiSoundobjectSlider->SetSoundobjectNamesEnabled(ctrl->IsStaticRemoteObjectsPollingEnabled());
+			m_multiSoundobjectSlider->SetSoundobjectNamesEnabled(ctrl->IsStaticProcessorRemoteObjectsPollingEnabled());
 		update = true;
 	}
 
@@ -485,9 +485,9 @@ void MultiSoundobjectComponent::buttonClicked(Button* button)
 	else if (m_objectNamesEnable.get() == button)
 	{
 		auto ctrl = Controller::GetInstance();
-		if (ctrl && ctrl->IsStaticRemoteObjectsPollingEnabled() != button->getToggleState())
+		if (ctrl && ctrl->IsStaticProcessorRemoteObjectsPollingEnabled() != button->getToggleState())
 		{
-			ctrl->SetStaticRemoteObjectsPollingEnabled(DCP_MultiSlider, button->getToggleState());
+			ctrl->SetStaticProcessorRemoteObjectsPollingEnabled(DCP_MultiSlider, button->getToggleState());
 			
 			if (m_multiSoundobjectSlider)
 				m_multiSoundobjectSlider->SetSoundobjectNamesEnabled(button->getToggleState());

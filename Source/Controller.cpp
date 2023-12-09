@@ -54,95 +54,6 @@ static constexpr int PROTOCOL_INTERVAL_MAX			= 5000;		//< Maximum supported OSC 
 static constexpr int PROTOCOL_INTERVAL_DEF			= 100;		//< Default OSC messaging rate in milliseconds
 static constexpr int PROTOCOL_INTERVAL_STATIC_OBJS	= 2000;		//< Object polling rate for non-flicering static objects in milliseconds
 
-/*
-===============================================================================
- Class StaticObjectsPollingHelper
-===============================================================================
-*/
-
-StaticObjectsPollingHelper::StaticObjectsPollingHelper()
-{
-	PollOnce();
-}
-
-StaticObjectsPollingHelper::StaticObjectsPollingHelper(int interval)
-	: StaticObjectsPollingHelper()
-{
-	SetInterval(interval); 
-}
-
-StaticObjectsPollingHelper::~StaticObjectsPollingHelper()
-{
-}
-
-int StaticObjectsPollingHelper::GetInterval()
-{
-	return m_interval;
-}
-
-void StaticObjectsPollingHelper::SetInterval(int interval)
-{ 
-	m_interval = interval;
-
-	if (m_running)
-		startTimer(interval);
-}
-
-bool StaticObjectsPollingHelper::IsRunning()
-{
-	return m_running && (getTimerInterval() != 0);
-}
-
-void StaticObjectsPollingHelper::SetRunning(bool running)
-{
-	// do not restart time (would mess up currently elapsing interval) and no need to set the m_running member to identical value
-	if (m_running != running)
-	{
-		if (running)
-			startTimer(GetInterval());
-		else
-			stopTimer();
-
-		m_running = running;
-	}
-}
-
-void StaticObjectsPollingHelper::TriggerPollOnce(Controller::StandaloneActiveObjectsListener* listener)
-{
-	if (nullptr == listener)
-		return PollOnce();
-
-	auto ctrl = Controller::GetInstance();
-	if (!ctrl || !ctrl->IsOnline())
-		return;
-
-	auto remoteObjectsToPoll = ctrl->GetStandaloneActiveRemoteObjects(listener);
-	for (auto const& remoteObject : remoteObjectsToPoll)
-	{
-		auto romd = RemoteObjectMessageData(remoteObject._Addr, ROVT_NONE, 0, nullptr, 0);
-		ctrl->SendMessageDataDirect(remoteObject._Id, romd);
-	}
-}
-
-void StaticObjectsPollingHelper::timerCallback()
-{
-	PollOnce();
-}
-
-void StaticObjectsPollingHelper::PollOnce()
-{
-	auto ctrl = Controller::GetInstance();
-	if (!ctrl || !ctrl->IsOnline())
-		return;
-
-	auto remoteObjectsToPoll = ctrl->GetAllStandaloneActiveRemoteObjectsToUse();
-	for (auto const& remoteObject : remoteObjectsToPoll)
-	{
-		auto romd = RemoteObjectMessageData(remoteObject._Addr, ROVT_NONE, 0, nullptr, 0);
-		ctrl->SendMessageDataDirect(remoteObject._Id, romd);
-	}
-}
-
 
 /*
 ===============================================================================
@@ -180,7 +91,7 @@ Controller::Controller()
 	SetExtensionMode(DCP_Init, EM_Off, true);
 	SetActiveParallelModeDS100(DCP_Init, APM_None, true);
 
-	m_pollingHelper = std::make_unique<StaticObjectsPollingHelper>(PROTOCOL_INTERVAL_STATIC_OBJS);
+	m_pollingHelper = std::make_unique<Controller::StandaloneActiveObjectsPollingHelper>(PROTOCOL_INTERVAL_STATIC_OBJS);
 
 	s_constructionFinished = true;
 }

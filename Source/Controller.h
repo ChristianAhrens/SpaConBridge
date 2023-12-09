@@ -51,7 +51,6 @@ namespace SpaConBridge
 class SoundobjectProcessor;
 class MatrixInputProcessor;
 class MatrixOutputProcessor;
-class StaticObjectsPollingHelper;
 
 
 /**
@@ -284,6 +283,95 @@ public:
 	bool SendMessageDataDirect(const RemoteObjectIdentifier roi, RemoteObjectMessageData& msgData);
 
 private:
+	/**
+	 * Class StandaloneActiveObjectsPollingHelper
+	 * @brief	Controller specific helper class
+	 *			that takes over the task of timerbased
+	 *			getting of values defined as standalone active in controller.
+	 */
+	class StandaloneActiveObjectsPollingHelper : private Timer
+	{
+	public:
+		StandaloneActiveObjectsPollingHelper()
+		{
+			PollOnce();
+		}
+		explicit StandaloneActiveObjectsPollingHelper(int interval) : StandaloneActiveObjectsPollingHelper()
+		{
+			SetInterval(interval);
+		}
+		~StandaloneActiveObjectsPollingHelper() override
+		{
+		}
+
+		int GetInterval()
+		{
+			return m_interval;
+		}
+		void SetInterval(int interval)
+		{
+			m_interval = interval;
+
+			if (m_running)
+				startTimer(interval);
+		}
+
+		bool IsRunning()
+		{
+			return m_running && (getTimerInterval() != 0);
+		}
+		void SetRunning(bool running)
+		{
+			// do not restart time (would mess up currently elapsing interval) and no need to set the m_running member to identical value
+			if (m_running != running)
+			{
+				if (running)
+					startTimer(GetInterval());
+				else
+					stopTimer();
+
+				m_running = running;
+			}
+		}
+
+		void TriggerPollOnce(Controller::StandaloneActiveObjectsListener* listener)
+		{
+			if (nullptr == listener)
+				return PollOnce();
+			else if (Controller::GetInstance()->IsOnline())
+			{
+				auto remoteObjectsToPoll = Controller::GetInstance()->GetStandaloneActiveRemoteObjects(listener);
+				for (auto const& remoteObject : remoteObjectsToPoll)
+				{
+					auto romd = RemoteObjectMessageData(remoteObject._Addr, ROVT_NONE, 0, nullptr, 0);
+					Controller::GetInstance()->SendMessageDataDirect(remoteObject._Id, romd);
+				}
+			}
+		}
+
+	private:
+		void timerCallback() override
+		{
+			PollOnce();
+		}
+		void PollOnce()
+		{
+			if (Controller::GetInstance()->IsOnline())
+			{
+				auto remoteObjectsToPoll = Controller::GetInstance()->GetAllStandaloneActiveRemoteObjectsToUse();
+				for (auto const& remoteObject : remoteObjectsToPoll)
+				{
+					auto romd = RemoteObjectMessageData(remoteObject._Addr, ROVT_NONE, 0, nullptr, 0);
+					Controller::GetInstance()->SendMessageDataDirect(remoteObject._Id, romd);
+				}
+			}
+		}
+
+		int m_interval{ 0 };
+		bool m_running{ false };
+	};
+
+private:
 	//==========================================================================
 	const ProtocolId GetProtocolIdForProtocolType(const ProtocolBridgingType type);
 	
@@ -323,40 +411,12 @@ private:
 
 	bool							m_staticProcessorRemoteObjectsPollingEnabled{ false };	/**< Member to define if static processor related objects should be regarded when polling/subscribing (usually object name strings). */
 
-	std::unique_ptr<StaticObjectsPollingHelper>											m_pollingHelper;					/**< Polling helper instance for OSC DS100 communation. */
+	std::unique_ptr<StandaloneActiveObjectsPollingHelper>								m_pollingHelper;					/**< Polling helper instance for OSC DS100 communation. */
 	std::vector<Controller::StandaloneActiveObjectsListener*>							m_standaloneActiveObjectListeners;	/**< The listner objects, for message data handling callback. */
 	std::map<Controller::StandaloneActiveObjectsListener*, std::vector<RemoteObject>>	m_standaloneActiveRemoteObjects;	/**< List of remote objects that the controller manages as lowfreq apart from regular hifreq object value subscription/polling. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Controller)
 };
 
-/**
- * Class StaticObjectsPollingHelper
- * @brief	Controller specific helper class
- *			that takes over the task of timerbased
- *			getting of values defined as static in controller.
- */
-class StaticObjectsPollingHelper : private Timer
-{
-public:
-	StaticObjectsPollingHelper();
-	explicit StaticObjectsPollingHelper(int interval);
-	~StaticObjectsPollingHelper() override;
-
-	int GetInterval();
-	void SetInterval(int interval);
-
-	bool IsRunning();
-	void SetRunning(bool running);
-
-	void TriggerPollOnce(Controller::StandaloneActiveObjectsListener* listener);
-
-private:
-	void timerCallback() override;
-	void PollOnce();
-
-	int m_interval{ 0 };
-	bool m_running{ false };
-};
 
 } // namespace SpaConBridge

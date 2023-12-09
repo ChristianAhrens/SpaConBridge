@@ -234,8 +234,10 @@ void EnSpacePageComponent::HandleObjectDataInternal(const RemoteObjectIdentifier
 		if (m_preDelayFactorChangePending)
 		{
 			if (std::roundf(10 * m_preDelayFactorChange) == std::roundf(10 * newPreDelayFactor))
+			{
 				m_preDelayFactorChangePending = false;
-			return;
+				return;
+			}
 		}
 
 		auto rpfR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixSettings_ReverbPredelayFactor);
@@ -257,8 +259,10 @@ void EnSpacePageComponent::HandleObjectDataInternal(const RemoteObjectIdentifier
 		if (m_rearLevelChangePending)
 		{
 			if (std::roundf(10 * m_rearLevelChange) == std::roundf(10 * newReverbRearLevel))
+			{
 				m_rearLevelChangePending = false;
-			return;
+				return;
+			}
 		}
 
 		auto rrLR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixSettings_ReverbRearLevel);

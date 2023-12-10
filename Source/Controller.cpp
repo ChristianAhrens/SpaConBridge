@@ -54,78 +54,6 @@ static constexpr int PROTOCOL_INTERVAL_MAX			= 5000;		//< Maximum supported OSC 
 static constexpr int PROTOCOL_INTERVAL_DEF			= 100;		//< Default OSC messaging rate in milliseconds
 static constexpr int PROTOCOL_INTERVAL_STATIC_OBJS	= 2000;		//< Object polling rate for non-flicering static objects in milliseconds
 
-/*
-===============================================================================
- Class StaticObjectsPollingHelper
-===============================================================================
-*/
-
-StaticObjectsPollingHelper::StaticObjectsPollingHelper()
-{
-	pollOnce();
-}
-
-StaticObjectsPollingHelper::StaticObjectsPollingHelper(int interval)
-	: StaticObjectsPollingHelper()
-{
-	SetInterval(interval); 
-}
-
-StaticObjectsPollingHelper::~StaticObjectsPollingHelper()
-{
-}
-
-int StaticObjectsPollingHelper::GetInterval()
-{
-	return m_interval;
-}
-
-void StaticObjectsPollingHelper::SetInterval(int interval)
-{ 
-	m_interval = interval;
-
-	if (m_running)
-		startTimer(interval);
-}
-
-bool StaticObjectsPollingHelper::IsRunning()
-{
-	return m_running && (getTimerInterval() != 0);
-}
-
-void StaticObjectsPollingHelper::SetRunning(bool running)
-{
-	// do not restart time (would mess up currently elapsing interval) and no need to set the m_running member to identical value
-	if (m_running != running)
-	{
-		if (running)
-			startTimer(GetInterval());
-		else
-			stopTimer();
-
-		m_running = running;
-	}
-}
-
-void StaticObjectsPollingHelper::timerCallback()
-{
-	pollOnce();
-}
-
-void StaticObjectsPollingHelper::pollOnce()
-{
-	auto ctrl = Controller::GetInstance();
-	if (!ctrl || !ctrl->IsOnline())
-		return;
-
-	auto remoteObjectsToPoll = ctrl->GetStaticRemoteObjects();
-	for (auto const& remoteObject : remoteObjectsToPoll)
-	{
-		auto romd = RemoteObjectMessageData(remoteObject._Addr, ROVT_NONE, 0, nullptr, 0);
-		ctrl->SendMessageDataDirect(remoteObject._Id, romd);
-	}
-};
-
 
 /*
 ===============================================================================
@@ -163,7 +91,7 @@ Controller::Controller()
 	SetExtensionMode(DCP_Init, EM_Off, true);
 	SetActiveParallelModeDS100(DCP_Init, APM_None, true);
 
-	m_pollingHelper = std::make_unique<StaticObjectsPollingHelper>(PROTOCOL_INTERVAL_STATIC_OBJS);
+	m_pollingHelper = std::make_unique<Controller::StandaloneActiveObjectsPollingHelper>(PROTOCOL_INTERVAL_STATIC_OBJS);
 
 	s_constructionFinished = true;
 }
@@ -341,58 +269,64 @@ juce::int32 Controller::GetNextProcessorId()
  * updated rarely, like channel or device names.
  * @return	The listing of remote objects.
  */
-std::vector<RemoteObject> Controller::GetStaticRemoteObjects()
+std::vector<RemoteObject> Controller::GetAllStandaloneActiveRemoteObjectsToUse()
 {
-	std::vector<RemoteObject> remoteObjects;
-	remoteObjects.push_back(RemoteObject(ROI_Settings_DeviceName, RemoteObjectAddressing(INVALID_ADDRESS_VALUE, INVALID_ADDRESS_VALUE)));
+	// initially add all RemoteObjects registered as required for standalone app components 
+	std::vector<RemoteObject> remoteObjects = GetStandaloneActiveRemoteObjects();
 
-	auto soProcIds = GetSoundobjectProcessorIds();
-	for (auto const& processorId : soProcIds)
+	if (IsStaticProcessorRemoteObjectsPollingEnabled())
 	{
-		auto processor = GetSoundobjectProcessor(processorId);
-		for (auto& roi : SoundobjectProcessor::GetStaticRemoteObjects())
+		// add all RemoteObjects that are specifically required for soundobject related UI
+		auto soProcIds = GetSoundobjectProcessorIds();
+		for (auto const& processorId : soProcIds)
 		{
-			if (ProcessingEngineConfig::IsRecordAddressingObject(roi))
-				jassertfalse;
-			else
+			auto processor = GetSoundobjectProcessor(processorId);
+			for (auto& roi : SoundobjectProcessor::GetStaticRemoteObjects())
 			{
-				auto sosro = RemoteObject(roi, RemoteObjectAddressing(processor->GetSoundobjectId(), INVALID_ADDRESS_VALUE));
-				if (std::find(remoteObjects.begin(), remoteObjects.end(), sosro) == remoteObjects.end())
-					remoteObjects.push_back(sosro);
+				if (ProcessingEngineConfig::IsRecordAddressingObject(roi))
+					jassertfalse;
+				else
+				{
+					auto sosro = RemoteObject(roi, RemoteObjectAddressing(processor->GetSoundobjectId(), INVALID_ADDRESS_VALUE));
+					if (std::find(remoteObjects.begin(), remoteObjects.end(), sosro) == remoteObjects.end())
+						remoteObjects.push_back(sosro);
+				}
 			}
 		}
-	}
 
-	auto miProcIds = GetMatrixInputProcessorIds();
-	for (auto const& processorId : miProcIds)
-	{
-		auto processor = GetMatrixInputProcessor(processorId);
-		for (auto& roi : MatrixInputProcessor::GetStaticRemoteObjects())
+		// add all RemoteObjects that are specifically required for matrixinput related UI
+		auto miProcIds = GetMatrixInputProcessorIds();
+		for (auto const& processorId : miProcIds)
 		{
-			if (ProcessingEngineConfig::IsRecordAddressingObject(roi))
-				jassertfalse;
-			else
+			auto processor = GetMatrixInputProcessor(processorId);
+			for (auto& roi : MatrixInputProcessor::GetStaticRemoteObjects())
 			{
-				auto misro = RemoteObject(roi, RemoteObjectAddressing(processor->GetMatrixInputId(), INVALID_ADDRESS_VALUE));
-				if (std::find(remoteObjects.begin(), remoteObjects.end(), misro) == remoteObjects.end())
-					remoteObjects.push_back(misro);
+				if (ProcessingEngineConfig::IsRecordAddressingObject(roi))
+					jassertfalse;
+				else
+				{
+					auto misro = RemoteObject(roi, RemoteObjectAddressing(processor->GetMatrixInputId(), INVALID_ADDRESS_VALUE));
+					if (std::find(remoteObjects.begin(), remoteObjects.end(), misro) == remoteObjects.end())
+						remoteObjects.push_back(misro);
+				}
 			}
 		}
-	}
 
-	auto moProcIds = GetMatrixOutputProcessorIds();
-	for (auto const& processorId : moProcIds)
-	{
-		auto processor = GetMatrixOutputProcessor(processorId);
-		for (auto& roi : MatrixOutputProcessor::GetStaticRemoteObjects())
+		// add all RemoteObjects that are specifically required for matrixoutput related UI
+		auto moProcIds = GetMatrixOutputProcessorIds();
+		for (auto const& processorId : moProcIds)
 		{
-			if (ProcessingEngineConfig::IsRecordAddressingObject(roi))
-				jassertfalse;
-			else
+			auto processor = GetMatrixOutputProcessor(processorId);
+			for (auto& roi : MatrixOutputProcessor::GetStaticRemoteObjects())
 			{
-				auto mosro = RemoteObject(roi, RemoteObjectAddressing(processor->GetMatrixOutputId(), INVALID_ADDRESS_VALUE));
-				if (std::find(remoteObjects.begin(), remoteObjects.end(), mosro) == remoteObjects.end())
-					remoteObjects.push_back(mosro);
+				if (ProcessingEngineConfig::IsRecordAddressingObject(roi))
+					jassertfalse;
+				else
+				{
+					auto mosro = RemoteObject(roi, RemoteObjectAddressing(processor->GetMatrixOutputId(), INVALID_ADDRESS_VALUE));
+					if (std::find(remoteObjects.begin(), remoteObjects.end(), mosro) == remoteObjects.end())
+						remoteObjects.push_back(mosro);
+				}
 			}
 		}
 	}
@@ -405,29 +339,192 @@ std::vector<RemoteObject> Controller::GetStaticRemoteObjects()
  * non-flickering objects polling.
  * @return	The running state of pollinghelper or false if object not existing.
  */
-bool Controller::IsStaticRemoteObjectsPollingEnabled()
+bool Controller::IsStaticProcessorRemoteObjectsPollingEnabled()
 {
-	if (!m_pollingHelper)
-		return false;
-
-	return m_pollingHelper->IsRunning();
+	return m_staticProcessorRemoteObjectsPollingEnabled;
 }
 
 /**
- * Helper to set the running state of internal polling of non-flickering
- * objects through pollinghelper object.
+ * Helper to set the running state of internal active
+ * handling of non-flickering objects.
  * @param	changeSource	
- * @param	enabled			True if pollingHelper shall be set to running, false if to notrunning.
+ * @param	enabled			True if processor related non-flickering objects should be monitored, false if to not.
 
  */
-void Controller::SetStaticRemoteObjectsPollingEnabled(DataChangeParticipant changeSource, bool enabled)
+void Controller::SetStaticProcessorRemoteObjectsPollingEnabled(DataChangeParticipant changeSource, bool enabled)
 {
-	if (m_pollingHelper && (m_pollingHelper->IsRunning() != enabled))
+	if (m_staticProcessorRemoteObjectsPollingEnabled != enabled)
 	{
-		m_pollingHelper->SetRunning(enabled);
+		m_staticProcessorRemoteObjectsPollingEnabled = enabled;
 
 		SetParameterChanged(changeSource, DCT_RefreshInterval);
 	}
+}
+
+/**
+ * Getter for the list of remote objects that are handled
+ * standalone active (read from DS100) as a flat list copy.
+ * @return	The internal list of remote objects.
+ */
+const std::vector<RemoteObject> Controller::GetStandaloneActiveRemoteObjects()
+{
+	std::vector<RemoteObject> currentStandaloneActiveRemoteObjects;
+	for (auto const& objectsPerListener : m_standaloneActiveRemoteObjects)
+	{
+		for (auto const& ro : objectsPerListener.second)
+			currentStandaloneActiveRemoteObjects.push_back(ro);
+	}
+
+	return currentStandaloneActiveRemoteObjects;
+}
+
+/**
+ * Getter for the list of remote objects that are handled
+ * standalone active (read from DS100) for a given listener
+ * as ref to the internal hash.
+ * @param	listener	The listener object to get the currently registered remote objects for
+ * @return	The internal list of remote objects.
+ */
+const std::vector<RemoteObject>& Controller::GetStandaloneActiveRemoteObjects(Controller::StandaloneActiveObjectsListener* listener)
+{
+	return m_standaloneActiveRemoteObjects[listener];
+}
+
+/**
+ * Method to check if a given remote object already is contained
+ * in the internal list of remote objects being actively handled
+ * as standalone.
+ * @param	remoteObject	The object to check.
+ * @return	True if given object is already contained, false if not.
+ */
+bool Controller::ContainsStandaloneActiveRemoteObject(Controller::StandaloneActiveObjectsListener* listener, const RemoteObject& remoteObject)
+{
+	auto objIter = std::find(GetStandaloneActiveRemoteObjects(listener).begin(), GetStandaloneActiveRemoteObjects(listener).end(), remoteObject);
+	return (objIter != GetStandaloneActiveRemoteObjects(listener).end());
+}
+
+/**
+ * Add a given remote object to the list of standalone actively handled objects.
+ * If the adding listener instance is not yet registered as listener, it is also added to list of listeners.
+ * @param	listener		The listener instance that wants to add an object
+ * @param	remoteObject	The object to add
+ * @return	True if adding succeeded, false if it already was present in list
+ */
+bool Controller::AddStandaloneActiveRemoteObject(Controller::StandaloneActiveObjectsListener* listener, const RemoteObject& remoteObject)
+{
+	// check if listener is already registered and if not add it
+	if (std::find(m_standaloneActiveObjectListeners.begin(), m_standaloneActiveObjectListeners.end(), listener) == m_standaloneActiveObjectListeners.end())
+		m_standaloneActiveObjectListeners.push_back(listener);
+
+	// if the object is already registered for th given listener, do not add again
+	if (ContainsStandaloneActiveRemoteObject(listener, remoteObject))
+		return false;
+	else
+	{
+		// if all was ok, add the object for the listener
+		m_standaloneActiveRemoteObjects[listener].push_back(remoteObject);
+		return true;
+	}
+}
+
+/**
+ * Remove a given remote object from the list of standalone actively handled objects.
+ * @param remoteObject	The object to remove
+ * @return	True if removing succeeded, false if it was not found in list
+ */
+bool Controller::RemoveStandaloneActiveRemoteObject(Controller::StandaloneActiveObjectsListener* listener, const RemoteObject& remoteObject)
+{
+	// something is fishy if the listener that wants to remove an object is not even known yet
+	jassert(std::find(m_standaloneActiveObjectListeners.begin(), m_standaloneActiveObjectListeners.end(), listener) != m_standaloneActiveObjectListeners.end());
+
+	// check if the object to remove can be found in the list
+	auto objIter = std::find(m_standaloneActiveRemoteObjects[listener].begin(), m_standaloneActiveRemoteObjects[listener].end(), remoteObject);
+	if (objIter == m_standaloneActiveRemoteObjects[listener].end())
+		return false;
+	else
+	{
+		// if all was ok, remove the object
+		m_standaloneActiveRemoteObjects[listener].erase(objIter);
+		return true;
+	}
+}
+
+/**
+ * Helper to trigger refreshing object values registered for a given
+ * standalone active objects listener.
+ * What actually happens to refresh the values depends on 
+ * the communication means to DS100 in use - subscription based
+ * communication e.g. does not require active confirmation of changes.
+ * @param	listener	The listener object instance to refresh the registered object's values for
+ */
+void Controller::TriggerConfirmStandaloneActiveObjects(Controller::StandaloneActiveObjectsListener* listener)
+{
+	// todo
+	m_pollingHelper->TriggerPollOnce(listener);
+}
+
+/**
+ * Adds a listener instance to the list of objects to be
+ * notified for all incoming bridging layer messages
+ * that come from a relevant source (prefiltered by controller).
+ * @param	listener	The listener object instance to add
+ * @return	True if added successfully, false if already in list.
+ */
+bool Controller::AddStandaloneActiveObjectsListener(Controller::StandaloneActiveObjectsListener* listener)
+{
+	if (std::find(m_standaloneActiveObjectListeners.begin(), m_standaloneActiveObjectListeners.end(), listener) == m_standaloneActiveObjectListeners.end())
+	{
+		m_standaloneActiveObjectListeners.push_back(listener);
+		return true;
+	}
+	else
+		return false;
+}
+
+/**
+ * Removes a listener instance from the internal list.
+ * Also removes all active remote objects registered for this listener instance from internal hash.
+ * @param	listener	The listener object instance to remove
+ * @return	True if removed successfully, false if not found in list.
+ */
+bool Controller::RemoveStandaloneActiveObjectsListener(Controller::StandaloneActiveObjectsListener* listener)
+{
+	m_standaloneActiveRemoteObjects.erase(listener);
+
+	auto listenerIter = std::find(m_standaloneActiveObjectListeners.begin(), m_standaloneActiveObjectListeners.end(), listener);
+	if (listenerIter != m_standaloneActiveObjectListeners.end())
+	{
+		m_standaloneActiveObjectListeners.erase(listenerIter);
+		return true;
+	}
+	else
+		return false;
+}
+
+/**
+ * Updates the remote objects that are currently being actively handled.
+ * @param dontSendNotification	Flag if the app configuration update should be triggered (fwd. to bridging wrapper).
+ */
+void Controller::UpdateActiveRemoteObjects(bool dontSendNotification)
+{
+	// Get currently active objects from controller and split them 
+	// into those relevant for first and second DS100
+	auto activeSoObjects = GetActivatedSoundObjectRemoteObjects();
+	auto activeMiObjects = GetActivatedMatrixInputRemoteObjects();
+	auto activeMoObjects = GetActivatedMatrixOutputRemoteObjects();
+
+	auto activeObjects = std::vector<RemoteObject>();
+	activeObjects.insert(activeObjects.end(), activeSoObjects.begin(), activeSoObjects.end());
+	activeObjects.insert(activeObjects.end(), activeMiObjects.begin(), activeMiObjects.end());
+	activeObjects.insert(activeObjects.end(), activeMoObjects.begin(), activeMoObjects.end());
+	
+	if (!IsPollingDS100ProtocolType())
+	{
+		auto standaloneActiveObjects = GetAllStandaloneActiveRemoteObjectsToUse();
+		activeObjects.insert(activeObjects.end(), standaloneActiveObjects.begin(), standaloneActiveObjects.end());
+	}
+
+	m_protocolBridge.UpdateActiveDS100RemoteObjectIds(activeObjects, dontSendNotification);
 }
 
 /**
@@ -498,7 +595,7 @@ void Controller::RemoveSoundobjectProcessor(SoundobjectProcessor* p)
 		// updating will not catch changes, if no soundobjects are
 		// left any more.
 		if (m_soundobjectProcessors.isEmpty())
-			UpdateActiveSoundobjects();
+			UpdateActiveRemoteObjects();
 
 		SetParameterChanged(DCP_Host, DCT_NumProcessors);
 	}
@@ -563,7 +660,7 @@ void Controller::RemoveSoundobjectProcessorIds(const std::vector<SoundobjectProc
 	// updating will not catch changes, if no soundobjects are
 	// left any more.
 	if (m_soundobjectProcessors.isEmpty())
-		UpdateActiveSoundobjects();
+		UpdateActiveRemoteObjects();
 
 	SetParameterChanged(DCP_Host, DCT_NumProcessors);
 }
@@ -668,7 +765,7 @@ void Controller::RemoveMatrixInputProcessor(MatrixInputProcessor* p)
 		// updating will not catch changes, if no matrix inputs are
 		// left any more.
 		if (m_matrixInputProcessors.isEmpty())
-			UpdateActiveMatrixInputs();
+			UpdateActiveRemoteObjects();
 
 		SetParameterChanged(DCP_Host, DCT_NumProcessors);
 	}
@@ -733,7 +830,7 @@ void Controller::RemoveMatrixInputProcessorIds(const std::vector<MatrixInputProc
 	// updating will not catch changes, if no matrix inputs are
 	// left any more.
 	if (m_matrixInputProcessors.isEmpty())
-		UpdateActiveMatrixInputs();
+		UpdateActiveRemoteObjects();
 
 	SetParameterChanged(DCP_Host, DCT_NumProcessors);
 }
@@ -839,7 +936,7 @@ void Controller::RemoveMatrixOutputProcessor(MatrixOutputProcessor* p)
 		// updating will not catch changes, if no matrix outputs are
 		// left any more.
 		if (m_matrixOutputProcessors.isEmpty())
-			UpdateActiveMatrixOutputs();
+			UpdateActiveRemoteObjects();
 
 		SetParameterChanged(DCP_Host, DCT_NumProcessors);
 	}
@@ -904,7 +1001,7 @@ void Controller::RemoveMatrixOutputProcessorIds(const std::vector<MatrixOutputPr
 	// updating will not catch changes, if no matrix outputs are
 	// left any more.
 	if (m_matrixOutputProcessors.isEmpty())
-		UpdateActiveMatrixOutputs();
+		UpdateActiveRemoteObjects();
 
 	SetParameterChanged(DCP_Host, DCT_NumProcessors);
 }
@@ -979,6 +1076,10 @@ void Controller::SetDS100ProtocolType(DataChangeParticipant changeSource, Protoc
 				m_DS100ExtensionMode = EM_Off;
 		}
 
+		m_pollingHelper->SetRunning(IsPollingDS100ProtocolType());
+
+		UpdateActiveRemoteObjects(DCP_Init == changeSource); // update objects but propage update only if it is not during init to avoid unfinished app construction asserts
+
 		m_protocolBridge.SetDS100ProtocolType(protocol, dontSendNotification);
 
 		// IP, port, etc. have likely changed when changing the protocol type (new defaults set)
@@ -995,6 +1096,26 @@ void Controller::SetDS100ProtocolType(DataChangeParticipant changeSource, Protoc
 		SetParameterChanged(changeSource, DCT_Connected);
 
 		Reconnect();
+	}
+}
+
+/***
+ * Helper to get the bool info on if the current
+ * protocol used for DS100 is using polling for
+ * getting updated values.
+ * @return	True if polling is used (OSC, No) or if not (OCP1)
+ */
+bool Controller::IsPollingDS100ProtocolType()
+{
+	switch (m_DS100ProtocolType)
+	{
+	case PT_OSCProtocol:
+		return true;
+	case PT_OCP1Protocol:
+	case PT_NoProtocol:
+	default:
+		return false;
+		break;
 	}
 }
 
@@ -1377,6 +1498,17 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 		// ...nor any protocol data from first DS100 if second is set as active one in parallel extension mode.
 		if (GetActiveParallelModeDS100() == APM_2nd && senderProtocolId != DS100_2_PROCESSINGPROTOCOL_ID)
 			return;
+	}
+
+	// notify all listeners that registered for the incoming object
+	for (auto const& listener : m_standaloneActiveObjectListeners)
+	{
+		if (listener)
+		{
+			auto& objsForListener = GetStandaloneActiveRemoteObjects(listener);
+			if (std::find(objsForListener.begin(), objsForListener.end(), RemoteObject(objectId, msgData._addrVal)) != objsForListener.end())
+				listener->HandleObjectDataInternal(objectId, msgData);
+		}
 	}
 
 	const ScopedLock lock(m_mutex);
@@ -2006,7 +2138,7 @@ void Controller::timerCallback()
 		soProcessor->PopParameterChanged(DCP_Protocol, DCT_SoundobjectParameters);
 	}
 	if (activeSSIdsChanged)
-		UpdateActiveSoundobjects();
+		UpdateActiveRemoteObjects();
 
 	auto activeMIIdsChanged = false;
 	for (auto const& miProcessor : m_matrixInputProcessors)
@@ -2129,7 +2261,7 @@ void Controller::timerCallback()
 		miProcessor->PopParameterChanged(DCP_Protocol, DCT_MatrixInputParameters);
 	}
 	if (activeMIIdsChanged)
-		UpdateActiveMatrixInputs();
+		UpdateActiveRemoteObjects();
 
 	auto activeMOIdsChanged = false;
 	for (auto const& moProcessor : m_matrixOutputProcessors)
@@ -2252,7 +2384,7 @@ void Controller::timerCallback()
 		moProcessor->PopParameterChanged(DCP_Protocol, DCT_MatrixOutputParameters);
 	}
 	if (activeMOIdsChanged)
-		UpdateActiveMatrixOutputs();
+		UpdateActiveRemoteObjects();
 
 	if (cleanupMutedObjectsRequired)
 		CleanupMutedObjects();
@@ -2327,7 +2459,7 @@ bool Controller::setStateXml(XmlElement* stateXml)
 	{
 		auto staticObjectsPollingStateTextXmlElement = staticObjectsPollingStateXmlElement->getFirstChildElement();
 		if (staticObjectsPollingStateTextXmlElement && staticObjectsPollingStateTextXmlElement->isTextElement())
-			SetStaticRemoteObjectsPollingEnabled(DCP_Init, staticObjectsPollingStateTextXmlElement->getAllSubText().getIntValue() == 1);
+			SetStaticProcessorRemoteObjectsPollingEnabled(DCP_Init, staticObjectsPollingStateTextXmlElement->getAllSubText().getIntValue() == 1);
 	}
 
 	// create soundobject processors from xml
@@ -2546,9 +2678,9 @@ std::unique_ptr<XmlElement> Controller::createStateXml()
 		staticObjectsPollingStateXmlElement = controllerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::STATICOBJECTSPOLLING));
 	auto staticObjectsPollingStateTextXmlElement = staticObjectsPollingStateXmlElement->getFirstChildElement();
 	if (staticObjectsPollingStateTextXmlElement && staticObjectsPollingStateTextXmlElement->isTextElement())
-		staticObjectsPollingStateTextXmlElement->setText(String(IsStaticRemoteObjectsPollingEnabled() ? 1 : 0));
+		staticObjectsPollingStateTextXmlElement->setText(String(IsStaticProcessorRemoteObjectsPollingEnabled() ? 1 : 0));
 	else
-		staticObjectsPollingStateXmlElement->addTextElement(String(IsStaticRemoteObjectsPollingEnabled() ? 1 : 0));
+		staticObjectsPollingStateXmlElement->addTextElement(String(IsStaticProcessorRemoteObjectsPollingEnabled() ? 1 : 0));
 
 	// create xml from soundobject processors
 	auto soundobjectProcessorsXmlElement = controllerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTPROCESSORS));
@@ -2618,14 +2750,6 @@ const std::vector<RemoteObject> Controller::GetActivatedSoundObjectRemoteObjects
 		}
 	}
 	return activeRemoteObjects;
-}
-
-/**
- * Updates the soundobjects that are currently being actively handled.
- */
-void Controller::UpdateActiveSoundobjects()
-{
-	m_protocolBridge.UpdateActiveDS100RemoteObjectIds();
 }
 
 /**
@@ -2704,14 +2828,6 @@ const std::vector<RemoteObject> Controller::GetActivatedMatrixInputRemoteObjects
 		}
 	}
 	return activeRemoteObjects;
-}
-
-/**
- * Updates the matrix inputs that are currently being actively handled.
- */
-void Controller::UpdateActiveMatrixInputs()
-{
-	m_protocolBridge.UpdateActiveDS100RemoteObjectIds();
 }
 
 /**
@@ -2809,13 +2925,6 @@ const std::vector<RemoteObject> Controller::GetActivatedMatrixOutputRemoteObject
 	return activeRemoteObjects;
 }
 
-/**
- * Updates the matrix outputs that are currently being actively handled.
- */
-void Controller::UpdateActiveMatrixOutputs()
-{
-	m_protocolBridge.UpdateActiveDS100RemoteObjectIds();
-}
 /**
  * Helper method to get a list of currently muted remote objects.
  * This is generated by dumping all muted processor properties and their objects to a list.

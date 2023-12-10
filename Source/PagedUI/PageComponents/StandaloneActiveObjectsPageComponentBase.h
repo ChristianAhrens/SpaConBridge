@@ -21,10 +21,9 @@
 
 #include <JuceHeader.h>
 
+#include "../../Controller.h"
 #include "PageComponentBase.h"
 #include "HeaderWithElmListComponent.h"
-
-#include "../../StandalonePollingBase.h"
 
 
 namespace SpaConBridge
@@ -127,24 +126,32 @@ private:
 };
 
 /**
- * class StandalonePollingPageComponentBase is supposed to be used
+ * class StandaloneActiveObjectsPageComponentBase is supposed to be used
  * as base component for pages that use remote objects for internal use only without
  * submitting them as active for bridging.
  */
-class StandalonePollingPageComponentBase :	public PageComponentBase, public StandalonePollingBase
+class StandaloneActiveObjectsPageComponentBase :	public PageComponentBase, public Controller::StandaloneActiveObjectsListener
 {
 public:
-	explicit StandalonePollingPageComponentBase(UIPageId id);
-	~StandalonePollingPageComponentBase() override;
+	explicit StandaloneActiveObjectsPageComponentBase(UIPageId id);
+	~StandaloneActiveObjectsPageComponentBase() override;
 
 	HeaderWithElmListComponent* GetElementsContainer();
 
 	//==============================================================================
-	void UpdateGui(bool init) override;
+	void UpdateGui(bool init) override { ignoreUnused(init); };
 
 	//==========================================================================
 	void paint(Graphics&) override;
 	void resized() override;
+
+protected:
+	//==============================================================================
+	void SetStandalonePollingObjects(const std::map<RemoteObjectIdentifier, std::vector<RemoteObjectAddressing>>& objects);
+	void AddStandalonePollingObject(const RemoteObjectIdentifier& roi, const RemoteObjectAddressing& addressing);
+
+	//==============================================================================
+	void TriggerConfirmActiveObjects();
 
 private:
 	//==============================================================================
@@ -152,7 +159,7 @@ private:
 	std::unique_ptr<BorderedComponentContainer>	m_borderedElementsContainer;
 	std::unique_ptr<Viewport>					m_elementsContainerViewport;
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StandalonePollingPageComponentBase)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StandaloneActiveObjectsPageComponentBase)
 };
 
 

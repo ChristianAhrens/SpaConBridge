@@ -136,7 +136,7 @@ void SoundobjectTableComponent::UpdateTable()
 		if (customTableHeader)
 		{
 			customTableHeader->updateBridgingTitles();
-			customTableHeader->setColumnVisible(BridgingAwareTableHeaderComponent::TC_Name, ctrl->IsStaticRemoteObjectsPollingEnabled());
+			customTableHeader->setColumnVisible(BridgingAwareTableHeaderComponent::TC_Name, ctrl->IsStaticProcessorRemoteObjectsPollingEnabled());
 		}
 	}
 }

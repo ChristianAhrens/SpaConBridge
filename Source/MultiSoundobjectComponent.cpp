@@ -22,7 +22,6 @@
 #include "PagedUI/PageComponentManager.h"
 
 #include "CustomAudioProcessors/SoundobjectProcessor/SoundobjectProcessor.h"
-#include "Controller.h"
 #include "ProcessorSelectionManager.h"
 #include "MultiSoundobjectSlider.h"
 #include "SelectGroupSelector.h"
@@ -44,7 +43,7 @@ namespace SpaConBridge
  * Class constructor.
  */
 MultiSoundobjectComponent::MultiSoundobjectComponent()
-	: StandalonePollingBase()
+	: Controller::StandaloneActiveObjectsListener()
 {
 	// Add multi-slider
 	m_multiSoundobjectSlider = std::make_unique<MultiSoundobjectSlider>();
@@ -110,28 +109,8 @@ MultiSoundobjectComponent::MultiSoundobjectComponent()
 	// trigger lookandfeel update
 	lookAndFeelChanged();
 
-	// add the coordinatemapping settings objects to low-freq local polling
-	for (auto i = int(MAI_First); i <= int(MAI_Fourth); i++)
-	{
-		AddStandalonePollingObject(ROI_CoordinateMappingSettings_P1real, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE));
-		AddStandalonePollingObject(ROI_CoordinateMappingSettings_P2real, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE));
-		AddStandalonePollingObject(ROI_CoordinateMappingSettings_P3real, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE));
-		AddStandalonePollingObject(ROI_CoordinateMappingSettings_P4real, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE));
-		AddStandalonePollingObject(ROI_CoordinateMappingSettings_P1virtual, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE));
-		AddStandalonePollingObject(ROI_CoordinateMappingSettings_P3virtual, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE));
-		AddStandalonePollingObject(ROI_CoordinateMappingSettings_Flip, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE));
-		AddStandalonePollingObject(ROI_CoordinateMappingSettings_Name, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE));
-	}
-
-	// add the speaker position objects to low-freq local polling
-	for (auto i = 1; i <= DS100_CHANNELCOUNT; i++)
-	{
-		AddStandalonePollingObject(ROI_Positioning_SpeakerPosition, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE));
-	}
-
-	// start the object refresh timer now
-	setRefreshRateMs(3000);
-	triggerPollOnce();
+	// Prepare that the objects required for speaker+mapping visu are fetched from device
+	AddRequiredActiveObjects();
 }
 
 /**
@@ -139,6 +118,15 @@ MultiSoundobjectComponent::MultiSoundobjectComponent()
  */
 MultiSoundobjectComponent::~MultiSoundobjectComponent()
 {
+	if (Controller::Exists())
+	{
+		auto const ctrl = Controller::GetInstance();
+		if (ctrl)
+		{
+			// add this class to be notified of object value changes to controller
+			ctrl->RemoveStandaloneActiveObjectsListener(this);
+		}
+	}
 }
 
 /**
@@ -281,11 +269,11 @@ void MultiSoundobjectComponent::UpdateGui(bool init)
 	}
 
 	// Update the objectnames enabled state
-	if (ctrl->IsStaticRemoteObjectsPollingEnabled() != m_objectNamesEnable->getToggleState())
+	if (ctrl->IsStaticProcessorRemoteObjectsPollingEnabled() != m_objectNamesEnable->getToggleState())
 	{
-		m_objectNamesEnable->setToggleState(ctrl->IsStaticRemoteObjectsPollingEnabled(), dontSendNotification);
+		m_objectNamesEnable->setToggleState(ctrl->IsStaticProcessorRemoteObjectsPollingEnabled(), dontSendNotification);
 		if (m_multiSoundobjectSlider)
-			m_multiSoundobjectSlider->SetSoundobjectNamesEnabled(ctrl->IsStaticRemoteObjectsPollingEnabled());
+			m_multiSoundobjectSlider->SetSoundobjectNamesEnabled(ctrl->IsStaticProcessorRemoteObjectsPollingEnabled());
 		update = true;
 	}
 
@@ -497,9 +485,9 @@ void MultiSoundobjectComponent::buttonClicked(Button* button)
 	else if (m_objectNamesEnable.get() == button)
 	{
 		auto ctrl = Controller::GetInstance();
-		if (ctrl && ctrl->IsStaticRemoteObjectsPollingEnabled() != button->getToggleState())
+		if (ctrl && ctrl->IsStaticProcessorRemoteObjectsPollingEnabled() != button->getToggleState())
 		{
-			ctrl->SetStaticRemoteObjectsPollingEnabled(DCP_MultiSlider, button->getToggleState());
+			ctrl->SetStaticProcessorRemoteObjectsPollingEnabled(DCP_MultiSlider, button->getToggleState());
 			
 			if (m_multiSoundobjectSlider)
 				m_multiSoundobjectSlider->SetSoundobjectNamesEnabled(button->getToggleState());
@@ -537,8 +525,7 @@ bool MultiSoundobjectComponent::SetSelectedMapping(MappingAreaId mapping)
 				m_multiSoundobjectSlider->SetCoordinateMappingSettingsDataReady(false);
 				m_multiSoundobjectSlider->SetSpeakerPositionDataReady(false);
 
-				restartTimer();
-				triggerPollOnce();
+				AddRequiredActiveObjects();
 			}
             
             m_loadImage->setEnabled(false);
@@ -825,28 +812,74 @@ void MultiSoundobjectComponent::HandleObjectDataInternal(const RemoteObjectIdent
 		}
 		break;
 	default:
+		jassertfalse;
 		break;
 	}
 
 	if (m_multiSoundobjectSlider->CheckCoordinateMappingSettingsDataCompleteness() && !m_multiSoundobjectSlider->IsCoordinateMappingsSettingsDataReady())
 	{
 		m_multiSoundobjectSlider->SetCoordinateMappingSettingsDataReady(true);
-		DBG(juce::String(__FUNCTION__) + " we now have the required CoordinateMappingSettings data at hand to do fancy stuff.");
+		DBG(juce::String(__FUNCTION__) + " we now have CoordinateMappingSettings data at hand" + (m_multiSoundobjectSlider->IsSpeakerPositionDataReady() ? "." : " - waiting for SpeakerPosition data."));
 	}
 
 	if (m_multiSoundobjectSlider->CheckSpeakerPositionDataCompleteness() && !m_multiSoundobjectSlider->IsSpeakerPositionDataReady())
 	{
 		m_multiSoundobjectSlider->SetSpeakerPositionDataReady(true);
-		DBG(juce::String(__FUNCTION__) + " we now have the required SpeakerPosition data at hand to do fancy stuff.");
+		DBG(juce::String(__FUNCTION__) + " we now have SpeakerPosition data at hand" + (m_multiSoundobjectSlider->IsCoordinateMappingsSettingsDataReady() ? "." : " - waiting for CoordinateMappingSettings data."));
 	}
 
 	if (m_multiSoundobjectSlider->IsCoordinateMappingsSettingsDataReady() && m_multiSoundobjectSlider->IsSpeakerPositionDataReady())
 	{
-		stopTimer();
 		DBG(juce::String(__FUNCTION__) + " we now have the required CoordinateMappingSettings and SpeakerPosition data at hand to do fancy stuff.");
 
-		UpdateGui(false);
+		UpdateGui(true);
 	}
+}
+
+/**
+ * Helper method to encapuslate what is required to read the object values
+ * for speaker positions and coordinate mapping areas from device.
+ */
+void MultiSoundobjectComponent::AddRequiredActiveObjects()
+{
+	auto const ctrl = Controller::GetInstance();
+	if (ctrl)
+	{
+		// add this class to be notified of object value changes to controller
+		ctrl->AddStandaloneActiveObjectsListener(this);
+
+		// add the coordinatemapping settings objects to low-freq local polling
+		for (auto i = int(MAI_First); i <= int(MAI_Fourth); i++)
+		{
+			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_CoordinateMappingSettings_P1real, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
+			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_CoordinateMappingSettings_P2real, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
+			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_CoordinateMappingSettings_P3real, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
+			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_CoordinateMappingSettings_P4real, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
+			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_CoordinateMappingSettings_P1virtual, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
+			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_CoordinateMappingSettings_P3virtual, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
+			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_CoordinateMappingSettings_Flip, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
+			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_CoordinateMappingSettings_Name, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
+		}
+
+		// add the speaker position objects to low-freq local polling
+		for (auto i = 1; i <= DS100_CHANNELCOUNT; i++)
+		{
+			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_Positioning_SpeakerPosition, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
+		}
+	}
+}
+
+/**
+ * Helper method to encapuslate what is required to no longer 
+ * read the object values for speaker positions
+ * and coordinate mapping areas from device.
+ */
+void MultiSoundobjectComponent::RemoveRequiredActiveObjects()
+{
+	// remove this class from being notified of object value changes (also cleans up the registered objects)
+	auto const ctrl = Controller::GetInstance();
+	if (ctrl)
+		ctrl->RemoveStandaloneActiveObjectsListener(this);
 }
 
 

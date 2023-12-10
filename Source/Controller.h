@@ -54,31 +54,6 @@ class MatrixOutputProcessor;
 
 
 /**
- * Class StaticObjectsPollingHelper 
- */
-class StaticObjectsPollingHelper : private Timer
-{
-public:
-	StaticObjectsPollingHelper();
-	explicit StaticObjectsPollingHelper(int interval);
-	~StaticObjectsPollingHelper() override;
-
-	int GetInterval();
-	void SetInterval(int interval);
-
-	bool IsRunning();
-	void SetRunning(bool running);
-
-private:
-	void timerCallback() override;
-	void pollOnce();
-
-	int m_interval{ 0 };
-	bool m_running{ false };
-};
-
-
-/**
  * Class Controller which takes care of protocol communication through protocolbridging wrapper, including connection establishment
  * and sending/receiving of messages over the network.
  * NOTE: This is a singleton class, i.e. there is only one instance.
@@ -89,22 +64,52 @@ class Controller :
 	public ProtocolBridgingWrapper::Listener
 {
 public:
+	class StandaloneActiveObjectsListener
+	{
+	public:
+		StandaloneActiveObjectsListener() {};
+		virtual ~StandaloneActiveObjectsListener() {};
+
+		/**
+		 * Method to be overloaded to interface
+		 * with incoming message data, prefiltered to originate from 
+		 * devices of interest.
+		 */
+		virtual void HandleObjectDataInternal(const RemoteObjectIdentifier& roi, const RemoteObjectMessageData& msgData) = 0;
+	};
+
+public:
 	Controller();
 	~Controller() override;
 	static Controller* GetInstance();
 	void DestroyInstance();
 	static bool Exists() { return bool(s_singleton) && s_constructionFinished; };
 
+	//==========================================================================
 	bool GetParameterChanged(DataChangeParticipant changeTarget, DataChangeType change);
 	bool PopParameterChanged(DataChangeParticipant changeTarget, DataChangeType change);
 	void SetParameterChanged(DataChangeParticipant changeSource, DataChangeType changeTypes);
 
 	juce::int32 GetNextProcessorId();
 
-	std::vector<RemoteObject> GetStaticRemoteObjects();
-	bool IsStaticRemoteObjectsPollingEnabled();
-	void SetStaticRemoteObjectsPollingEnabled(DataChangeParticipant changeSource, bool enabled);
+	//==========================================================================
+	std::vector<RemoteObject> GetAllStandaloneActiveRemoteObjectsToUse();
+	bool IsStaticProcessorRemoteObjectsPollingEnabled();
+	void SetStaticProcessorRemoteObjectsPollingEnabled(DataChangeParticipant changeSource, bool enabled);
 
+	const std::vector<RemoteObject> GetStandaloneActiveRemoteObjects();
+	const std::vector<RemoteObject>& GetStandaloneActiveRemoteObjects(Controller::StandaloneActiveObjectsListener* listener);
+	bool ContainsStandaloneActiveRemoteObject(Controller::StandaloneActiveObjectsListener* listener, const RemoteObject& remoteObject);
+	bool AddStandaloneActiveRemoteObject(Controller::StandaloneActiveObjectsListener* listener, const RemoteObject& remoteObject);
+	bool RemoveStandaloneActiveRemoteObject(Controller::StandaloneActiveObjectsListener* listener, const RemoteObject& remoteObject);
+	void TriggerConfirmStandaloneActiveObjects(Controller::StandaloneActiveObjectsListener* listener);
+
+	bool AddStandaloneActiveObjectsListener(Controller::StandaloneActiveObjectsListener* listener);
+	bool RemoveStandaloneActiveObjectsListener(Controller::StandaloneActiveObjectsListener* listener);
+
+	//==========================================================================
+	void UpdateActiveRemoteObjects(bool dontSendNotification = false);
+	
 	//==========================================================================
 	void createNewSoundobjectProcessor();
 	SoundobjectProcessorId AddSoundobjectProcessor(DataChangeParticipant changeSource, SoundobjectProcessor* p);
@@ -113,9 +118,6 @@ public:
 	int GetSoundobjectProcessorCount() const;
 	SoundobjectProcessor* GetSoundobjectProcessor(SoundobjectProcessorId processorId) const;
 	std::vector<SoundobjectProcessorId> GetSoundobjectProcessorIds() const;
-
-	void UpdateActiveSoundobjects();
-
 	std::vector<RemoteObject> GetSoundobjectProcessorRemoteObjects(SoundobjectProcessorId soundobjectProcessorId);
 
 	//==========================================================================
@@ -126,9 +128,6 @@ public:
 	int GetMatrixInputProcessorCount() const;
 	MatrixInputProcessor* GetMatrixInputProcessor(MatrixInputProcessorId processorId) const;
 	std::vector<MatrixInputProcessorId> GetMatrixInputProcessorIds() const;
-
-	void UpdateActiveMatrixInputs();
-
 	std::vector<RemoteObject> GetMatrixInputProcessorRemoteObjects(MatrixInputProcessorId matrixInputProcessorId);
 
 	//==========================================================================
@@ -139,14 +138,12 @@ public:
 	int GetMatrixOutputProcessorCount() const;
 	MatrixOutputProcessor* GetMatrixOutputProcessor(MatrixOutputProcessorId processorId) const;
 	std::vector<MatrixOutputProcessorId> GetMatrixOutputProcessorIds() const;
-
-	void UpdateActiveMatrixOutputs();
-
 	std::vector<RemoteObject> GetMatrixOutputProcessorRemoteObjects(MatrixOutputProcessorId matrixOutputProcessorId);
 
 	//==========================================================================
 	ProtocolType GetDS100ProtocolType() const;
 	void SetDS100ProtocolType(DataChangeParticipant changeSource, ProtocolType protocol, bool dontSendNotification = false);
+	bool IsPollingDS100ProtocolType();
 
 	//==========================================================================
 	std::pair<juce::IPAddress, int> GetDS100IpAndPort() const;
@@ -286,6 +283,95 @@ public:
 	bool SendMessageDataDirect(const RemoteObjectIdentifier roi, RemoteObjectMessageData& msgData);
 
 private:
+	/**
+	 * Class StandaloneActiveObjectsPollingHelper
+	 * @brief	Controller specific helper class
+	 *			that takes over the task of timerbased
+	 *			getting of values defined as standalone active in controller.
+	 */
+	class StandaloneActiveObjectsPollingHelper : private Timer
+	{
+	public:
+		StandaloneActiveObjectsPollingHelper()
+		{
+			PollOnce();
+		}
+		explicit StandaloneActiveObjectsPollingHelper(int interval) : StandaloneActiveObjectsPollingHelper()
+		{
+			SetInterval(interval);
+		}
+		~StandaloneActiveObjectsPollingHelper() override
+		{
+		}
+
+		int GetInterval()
+		{
+			return m_interval;
+		}
+		void SetInterval(int interval)
+		{
+			m_interval = interval;
+
+			if (m_running)
+				startTimer(interval);
+		}
+
+		bool IsRunning()
+		{
+			return m_running && (getTimerInterval() != 0);
+		}
+		void SetRunning(bool running)
+		{
+			// do not restart time (would mess up currently elapsing interval) and no need to set the m_running member to identical value
+			if (m_running != running)
+			{
+				if (running)
+					startTimer(GetInterval());
+				else
+					stopTimer();
+
+				m_running = running;
+			}
+		}
+
+		void TriggerPollOnce(Controller::StandaloneActiveObjectsListener* listener)
+		{
+			if (nullptr == listener)
+				return PollOnce();
+			else if (Controller::GetInstance()->IsOnline())
+			{
+				auto remoteObjectsToPoll = Controller::GetInstance()->GetStandaloneActiveRemoteObjects(listener);
+				for (auto const& remoteObject : remoteObjectsToPoll)
+				{
+					auto romd = RemoteObjectMessageData(remoteObject._Addr, ROVT_NONE, 0, nullptr, 0);
+					Controller::GetInstance()->SendMessageDataDirect(remoteObject._Id, romd);
+				}
+			}
+		}
+
+	private:
+		void timerCallback() override
+		{
+			PollOnce();
+		}
+		void PollOnce()
+		{
+			if (Controller::GetInstance()->IsOnline())
+			{
+				auto remoteObjectsToPoll = Controller::GetInstance()->GetAllStandaloneActiveRemoteObjectsToUse();
+				for (auto const& remoteObject : remoteObjectsToPoll)
+				{
+					auto romd = RemoteObjectMessageData(remoteObject._Addr, ROVT_NONE, 0, nullptr, 0);
+					Controller::GetInstance()->SendMessageDataDirect(remoteObject._Id, romd);
+				}
+			}
+		}
+
+		int m_interval{ 0 };
+		bool m_running{ false };
+	};
+
+private:
 	//==========================================================================
 	const ProtocolId GetProtocolIdForProtocolType(const ProtocolBridgingType type);
 	
@@ -295,7 +381,6 @@ private:
 	//==========================================================================
 	void timerCallback() override;
 
-protected:
 	//==========================================================================
 	static std::unique_ptr<Controller>	s_singleton;				/**< The one and only instance of CController. */
 	static bool							s_constructionFinished;		/**< Bool indicator if construction of the singleton is finished (to ensure no recursion stack overflow happens. */
@@ -324,8 +409,11 @@ protected:
 
 	CriticalSection					m_mutex;						/**< A re-entrant mutex. */
 
-private:
-	std::unique_ptr<StaticObjectsPollingHelper> m_pollingHelper;
+	bool							m_staticProcessorRemoteObjectsPollingEnabled{ false };	/**< Member to define if static processor related objects should be regarded when polling/subscribing (usually object name strings). */
+
+	std::unique_ptr<StandaloneActiveObjectsPollingHelper>								m_pollingHelper;					/**< Polling helper instance for OSC DS100 communation. */
+	std::vector<Controller::StandaloneActiveObjectsListener*>							m_standaloneActiveObjectListeners;	/**< The listner objects, for message data handling callback. */
+	std::map<Controller::StandaloneActiveObjectsListener*, std::vector<RemoteObject>>	m_standaloneActiveRemoteObjects;	/**< List of remote objects that the controller manages as lowfreq apart from regular hifreq object value subscription/polling. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Controller)
 };

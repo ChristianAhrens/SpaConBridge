@@ -19,9 +19,8 @@
 
 #pragma once
 
+#include "Controller.h"
 #include "SpaConBridgeCommon.h"
-
-#include "StandalonePollingBase.h"
 
 
 namespace SpaConBridge
@@ -40,7 +39,7 @@ class SelectGroupSelector;
 class MultiSoundobjectComponent :	public Component,
 									public ComboBox::Listener,
 									public ToggleButton::Listener,
-									public StandalonePollingBase
+									public Controller::StandaloneActiveObjectsListener
 {
 public:
 	MultiSoundobjectComponent();
@@ -70,13 +69,17 @@ public:
 	//==============================================================================
 	void lookAndFeelChanged() override;
 
-protected:
+private:
+	//==============================================================================
+	void AddRequiredActiveObjects();
+	void RemoveRequiredActiveObjects();
+
 	//==============================================================================
 	void paint(Graphics&) override;
 	void resized() override;
 
 	//==============================================================================
-	void comboBoxChanged(ComboBox *comboBox) override;
+	void comboBoxChanged(ComboBox* comboBox) override;
 
 	//==============================================================================
 	void buttonClicked(Button* button) override;
@@ -84,7 +87,6 @@ protected:
 	//==============================================================================
 	void HandleObjectDataInternal(const RemoteObjectIdentifier& roi, const RemoteObjectMessageData& msgData) override;
 
-private:
 	//==============================================================================
 	std::unique_ptr<MultiSoundobjectSlider>	m_multiSoundobjectSlider;	/**> Multi-source 2D-Slider. */
 

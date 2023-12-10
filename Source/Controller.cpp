@@ -1110,9 +1110,9 @@ bool Controller::IsPollingDS100ProtocolType()
 	switch (m_DS100ProtocolType)
 	{
 	case PT_OSCProtocol:
-	case PT_NoProtocol:
 		return true;
 	case PT_OCP1Protocol:
+	case PT_NoProtocol:
 	default:
 		return false;
 		break;

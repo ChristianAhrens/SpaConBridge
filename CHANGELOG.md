@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.13.2] 2023-12-10
+### Added
+
+### Changed
+- Refactored Names, Scenes, En-Space related 'Standalone' remote object handling to leverage subscription mechanism where possible (OCP1 + None)
+
+### Fixed
+- Fixed OSC processing performance by updating submodule JUCE to develop incl. DatagramSocket buffer size fix
+- Fixed NoProtocol dummy animation for En-Space related objects
+
 ## [0.13.1] 2023-11-14
 ### Added
 - Added DS100 connection protocol option 'None' dummy data animation option (Off/Circular/Random)

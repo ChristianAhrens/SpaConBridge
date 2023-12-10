@@ -129,7 +129,7 @@ public:
 	void SetActiveBridgingProtocols(ProtocolBridgingType desiredActiveBridgingTypes);
 
 	//==========================================================================
-	bool UpdateActiveDS100RemoteObjectIds();
+	bool UpdateActiveDS100RemoteObjectIds(const std::vector<RemoteObject>& activeObjects, bool dontSendNotification = false);
 
 	ProtocolType GetDS100ProtocolType();
 	bool SetDS100ProtocolType(ProtocolType protocolType, bool dontSendNotification = false);

@@ -17,7 +17,7 @@
  */
 
 
-#include "StandalonePollingPageComponentBase.h"
+#include "StandaloneActiveObjectsPageComponentBase.h"
 
 #include "../../Controller.h"
 
@@ -28,15 +28,15 @@ namespace SpaConBridge
 
 /*
 ===============================================================================
- Class StandalonePollingPageComponentBase
+ Class StandaloneActiveObjectsPageComponentBase
 ===============================================================================
 */
 
 /**
  * Class constructor.
  */
-StandalonePollingPageComponentBase::StandalonePollingPageComponentBase(UIPageId id)
-	: PageComponentBase(id), StandalonePollingBase()
+StandaloneActiveObjectsPageComponentBase::StandaloneActiveObjectsPageComponentBase(UIPageId id)
+	: PageComponentBase(id), Controller::StandaloneActiveObjectsListener()
 {
 	m_elementsContainer = std::make_unique<HeaderWithElmListComponent>();
 	m_borderedElementsContainer = std::make_unique<BorderedComponentContainer>();
@@ -45,20 +45,29 @@ StandalonePollingPageComponentBase::StandalonePollingPageComponentBase(UIPageId 
 	m_elementsContainerViewport = std::make_unique<Viewport>();
 	m_elementsContainerViewport->setViewedComponent(m_borderedElementsContainer.get(), false);
 	addAndMakeVisible(m_elementsContainerViewport.get());
+
+	// add this class to be notified of object value changes to controller
+	auto const ctrl = Controller::GetInstance();
+	if (ctrl)
+		ctrl->AddStandaloneActiveObjectsListener(this);
 }
 
 /**
  * Class destructor.
  */
-StandalonePollingPageComponentBase::~StandalonePollingPageComponentBase()
+StandaloneActiveObjectsPageComponentBase::~StandaloneActiveObjectsPageComponentBase()
 {
+	// add this class to be notified of object value changes to controller
+	auto const ctrl = Controller::GetInstance();
+	if (ctrl)
+		ctrl->RemoveStandaloneActiveObjectsListener(this);
 }
 
 /**
  * Getter for the private elements container component to be able to externally add items.
  * @return	The container object pointer, if existing. Otherwise nullptr.
  */
-HeaderWithElmListComponent* StandalonePollingPageComponentBase::GetElementsContainer()
+HeaderWithElmListComponent* StandaloneActiveObjectsPageComponentBase::GetElementsContainer()
 {
 	return m_elementsContainer.get();
 }
@@ -67,7 +76,7 @@ HeaderWithElmListComponent* StandalonePollingPageComponentBase::GetElementsConta
  * Reimplemented to paint background.
  * @param g		Graphics context that must be used to do the drawing operations.
  */
-void StandalonePollingPageComponentBase::paint(Graphics& g)
+void StandaloneActiveObjectsPageComponentBase::paint(Graphics& g)
 {
 	// Paint background to cover the controls behind this overlay.
 	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId).darker());
@@ -77,7 +86,7 @@ void StandalonePollingPageComponentBase::paint(Graphics& g)
 /**
  * Reimplemented to resize elements container component.
  */
-void StandalonePollingPageComponentBase::resized()
+void StandaloneActiveObjectsPageComponentBase::resized()
 {
 	auto bounds = getLocalBounds().reduced(5);
 
@@ -111,15 +120,41 @@ void StandalonePollingPageComponentBase::resized()
 }
 
 /**
- * Reimplemtend refresh method that is cyclically called by pagecontainercomponent parent
- * and used here to trigger a single burst of polling messages for the objects that are registered for 'monitoring'.
- * @param init	Ignored here
+ * Setter for the map of vectors of the objects that are registered for 'monitoring'.
+ * @param	objects	The map of vectors of the objects that shall be used for 'monitoring'.
  */
-void StandalonePollingPageComponentBase::UpdateGui(bool init)
+void StandaloneActiveObjectsPageComponentBase::SetStandalonePollingObjects(const std::map<RemoteObjectIdentifier, std::vector<RemoteObjectAddressing>>& objects)
 {
-	ignoreUnused(init);
+	for (auto const& objectsPerROI : objects)
+	{
+		auto const& roi = objectsPerROI.first;
+		for (auto const& objectAddr : objectsPerROI.second)
+			AddStandalonePollingObject(roi, objectAddr);
+	}
+}
 
-	triggerPollOnce();
+/**
+ * Helper method to add a single remote object (incl. addressing) to the map of vectors of the objects that are registered for 'monitoring'.
+ * @param	roi		The id of the remote object to add.
+ * @param	addressing	The addressing of the remote object.
+ */
+void StandaloneActiveObjectsPageComponentBase::AddStandalonePollingObject(const RemoteObjectIdentifier& roi, const RemoteObjectAddressing& addressing)
+{
+	auto const ctrl = Controller::GetInstance();
+	if (ctrl)
+		ctrl->AddStandaloneActiveRemoteObject(this, { roi, addressing });
+}
+
+/**
+ * Helper method to confirm active objects through controller interface.
+ * This might result in a single poll of all objects or subscription established
+ * verification, depending on the protocol in use.
+ */
+void StandaloneActiveObjectsPageComponentBase::TriggerConfirmActiveObjects()
+{
+	auto const ctrl = Controller::GetInstance();
+	if (ctrl)
+		ctrl->TriggerConfirmStandaloneActiveObjects(this);
 }
 
 

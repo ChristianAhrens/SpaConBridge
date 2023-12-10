@@ -2,7 +2,7 @@
 cd ../../../
 
 # set convenience variables
-NotarizationUser=$1 # appleid to use for notarization
+AppStoreUser=$1 # appleid to use for appstore access
 ProjectName=$2 # app name like "SpaConBridge"
 JUCEDir=submodules/JUCE
 ProjucerPath="$JUCEDir"/extras/Projucer/Builds/MacOSX
@@ -32,8 +32,8 @@ xcodebuild -project "$XCodeProjectPath" -scheme "$XCodeProjectScheme" clean arch
 xcodebuild -exportArchive -archivePath "$XCodeBuildPath"/"$ProjectName".xcarchive -exportOptionsPlist "$XCodeExportOptionsPath" -exportPath "$AppExportPath" -allowProvisioningUpdates
 
 # validate the app bundle
-# (assumes that a keychain item "SCB_DMG_Notarization_PW" exists, created e.g. with "xcrun altool --store-password-in-keychain-item "SCB_DMGNotarization_PW" -u "abc" -p "def"")
-xcrun altool --validate-app --file "$AppExportPath"/"$ProjectName".ipa --type ios --username "$NotarizationUser" --password "@keychain:SCB_DMGNotarization_PW"
+# (assumes that a keychain item "AppSpecificPW" exists, created e.g. with "xcrun altool --store-password-in-keychain-item "AppSpecificPW" -u "abc" -p "def"")
+xcrun altool --validate-app --file "$AppExportPath"/"$ProjectName".ipa --type ios --username "$AppStoreUser" --password "@keychain:AppSpecificPW"
 
 # uploading the app bundle can now be done with the following
-xcrun altool --upload-app --file "$AppExportPath"/"$ProjectName".ipa --type ios --username "$NotarizationUser" --password "@keychain:SCB_DMGNotarization_PW"
+xcrun altool --upload-app --file "$AppExportPath"/"$ProjectName".ipa --type ios --username "$AppStoreUser" --password "@keychain:AppSpecificPW"

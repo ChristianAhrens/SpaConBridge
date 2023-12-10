@@ -37,7 +37,7 @@ namespace SpaConBridge
  * Class constructor.
  */
 EnSpacePageComponent::EnSpacePageComponent()
-	: StandalonePollingPageComponentBase(UIPageId::UPI_EnSpace)
+	: StandaloneActiveObjectsPageComponentBase(UIPageId::UPI_EnSpace)
 {
 	AddStandalonePollingObject(ROI_MatrixSettings_ReverbRoomId, RemoteObjectAddressing());
 	AddStandalonePollingObject(ROI_MatrixSettings_ReverbPredelayFactor, RemoteObjectAddressing());
@@ -234,8 +234,10 @@ void EnSpacePageComponent::HandleObjectDataInternal(const RemoteObjectIdentifier
 		if (m_preDelayFactorChangePending)
 		{
 			if (std::roundf(10 * m_preDelayFactorChange) == std::roundf(10 * newPreDelayFactor))
+			{
 				m_preDelayFactorChangePending = false;
-			return;
+				return;
+			}
 		}
 
 		auto rpfR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixSettings_ReverbPredelayFactor);
@@ -257,8 +259,10 @@ void EnSpacePageComponent::HandleObjectDataInternal(const RemoteObjectIdentifier
 		if (m_rearLevelChangePending)
 		{
 			if (std::roundf(10 * m_rearLevelChange) == std::roundf(10 * newReverbRearLevel))
+			{
 				m_rearLevelChangePending = false;
-			return;
+				return;
+			}
 		}
 
 		auto rrLR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixSettings_ReverbRearLevel);
@@ -269,6 +273,7 @@ void EnSpacePageComponent::HandleObjectDataInternal(const RemoteObjectIdentifier
 		}
 		break;
 	default:
+		jassertfalse;
 		break;
 	}
 }
@@ -296,7 +301,7 @@ void EnSpacePageComponent::lookAndFeelChanged()
  */
 void EnSpacePageComponent::UpdateGui(bool init)
 {
-	StandalonePollingPageComponentBase::UpdateGui(init);
+	StandaloneActiveObjectsPageComponentBase::UpdateGui(init);
 
 	auto ctrl = Controller::GetInstance();
 	if (!ctrl)

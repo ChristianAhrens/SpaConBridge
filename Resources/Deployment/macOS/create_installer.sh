@@ -23,3 +23,5 @@ codesign --force --sign "$CodesignCertName" "$DmgTargetPath"
 # trigger notarization
 # (assumes that credentials are stored to keychain, e.g. with xcrun notarytool store-credentials APP_NOTARIZATION_CREDENTIALS_PROFILE --apple-id APPLE_ID --team-id TEAM_ID)
 xcrun notarytool submit --keychain-profile "APP_NOTARIZATION_CREDENTIALS_PROFILE" --wait "$DmgTargetPath"
+# staple the notarization to the artifact for offline operation
+xcrun stapler staple "$DmgTargetPath"

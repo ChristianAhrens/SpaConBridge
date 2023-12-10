@@ -1112,7 +1112,7 @@ void SettingsSectionsComponent::buttonClicked(Button* button)
 		pageMgr->SetEnabledPages(enabledPages, false);
 	}
 	if (m_StaticObjectsPollingButton.get() == button)
-		ctrl->SetStaticRemoteObjectsPollingEnabled(DCP_Settings, m_StaticObjectsPollingButton->getToggleState());
+		ctrl->SetStaticProcessorRemoteObjectsPollingEnabled(DCP_Settings, m_StaticObjectsPollingButton->getToggleState());
 #if USE_FULLSCREEN_WINDOWMODE_TOGGLE
 	if (m_ToggleFullscreenButton.get() == button)
 		pageMgr->SetFullscreenWindowMode(m_ToggleFullscreenButton->getToggleState(), false);
@@ -1615,7 +1615,7 @@ void SettingsSectionsComponent::processUpdatedGeneralConfig()
 
 	auto ctrl = Controller::GetInstance();
 	if (ctrl && m_StaticObjectsPollingButton)
-		m_StaticObjectsPollingButton->setToggleState(ctrl->IsStaticRemoteObjectsPollingEnabled(), dontSendNotification);
+		m_StaticObjectsPollingButton->setToggleState(ctrl->IsStaticProcessorRemoteObjectsPollingEnabled(), dontSendNotification);
 }
 
 /**

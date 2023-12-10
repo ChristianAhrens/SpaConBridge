@@ -22,7 +22,7 @@
 #include <JuceHeader.h>
 #include <TextWithImageButton.h>
 
-#include "../StandalonePollingPageComponentBase.h"
+#include "../StandaloneActiveObjectsPageComponentBase.h"
 
  /**
   * Fwd. decls.
@@ -38,7 +38,7 @@ namespace SpaConBridge
 /**
  * class ScenesPageComponent provides control for DS100 scene transport.
  */
-class ScenesPageComponent : public StandalonePollingPageComponentBase,
+class ScenesPageComponent : public StandaloneActiveObjectsPageComponentBase,
 							public TextButton::Listener,
 							public TextEditor::Listener
 {

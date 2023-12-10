@@ -21,7 +21,7 @@
 
 #include <JuceHeader.h>
 
-#include "../StandalonePollingPageComponentBase.h"
+#include "../StandaloneActiveObjectsPageComponentBase.h"
 
 
 namespace SpaConBridge
@@ -31,7 +31,7 @@ namespace SpaConBridge
 /**
  * class EnSpacePageComponent provides control for DS100 scene transport.
  */
-class EnSpacePageComponent :	public StandalonePollingPageComponentBase,
+class EnSpacePageComponent :	public StandaloneActiveObjectsPageComponentBase,
 								public TextButton::Listener,
 								public Slider::Listener
 {

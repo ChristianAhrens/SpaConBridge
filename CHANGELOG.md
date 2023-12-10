@@ -4,12 +4,15 @@ All notable changes to SpaConBridge will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.13.2] 2023-12-10
 ### Added
 
 ### Changed
+- Refactored Names, Scenes, En-Space related 'Standalone' remote object handling to leverage subscription mechanism where possible (OCP1 + None)
 
 ### Fixed
+- Fixed OSC processing performance by updating submodule JUCE to develop incl. DatagramSocket buffer size fix
+- Fixed NoProtocol dummy animation for En-Space related objects
 
 ## [0.13.1] 2023-11-14
 ### Added

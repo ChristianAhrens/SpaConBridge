@@ -832,8 +832,6 @@ void MultiSoundobjectComponent::HandleObjectDataInternal(const RemoteObjectIdent
 	{
 		DBG(juce::String(__FUNCTION__) + " we now have the required CoordinateMappingSettings and SpeakerPosition data at hand to do fancy stuff.");
 
-		RemoveRequiredActiveObjects();
-
 		UpdateGui(true);
 	}
 }

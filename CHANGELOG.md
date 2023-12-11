@@ -4,12 +4,13 @@ All notable changes to SpaConBridge will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.13.3] 2023-12-11
 ### Added
 
 ### Changed
 
 ### Fixed
+- Fixed bridging processing when 'None' DS100 protocol dummy data is used
 
 ## [0.13.2] 2023-12-10
 ### Added

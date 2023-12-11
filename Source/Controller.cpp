@@ -1070,7 +1070,7 @@ void Controller::SetDS100ProtocolType(DataChangeParticipant changeSource, Protoc
 		m_DS100ProtocolType = protocol;
 
 		// special case NoProtocol - this requires shutting off any extension mode
-		if (m_DS100ProtocolType == PT_NoProtocol)
+		if (m_DS100ProtocolType == PT_NoProtocol && m_DS100ExtensionMode != EM_Off)
 		{
 			if (m_protocolBridge.SetDS100ExtensionMode(EM_Off, true))
 				m_DS100ExtensionMode = EM_Off;

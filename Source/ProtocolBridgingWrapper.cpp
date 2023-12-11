@@ -2848,12 +2848,11 @@ bool ProtocolBridgingWrapper::UpdateActiveDS100RemoteObjectIds(const std::vector
 	if (protocolXmlElement1stDS100)
 	{
 		auto activeObjsXmlElement = protocolXmlElement1stDS100->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ACTIVEOBJECTS));
-		if (activeObjsXmlElement)
+		if (!activeObjsXmlElement)
 		{
-			ProcessingEngineConfig::WriteActiveObjects(activeObjsXmlElement, activeObjectsOnFirstDS100);
+			activeObjsXmlElement = protocolXmlElement1stDS100->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ACTIVEOBJECTS));
 		}
-		else
-			return false;
+		ProcessingEngineConfig::WriteActiveObjects(activeObjsXmlElement, activeObjectsOnFirstDS100);
 	}
 	// first DS100 existence is mandatory, we can assume that an error occured if the corresp. xml element is not available (second DS100 xml element is optional)
 	else
@@ -2864,12 +2863,11 @@ bool ProtocolBridgingWrapper::UpdateActiveDS100RemoteObjectIds(const std::vector
 	if (protocolXmlElement2ndDS100)
 	{
 		auto activeObjsXmlElement = protocolXmlElement2ndDS100->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ACTIVEOBJECTS));
-		if (activeObjsXmlElement)
+		if (!activeObjsXmlElement)
 		{
-			ProcessingEngineConfig::WriteActiveObjects(activeObjsXmlElement, activeObjectsOnSecondDS100);
+			activeObjsXmlElement = protocolXmlElement2ndDS100->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::ACTIVEOBJECTS));
 		}
-		else
-			return false;
+		ProcessingEngineConfig::WriteActiveObjects(activeObjsXmlElement, activeObjectsOnSecondDS100);
 	}
 
 	// set updated xml config live
@@ -2918,8 +2916,31 @@ bool ProtocolBridgingWrapper::SetDS100ProtocolType(ProtocolType protocolType, bo
 			// Set the new protocolType. This is responsible for the instantiation of correct ProtocolProcessor type in RPBC when parsing the updated xml
 			protocolXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), protocolTypeString);
 
-			if (protocolType != PT_NoProtocol)
+			if (protocolType == PT_NoProtocol)
 			{
+				if (auto hostPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT)))
+					protocolXmlElement->removeChildElement(hostPortXmlElement, true);
+				if (auto clientPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT)))
+					protocolXmlElement->removeChildElement(clientPortXmlElement, true);
+				if (auto ipAddressXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS)))
+					protocolXmlElement->removeChildElement(ipAddressXmlElement, true);
+				if (auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL)))
+					protocolXmlElement->removeChildElement(pollingIntervalXmlElement, true);
+				if (auto ocp1ConnectionModeXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE)))
+					protocolXmlElement->removeChildElement(ocp1ConnectionModeXmlElement, true);
+			}
+			else
+			{
+				auto ipAdressXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
+				auto ipAdressElmWasNewlyCreated = false;
+				if (!ipAdressXmlElement)
+				{
+					ipAdressXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
+					ipAdressElmWasNewlyCreated = true;
+				}
+				if (protocolTypeChanged || ipAdressElmWasNewlyCreated)
+					ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
+
 				// DS100 uses different ports for OSC (udp) and OCA (tcp)
 				auto clientPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
 				auto clientPortElmWasNewlyCreated = false;
@@ -2983,8 +3004,26 @@ bool ProtocolBridgingWrapper::SetDS100ProtocolType(ProtocolType protocolType, bo
 			// Set the new protocolType. This is responsible for the instantiation of correct ProtocolProcessor type in RPBC when parsing the updated xml
 			protocolXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::TYPE), ProcessingEngineConfig::ProtocolTypeToString(protocolType));
 
-			if (protocolType != PT_NoProtocol)
+			if (protocolType == PT_NoProtocol)
 			{
+				if (auto hostPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT)))
+					protocolXmlElement->removeChildElement(hostPortXmlElement, true);
+				if (auto clientPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT)))
+					protocolXmlElement->removeChildElement(clientPortXmlElement, true);
+				if (auto ipAddressXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS)))
+					protocolXmlElement->removeChildElement(ipAddressXmlElement, true);
+				if (auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL)))
+					protocolXmlElement->removeChildElement(pollingIntervalXmlElement, true);
+				if (auto ocp1ConnectionModeXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE)))
+					protocolXmlElement->removeChildElement(ocp1ConnectionModeXmlElement, true);
+			}
+			else
+			{
+				auto ipAdressXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
+				if (!ipAdressXmlElement)
+					ipAdressXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
+				ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT2_IP);
+
 				// DS100 uses different ports for OSC (udp) and OCA (tcp)
 				auto clientPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
 				if (!clientPortXmlElement)
@@ -3670,9 +3709,10 @@ const juce::String ProtocolBridgingWrapper::GetDS100dbprData() const
 		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
 		if (protocolXmlElement)
 		{
-			if (nullptr != protocolXmlElement->getFirstChildElement() && protocolXmlElement->getFirstChildElement()->isTextElement())
+			auto dbprDataXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DBPRDATA));
+			if (nullptr != dbprDataXmlElement && nullptr != dbprDataXmlElement->getFirstChildElement() && dbprDataXmlElement->getFirstChildElement()->isTextElement())
 			{
-				auto projectDummyData = protocolXmlElement->getFirstChildElement()->getAllSubText();
+				auto projectDummyData = dbprDataXmlElement->getFirstChildElement()->getAllSubText();
 				return projectDummyData;
 			}
 		}
@@ -3697,15 +3737,21 @@ bool ProtocolBridgingWrapper::SetDS100dbprData(const juce::String& projectDummyD
 		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
 		if (protocolXmlElement)
 		{
-			protocolXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::USESACTIVEOBJ), 0);
-			if (1 == protocolXmlElement->getNumChildElements() && protocolXmlElement->getFirstChildElement()->isTextElement())
+			protocolXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::USESACTIVEOBJ), 1);
+			auto dbprDataXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DBPRDATA));
+			if (nullptr != dbprDataXmlElement && 1 == dbprDataXmlElement->getNumChildElements() && dbprDataXmlElement->getFirstChildElement()->isTextElement())
 			{
-				protocolXmlElement->getFirstChildElement()->setText(projectDummyData);
+				dbprDataXmlElement->getFirstChildElement()->setText(projectDummyData);
 			}
-			else if (1 != protocolXmlElement->getNumChildElements() || !protocolXmlElement->getFirstChildElement()->isTextElement())
+			else if (nullptr != dbprDataXmlElement && (1 != dbprDataXmlElement->getNumChildElements() || !dbprDataXmlElement->getFirstChildElement()->isTextElement()))
 			{
-				protocolXmlElement->deleteAllChildElements();
-				protocolXmlElement->addTextElement(projectDummyData);
+				dbprDataXmlElement->deleteAllChildElements();
+				dbprDataXmlElement->addTextElement(projectDummyData);
+			}
+			else if (nullptr == dbprDataXmlElement)
+			{
+				dbprDataXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DBPRDATA));
+				dbprDataXmlElement->addTextElement(projectDummyData);
 			}
 			else
 				return false;

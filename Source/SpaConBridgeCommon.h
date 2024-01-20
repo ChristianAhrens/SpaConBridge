@@ -366,7 +366,7 @@ public:
 			tempFileOutputStream.write(destBlock.getData(), destBlock.getSize());
 		}
 		
-		return std::move(instanceOfThis);
+        return instanceOfThis;
 	}
 
 protected:

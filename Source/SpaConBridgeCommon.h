@@ -37,7 +37,7 @@ namespace SpaConBridge
  * Type definitions.
  */
 typedef juce::int32 SoundobjectId;
-typedef juce::int8 MappingId;
+typedef juce::int32 MappingId;
 typedef juce::int32 MatrixInputId;
 typedef juce::int32 MatrixOutputId;
 typedef juce::int32 SoundobjectProcessorId;

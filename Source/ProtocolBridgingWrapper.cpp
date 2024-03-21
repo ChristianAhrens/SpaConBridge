@@ -3427,9 +3427,9 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 						protocolBChCntXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLBCHCNT));
 					auto protocolBChCntTextXmlElement = protocolBChCntXmlElement->getFirstChildElement();
 					if (protocolBChCntTextXmlElement && protocolBChCntTextXmlElement->isTextElement())
-						protocolBChCntTextXmlElement->setText(String(DS100_EXTMODE_CHANNELCOUNT));
+						protocolBChCntTextXmlElement->setText(String(INVALID_ADDRESS_VALUE));
 					else
-						protocolBChCntXmlElement->addTextElement(String(DS100_EXTMODE_CHANNELCOUNT));
+						protocolBChCntXmlElement->addTextElement(String(INVALID_ADDRESS_VALUE));
 
 					// update precision element
 					auto precisionXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));

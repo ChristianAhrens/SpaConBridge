@@ -47,7 +47,7 @@ StatisticsLog::StatisticsLog()
 	int tableHeaderFlags = (TableHeaderComponent::visible);
 	m_table->getHeader().addColumn("", SLC_Number, 60, 60, -1, tableHeaderFlags);
 	m_table->getHeader().addColumn("Remote Object", SLC_ObjectName, 120, 120, -1, tableHeaderFlags);
-	m_table->getHeader().addColumn("Ch.", SLC_SourceId, 35, 35, -1, tableHeaderFlags);
+	m_table->getHeader().addColumn("Addr.", SLC_ObjectAddr, 35, 35, -1, tableHeaderFlags);
 	m_table->getHeader().addColumn("Value", SLC_Value, 70, 70, -1, tableHeaderFlags);
 	m_table->getHeader().addColumn("Origin", SLC_LogSourceName, 60, 60, -1, tableHeaderFlags);
 
@@ -129,7 +129,7 @@ void StatisticsLog::AddMessageData(StatisticsLogSource logSourceType, const Remo
 	jassert(mapIdx >= 0);
 	m_logEntries[mapIdx][SLC_Number] = String(m_logEntryCounter);
 	m_logEntries[mapIdx][SLC_ObjectName] = ProcessingEngineConfig::GetObjectShortDescription(roi);
-	m_logEntries[mapIdx][SLC_SourceId] = String(msgData._addrVal._first);
+	m_logEntries[mapIdx][SLC_ObjectAddr] = msgData._addrVal.toNiceString();
 	m_logEntries[mapIdx][SLC_Value] = valueString;
 	m_logEntries[mapIdx][SLC_LogSourceName] = GetLogSourceName(logSourceType);
 	m_logEntries[mapIdx][SLC_LogSourceType] = String(logSourceType);
@@ -237,7 +237,7 @@ int StatisticsLog::getColumnAutoSizeWidth(int columnId)
 		return 60;
 	case SLC_ObjectName:
 		return 120;
-	case SLC_SourceId:
+	case SLC_ObjectAddr:
 		return 40;
 	case SLC_Value:
 		return 60;

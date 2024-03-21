@@ -228,7 +228,9 @@ void SettingsPageComponent::onConfigUpdated()
 }
 
 /**
- *
+ * Method to be called when user clicks on 'apply config'
+ * to in consequence dump text from editor on ui to an xml
+ * and feed it to current configuration.
  */
 void SettingsPageComponent::onApplyClicked()
 {
@@ -246,6 +248,10 @@ void SettingsPageComponent::onApplyClicked()
 			auto uiCfgXmlElement = configXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::UICONFIG));
 			if (uiCfgXmlElement)
 				config->setConfigState(std::make_unique<XmlElement>(*uiCfgXmlElement));
+			
+			auto selMgrCfgXmlElement = configXmlElement->getChildByName(AppConfiguration::getTagName(AppConfiguration::TagID::PROCESSORSELECTIONMANAGER));
+			if (selMgrCfgXmlElement)
+				config->setConfigState(std::make_unique<XmlElement>(*selMgrCfgXmlElement));
 
 			config->triggerWatcherUpdate();
 		}

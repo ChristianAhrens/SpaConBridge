@@ -64,7 +64,7 @@ public:
 		SLC_Number,
 		SLC_LogSourceName,
 		SLC_ObjectName,
-		SLC_SourceId,
+		SLC_ObjectAddr,
 		SLC_Value,
 		SLC_LogSourceType,
 		SLC_MAX_COLUMNS

@@ -4,12 +4,15 @@ All notable changes to SpaConBridge will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.13.4] 2024-03-21
 ### Added
+- Added support for more remote objects to OCP1 DS100 communication protocol
 
 ### Changed
 
 ### Fixed
+- Fixed DS100 'Extend' mode to behave correctly when used with bridging to multiple 3rd party protocols
+- Fixed ADM OSC incoming polar coordinates processing
 
 ## [0.13.3] 2023-12-11
 ### Added
@@ -47,7 +50,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Updated JUCE submodule version to v7.0.8
 
 ### Fixed
-- Fixed 'all' mapping area multi Soundobject visualization mouse interaction for rotated or unusually parametrized mapping areas
+- Fixed 'all' ma.pping area multi Soundobject visualization mouse interaction for rotated or unusually parametrized mapping areas
 - Fixed occasional incorrect online indication state
 - Fixed runtime lookAndFeel change text editor text updating
 - Fixed protocol bridging to not forward DS100 data acknowledge messages to 3rd party that triggered the change

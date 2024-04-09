@@ -11,6 +11,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+## [0.13.5] 2024-04-09
+### Added
+- Added support for handling and simulation of more objects in DS100 emulation mode 'None'
+
+### Changed
+- Modified Ocp1 protocol communication to use synchronous thread-decoupled approach for enhanced performance
+
+### Fixed
+
 ## [0.13.4] 2024-03-21
 ### Added
 - Added support for more remote objects to OCP1 DS100 communication protocol

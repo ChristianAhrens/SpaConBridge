@@ -62,6 +62,8 @@
                   file="submodules/RemoteProtocolBridgeCore/submodules/NanoOcp/Source/Ocp1DS100ObjectDefinitions.h"/>
             <FILE id="FkICD0" name="Ocp1Message.cpp" compile="1" resource="0" file="submodules/RemoteProtocolBridgeCore/submodules/NanoOcp/Source/Ocp1Message.cpp"/>
             <FILE id="PCY7og" name="Ocp1Message.h" compile="0" resource="0" file="submodules/RemoteProtocolBridgeCore/submodules/NanoOcp/Source/Ocp1Message.h"/>
+            <FILE id="T2a9aH" name="Variant.cpp" compile="1" resource="0" file="submodules/RemoteProtocolBridgeCore/submodules/NanoOcp/Source/Variant.cpp"/>
+            <FILE id="hBeqjk" name="Variant.h" compile="0" resource="0" file="submodules/RemoteProtocolBridgeCore/submodules/NanoOcp/Source/Variant.h"/>
           </GROUP>
         </GROUP>
         <GROUP id="{F0157EC5-9555-900E-531F-BF6E4749BCDB}" name="Source">

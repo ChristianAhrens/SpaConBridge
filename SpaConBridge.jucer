@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="MFvkL5" name="SpaConBridge" projectType="guiapp" version="0.13.6"
+<JUCERPROJECT id="MFvkL5" name="SpaConBridge" projectType="guiapp" version="0.14.0"
               bundleIdentifier="com.ChristianAhrens.SpaConBridge" companyName="Christian Ahrens"
               companyEmail="christianahrens@me.com" displaySplashScreen="0"
               reportAppUsage="0" companyCopyright="2023" jucerFormatVersion="1"
@@ -69,6 +69,10 @@
         <GROUP id="{F0157EC5-9555-900E-531F-BF6E4749BCDB}" name="Source">
           <GROUP id="{2E8BFFBC-4304-5502-C5BC-5ED6245F5602}" name="ProcessingEngine">
             <GROUP id="{F34634AA-7C63-8492-0796-EA519DFF7646}" name="ProtocolProcessor">
+              <FILE id="qK91Dh" name="AURAProtocolProtocolProcessor.cpp" compile="1"
+                    resource="0" file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/AURAProtocolProtocolProcessor.cpp"/>
+              <FILE id="kqhSFS" name="AURAProtocolProtocolProcessor.h" compile="0"
+                    resource="0" file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/AURAProtocolProtocolProcessor.h"/>
               <GROUP id="{6229E86E-3EE8-7268-007E-0F86792E20C8}" name="OCP1ProtocolProcessor">
                 <FILE id="rF47EZ" name="OCP1ProtocolProcessor.cpp" compile="1" resource="0"
                       file="submodules/RemoteProtocolBridgeCore/Source/ProcessingEngine/ProtocolProcessor/OCP1ProtocolProcessor/OCP1ProtocolProcessor.cpp"/>

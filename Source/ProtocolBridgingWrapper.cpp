@@ -2975,6 +2975,17 @@ bool ProtocolBridgingWrapper::SetDS100ProtocolType(ProtocolType protocolType, bo
 				if (auto ocp1ConnectionModeXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE)))
 					protocolXmlElement->removeChildElement(ocp1ConnectionModeXmlElement, true);
 			}
+			else if (protocolType == PT_AURAProtocol)
+			{
+				if (auto hostPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT)))
+					protocolXmlElement->removeChildElement(hostPortXmlElement, true);
+				if (auto clientPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT)))
+					protocolXmlElement->removeChildElement(clientPortXmlElement, true);
+				if (auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL)))
+					protocolXmlElement->removeChildElement(pollingIntervalXmlElement, true);
+				if (auto ocp1ConnectionModeXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE)))
+					protocolXmlElement->removeChildElement(ocp1ConnectionModeXmlElement, true);
+			}
 			else
 			{
 				auto ipAdressXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
@@ -3058,6 +3069,17 @@ bool ProtocolBridgingWrapper::SetDS100ProtocolType(ProtocolType protocolType, bo
 					protocolXmlElement->removeChildElement(clientPortXmlElement, true);
 				if (auto ipAddressXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS)))
 					protocolXmlElement->removeChildElement(ipAddressXmlElement, true);
+				if (auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL)))
+					protocolXmlElement->removeChildElement(pollingIntervalXmlElement, true);
+				if (auto ocp1ConnectionModeXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE)))
+					protocolXmlElement->removeChildElement(ocp1ConnectionModeXmlElement, true);
+			}
+			else if (protocolType == PT_AURAProtocol)
+			{
+				if (auto hostPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT)))
+					protocolXmlElement->removeChildElement(hostPortXmlElement, true);
+				if (auto clientPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT)))
+					protocolXmlElement->removeChildElement(clientPortXmlElement, true);
 				if (auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL)))
 					protocolXmlElement->removeChildElement(pollingIntervalXmlElement, true);
 				if (auto ocp1ConnectionModeXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE)))

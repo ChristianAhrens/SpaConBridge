@@ -50,9 +50,6 @@ public:
 
 	const DataChangeParticipant GetParameterChangeSource(const DataChangeType& changeType);
 
-	void SetParamInTransit(DataChangeType paramsChanged);
-	bool IsParamInTransit(DataChangeType paramsChanged) const;
-
 	// Overriden functions of class AudioProcessor
 	virtual void getStateInformation(MemoryBlock& destData) override;
 	virtual void setStateInformation(const void* data, int sizeInBytes) override;
@@ -81,11 +78,7 @@ protected:
 
 	std::map<DataChangeParticipant, DataChangeType>	m_dataChangesByTarget;					/**< Keep track of which automation parameters have changed recently. */
 	std::map<DataChangeType, DataChangeParticipant>	m_dataChangeTypesByLastChangeSource;	/**< Keep track of who has last changed which automation parameters. */
-	DataChangeType									m_paramSetCommandsInTransit = DCT_None;	/**< Flags used to indicate when a SET command for a parameter is currently out on the network.
-																							 * Until such a flag is cleared (in the Tick() method), calls to IsParamInTransit will return true.
-																							 * This mechanism is used to ensure that parameters aren't overwritten right after having been
-																							 * changed via the Gui or the host.
-																							 */
+	
 	String											m_processorDisplayName;					/**< User friendly name for this processor instance. */
 	DataChangeParticipant							m_currentChangeSource = DCP_Host;		/**< Member used to ensure that property changes are registered to the correct source. See MainProcessor::SetParameterValue(). */
 

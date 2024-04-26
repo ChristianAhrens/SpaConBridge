@@ -66,6 +66,7 @@ static constexpr int PROTOCOL_INTERVAL_STATIC_OBJS	= 2000;		//< Object polling r
  */
 std::unique_ptr<Controller> Controller::s_singleton;
 bool Controller::s_constructionFinished{ false };
+bool Controller::TickTrigger::s_tickHandled{ true };
 
 /**
  * Constructs an Controller object.
@@ -103,7 +104,6 @@ Controller::~Controller()
 {
 	s_constructionFinished = false;
 
-	stopTimer();
 	Disconnect();
 
 	const ScopedLock lock(m_mutex);
@@ -183,6 +183,7 @@ void Controller::SetParameterChanged(DataChangeParticipant changeSource, DataCha
 	case DCT_MatrixInputProcessorConfig:
 	case DCT_MatrixOutputProcessorConfig:
 	case DCT_NumBridgingModules:
+	case DCT_OnlineState:
 		if (changeSource != DCP_Init)
 			triggerConfigurationUpdate(true);
 		break;
@@ -203,6 +204,8 @@ void Controller::SetParameterChanged(DataChangeParticipant changeSource, DataCha
 	default:
 		break;
 	}
+
+	EnqueueTickTrigger();
 }
 
 /**
@@ -591,13 +594,18 @@ void Controller::RemoveSoundobjectProcessor(SoundobjectProcessor* p)
 		const ScopedLock lock(m_mutex);
 		m_soundobjectProcessors.remove(idx);
 
-		// Manually trigger updating active objects, since timer based
+		// Manually trigger updating active objects, since tick based
 		// updating will not catch changes, if no soundobjects are
 		// left any more.
 		if (m_soundobjectProcessors.isEmpty())
+		{
 			UpdateActiveRemoteObjects();
+			CleanupMutedObjects();
+		}
 
 		SetParameterChanged(DCP_Host, DCT_NumProcessors);
+
+		EnqueueTickTrigger();
 	}
 }
 
@@ -656,13 +664,18 @@ void Controller::RemoveSoundobjectProcessorIds(const std::vector<SoundobjectProc
 	}
 
 	const ScopedLock lock(m_mutex);
-	// Manually trigger updating active objects, since timer based
+	// Manually trigger updating active objects, since tick based
 	// updating will not catch changes, if no soundobjects are
 	// left any more.
 	if (m_soundobjectProcessors.isEmpty())
+	{
 		UpdateActiveRemoteObjects();
+		CleanupMutedObjects();
+	}
 
 	SetParameterChanged(DCP_Host, DCT_NumProcessors);
+
+	EnqueueTickTrigger();
 }
 
 /**
@@ -683,7 +696,7 @@ int Controller::GetSoundobjectProcessorCount() const
 SoundobjectProcessor* Controller::GetSoundobjectProcessor(SoundobjectProcessorId processorId) const
 {
 	const ScopedLock lock(m_mutex);
-	for (auto processor : m_soundobjectProcessors)
+	for (const auto&processor : m_soundobjectProcessors)
 		if (processor->GetProcessorId() == processorId)
 			return processor;
 
@@ -761,13 +774,18 @@ void Controller::RemoveMatrixInputProcessor(MatrixInputProcessor* p)
 		const ScopedLock lock(m_mutex);
 		m_matrixInputProcessors.remove(idx);
 
-		// Manually trigger updating active objects, since timer based
+		// Manually trigger updating active objects, since tick based
 		// updating will not catch changes, if no matrix inputs are
 		// left any more.
 		if (m_matrixInputProcessors.isEmpty())
+		{
 			UpdateActiveRemoteObjects();
+			CleanupMutedObjects();
+		}
 
 		SetParameterChanged(DCP_Host, DCT_NumProcessors);
+
+		EnqueueTickTrigger();
 	}
 }
 
@@ -826,13 +844,18 @@ void Controller::RemoveMatrixInputProcessorIds(const std::vector<MatrixInputProc
 	}
 
 	const ScopedLock lock(m_mutex);
-	// Manually trigger updating active objects, since timer based
+	// Manually trigger updating active objects, since tick based
 	// updating will not catch changes, if no matrix inputs are
 	// left any more.
 	if (m_matrixInputProcessors.isEmpty())
+	{
 		UpdateActiveRemoteObjects();
+		CleanupMutedObjects();
+	}
 
 	SetParameterChanged(DCP_Host, DCT_NumProcessors);
+
+	EnqueueTickTrigger();
 }
 
 /**
@@ -932,13 +955,18 @@ void Controller::RemoveMatrixOutputProcessor(MatrixOutputProcessor* p)
 		const ScopedLock lock(m_mutex);
 		m_matrixOutputProcessors.remove(idx);
 
-		// Manually trigger updating active objects, since timer based
+		// Manually trigger updating active objects, since tick based
 		// updating will not catch changes, if no matrix outputs are
 		// left any more.
 		if (m_matrixOutputProcessors.isEmpty())
+		{
 			UpdateActiveRemoteObjects();
+			CleanupMutedObjects();
+		}
 
 		SetParameterChanged(DCP_Host, DCT_NumProcessors);
+
+		EnqueueTickTrigger();
 	}
 }
 
@@ -997,13 +1025,18 @@ void Controller::RemoveMatrixOutputProcessorIds(const std::vector<MatrixOutputPr
 	}
 
 	const ScopedLock lock(m_mutex);
-	// Manually trigger updating active objects, since timer based
+	// Manually trigger updating active objects, since tick based
 	// updating will not catch changes, if no matrix outputs are
 	// left any more.
 	if (m_matrixOutputProcessors.isEmpty())
+	{
 		UpdateActiveRemoteObjects();
+		CleanupMutedObjects();
+	}
 
 	SetParameterChanged(DCP_Host, DCT_NumProcessors);
+
+	EnqueueTickTrigger();
 }
 
 /**
@@ -1024,7 +1057,7 @@ int Controller::GetMatrixOutputProcessorCount() const
 MatrixOutputProcessor* Controller::GetMatrixOutputProcessor(MatrixOutputProcessorId processorId) const
 {
 	const ScopedLock lock(m_mutex);
-	for (auto processor : m_matrixOutputProcessors)
+	for (const auto&processor : m_matrixOutputProcessors)
 		if (processor->GetProcessorId() == processorId)
 			return processor;
 
@@ -1277,7 +1310,7 @@ void Controller::SetOnline(DataChangeParticipant changeSource, bool online)
 
 		m_protocolBridge.SetOnline(online);
 
-		SetParameterChanged(changeSource, DCT_RefreshInterval);
+		SetParameterChanged(changeSource, DCT_OnlineState);
 	}
 }
 
@@ -1312,7 +1345,11 @@ void Controller::SetRefreshInterval(DataChangeParticipant changeSource, int refr
 		const ScopedLock lock(m_mutex);
 
 		// Clip rate to the allowed range.
-		refreshInterval = jmin(PROTOCOL_INTERVAL_MAX, jmax(PROTOCOL_INTERVAL_MIN, refreshInterval));
+		if(refreshInterval != INVALID_RATE_VALUE)
+		{
+			DBG(juce::String(__FUNCTION__) << " clipping to range (" << PROTOCOL_INTERVAL_MIN << "," << PROTOCOL_INTERVAL_MAX << "): " << refreshInterval);
+			refreshInterval = juce::jlimit(PROTOCOL_INTERVAL_MIN, PROTOCOL_INTERVAL_MAX, refreshInterval);
+		}
 
 		m_refreshInterval = refreshInterval;
 
@@ -1320,9 +1357,6 @@ void Controller::SetRefreshInterval(DataChangeParticipant changeSource, int refr
 
 		// Signal the change to all Processors.
 		SetParameterChanged(changeSource, DCT_RefreshInterval);
-
-		// Reset timer to the new interval.
-		startTimer(m_refreshInterval);
 	}
 }
 
@@ -1819,14 +1853,10 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 			{
 				ComsMode mode = processor->GetComsMode();
 
-				// Check if a SET command was recently sent out and might currently be on transit to the device.
-				// If so, ignore the incoming message so that our local data does not jump back to a now outdated value.
-				bool ignoreResponse = processor->IsParamInTransit(change);
 				bool isReceiveMode = ((mode & CM_Rx) == CM_Rx);
 
 				// Only pass on new positions to processors that are in RX mode.
-				// Also, ignore all incoming messages for properties which this processor wants to send a set command.
-				if (!ignoreResponse && isReceiveMode)
+				if (isReceiveMode)
 				{
 					// Special handling for X/Y position, since message contains two parameters and MappingID needs to match too.
 					if (sopIdx == SPI_ParamIdx_X)
@@ -1880,14 +1910,10 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 			{
 				ComsMode mode = processor->GetComsMode();
 
-				// Check if a SET command was recently sent out and might currently be on transit to the device.
-				// If so, ignore the incoming message so that our local data does not jump back to a now outdated value.
-				bool ignoreResponse = processor->IsParamInTransit(change);
 				bool isReceiveMode = ((mode & CM_Rx) == CM_Rx);
 
 				// Only pass on new positions to processors that are in RX mode.
-				// Also, ignore all incoming messages for properties which this processor wants to send a set command.
-				if (!ignoreResponse && isReceiveMode)
+				if (isReceiveMode)
 				{
 					auto newValue = 0.0f;
 					switch (msgData._valType)
@@ -1915,14 +1941,10 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 			{
 				ComsMode mode = processor->GetComsMode();
 
-				// Check if a SET command was recently sent out and might currently be on transit to the device.
-				// If so, ignore the incoming message so that our local data does not jump back to a now outdated value.
-				bool ignoreResponse = processor->IsParamInTransit(change);
 				bool isReceiveMode = ((mode & CM_Rx) == CM_Rx);
 
 				// Only pass on new positions to processors that are in RX mode.
-				// Also, ignore all incoming messages for properties which this processor wants to send a set command.
-				if (!ignoreResponse && isReceiveMode)
+				if (isReceiveMode)
 				{
 					auto newValue = 0.0f;
 					switch (msgData._valType)
@@ -1953,6 +1975,24 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
  * @param	msgData	The message data incl. addressing to be sent.
  * @return	True on success, false on sending failure.
  */
+void Controller::handleMessage(const Message& message)
+{
+	if (auto tickTrigger = dynamic_cast<const TickTrigger*>(&message))
+	{
+		if (!tickTrigger->IsOutdated())
+			tick();
+
+		// Mark the tick event as handled here, even though the object will
+		// be deleted by JUCE later on, to allow new tick events to be enqueued
+		// from here on.
+		tickTrigger->SetTickHandled();
+	}
+	else if(auto parameterChange = dynamic_cast<const ParameterChangedMessage*>(&message))
+	{
+		SetParameterChanged(parameterChange->GetChangeSource(), parameterChange->GetChangeTypes());
+	}
+}
+
 bool Controller::SendMessageDataDirect(const RemoteObjectIdentifier roi, RemoteObjectMessageData& msgData)
 {
 	return m_protocolBridge.SendMessage(roi, msgData);
@@ -1961,6 +2001,12 @@ bool Controller::SendMessageDataDirect(const RemoteObjectIdentifier roi, RemoteO
 /**
  * Disconnect the active bridging nodes' protocols.
  */
+void Controller::EnqueueTickTrigger()
+{
+	if (TickTrigger::IsOutdated())
+		postMessage(new TickTrigger());
+}
+
 void Controller::Disconnect()
 {
 	m_protocolBridge.Disconnect();
@@ -1974,21 +2020,22 @@ void Controller::Reconnect()
 	m_protocolBridge.Reconnect();
 }
 
-/**
- * Timer callback function, which will be called at regular intervals to
- * send out OSC messages for the parameters that have been changed on UI.
- * 
- * Reimplemented from base class Timer.
- */
-void Controller::timerCallback()
+void Controller::tick()
 {
+	if (IsTickProcessingStopped())
+	{
+		SetTickWasPostponedWhenPaused();
+		return;
+	}
+
 	const ScopedLock lock(m_mutex);
 
 	float newDualFloatValue[2];
 	int newIntValue;
 	RemoteObjectMessageData newMsgData;
 
-	auto cleanupMutedObjectsRequired = false;
+	auto cleanupMutedObjectsRequired = PopParameterChanged(DCP_Host, DCT_NumProcessors);
+	auto isParameterUpdate = false;
 
 	auto activeSSIdsChanged = false;
 	for (auto const& soProcessor : m_soundobjectProcessors)
@@ -2028,10 +2075,8 @@ void Controller::timerCallback()
 			activeSSIdsChanged = activeSSIdsChanged || activateSSId || deactivateSSId;
 		}
 
-		// Signal every timer tick to each processor instance.
+		// Signal every tick to each processor instance.
 		soProcessor->Tick();
-
-		DataChangeType paramSetsInTransit = DCT_None;
 
 		newMsgData._addrVal._first = static_cast<juce::uint16>(soProcessor->GetSoundobjectId());
 		newMsgData._addrVal._second = INVALID_ADDRESS_VALUE;
@@ -2044,7 +2089,7 @@ void Controller::timerCallback()
 				case SPI_ParamIdx_X:
 				{
 					// SET command is only sent out while in CM_Tx mode, provided that
-					// this parameter has been changed since the last timer tick.
+					// this parameter has been changed since the last tick.
 					if (((comsMode & CM_Tx) == CM_Tx) && soProcessor->GetParameterChanged(DCP_Protocol, DCT_SoundobjectPosition))
 					{
 						newDualFloatValue[0] = soProcessor->GetParameterValue(SPI_ParamIdx_X);
@@ -2058,7 +2103,6 @@ void Controller::timerCallback()
 						newMsgData._payloadSize = 2 * sizeof(float);
 
 						m_protocolBridge.SendMessage(ROI_CoordinateMapping_SourcePosition_XY, newMsgData);
-						paramSetsInTransit |= DCT_SoundobjectPosition;
 					}
 				}
 				break;
@@ -2071,7 +2115,7 @@ void Controller::timerCallback()
 				case SPI_ParamIdx_ReverbSendGain:
 				{
 					// SET command is only sent out while in CM_Tx mode, provided that
-					// this parameter has been changed since the last timer tick.
+					// this parameter has been changed since the last tick.
 					if (((comsMode & CM_Tx) == CM_Tx) && soProcessor->GetParameterChanged(DCP_Protocol, DCT_ReverbSendGain))
 					{
 						newDualFloatValue[0] = soProcessor->GetParameterValue(SPI_ParamIdx_ReverbSendGain);
@@ -2082,7 +2126,6 @@ void Controller::timerCallback()
 						newMsgData._payloadSize = sizeof(float);
 
 						m_protocolBridge.SendMessage(ROI_MatrixInput_ReverbSendGain, newMsgData);
-						paramSetsInTransit |= DCT_ReverbSendGain;
 					}
 				}
 				break;
@@ -2090,7 +2133,7 @@ void Controller::timerCallback()
 				case SPI_ParamIdx_ObjectSpread:
 				{
 					// SET command is only sent out while in CM_Tx mode, provided that
-					// this parameter has been changed since the last timer tick.
+					// this parameter has been changed since the last tick.
 					if (((comsMode & CM_Tx) == CM_Tx) && soProcessor->GetParameterChanged(DCP_Protocol, DCT_SoundobjectSpread))
 					{
 						newDualFloatValue[0] = soProcessor->GetParameterValue(SPI_ParamIdx_ObjectSpread);
@@ -2101,7 +2144,6 @@ void Controller::timerCallback()
 						newMsgData._payloadSize = sizeof(float);
 
 						m_protocolBridge.SendMessage(ROI_Positioning_SourceSpread, newMsgData);
-						paramSetsInTransit |= DCT_SoundobjectSpread;
 					}
 				}
 				break;
@@ -2109,7 +2151,7 @@ void Controller::timerCallback()
 				case SPI_ParamIdx_DelayMode:
 				{
 					// SET command is only sent out while in CM_Tx mode, provided that
-					// this parameter has been changed since the last timer tick.
+					// this parameter has been changed since the last tick.
 					if (((comsMode & CM_Tx) == CM_Tx) && soProcessor->GetParameterChanged(DCP_Protocol, DCT_DelayMode))
 					{
 						newIntValue = static_cast<int>(soProcessor->GetParameterValue(SPI_ParamIdx_DelayMode));
@@ -2120,7 +2162,6 @@ void Controller::timerCallback()
 						newMsgData._payloadSize = sizeof(int);
 
 						m_protocolBridge.SendMessage(ROI_Positioning_SourceDelayMode, newMsgData);
-						paramSetsInTransit |= DCT_DelayMode;
 					}
 				}
 				break;
@@ -2131,14 +2172,14 @@ void Controller::timerCallback()
 			}
 		}
 
-		// Flag the parameters for which we just sent a SET command out.
-		soProcessor->SetParamInTransit(paramSetsInTransit);
-
 		// All changed parameters were sent out, so we can reset their flags now.
-		soProcessor->PopParameterChanged(DCP_Protocol, DCT_SoundobjectParameters);
+		isParameterUpdate = isParameterUpdate || soProcessor->PopParameterChanged(DCP_Protocol, DCT_SoundobjectParameters);
 	}
 	if (activeSSIdsChanged)
+	{
+		cleanupMutedObjectsRequired = true;
 		UpdateActiveRemoteObjects();
+	}
 
 	auto activeMIIdsChanged = false;
 	for (auto const& miProcessor : m_matrixInputProcessors)
@@ -2178,10 +2219,8 @@ void Controller::timerCallback()
 			activeMIIdsChanged = activeMIIdsChanged || activateMIId || deactivateMIId;
 		}
 
-		// Signal every timer tick to each processor instance.
+		// Signal every tick to each processor instance.
 		miProcessor->Tick();
-		
-		DataChangeType paramSetsInTransit = DCT_None;
 
 		newMsgData._addrVal._first = static_cast<juce::uint16>(miProcessor->GetMatrixInputId());
 		newMsgData._addrVal._second = INVALID_ADDRESS_VALUE;
@@ -2194,7 +2233,7 @@ void Controller::timerCallback()
 			case MII_ParamIdx_LevelMeterPreMute:
 			{
 				// SET command is only sent out while in CM_Tx mode, provided that
-				// this parameter has been changed since the last timer tick.
+				// this parameter has been changed since the last tick.
 				if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCP_Protocol, DCT_MatrixInputLevelMeter))
 				{
 					newDualFloatValue[0] = miProcessor->GetParameterValue(MII_ParamIdx_LevelMeterPreMute);
@@ -2205,7 +2244,6 @@ void Controller::timerCallback()
 					newMsgData._payloadSize = sizeof(float);
 
 					m_protocolBridge.SendMessage(ROI_MatrixInput_LevelMeterPreMute, newMsgData);
-					paramSetsInTransit |= DCT_MatrixInputLevelMeter;
 				}
 			}
 			break;
@@ -2213,7 +2251,7 @@ void Controller::timerCallback()
 			case MII_ParamIdx_Gain:
 			{
 				// SET command is only sent out while in CM_Tx mode, provided that
-				// this parameter has been changed since the last timer tick.
+				// this parameter has been changed since the last tick.
 				if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCP_Protocol, DCT_MatrixInputGain))
 				{
 					newDualFloatValue[0] = miProcessor->GetParameterValue(MII_ParamIdx_Gain);
@@ -2224,7 +2262,6 @@ void Controller::timerCallback()
 					newMsgData._payloadSize = sizeof(float);
 
 					m_protocolBridge.SendMessage(ROI_MatrixInput_Gain, newMsgData);
-					paramSetsInTransit |= DCT_MatrixInputGain;
 				}
 			}
 			break;
@@ -2232,7 +2269,7 @@ void Controller::timerCallback()
 			case MII_ParamIdx_Mute:
 			{
 				// SET command is only sent out while in CM_Tx mode, provided that
-				// this parameter has been changed since the last timer tick.
+				// this parameter has been changed since the last tick.
 				if (((comsMode & CM_Tx) == CM_Tx) && miProcessor->GetParameterChanged(DCP_Protocol, DCT_MatrixInputMute))
 				{
 					newIntValue = static_cast<int>(miProcessor->GetParameterValue(MII_ParamIdx_Mute));
@@ -2243,7 +2280,6 @@ void Controller::timerCallback()
 					newMsgData._payloadSize = sizeof(int);
 
 					m_protocolBridge.SendMessage(ROI_MatrixInput_Mute, newMsgData);
-					paramSetsInTransit |= DCT_MatrixInputMute;
 				}
 			}
 			break;
@@ -2254,14 +2290,14 @@ void Controller::timerCallback()
 			}
 		}
 
-		// Flag the parameters for which we just sent a SET command out.
-		miProcessor->SetParamInTransit(paramSetsInTransit);
-
 		// All changed parameters were sent out, so we can reset their flags now.
-		miProcessor->PopParameterChanged(DCP_Protocol, DCT_MatrixInputParameters);
+		isParameterUpdate = isParameterUpdate || miProcessor->PopParameterChanged(DCP_Protocol, DCT_MatrixInputParameters);
 	}
 	if (activeMIIdsChanged)
+	{
+		cleanupMutedObjectsRequired = true;
 		UpdateActiveRemoteObjects();
+	}
 
 	auto activeMOIdsChanged = false;
 	for (auto const& moProcessor : m_matrixOutputProcessors)
@@ -2301,10 +2337,8 @@ void Controller::timerCallback()
 			activeMOIdsChanged = activeMOIdsChanged || activateMOId || deactivateMOId;
 		}
 
-		// Signal every timer tick to each processor instance.
+		// Signal every tick to each processor instance.
 		moProcessor->Tick();
-
-		DataChangeType paramSetsInTransit = DCT_None;
 
 		newMsgData._addrVal._first = static_cast<juce::uint16>(moProcessor->GetMatrixOutputId());
 		newMsgData._addrVal._second = INVALID_ADDRESS_VALUE;
@@ -2317,7 +2351,7 @@ void Controller::timerCallback()
 			case MOI_ParamIdx_LevelMeterPostMute:
 			{
 				// SET command is only sent out while in CM_Tx mode, provided that
-				// this parameter has been changed since the last timer tick.
+				// this parameter has been changed since the last tick.
 				if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCP_Protocol, DCT_MatrixOutputLevelMeter))
 				{
 					newDualFloatValue[0] = moProcessor->GetParameterValue(MOI_ParamIdx_LevelMeterPostMute);
@@ -2328,7 +2362,6 @@ void Controller::timerCallback()
 					newMsgData._payloadSize = sizeof(float);
 
 					m_protocolBridge.SendMessage(ROI_MatrixOutput_LevelMeterPostMute, newMsgData);
-					paramSetsInTransit |= DCT_MatrixOutputLevelMeter;
 				}
 			}
 			break;
@@ -2336,7 +2369,7 @@ void Controller::timerCallback()
 			case MOI_ParamIdx_Gain:
 			{
 				// SET command is only sent out while in CM_Tx mode, provided that
-				// this parameter has been changed since the last timer tick.
+				// this parameter has been changed since the last tick.
 				if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCP_Protocol, DCT_MatrixOutputGain))
 				{
 					newDualFloatValue[0] = moProcessor->GetParameterValue(MOI_ParamIdx_Gain);
@@ -2347,7 +2380,6 @@ void Controller::timerCallback()
 					newMsgData._payloadSize = sizeof(float);
 
 					m_protocolBridge.SendMessage(ROI_MatrixOutput_Gain, newMsgData);
-					paramSetsInTransit |= DCT_MatrixOutputGain;
 				}
 			}
 			break;
@@ -2355,7 +2387,7 @@ void Controller::timerCallback()
 			case MOI_ParamIdx_Mute:
 			{
 				// SET command is only sent out while in CM_Tx mode, provided that
-				// this parameter has been changed since the last timer tick.
+				// this parameter has been changed since the last tick.
 				if (((comsMode & CM_Tx) == CM_Tx) && moProcessor->GetParameterChanged(DCP_Protocol, DCT_MatrixOutputMute))
 				{
 					newIntValue = static_cast<int>(moProcessor->GetParameterValue(MOI_ParamIdx_Mute));
@@ -2366,7 +2398,6 @@ void Controller::timerCallback()
 					newMsgData._payloadSize = sizeof(int);
 
 					m_protocolBridge.SendMessage(ROI_MatrixOutput_Mute, newMsgData);
-					paramSetsInTransit |= DCT_MatrixOutputMute;
 				}
 			}
 			break;
@@ -2377,26 +2408,64 @@ void Controller::timerCallback()
 			}
 		}
 
-		// Flag the parameters for which we just sent a SET command out.
-		moProcessor->SetParamInTransit(paramSetsInTransit);
-
 		// All changed parameters were sent out, so we can reset their flags now.
-		moProcessor->PopParameterChanged(DCP_Protocol, DCT_MatrixOutputParameters);
+		isParameterUpdate = isParameterUpdate || moProcessor->PopParameterChanged(DCP_Protocol, DCT_MatrixOutputParameters);
 	}
 	if (activeMOIdsChanged)
+	{
+		cleanupMutedObjectsRequired = true;
 		UpdateActiveRemoteObjects();
+	}
 
 	if (cleanupMutedObjectsRequired)
 		CleanupMutedObjects();
 
+	auto isControllerUpdate = GetParameterChanged(DCP_PageContainer, DCT_AllConfigParameters|DCT_Connected);
+
+	if (isParameterUpdate || isControllerUpdate)
+	{
+		auto pageMgr = PageComponentManager::GetInstance();
+		if (pageMgr)
+		{
+			auto pageContainer = pageMgr->GetPageContainer();
+			if (pageContainer)
+				pageContainer->UpdateGui(false);
+		}
+	}
+
+	// trigger the protocol bridge to update the node
+	m_protocolBridge.UpdateNode();
 }
 
-/**
- * Convenience helper method to resolve a given protocol type from application layer
- * into a processing protocol id in the bridging node layer.
- * @param	type	The protocol type to resolve into a processsing protocol id
- * @return	The processing protocol id or 0 if resolving failed.
- */
+void Controller::StopTickProcessing()
+{
+	m_tickProcessingRunning = false;
+	m_tickWasPostponedWhenPaused = false;
+}
+
+void Controller::ResumeTickProcessing()
+{
+	m_tickProcessingRunning = true;
+	if (m_tickWasPostponedWhenPaused)
+		tick();
+}
+
+bool Controller::IsTickProcessingStopped()
+{
+	return !m_tickProcessingRunning;
+}
+
+void Controller::SetTickWasPostponedWhenPaused()
+{
+	m_tickWasPostponedWhenPaused = true;
+}
+
+void Controller::PostParameterChanged(DataChangeParticipant changeSource, DataChangeType changeTypes)
+{
+	postMessage(new ParameterChangedMessage(changeSource, changeTypes));
+}
+
+
 const ProtocolId Controller::GetProtocolIdForProtocolType(const ProtocolBridgingType type)
 {
 	switch (type)
@@ -2478,7 +2547,7 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			newConfigSOPIds.push_back(elementProcessorId);
 
 			bool alreadyExists = false;
-			for (auto processor : m_soundobjectProcessors)
+			for (const auto&processor : m_soundobjectProcessors)
 			{
 				if (processor->GetProcessorId() == elementProcessorId)
 				{
@@ -2532,7 +2601,7 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			newConfigMIPIds.push_back(elementProcessorId);
 
 			bool alreadyExists = false;
-			for (auto processor : m_matrixInputProcessors)
+			for (const auto&processor : m_matrixInputProcessors)
 			{
 				if (processor->GetProcessorId() == elementProcessorId)
 				{
@@ -2586,7 +2655,7 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			newConfigMOPIds.push_back(elementProcessorId);
 
 			bool alreadyExists = false;
-			for (auto processor : m_matrixOutputProcessors)
+			for (const auto&processor : m_matrixOutputProcessors)
 			{
 				if (processor->GetProcessorId() == elementProcessorId)
 				{
@@ -2631,14 +2700,14 @@ bool Controller::setStateXml(XmlElement* stateXml)
 	{
 		if (m_protocolBridge.setStateXml(bridgingXmlElement))
 		{
-			SetDS100ProtocolType(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100ProtocolType(), true);
-			SetExtensionMode(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100ExtensionMode(), true);
-			SetDS100IpAndPort(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100IpAddress(), m_protocolBridge.GetDS100Port(), true);
-			SetSecondDS100IpAndPort(DataChangeParticipant::DCP_Init, m_protocolBridge.GetSecondDS100IpAddress(), m_protocolBridge.GetSecondDS100Port(), true);
-			SetRefreshInterval(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100MsgRate(), true);
-			SetActiveParallelModeDS100(DataChangeParticipant::DCP_Init, m_protocolBridge.GetActiveParallelModeDS100(), true);
-			SetDS100DummyProjectData(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100dbprData(), true);
-			SetDS100DummyAnimationMode(DataChangeParticipant::DCP_Init, m_protocolBridge.GetDS100AnimationMode(), true);
+			SetDS100ProtocolType(DCP_Init, m_protocolBridge.GetDS100ProtocolType(), true);
+			SetExtensionMode(DCP_Init, m_protocolBridge.GetDS100ExtensionMode(), true);
+			SetDS100IpAndPort(DCP_Init, m_protocolBridge.GetDS100IpAddress(), m_protocolBridge.GetDS100Port(), true);
+			SetSecondDS100IpAndPort(DCP_Init, m_protocolBridge.GetSecondDS100IpAddress(), m_protocolBridge.GetSecondDS100Port(), true);
+			SetRefreshInterval(DCP_Init, m_protocolBridge.GetDS100MsgRate(), true);
+			SetActiveParallelModeDS100(DCP_Init, m_protocolBridge.GetActiveParallelModeDS100(), true);
+			SetDS100DummyProjectData(DCP_Init, m_protocolBridge.GetDS100dbprData(), true);
+			SetDS100DummyAnimationMode(DCP_Init, m_protocolBridge.GetDS100AnimationMode(), true);
 		}
 	}
 
@@ -2686,7 +2755,7 @@ std::unique_ptr<XmlElement> Controller::createStateXml()
 	auto soundobjectProcessorsXmlElement = controllerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::SOUNDOBJECTPROCESSORS));
 	if (soundobjectProcessorsXmlElement)
 	{
-		for (auto processor : m_soundobjectProcessors)
+		for (const auto&processor : m_soundobjectProcessors)
 		{
 			jassert(processor->GetProcessorId() != -1);
 			soundobjectProcessorsXmlElement->addChildElement(processor->createStateXml().release());
@@ -2697,7 +2766,7 @@ std::unique_ptr<XmlElement> Controller::createStateXml()
 	auto matrixInputProcessorsXmlElement = controllerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXINPUTPROCESSORS));
 	if (matrixInputProcessorsXmlElement)
 	{
-		for (auto processor : m_matrixInputProcessors)
+		for (const auto&processor : m_matrixInputProcessors)
 		{
 			jassert(processor->GetProcessorId() != -1);
 			matrixInputProcessorsXmlElement->addChildElement(processor->createStateXml().release());
@@ -2708,7 +2777,7 @@ std::unique_ptr<XmlElement> Controller::createStateXml()
 	auto matrixOutputProcessorsXmlElement = controllerXmlElement->createNewChildElement(AppConfiguration::getTagName(AppConfiguration::TagID::MATRIXOUTPUTPROCESSORS));
 	if (matrixOutputProcessorsXmlElement)
 	{
-		for (auto processor : m_matrixOutputProcessors)
+		for (const auto&processor : m_matrixOutputProcessors)
 		{
 			jassert(processor->GetProcessorId() != -1);
 			matrixOutputProcessorsXmlElement->addChildElement(processor->createStateXml().release());

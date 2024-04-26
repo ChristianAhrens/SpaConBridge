@@ -357,7 +357,7 @@ void MultiSoundobjectSlider::paint(Graphics& g)
 {
     if (GetSelectedMapping() == MAI_Invalid)
     {
-        if (!IsCoordinateMappingsSettingsDataReady() && !IsSpeakerPositionDataReady())
+        if (!IsCoordinateMappingsSettingsDataReady() || !IsSpeakerPositionDataReady())
         {
             g.setColour(getLookAndFeel().findColour(TextEditor::textColourId));
             g.drawText("CoordinateMapping settings and speaker positions not yet read from device", getLocalBounds(), Justification::centred);
@@ -1348,8 +1348,8 @@ void MultiSoundobjectSlider::moveObjectsXYPos(const std::vector<SoundobjectProce
             auto yDelta = static_cast<float>(positionMoveDelta.getY()) / getLocalBounds().getHeight();
 
             auto const& cachedPos = m_objectPosMultiEditStartValues.at(objectId);
-            auto newPosX = jmin<float>(1.0, jmax<float>(0.0, (cachedPos.getX() + xDelta)));
-            auto newPosY = jmin<float>(1.0, jmax<float>(0.0, (cachedPos.getY() - yDelta)));
+            auto newPosX = juce::jlimit<float>(0.0f, 1.0f, (cachedPos.getX() + xDelta));
+            auto newPosY = juce::jlimit<float>(0.0f, 1.0f, (cachedPos.getY() - yDelta));
 
             processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, newPosX);
             processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, newPosY);
@@ -1395,8 +1395,8 @@ void MultiSoundobjectSlider::finalizeObjectsXYPos(const std::vector<SoundobjectP
             auto yDelta = static_cast<float>(positionMoveDelta.getY()) / getLocalBounds().getHeight();
 
             auto const& cachedPos = m_objectPosMultiEditStartValues.at(objectId);
-            auto newPosX = jmin<float>(1.0, jmax<float>(0.0, (cachedPos.getX() + xDelta)));
-            auto newPosY = jmin<float>(1.0, jmax<float>(0.0, (cachedPos.getY() - yDelta)));
+            auto newPosX = juce::jlimit<float>(0.0f, 1.0f, (cachedPos.getX() + xDelta));
+            auto newPosY = juce::jlimit<float>(0.0f, 1.0f, (cachedPos.getY() - yDelta));
 
             processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_X, newPosX);
             processor->SetParameterValue(DCP_MultiSlider, SPI_ParamIdx_Y, newPosY);
@@ -1593,6 +1593,7 @@ void MultiSoundobjectSlider::SetCoordinateMappingSettingsDataReady(bool ready)
     auto readyChange = (ready != m_coordinateMappingSettingsDataReady);
 
     m_coordinateMappingSettingsDataReady = ready;
+    jassert(!m_coordinateMappingSettingsDataReady || (m_mappingCornersReal.size() == 4 && m_mappingCornersVirtual.size() == 4 && m_mappingFlip.size() == 4 && m_mappingName.size() == 4));
 
     if (m_coordinateMappingSettingsDataReady && IsSpeakerPositionDataReady())
     {
@@ -1740,19 +1741,22 @@ void MultiSoundobjectSlider::SetSpeakerPositionDataReady(bool ready)
     {
         ComputeRealBoundingRect();
         
+        // for each channel
         for (auto i = 1; i <= DS100_CHANNELCOUNT; i++)
         {
             auto channelId = static_cast<ChannelId>(i);
+            // check if speaker is set (position other than 0,0,0)
             if (m_speakerPositions.count(channelId) == 1 && m_speakerPositions.at(channelId).first.length() != 0.0f)
             {
                 auto& rot = m_speakerPositions.at(channelId).second;
-                if ((int(rot.y) % 180) > 75 && (int(rot.y) % 180) < 105) // use icon without directivity if angle is too steep (+-15deg)
+                
+                // use icon without directivity if angle is too steep (90deg +- 15deg)
+                if (juce::isWithin<int>((int(std::abs(rot.y)) % 180), 90, 15))
                     m_speakerDrawables[channelId] = Drawable::createFromSVG(*XmlDocument::parse(BinaryData::loudspeaker_vert24px_svg));
                 else
                     m_speakerDrawables[channelId] = Drawable::createFromSVG(*XmlDocument::parse(BinaryData::loudspeaker_hor24px_svg));
                 auto& drawable = m_speakerDrawables.at(channelId);
-                drawable->replaceColour(Colours::black, getLookAndFeel().findColour(TextButton::textColourOnId));
-                m_speakerDrawablesCurrentColour = getLookAndFeel().findColour(TextButton::textColourOnId);
+                drawable->replaceColour(Colours::black, m_speakerDrawablesCurrentColour);
                 auto drawableBounds = drawable->getBounds().toFloat();
                 drawable->setTransform(juce::AffineTransform::rotation(juce::degreesToRadians(rot.x), drawableBounds.getCentreX(), drawableBounds.getCentreY()));
             }
@@ -1908,8 +1912,10 @@ juce::Point<float> MultiSoundobjectSlider::GetPointForRelativePosOnMapping(const
         auto& mappingP3 = mappingCornersReal.at(2);
         auto& mappingP4 = mappingCornersReal.at(3);
         auto& mappingCornersVirtual = m_mappingCornersVirtual.at(mapping);
-        auto& mappingVirtP1 = mappingCornersVirtual.at(0);
-        auto& mappingVirtP3 = mappingCornersVirtual.at(1);
+        auto mappingVirtP1 = mappingCornersVirtual.at(0);
+        mappingVirtP1.z = 0.0f; // set z to 0 as long as DS100 does not handle z-values
+        auto mappingVirtP3 = mappingCornersVirtual.at(1);
+        mappingVirtP3.z = 0.0f; // set z to 0 as long as DS100 does not handle z-values
         auto mappingVirtP2 = juce::Vector3D<float>(mappingVirtP1.x, mappingVirtP3.y, 0.0f);
         auto mappingVirtP4 = juce::Vector3D<float>(mappingVirtP3.x, mappingVirtP1.y, 0.0f);
         auto& isFlipped = m_mappingFlip.at(mapping);
@@ -1974,8 +1980,10 @@ juce::Point<float> MultiSoundobjectSlider::GetPosOnMappingForPoint(const juce::P
         auto& mappingP3 = mappingCornersReal.at(2);
         auto& mappingP4 = mappingCornersReal.at(3);
         auto& mappingCornersVirtual = m_mappingCornersVirtual.at(mapping);
-        auto& mappingVirtP1 = mappingCornersVirtual.at(0);
-        auto& mappingVirtP3 = mappingCornersVirtual.at(1);
+        auto mappingVirtP1 = mappingCornersVirtual.at(0);
+        mappingVirtP1.z = 0.0f; // set z to 0 as long as DS100 does not handle z-values
+        auto mappingVirtP3 = mappingCornersVirtual.at(1);
+        mappingVirtP3.z = 0.0f; // set z to 0 as long as DS100 does not handle z-values
         auto mappingVirtP2 = juce::Vector3D<float>(mappingVirtP1.x, mappingVirtP3.y, 0.0f);
         auto mappingVirtP4 = juce::Vector3D<float>(mappingVirtP3.x, mappingVirtP1.y, 0.0f);
         auto& isFlipped = m_mappingFlip.at(mapping);
@@ -2032,8 +2040,8 @@ juce::Point<float> MultiSoundobjectSlider::GetPosOnMappingForPoint(const juce::P
 
         // Get mouse pixel-wise position and scale it between 0 and 1.
         auto const& pos = pointInBounds - orig;
-        auto relX = jmin<float>(1.0f, jmax<float>(0.0f, (pos.getX() / w)));
-        auto relY = 1.0f - jmin<float>(1.0f, jmax<float>(0.0f, (pos.getY() / h)));
+        auto relX = juce::jlimit<float>(0.0f, 1.0f, (pos.getX() / w));
+        auto relY = 1.0f - juce::jlimit<float>(0.0f, 1.0f, (pos.getY() / h));
 
         return { relX, relY };
     }
@@ -2091,12 +2099,7 @@ void MultiSoundobjectSlider::PrerenderSpeakerAndMappingAreaInBounds()
         if (m_speakerDrawables.count(channelId) == 1 && m_speakerPositions.count(channelId) == 1 && m_speakerPositions.at(channelId).first.length() != 0.0f)
         {
             auto& p = m_speakerPositions.at(channelId).first;
-            auto speakerCenterPoint = GetPointForRealCoordinate(p);
-            auto speakerArea = juce::Rectangle<float>(
-                speakerCenterPoint.getX() - 9.0f,
-                speakerCenterPoint.getY() - 9.0f,
-                18.0f,
-                18.0f);
+            auto speakerArea = juce::Rectangle<float>(0.0f, 0.0f, 16.0f, 16.0f).withCentre(GetPointForRealCoordinate(p));
             m_speakerDrawableAreas[channelId] = speakerArea;
         }
     }
@@ -2113,7 +2116,7 @@ void MultiSoundobjectSlider::PrerenderSpeakerAndMappingAreaInBounds()
             auto& p2 = m_mappingCornersReal.at(mappingAreaId).at(0);
             m_mappingTextAnchorPointAndRot[mappingAreaId].first = GetPointForRealCoordinate(p0).toInt();
             m_mappingTextAnchorPointAndRot[mappingAreaId].second = juce::Line<float>(p0.x, p0.y, p1.x, p1.y).getAngle();
-            auto prevPoint = GetPointForRealCoordinate(m_mappingCornersReal.at(mappingAreaId).at(3));
+            auto prevPoint = GetPointForRealCoordinate(p1);
             for (auto j = 0; j < 4; j++) // p1 real - p4 real
             {
                 if (m_mappingCornersReal.at(mappingAreaId).size() > j)

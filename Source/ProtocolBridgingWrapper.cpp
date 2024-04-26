@@ -120,7 +120,7 @@ void ProtocolBridgingWrapper::HandleNodeData(const ProcessingEngineNode::NodeCal
     if (!callbackMessage)
         return;
     
-	for (auto l : m_listeners)
+	for (const auto&l : m_listeners)
         l->HandleMessageData(callbackMessage->_protocolMessage._nodeId, callbackMessage->_protocolMessage._senderProtocolId, callbackMessage->_protocolMessage._Id, callbackMessage->_protocolMessage._msgData);
 }
 
@@ -147,7 +147,7 @@ bool ProtocolBridgingWrapper::Reconnect()
 	auto nodeXmlElement = m_bridgingXml.getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::NODE));
 	if (nodeXmlElement)
 		SetBridgingNodeStateXml(nodeXmlElement, true);
-	m_processingNode.Start();
+	m_shouldBeOnline = true;
 
 	return true;
 }
@@ -157,6 +157,20 @@ bool ProtocolBridgingWrapper::Reconnect()
  * @param roi	The object id to be checked regarding relevance for handling in application.
  * @return	True if the object shall be only bridged to DS100, false if it is also relevant for application
  */
+void ProtocolBridgingWrapper::UpdateNode()
+{
+	if (!m_shouldUpdateNode)
+		return;
+
+	if(m_processingNode.IsRunning())
+		m_processingNode.Stop();
+
+	if(m_shouldBeOnline)
+		m_processingNode.Start();
+
+	m_shouldUpdateNode = false;
+}
+
 bool ProtocolBridgingWrapper::IsBridgingObjectOnly(const RemoteObjectIdentifier roi)
 {
 	switch (roi)
@@ -180,6 +194,38 @@ bool ProtocolBridgingWrapper::IsBridgingObjectOnly(const RemoteObjectIdentifier 
  * @param	id		The id of the protocol that the status has changed of.
  * @param	state	The new state value.
  */
+const std::string ProtocolBridgingWrapper::GetStringRepresentationForMessageData(const RemoteObjectMessageData& msgData)
+{	
+	if (msgData._payload != 0 && msgData._valCount != 0)
+	{
+		std::ostringstream oss;
+		if (msgData._valType == ROVT_FLOAT)
+		{
+			oss.precision(2);
+			oss << std::fixed;
+			for (int i = 0; i < msgData._valCount; ++i)
+				oss << static_cast<float*>(msgData._payload)[i] << ";";
+		}
+		else if (msgData._valType == ROVT_INT)
+		{
+			for (int i = 0; i < msgData._valCount; ++i)
+				oss << static_cast<int*>(msgData._payload)[i] << ";";
+		}
+		else if (msgData._valType == ROVT_STRING)
+		{
+			return "STR";
+		}
+		else
+		{
+			return "UNKNOWN";
+		}
+
+		return oss.str();
+	}
+		
+	return std::string();
+}
+
 void ProtocolBridgingWrapper::protocolStateChanged(ProtocolId id, ObjectHandlingState state)
 {
 	SetProtocolState(id, state);
@@ -311,9 +357,12 @@ bool ProtocolBridgingWrapper::SetBridgingNodeStateXml(XmlElement* stateXml, bool
 		if (ctrl)
 			ctrl->SetParameterChanged(DCP_Host, DCT_BridgingConfig);
 	}
-
+	
 	if (m_processingNode.setStateXml(stateXml))
 	{
+		m_shouldUpdateNode = true; // cache if the node shall be updated (reconnected) on the next controller tick
+		if(Controller::Exists())
+			Controller::GetInstance()->EnqueueTickTrigger(); // make sure there will be a controller tick
 		if (auto objHandling = m_processingNode.GetObjectDataHandling())
 			objHandling->AddStateListener(this);
 
@@ -1818,7 +1867,7 @@ JUCEAppBasics::MidiCommandRangeAssignment ProtocolBridgingWrapper::GetMidiAssign
         auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
         if (protocolXmlElement)
         {
-            auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(roi).removeCharacters(" "));
+            auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectTagName(roi));
             if (assiMapXmlElement)
             {
                 auto assiMapHexStringTextXmlElement = assiMapXmlElement->getFirstChildElement();
@@ -1866,7 +1915,7 @@ bool ProtocolBridgingWrapper::SetMidiAssignmentMapping(ProtocolId protocolId, co
             }
             else
             {
-                assiMapXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectDescription(roi).removeCharacters(" "));
+                assiMapXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectTagName(roi));
                 assiMapXmlElement->addTextElement(assiMapHexString);
             }
         }
@@ -1895,7 +1944,7 @@ std::map<String, JUCEAppBasics::MidiCommandRangeAssignment> ProtocolBridgingWrap
 		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
 		if (protocolXmlElement)
 		{
-			auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(roi).removeCharacters(" "));
+			auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectTagName(roi));
 			if (assiMapXmlElement)
 			{
 				if (assiMapXmlElement->getIntAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MULTIVALUE)) == 1)
@@ -1937,7 +1986,7 @@ bool ProtocolBridgingWrapper::SetMidiScenesAssignmentMapping(ProtocolId protocol
 		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), juce::String(protocolId));
 		if (protocolXmlElement)
 		{
-			auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(roi).removeCharacters(" "));
+			auto assiMapXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::GetObjectTagName(roi));
 			if (assiMapXmlElement)
 			{
 				// collect the xml elements that are no longer used according to new incoming mappings
@@ -1978,7 +2027,7 @@ bool ProtocolBridgingWrapper::SetMidiScenesAssignmentMapping(ProtocolId protocol
 			}
 			else
 			{
-				assiMapXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectDescription(roi).removeCharacters(" "));
+				assiMapXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectTagName(roi));
 				assiMapXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MULTIVALUE), 1);
 				for (auto const& assi : assignmentMapping)
 				{
@@ -2311,7 +2360,7 @@ std::map<RemoteObjectIdentifier, std::pair<juce::String, juce::Range<float>>> Pr
 					for (int i = ROI_Invalid + 1; i < ROI_BridgingMAX; ++i)
 					{
 						auto ROId = static_cast<RemoteObjectIdentifier>(i);
-						if (oscRemappingXmlElement->getTagName() == ProcessingEngineConfig::GetObjectDescription(ROId).removeCharacters(" "))
+						if (oscRemappingXmlElement->getTagName() == ProcessingEngineConfig::GetObjectTagName(ROId))
 						{
 							auto oscRemappingTextElement = oscRemappingXmlElement->getFirstChildElement();
 							if (oscRemappingTextElement && oscRemappingTextElement->isTextElement())
@@ -2364,7 +2413,7 @@ bool ProtocolBridgingWrapper::SetProtocolOscRemapAssignments(ProtocolId protocol
 				{
 					bool stillInUse = false;
 					for (auto const& assi : oscRemapAssignments)
-						if (ProcessingEngineConfig::GetObjectDescription(assi.first).removeCharacters(" ") == remappingXmlElement->getTagName())
+						if (ProcessingEngineConfig::GetObjectTagName(assi.first) == remappingXmlElement->getTagName())
 							stillInUse = true;
 					if (!stillInUse)
 						noLongerUsedElements.push_back(remappingXmlElement);
@@ -2378,7 +2427,7 @@ bool ProtocolBridgingWrapper::SetProtocolOscRemapAssignments(ProtocolId protocol
 				// create or update the xml elements according to new incoming assignments
 				for (auto const& assi : oscRemapAssignments)
 				{
-					auto oscRemappingXmlElement = oscRemappingsXmlElement->getChildByName(ProcessingEngineConfig::GetObjectDescription(assi.first).removeCharacters(" "));
+					auto oscRemappingXmlElement = oscRemappingsXmlElement->getChildByName(ProcessingEngineConfig::GetObjectTagName(assi.first));
 					if (oscRemappingXmlElement)
 					{
 						auto oscRemappingTextXmlElement = oscRemappingXmlElement->getFirstChildElement();
@@ -2391,7 +2440,7 @@ bool ProtocolBridgingWrapper::SetProtocolOscRemapAssignments(ProtocolId protocol
 					}
 					else
 					{
-						oscRemappingXmlElement = oscRemappingsXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectDescription(assi.first).removeCharacters(" "));
+						oscRemappingXmlElement = oscRemappingsXmlElement->createNewChildElement(ProcessingEngineConfig::GetObjectTagName(assi.first));
 						oscRemappingXmlElement->addTextElement(assi.second.first);
 						oscRemappingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MINVALUE), static_cast<double>(assi.second.second.getStart()));
 						oscRemappingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MAXVALUE), static_cast<double>(assi.second.second.getEnd()));
@@ -2555,11 +2604,11 @@ void ProtocolBridgingWrapper::SetProtocolState(ProtocolId protocolId, ObjectHand
 	{
 		m_bridgingProtocolState[protocolId] = state;
 
-		if (!Controller::Exists()) // avoid creating controller singleton here
-			return;
-		auto ctrl = Controller::GetInstance();
-		if (ctrl)
-			ctrl->SetParameterChanged(DCP_Protocol, DCT_Connected);
+		if (Controller::Exists())
+		{
+			Controller::GetInstance()->SetParameterChanged(DCP_Protocol, DCT_Connected);
+			Controller::GetInstance()->EnqueueTickTrigger();
+		}
 	}
 }
 
@@ -2569,10 +2618,7 @@ void ProtocolBridgingWrapper::SetProtocolState(ProtocolId protocolId, ObjectHand
  */
 void ProtocolBridgingWrapper::SetOnline(bool online)
 {
-	if (online)
-		Reconnect();
-	else
-		Disconnect();
+	m_shouldBeOnline = online;
 }
 
 /**
@@ -3556,7 +3602,11 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 
 					auto ctrl = Controller::GetInstance();
 					if (ctrl)
-						ctrl->SetSecondDS100IpAndPort(DCP_Init, juce::IPAddress(PROTOCOL_DEFAULT2_IP), RX_PORT_DS100_DEVICE, dontSendNotification);
+					{
+						auto ip = juce::IPAddress(PROTOCOL_DEFAULT2_IP);
+						auto port = ctrl->GetDS100ProtocolType() == PT_OCP1Protocol ? RX_PORT_DS100_DEVICE_OCP1 : RX_PORT_DS100_DEVICE;
+						ctrl->SetSecondDS100IpAndPort(DCP_Init, ip, port, dontSendNotification);
+					}
 				}
 			}
 			break;
@@ -3810,4 +3860,4 @@ bool ProtocolBridgingWrapper::SetDS100AnimationMode(const int& animationMode, bo
 }
 
 
-}
+} // namespace SpaConBridge

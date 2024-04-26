@@ -121,8 +121,7 @@ private:
  * Class PageContainerComponent is a simple container used to hold the GUI controls.
  */
 class PageContainerComponent :	public Component,
-								public Button::Listener,
-								private Timer
+								public Button::Listener
 {
 public:
 	PageContainerComponent();
@@ -188,9 +187,6 @@ private:
 
 	//==============================================================================
 	void buttonClicked(Button*) override;
-
-	//==============================================================================
-	void timerCallback() override;
 
 private:
 	//==============================================================================

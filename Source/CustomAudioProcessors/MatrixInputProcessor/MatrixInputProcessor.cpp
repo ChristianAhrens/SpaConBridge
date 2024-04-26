@@ -130,6 +130,9 @@ void MatrixInputProcessor::SetParameterChanged(const DataChangeParticipant& chan
 			|| (changeSource == DCP_MultiSlider))
 			m_dataChangesByTarget[static_cast<DataChangeParticipant>(changeTarget)] |= changeTypes;
 	}
+
+	if (auto ctrl = Controller::GetInstance())
+		ctrl->EnqueueTickTrigger();
 }
 
 /**
@@ -201,6 +204,9 @@ void MatrixInputProcessor::SetParameterValue(DataChangeParticipant changeSource,
 		jassertfalse; // Unknown parameter index!
 		break;
 	}
+
+	if (auto miEditor = dynamic_cast<MatrixInputProcessorEditor*>(getActiveEditor()))
+		miEditor->EnqueueTickTrigger();
 }
 
 /**
@@ -209,10 +215,6 @@ void MatrixInputProcessor::SetParameterValue(DataChangeParticipant changeSource,
  */
 void MatrixInputProcessor::Tick()
 {
-	// Reset the flags indicating when a parameter's SET command is out on the network. 
-	// These flags are set during Controller::timerCallback() and queried in Controller::oscMessageReceived()
-	m_paramSetCommandsInTransit = DCT_None;
-
 	for (int pIdx = 0; pIdx < MII_ParamIdx_MaxIndex; pIdx++)
 	{
 		switch (pIdx)
@@ -300,7 +302,7 @@ void MatrixInputProcessor::SetMatrixInputId(DataChangeParticipant changeSource, 
 	if (m_matrixInputId != matrixInputId)
 	{
 		// Ensure it's within allowed range.
-		m_matrixInputId = jmin(MatrixInput_ID_MAX, jmax(MatrixInput_ID_MIN, matrixInputId));
+		m_matrixInputId = juce::jlimit(MatrixInput_ID_MIN, MatrixInput_ID_MAX, matrixInputId);
 
 		// Signal change to other modules in the processor.
 		SetParameterChanged(changeSource, DCT_MatrixInputID);
@@ -418,7 +420,7 @@ void MatrixInputProcessor::parameterValueChanged(int parameterIndex, float newVa
  */
 AudioProcessorEditor* MatrixInputProcessor::createEditor()
 {
-	AudioProcessorEditor* editor = new MatrixInputProcessorEditor(*this);
+	auto editor = new MatrixInputProcessorEditor(*this);
 
 	// Initialize GUI with current IP address, etc.
 	SetParameterChanged(DCP_Protocol, DCT_MatrixInputParameters); // We use 'DCP_Protocol' as source here, to not have the initial update be resent as new values via protocol

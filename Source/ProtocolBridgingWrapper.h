@@ -118,6 +118,8 @@ public:
 	bool Reconnect();
 
 	//==========================================================================
+	void UpdateNode();
+
 	std::unique_ptr<XmlElement> createStateXml() override;
 	bool setStateXml(XmlElement* stateXml) override;
 
@@ -170,6 +172,8 @@ public:
 	static bool IsBridgingObjectOnly(const RemoteObjectIdentifier roi);
 
 	//==========================================================================
+	static const std::string GetStringRepresentationForMessageData(const RemoteObjectMessageData& msgData);
+
 	bool GetMuteProtocolSoundobjectProcessorId(ProtocolId protocolId, SoundobjectProcessorId soundobjectProcessorId);
 	bool SetMuteProtocolSoundobjectProcessorId(ProtocolId protocolId, SoundobjectProcessorId soundobjectProcessorId);
 	bool SetMuteProtocolSoundobjectProcessorIds(ProtocolId protocolId, const std::vector<SoundobjectProcessorId>& soundobjectProcessorIds);
@@ -265,7 +269,10 @@ private:
 	std::map<ProtocolId, std::vector<RemoteObject>>		m_bridgingProtocolMutedObjects;	/**< Map that holds (caches) the currently muted objects per protocol. */
 	std::vector<ProtocolBridgingWrapper::Listener*>		m_listeners;					/**< The listner objects, for message data handling callback. */
 
+	bool m_shouldUpdateNode{ false };	/**< Helper flag to decide if the node shall be updated on xml change */
+	bool m_shouldBeOnline{ false };		/**< Helper flag to decide if the node shall be started when updated */
+
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ProtocolBridgingWrapper)
 };
 
-}
+} // namespace SpaConBridge

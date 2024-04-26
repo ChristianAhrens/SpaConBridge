@@ -32,10 +32,10 @@ namespace SpaConBridge
  * Class MainProcessorEditor, a component that acts as the GUI for the AudioProcessor. 
  */
 class MatrixOutputProcessorEditor :
-	public AudioProcessorEditor,
-	public DrawableButton::Listener,
-	public Slider::Listener,
-	private Timer
+	public juce::AudioProcessorEditor,
+	public juce::DrawableButton::Listener,
+	public juce::Slider::Listener,
+	public juce::MessageListener
 {
 public:
 	explicit MatrixOutputProcessorEditor(MatrixOutputProcessor&);
@@ -44,16 +44,38 @@ public:
 	MatrixOutputId	GetMatrixOutputId();
 
 	void resized() override;
-	void UpdateGui(bool init);
+	void UpdateGui();
+	void EnqueueTickTrigger();
 
 private:
+	/**
+	 * Private message class to act as asynchronous
+	 * 'tick'/update trigger via message queue.
+	 * To prevent irrelevant processing of multiple queued triggers,
+	 * an internal flag is used that signals if a trigger message
+	 * is still relevant when dispatched from queue or no longer is relevant
+	 * due to an earlier trigger processing already handled things.
+	 */
+	class TickTrigger : public juce::Message
+	{
+	public:
+		TickTrigger() { s_tickHandled = false; };
+		~TickTrigger() {};
+
+		static const bool IsOutdated() { return s_tickHandled; };
+		void SetTickHandled() const { s_tickHandled = true; };
+
+	private:
+		static bool s_tickHandled;
+	};
+
 	GestureManagedAudioParameterFloat* GetParameterForSlider(Slider* slider);
 	void sliderValueChanged(Slider *slider) override;
 	void sliderDragStarted(Slider* slider) override;
 	void sliderDragEnded(Slider* slider) override;
 	void buttonClicked(Button* button) override;
 	void lookAndFeelChanged() override;
-	void timerCallback() override;
+	void handleMessage(const Message& message) override;
 
 	void updateDrawableButtonImageColours();
 

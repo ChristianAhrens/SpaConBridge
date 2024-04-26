@@ -490,7 +490,7 @@ void SoundobjectTablePageComponent::SetSoundsourceProcessorEditorActive(Soundobj
 					if (m_selectedProcessorInstanceEditor)
 					{
 						addAndMakeVisible(m_selectedProcessorInstanceEditor.get());
-						m_selectedProcessorInstanceEditor->UpdateGui(true);
+						m_selectedProcessorInstanceEditor->UpdateGui();
 					}
 
 					resized();

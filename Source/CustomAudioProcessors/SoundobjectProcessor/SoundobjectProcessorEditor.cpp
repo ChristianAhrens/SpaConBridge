@@ -38,9 +38,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "SoundobjectProcessor.h"
 
+#include "../../Controller.h"
 #include "../Parameters.h"
 
 #include "../../PagedUI/PageContainerComponent.h"
+
+#include "FixedFontTextEditor.h"
 
 
 namespace SpaConBridge
@@ -53,6 +56,9 @@ namespace SpaConBridge
 ===============================================================================
 */
 
+
+bool SoundobjectProcessorEditor::TickTrigger::s_tickHandled{ true };
+
 /**
  * Object constructor.
  * This is the base class for the component that acts as the GUI for an AudioProcessor.
@@ -61,8 +67,9 @@ namespace SpaConBridge
 SoundobjectProcessorEditor::SoundobjectProcessorEditor(SoundobjectProcessor& parent)
 	: AudioProcessorEditor(&parent)
 {
-	m_soundobjectSlider = std::make_unique<SoundobjectSlider>(&parent);
+	m_soundobjectSlider = std::make_unique<SoundobjectSlider>();
 	m_soundobjectSlider->setWantsKeyboardFocus(true);
+	m_soundobjectSlider->AddListener(this);
 	addAndMakeVisible(m_soundobjectSlider.get());
 
 	const Array<AudioProcessorParameter*>& params = parent.getParameters();
@@ -143,9 +150,6 @@ SoundobjectProcessorEditor::SoundobjectProcessorEditor(SoundobjectProcessor& par
 		}
 	}
 
-	// Start GUI-refreshing timer.
-	startTimer(GUI_UPDATE_RATE_FAST);
-
 	setSize(20, 20);
 }
 
@@ -154,8 +158,6 @@ SoundobjectProcessorEditor::SoundobjectProcessorEditor(SoundobjectProcessor& par
  */
 SoundobjectProcessorEditor::~SoundobjectProcessorEditor()
 {
-	stopTimer();
-
 	processor.editorBeingDeleted(this);
 }
 
@@ -182,6 +184,53 @@ GestureManagedAudioParameterFloat* SoundobjectProcessorEditor::GetParameterForSl
 }
 
 /**
+ * Callback function for changes to xy slider. Called when the slider's value is changed.
+ * @param slider    Slider object which was dragged by user.
+ */
+void SoundobjectProcessorEditor::sliderValueChanged(SoundobjectSlider* slider)
+{
+    SoundobjectProcessor* soProcessor = dynamic_cast<SoundobjectProcessor*>(getAudioProcessor());
+    if (soProcessor)
+    {
+        soProcessor->SetParameterValue(DCP_SoundobjectProcessor, SPI_ParamIdx_X, static_cast<float>(slider->GetSoundobjectPos().getX()));
+        soProcessor->SetParameterValue(DCP_SoundobjectProcessor, SPI_ParamIdx_Y, static_cast<float>(slider->GetSoundobjectPos().getY()));
+    }
+    EnqueueTickTrigger();
+}
+
+/**
+ * Called when the slider is about to be dragged.
+ * This is called when a drag begins, then it's followed by multiple calls to sliderValueChanged(),
+ * and then sliderDragEnded() is called after the user lets go.
+ * @param slider    Slider object which was dragged by user.
+ */
+void SoundobjectProcessorEditor::sliderDragStarted(SoundobjectSlider* slider)
+{
+    if (slider == m_soundobjectSlider.get())
+    {
+        if (GestureManagedAudioParameterFloat* paramx = GetParameterForSlider(static_cast<Slider*>(m_xSlider.get())))
+            paramx->BeginGuiGesture();
+        if (GestureManagedAudioParameterFloat* paramy = GetParameterForSlider(static_cast<Slider*>(m_ySlider.get())))
+            paramy->BeginGuiGesture();
+    }
+}
+
+/**
+ * Called after a drag operation has finished.
+ * @param slider    Slider object which was dragged by user.
+ */
+void SoundobjectProcessorEditor::sliderDragEnded(SoundobjectSlider* slider)
+{
+    if (slider == m_soundobjectSlider.get())
+    {
+        if (GestureManagedAudioParameterFloat* paramx = GetParameterForSlider(static_cast<Slider*>(m_xSlider.get())))
+            paramx->EndGuiGesture();
+        if (GestureManagedAudioParameterFloat* paramy = GetParameterForSlider(static_cast<Slider*>(m_ySlider.get())))
+            paramy->EndGuiGesture();
+    }
+}
+
+/**
  * Callback function for changes to our sliders. Called when the slider's value is changed.
  * This may be caused by dragging it, or by typing in its text entry box, or by a call to Slider::setValue().
  * You can find out the new value using Slider::getValue().
@@ -204,6 +253,7 @@ void SoundobjectProcessorEditor::sliderValueChanged(Slider* slider)
 
 		soProcessor->SetParameterValue(DCP_SoundobjectProcessor, paramIdx, static_cast<float>(slider->getValue()));
 	}
+	EnqueueTickTrigger();
 }
 
 /**
@@ -229,19 +279,6 @@ void SoundobjectProcessorEditor::sliderDragEnded(Slider* slider)
 }
 
 /**
- * Callback function for Enter key presses on textEditors.
- * @param textEditor	The TextEditor object whose where enter key was pressed.
- */
-void SoundobjectProcessorEditor::textEditorReturnKeyPressed(TextEditor& textEditor)
-{
-	ignoreUnused(textEditor);
-
-	// Remove keyboard focus from this editor. 
-	// Function textEditorFocusLost will then take care of setting values.
-	m_soundobjectSlider->grabKeyboardFocus();
-}
-
-/**
  * Called when a ComboBox has its selected item changed. 
  * @param comboBox	The combo box which has changed.
  */
@@ -255,6 +292,7 @@ void SoundobjectProcessorEditor::comboBoxChanged(ComboBox *comboBox)
 			pro->SetParameterValue(DCP_SoundobjectProcessor, SPI_ParamIdx_DelayMode, float(comboBox->getSelectedId() - 1));
 		}
 	}
+	EnqueueTickTrigger();
 }
 
 /**
@@ -441,31 +479,49 @@ void SoundobjectProcessorEditor::resized()
 }
 
 /**
- * Timer callback function, which will be called at regular intervals to update the GUI.
- * Reimplemented from base class Timer.
+ * Reimplemented from juce::MessageListener to process
+ * internally posted tick messages.
+ * This implementation takes care of not actually executing
+ * tick triggers that have been rendered irrelevant while
+ * pending in the message queue.
+ * @param    message        The message dispatched from queue to be handled.
+ *                        Only private TickTrigger message impl. is supported.
  */
-void SoundobjectProcessorEditor::timerCallback()
+void SoundobjectProcessorEditor::handleMessage(const Message& message)
 {
-	// Also update the regular GUI.
-	UpdateGui(false);
+    if (auto tickTrigger = dynamic_cast<const TickTrigger*>(&message))
+    {
+        if (!tickTrigger->IsOutdated())
+            UpdateGui();
+
+        // Mark the tick event as handled here, even though the object will
+        // be deleted by JUCE later on, to allow new tick events to be enqueued
+        // from here on.
+        tickTrigger->SetTickHandled();
+    }
+}
+
+/**
+ * Public helper to post a new tick trigger
+ * message to async message queue.
+ */
+void SoundobjectProcessorEditor::EnqueueTickTrigger()
+{
+	if (TickTrigger::IsOutdated())
+		postMessage(new TickTrigger());
 }
 
 /**
  * Update GUI elements with the current parameter values.
- * @param init	True to ignore any changed flags and update parameters
- *				in the GUI anyway. Good for when opening the GUI for the first time.
  */
-void SoundobjectProcessorEditor::UpdateGui(bool init)
+void SoundobjectProcessorEditor::UpdateGui()
 {
-	ignoreUnused(init); // No need to use this here so far.
-
 	bool somethingChanged = false;
 
 	SoundobjectProcessor* pro = dynamic_cast<SoundobjectProcessor*>(getAudioProcessor());
 	if (pro)
 	{
 		const Array<AudioProcessorParameter*>& params = pro->getParameters();
-		AudioParameterFloat* fParam;
 
 		// See if any parameters changed since the last timer callback.
 		somethingChanged = (pro->GetParameterChanged(DCP_SoundobjectProcessor, DCT_SoundobjectParameters) ||
@@ -475,23 +531,24 @@ void SoundobjectProcessorEditor::UpdateGui(bool init)
 		if (pro->PopParameterChanged(DCP_SoundobjectProcessor, DCT_SoundobjectPosition))
 		{
 			// Update position of X slider.
-			fParam = dynamic_cast<AudioParameterFloat*>(params[SPI_ParamIdx_X]);
-			if (fParam)
-				m_xSlider->setValue(fParam->get(), dontSendNotification);
+			auto xParam = dynamic_cast<AudioParameterFloat*>(params[SPI_ParamIdx_X]);
+			if (xParam)
+				m_xSlider->setValue(xParam->get(), dontSendNotification);
 
 			// Update position of Y slider.
-			fParam = dynamic_cast<AudioParameterFloat*>(params[SPI_ParamIdx_Y]);
-			if (fParam)
-				m_ySlider->setValue(fParam->get(), dontSendNotification);
+			auto yParam = dynamic_cast<AudioParameterFloat*>(params[SPI_ParamIdx_Y]);
+			if (yParam)
+				m_ySlider->setValue(yParam->get(), dontSendNotification);
 
 			// Update the nipple position on the 2D-Slider.
-			m_soundobjectSlider->repaint();
+			if (xParam && yParam)
+				m_soundobjectSlider->SetSoundobjectPos({ xParam->get(), yParam->get() });
 		}
 
 		if (pro->PopParameterChanged(DCP_SoundobjectProcessor, DCT_ReverbSendGain))
 		{
 			// Update ReverbSendGain slider
-			fParam = dynamic_cast<AudioParameterFloat*>(params[SPI_ParamIdx_ReverbSendGain]);
+			auto fParam = dynamic_cast<AudioParameterFloat*>(params[SPI_ParamIdx_ReverbSendGain]);
 			if (fParam)
 				m_reverbSendGainSlider->setValue(fParam->get(), dontSendNotification);
 		}
@@ -499,7 +556,7 @@ void SoundobjectProcessorEditor::UpdateGui(bool init)
 		if (pro->PopParameterChanged(DCP_SoundobjectProcessor, DCT_SoundobjectSpread))
 		{
 			// Update SourceSpread slider
-			fParam = dynamic_cast<AudioParameterFloat*>(params[SPI_ParamIdx_ObjectSpread]);
+			auto fParam = dynamic_cast<AudioParameterFloat*>(params[SPI_ParamIdx_ObjectSpread]);
 			if (fParam)
 				m_soundobjectSpreadSlider->setValue(fParam->get(), dontSendNotification);
 		}
@@ -517,33 +574,6 @@ void SoundobjectProcessorEditor::UpdateGui(bool init)
 
 		if (pro->PopParameterChanged(DCP_SoundobjectProcessor, DCT_SoundobjectID))
 			m_processorName = pro->getProgramName(0);
-	}
-
-	if (somethingChanged)
-	{
-		// At least one parameter was changed -> reset counter to prevent switching to "slow" refresh rate too soon.
-		m_ticksSinceLastChange = 0;
-
-		// Parameters have changed in the processor: Switch to frequent GUI refreshing rate
-		if (getTimerInterval() == GUI_UPDATE_RATE_SLOW)
-		{
-			startTimer(GUI_UPDATE_RATE_FAST);
-			DBG("SoundobjectProcessorEditor::timerCallback: Switching to GUI_UPDATE_RATE_FAST");
-		}
-	}
-
-	else
-	{
-		// No parameter changed since last timer callback -> increase counter.
-		if (m_ticksSinceLastChange < GUI_UPDATE_DELAY_TICKS)
-			m_ticksSinceLastChange++;
-
-		// Once counter has reached a certain limit: Switch to lazy GUI refreshing rate
-		else if (getTimerInterval() == GUI_UPDATE_RATE_FAST)
-		{
-			DBG("SoundobjectProcessorEditor::timerCallback(): Switching to GUI_UPDATE_RATE_SLOW");
-			startTimer(GUI_UPDATE_RATE_SLOW);
-		}
 	}
 }
 

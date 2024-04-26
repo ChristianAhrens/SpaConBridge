@@ -88,13 +88,13 @@ SoundobjectTableComponent::~SoundobjectTableComponent()
  */
 void SoundobjectTableComponent::RecreateTableRowIds()
 {
-	GetProcessorIds().clear();
+	m_processorIds.clear();
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
-		GetProcessorIds().reserve(ctrl->GetSoundobjectProcessorCount());
+        m_processorIds.reserve(ctrl->GetSoundobjectProcessorCount());
 		for (auto const& processorId : ctrl->GetSoundobjectProcessorIds())
-			GetProcessorIds().push_back(processorId);
+            m_processorIds.push_back(processorId);
 	}
 
 	auto table = GetTable();

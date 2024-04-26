@@ -82,7 +82,6 @@ private:
 	GestureManagedAudioParameterInt*				m_matrixInputMute;						/**< MatrixInput mute value. */
 	MatrixInputId									m_matrixInputId;						/**< matrix input id. */
 	MatrixInputProcessorId							m_processorId;							/**< Unique ID of this Processor instance. This is also this Processor's index within the Controller::m_processors array. */
-	
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixInputProcessor)
 };

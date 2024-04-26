@@ -28,21 +28,37 @@ namespace SpaConBridge
 
 
 /**
- * SoundobjectSlider class provides a 2D-Slider or "X/Y controller".
+ * @class SoundobjectSlider
+ * @brief SoundobjectSlider class provides a 2D-Slider or "X/Y controller".
  */
 class SoundobjectSlider  : public Component
 {
 public:
-	SoundobjectSlider(AudioProcessor* parent);
+	SoundobjectSlider();
 	~SoundobjectSlider() override;
+    class Listener
+    {
+    public:
+        virtual ~Listener() = default;
 
+        virtual void sliderValueChanged(SoundobjectSlider* slider) = 0;
+        virtual void sliderDragStarted(SoundobjectSlider*) {}
+        virtual void sliderDragEnded(SoundobjectSlider*) {}
+    };
+    void AddListener(Listener* listener);
+    void RemoveListener(Listener* listener);
+	const juce::Point<float>& GetSoundobjectPos();
+	void SetSoundobjectPos(const juce::Point<float>& pos, juce::NotificationType notify = juce::dontSendNotification);
 	void paint (Graphics& g) override;
 	void mouseDown (const MouseEvent& e) override;
 	void mouseDrag (const MouseEvent& e) override;
 	void mouseUp (const MouseEvent& e) override;
 
 private:
-	AudioProcessor*	m_parent = nullptr; /**> AudioProcessor object to act as parent to this component. */
+    const juce::Point<float> CalcSoundobjectPosFromMousePos(const juce::Point<float>& mousePos);
+
+	juce::Point<float> m_soundobjectPos;
+    ListenerList<SoundobjectSlider::Listener> m_listeners;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SoundobjectSlider)
 };

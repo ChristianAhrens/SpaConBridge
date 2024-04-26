@@ -78,13 +78,13 @@ MatrixInputTableComponent::~MatrixInputTableComponent()
  */
 void MatrixInputTableComponent::RecreateTableRowIds()
 {
-	GetProcessorIds().clear();
+	m_processorIds.clear();
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)
 	{
-		GetProcessorIds().reserve(ctrl->GetMatrixInputProcessorCount());
+        m_processorIds.reserve(ctrl->GetMatrixInputProcessorCount());
 		for (auto const& processorId : ctrl->GetMatrixInputProcessorIds())
-			GetProcessorIds().push_back(processorId);
+            m_processorIds.push_back(processorId);
 	}
 	
 	auto table = GetTable();

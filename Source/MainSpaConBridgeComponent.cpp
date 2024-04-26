@@ -46,6 +46,13 @@ MainSpaConBridgeComponent::MainSpaConBridgeComponent()
 MainSpaConBridgeComponent::MainSpaConBridgeComponent(std::function<void(DbLookAndFeelBase::LookAndFeelType)> lafUpdateCallback)
     : onUpdateLookAndFeel(lafUpdateCallback)
 {
+    // ensure the controller singleton is created
+    auto ctrl = SpaConBridge::Controller::GetInstance();
+    jassert(ctrl);
+    ignoreUnused(ctrl);
+    // ensure the pagemanager singleton is created
+    auto pageMgr = SpaConBridge::PageComponentManager::GetInstance();
+    jassert(pageMgr);
     addChildComponent(WaitingEntertainerComponent::GetInstance());
 
     // a single instance of tooltip window is required and used by JUCE everywhere a tooltip is required.
@@ -64,17 +71,12 @@ MainSpaConBridgeComponent::MainSpaConBridgeComponent(std::function<void(DbLookAn
     // add this main component to watchers
     m_config->addWatcher(this, true); // this initial update cannot yet reach all parts of the app, esp. settings page that relies on fully initialized pagecomponentmanager, therefor a manual watcher update is triggered below
 
-    // enshure the controller singleton is created
-    auto ctrl = SpaConBridge::Controller::GetInstance();
-    jassert(ctrl);
-    ignoreUnused(ctrl);
-    // enshure the pagemanager singleton is created
-    auto pageMgr = SpaConBridge::PageComponentManager::GetInstance();
-    jassert(pageMgr);
-
     // get the overview component from manager to use as central element for app ui
-    auto pageContainer = pageMgr->GetPageContainer();
-    addAndMakeVisible(pageContainer);
+    if (pageMgr)
+    {
+        auto pageContainer = pageMgr->GetPageContainer();
+        addAndMakeVisible(pageContainer);
+    }
 
     // do the initial update for the whole application with config contents
     m_config->triggerWatcherUpdate();

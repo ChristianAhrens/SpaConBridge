@@ -251,24 +251,6 @@ const DataChangeParticipant ProcessorBase::GetParameterChangeSource(const DataCh
 }
 
 /**
- * The given parameter(s) have a SET command message which has just been sent out on the network.
- * @param paramsChanged		Which parameter(s) should be marked as having a SET command in transit.
- */
-void ProcessorBase::SetParamInTransit(DataChangeType paramsChanged)
-{
-	m_paramSetCommandsInTransit |= paramsChanged;
-}
-
-/**
- * Check if the given parameter(s) have a SET command message which has just been sent out on the network.
- * @return True if the specified paranmeter(s) are marked as having a SET command in transit.
- */
-bool ProcessorBase::IsParamInTransit(DataChangeType paramsChanged) const
-{
-	return ((m_paramSetCommandsInTransit & paramsChanged) != DCT_None);
-}
-
-/**
  * The host will call this method when it wants to save the processor's internal state.
  * This must copy any info about the processor's state into the block of memory provided, 
  * so that the host can store this and later restore it using setStateInformation().
@@ -303,9 +285,6 @@ void ProcessorBase::SetComsMode(DataChangeParticipant changeSource, ComsMode new
 	if (m_comsMode != newMode)
 	{
 		m_comsMode = newMode;
-
-		// Reset response-ignoring mechanism.
-		m_paramSetCommandsInTransit = DCT_None;
 
 		// Signal change to other modules in the processor.
 		SetParameterChanged(changeSource, DCT_ComsMode);

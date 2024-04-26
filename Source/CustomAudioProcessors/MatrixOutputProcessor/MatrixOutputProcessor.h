@@ -83,7 +83,6 @@ private:
 	MatrixOutputId									m_matrixOutputId;						/**< matrix output id. */
 	MatrixOutputProcessorId							m_processorId;							/**< Unique ID of this Processor instance. This is also this Processor's index within the Controller::m_processors array. */
 
-
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixOutputProcessor)
 };
 

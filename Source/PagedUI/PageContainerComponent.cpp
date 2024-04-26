@@ -116,9 +116,6 @@ PageContainerComponent::PageContainerComponent()
 
 	m_tabbedComponent->SetIsHandlingChanges(true);
 
-	// Start GUI-refreshing timer.
-	startTimer(GUI_UPDATE_RATE_SLOW);
-
 	// push the logo button to front to overcome issue of overlapping tabbed component grabbing mouse interaction
 	m_logoButton->toFront(false);
 }
@@ -326,15 +323,6 @@ PageComponentBase* PageContainerComponent::GetComponentForPageId(const UIPageId 
 }
 
 /**
- * Timer callback function, which will be called at regular intervals to update the GUI.
- * Reimplemented from base class Timer.
- */
-void PageContainerComponent::timerCallback()
-{
-	UpdateGui(false);
-}
-
-/**
  * Update GUI elements with the current parameter values.
  * @param init	True to ignore any changed flags and update the OSC config parameters 
  *				in the GUI anyway. Good for when opening the Overview for the first time.
@@ -375,156 +363,26 @@ void PageContainerComponent::UpdateGui(bool init)
 		}
 	}
 
+	if(m_soundobjectsPage && (m_soundobjectsPage->IsPageVisible() || init))
+		m_soundobjectsPage->UpdateGui(init);
 
-	// updating is always required when init is set.
-	// starting of refresh timer only when page is visible.
-	auto updateSoundObjects = init;
-	auto startRefreshSoundObjects = false;
-	auto updateMultiSoundobjects = init;
-	auto startRefreshMultiSoundobjects = false;
-	auto updateMatrixIOs = init;
-	auto startRefreshMatrixIOs = false;
-	auto updateScenes = init;
-	auto startRefreshScenes = false;
-	auto updateEnSpace = init;
-	auto startRefreshEnSpace = false;
-	auto updateStatistics = init;
-	auto startRefreshStatistics = false;
-	auto updateSettings = init;
-	auto startRefreshSettings = false;
-	
-	// queue an update for all windowed pages
-	if (m_soundobjectsPage)
-		updateSoundObjects = updateSoundObjects || m_soundobjectsPage->isOnDesktop();
-	if (m_multiSoundobjectsPage)
-		updateMultiSoundobjects = updateMultiSoundobjects || m_multiSoundobjectsPage->isOnDesktop();
-	if (m_matrixIOPage)
-		updateMatrixIOs = updateMatrixIOs || m_matrixIOPage->isOnDesktop();
-	if (m_scenesPage)
-		updateScenes = updateScenes || m_scenesPage->isOnDesktop();
-	if (m_enSpacePage)
-		updateEnSpace = updateEnSpace || m_enSpacePage->isOnDesktop();
-	if (m_statisticsPage)
-		updateStatistics = updateStatistics ||m_statisticsPage->isOnDesktop();
-	if (m_settingsPage)
-		updateSettings = updateSettings || m_settingsPage->isOnDesktop();
+	if(m_multiSoundobjectsPage && (m_multiSoundobjectsPage->IsPageVisible() || init))
+		m_multiSoundobjectsPage->UpdateGui(init);
 
-	// queue an update and also if not already active continuous updating for the current page
-	if (m_tabbedComponent)
-	{
-		auto currentPageId = GetPageIdFromName(m_tabbedComponent->getCurrentTabName());
-		switch (currentPageId)
-		{
-		case UPI_Soundobjects:
-			updateSoundObjects = true;
-			startRefreshSoundObjects = true;
-			break;
-		case UPI_MultiSoundobjects:
-			updateMultiSoundobjects = true;
-			startRefreshMultiSoundobjects = true;
-			break;
-		case UPI_MatrixIOs:
-			updateMatrixIOs = true;
-			startRefreshMatrixIOs = true;
-			break;
-		case UPI_Scenes:
-			updateScenes = true;
-			startRefreshScenes = true;
-			break;
-		case UPI_EnSpace:
-			updateEnSpace = true;
-			startRefreshEnSpace = true;
-			break;
-		case UPI_Statistics:
-			updateStatistics = true;
-			startRefreshStatistics = true;
-			break;
-		case UPI_Settings:
-			updateSettings = true;
-			startRefreshSettings = true;
-			break;
-		default:
-			break;
-		}
-	}
+	if(m_matrixIOPage && (m_matrixIOPage->IsPageVisible() || init))
+		m_matrixIOPage->UpdateGui(init);
 
-	// perform updating and continuous updating 
-	if (updateSoundObjects)
-	{
-		if (m_soundobjectsPage)
-			m_soundobjectsPage->UpdateGui(init);
-	}
-	if (startRefreshSoundObjects)
-	{
-		if (getTimerInterval() != GUI_UPDATE_RATE_SLOW)
-			startTimer(GUI_UPDATE_RATE_SLOW);
-	}
+	if(m_scenesPage && (m_scenesPage->IsPageVisible() || init))
+		m_scenesPage->UpdateGui(init);
 
-	if (updateMultiSoundobjects)
-	{
-		if (m_multiSoundobjectsPage)
-			m_multiSoundobjectsPage->UpdateGui(init);
-	}
-	if (startRefreshMultiSoundobjects)
-	{
-		if (getTimerInterval() != GUI_UPDATE_RATE_FAST)
-			startTimer(GUI_UPDATE_RATE_FAST);
-	}
+	if(m_enSpacePage && (m_enSpacePage->IsPageVisible() || init))
+		m_enSpacePage->UpdateGui(init);
 
-	if (updateMatrixIOs)
-	{
-		if (m_matrixIOPage)
-			m_matrixIOPage->UpdateGui(init);
-	}
-	if (startRefreshMatrixIOs)
-	{
-		if (getTimerInterval() != GUI_UPDATE_RATE_SLOW)
-			startTimer(GUI_UPDATE_RATE_SLOW);
-	}
+	if(m_statisticsPage && (m_statisticsPage->IsPageVisible() || init))
+		m_statisticsPage->UpdateGui(init);
 
-	if (updateScenes)
-	{
-		if (m_scenesPage)
-			m_scenesPage->UpdateGui(init);
-	}
-	if (startRefreshScenes)
-	{
-		if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
-			startTimer(GUI_UPDATE_RATE_SUPERSLOW);
-	}
-		
-	if (updateEnSpace)
-	{
-		if (m_enSpacePage)
-			m_enSpacePage->UpdateGui(init);
-	}
-	if (startRefreshEnSpace)
-	{
-		if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
-			startTimer(GUI_UPDATE_RATE_SUPERSLOW);
-	}
-
-	if (updateStatistics)
-	{
-		if (m_statisticsPage)
-			m_statisticsPage->UpdateGui(init);
-	}
-	if (startRefreshStatistics)
-	{
-		if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
-			startTimer(GUI_UPDATE_RATE_SUPERSLOW);
-	}
-
-	if (updateSettings)
-	{
-		if (m_settingsPage)
-			m_settingsPage->UpdateGui(init);
-	}
-	if (startRefreshSettings)
-	{
-		if (getTimerInterval() != GUI_UPDATE_RATE_SUPERSLOW)
-			startTimer(GUI_UPDATE_RATE_SUPERSLOW);
-	}
+	if(m_settingsPage && (m_settingsPage->IsPageVisible() || init))
+		m_settingsPage->UpdateGui(init);
 }
 
 /**
@@ -553,13 +411,13 @@ void PageContainerComponent::SetPagesBeingInitialized(bool initializing)
  */
 void PageContainerComponent::SetActivePage(UIPageId pageId)
 {
-	jassert(pageId > UPI_InvalidMin && pageId < UPI_About);
+	jassert(pageId > UPI_InvalidMin && pageId < UPI_InvalidMax);
 
-	for (auto pageIdIter = int(UPI_InvalidMin + 1); pageIdIter < UPI_About; pageIdIter++)
+	for(auto pageIdIter = int(UPI_InvalidMin + 1); pageIdIter < UPI_InvalidMax; pageIdIter++)
 	{
 		auto page = GetComponentForPageId(static_cast<UIPageId>(pageIdIter));
-		if (page)
-			page->SetPageIsVisible(static_cast<UIPageId>(pageIdIter) == pageId);
+		if(page)
+			page->SetPageIsVisible(static_cast<UIPageId>(pageIdIter) == pageId || page->isOnDesktop());
 	}
 
 	m_tabbedComponent->setCurrentTabIndex(m_tabbedComponent->getTabNames().indexOf(GetPageNameFromId(pageId)));

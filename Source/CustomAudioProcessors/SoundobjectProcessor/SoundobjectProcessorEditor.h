@@ -1,44 +1,16 @@
-/*
-===============================================================================
-
-Copyright (C) 2019 d&b audiotechnik GmbH & Co. KG. All Rights Reserved.
-
-This file was originally part of the Soundscape VST, AU, and AAX Plug-in
-and now in a derived version is part of SpaConBridge.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice,
-this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
-
-3. The name of the author may not be used to endorse or promote products
-derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY d&b audiotechnik GmbH & Co. KG "AS IS" AND ANY
-EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
-OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
-ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-===============================================================================
-*/
-
-
 #pragma once
+// Copyright (C) 2023 d&b audiotechnik GmbH & Co. KG. All Rights Reserved.
 
 #include "SoundobjectProcessor.h"
 
 #include "../../SoundobjectSlider.h"
+
+
+namespace JUCEAppBasics
+{
+	class FixedFontTextEditor;
+	class NiceRotarySlider;
+}
 
 
 namespace SpaConBridge
@@ -49,11 +21,11 @@ namespace SpaConBridge
  * Class MainProcessorEditor, a component that acts as the GUI for the AudioProcessor. 
  */
 class SoundobjectProcessorEditor :
-	public AudioProcessorEditor,
-	public TextEditor::Listener,
-	public Slider::Listener,
-	public ComboBox::Listener,
-	private Timer
+	public juce::AudioProcessorEditor,
+	public juce::Slider::Listener,
+	public SoundobjectSlider::Listener,
+	public juce::ComboBox::Listener,
+	public juce::MessageListener
 {
 public:
 	explicit SoundobjectProcessorEditor(SoundobjectProcessor&);
@@ -61,17 +33,41 @@ public:
 
 	void paint(Graphics&) override;
 	void resized() override;
-	void UpdateGui(bool init);
+	void UpdateGui();
+	void EnqueueTickTrigger();
 
 private:
+	/**
+	 * Private message class to act as asynchronous
+	 * 'tick'/update trigger via message queue.
+	 * To prevent irrelevant processing of multiple queued triggers,
+	 * an internal flag is used that signals if a trigger message
+	 * is still relevant when dispatched from queue or no longer is relevant
+	 * due to an earlier trigger processing already handled things.
+	 */
+	class TickTrigger : public juce::Message
+	{
+	public:
+		TickTrigger() { s_tickHandled = false; };
+		~TickTrigger() {};
+
+		static const bool IsOutdated() { return s_tickHandled; };
+		void SetTickHandled() const { s_tickHandled = true; };
+
+	private:
+		static bool s_tickHandled;
+	};
+
 	GestureManagedAudioParameterFloat* GetParameterForSlider(Slider* slider);
+	void sliderValueChanged(SoundobjectSlider* slider) override;
+	void sliderDragStarted(SoundobjectSlider* slider) override;
+	void sliderDragEnded(SoundobjectSlider* slider) override;
 	void sliderValueChanged(Slider *slider) override;
 	void sliderDragStarted(Slider* slider) override;
 	void sliderDragEnded(Slider* slider) override;
-	void textEditorReturnKeyPressed(TextEditor &) override;
 	void comboBoxChanged(ComboBox *comboBox) override;
-	void timerCallback() override;
 	bool getResizePaintAreaSplit(Rectangle<int>& twoDSurfaceArea, Rectangle<int>& parameterEditArea);
+    void handleMessage(const Message& message) override;
 
 	std::unique_ptr<Slider>				m_xSlider;					/**< Horizontal slider for X axis. */
 	std::unique_ptr<Slider>				m_ySlider;					/**< Vertical slider for Y axis. */

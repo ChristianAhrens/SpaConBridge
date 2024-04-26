@@ -54,12 +54,14 @@ class MatrixOutputProcessor;
 
 
 /**
- * Class Controller which takes care of protocol communication through protocolbridging wrapper, including connection establishment
+ * @class Controller
+ * @brief Class Controller which takes care of protocol communication through protocolbridging wrapper, including connection establishment
  * and sending/receiving of messages over the network.
- * NOTE: This is a singleton class, i.e. there is only one instance.
+ * 
+ * @note This is a singleton class, i.e. there is only one instance.
  */
 class Controller :
-	private Timer,
+	public juce::MessageListener,
 	public AppConfiguration::XmlConfigurableElement,
 	public ProtocolBridgingWrapper::Listener
 {
@@ -280,8 +282,14 @@ public:
 	void HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, const RemoteObjectIdentifier roi, const RemoteObjectMessageData& msgData) override;
 
 	//==========================================================================
+	void handleMessage(const Message& message) override;
 	bool SendMessageDataDirect(const RemoteObjectIdentifier roi, RemoteObjectMessageData& msgData);
 
+	void EnqueueTickTrigger();
+	void StopTickProcessing();
+	void ResumeTickProcessing();
+	bool IsTickProcessingStopped();
+	void PostParameterChanged(DataChangeParticipant changeSource, DataChangeType changeTypes);
 private:
 	/**
 	 * Class StandaloneActiveObjectsPollingHelper
@@ -371,6 +379,46 @@ private:
 		bool m_running{ false };
 	};
 
+	/**
+	 * Private message class to act as asynchronous
+	 * 'tick'/update trigger via message queue.
+	 * To prevent irrelevant processing of multiple queued triggers,
+	 * an internal flag is used that signals if a trigger message
+	 * is still relevant when dispatched from queue or no longer is relevant
+	 * due to an earlier trigger processing already handled things.
+	 */
+	class TickTrigger : public juce::Message
+	{
+	public:
+		TickTrigger() { s_tickHandled = false; };
+		~TickTrigger() {};
+
+		static const bool IsOutdated() { return s_tickHandled; };
+		void SetTickHandled() const { s_tickHandled = true; };
+
+	private:
+		static bool s_tickHandled;
+	};
+
+	/**
+	 * Class ParameterChangedMessage
+	 * @brief	Private message class to act as asyynchronous
+	 *			trigger for SetParameterChanged.
+	 */
+	class ParameterChangedMessage : public juce::Message
+	{
+	public:
+		ParameterChangedMessage(DataChangeParticipant dcp, DataChangeType dct) { m_dcp = dcp; m_dct = dct; };
+		~ParameterChangedMessage() {};
+
+		DataChangeParticipant GetChangeSource() const { return m_dcp; };
+		DataChangeType GetChangeTypes() const { return m_dct; };
+
+	private:
+		DataChangeParticipant m_dcp;
+		DataChangeType m_dct;
+	};
+
 private:
 	//==========================================================================
 	const ProtocolId GetProtocolIdForProtocolType(const ProtocolBridgingType type);
@@ -378,8 +426,13 @@ private:
 	//==========================================================================
 	void CleanupMutedObjects();
 
-	//==========================================================================
-	void timerCallback() override;
+	/**
+	 * @brief Private method to process all parameter related
+	 * changes once and if neccessary handle parameter
+	 * value changes or parameter cound accordingly.
+	 */
+	void tick();
+	void SetTickWasPostponedWhenPaused();
 
 	//==========================================================================
 	static std::unique_ptr<Controller>	s_singleton;				/**< The one and only instance of CController. */
@@ -414,6 +467,9 @@ private:
 	std::unique_ptr<StandaloneActiveObjectsPollingHelper>								m_pollingHelper;					/**< Polling helper instance for OSC DS100 communation. */
 	std::vector<Controller::StandaloneActiveObjectsListener*>							m_standaloneActiveObjectListeners;	/**< The listner objects, for message data handling callback. */
 	std::map<Controller::StandaloneActiveObjectsListener*, std::vector<RemoteObject>>	m_standaloneActiveRemoteObjects;	/**< List of remote objects that the controller manages as lowfreq apart from regular hifreq object value subscription/polling. */
+
+	bool m_tickProcessingRunning{ true };		/**< Boolean flag to indicate if the TickTrigger async handling shall be active. */
+	bool m_tickWasPostponedWhenPaused{ false };	/**< Boolean flag to indicate if while TickTrigger handling was paused a trigger was dropped and has to be compensated manually. */
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Controller)
 };

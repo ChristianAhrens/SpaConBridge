@@ -29,141 +29,99 @@ namespace SpaConBridge
 {
 
 
-/*
-===============================================================================
- Class SoundobjectSlider
-===============================================================================
-*/
-
-/**
- * Object constructor.
- * @param parent	The audio processor object to act as parent.
- */
-SoundobjectSlider::SoundobjectSlider(AudioProcessor* parent)
+SoundobjectSlider::SoundobjectSlider()
 {
-	m_parent = parent;
 }
 
-/**
- * Object destructor.
- */
 SoundobjectSlider::~SoundobjectSlider()
 {
 }
 
-/**
- * Reimplemented paint event function.
- * Components can override this method to draw their content. The paint() method gets called when 
- * a region of a component needs redrawing, either because the component's repaint() method has 
- * been called, or because something has happened on the screen that means a section of a window needs to be redrawn.
- * @param g		The graphics context that must be used to do the drawing operations. 
- */
+void SoundobjectSlider::AddListener(Listener* listener)
+{
+	m_listeners.add(listener);
+}
+
+void SoundobjectSlider::RemoveListener(Listener* listener)
+{
+	m_listeners.remove(listener);
+}
+
+const juce::Point<float>& SoundobjectSlider::GetSoundobjectPos()
+{
+	return m_soundobjectPos;
+}
+
+void SoundobjectSlider::SetSoundobjectPos(const juce::Point<float>& pos, juce::NotificationType notify)
+{
+	m_soundobjectPos = pos;
+
+	if (juce::sendNotification == notify)
+		m_listeners.call([=](Listener& l) { l.sliderValueChanged(this); });
+
+	repaint();
+}
+
 void SoundobjectSlider::paint(Graphics& g)
 {
 	auto w = getLocalBounds().getWidth();
 	auto h = getLocalBounds().getHeight();
+    
+    auto areaColour = getLookAndFeel().findColour(ResizableWindow::backgroundColourId);
+    auto sliderColour = getLookAndFeel().findColour(Slider::thumbColourId);
+        
+    // Surface area
+    g.setColour(areaColour);
+    g.fillRect(0, 0, w, h);
 
-	// Surface area
-	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
-	g.fillRect(0, 0, w, h);
+    // X knob position
+    auto xPoint = static_cast<float>(m_soundobjectPos.getX() * w);
 
-	// Surface frame
-	g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
-	g.drawRect(Rectangle<int>(0, 0, w, h), 2);
+    // Y knob position
+    auto yPoint = h - (static_cast<float>(m_soundobjectPos.getY() * h));
 
-	// X knob posiiton
-	Path knobOutline;
+    // Paint knob
+    float knobSize = 10;
+    Path knobOutline;
+    knobOutline.addEllipse(xPoint - (knobSize / 2), yPoint - (knobSize / 2), knobSize, knobSize);
 
-	float x = 0;
-	const Array<AudioProcessorParameter*>& params = m_parent->getParameters();
-	AudioParameterFloat* param = dynamic_cast<AudioParameterFloat*> (params[SPI_ParamIdx_X]);
-	if (param)
-		x = static_cast<float>(*param * w);
-
-	// Y knob position
-	float y = 0;
-	param = dynamic_cast<AudioParameterFloat*> (params[SPI_ParamIdx_Y]);
-	if (param)
-		y = h - (static_cast<float>(*param * h));
-
-	// Paint knob
-	float knobSize = 10;
-	knobOutline.addEllipse(x - (knobSize / 2), y - (knobSize / 2), knobSize, knobSize);
-
-	g.setColour(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
-	g.fillPath(knobOutline);
-	g.setColour(getLookAndFeel().findColour(Slider::thumbColourId));
-	g.strokePath(knobOutline, PathStrokeType(3)); // Stroke width
+    g.setColour(areaColour);
+    g.fillPath(knobOutline);
+    g.setColour(sliderColour);
+    g.strokePath(knobOutline, PathStrokeType(3)); // Stroke width
 
 }
 
-/**
- * Called when a mouse button is pressed. 
- * @param e		Details about the position and status of the mouse event, including the source component in which it occurred 
- */
 void SoundobjectSlider::mouseDown(const MouseEvent& e)
 {
-	float w = static_cast<float>(getLocalBounds().getWidth());
-	float h = static_cast<float>(getLocalBounds().getHeight());
+	m_listeners.call([=](Listener& l) { l.sliderDragStarted(this); });
 
-	// Get mouse position and scale it between 0 and 1.
-	Point<int> pos = e.getMouseDownPosition();
-	float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / w)));
-	float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / h)));
-
-	SoundobjectProcessor* processor = dynamic_cast<SoundobjectProcessor*>(m_parent);
-	if (processor)
-	{
-		// Set new X and Y values
-		GestureManagedAudioParameterFloat* param;
-		param = dynamic_cast<GestureManagedAudioParameterFloat*>(m_parent->getParameters()[SPI_ParamIdx_X]);
-		param->BeginGuiGesture();
-		processor->SetParameterValue(DCP_SoundobjectProcessor, SPI_ParamIdx_X, x);
-		
-		param = dynamic_cast<GestureManagedAudioParameterFloat*>(m_parent->getParameters()[SPI_ParamIdx_Y]);
-		param->BeginGuiGesture();
-		processor->SetParameterValue(DCP_SoundobjectProcessor, SPI_ParamIdx_Y, y);
-	}
+	SetSoundobjectPos(CalcSoundobjectPosFromMousePos(e.getPosition().toFloat()), juce::sendNotification);
 }
 
-/**
- * Called when the mouse is moved while a button is held down. 
- * @param e		Details about the position and status of the mouse event, including the source component in which it occurred
- */
 void SoundobjectSlider::mouseDrag(const MouseEvent& e)
 {
-	float w = static_cast<float>(getLocalBounds().getWidth());
-	float h = static_cast<float>(getLocalBounds().getHeight());
-
-	// Get mouse position and scale it between 0 and 1.
-	Point<int> pos = e.getPosition();
-	float x = jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getX()) / w)));
-	float y = 1.0f - jmin<float>(1.0, jmax<float>(0.0, (static_cast<float>(pos.getY()) / h)));
-
-	SoundobjectProcessor* procssor = dynamic_cast<SoundobjectProcessor*>(m_parent);
-	if (procssor)
-	{
-		// Set new X and Y values
-		procssor->SetParameterValue(DCP_SoundobjectProcessor, SPI_ParamIdx_X, x);
-		procssor->SetParameterValue(DCP_SoundobjectProcessor, SPI_ParamIdx_Y, y);
-	}
+	SetSoundobjectPos(CalcSoundobjectPosFromMousePos(e.getPosition().toFloat()), juce::sendNotification);
 }
 
-/**
- * Called when the mouse button is released.
- * Reimplemented just to call EndGuiGesture() to inform the host.
- * @param e		Details about the position and status of the mouse event, including the source component in which it occurred
- */
 void SoundobjectSlider::mouseUp(const MouseEvent& e)
 {
-	ignoreUnused(e);
+	SetSoundobjectPos(CalcSoundobjectPosFromMousePos(e.getPosition().toFloat()), juce::sendNotification);
 
-	GestureManagedAudioParameterFloat* param;
-	param = dynamic_cast<GestureManagedAudioParameterFloat*>(m_parent->getParameters()[SPI_ParamIdx_X]);
-	param->EndGuiGesture();
+	m_listeners.call([=](Listener& l) { l.sliderDragEnded(this); });
+}
 
-	param = dynamic_cast<GestureManagedAudioParameterFloat*>(m_parent->getParameters()[SPI_ParamIdx_Y]);
-	param->EndGuiGesture();
+const juce::Point<float> SoundobjectSlider::CalcSoundobjectPosFromMousePos(const juce::Point<float>& mousePos)
+{
+	auto fBounds = getLocalBounds().toFloat();
+	if (fBounds.isEmpty()) // avoid zerodivison below by sanity checking bounds
+		return { 0.0f,0.0f };
+
+	// Get mouse position and scale it between 0 and 1.
+	auto x = juce::jlimit<float>(0.0f, 1.0f, mousePos.getX() / fBounds.getWidth());
+	auto y = 1.0f - juce::jlimit<float>(0.0f, 1.0f, mousePos.getY() / fBounds.getHeight());
+
+	return { x, y };
 }
 
 

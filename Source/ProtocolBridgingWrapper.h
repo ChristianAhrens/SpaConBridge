@@ -62,6 +62,12 @@ static constexpr int RX_PORT_ADMOSC_HOST = 50019;		//< Default UDP port to use f
 static constexpr int RX_PORT_REMAPOSC_DEVICE = 50020;	//< Default UDP port to use for Remap OSC device side
 static constexpr int RX_PORT_REMAPOSC_HOST = 50021;		//< Default UDP port to use for Remap OSC host (spaconbridge) side
 
+static constexpr int AURA_DEFAULT_AREA_WIDTH = 10;
+static constexpr int AURA_DEFAULT_AREA_HEIGHT = 10;
+static constexpr int AURA_DEFAULT_LISTENERPOSITION_X = 5;
+static constexpr int AURA_DEFAULT_LISTENERPOSITION_Y = 5;
+static constexpr int AURA_DEFAULT_LISTENERPOSITION_Z = 0;
+
 /**
  * Pre-define processing bridge config values
  */
@@ -167,6 +173,12 @@ public:
 
 	const int GetDS100AnimationMode() const;
 	bool SetDS100AnimationMode(const int& animationMode, bool dontSendNotification = false);
+
+	const juce::Vector3D<float> GetDS100AuraListenerPosition() const;
+	bool SetDS100AuraListenerPosition(const juce::Vector3D<float>& position, bool dontSendNotificaion = false);
+
+	const juce::Rectangle<float> GetDS100AuraArea() const;
+	bool SetDS100AuraArea(const juce::Rectangle<float>& area, bool dontSendNotificaion = false);
 
 	//==========================================================================
 	static bool IsBridgingObjectOnly(const RemoteObjectIdentifier roi);

@@ -1502,6 +1502,71 @@ void Controller::SetDS100DummyAnimationMode(DataChangeParticipant changeSource, 
 }
 
 /**
+ * Getter for the listener position config data set for DS100 'AURA' mode.
+ * @return	Current listener position config data.
+ */
+const juce::Vector3D<float>& Controller::GetDS100AuraListenerPosition() const
+{
+	return m_DS100AuraListenerPosition;
+}
+
+/**
+ * Setter for the listener position config data set for DS100 'AURA' mode.
+ * @param changeSource	The application module which is causing the property change.
+ * @param position		New listener position config data.
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ */
+void Controller::SetDS100AuraListenerPosition(DataChangeParticipant changeSource, const juce::Vector3D<float>& position, bool dontSendNotification)
+{
+	if (m_DS100AuraListenerPosition.x != position.x || m_DS100AuraListenerPosition.y != position.y || m_DS100AuraListenerPosition.z != position.z)
+	{
+		const ScopedLock lock(m_mutex);
+
+		m_DS100AuraListenerPosition = position;
+
+		m_protocolBridge.SetDS100AuraListenerPosition(position, dontSendNotification);
+
+		// Signal the change to all Processors.
+		SetParameterChanged(changeSource, DCT_Connected | DCT_SpeakerPositionData);
+
+		Reconnect();
+	}
+}
+
+/**
+ * Getter for the area config data set for DS100 'AURA' mode.
+ * @return	Current area config data.
+ */
+const juce::Rectangle<float>& Controller::GetDS100AuraArea() const
+{
+	return m_DS100AuraArea;
+}
+
+/**
+ * Setter for the area config data set for DS100 'AURA' mode.
+ * @param changeSource	The application module which is causing the property change.
+ * @param area			New area config data.
+ * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ */
+void Controller::SetDS100AuraArea(DataChangeParticipant changeSource, const juce::Rectangle<float>& area, bool dontSendNotification)
+{
+	if (m_DS100AuraArea != area)
+	{
+		const ScopedLock lock(m_mutex);
+
+		m_DS100AuraArea = area;
+
+		m_protocolBridge.SetDS100AuraArea(area, dontSendNotification);
+
+		// Signal the change to all Processors.
+		SetParameterChanged(changeSource, DCT_Connected | DCT_CoordinateMappingSettingsData);
+
+		Reconnect();
+	}
+}
+
+
+/**
  * Reimplemented callback for bridging wrapper callback to process incoming protocol data.
  * It forwards the message to all registered Processor objects.
  * @param nodeId	The bridging node that the message data was received on (only a single default id node supported currently).
@@ -2709,6 +2774,8 @@ bool Controller::setStateXml(XmlElement* stateXml)
 			SetActiveParallelModeDS100(DCP_Init, m_protocolBridge.GetActiveParallelModeDS100(), true);
 			SetDS100DummyProjectData(DCP_Init, m_protocolBridge.GetDS100dbprData(), true);
 			SetDS100DummyAnimationMode(DCP_Init, m_protocolBridge.GetDS100AnimationMode(), true);
+			SetDS100AuraListenerPosition(DCP_Init, m_protocolBridge.GetDS100AuraListenerPosition(), true);
+			SetDS100AuraArea(DCP_Init, m_protocolBridge.GetDS100AuraArea(), true);
 		}
 	}
 

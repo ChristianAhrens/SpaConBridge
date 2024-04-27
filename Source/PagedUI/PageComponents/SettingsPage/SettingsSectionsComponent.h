@@ -210,6 +210,19 @@ private:
 	const std::vector<std::string>								m_DS100DummyAnimationModes{ "Off", "Circular", "Random" };
 	std::map<std::string, uint64>								m_DS100DummyAnimationModeButtonIds;
 
+	std::unique_ptr<Label>										m_DS100AuraListenerPositionLabel;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_DS100AuraListenerPositionXEdit;
+	std::unique_ptr<Label>										m_DS100AuraListenerPositionXLabel;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_DS100AuraListenerPositionYEdit;
+	std::unique_ptr<Label>										m_DS100AuraListenerPositionYLabel;
+	std::unique_ptr<HorizontalLayouterComponent>				m_DS100AuraListenerPositionElmsContainer;
+	std::unique_ptr<Label>										m_DS100AuraAreaLabel;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_DS100AuraAreaWEdit;
+	std::unique_ptr<Label>										m_DS100AuraAreaWLabel;
+	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_DS100AuraAreaHEdit;
+	std::unique_ptr<Label>										m_DS100AuraAreaHLabel;
+	std::unique_ptr<HorizontalLayouterComponent>				m_DS100AuraAreaElmsContainer;
+
 	// DiGiCo settings section
 	std::unique_ptr<HeaderWithElmListComponent>					m_DiGiCoBridgingSettings;
 	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_DiGiCoIpAddressEdit;

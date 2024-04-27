@@ -282,6 +282,46 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 	m_DS100Settings->addComponent(m_DS100DummyAnimationModeLabel.get(), false, false);
 	m_DS100Settings->addComponent(m_DS100DummyAnimationModeButton.get(), true, false);
 
+	m_DS100AuraListenerPositionElmsContainer = std::make_unique<HorizontalLayouterComponent>();
+	m_DS100AuraListenerPositionElmsContainer->SetSpacing(5);
+	m_DS100AuraListenerPositionXLabel = std::make_unique<Label>("DS100AuraListenerPositionXLabel", "x");
+	m_DS100AuraListenerPositionElmsContainer->AddComponent(m_DS100AuraListenerPositionXLabel.get(), 0.25f);
+	m_DS100AuraListenerPositionXEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
+	m_DS100AuraListenerPositionXEdit->addListener(this);
+	m_DS100AuraListenerPositionXEdit->setInputFilter(std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890.,-").release(), true);
+	m_DS100AuraListenerPositionElmsContainer->AddComponent(m_DS100AuraListenerPositionXEdit.get(), 0.75f);
+	m_DS100AuraListenerPositionYLabel = std::make_unique<Label>("DS100AuraListenerPositionYLabel", "y");
+	m_DS100AuraListenerPositionElmsContainer->AddComponent(m_DS100AuraListenerPositionYLabel.get(), 0.25f);
+	m_DS100AuraListenerPositionYEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
+	m_DS100AuraListenerPositionYEdit->addListener(this);
+	m_DS100AuraListenerPositionYEdit->setInputFilter(std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890.,-").release(), true);
+	m_DS100AuraListenerPositionElmsContainer->AddComponent(m_DS100AuraListenerPositionYEdit.get(), 0.75f);
+	m_DS100AuraListenerPositionLabel = std::make_unique<Label>("DS100AuraListenerPosition", "AURA listener pos");
+	m_DS100AuraListenerPositionLabel->setTooltip("Only available when using '" + m_DS100ProtocolSelectTexts[3].first + "' mode.");
+	m_DS100AuraListenerPositionLabel->attachToComponent(m_DS100AuraListenerPositionElmsContainer.get(), true);
+	m_DS100Settings->addComponent(m_DS100AuraListenerPositionLabel.get(), false, false);
+	m_DS100Settings->addComponent(m_DS100AuraListenerPositionElmsContainer.get(), true, false);
+
+	m_DS100AuraAreaElmsContainer = std::make_unique<HorizontalLayouterComponent>();
+	m_DS100AuraAreaElmsContainer->SetSpacing(5);
+	m_DS100AuraAreaWLabel = std::make_unique<Label>("DS100AuraAareaWEdit", "w");
+	m_DS100AuraAreaElmsContainer->AddComponent(m_DS100AuraAreaWLabel.get(), 0.25f);
+	m_DS100AuraAreaWEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
+	m_DS100AuraAreaWEdit->addListener(this);
+	m_DS100AuraAreaWEdit->setInputFilter(std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890.,-").release(), true);
+	m_DS100AuraAreaElmsContainer->AddComponent(m_DS100AuraAreaWEdit.get(), 0.75f);
+	m_DS100AuraAreaHLabel = std::make_unique<Label>("DS100AuraAreaHLabel", "h");
+	m_DS100AuraAreaElmsContainer->AddComponent(m_DS100AuraAreaHLabel.get(), 0.25f);
+	m_DS100AuraAreaHEdit = std::make_unique<JUCEAppBasics::FixedFontTextEditor>();
+	m_DS100AuraAreaHEdit->addListener(this);
+	m_DS100AuraAreaHEdit->setInputFilter(std::make_unique<TextEditor::LengthAndCharacterRestriction>(7, "1234567890.,-").release(), true);
+	m_DS100AuraAreaElmsContainer->AddComponent(m_DS100AuraAreaHEdit.get(), 0.75f);
+	m_DS100AuraAreaLabel = std::make_unique<Label>("DS100AuraArea", "AURA area");
+	m_DS100AuraAreaLabel->setTooltip("Only available when using '" + m_DS100ProtocolSelectTexts[3].first + "' mode.");
+	m_DS100AuraAreaLabel->attachToComponent(m_DS100AuraAreaElmsContainer.get(), true);
+	m_DS100Settings->addComponent(m_DS100AuraAreaLabel.get(), false, false);
+	m_DS100Settings->addComponent(m_DS100AuraAreaElmsContainer.get(), true, false);
+
 	m_DS100Settings->resized();
 }
 
@@ -1330,6 +1370,10 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 			juce::IPAddress(m_SecondDS100IpAndPortEdit->getText().upToFirstOccurrenceOf(":", false, true)),
 			m_SecondDS100IpAndPortEdit->getText().fromFirstOccurrenceOf(":", false, true).getIntValue() % 0xffff);
 	}
+	else if (m_DS100AuraListenerPositionXEdit && m_DS100AuraListenerPositionYEdit && (m_DS100AuraListenerPositionXEdit.get() == &editor || m_DS100AuraListenerPositionYEdit.get() == &editor))
+		ctrl->SetDS100AuraListenerPosition(DCP_Settings, { m_DS100AuraListenerPositionXEdit->getText().getFloatValue(), m_DS100AuraListenerPositionYEdit->getText().getFloatValue(), 0.0f });
+	else if (m_DS100AuraAreaWEdit && m_DS100AuraAreaHEdit && (m_DS100AuraAreaWEdit.get() == &editor || m_DS100AuraAreaHEdit.get() == &editor))
+		ctrl->SetDS100AuraArea(DCP_Settings, { m_DS100AuraAreaWEdit->getText().getFloatValue(), m_DS100AuraAreaHEdit->getText().getFloatValue() });
 
 	// DiGiCo settings section
 	else if (m_DiGiCoIpAddressEdit && m_DiGiCoIpAddressEdit.get() == &editor)
@@ -1660,7 +1704,7 @@ void SettingsSectionsComponent::processUpdatedDS100Config()
 		m_DS100IpAndPortEdit->setEnabled(ctrl->GetDS100ProtocolType() != PT_NoProtocol);
 	}
 	if (m_DS100IpAndPortLabel)
-		m_DS100IpAndPortLabel->setEnabled(ctrl->GetDS100ProtocolType() != PT_NoProtocol && ctrl->GetDS100ProtocolType() != PT_AURAProtocol);
+		m_DS100IpAndPortLabel->setEnabled(ctrl->GetDS100ProtocolType() != PT_NoProtocol);
 	if (m_DS100ZeroconfDiscovery)
 	{
 		m_DS100ZeroconfDiscovery->setEnabled(ctrl->GetDS100ProtocolType() != PT_NoProtocol && ctrl->GetDS100ProtocolType() != PT_AURAProtocol);
@@ -1724,6 +1768,7 @@ void SettingsSectionsComponent::processUpdatedDS100Config()
 		}
 		m_SecondDS100ZeroconfDiscovery->resized();
 	}
+	// None specific config
 	if (m_DS100ProjectDummyDataLoader)
 	{
 		m_DS100ProjectDummyDataLoader->setEnabled(ctrl->GetDS100ProtocolType() == PT_NoProtocol);
@@ -1744,6 +1789,27 @@ void SettingsSectionsComponent::processUpdatedDS100Config()
 	}
 	if (m_DS100DummyAnimationModeLabel)
 		m_DS100DummyAnimationModeLabel->setEnabled(ctrl->GetDS100ProtocolType() == PT_NoProtocol);
+	// AURA specific config
+	if (m_DS100AuraListenerPositionLabel)
+		m_DS100AuraListenerPositionLabel->setEnabled(ctrl->GetDS100ProtocolType() == PT_AURAProtocol);
+	if (m_DS100AuraListenerPositionXEdit && m_DS100AuraListenerPositionYEdit)
+	{
+		auto& listenerPos = ctrl->GetDS100AuraListenerPosition();
+		m_DS100AuraListenerPositionXEdit->setText(juce::String(listenerPos.x) + " m");
+		m_DS100AuraListenerPositionYEdit->setText(juce::String(listenerPos.y) + " m");
+	}
+	if (m_DS100AuraListenerPositionElmsContainer)
+		m_DS100AuraListenerPositionElmsContainer->setEnabled(ctrl->GetDS100ProtocolType() == PT_AURAProtocol);
+	if (m_DS100AuraAreaLabel)
+		m_DS100AuraAreaLabel->setEnabled(ctrl->GetDS100ProtocolType() == PT_AURAProtocol);
+	if (m_DS100AuraAreaWEdit && m_DS100AuraAreaHEdit)
+	{
+		auto& area = ctrl->GetDS100AuraArea();
+		m_DS100AuraAreaWEdit->setText(juce::String(area.getWidth()) + " m");
+		m_DS100AuraAreaHEdit->setText(juce::String(area.getHeight()) + " m");
+	}
+	if (m_DS100AuraAreaElmsContainer)
+		m_DS100AuraAreaElmsContainer->setEnabled(ctrl->GetDS100ProtocolType() == PT_AURAProtocol);
 }
 
 /**

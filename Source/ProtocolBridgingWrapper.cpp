@@ -2985,6 +2985,28 @@ bool ProtocolBridgingWrapper::SetDS100ProtocolType(ProtocolType protocolType, bo
 					protocolXmlElement->removeChildElement(pollingIntervalXmlElement, true);
 				if (auto ocp1ConnectionModeXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE)))
 					protocolXmlElement->removeChildElement(ocp1ConnectionModeXmlElement, true);
+				if (auto dbprDataXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DBPRDATA)))
+					protocolXmlElement->removeChildElement(dbprDataXmlElement, true);
+
+				auto areaString = juce::String(AURA_DEFAULT_AREA_WIDTH) + ";" + juce::String(AURA_DEFAULT_AREA_HEIGHT);
+				auto areaXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::AREA));
+				if (!areaXmlElement)
+					areaXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::AREA));
+				auto areaTextXmlElement = areaXmlElement->getFirstChildElement();
+				if (areaTextXmlElement && areaTextXmlElement->isTextElement())
+					areaTextXmlElement->setText(areaString);
+				else
+					areaXmlElement->addTextElement(areaString);
+
+				auto positionString = juce::String(AURA_DEFAULT_LISTENERPOSITION_X) + ";" + juce::String(AURA_DEFAULT_LISTENERPOSITION_Y) + ";" + juce::String(AURA_DEFAULT_LISTENERPOSITION_Z);
+				auto listenerPosXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POSITION));
+				if (!listenerPosXmlElement)
+					listenerPosXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POSITION));
+				auto listenerPosTextXmlElement = listenerPosXmlElement->getFirstChildElement();
+				if (listenerPosTextXmlElement && listenerPosTextXmlElement->isTextElement())
+					listenerPosTextXmlElement->setText(positionString);
+				else
+					listenerPosXmlElement->addTextElement(positionString);
 			}
 			else
 			{
@@ -3063,27 +3085,11 @@ bool ProtocolBridgingWrapper::SetDS100ProtocolType(ProtocolType protocolType, bo
 
 			if (protocolType == PT_NoProtocol)
 			{
-				if (auto hostPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT)))
-					protocolXmlElement->removeChildElement(hostPortXmlElement, true);
-				if (auto clientPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT)))
-					protocolXmlElement->removeChildElement(clientPortXmlElement, true);
-				if (auto ipAddressXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS)))
-					protocolXmlElement->removeChildElement(ipAddressXmlElement, true);
-				if (auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL)))
-					protocolXmlElement->removeChildElement(pollingIntervalXmlElement, true);
-				if (auto ocp1ConnectionModeXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE)))
-					protocolXmlElement->removeChildElement(ocp1ConnectionModeXmlElement, true);
+				nodeXmlElement->removeChildElement(protocolXmlElement, true);
 			}
 			else if (protocolType == PT_AURAProtocol)
 			{
-				if (auto hostPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT)))
-					protocolXmlElement->removeChildElement(hostPortXmlElement, true);
-				if (auto clientPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT)))
-					protocolXmlElement->removeChildElement(clientPortXmlElement, true);
-				if (auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL)))
-					protocolXmlElement->removeChildElement(pollingIntervalXmlElement, true);
-				if (auto ocp1ConnectionModeXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE)))
-					protocolXmlElement->removeChildElement(ocp1ConnectionModeXmlElement, true);
+				nodeXmlElement->removeChildElement(protocolXmlElement, true);
 			}
 			else
 			{
@@ -3871,6 +3877,103 @@ bool ProtocolBridgingWrapper::SetDS100AnimationMode(const int& animationMode, bo
 		if (protocolXmlElement)
 		{
 			protocolXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), animationMode);
+		}
+		else
+			return false;
+
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
+}
+
+
+const juce::Vector3D<float> ProtocolBridgingWrapper::GetDS100AuraListenerPosition() const
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+		{
+			auto listenerPosXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POSITION));
+			if (listenerPosXmlElement)
+			{
+				auto positionValues = StringArray();
+				if (3 == positionValues.addTokens(listenerPosXmlElement->getAllSubText(), ";", ""))
+					return { positionValues[0].getFloatValue(), positionValues[1].getFloatValue(), positionValues[2].getFloatValue() };
+			}
+		}
+	}
+
+	return {};
+}
+
+bool ProtocolBridgingWrapper::SetDS100AuraListenerPosition(const juce::Vector3D<float>& position, bool dontSendNotificaion)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+		{
+			auto positionString = juce::String() + juce::String(position.x) + ";" + juce::String(position.y) + ";" + juce::String(position.z);
+			auto listenerPosXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POSITION));
+			if (!listenerPosXmlElement)
+				listenerPosXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POSITION));
+			auto listenerPosTextXmlElement = listenerPosXmlElement->getFirstChildElement();
+			if (listenerPosTextXmlElement && listenerPosTextXmlElement->isTextElement())
+				listenerPosTextXmlElement->setText(positionString);
+			else
+				listenerPosXmlElement->addTextElement(positionString);
+		}
+		else
+			return false;
+
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
+}
+
+const juce::Rectangle<float> ProtocolBridgingWrapper::GetDS100AuraArea() const
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+		{
+			auto auraAreaXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::AREA));
+			if (auraAreaXmlElement)
+			{
+				auto areaValues = StringArray();
+				if (2 == areaValues.addTokens(auraAreaXmlElement->getAllSubText(), ";", ""))
+					return { areaValues[0].getFloatValue(), areaValues[1].getFloatValue() };
+			}
+		}
+	}
+
+	return {};
+}
+
+bool ProtocolBridgingWrapper::SetDS100AuraArea(const juce::Rectangle<float>& area, bool dontSendNotificaion)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DS100_1_PROCESSINGPROTOCOL_ID));
+		if (protocolXmlElement)
+		{
+			auto areaString = juce::String(area.getWidth()) + ";" + juce::String(area.getHeight());
+			auto areaXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::AREA));
+			if (!areaXmlElement)
+				areaXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::AREA));
+			auto areaTextXmlElement = areaXmlElement->getFirstChildElement();
+			if (areaTextXmlElement && areaTextXmlElement->isTextElement())
+				areaTextXmlElement->setText(areaString);
+			else
+				areaXmlElement->addTextElement(areaString);
 		}
 		else
 			return false;

@@ -396,6 +396,7 @@ void MultiSoundobjectSlider::paintSpeakersAndMappingAreas2DVisu(Graphics& g)
         g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
 
         if (m_mappingAreaPaths.count(mappingAreaId) == 1 
+            && !m_mappingAreaPaths.at(mappingAreaId).isEmpty()
             && m_mappingName.count(mappingAreaId) == 1
             && m_mappingTextAnchorPointAndRot.count(mappingAreaId) == 1
             && m_mappingCornersVirtual.count(mappingAreaId) == 1
@@ -1572,16 +1573,27 @@ void MultiSoundobjectSlider::UpdateParameters(const ParameterCache& parameters, 
  */
 bool MultiSoundobjectSlider::CheckCoordinateMappingSettingsDataCompleteness()
 {
-    auto requiredRealPoints = 4;
-    auto requiredVirtualPoints = 2;
-    auto cornRealIsComplete = m_mappingCornersReal.count(MAI_First) == 1 && m_mappingCornersReal.count(MAI_Second) == 1 && m_mappingCornersReal.count(MAI_Third) == 1 && m_mappingCornersReal.count(MAI_Fourth) == 1
-        && m_mappingCornersReal.at(MAI_First).size() == requiredRealPoints && m_mappingCornersReal.at(MAI_Second).size() == requiredRealPoints && m_mappingCornersReal.at(MAI_Third).size() == requiredRealPoints && m_mappingCornersReal.at(MAI_Fourth).size() == requiredRealPoints;
-    auto cornVirtIsComplete = m_mappingCornersVirtual.count(MAI_First) == 1 && m_mappingCornersVirtual.count(MAI_Second) == 1 && m_mappingCornersVirtual.count(MAI_Third) == 1 && m_mappingCornersVirtual.count(MAI_Fourth) == 1
-        && m_mappingCornersVirtual.at(MAI_First).size() == requiredVirtualPoints && m_mappingCornersVirtual.at(MAI_Second).size() == requiredVirtualPoints && m_mappingCornersVirtual.at(MAI_Third).size() == requiredVirtualPoints && m_mappingCornersVirtual.at(MAI_Fourth).size() == requiredVirtualPoints;
-    auto flipIsComplete = m_mappingFlip.count(MAI_First) == 1 && m_mappingFlip.count(MAI_Second) == 1 && m_mappingFlip.count(MAI_Third) == 1 && m_mappingFlip.count(MAI_Fourth) == 1;
-    auto nameIsComplete = m_mappingName.count(MAI_First) == 1 && m_mappingName.count(MAI_Second) == 1 && m_mappingName.count(MAI_Third) == 1 && m_mappingName.count(MAI_Fourth) == 1;
+    auto coordinateMappingSettingsDataSetCount = 0;
+    auto incompleteDataSetPresent = false;
+    for(auto i = int(MAI_First); i <= int(MAI_Fourth); i++)
+    {
+        auto mai = MappingAreaId(i);
+        auto requiredRealPoints = 4;
+        auto requiredVirtualPoints = 2;
+        auto cornRealIsComplete = m_mappingCornersReal.count(mai) == 1 && m_mappingCornersReal.at(mai).size() == requiredRealPoints;
+        auto cornVirtIsComplete = m_mappingCornersVirtual.count(mai) == 1 && m_mappingCornersVirtual.at(mai).size() == requiredVirtualPoints;
+        auto flipIsComplete = m_mappingFlip.count(mai) == 1;
+        auto nameIsComplete = m_mappingName.count(mai) == 1;
 
-    return cornRealIsComplete && cornVirtIsComplete && flipIsComplete && nameIsComplete;
+        // if all elements of a coordinate mapping dataset are present, it can be counted as usable
+        if (cornRealIsComplete && cornVirtIsComplete && flipIsComplete && nameIsComplete)
+            coordinateMappingSettingsDataSetCount++;
+        // if some parts are missing, it of course is incomplete
+        else if (cornRealIsComplete || cornVirtIsComplete || flipIsComplete || nameIsComplete)
+            incompleteDataSetPresent = true;
+    }
+
+    return (coordinateMappingSettingsDataSetCount > 0) && !incompleteDataSetPresent;
 }
 
 /**
@@ -2114,6 +2126,11 @@ void MultiSoundobjectSlider::PrerenderSpeakerAndMappingAreaInBounds()
             auto& p0 = m_mappingCornersReal.at(mappingAreaId).at(2);
             auto& p1 = m_mappingCornersReal.at(mappingAreaId).at(3);
             auto& p2 = m_mappingCornersReal.at(mappingAreaId).at(0);
+            auto& p3 = m_mappingCornersReal.at(mappingAreaId).at(1);
+
+            if (p0.lengthIsBelowEpsilon() && p1.lengthIsBelowEpsilon() && p2.lengthIsBelowEpsilon() && p3.lengthIsBelowEpsilon())
+                continue; // if mapping area real coords are 0, do not take it into account for visu
+
             m_mappingTextAnchorPointAndRot[mappingAreaId].first = GetPointForRealCoordinate(p0).toInt();
             m_mappingTextAnchorPointAndRot[mappingAreaId].second = juce::Line<float>(p0.x, p0.y, p1.x, p1.y).getAngle();
             auto prevPoint = GetPointForRealCoordinate(p1);

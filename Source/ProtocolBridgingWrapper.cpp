@@ -2977,10 +2977,9 @@ bool ProtocolBridgingWrapper::SetDS100ProtocolType(ProtocolType protocolType, bo
 			}
 			else if (protocolType == PT_AURAProtocol)
 			{
+				// remove not required tags
 				if (auto hostPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::HOSTPORT)))
 					protocolXmlElement->removeChildElement(hostPortXmlElement, true);
-				if (auto clientPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT)))
-					protocolXmlElement->removeChildElement(clientPortXmlElement, true);
 				if (auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL)))
 					protocolXmlElement->removeChildElement(pollingIntervalXmlElement, true);
 				if (auto ocp1ConnectionModeXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE)))
@@ -2988,6 +2987,29 @@ bool ProtocolBridgingWrapper::SetDS100ProtocolType(ProtocolType protocolType, bo
 				if (auto dbprDataXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DBPRDATA)))
 					protocolXmlElement->removeChildElement(dbprDataXmlElement, true);
 
+				// add ip if missing
+				auto ipAdressXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
+				auto ipAdressElmWasNewlyCreated = false;
+				if (!ipAdressXmlElement)
+				{
+					ipAdressXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
+					ipAdressElmWasNewlyCreated = true;
+				}
+				if (protocolTypeChanged || ipAdressElmWasNewlyCreated)
+					ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
+
+				// add clientport if missing
+				auto clientPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+				auto clientPortElmWasNewlyCreated = false;
+				if (!clientPortXmlElement)
+				{
+					clientPortXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
+					clientPortElmWasNewlyCreated = true;
+				}
+				if (protocolTypeChanged || clientPortElmWasNewlyCreated)
+					clientPortXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::PORT), AURA_PORT);
+
+				// add auraarea if missing
 				auto areaString = juce::String(AURA_DEFAULT_AREA_WIDTH) + ";" + juce::String(AURA_DEFAULT_AREA_HEIGHT);
 				auto areaXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::AREA));
 				if (!areaXmlElement)
@@ -2998,6 +3020,7 @@ bool ProtocolBridgingWrapper::SetDS100ProtocolType(ProtocolType protocolType, bo
 				else
 					areaXmlElement->addTextElement(areaString);
 
+				// add listenerposition if missing
 				auto positionString = juce::String(AURA_DEFAULT_LISTENERPOSITION_X) + ";" + juce::String(AURA_DEFAULT_LISTENERPOSITION_Y) + ";" + juce::String(AURA_DEFAULT_LISTENERPOSITION_Z);
 				auto listenerPosXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POSITION));
 				if (!listenerPosXmlElement)

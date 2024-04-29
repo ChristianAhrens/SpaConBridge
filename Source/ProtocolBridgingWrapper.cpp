@@ -3909,7 +3909,7 @@ const juce::Vector3D<float> ProtocolBridgingWrapper::GetDS100AuraListenerPositio
 	return {};
 }
 
-bool ProtocolBridgingWrapper::SetDS100AuraListenerPosition(const juce::Vector3D<float>& position, bool dontSendNotificaion)
+bool ProtocolBridgingWrapper::SetDS100AuraListenerPosition(const juce::Vector3D<float>& position, bool dontSendNotification)
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
@@ -3957,7 +3957,7 @@ const juce::Rectangle<float> ProtocolBridgingWrapper::GetDS100AuraArea() const
 	return {};
 }
 
-bool ProtocolBridgingWrapper::SetDS100AuraArea(const juce::Rectangle<float>& area, bool dontSendNotificaion)
+bool ProtocolBridgingWrapper::SetDS100AuraArea(const juce::Rectangle<float>& area, bool dontSendNotification)
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)

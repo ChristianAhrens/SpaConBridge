@@ -564,7 +564,7 @@ void MultiSoundobjectSlider::paintSoundobjects(Graphics& g)
                         g.setOpacity(0.15f);
                         g.fillRect(Rectangle<float>(p1.toFloat().getX(), 0.0f, p2.toFloat().getX() - p1.toFloat().getX(), height));
 
-                        auto font = Font(static_cast<float>(goodVisibilityDistance), Font::plain);
+                        auto font = juce::Font(juce::FontOptions(float(goodVisibilityDistance), juce::Font::plain));
                         g.setFont(font);
                         g.setOpacity(1.0f);
                         auto textLabel = String("EnSpace Gain ") + String(paramsKV.second._reverbSndGain, 2) + String("dB");
@@ -584,7 +584,7 @@ void MultiSoundobjectSlider::paintSoundobjects(Graphics& g)
                         g.setOpacity(0.15f);
                         g.fillRect(Rectangle<float>(0.0f, p1.toFloat().getY(), width, p2.toFloat().getY() - p1.toFloat().getY()));
 
-                        auto font = Font(static_cast<float>(goodVisibilityDistance), Font::plain);
+                        auto font = juce::Font(juce::FontOptions(float(goodVisibilityDistance), juce::Font::plain));
                         g.setFont(font);
                         g.setOpacity(1.0f);
                         auto textLabel = String("Spread Factor ") + String(paramsKV.second._spread, 2);
@@ -669,7 +669,7 @@ void MultiSoundobjectSlider::paintSoundobjects(Graphics& g)
                 else
                     textLabel = String(paramsKV.second._id);
                 auto fontSizeScaleFactor = static_cast<float>(2.0f * paramsKV.second._size);
-                auto font = Font(12.0f + 5.0f * fontSizeScaleFactor, Font::plain);
+                auto font = juce::Font(juce::FontOptions(12.0f + 5.0f * fontSizeScaleFactor, juce::Font::plain));
                 auto fontDependantWidth = static_cast<float>(font.getStringWidth(textLabel));
                 g.setFont(font);
                 g.drawText(textLabel, Rectangle<float>(x - (0.5f * fontDependantWidth), y + 3, fontDependantWidth, knobSize * 2.0f), Justification::centred, true);
@@ -696,7 +696,7 @@ void MultiSoundobjectSlider::paintSoundobjects(Graphics& g)
             g.setOpacity(0.15f);
             g.fillRect(Rectangle<float>(p1.toFloat().getX(), 0.0f, p2.toFloat().getX() - p1.toFloat().getX(), height));
 
-            auto font = Font(static_cast<float>(goodVisibilityDistance), Font::plain);
+            auto font = juce::Font(juce::FontOptions(float(goodVisibilityDistance), juce::Font::plain));
             g.setFont(font);
             g.setOpacity(1.0f);
             auto enSpacGainFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
@@ -718,7 +718,7 @@ void MultiSoundobjectSlider::paintSoundobjects(Graphics& g)
             g.setOpacity(0.15f);
             g.fillRect(Rectangle<float>(0.0f, p1.toFloat().getY(), width, p2.toFloat().getY() - p1.toFloat().getY()));
 
-            auto font = Font(static_cast<float>(goodVisibilityDistance), Font::plain);
+            auto font = juce::Font(juce::FontOptions(float(goodVisibilityDistance), juce::Font::plain));
             g.setFont(font);
             g.setOpacity(1.0f);
             auto spreadFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_Positioning_SourceSpread);

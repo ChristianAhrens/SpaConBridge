@@ -130,6 +130,9 @@ void MatrixOutputProcessor::SetParameterChanged(const DataChangeParticipant& cha
 			|| (changeSource == DCP_MultiSlider))
 			m_dataChangesByTarget[static_cast<DataChangeParticipant>(changeTarget)] |= changeTypes;
 	}
+
+	if (auto ctrl = Controller::GetInstance())
+		ctrl->EnqueueTickTrigger();
 }
 
 /**
@@ -201,6 +204,9 @@ void MatrixOutputProcessor::SetParameterValue(DataChangeParticipant changeSource
 		jassertfalse; // Unknown parameter index!
 		break;
 	}
+
+	if (auto moEditor = dynamic_cast<MatrixOutputProcessorEditor*>(getActiveEditor()))
+		moEditor->EnqueueTickTrigger();
 }
 
 /**
@@ -209,10 +215,6 @@ void MatrixOutputProcessor::SetParameterValue(DataChangeParticipant changeSource
  */
 void MatrixOutputProcessor::Tick()
 {
-	// Reset the flags indicating when a parameter's SET command is out on the network. 
-	// These flags are set during Controller::timerCallback() and queried in Controller::oscMessageReceived()
-	m_paramSetCommandsInTransit = DCT_None;
-
 	for (int pIdx = 0; pIdx < MOI_ParamIdx_MaxIndex; pIdx++)
 	{
 		switch (pIdx)
@@ -301,7 +303,7 @@ void MatrixOutputProcessor::SetMatrixOutputId(DataChangeParticipant changeSource
 	if (m_matrixOutputId != matrixOutputId)
 	{
 		// Ensure it's within allowed range.
-		m_matrixOutputId = jmin(MatrixOutput_ID_MAX, jmax(MatrixOutput_ID_MIN, matrixOutputId));
+		m_matrixOutputId = juce::jlimit(MatrixOutput_ID_MIN, MatrixOutput_ID_MAX, matrixOutputId);
 
 		// Signal change to other modules in the processor.
 		SetParameterChanged(changeSource, DCT_MatrixOutputID);
@@ -419,7 +421,7 @@ void MatrixOutputProcessor::parameterValueChanged(int parameterIndex, float newV
  */
 AudioProcessorEditor* MatrixOutputProcessor::createEditor()
 {
-	AudioProcessorEditor* editor = new MatrixOutputProcessorEditor(*this);
+	auto editor = new MatrixOutputProcessorEditor(*this);
 
 	// Initialize GUI with current IP address, etc.
 	SetParameterChanged(DCP_Protocol, DCT_MatrixOutputParameters); // We use 'DCP_Protocol' as source here, to not have the initial update be resent as new values via protocol

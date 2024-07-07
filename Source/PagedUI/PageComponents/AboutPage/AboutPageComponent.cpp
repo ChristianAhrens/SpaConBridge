@@ -42,12 +42,12 @@ AboutPageContentComponent::AboutPageContentComponent()
                     + JUCEApplication::getInstance()->getApplicationName() + String(" uses GPLv3");
 	m_appInfoLabel = std::make_unique<Label>("Version", infoString);
 	m_appInfoLabel->setJustificationType(Justification::topLeft);
-	m_appInfoLabel->setFont(Font(13.0, Font::plain));
+	m_appInfoLabel->setFont(juce::Font(juce::FontOptions(13.0, juce::Font::plain)));
 	addAndMakeVisible(m_appInfoLabel.get());
 
 	// Hyperlink to dbaudio.com
 	m_appInfoLink = std::make_unique<HyperlinkButton>(JUCEApplication::getInstance()->getApplicationName() + String(" on GitHub"), URL("https://www.github.com/ChristianAhrens/SpaConBridge"));
-	m_appInfoLink->setFont(Font(13.0, Font::plain), false /* do not resize */);
+	m_appInfoLink->setFont(juce::Font(juce::FontOptions(13.0, juce::Font::plain)), false /* do not resize */);
     m_appInfoLink->setJustificationType(Justification::centredLeft);
 	addAndMakeVisible(m_appInfoLink.get());
 
@@ -58,11 +58,11 @@ AboutPageContentComponent::AboutPageContentComponent()
 	String juceLabelString = String("Made with JUCE.\nCopyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2020 - ROLI Ltd.\nJUCE uses GPLv3");
 	m_juceLabel = std::make_unique<Label>("JuceLabel", juceLabelString);
 	m_juceLabel->setJustificationType(Justification::topRight);
-	m_juceLabel->setFont(Font(13.0, Font::plain));
+	m_juceLabel->setFont(juce::Font(juce::FontOptions(13.0, juce::Font::plain)));
 	addAndMakeVisible(m_juceLabel.get());
 	// JUCE link
 	m_juceLink = std::make_unique<HyperlinkButton>("JUCE.com", URL("https://juce.com/"));
-	m_juceLink->setFont(Font(13.0, Font::plain), false /* do not resize */);
+	m_juceLink->setFont(juce::Font(juce::FontOptions(13.0, juce::Font::plain)), false /* do not resize */);
 	m_juceLink->setJustificationType(Justification::centredLeft);
 	addAndMakeVisible(m_juceLink.get());
 
@@ -73,11 +73,11 @@ AboutPageContentComponent::AboutPageContentComponent()
 	String materialLabelString = String("Material.io Icon Theme.\nCopyright ") + String(CharPointer_UTF8("\xc2\xa9")) + String(" 2020 - Google, Inc.\nMaterial Icons uses Apache License v2.0");
 	m_materialLabel = std::make_unique<Label>("MaterialLabel", materialLabelString);
 	m_materialLabel->setJustificationType(Justification::topRight);
-	m_materialLabel->setFont(Font(13.0, Font::plain));
+	m_materialLabel->setFont(juce::Font(juce::FontOptions(13.0, juce::Font::plain)));
 	addAndMakeVisible(m_materialLabel.get());
 	// MATERIAL.IO link
 	m_materialLink = std::make_unique<HyperlinkButton>("material.io", URL("https://material.io"));
-	m_materialLink->setFont(Font(13.0, Font::plain), false /* do not resize */);
+	m_materialLink->setFont(juce::Font(juce::FontOptions(13.0, juce::Font::plain)), false /* do not resize */);
 	m_materialLink->setJustificationType(Justification::centredLeft);
 	addAndMakeVisible(m_materialLink.get());
 
@@ -86,7 +86,7 @@ AboutPageContentComponent::AboutPageContentComponent()
 	m_licenseGPLv3Field = std::make_unique<JUCEAppBasics::FixedFontTextEditor>("GPLv3License");
 	m_licenseGPLv3Field->setReadOnly(true);
 	m_licenseGPLv3Field->setPopupMenuEnabled(false);
-	m_licenseGPLv3Field->setFont(Font(13.0, Font::plain));
+	m_licenseGPLv3Field->setFont(juce::Font(juce::FontOptions(13.0, juce::Font::plain)));
 	m_licenseGPLv3Field->setCaretVisible(false);
 	m_licenseGPLv3Field->setMultiLine(true, false /* no wrapping */);
 	m_licenseGPLv3Field->setScrollbarsShown(true);
@@ -98,7 +98,7 @@ AboutPageContentComponent::AboutPageContentComponent()
 	m_licenseAPACHEv2Field = std::make_unique<JUCEAppBasics::FixedFontTextEditor>("APACHEv2License");
 	m_licenseAPACHEv2Field->setReadOnly(true);
 	m_licenseAPACHEv2Field->setPopupMenuEnabled(false);
-	m_licenseAPACHEv2Field->setFont(Font(13.0, Font::plain));
+	m_licenseAPACHEv2Field->setFont(juce::Font(juce::FontOptions(13.0, juce::Font::plain)));
 	m_licenseAPACHEv2Field->setCaretVisible(false);
 	m_licenseAPACHEv2Field->setMultiLine(true, false /* no wrapping */);
 	m_licenseAPACHEv2Field->setScrollbarsShown(true);
@@ -110,7 +110,7 @@ AboutPageContentComponent::AboutPageContentComponent()
 	m_licenseLGPLv3Field = std::make_unique<JUCEAppBasics::FixedFontTextEditor>("LGPLv3License");
 	m_licenseLGPLv3Field->setReadOnly(true);
 	m_licenseLGPLv3Field->setPopupMenuEnabled(false);
-	m_licenseLGPLv3Field->setFont(Font(13.0, Font::plain));
+	m_licenseLGPLv3Field->setFont(juce::Font(juce::FontOptions(13.0, juce::Font::plain)));
 	m_licenseLGPLv3Field->setCaretVisible(false);
 	m_licenseLGPLv3Field->setMultiLine(true, false /* no wrapping */);
 	m_licenseLGPLv3Field->setScrollbarsShown(true);

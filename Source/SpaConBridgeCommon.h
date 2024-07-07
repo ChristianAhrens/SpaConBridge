@@ -143,6 +143,7 @@ static constexpr DataChangeType DCT_NumProcessors					= 0x0000000001; //< The nu
 static constexpr DataChangeType DCT_IPAddress						= 0x0000000002; //< The user has entered a new IP address for the DS100. */
 static constexpr DataChangeType DCT_RefreshInterval					= 0x0000000004; //< The user has entered a new interval for controller refreshing. */
 static constexpr DataChangeType DCT_Connected						= 0x0000000008; //< The bridging module communication connection status has changed, based on the time since last response. */
+static constexpr DataChangeType DCT_OnlineState						= 0x0000080000; //< The application online toggle state has changed. */
 static constexpr DataChangeType DCT_CommunicationConfig				= (DCT_IPAddress | DCT_RefreshInterval | DCT_Connected); //< IP address, rate, and Online status. */
 static constexpr DataChangeType DCT_SoundobjectID					= 0x0000000010; //< The SoundobjectID of this processor instance has been changed. */
 static constexpr DataChangeType DCT_MappingID						= 0x0000000020; //< The user has selected a different coordinate mapping for this Plug-in. */
@@ -263,27 +264,6 @@ String GetRepositoryBaseWebUrl();
 String GetDocumentationBaseWebUrl();
 String GetDocumentationSectionIdentification(UIPageId pageId);
 
-
-/**
- * Rate at which the GUI will refresh, after parameter changes have been detected.
- * 33 ms translates to about 30 frames per second.
- */
-static constexpr int GUI_UPDATE_RATE_FAST = 60;
-
-/**
- * Rate at which the GUI will refresh, when no parameter changes have taken place for a while.
- */
-static constexpr int GUI_UPDATE_RATE_SLOW = 120;
-
-/**
- * Rate at which the Scenes/EnSpace pages will refresh.
- */
-static constexpr int GUI_UPDATE_RATE_SUPERSLOW = 1500;
-
-/**
- * After this number of timer callbacks without parameter changes, the timer will switch to GUI_UPDATE_RATE_SLOW.
- */
-static constexpr int GUI_UPDATE_DELAY_TICKS = 15;
 
 /**
  * Possible errors in SpaConBridge application that result in a user notification.

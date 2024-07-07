@@ -22,9 +22,9 @@ namespace SpaConBridge
 {
 
 AppConfiguration::AppConfiguration(const File& file)
-	: JUCEAppBasics::AppConfigurationBase(file)
+	: JUCEAppBasics::AppConfigurationBase()
 {
-
+	InitializeBase(file, JUCEAppBasics::AppConfigurationBase::Version::FromString(SPACONBRIDGE_CONFIG_VERSION));
 }
 
 AppConfiguration::~AppConfiguration()
@@ -145,5 +145,31 @@ bool AppConfiguration::ResetToDefault()
 	return false;
 }
 
+bool AppConfiguration::HandleConfigVersionConflict(const JUCEAppBasics::AppConfigurationBase::Version& configVersionFound)
+{
+	if (configVersionFound != JUCEAppBasics::AppConfigurationBase::Version::FromString(SPACONBRIDGE_CONFIG_VERSION))
+	{
+		auto conflictTitle = "Incompatible configuration version";
+		auto conflictInfo = "The configuration file version detected\ncannot be handled by this version of " + juce::JUCEApplication::getInstance()->getApplicationName();
+#ifdef DEBUG
+		conflictInfo << "\n(Found " + configVersionFound.ToString() + ", expected " + SPACONBRIDGE_CONFIG_VERSION + ")";
+#endif
+		juce::AlertWindow::showOkCancelBox(juce::MessageBoxIconType::WarningIcon, conflictTitle, conflictInfo, "Reset to default", "Quit", nullptr, ModalCallbackFunction::create([this](int result) {
+			if (1 == result)
+			{
+				ResetToDefault();
+			}
+			else
+			{
+				juce::JUCEApplication::getInstance()->quit();
+			}
+		}));
 
-}
+		return false;
+	}
+	else
+		return true;
+}	
+
+
+} // namespace SpaConBridge

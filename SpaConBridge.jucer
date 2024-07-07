@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="MFvkL5" name="SpaConBridge" projectType="guiapp" version="0.13.6"
+<JUCERPROJECT id="MFvkL5" name="SpaConBridge" projectType="guiapp" version="0.14.0"
               bundleIdentifier="com.ChristianAhrens.SpaConBridge" companyName="Christian Ahrens"
               companyEmail="christianahrens@me.com" displaySplashScreen="0"
               reportAppUsage="0" companyCopyright="2023" jucerFormatVersion="1"
               headerPath="../../submodules/RemoteProtocolBridgeCore/submodules/NanoOcp/Source/&#10;../../submodules/RemoteProtocolBridgeCore/Source&#10;../../submodules/JUCE-AppBasics/Source&#10;../../submodules/SQLiteCpp/include&#10;../../submodules/SQLiteCpp/sqlite3"
               companyWebsite="https://github.com/ChristianAhrens/SpaConBridge"
-              defines="SQLITE_ENABLE_COLUMN_METADATA=1&#10;USE_DBPR_PROJECT_UTILS=1">
+              defines="SQLITE_ENABLE_COLUMN_METADATA=1&#10;USE_DBPR_PROJECT_UTILS=1&#10;JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING=1">
   <MAINGROUP id="cS7SrP" name="SpaConBridge">
     <GROUP id="{F93FDF74-FF39-A47E-E403-31E5ADA7ADD3}" name="submodules">
       <GROUP id="{ABDE5966-4366-3448-7A14-89E6D88C1E6A}" name="SQLiteCpp">
@@ -62,6 +62,8 @@
                   file="submodules/RemoteProtocolBridgeCore/submodules/NanoOcp/Source/Ocp1DS100ObjectDefinitions.h"/>
             <FILE id="FkICD0" name="Ocp1Message.cpp" compile="1" resource="0" file="submodules/RemoteProtocolBridgeCore/submodules/NanoOcp/Source/Ocp1Message.cpp"/>
             <FILE id="PCY7og" name="Ocp1Message.h" compile="0" resource="0" file="submodules/RemoteProtocolBridgeCore/submodules/NanoOcp/Source/Ocp1Message.h"/>
+            <FILE id="T2a9aH" name="Variant.cpp" compile="1" resource="0" file="submodules/RemoteProtocolBridgeCore/submodules/NanoOcp/Source/Variant.cpp"/>
+            <FILE id="hBeqjk" name="Variant.h" compile="0" resource="0" file="submodules/RemoteProtocolBridgeCore/submodules/NanoOcp/Source/Variant.h"/>
           </GROUP>
         </GROUP>
         <GROUP id="{F0157EC5-9555-900E-531F-BF6E4749BCDB}" name="Source">

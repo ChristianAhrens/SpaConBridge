@@ -79,7 +79,7 @@ SoundobjectProcessor::SoundobjectProcessor(bool insertToConfig)
 
 	// EnSpace send gain param
 	auto rsgR = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
-	m_reverbSendGain = new GestureManagedAudioParameterFloat("ReverbSendGain", "Reverb", rsgR.getStart(), rsgR.getEnd(), 0.1f, 0.0f);
+	m_reverbSendGain = new GestureManagedAudioParameterFloat("ReverbSendGain", "En-Space gain", rsgR.getStart(), rsgR.getEnd(), 0.1f, 0.0f);
 	m_reverbSendGain->addListener(this);
 	addParameter(m_reverbSendGain);
 
@@ -91,7 +91,7 @@ SoundobjectProcessor::SoundobjectProcessor(bool insertToConfig)
 
 	// sound object delay mode param
 	StringArray delayModeChoices("Off", "Tight", "Full");
-	m_delayMode = new GestureManagedAudioParameterChoice("DelayMode", "Delay", delayModeChoices, 1);
+	m_delayMode = new GestureManagedAudioParameterChoice("DelayMode", "Delay mode", delayModeChoices, 1);
 	m_delayMode->addListener(this);
 	addParameter(m_delayMode);
 
@@ -167,6 +167,9 @@ void SoundobjectProcessor::SetParameterChanged(const DataChangeParticipant& chan
 			|| (changeSource == DCP_MultiSlider))
 			m_dataChangesByTarget[static_cast<DataChangeParticipant>(changeTarget)] |= changeTypes;
 	}
+
+	if (auto ctrl = Controller::GetInstance())
+		ctrl->EnqueueTickTrigger();
 }
 
 /**
@@ -259,6 +262,9 @@ void SoundobjectProcessor::SetParameterValue(DataChangeParticipant changeSource,
 		jassertfalse; // Unknown parameter index!
 		break;
 	}
+
+	if (auto soEditor = dynamic_cast<SoundobjectProcessorEditor*>(getActiveEditor()))
+		soEditor->EnqueueTickTrigger();
 }
 
 /**
@@ -267,10 +273,6 @@ void SoundobjectProcessor::SetParameterValue(DataChangeParticipant changeSource,
  */
 void SoundobjectProcessor::Tick()
 {
-	// Reset the flags indicating when a parameter's SET command is out on the network. 
-	// These flags are set during Controller::timerCallback() and queried in Controller::oscMessageReceived()
-	m_paramSetCommandsInTransit = DCT_None;
-
 	for (int pIdx = 0; pIdx < SPI_ParamIdx_MaxIndex; pIdx++)
 	{
 		switch (pIdx)
@@ -402,7 +404,7 @@ void SoundobjectProcessor::SetSoundobjectId(DataChangeParticipant changeSource, 
 	if (m_soundobjectId != soundobjectId)
 	{
 		// Ensure it's within allowed range.
-		m_soundobjectId = jmin(SOURCE_ID_MAX, jmax(SOURCE_ID_MIN, soundobjectId));
+		m_soundobjectId = juce::jlimit(SOURCE_ID_MIN, SOURCE_ID_MAX, soundobjectId);
 
 		// Signal change to other modules in the procssor.
 		SetParameterChanged(changeSource, DCT_SoundobjectID);
@@ -595,7 +597,7 @@ void SoundobjectProcessor::parameterValueChanged(int parameterIndex, float newVa
  */
 AudioProcessorEditor* SoundobjectProcessor::createEditor()
 {
-	AudioProcessorEditor* editor = new SoundobjectProcessorEditor(*this);
+	auto editor = new SoundobjectProcessorEditor(*this);
 
 	// Initialize GUI with current IP address, etc.
 	SetParameterChanged(DCP_Protocol, DCT_SoundobjectParameters); // We use 'DCP_Protocol' as source here, to not have the initial update be resent as new values via protocol

@@ -39,6 +39,9 @@ namespace SpaConBridge
 ===============================================================================
 */
 
+
+bool MatrixOutputProcessorEditor::TickTrigger::s_tickHandled{ true };
+
 /**
  * Object constructor.
  * This is the base class for the component that acts as the GUI for an AudioProcessor.
@@ -52,9 +55,8 @@ MatrixOutputProcessorEditor::MatrixOutputProcessorEditor(MatrixOutputProcessor& 
 	{
 		auto fparam = dynamic_cast<AudioParameterFloat*> (params[MOI_ParamIdx_LevelMeterPostMute]);
 		m_MatrixOutputLevelMeterSlider = std::make_unique<LevelMeterSlider>(fparam->name, LevelMeterSlider::LMM_ReadOnly);
-		m_MatrixOutputLevelMeterSlider->setRange(fparam->range.start, fparam->range.end, fparam->range.interval);
-		m_MatrixOutputLevelMeterSlider->setValue(fparam->get(), dontSendNotification);
-		m_MatrixOutputLevelMeterSlider->addListener(this);
+		m_MatrixOutputLevelMeterSlider->setRange(fparam->range.start, fparam->range.end);
+		m_MatrixOutputLevelMeterSlider->setValue(fparam->get());
 		addAndMakeVisible(m_MatrixOutputLevelMeterSlider.get());
 
 		fparam = dynamic_cast<AudioParameterFloat*> (params[MOI_ParamIdx_Gain]);
@@ -77,9 +79,6 @@ MatrixOutputProcessorEditor::MatrixOutputProcessorEditor(MatrixOutputProcessor& 
 		lookAndFeelChanged();
 	}
 
-	// Start GUI-refreshing timer.
-	startTimer(GUI_UPDATE_RATE_FAST);
-
 	setSize(20, 20);
 }
 
@@ -88,8 +87,6 @@ MatrixOutputProcessorEditor::MatrixOutputProcessorEditor(MatrixOutputProcessor& 
  */
 MatrixOutputProcessorEditor::~MatrixOutputProcessorEditor()
 {
-	stopTimer();
-
 	processor.editorBeingDeleted(this);
 }
 
@@ -155,9 +152,7 @@ void MatrixOutputProcessorEditor::lookAndFeelChanged()
 GestureManagedAudioParameterFloat* MatrixOutputProcessorEditor::GetParameterForSlider(Slider* slider)
 {
 	auto const& params = getAudioProcessor()->getParameters();
-	if (slider == m_MatrixOutputLevelMeterSlider.get())
-		return dynamic_cast<GestureManagedAudioParameterFloat*> (params[MOI_ParamIdx_LevelMeterPostMute]);
-	else if (slider == m_MatrixOutputGainSlider.get())
+	if (slider == m_MatrixOutputGainSlider.get())
 		return dynamic_cast<GestureManagedAudioParameterFloat*> (params[MOI_ParamIdx_Gain]);
 	
 	// Should not make it this far.
@@ -177,13 +172,12 @@ void MatrixOutputProcessorEditor::sliderValueChanged(Slider* slider)
 	if (moProcessor)
 	{
 		auto paramIdx = MOI_ParamIdx_MaxIndex;
-		if (slider == m_MatrixOutputLevelMeterSlider.get())
-			paramIdx = MOI_ParamIdx_LevelMeterPostMute;
-		else if (slider == m_MatrixOutputGainSlider.get())
+		if (slider == m_MatrixOutputGainSlider.get())
 			paramIdx = MOI_ParamIdx_Gain;
 
 		moProcessor->SetParameterValue(DCP_MatrixOutputProcessor, paramIdx, static_cast<float>(slider->getValue()));
 	}
+	EnqueueTickTrigger();
 }
 
 /**
@@ -223,6 +217,7 @@ void MatrixOutputProcessorEditor::buttonClicked(Button* button)
 
 		moProcessor->SetParameterValue(DCP_MatrixOutputProcessor, paramIdx, static_cast<float>(button->getToggleState() ? 1 : 0));
 	}
+	EnqueueTickTrigger();
 }
 
 /**
@@ -247,24 +242,42 @@ void MatrixOutputProcessorEditor::resized()
 }
 
 /**
- * Timer callback function, which will be called at regular intervals to update the GUI.
- * Reimplemented from base class Timer.
+ * Reimplemented from juce::MessageListener to process
+ * internally posted tick messages.
+ * This implementation takes care of not actually executing
+ * tick triggers that have been rendered irrelevant while
+ * pending in the message queue.
+ * @param	message		The message dispatched from queue to be handled. Only ControllerTickTrigger message type is supported.
  */
-void MatrixOutputProcessorEditor::timerCallback()
+void MatrixOutputProcessorEditor::handleMessage(const Message& message)
 {
-	// Also update the regular GUI.
-	UpdateGui(false);
+	if (auto tickTrigger = dynamic_cast<const TickTrigger*>(&message))
+	{
+		if (!tickTrigger->IsOutdated())
+			UpdateGui();
+
+		// Mark the tick event as handled here, even though the object will
+		// be deleted by JUCE later on, to allow new tick events to be enqueued
+		// from here on.
+		tickTrigger->SetTickHandled();
+	}
+}
+
+/**
+ * Public helper to post a new tick trigger
+ * message to async message queue.
+ */
+void MatrixOutputProcessorEditor::EnqueueTickTrigger()
+{
+	if (TickTrigger::IsOutdated())
+		postMessage(new TickTrigger());
 }
 
 /**
  * Update GUI elements with the current parameter values.
- * @param init	True to ignore any changed flags and update parameters
- *				in the GUI anyway. Good for when opening the GUI for the first time.
  */
-void MatrixOutputProcessorEditor::UpdateGui(bool init)
+void MatrixOutputProcessorEditor::UpdateGui()
 {
-	ignoreUnused(init); // No need to use this here so far.
-
 	bool somethingChanged = false;
 
 	MatrixOutputProcessor* pro = dynamic_cast<MatrixOutputProcessor*>(getAudioProcessor());
@@ -284,7 +297,7 @@ void MatrixOutputProcessorEditor::UpdateGui(bool init)
 			// Update level meter.
 			fParam = dynamic_cast<AudioParameterFloat*>(params[MOI_ParamIdx_LevelMeterPostMute]);
 			if (fParam)
-				m_MatrixOutputLevelMeterSlider->setValue(fParam->get(), dontSendNotification);
+				m_MatrixOutputLevelMeterSlider->setValue(fParam->get());
 		}
 
 		if (pro->PopParameterChanged(DCP_MatrixOutputProcessor, DCT_MatrixOutputGain))
@@ -301,33 +314,6 @@ void MatrixOutputProcessorEditor::UpdateGui(bool init)
 			iParam = dynamic_cast<AudioParameterInt*>(params[MOI_ParamIdx_Mute]);
 			if (iParam)
 				m_MatrixOutputMuteButton->setToggleState(iParam->get() == Mute_On, dontSendNotification);
-		}
-	}
-
-	if (somethingChanged)
-	{
-		// At least one parameter was changed -> reset counter to prevent switching to "slow" refresh rate too soon.
-		m_ticksSinceLastChange = 0;
-
-		// Parameters have changed in the procssor: Switch to frequent GUI refreshing rate
-		if (getTimerInterval() == GUI_UPDATE_RATE_SLOW)
-		{
-			startTimer(GUI_UPDATE_RATE_FAST);
-			DBG("MatrixOutputProcessorEditor::timerCallback: Switching to GUI_UPDATE_RATE_FAST");
-		}
-	}
-
-	else
-	{
-		// No parameter changed since last timer callback -> increase counter.
-		if (m_ticksSinceLastChange < GUI_UPDATE_DELAY_TICKS)
-			m_ticksSinceLastChange++;
-
-		// Once counter has reached a certain limit: Switch to lazy GUI refreshing rate
-		else if (getTimerInterval() == GUI_UPDATE_RATE_FAST)
-		{
-			DBG("MatrixOutputProcessorEditor::timerCallback(): Switching to GUI_UPDATE_RATE_SLOW");
-			startTimer(GUI_UPDATE_RATE_SLOW);
 		}
 	}
 }

@@ -591,7 +591,7 @@ bool TableModelComponent::LessThanSoundobjectBridgingMute(juce::int32 pId1, juce
 			auto mutedProtocolCountP1 = 0;
 			auto mutedProtocolCountP2 = 0;
 
-			for (auto bridgingType : ProtocolBridgingTypes)
+			for (const auto&bridgingType : ProtocolBridgingTypes)
 			{
 				auto activeBridging = ctrl->GetActiveProtocolBridging();
 				if ((activeBridging & bridgingType) == bridgingType)
@@ -639,7 +639,7 @@ bool TableModelComponent::LessThanMatrixInputBridgingMute(juce::int32 pId1, juce
 			auto mutedProtocolCountP1 = 0;
 			auto mutedProtocolCountP2 = 0;
 
-			for (auto bridgingType : ProtocolBridgingTypes)
+			for (const auto&bridgingType : ProtocolBridgingTypes)
 			{
 				auto activeBridging = ctrl->GetActiveProtocolBridging();
 				if ((activeBridging & bridgingType) == bridgingType)
@@ -687,7 +687,7 @@ bool TableModelComponent::LessThanMatrixOutputBridgingMute(juce::int32 pId1, juc
 			auto mutedProtocolCountP1 = 0;
 			auto mutedProtocolCountP2 = 0;
 
-			for (auto bridgingType : ProtocolBridgingTypes)
+			for (const auto&bridgingType : ProtocolBridgingTypes)
 			{
 				auto activeBridging = ctrl->GetActiveProtocolBridging();
 				if ((activeBridging & bridgingType) == bridgingType)
@@ -705,7 +705,163 @@ bool TableModelComponent::LessThanMatrixOutputBridgingMute(juce::int32 pId1, juc
 	return false;
 }
 
+bool TableModelComponent::LessThanSoundobjectUiActive(juce::int32 pId1, juce::int32 pId2)
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return false;
 
+	auto processorIds = ctrl->GetSoundobjectProcessorIds();
+	auto maxProcessorIdIter = std::max_element(processorIds.begin(), processorIds.end());
+	if (maxProcessorIdIter == processorIds.end())
+		return false;
+	auto maxProcessorId = *maxProcessorIdIter;
+	if ((pId1 <= maxProcessorId) && (pId2 <= maxProcessorId))
+	{
+		auto p1 = ctrl->GetSoundobjectProcessor(pId1);
+		auto p2 = ctrl->GetSoundobjectProcessor(pId2);
+		if (p1 && p2)
+		{
+			auto p1UiActiveValue = (p1->GetComsMode() | CM_Tx);
+			auto p2UiActiveValue = (p2->GetComsMode() | CM_Tx);
+			return (p1UiActiveValue < p2UiActiveValue);
+		}
+	}
+
+	jassertfalse; // Index out of range!
+	return false;
+}
+
+bool TableModelComponent::LessThanMatrixInputUiActive(juce::int32 pId1, juce::int32 pId2)
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return false;
+
+	auto processorIds = ctrl->GetMatrixInputProcessorIds();
+	auto maxProcessorIdIter = std::max_element(processorIds.begin(), processorIds.end());
+	if (maxProcessorIdIter == processorIds.end())
+		return false;
+	auto maxProcessorId = *maxProcessorIdIter;
+	if ((pId1 <= maxProcessorId) && (pId2 <= maxProcessorId))
+	{
+		auto p1 = ctrl->GetMatrixInputProcessor(pId1);
+		auto p2 = ctrl->GetMatrixInputProcessor(pId2);
+		if (p1 && p2)
+		{
+			auto p1UiActiveValue = (p1->GetComsMode() | CM_Tx);
+			auto p2UiActiveValue = (p2->GetComsMode() | CM_Tx);
+			return (p1UiActiveValue < p2UiActiveValue);
+		}
+	}
+
+	jassertfalse; // Index out of range!
+	return false;
+}
+bool TableModelComponent::LessThanMatrixOutputUiActive(juce::int32 pId1, juce::int32 pId2)
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return false;
+
+	auto processorIds = ctrl->GetMatrixOutputProcessorIds();
+	auto maxProcessorIdIter = std::max_element(processorIds.begin(), processorIds.end());
+	if (maxProcessorIdIter == processorIds.end())
+		return false;
+	auto maxProcessorId = *maxProcessorIdIter;
+	if ((pId1 <= maxProcessorId) && (pId2 <= maxProcessorId))
+	{
+		auto p1 = ctrl->GetMatrixOutputProcessor(pId1);
+		auto p2 = ctrl->GetMatrixOutputProcessor(pId2);
+		if (p1 && p2)
+		{
+			auto p1UiActiveValue = (p1->GetComsMode() | CM_Tx);
+			auto p2UiActiveValue = (p2->GetComsMode() | CM_Tx);
+			return (p1UiActiveValue < p2UiActiveValue);
+		}
+	}
+
+	jassertfalse; // Index out of range!
+	return false;
+}
+bool TableModelComponent::LessThanSoundobjectReadActive(juce::int32 pId1, juce::int32 pId2)
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return false;
+
+	auto processorIds = ctrl->GetSoundobjectProcessorIds();
+	auto maxProcessorIdIter = std::max_element(processorIds.begin(), processorIds.end());
+	if (maxProcessorIdIter == processorIds.end())
+		return false;
+	auto maxProcessorId = *maxProcessorIdIter;
+	if ((pId1 <= maxProcessorId) && (pId2 <= maxProcessorId))
+	{
+		auto p1 = ctrl->GetSoundobjectProcessor(pId1);
+		auto p2 = ctrl->GetSoundobjectProcessor(pId2);
+		if (p1 && p2)
+		{
+			auto p1ReadActiveValue = (p1->GetComsMode() | CM_Rx);
+			auto p2ReadActiveValue = (p2->GetComsMode() | CM_Rx);
+			return (p1ReadActiveValue < p2ReadActiveValue);
+		}
+	}
+
+	jassertfalse; // Index out of range!
+	return false;
+}
+bool TableModelComponent::LessThanMatrixInputReadActive(juce::int32 pId1, juce::int32 pId2)
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return false;
+
+	auto processorIds = ctrl->GetMatrixInputProcessorIds();
+	auto maxProcessorIdIter = std::max_element(processorIds.begin(), processorIds.end());
+	if (maxProcessorIdIter == processorIds.end())
+		return false;
+	auto maxProcessorId = *maxProcessorIdIter;
+	if ((pId1 <= maxProcessorId) && (pId2 <= maxProcessorId))
+	{
+		auto p1 = ctrl->GetMatrixInputProcessor(pId1);
+		auto p2 = ctrl->GetMatrixInputProcessor(pId2);
+		if (p1 && p2)
+		{
+			auto p1ReadActiveValue = (p1->GetComsMode() | CM_Rx);
+			auto p2ReadActiveValue = (p2->GetComsMode() | CM_Rx);
+			return (p1ReadActiveValue < p2ReadActiveValue);
+		}
+	}
+
+	jassertfalse; // Index out of range!
+	return false;
+}
+bool TableModelComponent::LessThanMatrixOutputReadActive(juce::int32 pId1, juce::int32 pId2)
+{
+	auto ctrl = Controller::GetInstance();
+	if (!ctrl)
+		return false;
+
+	auto processorIds = ctrl->GetMatrixOutputProcessorIds();
+	auto maxProcessorIdIter = std::max_element(processorIds.begin(), processorIds.end());
+	if (maxProcessorIdIter == processorIds.end())
+		return false;
+	auto maxProcessorId = *maxProcessorIdIter;
+	if ((pId1 <= maxProcessorId) && (pId2 <= maxProcessorId))
+	{
+		auto p1 = ctrl->GetMatrixOutputProcessor(pId1);
+		auto p2 = ctrl->GetMatrixOutputProcessor(pId2);
+		if (p1 && p2)
+		{
+			auto p1ReadActiveValue = (p1->GetComsMode() | CM_Rx);
+			auto p2ReadActiveValue = (p2->GetComsMode() | CM_Rx);
+			return (p1ReadActiveValue < p2ReadActiveValue);
+		}
+	}
+
+	jassertfalse; // Index out of range!
+	return false;
+}
 /**
  * This can be overridden to react to the user double-clicking on a part of the list where there are no rows. 
  * @param event	Contains position and status information about a mouse event.
@@ -824,7 +980,7 @@ void TableModelComponent::sortOrderChanged(int newSortColumnId, bool isForwards)
 
 		// Restore row selection after sorting order has been changed, BUT make sure that
 		// it is the same Processors which are selected after the sorting, NOT the same rows.
-		for (auto processorId : selectedProcessors)
+		for (const auto&processorId : selectedProcessors)
 		{
 			int rowNo = static_cast<int>(std::find(m_processorIds.begin(), m_processorIds.end(), processorId) - m_processorIds.begin());
 			m_table->selectRow(rowNo, true /* don't scroll */, false /* do not deselect other rows*/);
@@ -842,7 +998,6 @@ void TableModelComponent::sortOrderChanged(int newSortColumnId, bool isForwards)
  */
 Component* TableModelComponent::refreshComponentForCell(int rowNumber, int columnId, bool isRowSelected, Component* existingComponentToUpdate)
 {
-	ignoreUnused(isRowSelected);
 
 	Component* ret = nullptr;
 
@@ -1009,7 +1164,7 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 			}
 
 			if (matrixInputEditor)
-				matrixInputEditor->UpdateGui(true);
+				matrixInputEditor->UpdateGui();
 
 			// Return a pointer to the component.
 			ret = matrixInputEditor;
@@ -1043,7 +1198,7 @@ Component* TableModelComponent::refreshComponentForCell(int rowNumber, int colum
 			}
 
 			if (matrixOutputEditor)
-				matrixOutputEditor->UpdateGui(true);
+				matrixOutputEditor->UpdateGui();
 
 			// Return a pointer to the component.
 			ret = matrixOutputEditor;

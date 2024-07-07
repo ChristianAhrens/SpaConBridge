@@ -122,6 +122,12 @@ public:
 	bool IsMuSelVisuEnabled();
 	void SetMuSelVisuEnabled(bool enabled);
 
+	bool IsSpeakersVisuEnabled();
+	void SetSpeakersVisuEnabled(bool enabled);
+	bool IsMappingAreasVisuEnabled();
+	void SetMappingAreasVisuEnabled(bool enabled);
+	bool IsMappingAreaLabelsVisuEnabled();
+	void SetMappingAreaLabelsVisuEnabled(bool enabled);
 	bool HasBackgroundImage(MappingAreaId mappingAreaId);
 	const juce::Image& GetBackgroundImage(MappingAreaId mappingAreaId);
 	void SetBackgroundImage(MappingAreaId mappingAreaId, const juce::Image& backgroundImage);

@@ -22,6 +22,8 @@
 
 #include <AppConfigurationBase.h>
 
+#define SPACONBRIDGE_CONFIG_VERSION "1.0.0"
+
 namespace SpaConBridge
 {
 
@@ -43,7 +45,7 @@ public:
         MATRIXINPUTPROCESSORS,
         MATRIXOUTPUTPROCESSORS,
         PROCESSORINSTANCE,
-		BRIDGING,
+        BRIDGING,
         LOOKANDFEELTYPE,
         ONLINESTATE,
         SCENESPAGE,
@@ -52,6 +54,9 @@ public:
         ENABLEDPAGES,
         MULTISLIDER,
         MAPPINGAREA,
+        SPEAKERPOSENABLED,
+        MAPPINGAREASENABLED,
+        MAPPINGAREALABELSENABLED,
         REVERBENABLED,
         SPREADENABLED,
         BACKGROUNDIMAGES,
@@ -66,6 +71,8 @@ public:
         MATRIXOUTPUTPROCESSORSELECTIONS,
         SELECTIONGROUP,
         MUSELVISUENABLED,
+        SEARCHFORUPDATES,
+        SETTINGS,
     };
     static String getTagName(TagID ID)
     {
@@ -113,6 +120,12 @@ public:
             return "MultiSlider";
         case MAPPINGAREA:
             return "MappingArea";
+        case SPEAKERPOSENABLED:
+            return "SpeakerPosEnabled";
+        case MAPPINGAREASENABLED:
+            return "MappingAreasEnabled";
+        case MAPPINGAREALABELSENABLED:
+            return "MappingAreaLabelsEnabled";
         case REVERBENABLED:
             return "ReverbEnabled";
         case SPREADENABLED:
@@ -141,14 +154,18 @@ public:
             return "SelctGrp";
         case MUSELVISUENABLED:
             return "MuSelVisuEnabled";
-		default:
-			return "INVALID";
+        case SEARCHFORUPDATES:
+            return "SearchForUpdates";
+        case SETTINGS:
+            return "Settings";
+        default:
+            return "INVALID";
         }
-	};
+    };
 
-	enum AttributeID
-	{
-		PROCESSORCHANNELID,
+    enum AttributeID
+    {
+        PROCESSORCHANNELID,
         PROCESSORRECORDID,
         PROCESSORCOMSMODE,
         PROCESSORCOLOUR,
@@ -156,11 +173,12 @@ public:
         INDEXMAJOR,
         INDEXMINOR,
         NAME,
-	};
-	static String getAttributeName(AttributeID Id)
-	{
-		switch (Id)
-		{
+        EXPANDED,
+    };
+    static String getAttributeName(AttributeID Id)
+    {
+        switch (Id)
+        {
         case PROCESSORCHANNELID:
             return "ChannelId";
         case PROCESSORRECORDID:
@@ -177,23 +195,28 @@ public:
             return "IndexMinor";
         case NAME:
             return "Name";
-		default:
-			return "INVALID";
-		}
-	};
+        case EXPANDED:
+            return "Expanded";
+        default:
+            return "INVALID";
+        }
+    };
 
 public:
-	explicit AppConfiguration(const File &file);
-	~AppConfiguration() override;
+    explicit AppConfiguration(const File &file);
+    ~AppConfiguration() override;
 
-	bool isValid() override;
+    bool isValid() override;
     static bool isValid(const std::unique_ptr<XmlElement>& xmlConfig);
 
     bool ResetToDefault();
 
+protected:
+    bool HandleConfigVersionConflict(const Version& configVersionFound) override;
+
 private:
 
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AppConfiguration)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AppConfiguration)
 };
 
-}
+} // namespace SpaConBridge

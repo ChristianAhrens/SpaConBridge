@@ -67,6 +67,7 @@ public:
 	void SetHandleSelectedOnly(bool selectedOnly);
 
 	//==============================================================================
+	void ClearVisualizationParameterData();
 	void lookAndFeelChanged() override;
 
 private:

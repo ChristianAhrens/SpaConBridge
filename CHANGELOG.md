@@ -4,12 +4,14 @@ All notable changes to SpaConBridge will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.14.0] 2024-07-07
 ### Added
 
 ### Changed
+- Updated JUCE framework to v8 for improved windows performance (Direct2D)
 
 ### Fixed
+- Fixed minor stability and performance issues
 
 ## [0.13.5] 2024-04-09
 ### Added

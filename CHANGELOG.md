@@ -4,6 +4,23 @@ All notable changes to SpaConBridge will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Added
+
+### Changed
+
+### Fixed
+
+## [0.14.1] 2024-10-03
+### Added
+
+### Changed
+- Restrict iPhone target to landscapeRight and portrait
+
+### Fixed
+- Fixed iOS screen indent/island handling
+- Updated included modules for general fixes
+
 ## [0.14.0] 2024-07-07
 ### Added
 

@@ -220,7 +220,7 @@ void DbLookAndFeelBase::drawAlertBox(	Graphics& g,
 		}
 
 		GlyphArrangement ga;
-		ga.addFittedText({ (float)iconRect.getHeight() * 0.9f, Font::bold },
+		ga.addFittedText({ juce::FontOptions((float)iconRect.getHeight() * 0.9f, Font::bold) },
 			String::charToString((juce_wchar)(uint8)character),
 			static_cast<float> (iconRect.getX()), static_cast<float> (iconRect.getY()),
 			static_cast<float> (iconRect.getWidth()), static_cast<float> (iconRect.getHeight()),

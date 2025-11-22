@@ -85,12 +85,11 @@ bool ProtocolBridgingWrapper::SendMessage(const RemoteObjectIdentifier roi, Remo
 	}
 	else if (GetDS100ExtensionMode() == EM_Extend)
 	{
-		if (msgData._addrVal._first > DS100_CHANNELCOUNT)
+		int firstDS100InputChannelCount = Controller::GetInstance()->GetDS100InputChannelCount();
+		if (msgData._addrVal._first > firstDS100InputChannelCount)
 		{
-			auto mappedChannel = static_cast<std::int32_t>(msgData._addrVal._first % DS100_CHANNELCOUNT);
-			if (mappedChannel == 0)
-				mappedChannel = static_cast<std::int32_t>(DS100_CHANNELCOUNT);
-			msgData._addrVal._first = mappedChannel;
+			// subtract the channel count of first DS100 to get ID for the second DS100
+			msgData._addrVal._first = static_cast<std::int32_t>(msgData._addrVal._first - firstDS100InputChannelCount);
 
 			return m_processingNode.SendMessageTo(DS100_2_PROCESSINGPROTOCOL_ID, roi, msgData, ASYNC_EXTID);
 		}
@@ -115,6 +114,26 @@ bool ProtocolBridgingWrapper::SendMessage(const RemoteObjectIdentifier roi, Remo
  * It forwards the message to all registered Processor objects.
  * @param callbackMessage	The node data to handle encapsulated in a calbackmsg struct..
  */
+bool ProtocolBridgingWrapper::SendMessageToThirdPartyDirect(const RemoteObjectIdentifier roi, RemoteObjectMessageData& msgData)
+{
+	std::vector<int> protocols = {
+		DIGICO_PROCESSINGPROTOCOL_ID,
+		RTTRPM_PROCESSINGPROTOCOL_ID,
+		GENERICOSC_PROCESSINGPROTOCOL_ID,
+		GENERICMIDI_PROCESSINGPROTOCOL_ID,
+		YAMAHAOSC_PROCESSINGPROTOCOL_ID,
+		ADMOSC_PROCESSINGPROTOCOL_ID,
+		DAWPLUGIN_PROCESSINGPROTOCOL_ID,
+		REMAPOSC_PROCESSINGPROTOCOL_ID
+	};
+
+	bool anySucceeded = false;
+	for (auto const& protocol : protocols)
+		anySucceeded = anySucceeded || m_processingNode.SendMessageTo(protocol, roi, msgData, ASYNC_EXTID);
+
+	return anySucceeded;
+}
+
 void ProtocolBridgingWrapper::HandleNodeData(const ProcessingEngineNode::NodeCallbackMessage* callbackMessage)
 {
     if (!callbackMessage)
@@ -175,7 +194,7 @@ bool ProtocolBridgingWrapper::IsBridgingObjectOnly(const RemoteObjectIdentifier 
 {
 	switch (roi)
 	{
-	case ROI_MatrixInput_Select:
+	case ROI_RemoteProtocolBridge_MatrixInputSelect:
 	case ROI_RemoteProtocolBridge_SoundObjectSelect:
 	case ROI_RemoteProtocolBridge_UIElementIndexSelect:
 	case ROI_RemoteProtocolBridge_GetAllKnownValues:
@@ -264,8 +283,48 @@ bool ProtocolBridgingWrapper::setStateXml(XmlElement* stateXml)
 				objectHandlingXmlElement = nodeXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OBJECTHANDLING));
 			if (objectHandlingXmlElement)
 			{
-				if (objectHandlingXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE)).isEmpty())
+				auto bridgingMode = objectHandlingXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE));
+				if (bridgingMode.isEmpty())
 					objectHandlingXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::MODE), ProcessingEngineConfig::ObjectHandlingModeToString(OHM_Forward_only_valueChanges));
+				
+				// sanity check for failover time if in mirrormode
+				else if (ProcessingEngineConfig::ObjectHandlingModeFromString(bridgingMode) == OHM_Mirror_dualA_withValFilter)
+				{
+					auto protoFailoverTimeXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::FAILOVERTIME));
+					if (!protoFailoverTimeXmlElement)
+					{
+						protoFailoverTimeXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::FAILOVERTIME));
+						protoFailoverTimeXmlElement->addTextElement(juce::String(MIRROR_MODE_FAILOVER_TIME));
+					}
+					else
+					{
+						double failoverTime = protoFailoverTimeXmlElement->getAllSubText().getDoubleValue();
+						if (failoverTime < MIRROR_MODE_FAILOVER_TIME)
+						{
+							protoFailoverTimeXmlElement->deleteAllChildElements();
+							protoFailoverTimeXmlElement->addTextElement(juce::String(MIRROR_MODE_FAILOVER_TIME));
+						}
+					}
+
+					auto protoAutoFailoverXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::AUTOFAILOVER));
+					if (!protoAutoFailoverXmlElement)
+					{
+						protoAutoFailoverXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::AUTOFAILOVER));
+						auto DS100AutoFailoverActive = Controller::GetInstance()->IsDS100AutoFailoverActive(); // DS100 auto failover must always be ON (production mode behavior) when not in beta mode
+						protoAutoFailoverXmlElement->addTextElement(juce::String(DS100AutoFailoverActive ? 1 : 0));
+					}
+					else
+					{
+						bool currentAutoFailoverInConfig = 1 == protoAutoFailoverXmlElement->getAllSubText().getIntValue(); // get value from incoming xml config that is supposed to be applied
+						auto DS100AutoFailoverActive = currentAutoFailoverInConfig; // DS100 auto failover must always be ON (production mode behavior) when not in beta mode
+						if (currentAutoFailoverInConfig != DS100AutoFailoverActive)
+						{
+							protoAutoFailoverXmlElement->deleteAllChildElements();
+							protoAutoFailoverXmlElement->addTextElement(juce::String(DS100AutoFailoverActive ? 1 : 0));
+						}
+					}
+				}
+				
 
 				// init precision element
 				auto precisionXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
@@ -296,28 +355,29 @@ bool ProtocolBridgingWrapper::setStateXml(XmlElement* stateXml)
 			// cache all bridging protocol elements
 			auto digicoProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DIGICO_PROCESSINGPROTOCOL_ID));
 			if (digicoProtocolXmlElement)
-				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_DiGiCo, *digicoProtocolXmlElement));
+				UpdateBridgingProtocolXmlCache(PBT_DiGiCo, digicoProtocolXmlElement);
 			auto DAWPluginProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DAWPLUGIN_PROCESSINGPROTOCOL_ID));
 			if (DAWPluginProtocolXmlElement)
-				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_DAWPlugin, *DAWPluginProtocolXmlElement));
+				UpdateBridgingProtocolXmlCache(PBT_DAWPlugin, DAWPluginProtocolXmlElement);
 			auto RTTrPMProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(RTTRPM_PROCESSINGPROTOCOL_ID));
 			if (RTTrPMProtocolXmlElement)
-				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_BlacktraxRTTrPM, *RTTrPMProtocolXmlElement));
+				UpdateBridgingProtocolXmlCache(PBT_BlacktraxRTTrPM, RTTrPMProtocolXmlElement);
 			auto genericOSCProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(GENERICOSC_PROCESSINGPROTOCOL_ID));
 			if (genericOSCProtocolXmlElement)
-				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericOSC, *genericOSCProtocolXmlElement));
+				UpdateBridgingProtocolXmlCache(PBT_GenericOSC, genericOSCProtocolXmlElement);
 			auto genericMIDIProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(GENERICMIDI_PROCESSINGPROTOCOL_ID));
 			if (genericMIDIProtocolXmlElement)
-				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericMIDI, *genericMIDIProtocolXmlElement));
+				UpdateBridgingProtocolXmlCache(PBT_GenericMIDI, genericMIDIProtocolXmlElement);
 			auto admOSCProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(ADMOSC_PROCESSINGPROTOCOL_ID));
 			if (admOSCProtocolXmlElement)
-				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_ADMOSC, *admOSCProtocolXmlElement));
+				UpdateBridgingProtocolXmlCache(PBT_ADMOSC, admOSCProtocolXmlElement);
 			auto yamahaOSCProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(YAMAHAOSC_PROCESSINGPROTOCOL_ID));
 			if (yamahaOSCProtocolXmlElement)
-				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_YamahaOSC, *yamahaOSCProtocolXmlElement));
+				UpdateBridgingProtocolXmlCache(PBT_YamahaOSC, yamahaOSCProtocolXmlElement);
 			auto remapOSCProtocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(REMAPOSC_PROCESSINGPROTOCOL_ID));
 			if (remapOSCProtocolXmlElement)
-				m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_RemapOSC, *remapOSCProtocolXmlElement));
+				UpdateBridgingProtocolXmlCache(PBT_RemapOSC, remapOSCProtocolXmlElement);
+			m_bridgingXml = *stateXml; // here stateXml is the filtered xml 
 
 			return SetBridgingNodeStateXml(nodeXmlElement, true);
 		}
@@ -340,6 +400,13 @@ bool ProtocolBridgingWrapper::setStateXml(XmlElement* stateXml)
  * @param	stateXml		The new bridging node xml configuration to activate.
  * @return	True on success, false on failure
  */
+void ProtocolBridgingWrapper::UpdateBridgingProtocolXmlCache(const ProtocolBridgingType bridgingType, const juce::XmlElement* stateXml)
+{
+	auto insertResult = m_bridgingProtocolCacheMap.insert(std::make_pair(bridgingType, *stateXml));
+	if (!insertResult.second && insertResult.first != m_bridgingProtocolCacheMap.end())
+		insertResult.first->second = *stateXml;
+}
+
 bool ProtocolBridgingWrapper::SetBridgingNodeStateXml(XmlElement* stateXml, bool dontSendNotification)
 {
 	// sanity check, if the incoming xml does make sense for this method
@@ -450,6 +517,10 @@ bool ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridg
 		if (ipAdressXmlElement)
 			ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
 
+		auto variantXmlElement = protocolAXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DS100VARIANTS));
+		if (variantXmlElement)
+			variantXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::VARIANT), PROTOCOL_DEFAULT_DS100_VARIANT);
+
 		auto pollIntervalXmlElement = protocolAXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL));
 		if (pollIntervalXmlElement)
 			pollIntervalXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::INTERVAL), ET_DefaultPollingRate);
@@ -460,7 +531,7 @@ bool ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridg
 		auto digicoBridgingXmlElement = SetupDiGiCoBridgingProtocol();
 		if (digicoBridgingXmlElement)
 		{
-			m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_DiGiCo, *digicoBridgingXmlElement));
+			UpdateBridgingProtocolXmlCache(PBT_DiGiCo, digicoBridgingXmlElement.get());
 
 			if ((bridgingProtocolsToActivate & PBT_DiGiCo) == PBT_DiGiCo)
 				nodeXmlElement->addChildElement(digicoBridgingXmlElement.release());
@@ -472,7 +543,7 @@ bool ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridg
 		auto DAWPluginBridgingXmlElement = SetupDAWPluginBridgingProtocol();
 		if (DAWPluginBridgingXmlElement)
 		{
-			m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_DAWPlugin, *DAWPluginBridgingXmlElement));
+			UpdateBridgingProtocolXmlCache(PBT_DAWPlugin, DAWPluginBridgingXmlElement.get());
 
 			if ((bridgingProtocolsToActivate & PBT_DAWPlugin) == PBT_DAWPlugin)
 				nodeXmlElement->addChildElement(DAWPluginBridgingXmlElement.release());
@@ -484,7 +555,7 @@ bool ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridg
 		auto RTTrPMBridgingXmlElement = SetupRTTrPMBridgingProtocol();
 		if (RTTrPMBridgingXmlElement)
 		{
-			m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_BlacktraxRTTrPM, *RTTrPMBridgingXmlElement));
+			UpdateBridgingProtocolXmlCache(PBT_BlacktraxRTTrPM, RTTrPMBridgingXmlElement.get());
 
 			if ((bridgingProtocolsToActivate & PBT_BlacktraxRTTrPM) == PBT_BlacktraxRTTrPM)
 				nodeXmlElement->addChildElement(RTTrPMBridgingXmlElement.release());
@@ -496,7 +567,7 @@ bool ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridg
 		auto genericOSCBridgingXmlElement = SetupGenericOSCBridgingProtocol();
 		if (genericOSCBridgingXmlElement)
 		{
-			m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericOSC, *genericOSCBridgingXmlElement));
+			UpdateBridgingProtocolXmlCache(PBT_GenericOSC, genericOSCBridgingXmlElement.get());
 
 			if ((bridgingProtocolsToActivate & PBT_GenericOSC) == PBT_GenericOSC)
 				nodeXmlElement->addChildElement(genericOSCBridgingXmlElement.release());
@@ -508,7 +579,7 @@ bool ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridg
 		auto genericMIDIBridgingXmlElement = SetupGenericMIDIBridgingProtocol();
 		if (genericMIDIBridgingXmlElement)
 		{
-			m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericMIDI, *genericMIDIBridgingXmlElement));
+			UpdateBridgingProtocolXmlCache(PBT_GenericMIDI, genericMIDIBridgingXmlElement.get());
 
 			if ((bridgingProtocolsToActivate & PBT_GenericMIDI) == PBT_GenericMIDI)
 				nodeXmlElement->addChildElement(genericMIDIBridgingXmlElement.release());
@@ -520,7 +591,7 @@ bool ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridg
 		auto admOSCBridgingXmlElement = SetupADMOSCBridgingProtocol();
 		if (admOSCBridgingXmlElement)
 		{
-			m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_ADMOSC, *admOSCBridgingXmlElement));
+			UpdateBridgingProtocolXmlCache(PBT_ADMOSC, admOSCBridgingXmlElement.get());
 
 			if ((bridgingProtocolsToActivate & PBT_ADMOSC) == PBT_ADMOSC)
 				nodeXmlElement->addChildElement(admOSCBridgingXmlElement.release());
@@ -532,7 +603,7 @@ bool ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridg
 		auto yamahaOSCBridgingXmlElement = SetupYamahaOSCBridgingProtocol();
 		if (yamahaOSCBridgingXmlElement)
 		{
-			m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_YamahaOSC, *yamahaOSCBridgingXmlElement));
+			UpdateBridgingProtocolXmlCache(PBT_YamahaOSC, yamahaOSCBridgingXmlElement.get());
 
 			if ((bridgingProtocolsToActivate & PBT_YamahaOSC) == PBT_YamahaOSC)
 				nodeXmlElement->addChildElement(yamahaOSCBridgingXmlElement.release());
@@ -544,7 +615,7 @@ bool ProtocolBridgingWrapper::SetupBridgingNode(const ProtocolBridgingType bridg
 		auto remapOSCBridgingXmlElement = SetupRemapOSCBridgingProtocol();
 		if (remapOSCBridgingXmlElement)
 		{
-			m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_RemapOSC, *remapOSCBridgingXmlElement));
+			UpdateBridgingProtocolXmlCache(PBT_RemapOSC, remapOSCBridgingXmlElement.get());
 
 			if ((bridgingProtocolsToActivate & PBT_RemapOSC) == PBT_RemapOSC)
 				nodeXmlElement->addChildElement(remapOSCBridgingXmlElement.release());
@@ -586,6 +657,10 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupDiGiCoBridgingProtocol
 	if (ipAdressXmlElement)
 		ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
 
+	auto selectionFollowDisableXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::SELECTIONFOLLOWDISABLED));
+	if (selectionFollowDisableXmlElement)
+		selectionFollowDisableXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 1);
+
 	auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
 	auto mutedObjects = std::vector<RemoteObject>();
 	if (mutedObjsXmlElement)
@@ -619,6 +694,10 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupDAWPluginBridgingProto
 	auto ipAdressXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
 	if (ipAdressXmlElement)
 		ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_PRVATELAN_IP);
+
+	auto selectionFollowDisableXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::SELECTIONFOLLOWDISABLED));
+	if (selectionFollowDisableXmlElement)
+		selectionFollowDisableXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 1);
 
 	auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
 	auto mutedObjects = std::vector<RemoteObject>();
@@ -711,6 +790,10 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupGenericOSCBridgingProt
 	if (ipAdressXmlElement)
 		ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
 
+	auto selectionFollowDisableXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::SELECTIONFOLLOWDISABLED));
+	if (selectionFollowDisableXmlElement)
+		selectionFollowDisableXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 1);
+
 	auto dataSendingDisabledXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATASENDINGDISABLED));
 	if (dataSendingDisabledXmlElement)
 		dataSendingDisabledXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
@@ -783,6 +866,10 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupADMOSCBridgingProtocol
 	if (ipAdressXmlElement)
 		ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
 
+	auto selectionFollowDisableXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::SELECTIONFOLLOWDISABLED));
+	if (selectionFollowDisableXmlElement)
+		selectionFollowDisableXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 1);
+
 	auto mappingAreaIdXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MAPPINGAREA));
 	if (mappingAreaIdXmlElement)
 		mappingAreaIdXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), PROTOCOL_DEFAULT_MAPPINGAREA);
@@ -841,9 +928,9 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupYamahaOSCBridgingProto
 	if (ipAdressXmlElement)
 		ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
 
-	auto mappingAreaIdXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MAPPINGAREA));
-	if (mappingAreaIdXmlElement)
-		mappingAreaIdXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), PROTOCOL_DEFAULT_MAPPINGAREA);
+	auto selectionFollowDisableXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::SELECTIONFOLLOWDISABLED));
+	if (selectionFollowDisableXmlElement)
+		selectionFollowDisableXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 0);
 
 	auto mutedObjsXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::MUTEDOBJECTS));
 	auto mutedObjects = std::vector<RemoteObject>();
@@ -878,6 +965,10 @@ std::unique_ptr<XmlElement> ProtocolBridgingWrapper::SetupRemapOSCBridgingProtoc
 	auto ipAdressXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
 	if (ipAdressXmlElement)
 		ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
+
+	auto selectionFollowDisableXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::SELECTIONFOLLOWDISABLED));
+	if (selectionFollowDisableXmlElement)
+		selectionFollowDisableXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), 1);
 
 	auto dataSendingDisabledXmlElement = protocolBXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATASENDINGDISABLED));
 	if (dataSendingDisabledXmlElement)
@@ -1452,11 +1543,68 @@ bool ProtocolBridgingWrapper::SetProtocolRemotePort(ProtocolId protocolId, int r
 		return false;
 }
 
-/**
- * Gets the protocol's currently set mapping area id, if available for the given protocol.
- * @param protocolId The id of the protocol for which to get the currently configured mappingarea id
- * @return	The mapping area id
- */
+juce::String ProtocolBridgingWrapper::GetDS100VariantFromProtocol(ProtocolId protocolId) const
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto variantXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DS100VARIANTS));
+			if (variantXmlElement)
+			{
+				return juce::String(variantXmlElement->getStringAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::VARIANT)));
+			}
+		}
+	}
+	return juce::String();
+}
+
+bool ProtocolBridgingWrapper::SetDS100VariantProtocol(ProtocolId protocolId, const juce::String& variant, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto variantXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DS100VARIANTS));
+			if (!variantXmlElement)
+				variantXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DS100VARIANTS));
+			if (variantXmlElement)
+				variantXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::VARIANT), variant);
+			else
+				return false;
+		}
+		else
+			return false;
+
+		//We also have to update the ProtocolAChCnt in the Xml so that the number of objects handled by the first DS100 is correct and in sync with it's I/O size
+		if(DS100_1_PROCESSINGPROTOCOL_ID == protocolId)
+		{
+			auto objectHandlingXmlElement = nodeXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OBJECTHANDLING));
+			if(objectHandlingXmlElement)
+			{
+				auto protocolAChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
+				if (!protocolAChCntXmlElement)
+					protocolAChCntXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
+				auto protocolAChCntTextXmlElement = protocolAChCntXmlElement->getFirstChildElement();
+				if (protocolAChCntTextXmlElement && protocolAChCntTextXmlElement->isTextElement())
+					protocolAChCntTextXmlElement->setText(juce::String(DS100_VariantHelper::GetNumInputChannelsForVariant(variant)));
+				else
+					protocolAChCntXmlElement->addTextElement(juce::String(DS100_VariantHelper::GetNumInputChannelsForVariant(variant)));
+			}
+			else
+				return false;
+		}
+
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
+}
+
 int ProtocolBridgingWrapper::GetProtocolMappingArea(ProtocolId protocolId)
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
@@ -2580,11 +2728,50 @@ bool ProtocolBridgingWrapper::SetProtocolChannelRemapAssignments(ProtocolId prot
 		return false;
 }
 
-/**
- * Getter for the controller-understandable status per protocol as can be presented to the user.
- * @param	protocolId	The id of the protocol to get the status for
- * @return	The status as requested
- */
+int ProtocolBridgingWrapper::GetFollowChannelSelectionDisabled(ProtocolId protocolId)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto selectionFollowDisableXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::SELECTIONFOLLOWDISABLED));
+			if (selectionFollowDisableXmlElement)
+			{
+				return selectionFollowDisableXmlElement->getIntAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE));
+			}
+		}
+	}
+
+	return 0;
+}
+
+bool ProtocolBridgingWrapper::SetFollowChannelSelectionDisabled(ProtocolId protocolId, int disabled, bool dontSendNotification)
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(protocolId));
+		if (protocolXmlElement)
+		{
+			auto selectionFollowDisableXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::SELECTIONFOLLOWDISABLED));
+			if (selectionFollowDisableXmlElement)
+			{
+				selectionFollowDisableXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::STATE), disabled);
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+
+		return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+	}
+	else
+		return false;
+}
+
 ObjectHandlingState ProtocolBridgingWrapper::GetProtocolState(ProtocolId protocolId) const
 {
 	if (m_bridgingProtocolState.count(protocolId) < 1)
@@ -2722,8 +2909,11 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 				auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DAWPLUGIN_PROCESSINGPROTOCOL_ID));
 				if (protocolXmlElement)
 				{
-					m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_DAWPlugin, *protocolXmlElement));
+					auto insRes = m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_DAWPlugin, *protocolXmlElement));
+					if (!insRes.second && insRes.first != m_bridgingProtocolCacheMap.end())
+						insRes.first->second = *protocolXmlElement;
 					nodeXmlElement->removeChildElement(protocolXmlElement, true);
+					m_bridgingProtocolMutedObjects[DAWPLUGIN_PROCESSINGPROTOCOL_ID].clear();
 				}
 			}
 
@@ -2736,8 +2926,11 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 				auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(RTTRPM_PROCESSINGPROTOCOL_ID));
 				if (protocolXmlElement)
 				{
-					m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_BlacktraxRTTrPM, *protocolXmlElement));
+					auto insRes = m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_BlacktraxRTTrPM, *protocolXmlElement));
+					if (!insRes.second && insRes.first != m_bridgingProtocolCacheMap.end())
+						insRes.first->second = *protocolXmlElement;
 					nodeXmlElement->removeChildElement(protocolXmlElement, true);
+					m_bridgingProtocolMutedObjects[RTTRPM_PROCESSINGPROTOCOL_ID].clear();
 				}
 			}
 
@@ -2750,8 +2943,11 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 				auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(GENERICOSC_PROCESSINGPROTOCOL_ID));
 				if (protocolXmlElement)
 				{
-					m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericOSC, *protocolXmlElement));
+					auto insRes = m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericOSC, *protocolXmlElement));
+					if (!insRes.second && insRes.first != m_bridgingProtocolCacheMap.end())
+						insRes.first->second = *protocolXmlElement;
 					nodeXmlElement->removeChildElement(protocolXmlElement, true);
+					m_bridgingProtocolMutedObjects[GENERICOSC_PROCESSINGPROTOCOL_ID].clear();
 				}
 			}
 
@@ -2764,8 +2960,11 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 				auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(GENERICMIDI_PROCESSINGPROTOCOL_ID));
 				if (protocolXmlElement)
 				{
-					m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericMIDI, *protocolXmlElement));
+					auto insRes = m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_GenericMIDI, *protocolXmlElement));
+					if (!insRes.second && insRes.first != m_bridgingProtocolCacheMap.end())
+						insRes.first->second = *protocolXmlElement;
 					nodeXmlElement->removeChildElement(protocolXmlElement, true);
+					m_bridgingProtocolMutedObjects[GENERICMIDI_PROCESSINGPROTOCOL_ID].clear();
 				}
 			}
 
@@ -2778,8 +2977,11 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 				auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(ADMOSC_PROCESSINGPROTOCOL_ID));
 				if (protocolXmlElement)
 				{
-					m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_ADMOSC, *protocolXmlElement));
+					auto insRes = m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_ADMOSC, *protocolXmlElement));
+					if (!insRes.second && insRes.first != m_bridgingProtocolCacheMap.end())
+						insRes.first->second = *protocolXmlElement;
 					nodeXmlElement->removeChildElement(protocolXmlElement, true);
+					m_bridgingProtocolMutedObjects[ADMOSC_PROCESSINGPROTOCOL_ID].clear();
 				}
 			}
 
@@ -2792,8 +2994,11 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 				auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(YAMAHAOSC_PROCESSINGPROTOCOL_ID));
 				if (protocolXmlElement)
 				{
-					m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_YamahaOSC, *protocolXmlElement));
+					auto insRes = m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_YamahaOSC, *protocolXmlElement));
+					if (!insRes.second && insRes.first != m_bridgingProtocolCacheMap.end())
+						insRes.first->second = *protocolXmlElement;
 					nodeXmlElement->removeChildElement(protocolXmlElement, true);
+					m_bridgingProtocolMutedObjects[YAMAHAOSC_PROCESSINGPROTOCOL_ID].clear();
 				}
 			}
 
@@ -2806,8 +3011,11 @@ void ProtocolBridgingWrapper::SetActiveBridgingProtocols(ProtocolBridgingType de
 				auto protocolXmlElement = nodeXmlElement->getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(REMAPOSC_PROCESSINGPROTOCOL_ID));
 				if (protocolXmlElement)
 				{
-					m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_RemapOSC, *protocolXmlElement));
+					auto insRes = m_bridgingProtocolCacheMap.insert(std::make_pair(PBT_RemapOSC, *protocolXmlElement));
+					if (!insRes.second && insRes.first != m_bridgingProtocolCacheMap.end())
+						insRes.first->second = *protocolXmlElement;
 					nodeXmlElement->removeChildElement(protocolXmlElement, true);
+					m_bridgingProtocolMutedObjects[REMAPOSC_PROCESSINGPROTOCOL_ID].clear();
 				}
 			}
 
@@ -2843,6 +3051,7 @@ bool ProtocolBridgingWrapper::UpdateActiveDS100RemoteObjectIds(const std::vector
 		return false;
 
 	auto extensionMode = ctrl->GetExtensionMode();
+	int ds100ChannelCount = ctrl->GetDS100InputChannelCount();
 
 	auto activeObjectsOnFirstDS100 = std::vector<RemoteObject>{};
 	auto activeObjectsOnSecondDS100 = std::vector<RemoteObject>{};
@@ -2854,31 +3063,33 @@ bool ProtocolBridgingWrapper::UpdateActiveDS100RemoteObjectIds(const std::vector
 		{
 		case EM_Off:
 			// We do not support anything exceeding one DS100 channelcount wise
-			if (objectId <= DS100_CHANNELCOUNT)
+			if (objectId <= ds100ChannelCount)
 				activeObjectsOnFirstDS100.push_back(ro);
 			break;
 		case EM_Extend:
 			// We do not support anything exceeding two DS100 (ext. mode) channelcount wise
-			if (objectId > DS100_EXTMODE_CHANNELCOUNT)
+		{
+			if (objectId > ctrl->GetMaxExtendedChannelCount())
 				break;
 
 			// If the soundobjectId is out of range for a single DS100, take it as relevant 
 			// for second and map the soundobjectId back into a single DS100's source range
-			if (objectId > DS100_CHANNELCOUNT)
+			if (objectId > ds100ChannelCount)
 			{
 				activeObjectsOnSecondDS100.push_back(ro);
-				activeObjectsOnSecondDS100.back()._Addr._first = static_cast<int>(objectId - DS100_CHANNELCOUNT);
+				activeObjectsOnSecondDS100.back()._Addr._first = static_cast<int>(objectId - ds100ChannelCount);
 			}
 			// Otherwise simply take it as relevant for first DS100
 			else
 			{
 				activeObjectsOnFirstDS100.push_back(ro);
 			}
+		}
 			break;
 		case EM_Parallel:
 		case EM_Mirror:
 			// We do not support anything exceeding one DS100 channelcount wise
-			if (objectId <= DS100_CHANNELCOUNT)
+			if (objectId <= ds100ChannelCount)
 			{
 				activeObjectsOnFirstDS100.push_back(ro);
 				activeObjectsOnSecondDS100.push_back(ro);
@@ -2970,6 +3181,8 @@ bool ProtocolBridgingWrapper::SetDS100ProtocolType(ProtocolType protocolType, bo
 					protocolXmlElement->removeChildElement(clientPortXmlElement, true);
 				if (auto ipAddressXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS)))
 					protocolXmlElement->removeChildElement(ipAddressXmlElement, true);
+				if (auto variantXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DS100VARIANTS)))
+					protocolXmlElement->removeChildElement(variantXmlElement, true);
 				if (auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL)))
 					protocolXmlElement->removeChildElement(pollingIntervalXmlElement, true);
 				if (auto ocp1ConnectionModeXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE)))
@@ -2986,6 +3199,16 @@ bool ProtocolBridgingWrapper::SetDS100ProtocolType(ProtocolType protocolType, bo
 				}
 				if (protocolTypeChanged || ipAdressElmWasNewlyCreated)
 					ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT_IP);
+
+				auto variantXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DS100VARIANTS));
+				auto variantsElmWasNewlyCreated = false;
+				if (!variantXmlElement)
+				{
+					variantXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DS100VARIANTS));
+					variantsElmWasNewlyCreated = true;
+				}
+				if (protocolTypeChanged || variantsElmWasNewlyCreated)
+					variantXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::VARIANT), PROTOCOL_DEFAULT_DS100_VARIANT);
 
 				// DS100 uses different ports for OSC (udp) and OCA (tcp)
 				auto clientPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
@@ -3058,6 +3281,8 @@ bool ProtocolBridgingWrapper::SetDS100ProtocolType(ProtocolType protocolType, bo
 					protocolXmlElement->removeChildElement(clientPortXmlElement, true);
 				if (auto ipAddressXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS)))
 					protocolXmlElement->removeChildElement(ipAddressXmlElement, true);
+				if (auto variantXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DS100VARIANTS)))
+					protocolXmlElement->removeChildElement(variantXmlElement, true);
 				if (auto pollingIntervalXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::POLLINGINTERVAL)))
 					protocolXmlElement->removeChildElement(pollingIntervalXmlElement, true);
 				if (auto ocp1ConnectionModeXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OCP1CONNECTIONMODE)))
@@ -3069,6 +3294,11 @@ bool ProtocolBridgingWrapper::SetDS100ProtocolType(ProtocolType protocolType, bo
 				if (!ipAdressXmlElement)
 					ipAdressXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::IPADDRESS));
 				ipAdressXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ADRESS), PROTOCOL_DEFAULT2_IP);
+
+				auto variantXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DS100VARIANTS));
+				if (!variantXmlElement)
+					variantXmlElement = protocolXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DS100VARIANTS));
+				variantXmlElement->setAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::VARIANT), PROTOCOL_DEFAULT_DS100_VARIANT);
 
 				// DS100 uses different ports for OSC (udp) and OCA (tcp)
 				auto clientPortXmlElement = protocolXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::CLIENTPORT));
@@ -3165,11 +3395,16 @@ bool ProtocolBridgingWrapper::SetDS100Port(int port, bool dontSendNotification)
 	return SetProtocolRemotePort(DS100_1_PROCESSINGPROTOCOL_ID, port, dontSendNotification);
 }
 
-/**
- * Gets the currently set cascade DS100 client ip address.
- * This method forwards the call to the generic implementation.
- * @return	The ip address string
- */
+juce::String ProtocolBridgingWrapper::GetDS100Variant() const
+{
+	return GetDS100VariantFromProtocol(DS100_1_PROCESSINGPROTOCOL_ID);
+}
+
+bool ProtocolBridgingWrapper::SetDS100Variant(const juce::String& variant, bool dontSendNotification)
+{
+	return SetDS100VariantProtocol(DS100_1_PROCESSINGPROTOCOL_ID, variant, dontSendNotification);
+}
+
 juce::IPAddress ProtocolBridgingWrapper::GetSecondDS100IpAddress()
 {
 	return GetProtocolIpAddress(DS100_2_PROCESSINGPROTOCOL_ID);
@@ -3210,10 +3445,16 @@ bool ProtocolBridgingWrapper::SetSecondDS100Port(int port, bool dontSendNotifica
 	return SetProtocolRemotePort(DS100_2_PROCESSINGPROTOCOL_ID, port, dontSendNotification);
 }
 
-/**
- * Gets the currently active message rate for protocol polling.
- * @return	The message rate currently set in xml config
- */
+juce::String ProtocolBridgingWrapper::GetSecondDS100Variant() const
+{
+	return GetDS100VariantFromProtocol(DS100_2_PROCESSINGPROTOCOL_ID);
+}
+
+bool ProtocolBridgingWrapper::SetSecondDS100Variant(const juce::String& variant, bool dontSendNotification)
+{
+	return SetDS100VariantProtocol(DS100_2_PROCESSINGPROTOCOL_ID, variant, dontSendNotification);
+}
+
 int ProtocolBridgingWrapper::GetDS100MsgRate()
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
@@ -3365,6 +3606,9 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 					auto protoFailoverTimeXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::FAILOVERTIME));
 					if (protoFailoverTimeXmlElement)
 						objectHandlingXmlElement->removeChildElement(protoFailoverTimeXmlElement, true);
+					auto protoAutoFailoverXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::AUTOFAILOVER));
+					if (protoAutoFailoverXmlElement)
+						objectHandlingXmlElement->removeChildElement(protoAutoFailoverXmlElement, true);
 
 					// update precision element
 					auto precisionXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
@@ -3414,6 +3658,9 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 					auto protoFailoverTimeXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::FAILOVERTIME));
 					if (protoFailoverTimeXmlElement)
 						objectHandlingXmlElement->removeChildElement(protoFailoverTimeXmlElement, true);
+					auto protoAutoFailoverXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::AUTOFAILOVER));
+					if (protoAutoFailoverXmlElement)
+						objectHandlingXmlElement->removeChildElement(protoAutoFailoverXmlElement, true);
 
 					// update precision element
 					auto precisionXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
@@ -3456,6 +3703,9 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 					auto protoFailoverTimeXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::FAILOVERTIME));
 					if (protoFailoverTimeXmlElement)
 						objectHandlingXmlElement->removeChildElement(protoFailoverTimeXmlElement, true);
+					auto protoAutoFailoverXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::AUTOFAILOVER));
+					if (protoAutoFailoverXmlElement)
+						objectHandlingXmlElement->removeChildElement(protoAutoFailoverXmlElement, true);
 				
 					// update first DS100 channel count elements
 					auto protocolAChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
@@ -3463,9 +3713,9 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 						protocolAChCntXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLACHCNT));
 					auto protocolAChCntTextXmlElement = protocolAChCntXmlElement->getFirstChildElement();
 					if (protocolAChCntTextXmlElement && protocolAChCntTextXmlElement->isTextElement())
-						protocolAChCntTextXmlElement->setText(String(DS100_CHANNELCOUNT));
+						protocolAChCntTextXmlElement->setText(juce::String(Controller::GetInstance()->GetDS100InputChannelCount()));
 					else
-						protocolAChCntXmlElement->addTextElement(String(DS100_CHANNELCOUNT));
+						protocolAChCntXmlElement->addTextElement(juce::String(Controller::GetInstance()->GetDS100InputChannelCount()));
 
 					// update first DS100 channel count elements
 					auto protocolBChCntXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::PROTOCOLBCHCNT));
@@ -3528,9 +3778,20 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 						protoFailoverTimeXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::FAILOVERTIME));
 					auto protoFailoverTimeTextXmlElement = protoFailoverTimeXmlElement->getFirstChildElement();
 					if (protoFailoverTimeTextXmlElement && protoFailoverTimeTextXmlElement->isTextElement())
-						protoFailoverTimeTextXmlElement->setText("1000");
+						protoFailoverTimeTextXmlElement->setText(juce::String(MIRROR_MODE_FAILOVER_TIME));
 					else
-						protoFailoverTimeXmlElement->addTextElement("1000");
+						protoFailoverTimeXmlElement->addTextElement(juce::String(MIRROR_MODE_FAILOVER_TIME));
+
+					// update autofailover element
+					auto protoAutoFailoverXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::AUTOFAILOVER));
+					if (!protoAutoFailoverXmlElement)
+						protoAutoFailoverXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::AUTOFAILOVER));
+					auto protoAutoFailoverTextXmlElement = protoAutoFailoverXmlElement->getFirstChildElement();
+					auto DS100AutoFailoverActive = Controller::GetInstance()->IsDS100AutoFailoverActive(); // DS100 auto failover must always be ON (production mode behavior) when not in beta mode
+					if (protoAutoFailoverTextXmlElement && protoAutoFailoverTextXmlElement->isTextElement())
+						protoAutoFailoverTextXmlElement->setText(juce::String(DS100AutoFailoverActive ? 1 : 0));
+					else
+						protoAutoFailoverXmlElement->addTextElement(juce::String(DS100AutoFailoverActive ? 1 : 0));
 
 					// update precision element
 					auto precisionXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::DATAPRECISION));
@@ -3586,7 +3847,7 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 
 				auto ctrl = Controller::GetInstance();
 				if (ctrl)
-					ctrl->SetSecondDS100IpAndPort(DCP_Init, juce::IPAddress(), 0xffff, dontSendNotification);
+					ctrl->SetSecondDS100IPAndPortAndIO(DCP_Init, juce::IPAddress(), 0xffff, PROTOCOL_DEFAULT_DS100_VARIANT, dontSendNotification);
 			}
 			break;
 			case EM_Extend:
@@ -3605,7 +3866,7 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
 					{
 						auto ip = juce::IPAddress(PROTOCOL_DEFAULT2_IP);
 						auto port = ctrl->GetDS100ProtocolType() == PT_OCP1Protocol ? RX_PORT_DS100_DEVICE_OCP1 : RX_PORT_DS100_DEVICE;
-						ctrl->SetSecondDS100IpAndPort(DCP_Init, ip, port, dontSendNotification);
+						ctrl->SetSecondDS100IPAndPortAndIO(DCP_Init, ip, port, PROTOCOL_DEFAULT_DS100_VARIANT, dontSendNotification);
 					}
 				}
 			}
@@ -3628,7 +3889,7 @@ bool ProtocolBridgingWrapper::SetDS100ExtensionMode(ExtensionMode mode, bool don
  * This does not return a member variable value but contains logic to derive the mode from internal cached xml element configuration.
  * @return The DS100 currently set as active one for extension mode "parallel" in cached xml config.
  */
-ActiveParallelModeDS100 ProtocolBridgingWrapper::GetActiveParallelModeDS100()
+ActiveParallelModeDS100 ProtocolBridgingWrapper::GetActiveParallelModeDS100() const
 {
 	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
 	if (nodeXmlElement)
@@ -3707,11 +3968,61 @@ bool ProtocolBridgingWrapper::SetActiveParallelModeDS100(ActiveParallelModeDS100
 		return false;
 }
 
-/**
- * Gets the status of the first DS100 protocol connection.
- * This forwards the call to the generic implementation that itself gets the info from BridgingWrapper.
- * @return	The protocol status
- */
+bool ProtocolBridgingWrapper::GetDS100AutoFailoverActive() const
+{
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto objectHandlingXmlElement = nodeXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OBJECTHANDLING));
+		if (objectHandlingXmlElement)
+		{
+			auto protoAutoFailoverXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::AUTOFAILOVER));
+			if (protoAutoFailoverXmlElement)
+			{
+				bool autoFailover = 1 == protoAutoFailoverXmlElement->getAllSubText().getIntValue();
+				return autoFailover;
+			}
+		}
+	}
+
+	return false;
+}
+
+bool ProtocolBridgingWrapper::SetDS100AutoFailoverActive(bool failoverActive, bool dontSendNotification)
+{
+	ignoreUnused(dontSendNotification);
+
+	auto nodeXmlElement = m_bridgingXml.getChildByAttribute(ProcessingEngineConfig::getAttributeName(ProcessingEngineConfig::AttributeID::ID), String(DEFAULT_PROCNODE_ID));
+	if (nodeXmlElement)
+	{
+		auto objectHandlingXmlElement = nodeXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::OBJECTHANDLING));
+		if (objectHandlingXmlElement)
+		{
+			auto protoAutoFailoverXmlElement = objectHandlingXmlElement->getChildByName(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::AUTOFAILOVER));
+			if (!protoAutoFailoverXmlElement)
+			{
+				protoAutoFailoverXmlElement = objectHandlingXmlElement->createNewChildElement(ProcessingEngineConfig::getTagName(ProcessingEngineConfig::TagID::AUTOFAILOVER));
+				protoAutoFailoverXmlElement->addTextElement(juce::String(failoverActive ? 1 : 0));
+			}
+			else
+			{
+				bool autoFailover = 1 == protoAutoFailoverXmlElement->getAllSubText().getIntValue();
+				if (autoFailover != failoverActive)
+				{
+					protoAutoFailoverXmlElement->deleteAllChildElements();
+					protoAutoFailoverXmlElement->addTextElement(juce::String(failoverActive ? 1 : 0));
+				}
+			}
+
+			return SetBridgingNodeStateXml(nodeXmlElement, dontSendNotification);
+		}
+		else
+			return false;
+	}
+	else
+		return false;
+}
+
 ObjectHandlingState ProtocolBridgingWrapper::GetDS100State() const
 {
 	return GetProtocolState(DS100_1_PROCESSINGPROTOCOL_ID);

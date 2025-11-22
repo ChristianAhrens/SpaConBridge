@@ -369,7 +369,7 @@ void HeaderWithElmListComponent::paint(Graphics& g)
 		trans = trans.rotated(-0.5f);
 
 		g.addTransform(trans);
-		g.setFont(Font(100, Font::FontStyleFlags::bold));
+		g.setFont({ juce::FontOptions(100.0f, Font::FontStyleFlags::bold) });
 		g.drawMultiLineText(String(m_backgroundDecorationText), 0, 0, static_cast<int>(1.5f * w));
 	}
 }
@@ -382,8 +382,7 @@ void HeaderWithElmListComponent::resized()
 	if (!m_headerLabel)
 		return;
 
-	Font f = m_headerLabel->getFont();
-	auto headerTextWidth = f.getStringWidth(m_headerLabel->getText());
+	auto headerTextWidth = juce::GlyphArrangement::getStringWidthInt(m_headerLabel->getFont(), m_headerLabel->getText());
 
 	auto activeToggleHeight = 20.0f;
 	auto activeToggleMargin = 2.0f;

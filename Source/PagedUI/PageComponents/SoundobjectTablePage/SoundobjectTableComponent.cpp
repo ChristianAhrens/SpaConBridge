@@ -214,6 +214,8 @@ void SoundobjectTableComponent::onAddMultipleProcessors()
 					auto config = SpaConBridge::AppConfiguration::getInstance();
 					if (config)
 						config->SetFlushAndUpdateDisabled();
+					if (Controller::Exists())
+						Controller::GetInstance()->StopTickProcessing();
 
 					auto functionCaller = std::make_unique<DelayedRecursiveFunctionCaller>([]
 						{
@@ -226,6 +228,8 @@ void SoundobjectTableComponent::onAddMultipleProcessors()
 							auto config = SpaConBridge::AppConfiguration::getInstance();
 							if (config)
 								config->ResetFlushAndUpdateDisabled();
+							if (Controller::Exists())
+								Controller::GetInstance()->ResumeTickProcessing();
 						});
 					functionCaller->Run();
 					functionCaller.release();
@@ -272,6 +276,8 @@ void SoundobjectTableComponent::onRemoveProcessor()
 		auto config = SpaConBridge::AppConfiguration::getInstance();
 		if (config)
 			config->SetFlushAndUpdateDisabled();
+		if (Controller::Exists())
+			Controller::GetInstance()->StopTickProcessing();
 
 		auto functionCaller = std::make_unique<DelayedRecursiveFunctionCaller>([](int processorId)
 			{
@@ -287,6 +293,8 @@ void SoundobjectTableComponent::onRemoveProcessor()
 				auto config = SpaConBridge::AppConfiguration::getInstance();
 				if (config)
 					config->ResetFlushAndUpdateDisabled();
+				if (Controller::Exists())
+					Controller::GetInstance()->ResumeTickProcessing();
 			});
 		functionCaller->Run();
 		functionCaller.release();

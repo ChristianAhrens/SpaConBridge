@@ -172,6 +172,7 @@ private:
 	std::unique_ptr<Label>										m_SystemIpInfoLabel;
 
 	// DS100 settings section
+	std::map<juce::String, int>									m_IOSizeComboIds;
 	std::unique_ptr<HeaderWithElmListComponent>					m_DS100Settings;
 	std::unique_ptr<JUCEAppBasics::SplitButtonComponent>		m_DS100ProtocolSelectButton;
 	std::unique_ptr<Label>										m_DS100ProtocolSelectLabel;
@@ -180,6 +181,8 @@ private:
 	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_DS100IntervalEdit;
 	std::unique_ptr<Label>										m_DS100IntervalLabel;
 	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_DS100IpAndPortEdit;
+	std::unique_ptr<ComboBox>									m_DS100IOSizeSelect;
+	std::unique_ptr<Label>										m_DS100IOSizeLabel;
 	std::unique_ptr<HorizontalLayouterComponent>				m_DS100ConnectionElmsContainer;
 	std::unique_ptr<Label>										m_DS100IpAndPortLabel;
 #ifdef ZEROCONF_SUPPORTED
@@ -191,6 +194,8 @@ private:
 	const std::vector<std::string>								m_SecondDS100Modes{ "Off", "Extend", "Parallel", "Mirror" };
 	std::map<std::string, uint64>								m_SecondDS100ModeButtonIds;
 	std::unique_ptr<JUCEAppBasics::FixedFontTextEditor>			m_SecondDS100IpAndPortEdit;
+	std::unique_ptr<ComboBox>									m_SecondDS100IOSizeSelect;
+	std::unique_ptr<Label>										m_SecondDS100IOSizeLabel;
 	std::unique_ptr<HorizontalLayouterComponent>				m_SecondDS100ConnectionElmsContainer;
 	std::unique_ptr<Label>										m_SecondDS100IpAndPortLabel;
 #ifdef ZEROCONF_SUPPORTED

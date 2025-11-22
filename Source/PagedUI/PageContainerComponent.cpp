@@ -79,11 +79,11 @@ PageContainerComponent::PageContainerComponent()
 	addAndMakeVisible(m_logoButton.get());
 	m_versionLabel = std::make_unique<Label>("Version", String(JUCE_STRINGIFY(JUCE_APP_VERSION)));
 	m_versionLabel->setJustificationType(Justification::centred);
-	m_versionLabel->setFont(Font(11));
+	m_versionLabel->setFont({ juce::FontOptions(11.0f) });
 	addAndMakeVisible(m_versionLabel.get());
 	m_versionStringLabel = std::make_unique<Label>("VersionString", "Version");
 	m_versionStringLabel->setJustificationType(Justification::centred);
-	m_versionStringLabel->setFont(Font(11));
+	m_versionLabel->setFont({ juce::FontOptions(11.0f) });
 	addAndMakeVisible(m_versionStringLabel.get());
 
 	// Create the pages.

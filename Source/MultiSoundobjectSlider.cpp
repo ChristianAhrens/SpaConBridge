@@ -161,7 +161,7 @@ MultiSoundobjectSlider::MultiSoundobjectSlider(bool spreadEnabled, bool reverbSn
         m_mappingName[mappingAreaId] = juce::String("empty");
     }
 
-    for (auto i = 1; i <= DS100_CHANNELCOUNT; i++)
+    for (auto i = 1; i <= MAX_OUTPUT_CHANNELS; i++)
     {
         auto channelId = static_cast<ChannelId>(i);
         m_speakerPositions[channelId] = std::make_pair(juce::Vector3D(0.0f, 0.0f, 0.0f), juce::Vector3D(0.0f, 0.0f, 0.0f));
@@ -388,7 +388,7 @@ void MultiSoundobjectSlider::paintSpeakersAndMappingAreas2DVisu(Graphics& g)
     g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
     g.drawRect(GetAspectAndMarginCorrectedBounds().toFloat(), 1.5f);
 
-    // Mapping Areas
+    // paint Mapping Areas
     for (auto i = int(MAI_First); i <= int(MAI_Fourth); i++)
     {
         auto mappingAreaId = static_cast<MappingAreaId>(i);
@@ -396,55 +396,90 @@ void MultiSoundobjectSlider::paintSpeakersAndMappingAreas2DVisu(Graphics& g)
         g.setColour(getLookAndFeel().findColour(TextButton::buttonColourId));
 
         if (m_mappingAreaPaths.count(mappingAreaId) == 1 
-            && !m_mappingAreaPaths.at(mappingAreaId).isEmpty()
+            && m_mappingAreaPaths.at(mappingAreaId).getLength() > 0.0f
             && m_mappingName.count(mappingAreaId) == 1
             && m_mappingTextAnchorPointAndRot.count(mappingAreaId) == 1
             && m_mappingCornersVirtual.count(mappingAreaId) == 1
             && m_mappingCornersVirtualPoints.count(mappingAreaId) == 1)
         {
+            // paint the path
             g.fillPath(m_mappingAreaPaths.at(mappingAreaId));
+                
+            // Helper: paint the corner indexes
+            /*g.saveState();
+            int pidx = 0;
+            for (auto& p : m_mappingCornersReal.at(mappingAreaId))
+            {
+                auto ppx = GetPointForRealCoordinate(p).toInt();
+                auto pbounds = juce::Rectangle<float>(ppx.x - 5, ppx.y - 5, 10, 10);
+                g.setColour(juce::Colours::deepskyblue);
+                g.fillEllipse(pbounds);
+                g.setColour(juce::Colours::black);
+                g.drawText(juce::String(pidx), pbounds, juce::Justification::centred);
+                pidx++;
+            }
+            g.restoreState();*/
 
+            // paint the mapping area label
             auto mappingString = juce::String("CoordinateMapping ") + juce::String(mappingAreaId);
             if (m_mappingName.at(mappingAreaId).isNotEmpty())
                 mappingString = m_mappingName.at(mappingAreaId);
-
             g.saveState();
             g.setFont(18);
+            g.setColour(getLookAndFeel().findColour(TextButton::textColourOnId));
             auto margin = 5;
             auto& anchorPoint = m_mappingTextAnchorPointAndRot.at(mappingAreaId).first;
             auto& angle = m_mappingTextAnchorPointAndRot.at(mappingAreaId).second;
             g.setOrigin(anchorPoint);
             g.addTransform(juce::AffineTransform().rotated(angle));
-            g.drawSingleLineText(mappingString, margin, -margin);
+            g.drawSingleLineText(mappingString, margin, static_cast<int>(g.getCurrentFont().getHeight()));
             g.restoreState();
 
-            g.setFont(12);
+            // Helper: paint the anchor of the mapping area label
+            /*g.saveState();
+            g.setColour(juce::Colours::deeppink);
+            g.fillEllipse(anchorPoint.x-10, anchorPoint.y-10, 20, 20);
+            g.restoreState();*/
+
+            // for the corner labels: flip the angle to make them readable if > 110deg
+            auto angleDeg = juce::radiansToDegrees(angle);
+            bool normalizeLableAngle = std::abs(angleDeg) > 110.0f;
+            if (normalizeLableAngle)
+                angleDeg -= 180.0f;
+
+            // draw the corner labels with solid background
+            auto fontHeight = 12.0f;
+            g.setFont(fontHeight);
             auto& virtCorners = m_mappingCornersVirtual.at(mappingAreaId);
             auto& virtPoints = m_mappingCornersVirtualPoints.at(mappingAreaId);
-            if (virtCorners.size() >= 2)
+            auto textboxbounds = juce::Rectangle<float>(0.0f, 0.0f, 56.0f, fontHeight + margin / 2.0f);
+            for (int c = 0; c < virtCorners.size(); c++)
             {
-                auto& p1Point = virtPoints.at(0);
-                auto& p1Corner = virtCorners.at(0);
-                juce::String p1Str;
-                p1Str << "M" << mappingAreaId << "P1(" << p1Corner.x << "," << p1Corner.y << ")";
-                g.drawSingleLineText(p1Str, p1Point.x + margin, p1Point.y - margin);
-
-                auto& p3Point = virtPoints.at(1);
-                auto& p3Corner = virtCorners.at(1);
-                juce::String p3Str;
-                p3Str << "M" << mappingAreaId << "P3(" << p3Corner.x << "," << p3Corner.y << ")";
-                g.drawSingleLineText(p3Str, p3Point.x - g.getCurrentFont().getStringWidth(p3Str) - margin, p3Point.y + margin);
+                auto& corner = virtCorners.at(c);
+                juce::String pstr;
+                pstr << "M" << mappingAreaId << "P" << (2*c+1) << "(" << corner.x << "," << corner.y << ")";
+                g.saveState();
+                g.setOrigin(virtPoints.at(c));
+                g.addTransform(juce::AffineTransform().rotated(juce::degreesToRadians(angleDeg)));
+                // if angle is flipped, the label box translation needs to flip too
+                auto boundsDirectionUp = normalizeLableAngle ? (c == 1) : (c == 0);
+                auto bounds = boundsDirectionUp ? textboxbounds.translated(-textboxbounds.getWidth(), 0)
+                                                : textboxbounds.translated(0, -textboxbounds.getHeight());
+                g.fillRect(bounds);
+                g.setColour(getLookAndFeel().findColour(TextButton::textColourOnId));
+                g.drawFittedText(pstr, bounds.toNearestInt(), juce::Justification::centred, 1);
+                g.restoreState();
             }
         }
     }
 
-    // Speaker positions
+    // paint Speaker positions
     g.setColour(m_speakerDrawablesCurrentColour);
     for (auto const& speakerDrawableKV : m_speakerDrawables)
     {
         // draw speaker icons in target area
         speakerDrawableKV.second->drawWithin(g, m_speakerDrawableAreas[speakerDrawableKV.first], juce::RectanglePlacement::centred, 1.0f);
-        // draw framing rect around icons, 2px larger than icon target area itself
+        // draw framing rect around icons, 3px larger than icon target area itself
         g.drawRect(m_speakerDrawableAreas[speakerDrawableKV.first].expanded(2.0f));
     }
 
@@ -568,7 +603,7 @@ void MultiSoundobjectSlider::paintSoundobjects(Graphics& g)
                         g.setFont(font);
                         g.setOpacity(1.0f);
                         auto textLabel = String("EnSpace Gain ") + String(paramsKV.second._reverbSndGain, 2) + String("dB");
-                        auto fontDependantWidth = font.getStringWidth(textLabel);
+                        auto fontDependantWidth = juce::GlyphArrangement::getStringWidthInt(font, textLabel);
                         auto textLeftOfMouse = (getWidth() - p2.getX() - goodVisibilityDistance) < fontDependantWidth;
                         if (textLeftOfMouse)
                             g.drawText(textLabel, goodVisibilityDistance, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
@@ -588,7 +623,7 @@ void MultiSoundobjectSlider::paintSoundobjects(Graphics& g)
                         g.setFont(font);
                         g.setOpacity(1.0f);
                         auto textLabel = String("Spread Factor ") + String(paramsKV.second._spread, 2);
-                        auto fontDependantWidth = font.getStringWidth(textLabel);
+                        auto fontDependantWidth = juce::GlyphArrangement::getStringWidthInt(font, textLabel);
                         auto textBelowMouse = (p2.getY() - goodVisibilityDistance) < goodVisibilityDistance;
                         if (textBelowMouse)
                             g.drawText(textLabel, goodVisibilityDistance, getHeight() - 2 * goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
@@ -670,7 +705,7 @@ void MultiSoundobjectSlider::paintSoundobjects(Graphics& g)
                     textLabel = String(paramsKV.second._id);
                 auto fontSizeScaleFactor = static_cast<float>(2.0f * paramsKV.second._size);
                 auto font = juce::Font(juce::FontOptions(12.0f + 5.0f * fontSizeScaleFactor, juce::Font::plain));
-                auto fontDependantWidth = static_cast<float>(font.getStringWidth(textLabel));
+                auto fontDependantWidth = float(juce::GlyphArrangement::getStringWidthInt(font, textLabel));
                 g.setFont(font);
                 g.drawText(textLabel, Rectangle<float>(x - (0.5f * fontDependantWidth), y + 3, fontDependantWidth, knobSize * 2.0f), Justification::centred, true);
             }
@@ -702,7 +737,7 @@ void MultiSoundobjectSlider::paintSoundobjects(Graphics& g)
             auto enSpacGainFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_MatrixInput_ReverbSendGain);
             auto enSpacGainChangeVal = -1.0f * getMultiTouchFactorValue() * enSpacGainFactorRange.getLength();
             auto textLabel = String("Adding ") + String(enSpacGainChangeVal, 2) + String("dB to EnSpace Gain");
-            auto fontDependantWidth = font.getStringWidth(textLabel);
+            auto fontDependantWidth = juce::GlyphArrangement::getStringWidthInt(font, textLabel);
             auto isTextLeftOfMouse = (getWidth() - p2.getX() - goodVisibilityDistance) < fontDependantWidth;
             if (isTextLeftOfMouse)
                 g.drawText(textLabel, goodVisibilityDistance, goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
@@ -724,7 +759,7 @@ void MultiSoundobjectSlider::paintSoundobjects(Graphics& g)
             auto spreadFactorRange = ProcessingEngineConfig::GetRemoteObjectRange(ROI_Positioning_SourceSpread);
             auto spreadFactorChangeVal = -1.0f * getMultiTouchFactorValue() * spreadFactorRange.getLength();
             auto textLabel = String("Adding ") + String(spreadFactorChangeVal, 2) + String(" to Spread Factor");
-            auto fontDependantWidth = font.getStringWidth(textLabel);
+            auto fontDependantWidth = juce::GlyphArrangement::getStringWidthInt(font, textLabel);
             auto isTextBelowMouse = (p2.getY() - goodVisibilityDistance) < goodVisibilityDistance;
             if (isTextBelowMouse)
                 g.drawText(textLabel, goodVisibilityDistance, getHeight() - 2 * goodVisibilityDistance, fontDependantWidth, goodVisibilityDistance, Justification::centred, true);
@@ -1573,27 +1608,16 @@ void MultiSoundobjectSlider::UpdateParameters(const ParameterCache& parameters, 
  */
 bool MultiSoundobjectSlider::CheckCoordinateMappingSettingsDataCompleteness()
 {
-    auto coordinateMappingSettingsDataSetCount = 0;
-    auto incompleteDataSetPresent = false;
-    for(auto i = int(MAI_First); i <= int(MAI_Fourth); i++)
-    {
-        auto mai = MappingAreaId(i);
-        auto requiredRealPoints = 4;
-        auto requiredVirtualPoints = 2;
-        auto cornRealIsComplete = m_mappingCornersReal.count(mai) == 1 && m_mappingCornersReal.at(mai).size() == requiredRealPoints;
-        auto cornVirtIsComplete = m_mappingCornersVirtual.count(mai) == 1 && m_mappingCornersVirtual.at(mai).size() == requiredVirtualPoints;
-        auto flipIsComplete = m_mappingFlip.count(mai) == 1;
-        auto nameIsComplete = m_mappingName.count(mai) == 1;
+    auto requiredRealPoints = 4;
+    auto requiredVirtualPoints = 2;
+    auto cornRealIsComplete = m_mappingCornersReal.count(MAI_First) == 1 && m_mappingCornersReal.count(MAI_Second) == 1 && m_mappingCornersReal.count(MAI_Third) == 1 && m_mappingCornersReal.count(MAI_Fourth) == 1
+        && m_mappingCornersReal.at(MAI_First).size() == requiredRealPoints && m_mappingCornersReal.at(MAI_Second).size() == requiredRealPoints && m_mappingCornersReal.at(MAI_Third).size() == requiredRealPoints && m_mappingCornersReal.at(MAI_Fourth).size() == requiredRealPoints;
+    auto cornVirtIsComplete = m_mappingCornersVirtual.count(MAI_First) == 1 && m_mappingCornersVirtual.count(MAI_Second) == 1 && m_mappingCornersVirtual.count(MAI_Third) == 1 && m_mappingCornersVirtual.count(MAI_Fourth) == 1
+        && m_mappingCornersVirtual.at(MAI_First).size() == requiredVirtualPoints && m_mappingCornersVirtual.at(MAI_Second).size() == requiredVirtualPoints && m_mappingCornersVirtual.at(MAI_Third).size() == requiredVirtualPoints && m_mappingCornersVirtual.at(MAI_Fourth).size() == requiredVirtualPoints;
+    auto flipIsComplete = m_mappingFlip.count(MAI_First) == 1 && m_mappingFlip.count(MAI_Second) == 1 && m_mappingFlip.count(MAI_Third) == 1 && m_mappingFlip.count(MAI_Fourth) == 1;
+    auto nameIsComplete = m_mappingName.count(MAI_First) == 1 && m_mappingName.count(MAI_Second) == 1 && m_mappingName.count(MAI_Third) == 1 && m_mappingName.count(MAI_Fourth) == 1;
 
-        // if all elements of a coordinate mapping dataset are present, it can be counted as usable
-        if (cornRealIsComplete && cornVirtIsComplete && flipIsComplete && nameIsComplete)
-            coordinateMappingSettingsDataSetCount++;
-        // if some parts are missing, it of course is incomplete
-        else if (cornRealIsComplete || cornVirtIsComplete || flipIsComplete || nameIsComplete)
-            incompleteDataSetPresent = true;
-    }
-
-    return (coordinateMappingSettingsDataSetCount > 0) && !incompleteDataSetPresent;
+    return cornRealIsComplete && cornVirtIsComplete && flipIsComplete && nameIsComplete;
 }
 
 /**
@@ -1730,7 +1754,7 @@ void MultiSoundobjectSlider::SetMappingName(const MappingAreaId mappingAreaId, c
  */
 bool MultiSoundobjectSlider::CheckSpeakerPositionDataCompleteness()
 {
-    for (auto i = 1; i <= DS100_CHANNELCOUNT; i++)
+    for (auto i = 1; i <= Controller::GetInstance()->GetDS100OutputChannelCount(); i++)
     {
         if (m_speakerPositions.count(i) != 1)
             return false;
@@ -1754,7 +1778,7 @@ void MultiSoundobjectSlider::SetSpeakerPositionDataReady(bool ready)
         ComputeRealBoundingRect();
         
         // for each channel
-        for (auto i = 1; i <= DS100_CHANNELCOUNT; i++)
+        for (auto i = 1; i <= Controller::GetInstance()->GetDS100OutputChannelCount(); i++)
         {
             auto channelId = static_cast<ChannelId>(i);
             // check if speaker is set (position other than 0,0,0)
@@ -1828,7 +1852,7 @@ void MultiSoundobjectSlider::ComputeRealBoundingRect()
     m_realYBoundingRange.setStart(m_speakerPositions.at(1).first.y);
     m_realYBoundingRange.setEnd(m_speakerPositions.at(1).first.y);
 
-    for (auto i = 1; i <= DS100_CHANNELCOUNT; i++)
+    for (auto i = 1; i <= Controller::GetInstance()->GetDS100OutputChannelCount(); i++)
     {
         auto channelId = static_cast<ChannelId>(i);
         if (m_speakerPositions.count(channelId) == 1)
@@ -2105,7 +2129,7 @@ juce::Rectangle<int> MultiSoundobjectSlider::GetAspectAndMarginCorrectedBounds()
 void MultiSoundobjectSlider::PrerenderSpeakerAndMappingAreaInBounds()
 {
     // Speaker positions
-    for (auto i = 1; i <= DS100_CHANNELCOUNT; i++)
+    for (auto i = 1; i <= Controller::GetInstance()->GetDS100OutputChannelCount(); i++)
     {
         auto channelId = static_cast<ChannelId>(i);
         if (m_speakerDrawables.count(channelId) == 1 && m_speakerPositions.count(channelId) == 1 && m_speakerPositions.at(channelId).first.length() != 0.0f)
@@ -2126,12 +2150,7 @@ void MultiSoundobjectSlider::PrerenderSpeakerAndMappingAreaInBounds()
             auto& p0 = m_mappingCornersReal.at(mappingAreaId).at(2);
             auto& p1 = m_mappingCornersReal.at(mappingAreaId).at(3);
             auto& p2 = m_mappingCornersReal.at(mappingAreaId).at(0);
-            auto& p3 = m_mappingCornersReal.at(mappingAreaId).at(1);
-
-            if (p0.lengthIsBelowEpsilon() && p1.lengthIsBelowEpsilon() && p2.lengthIsBelowEpsilon() && p3.lengthIsBelowEpsilon())
-                continue; // if mapping area real coords are 0, do not take it into account for visu
-
-            m_mappingTextAnchorPointAndRot[mappingAreaId].first = GetPointForRealCoordinate(p0).toInt();
+            m_mappingTextAnchorPointAndRot[mappingAreaId].first = GetPointForRealCoordinate(p1).toInt();
             m_mappingTextAnchorPointAndRot[mappingAreaId].second = juce::Line<float>(p0.x, p0.y, p1.x, p1.y).getAngle();
             auto prevPoint = GetPointForRealCoordinate(p1);
             for (auto j = 0; j < 4; j++) // p1 real - p4 real

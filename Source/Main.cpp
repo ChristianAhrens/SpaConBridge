@@ -32,7 +32,15 @@ class SpaConBridgeApplication : public JUCEApplication
 {
 public:
     //==============================================================================
-    SpaConBridgeApplication() {}
+    SpaConBridgeApplication()
+    {
+#if JUCE_MAC || JUCE_IOS || JUCE_ANDROID || JUCE_LINUX
+        // ENBRIDGE-524 / ENBRIDGE-570 Set the signal handler for SIGPIPE to ignore signals of type SIGPIPE.
+        // Otherwise this could lead to an automatic termination of the application if any
+        // writing to a closed socket/pipe/fileDescriptor.
+        signal(SIGPIPE, SIG_IGN);
+#endif
+    }
 
     const String getApplicationName() override { return ProjectInfo::projectName; }
     const String getApplicationVersion() override { return ProjectInfo::versionString; }
@@ -84,6 +92,7 @@ public:
             
 #if JUCE_IOS || JUCE_ANDROID
             setFullScreen(true);
+            Desktop::setScreenSaverEnabled(false);
 #else
             setResizable(true, true);
 

@@ -573,7 +573,8 @@ void SoundobjectTablePageComponent::UpdateGui(bool init)
 			m_soundobjectsTable->UpdateTable();
 		}
 		else if (ctrl->PopParameterChanged(DCP_Protocol, DCT_ProcessorSelection) ||
-			ctrl->PopParameterChanged(DCP_Host, DCT_BridgingConfig))
+				 ctrl->PopParameterChanged(DCP_SoundobjectProcessor, DCT_ProcessorSelection) ||
+				 ctrl->PopParameterChanged(DCP_Host, DCT_BridgingConfig))
 		{
 			m_soundobjectsTable->UpdateTable();
 		}

@@ -50,7 +50,7 @@ namespace SpaConBridge
 
 
 static constexpr SoundobjectId SOURCE_ID_MIN = 1;	//< Minimum maxtrix input number / SourceId
-static constexpr SoundobjectId SOURCE_ID_MAX = 128;	//< Highest maxtrix input number / SourceId
+static constexpr SoundobjectId SOURCE_ID_MAX = 256;	//< Highest maxtrix input number / SourceId
 static constexpr int DEFAULT_COORD_MAPPING = 1;		//< Default coordinate mapping
 
 /*
@@ -486,10 +486,9 @@ double SoundobjectProcessor::GetSoundobjectSize() const
  * Method to initialize config setting, without risking overwriting with the defaults.
  * @param soundobjectId	New SoundobjectID or matrix input number to use for this processor instance.
  * @param mappingId		New coordinate mapping to use for this procssor instance.
- * @param ipAddress		New IP address of the DS100 device.
  * @param newMode		New protocol communication mode (Rx/Tx).
  */
-void SoundobjectProcessor::InitializeSettings(SoundobjectId soundobjectId, MappingId mappingId, String ipAddress, ComsMode newMode)
+void SoundobjectProcessor::InitializeSettings(SoundobjectId soundobjectId, MappingId mappingId, ComsMode newMode)
 {
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)

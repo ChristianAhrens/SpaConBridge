@@ -883,7 +883,7 @@ void MultiSoundobjectComponent::AddRequiredActiveObjects()
 		}
 
 		// add the speaker position objects to low-freq local polling
-		for (auto i = 1; i <= DS100_CHANNELCOUNT; i++)
+		for (auto i = 1; i <= Controller::GetInstance()->GetDS100OutputChannelCount(); i++)
 		{
 			ctrl->AddStandaloneActiveRemoteObject(this, { ROI_Positioning_SpeakerPosition, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
 		}
@@ -918,7 +918,7 @@ void MultiSoundobjectComponent::RemoveRequiredActiveObjects()
 		}
 
 		// add the speaker position objects to low-freq local polling
-		for (auto i = 1; i <= DS100_CHANNELCOUNT; i++)
+		for (auto i = 1; i <= Controller::GetInstance()->GetDS100OutputChannelCount(); i++)
 		{
 			ctrl->RemoveStandaloneActiveRemoteObject(this, { ROI_Positioning_SpeakerPosition, RemoteObjectAddressing(i, INVALID_ADDRESS_VALUE) });
 		}

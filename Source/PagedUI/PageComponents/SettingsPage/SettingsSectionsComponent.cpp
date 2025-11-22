@@ -163,6 +163,10 @@ void SettingsSectionsComponent::createGeneralSettingsSection()
  */
 void SettingsSectionsComponent::createDS100SettingsSection()
 {
+	m_IOSizeComboIds["128x64"] = 1;
+	m_IOSizeComboIds["64x64"] = 2;
+	m_IOSizeComboIds["64x24"] = 3;
+
 	// DS100 settings section
 	m_DS100Settings = std::make_unique<HeaderWithElmListComponent>();
 	m_DS100Settings->setHeaderText("DS100 Settings");
@@ -214,6 +218,16 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 	m_DS100Settings->addComponent(m_DS100IpAndPortLabel.get(), false, false);
 	m_DS100Settings->addComponent(m_DS100ConnectionElmsContainer.get(), true, false);
 
+	m_DS100IOSizeSelect = std::make_unique<juce::ComboBox>();
+	m_DS100IOSizeSelect->addListener(this);
+	m_DS100IOSizeSelect->addItemList(juce::StringArray{ "128x64", "64x64", "64x24" }, 1);
+	m_DS100IOSizeSelect->setSelectedId(1);
+	m_DS100IOSizeLabel = std::make_unique<Label>("DS100IOSizeSelect", "I/O size");
+	m_DS100IOSizeLabel->setJustificationType(Justification::centred);
+	m_DS100IOSizeLabel->attachToComponent(m_DS100IOSizeSelect.get(), true);
+	m_DS100Settings->addComponent(m_DS100IOSizeLabel.get(), false, false);
+	m_DS100Settings->addComponent(m_DS100IOSizeSelect.get(), true, false);
+
 	m_SecondDS100ModeButton = std::make_unique<JUCEAppBasics::SplitButtonComponent>();
 	m_SecondDS100ModeButton->addListener(this);
 	m_SecondDS100ModeButtonIds[m_SecondDS100Modes[0]] = m_SecondDS100ModeButton->addButton(m_SecondDS100Modes[0]);
@@ -259,6 +273,16 @@ void SettingsSectionsComponent::createDS100SettingsSection()
 #endif
 	m_DS100Settings->addComponent(m_SecondDS100IpAndPortLabel.get(), false, false);
 	m_DS100Settings->addComponent(m_SecondDS100ConnectionElmsContainer.get(), true, false);
+
+	m_SecondDS100IOSizeSelect = std::make_unique<juce::ComboBox>();
+	m_SecondDS100IOSizeSelect->addListener(this);
+	m_SecondDS100IOSizeSelect->addItemList(juce::StringArray{ "128x64", "64x64", "64x24" }, 1);
+	m_SecondDS100IOSizeSelect->setSelectedId(1);
+	m_SecondDS100IOSizeLabel = std::make_unique<Label>("DS100IOSizeSelect", "I/O size");
+	m_SecondDS100IOSizeLabel->setJustificationType(Justification::centred);
+	m_SecondDS100IOSizeLabel->attachToComponent(m_SecondDS100IOSizeSelect.get(), true);
+	m_DS100Settings->addComponent(m_SecondDS100IOSizeLabel.get(), false, false);
+	m_DS100Settings->addComponent(m_SecondDS100IOSizeSelect.get(), true, false);
 
 	//dummy DS100 projectdata loading elements
 	m_DS100ProjectDummyDataLoader = std::make_unique<ProjectDummyDataLoaderComponent>();
@@ -1313,17 +1337,19 @@ void SettingsSectionsComponent::textEditorUpdated(TextEditor& editor)
 	// DS100 settings section
 	if (m_DS100IntervalEdit && m_DS100IntervalEdit.get() == &editor)
 		ctrl->SetRefreshInterval(DCP_Settings, m_DS100IntervalEdit->getText().getIntValue());
-	else if (m_DS100IpAndPortEdit && m_DS100IpAndPortEdit.get() == &editor)
+	else if (m_DS100IpAndPortEdit && m_DS100IpAndPortEdit.get() == &editor && m_DS100IOSizeSelect)
 	{
-		ctrl->SetDS100IpAndPort(DCP_Settings,
+		ctrl->SetDS100IPAndPortAndIO(DCP_Settings,
 			juce::IPAddress(m_DS100IpAndPortEdit->getText().upToFirstOccurrenceOf(":", false, true)),
-			m_DS100IpAndPortEdit->getText().fromFirstOccurrenceOf(":", false, true).getIntValue() % 0xffff);
+			m_DS100IpAndPortEdit->getText().fromFirstOccurrenceOf(":", false, true).getIntValue() % 0xffff,
+			m_DS100IOSizeSelect->getText());
 	}
-	else if (m_SecondDS100IpAndPortEdit && m_SecondDS100IpAndPortEdit.get() == &editor)
+	else if (m_SecondDS100IpAndPortEdit && m_SecondDS100IpAndPortEdit.get() == &editor && m_SecondDS100IOSizeSelect)
 	{
-		ctrl->SetSecondDS100IpAndPort(DCP_Settings,
+		ctrl->SetSecondDS100IPAndPortAndIO(DCP_Settings,
 			juce::IPAddress(m_SecondDS100IpAndPortEdit->getText().upToFirstOccurrenceOf(":", false, true)),
-			m_SecondDS100IpAndPortEdit->getText().fromFirstOccurrenceOf(":", false, true).getIntValue() % 0xffff);
+			m_SecondDS100IpAndPortEdit->getText().fromFirstOccurrenceOf(":", false, true).getIntValue() % 0xffff,
+			m_SecondDS100IOSizeSelect->getText());
 	}
 
 	// DiGiCo settings section
@@ -1422,6 +1448,22 @@ void SettingsSectionsComponent::comboBoxChanged(ComboBox* comboBox)
 		auto lookAndFeelType = static_cast<DbLookAndFeelBase::LookAndFeelType>(m_LookAndFeelSelect->getSelectedId());
 		jassert(lookAndFeelType > DbLookAndFeelBase::LookAndFeelType::LAFT_InvalidFirst && lookAndFeelType < DbLookAndFeelBase::LookAndFeelType::LAFT_InvalidLast);
 		pageMgr->SetLookAndFeelType(lookAndFeelType, false);
+	}
+
+	// DS100 settings section
+	else if (m_DS100IOSizeSelect && m_DS100IOSizeSelect.get() == comboBox && m_DS100IpAndPortEdit)
+	{
+		ctrl->SetDS100IPAndPortAndIO(DCP_Settings,
+			juce::IPAddress(m_DS100IpAndPortEdit->getText().upToFirstOccurrenceOf(":", false, true)),
+			m_DS100IpAndPortEdit->getText().fromFirstOccurrenceOf(":", false, true).getIntValue() % 0xffff,
+			m_DS100IOSizeSelect->getText());
+	}
+	else if (m_SecondDS100IOSizeSelect && m_SecondDS100IOSizeSelect.get() == comboBox && m_SecondDS100IpAndPortEdit)
+	{
+		ctrl->SetSecondDS100IPAndPortAndIO(DCP_Settings,
+			juce::IPAddress(m_SecondDS100IpAndPortEdit->getText().upToFirstOccurrenceOf(":", false, true)),
+			m_SecondDS100IpAndPortEdit->getText().fromFirstOccurrenceOf(":", false, true).getIntValue() % 0xffff,
+			m_SecondDS100IOSizeSelect->getText());
 	}
 
 	// RTTrPM settings section
@@ -1669,6 +1711,14 @@ void SettingsSectionsComponent::processUpdatedDS100Config()
 		}
 		m_DS100ZeroconfDiscovery->resized();
 	}
+	if (m_DS100IOSizeSelect)
+	{
+		auto variant = ctrl->GetDS100Variant();
+		m_DS100IOSizeSelect->setSelectedId(m_IOSizeComboIds[variant], juce::dontSendNotification);
+		m_DS100IOSizeSelect->setEnabled(ctrl->GetDS100ProtocolType() != PT_NoProtocol);
+	}
+	if (m_DS100IOSizeLabel)
+		m_DS100IOSizeLabel->setEnabled(ctrl->GetDS100ProtocolType() != PT_NoProtocol);
 	if (m_SecondDS100ModeButton)
 	{
 		auto newActiveButtonId = m_SecondDS100ModeButtonIds[m_SecondDS100Modes[0]];
@@ -1717,6 +1767,14 @@ void SettingsSectionsComponent::processUpdatedDS100Config()
 		}
 		m_SecondDS100ZeroconfDiscovery->resized();
 	}
+	if (m_SecondDS100IOSizeSelect)
+	{
+		auto variant = ctrl->GetSecondDS100Variant();
+		m_SecondDS100IOSizeSelect->setSelectedId(m_IOSizeComboIds[variant], juce::dontSendNotification);
+		m_SecondDS100IOSizeSelect->setEnabled(ctrl->GetExtensionMode() != EM_Off && ctrl->GetDS100ProtocolType() != PT_NoProtocol);
+	}
+	if (m_SecondDS100IOSizeLabel)
+		m_SecondDS100IOSizeLabel->setEnabled(ctrl->GetExtensionMode() != EM_Off && ctrl->GetDS100ProtocolType() != PT_NoProtocol);
 	if (m_DS100ProjectDummyDataLoader)
 	{
 		m_DS100ProjectDummyDataLoader->setEnabled(ctrl->GetDS100ProtocolType() == PT_NoProtocol);
@@ -2137,7 +2195,7 @@ void SettingsSectionsComponent::handleDS100ServiceSelected(JUCEAppBasics::Zeroco
         
         auto ctrl = Controller::GetInstance();
         if (ctrl)
-			ctrl->SetDS100IpAndPort(DCP_Settings, juce::IPAddress(info->ip), info->port);
+			ctrl->SetDS100IPAndPortAndIO(DCP_Settings, juce::IPAddress(info->ip), info->port, info->txtRecords["db_matrixSize"]);
 	}
 }
 
@@ -2156,7 +2214,7 @@ void SettingsSectionsComponent::handleSecondDS100ServiceSelected(JUCEAppBasics::
 
 		auto ctrl = Controller::GetInstance();
 		if (ctrl)
-			ctrl->SetSecondDS100IpAndPort(DCP_Settings, juce::IPAddress(info->ip), info->port);
+			ctrl->SetSecondDS100IPAndPortAndIO(DCP_Settings, juce::IPAddress(info->ip), info->port, info->txtRecords["db_matrixSize"]);
 	}
 }
 

@@ -50,7 +50,7 @@ public:
 	int GetProcessorId() const;
 	void SetProcessorId(DataChangeParticipant changeSource, int processorId);
 
-	void InitializeSettings(MatrixInputId matrixInputId, String ipAddress, ComsMode newMode);
+	void InitializeSettings(MatrixInputId matrixInputId, ComsMode newMode);
 
 	static const std::vector<RemoteObjectIdentifier>	GetUsedRemoteObjects();
 	static const std::vector<RemoteObjectIdentifier>	GetStaticRemoteObjects();

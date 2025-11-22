@@ -36,6 +36,8 @@ static const String PROTOCOL_DEFAULT_IP("127.0.0.1");	//< Default IP Address
 static const String PROTOCOL_DEFAULT2_IP("127.0.0.2");	//< Default IP Address
 static const String PROTOCOL_DEFAULT_PRVATELAN_IP("192.168.1.101");	//< Default IP Address
 
+static const String PROTOCOL_DEFAULT_DS100_VARIANT("128x64"); //< Default Variant size
+
 static constexpr int PROTOCOL_DEFAULT_MAPPINGAREA = 1;	//< Mapping Area Id to use as default
 
 static constexpr int PROTOCOL_DEFAULT_INPUTDEVICEINDEX = 0;	//< Input Device Index to use as default
@@ -61,6 +63,8 @@ static constexpr int RX_PORT_ADMOSC_HOST = 50019;		//< Default UDP port to use f
 
 static constexpr int RX_PORT_REMAPOSC_DEVICE = 50020;	//< Default UDP port to use for Remap OSC device side
 static constexpr int RX_PORT_REMAPOSC_HOST = 50021;		//< Default UDP port to use for Remap OSC host (spaconbridge) side
+
+static constexpr double MIRROR_MODE_FAILOVER_TIME = 2000.0f;	//< Failover time for mirror mode if no message was received from primary DS100
 
 /**
  * Pre-define processing bridge config values
@@ -111,6 +115,7 @@ public:
 	bool SendMessage(RemoteObjectIdentifier roi, RemoteObjectMessageData& msgData);
 
 	//==========================================================================
+	bool SendMessageToThirdPartyDirect(RemoteObjectIdentifier roi, RemoteObjectMessageData& msgData);
 	void SetOnline(bool online);
 
 	//==========================================================================
@@ -124,6 +129,7 @@ public:
 	bool setStateXml(XmlElement* stateXml) override;
 
 	//==========================================================================
+	void UpdateBridgingProtocolXmlCache(const ProtocolBridgingType bridgingType, const juce::XmlElement* stateXml);
 	void protocolStateChanged(ProtocolId id, ObjectHandlingState state) override;
 
 	//==========================================================================
@@ -142,6 +148,8 @@ public:
 	int GetDS100Port();
 	bool SetDS100Port(int port, bool dontSendNotification = false);
 
+	juce::String GetDS100Variant() const;
+	bool SetDS100Variant(const juce::String& variant, bool dontSendNotification = false);
 	int GetDS100MsgRate();
 	bool SetDS100MsgRate(int msgRate, bool dontSendNotification = false);
 
@@ -151,12 +159,16 @@ public:
 	int GetSecondDS100Port();
 	bool SetSecondDS100Port(int port, bool dontSendNotification = false);
 
+	juce::String GetSecondDS100Variant() const;
+	bool SetSecondDS100Variant(const juce::String& variant, bool dontSendNotification = false);
 	ExtensionMode GetDS100ExtensionMode();
 	bool SetDS100ExtensionMode(ExtensionMode mode, bool dontSendNotification = false);
 
-	ActiveParallelModeDS100 GetActiveParallelModeDS100();
+	ActiveParallelModeDS100 GetActiveParallelModeDS100() const;
 	bool SetActiveParallelModeDS100(ActiveParallelModeDS100 activeParallelModeDS100, bool dontSendNotification = false);
 
+	bool GetDS100AutoFailoverActive() const;
+	bool SetDS100AutoFailoverActive(bool failoverActive, bool dontSendNotification = false);
 	ObjectHandlingState GetDS100State() const;
 	void SetDS100State(ObjectHandlingState state);
 	ObjectHandlingState GetSecondDS100State() const;
@@ -202,6 +214,8 @@ public:
 	bool SetProtocolListeningPort(ProtocolId protocolId, int listeningPort, bool dontSendNotification = false);
 	int GetProtocolRemotePort(ProtocolId protocolId);
 	bool SetProtocolRemotePort(ProtocolId protocolId, int remotePort, bool dontSendNotification = false);
+	juce::String GetDS100VariantFromProtocol(ProtocolId protocolId) const;
+	bool SetDS100VariantProtocol(ProtocolId protocolId, const juce::String& variant, bool dontSendNotification = false);
 	int GetProtocolMappingArea(ProtocolId protocolId);
 	bool SetProtocolMappingArea(ProtocolId protocolId, int mappingAreaId, bool dontSendNotification = false);
 
@@ -236,6 +250,8 @@ public:
 	std::map<int, ChannelId> GetProtocolChannelRemapAssignments(ProtocolId protocolId);
 	bool SetProtocolChannelRemapAssignments(ProtocolId protocolId, const std::map<int, ChannelId>& channelRemapAssignments, bool dontSendNotification = false);
 
+	int GetFollowChannelSelectionDisabled(ProtocolId protocolId);
+	bool SetFollowChannelSelectionDisabled(ProtocolId protocolId, int disabled, bool dontSendNotification = false);
 private:
 	//==========================================================================
 	ObjectHandlingState GetProtocolState(ProtocolId protocolId) const;

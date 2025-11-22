@@ -180,6 +180,8 @@ static constexpr DataChangeType DCT_MatrixInputName					= 0x0100000000; //< The 
 static constexpr DataChangeType DCT_MatrixOutputName				= 0x0200000000; //< The name of the MatrixOutput has changed. */
 static constexpr DataChangeType DCT_SpeakerPositionData				= 0x0400000000; //< The speaker position data x,y,z,h,v,t
 static constexpr DataChangeType DCT_CoordinateMappingSettingsData	= 0x0800000000; //< The coordinate mapping settings data (corner points real+virt for all mappings)
+static constexpr DataChangeType DCT_Variant                         = 0x1000000000; //< The DS100 variant has changed */
+
 
 /**
  * Protocol Bridging Type
@@ -223,12 +225,6 @@ static const std::string UNIT_SECOND = " s";
 static const std::string UNIT_MINUTE = " min";
 static const std::string UNIT_HOUR = " h";
 static const std::string UNIT_DECIBEL = " dB";
-
-/**
- * Channelcount of a DS100 device
- */
-static constexpr int DS100_CHANNELCOUNT = 64;
-static constexpr int DS100_EXTMODE_CHANNELCOUNT = 2 * DS100_CHANNELCOUNT;
 
 /**
  * Bridging ObjectHandlingMode parameters

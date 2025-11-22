@@ -54,6 +54,124 @@ class MatrixOutputProcessor;
 
 
 /**
+ * @brief	Enum used to describe the size variants of a DS100.
+ */
+enum DS100_Variant
+{
+	DV_INVALID = 0,
+	DV_S,
+	DV_M,
+	DV_L,
+	DV_INVALID_MAX // for iteration
+};
+
+
+/**
+ * @brief	Struct that contains helper methods that can be used to further process the 
+ *          the DS100_Variant enum.
+ * @details The helper methods are used for fast processing of the enum in order to obtain 
+ *			other types of data
+ */
+struct DS100_VariantHelper
+{
+	/**
+     * @brief	Getter that returns a string version of the size variant.
+	 * @details The returned string contains the input and output channels 
+	 *			of a size variant found in the DS100.
+	 * @return The size variant as a juce::String.
+     */
+	static juce::String GetStringFromVariant(const DS100_Variant variant)
+	{
+		switch (variant)
+		{
+		case DV_S:
+			return "64x24";
+		case DV_M:
+			return "64x64";
+		case DV_L:
+			return "128x64";
+		default:
+			return "";
+		}
+	}
+
+	/**
+     * @brief	Getter that returns an array of strings of all the possible size variants.
+     * @return  A string array with all possible size variants.
+     */
+	static juce::StringArray GetStringVariants()
+	{
+		juce::StringArray vars;
+
+		for (int i = DV_INVALID + 1; i < DV_INVALID_MAX; i++)
+		{
+			vars.add(GetStringFromVariant(static_cast<DS100_Variant>(i)));
+		}
+
+		return vars;
+	}
+
+	/**
+	 * @brief	Getter that returns a pair of input and output channel count for a given size variant.
+	 * @return  Max input and output channel count for the given DS100 size variant.
+	 */
+	static std::pair<int, int> GetChannelCountFromVariant(const DS100_Variant variant)
+	{
+		switch (variant)
+		{
+		case DV_S:
+			return { 64, 24 };
+		case DV_M:
+			return { 64, 64 };
+		case DV_L:
+			return { 128, 64 };
+		default:
+			return { 0, 0 };
+		}
+	}
+
+    /**
+	* @brief	Getter that returns a pair of input and output channel count for a given size string.
+	* @return  Max input and output channel count for the given DS100 size variant.
+	*/
+    static std::pair<int, int> GetChannelCountFromVariant(const juce::String& variantSize)
+    {
+		if (variantSize == juce::String("64x24"))
+			return { 64, 24 };
+		else if (variantSize == juce::String("64x64"))
+			return { 64, 64 };
+		else if (variantSize == juce::String("128x64"))
+			return { 128, 64 };
+		else
+			return {};
+    };
+
+    /**
+	 * @brief	Getter that returns the max number of input channels for a given size variant.
+	 * @return  Max input channel count for the given DS100 size variant.
+	 */
+	static int GetNumInputChannelsForVariant(const DS100_Variant variant) { return GetChannelCountFromVariant(variant).first; }
+
+	/**
+     * @brief	Getter that returns the max number of input channels for a given size variant.
+     * @return  Max input channel count for the given DS100 size variant.
+     */
+	static int GetNumInputChannelsForVariant(const juce::String& variant) { return GetChannelCountFromVariant(variant).first; }
+	
+	/**
+	 * @brief	Getter that returns the max number of output channels for a given size variant.
+	 * @return  Max output channel count for the given DS100 size variant.
+	 */
+	static int GetNumOutputChannelsForVariant(const DS100_Variant variant) { return GetChannelCountFromVariant(variant).second; }
+
+	/**
+     * @brief	Getter that returns the max number of output channels for a given size variant.
+     * @return  Max output channel count for the given DS100 size variant.
+     */
+	static int GetNumOutputChannelsForVariant(const juce::String& variant) { return GetChannelCountFromVariant(variant).second; }
+};
+
+/**
  * @class Controller
  * @brief Class Controller which takes care of protocol communication through protocolbridging wrapper, including connection establishment
  * and sending/receiving of messages over the network.
@@ -149,11 +267,18 @@ public:
 
 	//==========================================================================
 	std::pair<juce::IPAddress, int> GetDS100IpAndPort() const;
-	void SetDS100IpAndPort(DataChangeParticipant changeSource, juce::IPAddress ipAddress, int port, bool dontSendNotification = false);
-	std::pair<juce::IPAddress, int> GetSecondDS100IpAndPort() const;
-	void SetSecondDS100IpAndPort(DataChangeParticipant changeSource, juce::IPAddress ipAddress, int port, bool dontSendNotification = false);
+	void SetDS100IPAndPortAndIO(DataChangeParticipant changeSource, juce::IPAddress ipAddress, int port, const juce::String &mtrxSize, bool dontSendNotification = false);
+	juce::String GetDS100Variant() const;
+	int GetDS100InputChannelCount() const;
+	int GetDS100OutputChannelCount() const;
 
 	//==========================================================================
+	std::pair<juce::IPAddress, int> GetSecondDS100IpAndPort() const;
+	void SetSecondDS100IPAndPortAndIO(DataChangeParticipant changeSource, juce::IPAddress ipAddress, int port, const juce::String& mtrxSize, bool dontSendNotification = false);
+	juce::String GetSecondDS100Variant() const;
+	int GetSecondDS100InputChannelCount() const;
+	int GetSecondDS100OutputChannelCount() const;
+	int GetMaxExtendedChannelCount() const;
 	int GetRefreshInterval() const;
 	void SetRefreshInterval(DataChangeParticipant changeSource, int refreshInterval, bool dontSendNotification = false);
 	static std::pair<int, int> GetSupportedRefreshIntervalRange();
@@ -175,6 +300,8 @@ public:
 	void SetDS100DummyAnimationMode(DataChangeParticipant changeSource, const int& animationMode, bool dontSendNotification = false);
 
 	//==========================================================================
+	bool IsDS100AutoFailoverActive() const;
+	void SetDS100AutoFailoverActive(DataChangeParticipant changeSource, const bool autoFailoverActive, bool dontSendNotification = false);
 	const std::vector<RemoteObject> GetActivatedSoundObjectRemoteObjects();
 	const std::vector<RemoteObject> GetActivatedMatrixInputRemoteObjects();
 	const std::vector<RemoteObject> GetActivatedMatrixOutputRemoteObjects();
@@ -283,13 +410,20 @@ public:
 
 	//==========================================================================
 	void handleMessage(const Message& message) override;
-	bool SendMessageDataDirect(const RemoteObjectIdentifier roi, RemoteObjectMessageData& msgData);
 
+	//==========================================================================
+	bool SendMessageDataDirect(const RemoteObjectIdentifier roi, RemoteObjectMessageData& msgData, bool onylToThirdParty = false);
+
+	//==========================================================================
 	void EnqueueTickTrigger();
 	void StopTickProcessing();
 	void ResumeTickProcessing();
 	bool IsTickProcessingStopped();
 	void PostParameterChanged(DataChangeParticipant changeSource, DataChangeType changeTypes);
+
+	//==========================================================================
+	bool ShouldBlockInactiveDeviceData(ProtocolId& senderProtocolId);
+
 private:
 	/**
 	 * Class StandaloneActiveObjectsPollingHelper
@@ -451,9 +585,14 @@ private:
 	juce::IPAddress					m_DS100IpAddress;				/**< IP Address where OSC messages will be sent to / received from. */
 	int								m_DS100Port;					/**< Port on the ds100 device to connect to. */
 	ExtensionMode					m_DS100ExtensionMode;			/**< Current extension mode. This has impact on if second DS100 is active or not. */
-	ActiveParallelModeDS100			m_DS100ActiveParallelModeDS100;	/**< Currently active DS100 when in extension mode "parallel". */
+	juce::String					m_DS100Variant;					/**< selected Product variant for the first DS100 */
+
 	juce::IPAddress					m_SecondDS100IpAddress;			/**< IP Address where OSC messages will be sent to / received from. */
 	int								m_SecondDS100Port;				/**< Port on a second ds100 device to connect to. */
+	juce::String					m_SecondDS100Variant;			/**< selected Product variant for the second DS100.  */
+
+	bool m_autoFailoverActive{ true };
+
 	juce::String					m_DS100DummyProjectData;		/**< Dummy dbpr project data excerpt as string. */
 	int								m_DS100DummyAnimationMode;		/**< Dummy animation mode integer value (0, 1, 2). */
 

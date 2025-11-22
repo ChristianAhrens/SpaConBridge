@@ -326,10 +326,9 @@ MatrixInputId MatrixInputProcessor::GetMatrixInputId() const
  * Method to initialize config setting, without risking overwriting with the defaults.
  * @param matrixInputId		New SourceID or matrix input number to use for this processor instance.
  * @param mappingId		New coordinate mapping to use for this procssor instance.
- * @param ipAddress		New IP address of the DS100 device.
  * @param newMode		New OSC communication mode (Rx/Tx).
  */
-void MatrixInputProcessor::InitializeSettings(MatrixInputId matrixInputId, String ipAddress, ComsMode newMode)
+void MatrixInputProcessor::InitializeSettings(MatrixInputId matrixInputId, ComsMode newMode)
 {
 	Controller* ctrl = Controller::GetInstance();
 	if (ctrl)

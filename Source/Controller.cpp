@@ -87,8 +87,8 @@ Controller::Controller()
 
 	// Some default value initialization just to be sure
 	SetRefreshInterval(DCP_Init, PROTOCOL_INTERVAL_DEF, true);
-	SetDS100IpAndPort(DCP_Init, juce::IPAddress(PROTOCOL_DEFAULT_IP), RX_PORT_DS100_DEVICE, true);
-	SetSecondDS100IpAndPort(DCP_Init, juce::IPAddress(PROTOCOL_DEFAULT2_IP), RX_PORT_DS100_DEVICE, true);
+	SetDS100IPAndPortAndIO(DCP_Init, juce::IPAddress(PROTOCOL_DEFAULT_IP), RX_PORT_DS100_DEVICE, PROTOCOL_DEFAULT_DS100_VARIANT, true);
+	SetSecondDS100IPAndPortAndIO(DCP_Init, juce::IPAddress(PROTOCOL_DEFAULT2_IP), RX_PORT_DS100_DEVICE, PROTOCOL_DEFAULT_DS100_VARIANT, true);
 	SetExtensionMode(DCP_Init, EM_Off, true);
 	SetActiveParallelModeDS100(DCP_Init, APM_None, true);
 
@@ -184,6 +184,7 @@ void Controller::SetParameterChanged(DataChangeParticipant changeSource, DataCha
 	case DCT_MatrixOutputProcessorConfig:
 	case DCT_NumBridgingModules:
 	case DCT_OnlineState:
+	case DCT_Variant:
 		if (changeSource != DCP_Init)
 			triggerConfigurationUpdate(true);
 		break;
@@ -579,6 +580,8 @@ SoundobjectProcessorId Controller::AddSoundobjectProcessor(DataChangeParticipant
 	// Set a default painting siez for the new soundobject
 	p->SetSoundobjectSize(changeSource, 0.4f);
 
+	SetParameterChanged(changeSource, DCT_NumProcessors);
+
 	return newProcessorId;
 }
 
@@ -876,7 +879,7 @@ int Controller::GetMatrixInputProcessorCount() const
 MatrixInputProcessor* Controller::GetMatrixInputProcessor(MatrixInputProcessorId processorId) const
 {
 	const ScopedLock lock(m_mutex);
-	for (auto processor : m_matrixInputProcessors)
+	for (const auto&processor : m_matrixInputProcessors)
 		if (processor->GetProcessorId() == processorId)
 			return processor;
 
@@ -1152,26 +1155,18 @@ bool Controller::IsPollingDS100ProtocolType()
 	}
 }
 
-/**
- * Getter function for the IP address and port to which we are connected.
- * @return	Current IP address.
- */
 std::pair<juce::IPAddress, int> Controller::GetDS100IpAndPort() const
 {
 	return std::make_pair(m_DS100IpAddress, m_DS100Port);
 }
 
 /**
- * Setter function for the IP address to which m_oscSender and m_oscReceiver are connected.
- * NOTE: changing ip address will disconnect m_oscSender and m_oscReceiver.
- * @param changeSource	The application module which is causing the property change.
- * @param ipAddress		New IP address.
- * @param port			New port.
- * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
+ * Getter function for the IP address and port to which we are connected.
+ * @return	Current IP address.
  */
-void Controller::SetDS100IpAndPort(DataChangeParticipant changeSource, juce::IPAddress ipAddress, int port, bool dontSendNotification)
+void Controller::SetDS100IPAndPortAndIO(DataChangeParticipant changeSource, juce::IPAddress ipAddress, int port, const juce::String &mtrxSize, bool dontSendNotification)
 {
-	if (m_DS100IpAddress != ipAddress || m_DS100Port != port)
+	if (m_DS100IpAddress != ipAddress || m_DS100Port != port || m_DS100Variant != mtrxSize)
 	{
 		const ScopedLock lock(m_mutex);
 
@@ -1181,6 +1176,9 @@ void Controller::SetDS100IpAndPort(DataChangeParticipant changeSource, juce::IPA
 		m_DS100Port = port;
 		m_protocolBridge.SetDS100Port(port, dontSendNotification);
 
+		m_DS100Variant = mtrxSize;
+		m_protocolBridge.SetDS100Variant(mtrxSize, dontSendNotification);
+
 		// Signal the change to all Processors. 
 		SetParameterChanged(changeSource, DCT_IPAddress);
 		SetParameterChanged(changeSource, DCT_Connected);
@@ -1189,26 +1187,29 @@ void Controller::SetDS100IpAndPort(DataChangeParticipant changeSource, juce::IPA
 	}
 }
 
-/**
- * Getter function for the IP address and to which we are connected.
- * @return	Current IP address + port.
- */
+juce::String Controller::GetDS100Variant() const
+{
+	return m_DS100Variant;
+}
+
+int Controller::GetDS100InputChannelCount() const
+{
+	return DS100_VariantHelper::GetNumInputChannelsForVariant(m_DS100Variant);
+}
+
+int Controller::GetDS100OutputChannelCount() const
+{
+	return DS100_VariantHelper::GetNumOutputChannelsForVariant(m_DS100Variant);
+}
+
 std::pair<juce::IPAddress, int> Controller::GetSecondDS100IpAndPort() const
 {
 	return std::make_pair(m_SecondDS100IpAddress, m_SecondDS100Port);
 }
 
-/**
- * Setter function for the IP address to which m_oscSender and m_oscReceiver are connected.
- * NOTE: changing ip address will disconnect m_oscSender and m_oscReceiver.
- * @param changeSource	The application module which is causing the property change.
- * @param ipAddress		New IP address.
- * @param port			New port.
- * @param dontSendNotification	Flag if the app configuration should be triggered to be updated
- */
-void Controller::SetSecondDS100IpAndPort(DataChangeParticipant changeSource, juce::IPAddress ipAddress, int port, bool dontSendNotification)
+void Controller::SetSecondDS100IPAndPortAndIO(DataChangeParticipant changeSource, juce::IPAddress ipAddress, int port, const juce::String& mtrxSize, bool dontSendNotification)
 {
-	if (m_SecondDS100IpAddress != ipAddress || m_SecondDS100Port != port)
+	if (m_SecondDS100IpAddress != ipAddress || m_SecondDS100Port != port || m_SecondDS100Variant != mtrxSize)
 	{
 		const ScopedLock lock(m_mutex);
 
@@ -1218,6 +1219,9 @@ void Controller::SetSecondDS100IpAndPort(DataChangeParticipant changeSource, juc
 		m_SecondDS100Port = port;
 		m_protocolBridge.SetSecondDS100Port(port, dontSendNotification);
 
+		m_SecondDS100Variant = mtrxSize;
+		m_protocolBridge.SetSecondDS100Variant(mtrxSize, dontSendNotification);
+
 		// Signal the change to all Processors. 
 		SetParameterChanged(changeSource, DCT_IPAddress);
 		SetParameterChanged(changeSource, DCT_Connected);
@@ -1226,10 +1230,26 @@ void Controller::SetSecondDS100IpAndPort(DataChangeParticipant changeSource, juc
 	}
 }
 
-/**
- * Getter function for the DS100 bridging communication state.
- * @return		True if all communication channels are connected.
- */
+juce::String Controller::GetSecondDS100Variant() const
+{
+	return m_SecondDS100Variant;
+}
+
+int Controller::GetSecondDS100InputChannelCount() const
+{
+	return DS100_VariantHelper::GetNumInputChannelsForVariant(m_SecondDS100Variant);
+}
+
+int Controller::GetSecondDS100OutputChannelCount() const
+{
+	return DS100_VariantHelper::GetNumOutputChannelsForVariant(m_SecondDS100Variant);
+}
+
+int Controller::GetMaxExtendedChannelCount() const
+{
+	return GetDS100InputChannelCount() + GetSecondDS100InputChannelCount();
+}
+
 bool Controller::IsConnected() const
 {
 	switch (GetExtensionMode())
@@ -1409,7 +1429,7 @@ void Controller::SetExtensionMode(DataChangeParticipant changeSource, ExtensionM
  */
 ActiveParallelModeDS100 Controller::GetActiveParallelModeDS100() const
 {
-	return m_DS100ActiveParallelModeDS100;
+	return m_protocolBridge.GetActiveParallelModeDS100();
 }
 
 /**
@@ -1420,11 +1440,9 @@ ActiveParallelModeDS100 Controller::GetActiveParallelModeDS100() const
  */
 void Controller::SetActiveParallelModeDS100(DataChangeParticipant changeSource, ActiveParallelModeDS100 activeParallelModeDS100, bool dontSendNotification)
 {
-	if (m_DS100ActiveParallelModeDS100 != activeParallelModeDS100)
+	if (GetActiveParallelModeDS100() != activeParallelModeDS100)
 	{
 		const ScopedLock lock(m_mutex);
-
-		m_DS100ActiveParallelModeDS100 = activeParallelModeDS100;
 
 		m_protocolBridge.SetActiveParallelModeDS100(activeParallelModeDS100, dontSendNotification);
 
@@ -1500,14 +1518,29 @@ void Controller::SetDS100DummyAnimationMode(DataChangeParticipant changeSource, 
 	}
 }
 
-/**
- * Reimplemented callback for bridging wrapper callback to process incoming protocol data.
- * It forwards the message to all registered Processor objects.
- * @param nodeId	The bridging node that the message data was received on (only a single default id node supported currently).
- * @param senderProtocolId	The protocol that the message data was received on and was sent to controller from.
- * @param objectId	The remote object id of the object that was received
- * @param msgData	The actual message data that was received
- */
+bool Controller::IsDS100AutoFailoverActive() const
+{
+	return m_autoFailoverActive;
+}
+
+void Controller::SetDS100AutoFailoverActive(DataChangeParticipant changeSource, const bool autoFailoverActive, bool dontSendNotification)
+{
+	if (m_autoFailoverActive != autoFailoverActive)
+	{
+		const ScopedLock lock(m_mutex);
+
+		m_autoFailoverActive = autoFailoverActive;
+
+		m_protocolBridge.SetDS100AutoFailoverActive(autoFailoverActive, dontSendNotification);
+
+		// Signal the change to all Processors. 
+		SetParameterChanged(changeSource, DCT_ExtensionMode);
+		SetParameterChanged(changeSource, DCT_Connected);
+
+		Reconnect();
+	}
+}
+
 void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, RemoteObjectIdentifier objectId, const RemoteObjectMessageData& msgData)
 {
 	jassert(nodeId == DEFAULT_PROCNODE_ID);
@@ -1533,6 +1566,8 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 		if (GetActiveParallelModeDS100() == APM_2nd && senderProtocolId != DS100_2_PROCESSINGPROTOCOL_ID)
 			return;
 	}
+	if (ShouldBlockInactiveDeviceData(senderProtocolId))
+		return;
 
 	// notify all listeners that registered for the incoming object
 	for (auto const& listener : m_standaloneActiveObjectListeners)
@@ -1617,6 +1652,8 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 		break;
 	case RemoteObjectIdentifier::ROI_MatrixInput_Gain:
 		{
+			soundobjectId = msgData._addrVal._first;
+			jassert(soundobjectId > 0);
 			matrixInputId = msgData._addrVal._first;
 			jassert(matrixInputId > 0);
 
@@ -1626,6 +1663,8 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 		break;
 	case RemoteObjectIdentifier::ROI_MatrixInput_Mute:
 		{
+			soundobjectId = msgData._addrVal._first;
+			jassert(soundobjectId > 0);
 			matrixInputId = msgData._addrVal._first;
 			jassert(matrixInputId > 0);
 
@@ -1661,7 +1700,7 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 		}
 		break;
 	case RemoteObjectIdentifier::ROI_RemoteProtocolBridge_SoundObjectSelect:
-	case RemoteObjectIdentifier::ROI_MatrixInput_Select:
+	case RemoteObjectIdentifier::ROI_RemoteProtocolBridge_MatrixInputSelect:
 		{
 			// The Source ID
 			soundobjectId = msgData._addrVal._first;
@@ -1736,11 +1775,11 @@ void Controller::HandleMessageData(NodeId nodeId, ProtocolId senderProtocolId, R
 
 	// If soundobject/matrixInput/matrixOutput id is present, it needs to be checked regarding special DS100 extension mode
 	if (soundobjectId > 0 && senderProtocolId == DS100_2_PROCESSINGPROTOCOL_ID && GetExtensionMode() == EM_Extend)
-		soundobjectId += DS100_CHANNELCOUNT;
+		soundobjectId += GetDS100InputChannelCount();
 	if (matrixInputId > 0 && senderProtocolId == DS100_2_PROCESSINGPROTOCOL_ID && GetExtensionMode() == EM_Extend)
-		matrixInputId += DS100_CHANNELCOUNT;
+		matrixInputId += GetDS100InputChannelCount(); 
 	if (matrixOutputId > 0 && senderProtocolId == DS100_2_PROCESSINGPROTOCOL_ID && GetExtensionMode() == EM_Extend)
-		matrixOutputId += DS100_CHANNELCOUNT;
+		matrixOutputId += GetDS100OutputChannelCount();
 
 	// now process what changes were detected to be neccessary to perform
 	if (change == DCT_ProcessorSelection)
@@ -1993,9 +2032,12 @@ void Controller::handleMessage(const Message& message)
 	}
 }
 
-bool Controller::SendMessageDataDirect(const RemoteObjectIdentifier roi, RemoteObjectMessageData& msgData)
+bool Controller::SendMessageDataDirect(const RemoteObjectIdentifier roi, RemoteObjectMessageData& msgData, bool onylToThirdParty)
 {
-	return m_protocolBridge.SendMessage(roi, msgData);
+	if (onylToThirdParty)
+		return m_protocolBridge.SendMessageToThirdPartyDirect(roi, msgData);
+	else
+		return m_protocolBridge.SendMessage(roi, msgData);
 }
 
 /**
@@ -2465,6 +2507,30 @@ void Controller::PostParameterChanged(DataChangeParticipant changeSource, DataCh
 	postMessage(new ParameterChangedMessage(changeSource, changeTypes));
 }
 
+bool Controller::ShouldBlockInactiveDeviceData(ProtocolId& senderProtocolId)
+{
+	if (GetExtensionMode() == EM_Parallel)
+	{
+		// Do neither handle any protocol data from second DS100 if first is set as active one...
+		if (GetActiveParallelModeDS100() == APM_1st && senderProtocolId != DS100_1_PROCESSINGPROTOCOL_ID)
+			return true;
+		// ...nor any protocol data from first DS100 if second is set as active one in parallel extension mode.
+		if (GetActiveParallelModeDS100() == APM_2nd && senderProtocolId != DS100_2_PROCESSINGPROTOCOL_ID)
+			return true;
+	}
+
+	if (GetExtensionMode() == EM_Mirror)
+	{
+		// Same behavior in mirror mode - ensure that only the active device's data is being handled
+		if (IsFirstDS100Master() && senderProtocolId == DS100_2_PROCESSINGPROTOCOL_ID)
+			return true;
+		if (IsSecondDS100Master() && senderProtocolId == DS100_1_PROCESSINGPROTOCOL_ID)
+			return true;
+	}
+
+	return false;
+}
+
 
 const ProtocolId Controller::GetProtocolIdForProtocolType(const ProtocolBridgingType type)
 {
@@ -2701,9 +2767,10 @@ bool Controller::setStateXml(XmlElement* stateXml)
 		if (m_protocolBridge.setStateXml(bridgingXmlElement))
 		{
 			SetDS100ProtocolType(DCP_Init, m_protocolBridge.GetDS100ProtocolType(), true);
+			SetDS100AutoFailoverActive(DCP_Init, m_protocolBridge.GetDS100AutoFailoverActive(), true);
 			SetExtensionMode(DCP_Init, m_protocolBridge.GetDS100ExtensionMode(), true);
-			SetDS100IpAndPort(DCP_Init, m_protocolBridge.GetDS100IpAddress(), m_protocolBridge.GetDS100Port(), true);
-			SetSecondDS100IpAndPort(DCP_Init, m_protocolBridge.GetSecondDS100IpAddress(), m_protocolBridge.GetSecondDS100Port(), true);
+			SetDS100IPAndPortAndIO(DCP_Init, m_protocolBridge.GetDS100IpAddress(), m_protocolBridge.GetDS100Port(), m_protocolBridge.GetDS100Variant(), true);
+			SetSecondDS100IPAndPortAndIO(DCP_Init, m_protocolBridge.GetSecondDS100IpAddress(), m_protocolBridge.GetSecondDS100Port(), m_protocolBridge.GetSecondDS100Variant(), true);
 			SetRefreshInterval(DCP_Init, m_protocolBridge.GetDS100MsgRate(), true);
 			SetActiveParallelModeDS100(DCP_Init, m_protocolBridge.GetActiveParallelModeDS100(), true);
 			SetDS100DummyProjectData(DCP_Init, m_protocolBridge.GetDS100dbprData(), true);
@@ -2860,12 +2927,15 @@ std::vector<RemoteObject> Controller::GetSoundobjectProcessorRemoteObjects(Sound
 {
 	auto remoteObjects = std::vector<RemoteObject>();
 	auto processor = GetSoundobjectProcessor(soundobjectProcessorId);
-	for (auto& roi : SoundobjectProcessor::GetUsedRemoteObjects())
+	if (nullptr != processor)
 	{
-		if (ProcessingEngineConfig::IsRecordAddressingObject(roi))
-			remoteObjects.push_back(RemoteObject(roi, RemoteObjectAddressing(processor->GetSoundobjectId(), processor->GetMappingId())));
-		else
-			remoteObjects.push_back(RemoteObject(roi, RemoteObjectAddressing(processor->GetSoundobjectId(), INVALID_ADDRESS_VALUE)));
+		for (auto& roi : SoundobjectProcessor::GetUsedRemoteObjects())
+		{
+			if (ProcessingEngineConfig::IsRecordAddressingObject(roi))
+				remoteObjects.push_back(RemoteObject(roi, RemoteObjectAddressing(processor->GetSoundobjectId(), processor->GetMappingId())));
+			else
+				remoteObjects.push_back(RemoteObject(roi, RemoteObjectAddressing(processor->GetSoundobjectId(), INVALID_ADDRESS_VALUE)));
+		}
 	}
 
 	return remoteObjects;

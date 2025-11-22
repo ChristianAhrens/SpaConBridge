@@ -996,7 +996,7 @@ void TableModelComponent::sortOrderChanged(int newSortColumnId, bool isForwards)
  * @param existingComponentToUpdate		Pointer to existing component for this cell. Null if no component exists yet.
  * @return	Pointer to component which should be used for this cell. Null if no component is necessary.
  */
-Component* TableModelComponent::refreshComponentForCell(int rowNumber, int columnId, bool isRowSelected, Component* existingComponentToUpdate)
+Component* TableModelComponent::refreshComponentForCell(int rowNumber, int columnId, bool /*isRowSelected*/, Component* existingComponentToUpdate)
 {
 
 	Component* ret = nullptr;

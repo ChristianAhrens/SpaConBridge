@@ -176,6 +176,19 @@ const std::vector<SoundobjectProcessorId> ProcessorSelectionManager::GetSelected
 void ProcessorSelectionManager::SetSoundobjectProcessorIdSelectState(SoundobjectProcessorId soundobjectProcessorId, bool selected)
 {
 	m_currentSoundobjectProcessorSelection[soundobjectProcessorId] = selected;
+
+	auto ctrl = Controller::GetInstance();
+	if (ctrl)
+	{
+		auto selectedStateVal = selected ? 1 : 0;
+		auto soProc = ctrl->GetSoundobjectProcessor(soundobjectProcessorId);
+		if (nullptr != soProc)
+		{
+			auto romd = RemoteObjectMessageData(RemoteObjectAddressing(soProc->GetSoundobjectId(), INVALID_ADDRESS_VALUE), ROVT_INT, 1, &selectedStateVal, sizeof(int));
+			romd._payloadOwned = false;
+			ctrl->SendMessageDataDirect(ROI_RemoteProtocolBridge_SoundObjectSelect, romd, true);
+		}
+	}
 }
 
 /**

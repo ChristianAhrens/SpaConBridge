@@ -67,7 +67,7 @@ public:
 	int GetProcessorId() const;
 	void SetProcessorId(DataChangeParticipant changeSource, int processorId);
 
-	void InitializeSettings(SoundobjectId sourceId, MappingId mappingId, String ipAddress, ComsMode newMode);
+	void InitializeSettings(SoundobjectId sourceId, MappingId mappingId, ComsMode newMode);
 
 	static const std::vector<RemoteObjectIdentifier>	GetUsedRemoteObjects();
 	static const std::vector<RemoteObjectIdentifier>	GetStaticRemoteObjects();
